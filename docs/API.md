@@ -17,7 +17,7 @@ Returns capability information:
   "modules": {
     "text": true,
     "url_static": true,
-    "ml": false,
+    "ml": {"available": true, "model_name": "trustshield_text_v1", "model_version": "phase3-1"},
     "ocr": {"available": true, "provider": "tesseract"},
     "qr": true,
     "web_sandbox": false
@@ -26,6 +26,16 @@ Returns capability information:
 ```
 
 `modules.ocr.available` reflects the selected provider. Its provider is normally `tesseract`, or `mock` when `TRUSTSHIELD_OCR_PROVIDER=mock` is set. The mock is a demo/test provider and is not real OCR.
+
+When `TRUSTSHIELD_ML=off`, the health response keeps the documented
+`available`, `model_name`, and `model_version` fields and reports:
+
+```json
+{"available": false, "reason": "disabled_by_env", "model_name": null, "model_version": null}
+```
+
+When enabled, health reuses the pipeline's cached classifier; it does not hash
+or load the model on every request.
 
 ### `POST /api/v1/analyze/text`
 
@@ -56,7 +66,7 @@ file=<PNG, JPEG, or WebP image>
 ```
 
 The server validates the decoded image, then runs the selected OCR provider and sends extracted text through the shared text/static URL pipeline. If Tesseract is unavailable, the HTTP request can still succeed with a structured `unable_to_verify` result and `modules.ocr.status: "unavailable"`.
-OCR text shorter than the shared 15-character minimum follows the same rule as pasted text: text rules fail and the image can resolve to `unable_to_verify`.
+OCR text is analyzable when normalization leaves at least one alphanumeric token, regardless of character count. Very short OCR text runs through text and URL rules but includes the limitation `Limited context: the text is very short, so confidence is reduced.`; empty or punctuation-only OCR remains `unable_to_verify`.
 
 ### `POST /api/v1/analyze/qr`
 
@@ -155,7 +165,18 @@ The payload is bounded in the response. A decoded UPI payload adds:
 
 UPI values can be `null` when absent or when an oversized field is discarded; malformed values may remain visible alongside warning evidence. A failed decoder returns `status: "failed"`, `payload_type: null`, and a detail explaining that no QR was detected. Multiple detected codes produce a warning and the first decoded payload is analyzed.
 
-Image and QR analyses can also include the shared `text_rules`, `url_static`, `ml`, `reputation`, and `web_sandbox` modules depending on the decoded content. In the current implementation, ML is unavailable, reputation is unavailable when a URL is present, and the web sandbox is not run.
+Image and QR analyses can also include the shared `text_rules`, `url_static`, `ml`, `reputation`, and `web_sandbox` modules depending on the decoded content. OCR text and analyzable QR text run the text model when it is available. URL-only inputs do not run the text model. With `TRUSTSHIELD_ML=off`, `modules.ml.status` is `not_run`; missing, tampered, corrupt, or incompatible artifacts use `unavailable` and include a reason while the scan still completes.
+
+### `modules.ml`
+
+When completed, `modules.ml.data` contains `model_name`, `model_version`,
+`dataset_version`, `dataset_manifest_sha256`, `feature_pipeline_version`,
+`calibration_version`, `p_malicious`, `threshold`, `predicted_binary`,
+`category`, optional `category_probs`, and `latency_ms`. ML evidence uses
+`source: "ml_classifier"` and is explicitly provisional. ML availability does
+not raise the risk confidence above the fusion `CONFIDENCE_CAP` of `medium`.
+
+Text, OCR, plain QR payloads, and UPI notes use the same analyzability rule: normalized content must contain at least one run of letters or digits. The `text_rules` module records a `context_quality` factor in its data, increasing linearly with alphanumeric-token count and reaching `1.0` at eight tokens. Below that point confidence is reduced, but the evidence-derived score label is retained; no-token content is `unable_to_verify` with a limitation explaining why.
 
 ## Image upload errors
 
@@ -174,4 +195,4 @@ FastAPI validation, including a missing multipart `file`, also uses HTTP 422. Th
 
 ## PLANNED
 
-There are no implemented API routes for PaddleOCR, ML classification, web sandbox inspection, reputation services, Ollama, SQLite persistence, or Hindi OCR. They are planned extensions and are not advertised by the current health response.
+There are no implemented API routes for PaddleOCR, web sandbox inspection, reputation services, Ollama, SQLite persistence, or Hindi OCR. The text ML classifier is an internal analysis module, not a separate route; the final test-set evaluation remains pending.

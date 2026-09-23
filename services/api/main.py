@@ -12,6 +12,7 @@ from services.analysis.normalization.text import InvalidInput
 from services.analysis.extractors.image_validation import ImageRejected, max_upload_size
 from services.analysis.extractors.ocr import get_ocr_provider
 from services.analysis.pipeline import analyze_image, analyze_qr, analyze_text, analyze_url
+from services.analysis import pipeline as analysis_pipeline
 
 app = FastAPI(title="TrustShield AI", version="0.1.0")
 app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:3000"], allow_methods=["GET", "POST"], allow_headers=["*"])
@@ -39,8 +40,17 @@ def _remember(r: AnalysisResult) -> AnalysisResult:
 @app.get("/api/v1/health")
 def health():
     ocr = get_ocr_provider()
+    if __import__("os").getenv("TRUSTSHIELD_ML", "on").strip().lower() == "off":
+        ml = {"available": False, "reason": "disabled_by_env", "model_name": None, "model_version": None}
+    else:
+        classifier = analysis_pipeline._text_classifier()
+        ml = {"available": classifier.available, "model_name": classifier.model_name,
+              "model_version": classifier.metadata.get("model_version") if classifier.available else None}
+        if not classifier.available:
+            ml["reason"] = getattr(classifier, "reason", "unavailable")
     return {"status": "ok", "schema_version": SCHEMA_VERSION, "modules": {
-        "text": True, "url_static": True, "ml": False,
+        "text": True, "url_static": True,
+        "ml": ml,
         "ocr": {"available": ocr.is_available(), "provider": ocr.name},
         "qr": True, "web_sandbox": False,
     }}

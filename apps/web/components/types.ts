@@ -42,11 +42,27 @@ export type QrModuleData = {
   upi?: QrUpiData;
 };
 
+export type MlModuleData = {
+  model_name?: string;
+  model_version?: string;
+  dataset_version?: string;
+  dataset_manifest_sha256?: string;
+  feature_pipeline_version?: string;
+  calibration_version?: string;
+  p_malicious?: number;
+  threshold?: number;
+  predicted_binary?: "legitimate" | "malicious_or_fraudulent" | boolean | string;
+  category?: string;
+  category_probs?: Record<string, number>;
+  latency_ms?: number;
+};
+
 export type ModuleResult = {
   status: "completed" | "unavailable" | "failed" | "not_run" | "timeout" | string;
   detail?: string;
-  data?: (OcrModuleData & QrModuleData) | Record<string, unknown>;
+  data?: (OcrModuleData & QrModuleData & MlModuleData) | Record<string, unknown>;
 };
+
 
 export type Risk = {
   score: number;

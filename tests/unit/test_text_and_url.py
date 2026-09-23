@@ -57,9 +57,49 @@ def test_single_keyword_not_decisive():
     assert r.risk.score < 25
 
 
-def test_short_input_unable_to_verify():
+def test_short_benign_input_is_analyzed_with_low_confidence():
     r = analyze_text("hello there")
-    assert r.risk.label == "unable_to_verify" and r.status == "failed"
+    assert r.status != "failed"
+    assert r.risk.label == "low_risk"
+    assert r.risk.confidence == "low"
+    assert any("Limited context" in limitation for limitation in r.limitations)
+
+
+@pytest.mark.parametrize("text, expected_category", [
+    ("OTP 481926", None),
+    ("Enter CVV", "credential_request"),
+    ("Pay ₹5000", "payment_request"),
+    ("bit.ly/x", "url_shortener"),
+])
+def test_meaningful_short_text_is_analyzed_with_limited_context(text, expected_category):
+    short = analyze_text(text)
+    long = analyze_text("This is a longer message with enough context for analysis.")
+    confidence_rank = {"low": 0, "medium": 1, "high": 2}
+
+    assert short.status != "failed"
+    assert short.modules["text_rules"].status == "completed"
+    assert short.risk.label != "unable_to_verify"
+    assert confidence_rank[short.risk.confidence] <= confidence_rank[long.risk.confidence]
+    assert any("Limited context" in limitation for limitation in short.limitations)
+    if expected_category:
+        assert expected_category in cats(short.evidence)
+
+
+def test_short_credential_phrase_keeps_existing_rule_evidence():
+    result = analyze_text("Send your OTP now")
+
+    assert result.status != "failed"
+    assert result.modules["text_rules"].status == "completed"
+    assert "credential_request" in cats(result.evidence)
+
+
+@pytest.mark.parametrize("text", ["", "   ", "!!!", "🙂🙂", "..."])
+def test_text_without_alphanumeric_tokens_is_unable_to_verify(text):
+    result = analyze_text(text)
+
+    assert result.status == "failed"
+    assert result.risk.label == "unable_to_verify"
+    assert any("alphanumeric" in limitation.lower() for limitation in result.limitations)
 
 
 # ---------- url static

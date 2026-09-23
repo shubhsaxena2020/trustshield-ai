@@ -17,12 +17,16 @@ TrustShield accepts attacker-controlled text, URLs, QR payloads, and image bytes
 | Mock-provider misuse | The provider name is exposed, the UI displays the demo warning, and the provider reads only the explicit demo metadata field. It is documented as test/demo-only. | Implemented; operational discipline still required |
 | URL SSRF if a future fetch is added | `validate_public_url` blocks disallowed schemes, internal names, private/link-local/metadata destinations, numeric-IP tricks, credentials, and private DNS results. | Guard implemented and tested; no current fetch path |
 | Raw content leakage through result storage | Raw image bytes are never stored. Structured results, including extracted OCR text when present, remain in a bounded in-memory store of 200 entries and are lost on restart. | Implemented |
+| Model-artifact loading trust | The loader confines metadata/artifact paths below the project model directories, rejects non-`.joblib` paths, verifies the recorded SHA-256 before loading, checks the recorded sklearn version, and converts load/inference failures into `ml=unavailable`. | Implemented |
+| Dataset poisoning or misleading public labels | v1 keeps only the two retained SMS sources, uses supplied per-row audits, records provenance/confidence, caps legitimate rows before grouping, and excludes the unaudited Hugging Face bulk labels. Remaining public ham outside the reviewed samples is explicitly marked not individually audited. | Implemented with documented residual limitation |
+| Prompt/text injection in input | Not applicable to the model path: input text is feature data for deterministic rules/TF-IDF inference, not instructions to an LLM or tool executor. | Not applicable |
+| ML evasion / style shortcut | Validation includes source-name breakdown, hard legitimate controls, synthetic holdout assignment, calibrated threshold selection, manual FP/FN review, and saved-prediction leakage sensitivity analysis. Obfuscation, near-duplicate template overlap, and unseen scam patterns remain residual risks. | Partially mitigated; leakage-aware test interpretation documented |
 
 ## PLANNED or not enabled
 
 - A web sandbox for inspecting page content is not enabled. The current application does not fetch QR or user-supplied URLs.
 - External reputation providers are not configured.
-- ML classification is not trained or loaded.
+- The final test-set ML evaluation is frozen and was accessed once by the coordinator. Further reporting reads saved predictions only; the primary numbers remain affected by cross-split near-duplicate templates.
 - Ollama explanations, SQLite persistence, PaddleOCR, and Hindi OCR are not implemented.
 
 ## Residual gaps

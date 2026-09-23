@@ -1,0 +1,547 @@
+{
+  "accepted_after_caps": 4360,
+  "accepted_before_caps": 8760,
+  "caps": {
+    "india_spam_sms:legitimate": 1500,
+    "ucI_sms_spam:legitimate": 1500
+  },
+  "counts": {
+    "overall": {
+      "binary_label": {
+        "legitimate": 3242,
+        "malicious_or_fraudulent": 926
+      },
+      "category_label": {
+        "credential_theft": 61,
+        "delivery_scam": 62,
+        "digital_arrest": 60,
+        "fake_job": 67,
+        "impersonation": 74,
+        "investment_scam": 63,
+        "legitimate": 3242,
+        "other_fraud": 142,
+        "payment_fraud": 79,
+        "phishing": 64,
+        "prize_lottery_scam": 254
+      },
+      "source_name": {
+        "agy-gen-fraud-v1": 400,
+        "agy-gen-legit-v1": 400,
+        "holdout-codex-v1": 400,
+        "india_spam_sms": 1321,
+        "ucI_sms_spam": 1647
+      },
+      "source_type": {
+        "legitimate_control": 600,
+        "public_dataset": 2968,
+        "synthetic": 600
+      },
+      "synthetic": {
+        "False": 2968,
+        "True": 1200
+      }
+    },
+    "splits": {
+      "test": {
+        "binary_label": {
+          "legitimate": 328,
+          "malicious_or_fraudulent": 297
+        },
+        "category_label": {
+          "credential_theft": 20,
+          "delivery_scam": 20,
+          "digital_arrest": 20,
+          "fake_job": 20,
+          "impersonation": 27,
+          "investment_scam": 22,
+          "legitimate": 328,
+          "other_fraud": 37,
+          "payment_fraud": 24,
+          "phishing": 20,
+          "prize_lottery_scam": 87
+        },
+        "source_name": {
+          "agy-gen-legit-v1": 2,
+          "holdout-codex-v1": 400,
+          "india_spam_sms": 110,
+          "ucI_sms_spam": 113
+        },
+        "source_type": {
+          "legitimate_control": 202,
+          "public_dataset": 223,
+          "synthetic": 200
+        },
+        "synthetic": {
+          "False": 223,
+          "True": 402
+        }
+      },
+      "train": {
+        "binary_label": {
+          "legitimate": 2413,
+          "malicious_or_fraudulent": 505
+        },
+        "category_label": {
+          "credential_theft": 35,
+          "delivery_scam": 32,
+          "digital_arrest": 33,
+          "fake_job": 38,
+          "impersonation": 37,
+          "investment_scam": 35,
+          "legitimate": 2413,
+          "other_fraud": 77,
+          "payment_fraud": 45,
+          "phishing": 35,
+          "prize_lottery_scam": 138
+        },
+        "source_name": {
+          "agy-gen-fraud-v1": 321,
+          "agy-gen-legit-v1": 321,
+          "india_spam_sms": 1007,
+          "ucI_sms_spam": 1269
+        },
+        "source_type": {
+          "legitimate_control": 321,
+          "public_dataset": 2276,
+          "synthetic": 321
+        },
+        "synthetic": {
+          "False": 2276,
+          "True": 642
+        }
+      },
+      "validation": {
+        "binary_label": {
+          "legitimate": 501,
+          "malicious_or_fraudulent": 124
+        },
+        "category_label": {
+          "credential_theft": 6,
+          "delivery_scam": 10,
+          "digital_arrest": 7,
+          "fake_job": 9,
+          "impersonation": 10,
+          "investment_scam": 6,
+          "legitimate": 501,
+          "other_fraud": 28,
+          "payment_fraud": 10,
+          "phishing": 9,
+          "prize_lottery_scam": 29
+        },
+        "source_name": {
+          "agy-gen-fraud-v1": 79,
+          "agy-gen-legit-v1": 77,
+          "india_spam_sms": 204,
+          "ucI_sms_spam": 265
+        },
+        "source_type": {
+          "legitimate_control": 77,
+          "public_dataset": 469,
+          "synthetic": 79
+        },
+        "synthetic": {
+          "False": 469,
+          "True": 156
+        }
+      }
+    }
+  },
+  "created": "2026-09-23",
+  "cross_label_conflicts": [
+    {
+      "ids": [
+        "ucisms-1131b6e4",
+        "ucisms-37cda9aa",
+        "ucisms-3abb689b"
+      ],
+      "labels": [
+        [
+          "malicious_or_fraudulent",
+          "other_fraud"
+        ],
+        [
+          "malicious_or_fraudulent",
+          "prize_lottery_scam"
+        ]
+      ],
+      "normalized_text": "private! your 0000 account statement for 00000000000 shows 000 un-redeemed s. i. m. points. call 00000000000 identifier code: 00000 expires 00/00/00"
+    }
+  ],
+  "dataset_version": "trustshield-text-v1",
+  "input_files": [
+    {
+      "path": "C:\\Users\\shubh\\trustshield-ai\\datasets\\processed\\public\\india_spam_sms.jsonl",
+      "sha256": "a2c661c78fdc11033626fa7f81ec5c00c5f0090a15c3915d8bb14c9ffb87cce8"
+    },
+    {
+      "path": "C:\\Users\\shubh\\trustshield-ai\\datasets\\processed\\public\\ucI_sms_spam.jsonl",
+      "sha256": "977a1138e51eeeebcfe2dad34afe3c8df6ec4be1b7cb1f45fac5ff1b24bb9b20"
+    },
+    {
+      "path": "C:\\Users\\shubh\\trustshield-ai\\datasets\\raw\\synthetic\\agy_fraud.jsonl",
+      "sha256": "b5010a05f14472c7fe0aac6539c749e51e565366ab2757f4d0aba09e49bf2a83"
+    },
+    {
+      "path": "C:\\Users\\shubh\\trustshield-ai\\datasets\\raw\\synthetic\\agy_legit.jsonl",
+      "sha256": "71f192af7fe0181a6dbb0ec6fb8144ebab046592aa54e5fb92b27007ee01c3dc"
+    },
+    {
+      "path": "C:\\Users\\shubh\\trustshield-ai\\datasets\\raw\\synthetic\\codex_holdout.jsonl",
+      "sha256": "f94d35fe9ca8b6187789fc424a8d1b6afe0b887afd63365280bc2ba9f1549b5a"
+    }
+  ],
+  "ordered_concatenation_sha256": "95481c5c756966f5300133aeb1a94bd0fe844e5ad03df0292541633c3b6aad29",
+  "post_cap_counts": {
+    "agy-gen-fraud-v1:credential_theft": 40,
+    "agy-gen-fraud-v1:delivery_scam": 40,
+    "agy-gen-fraud-v1:digital_arrest": 40,
+    "agy-gen-fraud-v1:fake_job": 40,
+    "agy-gen-fraud-v1:impersonation": 40,
+    "agy-gen-fraud-v1:investment_scam": 40,
+    "agy-gen-fraud-v1:other_fraud": 40,
+    "agy-gen-fraud-v1:payment_fraud": 40,
+    "agy-gen-fraud-v1:phishing": 40,
+    "agy-gen-fraud-v1:prize_lottery_scam": 40,
+    "agy-gen-legit-v1:legitimate": 400,
+    "holdout-codex-v1:credential_theft": 20,
+    "holdout-codex-v1:delivery_scam": 20,
+    "holdout-codex-v1:digital_arrest": 20,
+    "holdout-codex-v1:fake_job": 20,
+    "holdout-codex-v1:impersonation": 20,
+    "holdout-codex-v1:investment_scam": 20,
+    "holdout-codex-v1:legitimate": 200,
+    "holdout-codex-v1:other_fraud": 20,
+    "holdout-codex-v1:payment_fraud": 20,
+    "holdout-codex-v1:phishing": 20,
+    "holdout-codex-v1:prize_lottery_scam": 20,
+    "india_spam_sms:fake_job": 5,
+    "india_spam_sms:investment_scam": 1,
+    "india_spam_sms:legitimate": 1500,
+    "india_spam_sms:other_fraud": 4,
+    "india_spam_sms:payment_fraud": 10,
+    "india_spam_sms:phishing": 2,
+    "india_spam_sms:prize_lottery_scam": 4,
+    "ucI_sms_spam:credential_theft": 1,
+    "ucI_sms_spam:delivery_scam": 3,
+    "ucI_sms_spam:fake_job": 2,
+    "ucI_sms_spam:impersonation": 16,
+    "ucI_sms_spam:investment_scam": 2,
+    "ucI_sms_spam:legitimate": 1500,
+    "ucI_sms_spam:other_fraud": 96,
+    "ucI_sms_spam:payment_fraud": 11,
+    "ucI_sms_spam:phishing": 2,
+    "ucI_sms_spam:prize_lottery_scam": 245
+  },
+  "pre_cap_counts": {
+    "agy-gen-fraud-v1:credential_theft": 40,
+    "agy-gen-fraud-v1:delivery_scam": 40,
+    "agy-gen-fraud-v1:digital_arrest": 40,
+    "agy-gen-fraud-v1:fake_job": 40,
+    "agy-gen-fraud-v1:impersonation": 40,
+    "agy-gen-fraud-v1:investment_scam": 40,
+    "agy-gen-fraud-v1:other_fraud": 40,
+    "agy-gen-fraud-v1:payment_fraud": 40,
+    "agy-gen-fraud-v1:phishing": 40,
+    "agy-gen-fraud-v1:prize_lottery_scam": 40,
+    "agy-gen-legit-v1:legitimate": 400,
+    "holdout-codex-v1:credential_theft": 20,
+    "holdout-codex-v1:delivery_scam": 20,
+    "holdout-codex-v1:digital_arrest": 20,
+    "holdout-codex-v1:fake_job": 20,
+    "holdout-codex-v1:impersonation": 20,
+    "holdout-codex-v1:investment_scam": 20,
+    "holdout-codex-v1:legitimate": 200,
+    "holdout-codex-v1:other_fraud": 20,
+    "holdout-codex-v1:payment_fraud": 20,
+    "holdout-codex-v1:phishing": 20,
+    "holdout-codex-v1:prize_lottery_scam": 20,
+    "india_spam_sms:fake_job": 5,
+    "india_spam_sms:investment_scam": 1,
+    "india_spam_sms:legitimate": 2069,
+    "india_spam_sms:other_fraud": 4,
+    "india_spam_sms:payment_fraud": 10,
+    "india_spam_sms:phishing": 2,
+    "india_spam_sms:prize_lottery_scam": 4,
+    "ucI_sms_spam:credential_theft": 1,
+    "ucI_sms_spam:delivery_scam": 3,
+    "ucI_sms_spam:fake_job": 2,
+    "ucI_sms_spam:impersonation": 16,
+    "ucI_sms_spam:investment_scam": 2,
+    "ucI_sms_spam:legitimate": 5087,
+    "ucI_sms_spam:other_fraud": 96,
+    "ucI_sms_spam:payment_fraud": 11,
+    "ucI_sms_spam:phishing": 2,
+    "ucI_sms_spam:prize_lottery_scam": 245
+  },
+  "rejected_row_details": [],
+  "rejected_rows": 0,
+  "removed_ids": [
+    "indiaspam-12e20a2a",
+    "indiaspam-12e20a2a",
+    "indiaspam-1b1624be",
+    "indiaspam-1c107e39",
+    "indiaspam-2abc9405",
+    "indiaspam-2abc9405",
+    "indiaspam-2caab43d",
+    "indiaspam-2d1dd2ec",
+    "indiaspam-35a95df8",
+    "indiaspam-36869135",
+    "indiaspam-4406d90a",
+    "indiaspam-45c83ce6",
+    "indiaspam-467de3d0",
+    "indiaspam-4f29cead",
+    "indiaspam-5382d5f3",
+    "indiaspam-543675b9",
+    "indiaspam-5826e455",
+    "indiaspam-5b4116e6",
+    "indiaspam-5d55faa7",
+    "indiaspam-611930ed",
+    "indiaspam-621bb38c",
+    "indiaspam-64ff8c95",
+    "indiaspam-6ac54454",
+    "indiaspam-6cc324c1",
+    "indiaspam-6f98057d",
+    "indiaspam-6fabc2e4",
+    "indiaspam-7997ad9e",
+    "indiaspam-79bf5b96",
+    "indiaspam-7b455d9c",
+    "indiaspam-7da2aa90",
+    "indiaspam-810671cd",
+    "indiaspam-82c1544b",
+    "indiaspam-8575ed78",
+    "indiaspam-8915370c",
+    "indiaspam-89851d5c",
+    "indiaspam-8c76abde",
+    "indiaspam-8cc482d8",
+    "indiaspam-8cfb62e5",
+    "indiaspam-914db1b4",
+    "indiaspam-92846054",
+    "indiaspam-92f9cd3d",
+    "indiaspam-953ca774",
+    "indiaspam-95d37935",
+    "indiaspam-96c3007e",
+    "indiaspam-9892ce29",
+    "indiaspam-9892ce29",
+    "indiaspam-9b022694",
+    "indiaspam-9b243a93",
+    "indiaspam-9f8efc44",
+    "indiaspam-9fc39512",
+    "indiaspam-a32b8cf0",
+    "indiaspam-a3e97196",
+    "indiaspam-a74f3956",
+    "indiaspam-a74f3956",
+    "indiaspam-a7fdcbf0",
+    "indiaspam-a8d9e0d1",
+    "indiaspam-a932d53a",
+    "indiaspam-ab797089",
+    "indiaspam-ac7fd8fe",
+    "indiaspam-ad52883b",
+    "indiaspam-ae0aa950",
+    "indiaspam-b1c0fe1c",
+    "indiaspam-b8bbb166",
+    "indiaspam-bf414412",
+    "indiaspam-bfc26878",
+    "indiaspam-c31dc9f7",
+    "indiaspam-c68cf171",
+    "indiaspam-cec88074",
+    "indiaspam-cf4eb6bc",
+    "indiaspam-d1c7e90f",
+    "indiaspam-d474e816",
+    "indiaspam-d4836553",
+    "indiaspam-d4836553",
+    "indiaspam-d94fecc7",
+    "indiaspam-da51c6e0",
+    "indiaspam-dce9a927",
+    "indiaspam-e0f34c8c",
+    "indiaspam-e696661c",
+    "indiaspam-e979c3fa",
+    "indiaspam-e9d30080",
+    "indiaspam-ea101f27",
+    "indiaspam-ea101f27",
+    "indiaspam-ea101f27",
+    "indiaspam-ec9ae13d",
+    "indiaspam-ee546d0d",
+    "indiaspam-ee9b2888",
+    "indiaspam-ee9b2888",
+    "indiaspam-ee9b2888",
+    "indiaspam-f04c60ad",
+    "indiaspam-fac3ca45",
+    "indiaspam-fb941320",
+    "indiaspam-ff5e741d",
+    "ucisms-054654cc",
+    "ucisms-063fcb3b",
+    "ucisms-07840e71",
+    "ucisms-0d8c8e32",
+    "ucisms-1131b6e4",
+    "ucisms-17ff66ab",
+    "ucisms-1895cef8",
+    "ucisms-19540868",
+    "ucisms-196675a2",
+    "ucisms-1e0ae39c",
+    "ucisms-1f9d9c51",
+    "ucisms-218fb133",
+    "ucisms-21930c88",
+    "ucisms-22c38837",
+    "ucisms-2a2d31bd",
+    "ucisms-2aac42eb",
+    "ucisms-2b3fe6cc",
+    "ucisms-2d296534",
+    "ucisms-2dacccab",
+    "ucisms-338bf66e",
+    "ucisms-36e48452",
+    "ucisms-37cda9aa",
+    "ucisms-39651400",
+    "ucisms-39ea60e6",
+    "ucisms-3abb689b",
+    "ucisms-3bf48fa4",
+    "ucisms-3f9f162d",
+    "ucisms-44b59431",
+    "ucisms-44d06641",
+    "ucisms-4eeb5e2c",
+    "ucisms-502a6ee2",
+    "ucisms-504fc5a2",
+    "ucisms-510d0f3c",
+    "ucisms-518f4c82",
+    "ucisms-5d2fb195",
+    "ucisms-5d2fb195",
+    "ucisms-5f18d6f4",
+    "ucisms-61d46104",
+    "ucisms-61d46104",
+    "ucisms-61d46104",
+    "ucisms-6788fe49",
+    "ucisms-67ff5112",
+    "ucisms-6a6e6932",
+    "ucisms-6a6e6932",
+    "ucisms-728aa879",
+    "ucisms-74b23e0e",
+    "ucisms-7ce09ec4",
+    "ucisms-7d18f9ef",
+    "ucisms-7d61a8f5",
+    "ucisms-7e9cadbf",
+    "ucisms-84db5741",
+    "ucisms-88ef2e91",
+    "ucisms-93579e6b",
+    "ucisms-94213d46",
+    "ucisms-98aed353",
+    "ucisms-98aed353",
+    "ucisms-9a749d46",
+    "ucisms-9e772678",
+    "ucisms-a3517d13",
+    "ucisms-a3c185ff",
+    "ucisms-a97b5761",
+    "ucisms-aa669dc9",
+    "ucisms-aa8526b4",
+    "ucisms-aec3cc5d",
+    "ucisms-af7bd375",
+    "ucisms-b0265aa2",
+    "ucisms-b4282f4b",
+    "ucisms-b4282f4b",
+    "ucisms-b9441349",
+    "ucisms-b9fc255a",
+    "ucisms-ba7c6913",
+    "ucisms-c523e292",
+    "ucisms-ca243cfd",
+    "ucisms-ca243cfd",
+    "ucisms-cea6ebef",
+    "ucisms-d1243c28",
+    "ucisms-d1243c28",
+    "ucisms-d2409d94",
+    "ucisms-d4c07817",
+    "ucisms-d5aacec0",
+    "ucisms-d5ec6057",
+    "ucisms-d968f60b",
+    "ucisms-d97266bb",
+    "ucisms-dc18ce5e",
+    "ucisms-dc4c1558",
+    "ucisms-dd6eadd8",
+    "ucisms-dd6eadd8",
+    "ucisms-ddbab175",
+    "ucisms-e02f54be",
+    "ucisms-e325db77",
+    "ucisms-e4a21055",
+    "ucisms-e9e9c36d",
+    "ucisms-e9f3b26e",
+    "ucisms-ecabb870",
+    "ucisms-ecabb870",
+    "ucisms-f0105196",
+    "ucisms-f3518a9f",
+    "ucisms-f79030ff",
+    "ucisms-f79030ff",
+    "ucisms-fcb8bea9"
+  ],
+  "seed": 42,
+  "sha256": {
+    "all.jsonl": "95481c5c756966f5300133aeb1a94bd0fe844e5ad03df0292541633c3b6aad29",
+    "dedup_report.md": "dfdc9b8b16136fcd7c5c7fd296a68cdeebed0f46687cf18311bb55ba8ceff1c6",
+    "duplicate_groups.json": "5be2a97b88b17e09824924f116c79dfbc6c14a4323a1d6adbab1defbbdcaefdf",
+    "test.jsonl": "d274960eaeffb08988151eb813fad712320e2c0bbc1291d7ebd3aa20ed3b4a65",
+    "train.jsonl": "0cd9babfe20e79049747215a3598a151b3d75865806004185c3a2d7855377436",
+    "validation.jsonl": "9d469dc7ebb3409cc2c0b7b60f73d78fd956143669d0626333f1286e8380b59e"
+  },
+  "thresholds": {
+    "near_duplicate_cosine": 0.85,
+    "reported": [
+      0.7,
+      0.8,
+      0.85,
+      0.9
+    ]
+  },
+  "under_supported_categories": {
+    "credential_theft": {
+      "test": 20,
+      "train": 35,
+      "validation": 6
+    },
+    "delivery_scam": {
+      "test": 20,
+      "train": 32,
+      "validation": 10
+    },
+    "digital_arrest": {
+      "test": 20,
+      "train": 33,
+      "validation": 7
+    },
+    "fake_job": {
+      "test": 20,
+      "train": 38,
+      "validation": 9
+    },
+    "impersonation": {
+      "test": 27,
+      "train": 37,
+      "validation": 10
+    },
+    "investment_scam": {
+      "test": 22,
+      "train": 35,
+      "validation": 6
+    },
+    "legitimate": {
+      "test": 328,
+      "train": 2413,
+      "validation": 501
+    },
+    "other_fraud": {
+      "test": 37,
+      "train": 77,
+      "validation": 28
+    },
+    "payment_fraud": {
+      "test": 24,
+      "train": 45,
+      "validation": 10
+    },
+    "phishing": {
+      "test": 20,
+      "train": 35,
+      "validation": 9
+    },
+    "prize_lottery_scam": {
+      "test": 87,
+      "train": 138,
+      "validation": 29
+    }
+  }
+}

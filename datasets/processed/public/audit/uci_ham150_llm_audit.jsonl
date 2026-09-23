@@ -1,0 +1,150 @@
+{"source_row_id": "uci-002377", "verdict": "legit", "category": "legitimate", "rationale": "personal friendly appreciation text thanking a mate for cheering them up", "confidence": "high"}
+{"source_row_id": "uci-001400", "verdict": "legit", "category": "legitimate", "rationale": "routine personal conversation about checking a received detailed message", "confidence": "high"}
+{"source_row_id": "uci-003356", "verdict": "legit", "category": "legitimate", "rationale": "casual conversational message about having wine and discussing understanding", "confidence": "high"}
+{"source_row_id": "uci-000527", "verdict": "legit", "category": "legitimate", "rationale": "personal holiday greeting wishing Merry Christmas while explaining absence", "confidence": "high"}
+{"source_row_id": "uci-003132", "verdict": "legit", "category": "legitimate", "rationale": "brief personal message coordinating availability after finishing at six", "confidence": "high"}
+{"source_row_id": "uci-002844", "verdict": "legit", "category": "legitimate", "rationale": "personal message asking a contact for their current location", "confidence": "high"}
+{"source_row_id": "uci-004635", "verdict": "legit", "category": "legitimate", "rationale": "casual informal inquiry asking if a firmware update will fix an issue", "confidence": "high"}
+{"source_row_id": "uci-003708", "verdict": "exclude", "category": "non_english", "rationale": "contains mixed Kannada transliteration text excluded per non-English guideline", "confidence": "high"}
+{"source_row_id": "uci-002788", "verdict": "legit", "category": "legitimate", "rationale": "student discussion dividing up report sections like contents and cover page", "confidence": "high"}
+{"source_row_id": "uci-001621", "verdict": "legit", "category": "legitimate", "rationale": "casual conversational remark referring to Facebook chat friends", "confidence": "high"}
+{"source_row_id": "uci-004555", "verdict": "legit", "category": "legitimate", "rationale": "conversational Singlish message planning a pilates session near Orchard MRT", "confidence": "high"}
+{"source_row_id": "uci-004484", "verdict": "legit", "category": "legitimate", "rationale": "personal coordination request regarding arranging transport if contact cannot", "confidence": "high"}
+{"source_row_id": "uci-001637", "verdict": "legit", "category": "legitimate", "rationale": "romantic personal text expressing heartfelt appreciation and love", "confidence": "high"}
+{"source_row_id": "uci-003024", "verdict": "legit", "category": "legitimate", "rationale": "playful or annoyed personal message asking why ringtone was changed", "confidence": "high"}
+{"source_row_id": "uci-001640", "verdict": "legit", "category": "legitimate", "rationale": "casual reaction message praising a comedy show and laughing", "confidence": "high"}
+{"source_row_id": "uci-004792", "verdict": "legit", "category": "legitimate", "rationale": "casual text asking about weather outside while riding the MRT", "confidence": "high"}
+{"source_row_id": "uci-004601", "verdict": "legit", "category": "legitimate", "rationale": "personal question asking if friend stopped using their Airtel phone number", "confidence": "high"}
+{"source_row_id": "uci-002660", "verdict": "legit", "category": "legitimate", "rationale": "friendly personal reply answering not yet and asking what about you", "confidence": "high"}
+{"source_row_id": "uci-000222", "verdict": "legit", "category": "legitimate", "rationale": "routine courteous message telling contact no problem and take their time", "confidence": "high"}
+{"source_row_id": "uci-000623", "verdict": "legit", "category": "legitimate", "rationale": "philosophical personal thought about words and disappointment", "confidence": "high"}
+{"source_row_id": "uci-003376", "verdict": "legit", "category": "legitimate", "rationale": "fragmentary conversational text adding items like andros ice to list", "confidence": "medium"}
+{"source_row_id": "uci-002437", "verdict": "legit", "category": "legitimate", "rationale": "conversational acknowledgment recalling a previously mentioned topic", "confidence": "high"}
+{"source_row_id": "uci-004031", "verdict": "legit", "category": "legitimate", "rationale": "friendly personal sign-off wishing someone many good evenings", "confidence": "high"}
+{"source_row_id": "uci-005492", "verdict": "legit", "category": "legitimate", "rationale": "routine personal errand message mentioning already purchasing two eggs", "confidence": "high"}
+{"source_row_id": "uci-004444", "verdict": "legit", "category": "legitimate", "rationale": "interpersonal message reassuring recipient that their words are not denied", "confidence": "high"}
+{"source_row_id": "uci-004892", "verdict": "exclude", "category": "adult", "rationale": "explicit BDSM adult roleplay conversation excluded under schema rules", "confidence": "high"}
+{"source_row_id": "uci-002038", "verdict": "legit", "category": "legitimate", "rationale": "practical personal advice suggesting jotting down notes for later memory", "confidence": "high"}
+{"source_row_id": "uci-001958", "verdict": "legit", "category": "legitimate", "rationale": "friendly message inviting contact to come over and look for jobs", "confidence": "high"}
+{"source_row_id": "uci-001937", "verdict": "legit", "category": "legitimate", "rationale": "social inquiry asking group members for activity ideas or venue plans", "confidence": "high"}
+{"source_row_id": "uci-004279", "verdict": "legit", "category": "legitimate", "rationale": "warm personal encouragement expressing happiness that recipient is pursuing dreams", "confidence": "high"}
+{"source_row_id": "uci-001011", "verdict": "legit", "category": "legitimate", "rationale": "personal departure message announcing move to Qatar and sharing contact email", "confidence": "high"}
+{"source_row_id": "uci-001363", "verdict": "legit", "category": "legitimate", "rationale": "informal coordination message regarding meeting change for steamboat meal at Suntec", "confidence": "high"}
+{"source_row_id": "uci-000252", "verdict": "legit", "category": "legitimate", "rationale": "real-time teleconference coordination note about dropped call and holding briefly", "confidence": "high"}
+{"source_row_id": "uci-003036", "verdict": "exclude", "category": "adult", "rationale": "sexually suggestive message referencing inches of pleasure excluded per adult policy", "confidence": "high"}
+{"source_row_id": "uci-005146", "verdict": "legit", "category": "legitimate", "rationale": "personal social invite sent from a friend's phone to meet tonight", "confidence": "high"}
+{"source_row_id": "uci-003653", "verdict": "legit", "category": "legitimate", "rationale": "affectionate personal request asking a friend for a virtual hug", "confidence": "high"}
+{"source_row_id": "uci-005032", "verdict": "legit", "category": "legitimate", "rationale": "workplace inquiry asking if coming Friday is a holiday for Pongal", "confidence": "high"}
+{"source_row_id": "uci-000932", "verdict": "legit", "category": "legitimate", "rationale": "polite personal cancellation apology for Friday with supportive wishes", "confidence": "high"}
+{"source_row_id": "uci-001665", "verdict": "legit", "category": "legitimate", "rationale": "brief conversational response clarifying that circumstances are mostly not like that", "confidence": "high"}
+{"source_row_id": "uci-003183", "verdict": "legit", "category": "legitimate", "rationale": "inspirational personal friendship quote reminding contact to value long-term bonds", "confidence": "high"}
+{"source_row_id": "uci-005363", "verdict": "legit", "category": "legitimate", "rationale": "personal introduction text from a mutual acquaintance introducing themselves", "confidence": "high"}
+{"source_row_id": "uci-003937", "verdict": "legit", "category": "legitimate", "rationale": "urgent interpersonal wake-up reminder instructing contact to get up", "confidence": "high"}
+{"source_row_id": "uci-000240", "verdict": "legit", "category": "legitimate", "rationale": "humorous personal text joke about winning arguments with friends", "confidence": "high"}
+{"source_row_id": "uci-000448", "verdict": "legit", "category": "legitimate", "rationale": "humorous conversational reaction regarding remembering what exercise is", "confidence": "high"}
+{"source_row_id": "uci-005224", "verdict": "legit", "category": "legitimate", "rationale": "workplace message asking a coworker to cover a shift due to illness", "confidence": "high"}
+{"source_row_id": "uci-003519", "verdict": "legit", "category": "legitimate", "rationale": "detailed personal message seeking advice about an encounter at an auto shop", "confidence": "high"}
+{"source_row_id": "uci-004871", "verdict": "legit", "category": "legitimate", "rationale": "playful SMS chain list categorizing different facial expressions", "confidence": "high"}
+{"source_row_id": "uci-001910", "verdict": "legit", "category": "legitimate", "rationale": "personal relationship message describing an argument at a pub and missing partner", "confidence": "high"}
+{"source_row_id": "uci-001202", "verdict": "legit", "category": "legitimate", "rationale": "informal personal update discussing part-time tuition work", "confidence": "high"}
+{"source_row_id": "uci-001970", "verdict": "legit", "category": "legitimate", "rationale": "casual conversation expressing preference for a faster laptop", "confidence": "high"}
+{"source_row_id": "uci-000259", "verdict": "legit", "category": "legitimate", "rationale": "intimate romantic message asking partner for their whereabouts", "confidence": "high"}
+{"source_row_id": "uci-004304", "verdict": "legit", "category": "legitimate", "rationale": "informal personal text offering to call later to talk directly", "confidence": "high"}
+{"source_row_id": "uci-001882", "verdict": "legit", "category": "legitimate", "rationale": "courteous family message acknowledging a missed call from a brother", "confidence": "high"}
+{"source_row_id": "uci-000465", "verdict": "legit", "category": "legitimate", "rationale": "brief personal apology promising to call back later", "confidence": "high"}
+{"source_row_id": "uci-004772", "verdict": "legit", "category": "legitimate", "rationale": "friendly social sign-off recapping a good night out", "confidence": "high"}
+{"source_row_id": "uci-001973", "verdict": "legit", "category": "legitimate", "rationale": "friendly personal evening message wishing someone well and good night", "confidence": "high"}
+{"source_row_id": "uci-002975", "verdict": "legit", "category": "legitimate", "rationale": "affectionate holiday greeting wishing Happy New Year to a loved one", "confidence": "high"}
+{"source_row_id": "uci-005120", "verdict": "exclude", "category": "non_english", "rationale": "contains transliterated Arabic phrasing excluded under non-English guideline", "confidence": "high"}
+{"source_row_id": "uci-002697", "verdict": "legit", "category": "legitimate", "rationale": "casual personal message suggesting meeting up in the future", "confidence": "high"}
+{"source_row_id": "uci-001706", "verdict": "legit", "category": "legitimate", "rationale": "personal travel update explaining traffic delay due to road accident", "confidence": "high"}
+{"source_row_id": "uci-001844", "verdict": "legit", "category": "legitimate", "rationale": "brief personal question asking if someone is coming down later", "confidence": "high"}
+{"source_row_id": "uci-001885", "verdict": "exclude", "category": "adult", "rationale": "erotic dominance roleplay personal message excluded under adult content guideline", "confidence": "medium"}
+{"source_row_id": "uci-004311", "verdict": "legit", "category": "legitimate", "rationale": "interpersonal message explaining someone is angry about information shared with Abi", "confidence": "high"}
+{"source_row_id": "uci-002136", "verdict": "legit", "category": "legitimate", "rationale": "encouraging conversation praising someone's talent and job search prospects", "confidence": "high"}
+{"source_row_id": "uci-002356", "verdict": "legit", "category": "legitimate", "rationale": "routine travel question asking which bus route to take", "confidence": "high"}
+{"source_row_id": "uci-001546", "verdict": "legit", "category": "legitimate", "rationale": "personal career advice advising against joining finance after completing degree", "confidence": "high"}
+{"source_row_id": "uci-000438", "verdict": "legit", "category": "legitimate", "rationale": "casual message telling contact to ask mutual friends for a story", "confidence": "high"}
+{"source_row_id": "uci-004521", "verdict": "legit", "category": "legitimate", "rationale": "personal travel update describing slow driving conditions past Nottingham", "confidence": "high"}
+{"source_row_id": "uci-001533", "verdict": "legit", "category": "legitimate", "rationale": "informal apology acknowledging an accidentally misdirected text message", "confidence": "high"}
+{"source_row_id": "uci-002143", "verdict": "legit", "category": "legitimate", "rationale": "casual personal message mentioning taking prescribed pain medication", "confidence": "high"}
+{"source_row_id": "uci-002745", "verdict": "legit", "category": "legitimate", "rationale": "emotional personal message expressing loneliness over family not calling during Diwali", "confidence": "high"}
+{"source_row_id": "uci-001022", "verdict": "legit", "category": "legitimate", "rationale": "affectionate anniversary note sending romantic greetings from across the sea", "confidence": "high"}
+{"source_row_id": "uci-005128", "verdict": "legit", "category": "legitimate", "rationale": "colloquial Singlish message planning an evening meetup at Orchard after work", "confidence": "high"}
+{"source_row_id": "uci-004344", "verdict": "legit", "category": "legitimate", "rationale": "friendly banter about reserving judgment for Friday visits to the pub", "confidence": "high"}
+{"source_row_id": "uci-002464", "verdict": "legit", "category": "legitimate", "rationale": "sentimental poetic message celebrating friendship and asking for text messages", "confidence": "high"}
+{"source_row_id": "uci-003526", "verdict": "legit", "category": "legitimate", "rationale": "brief conversational agreement agreeing that something is the best case scenario", "confidence": "high"}
+{"source_row_id": "uci-005351", "verdict": "legit", "category": "legitimate", "rationale": "casual personal question regarding putting an item back in its box", "confidence": "high"}
+{"source_row_id": "uci-003703", "verdict": "legit", "category": "legitimate", "rationale": "short routine question asking whether to bring along a pouch", "confidence": "high"}
+{"source_row_id": "uci-005305", "verdict": "legit", "category": "legitimate", "rationale": "practical personal advice advising someone to check fixed bank fees directly", "confidence": "high"}
+{"source_row_id": "uci-003735", "verdict": "legit", "category": "legitimate", "rationale": "brief location update stating proximity to Old Orchard and asking location", "confidence": "high"}
+{"source_row_id": "uci-003289", "verdict": "legit", "category": "legitimate", "rationale": "detailed driving directions describing street intersections near sender's home", "confidence": "high"}
+{"source_row_id": "uci-004458", "verdict": "legit", "category": "legitimate", "rationale": "navigation assistance directing recipient to search USF Dogwood Drive for parking", "confidence": "high"}
+{"source_row_id": "uci-005377", "verdict": "legit", "category": "legitimate", "rationale": "playful scrambled-spelling message about friendship wishing recipient goodnight", "confidence": "high"}
+{"source_row_id": "uci-002352", "verdict": "legit", "category": "legitimate", "rationale": "brief conversational statement asserting that someone will replace another person", "confidence": "high"}
+{"source_row_id": "uci-002102", "verdict": "exclude", "category": "non_english", "rationale": "conversational Kannada transliterated into English script excluded under non-English guideline", "confidence": "high"}
+{"source_row_id": "uci-001535", "verdict": "legit", "category": "legitimate", "rationale": "informal personal text expressing hunger and complaining about breakfast", "confidence": "high"}
+{"source_row_id": "uci-002814", "verdict": "legit", "category": "legitimate", "rationale": "interpersonal religious chain prayer urging recipient to forward to ten people", "confidence": "high"}
+{"source_row_id": "uci-003192", "verdict": "legit", "category": "legitimate", "rationale": "affectionate poetic personal text wishing a good night or morning", "confidence": "high"}
+{"source_row_id": "uci-003811", "verdict": "legit", "category": "legitimate", "rationale": "somber personal status update at a funeral home with family", "confidence": "high"}
+{"source_row_id": "uci-001828", "verdict": "legit", "category": "legitimate", "rationale": "detailed personal check-in discussing a package delivery and USMLE medical study", "confidence": "high"}
+{"source_row_id": "uci-004717", "verdict": "legit", "category": "legitimate", "rationale": "casual daytime update counting down eight minutes until lunch", "confidence": "high"}
+{"source_row_id": "uci-000102", "verdict": "legit", "category": "legitimate", "rationale": "informal personal text asking about price and pickup time for items", "confidence": "high"}
+{"source_row_id": "uci-004640", "verdict": "legit", "category": "legitimate", "rationale": "casual pop-culture commentary observing actor Vijayakanth on Captain TV", "confidence": "high"}
+{"source_row_id": "uci-003166", "verdict": "legit", "category": "legitimate", "rationale": "playful humorous chain text teasing a friend about Sorry Day", "confidence": "high"}
+{"source_row_id": "uci-000680", "verdict": "legit", "category": "legitimate", "rationale": "casual lighthearted remark explaining not being freaky", "confidence": "high"}
+{"source_row_id": "uci-002381", "verdict": "legit", "category": "legitimate", "rationale": "respectful tenant inquiry requesting landlord assistance with late rent fees", "confidence": "high"}
+{"source_row_id": "uci-004110", "verdict": "legit", "category": "legitimate", "rationale": "polite formal request asking a contact for their physical address", "confidence": "high"}
+{"source_row_id": "uci-003366", "verdict": "legit", "category": "legitimate", "rationale": "casual personal check-in asking if friend is stocked up after postponement", "confidence": "high"}
+{"source_row_id": "uci-004552", "verdict": "legit", "category": "legitimate", "rationale": "friendly social invitation from Pete offering to buy a beverage", "confidence": "high"}
+{"source_row_id": "uci-004947", "verdict": "legit", "category": "legitimate", "rationale": "casual social message offering to drive down south and hang out", "confidence": "high"}
+{"source_row_id": "uci-001550", "verdict": "legit", "category": "legitimate", "rationale": "informal colloquial expression expressing personal uncertainty", "confidence": "high"}
+{"source_row_id": "uci-000015", "verdict": "legit", "category": "legitimate", "rationale": "enthusiastic personal announcement celebrating an upcoming Sunday date with Will", "confidence": "high"}
+{"source_row_id": "uci-004141", "verdict": "legit", "category": "legitimate", "rationale": "affectionate quote forward wishing good night with a cartoon reference", "confidence": "high"}
+{"source_row_id": "uci-004795", "verdict": "legit", "category": "legitimate", "rationale": "informal Singlish text coordinating group availability for next Saturday", "confidence": "high"}
+{"source_row_id": "uci-003975", "verdict": "legit", "category": "legitimate", "rationale": "short affectionate bedtime sign-off confirming plans to meet tomorrow", "confidence": "high"}
+{"source_row_id": "uci-000524", "verdict": "legit", "category": "legitimate", "rationale": "casual personal message announcing a quick trip to get tacos", "confidence": "high"}
+{"source_row_id": "uci-005424", "verdict": "legit", "category": "legitimate", "rationale": "routine professional message asking Elaine to confirm today's scheduled meeting", "confidence": "high"}
+{"source_row_id": "uci-001799", "verdict": "legit", "category": "legitimate", "rationale": "conversational request asking a contact for their opinion on a matter", "confidence": "high"}
+{"source_row_id": "uci-000916", "verdict": "legit", "category": "legitimate", "rationale": "personal prompt asking a friend to call back while waiting", "confidence": "high"}
+{"source_row_id": "uci-004796", "verdict": "legit", "category": "legitimate", "rationale": "personal clarification explaining an interruption was from sender's uncle", "confidence": "high"}
+{"source_row_id": "uci-000751", "verdict": "legit", "category": "legitimate", "rationale": "casual request asking for full details and gossip by next Monday", "confidence": "high"}
+{"source_row_id": "uci-002302", "verdict": "legit", "category": "legitimate", "rationale": "informal Singlish text requesting help buying clothes hangers", "confidence": "high"}
+{"source_row_id": "uci-005102", "verdict": "legit", "category": "legitimate", "rationale": "personal reflection discussing social complications regarding an invitation and budget constraints", "confidence": "high"}
+{"source_row_id": "uci-003219", "verdict": "legit", "category": "legitimate", "rationale": "routine transit coordination asking contact to meet at Mahal bus stop", "confidence": "high"}
+{"source_row_id": "uci-004171", "verdict": "legit", "category": "legitimate", "rationale": "personal update expressing belief that someone flaked while praising a job", "confidence": "high"}
+{"source_row_id": "uci-004366", "verdict": "legit", "category": "legitimate", "rationale": "conversational inquiry asking what the recipient remembers about past events", "confidence": "high"}
+{"source_row_id": "uci-003611", "verdict": "legit", "category": "legitimate", "rationale": "informal logic riddle chain text challenging recipient to solve a question", "confidence": "high"}
+{"source_row_id": "uci-004081", "verdict": "legit", "category": "legitimate", "rationale": "casual gaming remark mentioning playing Super Smash Bros religiously", "confidence": "high"}
+{"source_row_id": "uci-002292", "verdict": "legit", "category": "legitimate", "rationale": "affectionate friendly greeting from Annie asking about plans for tonight", "confidence": "high"}
+{"source_row_id": "uci-003114", "verdict": "legit", "category": "legitimate", "rationale": "casual inquiry asking if a location has been decided upon yet", "confidence": "high"}
+{"source_row_id": "uci-002450", "verdict": "legit", "category": "legitimate", "rationale": "personal question asking if recipient recognizes an unknown phone number", "confidence": "high"}
+{"source_row_id": "uci-002513", "verdict": "legit", "category": "legitimate", "rationale": "brief conversational agreement and inquiry about props for an event", "confidence": "high"}
+{"source_row_id": "uci-002587", "verdict": "legit", "category": "legitimate", "rationale": "logistical coordination instruction to collect items outside the office", "confidence": "high"}
+{"source_row_id": "uci-000620", "verdict": "legit", "category": "legitimate", "rationale": "personal pickup arrangement instructing contact to come out after their lesson", "confidence": "high"}
+{"source_row_id": "uci-003473", "verdict": "legit", "category": "legitimate", "rationale": "poetic friendship quote wishing recipient good night and sweet dreams", "confidence": "high"}
+{"source_row_id": "uci-001499", "verdict": "legit", "category": "legitimate", "rationale": "household message stating food or task will be ready by scheduled time", "confidence": "high"}
+{"source_row_id": "uci-001449", "verdict": "legit", "category": "legitimate", "rationale": "supportive interpersonal text encouraging a friend to ignore others' opinions", "confidence": "high"}
+{"source_row_id": "uci-000330", "verdict": "legit", "category": "legitimate", "rationale": "casual meetup coordination asking contact to text when they have parked", "confidence": "high"}
+{"source_row_id": "uci-004900", "verdict": "legit", "category": "legitimate", "rationale": "exasperated personal conversation regarding someone being located in Tallahassee", "confidence": "high"}
+{"source_row_id": "uci-002053", "verdict": "legit", "category": "legitimate", "rationale": "affectionate pickup offer from Pete asking when and where to meet", "confidence": "high"}
+{"source_row_id": "uci-001677", "verdict": "legit", "category": "legitimate", "rationale": "melancholy inspirational forward quote reflecting on hiding personal pain", "confidence": "high"}
+{"source_row_id": "uci-000607", "verdict": "legit", "category": "legitimate", "rationale": "caring personal well-wish hoping contact gets well soon", "confidence": "high"}
+{"source_row_id": "uci-002766", "verdict": "legit", "category": "legitimate", "rationale": "detailed personal instructions for configuring Rebtel service to place a call", "confidence": "high"}
+{"source_row_id": "uci-002840", "verdict": "legit", "category": "legitimate", "rationale": "routine personal update looking for a nearby Chinese restaurant", "confidence": "high"}
+{"source_row_id": "uci-002777", "verdict": "legit", "category": "legitimate", "rationale": "brief social query confirming dinner plans at the Esplanade", "confidence": "high"}
+{"source_row_id": "uci-003196", "verdict": "legit", "category": "legitimate", "rationale": "supportive personal message wishing good luck for tomorrow", "confidence": "high"}
+{"source_row_id": "uci-002205", "verdict": "exclude", "category": "adult", "rationale": "sexually explicit private text excluded under adult content guideline", "confidence": "high"}
+{"source_row_id": "uci-002586", "verdict": "legit", "category": "legitimate", "rationale": "cheerful personal birthday greeting wishing happy birthday", "confidence": "high"}
+{"source_row_id": "uci-003013", "verdict": "legit", "category": "legitimate", "rationale": "playful morning check-in asking about shared headaches after an evening", "confidence": "high"}
+{"source_row_id": "uci-004590", "verdict": "legit", "category": "legitimate", "rationale": "personal relationship update seeking in-person legal advice regarding a separation", "confidence": "high"}
+{"source_row_id": "uci-004430", "verdict": "legit", "category": "legitimate", "rationale": "considerate Singlish text deciding not to disturb friend who is busy", "confidence": "high"}
+{"source_row_id": "uci-002812", "verdict": "legit", "category": "legitimate", "rationale": "conversational clarification regarding being asked not to call the radio station", "confidence": "high"}
+{"source_row_id": "uci-003539", "verdict": "legit", "category": "legitimate", "rationale": "intimate affectionate romantic message expressing love across the sea", "confidence": "high"}
+{"source_row_id": "uci-002359", "verdict": "legit", "category": "legitimate", "rationale": "courteous conversational response expressing thanks for a clarification", "confidence": "high"}
+{"source_row_id": "uci-004254", "verdict": "exclude", "category": "ambiguous", "rationale": "chain numerology prompt ambiguous between peer text and unsolicited gimmick", "confidence": "medium"}
+{"source_row_id": "uci-001083", "verdict": "legit", "category": "legitimate", "rationale": "routine inquiry asking if recipient's phone can receive picture messages", "confidence": "high"}
+{"source_row_id": "uci-005557", "verdict": "legit", "category": "legitimate", "rationale": "practical travel update noting gas limitations without additional cash", "confidence": "high"}
+{"source_row_id": "uci-002571", "verdict": "exclude", "category": "non_english", "rationale": "conversational Bengali text transliterated into Latin script excluded under non-English guideline", "confidence": "high"}
+{"source_row_id": "uci-003784", "verdict": "legit", "category": "legitimate", "rationale": "casual personal question inquiring about method of sending an item", "confidence": "high"}
+{"source_row_id": "uci-002094", "verdict": "legit", "category": "legitimate", "rationale": "affectionate personal text expressing love and sympathy over phone provider problems", "confidence": "high"}

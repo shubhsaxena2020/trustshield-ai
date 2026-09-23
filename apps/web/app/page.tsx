@@ -24,8 +24,9 @@ export default function Home() {
   const [error, setError] = useState("");
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [ocrHealthy, setOcrHealthy] = useState<boolean | null>(null);
+  const [mlHealthy, setMlHealthy] = useState<boolean | null>(null);
 
-  // Check backend health for optional OCR module status notice
+  // Check backend health for optional OCR and ML module status notice
   useEffect(() => {
     let isMounted = true;
     fetch(`${API}/api/v1/health`)
@@ -35,6 +36,10 @@ export default function Home() {
         const ocr = data?.modules?.ocr;
         if (typeof ocr === "boolean") setOcrHealthy(ocr);
         else if (ocr && typeof ocr.available === "boolean") setOcrHealthy(ocr.available);
+
+        const ml = data?.modules?.ml;
+        if (typeof ml === "boolean") setMlHealthy(ml);
+        else if (ml && typeof ml.available === "boolean") setMlHealthy(ml.available);
       })
       .catch(() => {
         // Fail gracefully if health check fails or is unreachable
@@ -178,6 +183,11 @@ export default function Home() {
                 className="w-full rounded-md border border-slate-300 bg-transparent p-3 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-500"
                 placeholder="e.g. Your bank KYC expires today. Verify immediately at ..."
               />
+              {mlHealthy === false && (
+                <p className="mt-2 text-xs text-amber-800 dark:text-amber-300">
+                  Notice: ML analysis is unavailable; rule-based analysis still works.
+                </p>
+              )}
             </div>
           )}
 

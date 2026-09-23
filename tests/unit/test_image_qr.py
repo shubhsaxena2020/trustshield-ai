@@ -50,6 +50,17 @@ def test_mock_ocr_screenshot_uses_shared_text_pipeline(monkeypatch):
     assert any("OCR" in warning for warning in result.modules["ocr"].data["warnings"])
 
 
+def test_short_mock_ocr_text_is_analyzed_with_limited_context(monkeypatch):
+    monkeypatch.setenv("TRUSTSHIELD_OCR_PROVIDER", "mock")
+    result = analyze_image(png_bytes("OTP 481926"), "image/png", "short.png")
+
+    assert result.status != "failed"
+    assert result.modules["ocr"].status == "completed"
+    assert result.modules["text_rules"].status == "completed"
+    assert result.risk.label != "unable_to_verify"
+    assert any("Limited context" in limitation for limitation in result.limitations)
+
+
 def test_ocr_unavailable_returns_valid_unable_to_verify(monkeypatch):
     monkeypatch.delenv("TRUSTSHIELD_OCR_PROVIDER", raising=False)
     monkeypatch.setattr(TesseractProvider, "is_available", lambda self: False)
@@ -93,6 +104,7 @@ def test_mime_parameters_are_accepted():
 
 def test_low_quality_ocr_has_lower_confidence_than_direct_text(monkeypatch):
     monkeypatch.setenv("TRUSTSHIELD_OCR_PROVIDER", "mock")
+    monkeypatch.setenv("TRUSTSHIELD_ML", "off")
     text = "Your account will be blocked today. Share OTP now at http://sbi-kyc-update.xyz/login"
     monkeypatch.setattr(
         "services.analysis.pipeline.get_ocr_provider",
@@ -196,13 +208,17 @@ def test_qr_url_uses_static_analysis_without_fetching(monkeypatch):
     analyze_qr(qr_bytes("upi://pay?pa=merchant@upi&pn=Store&am=100&tn=Dinner"), "image/png", "qr.png")
 
 
-def test_qr_text_and_short_text():
+def test_qr_text_and_short_text(monkeypatch):
+    monkeypatch.setenv("TRUSTSHIELD_ML", "off")
     result = analyze_qr(qr_bytes("This is a plain QR message with enough text"), "image/png", "qr.png")
     assert result.modules["qr"].data["payload_type"] == "text"
     assert result.modules["text_rules"].status == "completed"
     short = analyze_qr(qr_bytes("hello"), "image/png", "qr.png")
-    assert short.risk.label == "unable_to_verify"
-    assert any("short" in limitation.lower() for limitation in short.limitations)
+    assert short.status != "failed"
+    assert short.modules["text_rules"].status == "completed"
+    assert short.risk.label == "low_risk"
+    assert short.risk.confidence == "low"
+    assert any("Limited context" in limitation for limitation in short.limitations)
 
 
 def test_benign_qr_and_image_without_qr():
@@ -227,7 +243,8 @@ def test_short_upi_note_does_not_register_failed_text_rules():
     result = analyze_qr(qr_bytes("upi://pay?pa=merchant@upi&pn=Store&am=100&tn=Dinner"), "image/png", "qr.png")
     assert result.status == "completed"
     assert result.risk.label != "unable_to_verify"
-    assert "text_rules" not in result.modules
+    assert result.modules["text_rules"].status == "completed"
+    assert any("Limited context" in limitation for limitation in result.limitations)
 
 
 def test_upi_query_keys_are_case_insensitive():

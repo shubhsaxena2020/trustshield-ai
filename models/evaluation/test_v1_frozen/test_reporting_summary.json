@@ -1,0 +1,333 @@
+{
+  "calibration": {
+    "bins": 10,
+    "brier_score": 0.116781976516,
+    "ece": 0.105503118658,
+    "ece_definition": "equal-width 10 bins over [0,1]; count-weighted mean absolute difference between mean predicted probability and observed malicious fraction; empty bins contribute zero"
+  },
+  "consistency_with_evaluation_json": {
+    "combined": {
+      "F1": {
+        "evaluation_json": 0.405194805195,
+        "match": true,
+        "recomputed": 0.405194805195
+      },
+      "FN": {
+        "evaluation_json": 219,
+        "match": true,
+        "recomputed": 219
+      },
+      "FNR": {
+        "evaluation_json": 0.737373737374,
+        "match": true,
+        "recomputed": 0.737373737374
+      },
+      "FP": {
+        "evaluation_json": 10,
+        "match": true,
+        "recomputed": 10
+      },
+      "FPR": {
+        "evaluation_json": 0.030487804878,
+        "match": true,
+        "recomputed": 0.030487804878
+      },
+      "TN": {
+        "evaluation_json": 318,
+        "match": true,
+        "recomputed": 318
+      },
+      "TP": {
+        "evaluation_json": 78,
+        "match": true,
+        "recomputed": 78
+      },
+      "accuracy": {
+        "evaluation_json": 0.6336,
+        "match": true,
+        "recomputed": 0.6336
+      },
+      "precision": {
+        "evaluation_json": 0.886363636364,
+        "match": true,
+        "recomputed": 0.886363636364
+      },
+      "recall": {
+        "evaluation_json": 0.262626262626,
+        "match": true,
+        "recomputed": 0.262626262626
+      },
+      "specificity": {
+        "evaluation_json": 0.969512195122,
+        "match": true,
+        "recomputed": 0.969512195122
+      }
+    },
+    "ml": {
+      "F1": {
+        "evaluation_json": 0.843226788432,
+        "match": true,
+        "recomputed": 0.843226788432
+      },
+      "FN": {
+        "evaluation_json": 20,
+        "match": true,
+        "recomputed": 20
+      },
+      "FNR": {
+        "evaluation_json": 0.06734006734,
+        "match": true,
+        "recomputed": 0.06734006734
+      },
+      "FP": {
+        "evaluation_json": 83,
+        "match": true,
+        "recomputed": 83
+      },
+      "FPR": {
+        "evaluation_json": 0.253048780488,
+        "match": true,
+        "recomputed": 0.253048780488
+      },
+      "TN": {
+        "evaluation_json": 245,
+        "match": true,
+        "recomputed": 245
+      },
+      "TP": {
+        "evaluation_json": 277,
+        "match": true,
+        "recomputed": 277
+      },
+      "accuracy": {
+        "evaluation_json": 0.8352,
+        "match": true,
+        "recomputed": 0.8352
+      },
+      "precision": {
+        "evaluation_json": 0.769444444444,
+        "match": true,
+        "recomputed": 0.769444444444
+      },
+      "recall": {
+        "evaluation_json": 0.93265993266,
+        "match": true,
+        "recomputed": 0.93265993266
+      },
+      "specificity": {
+        "evaluation_json": 0.746951219512,
+        "match": true,
+        "recomputed": 0.746951219512
+      }
+    },
+    "rules": {
+      "F1": {
+        "evaluation_json": 0.105263157895,
+        "match": true,
+        "recomputed": 0.105263157895
+      },
+      "FN": {
+        "evaluation_json": 280,
+        "match": true,
+        "recomputed": 280
+      },
+      "FNR": {
+        "evaluation_json": 0.942760942761,
+        "match": true,
+        "recomputed": 0.942760942761
+      },
+      "FP": {
+        "evaluation_json": 9,
+        "match": true,
+        "recomputed": 9
+      },
+      "FPR": {
+        "evaluation_json": 0.02743902439,
+        "match": true,
+        "recomputed": 0.02743902439
+      },
+      "TN": {
+        "evaluation_json": 319,
+        "match": true,
+        "recomputed": 319
+      },
+      "TP": {
+        "evaluation_json": 17,
+        "match": true,
+        "recomputed": 17
+      },
+      "accuracy": {
+        "evaluation_json": 0.5376,
+        "match": true,
+        "recomputed": 0.5376
+      },
+      "precision": {
+        "evaluation_json": 0.653846153846,
+        "match": true,
+        "recomputed": 0.653846153846
+      },
+      "recall": {
+        "evaluation_json": 0.057239057239,
+        "match": true,
+        "recomputed": 0.057239057239
+      },
+      "specificity": {
+        "evaluation_json": 0.97256097561,
+        "match": true,
+        "recomputed": 0.97256097561
+      }
+    }
+  },
+  "dataset": {
+    "duplicate_group_multirow_count": 87,
+    "duplicate_groups": 497,
+    "legitimate": 328,
+    "malicious": 297,
+    "n": 625,
+    "non_synthetic": 223,
+    "synthetic": 402
+  },
+  "manual_review_counts": {
+    "combined_false_negative_sample_read": 40,
+    "combined_false_negative_sample_seed": 42,
+    "ml_false_negatives_read": 20,
+    "ml_false_positives_read": 83,
+    "review_candidate_rows_unique": 150,
+    "rules_false_positives_read": 9
+  },
+  "multiclass": {
+    "classes": [
+      "credential_theft",
+      "delivery_scam",
+      "digital_arrest",
+      "fake_job",
+      "impersonation",
+      "investment_scam",
+      "legitimate",
+      "other_fraud",
+      "payment_fraud",
+      "phishing",
+      "prize_lottery_scam"
+    ],
+    "macro_f1": 0.584783347302,
+    "metadata_merge_map": {
+      "credential_theft": "credential_theft",
+      "delivery_scam": "delivery_scam",
+      "digital_arrest": "digital_arrest",
+      "fake_job": "fake_job",
+      "impersonation": "impersonation",
+      "investment_scam": "investment_scam",
+      "other_fraud": "other_fraud",
+      "payment_fraud": "payment_fraud",
+      "phishing": "phishing",
+      "prize_lottery_scam": "prize_lottery_scam"
+    },
+    "metadata_merged_source_categories": {},
+    "support": 625,
+    "under_supported_test_support_lt_30": [
+      "credential_theft",
+      "delivery_scam",
+      "digital_arrest",
+      "fake_job",
+      "impersonation",
+      "investment_scam",
+      "payment_fraud",
+      "phishing"
+    ],
+    "weighted_f1": 0.710871872882
+  },
+  "operating_points": {
+    "combined_risk_score_threshold": 25,
+    "ml_probability_threshold": 0.12,
+    "rules_risk_score_threshold": 25,
+    "secondary_rules_and_combined_risk_score_threshold": 50,
+    "threshold_sensitivity_label": "post-hoc, not used for selection"
+  },
+  "provenance": {
+    "additional_metrics_are_recomputed_from_saved_predictions": true,
+    "dataset_manifest_sha256": "4e5556fd63cb29e932fd6e241d8d1e98eda1bf1abb46ffba55b437a40b967485",
+    "model_artifact_sha256": "4daac40049baa3622d4b7acbad309ef001456d04f029e361dcd67be186e130ea",
+    "source_labels_and_duplicate_groups": "datasets/processed/trustshield-text-v1/test.jsonl",
+    "source_predictions": "models/evaluation/test/predictions_test.csv",
+    "test_access_log_count": 1,
+    "test_evaluation_json": "models/evaluation/test/evaluation.json",
+    "test_jsonl_sha256": "d274960eaeffb08988151eb813fad712320e2c0bbc1291d7ebd3aa20ed3b4a65",
+    "test_split_evaluator_invoked_by_this_script": false
+  },
+  "slices": {
+    "agy-gen-legit-v1": {
+      "legitimate": 2,
+      "malicious": 0,
+      "n": 2
+    },
+    "holdout-codex-cross-author-synthetic": {
+      "legitimate": 200,
+      "malicious": 200,
+      "n": 400
+    },
+    "holdout-codex-v1": {
+      "legitimate": 200,
+      "malicious": 200,
+      "n": 400
+    },
+    "india_spam_sms": {
+      "legitimate": 110,
+      "malicious": 0,
+      "n": 110
+    },
+    "non-synthetic-public": {
+      "legitimate": 126,
+      "malicious": 97,
+      "n": 223
+    },
+    "ucI_sms_spam": {
+      "legitimate": 16,
+      "malicious": 97,
+      "n": 113
+    }
+  },
+  "systems": {
+    "combined": {
+      "F1": 0.4051948051948052,
+      "FN": 219,
+      "FNR": 0.7373737373737373,
+      "FP": 10,
+      "FPR": 0.03048780487804878,
+      "TN": 318,
+      "TP": 78,
+      "accuracy": 0.6336,
+      "precision": 0.8863636363636364,
+      "recall": 0.26262626262626265,
+      "specificity": 0.9695121951219512,
+      "threshold": 25.0
+    },
+    "ml": {
+      "F1": 0.8432267884322678,
+      "FN": 20,
+      "FNR": 0.06734006734006734,
+      "FP": 83,
+      "FPR": 0.2530487804878049,
+      "TN": 245,
+      "TP": 277,
+      "accuracy": 0.8352,
+      "precision": 0.7694444444444445,
+      "recall": 0.9326599326599326,
+      "specificity": 0.7469512195121951,
+      "threshold": 0.12
+    },
+    "rules": {
+      "F1": 0.10526315789473685,
+      "FN": 280,
+      "FNR": 0.9427609427609428,
+      "FP": 9,
+      "FPR": 0.027439024390243903,
+      "TN": 319,
+      "TP": 17,
+      "accuracy": 0.5376,
+      "precision": 0.6538461538461539,
+      "recall": 0.05723905723905724,
+      "specificity": 0.9725609756097561,
+      "threshold": 25.0
+    }
+  }
+}

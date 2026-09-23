@@ -3,24 +3,46 @@ from __future__ import annotations
 
 import re
 import unicodedata
+import os
+from functools import lru_cache
 
 from services.analysis.evidence.models import Evidence, Severity
 from services.analysis.explanation.template import explain
 from services.analysis.fusion.engine import fuse
 from services.analysis.fusion.result import AnalysisResult, Classification, ModuleResult, Risk
-from services.analysis.normalization.text import MAX_TEXT_CHARS, extract_urls, normalize_text
+from services.analysis.normalization.text import (
+    MAX_TEXT_CHARS,
+    alphanumeric_token_count,
+    extract_urls,
+    normalize_text,
+    text_context_quality,
+)
 from services.analysis.rules.text_rules import brand_name, claimed_brands, run_text_rules
 from services.analysis.extractors.image_validation import validate_image
 from services.analysis.extractors.ocr import OCRResult, get_ocr_provider
 from services.analysis.extractors.qr import QRResult, OpenCVQRDecoder
 from services.analysis.url_analysis.brands import is_official
 from services.analysis.url_analysis.static import analyze_url_static
-
-MIN_TEXT_CHARS = 15
+from services.analysis.ml.classifier import TextClassifier
+from services.analysis.ml.evidence import ml_evidence, ml_module_result
 
 LIMIT_ML = "Machine-learning classification was not available for this analysis."
 LIMIT_REP = "No threat-intelligence reputation information is available; this is not the same as the link being known-clean."
 LIMIT_SANDBOX = "The destination page was not inspected in an isolated browser, so its actual content and behaviour are unknown."
+LIMIT_SHORT_CONTEXT = "Limited context: the text is very short, so confidence is reduced."
+
+
+@lru_cache(maxsize=1)
+def _text_classifier() -> TextClassifier:
+    return TextClassifier()
+
+
+def _run_ml(text: str) -> tuple[ModuleResult, list[Evidence], bool]:
+    if os.getenv("TRUSTSHIELD_ML", "on").strip().lower() == "off":
+        return ModuleResult(status="not_run", detail="Disabled by TRUSTSHIELD_ML=off"), [], False
+    prediction = _text_classifier().predict(text)
+    module = ml_module_result(prediction)
+    return module, ml_evidence(prediction), module.status == "completed"
 
 
 def _finish(input_type: str, evidence: list[Evidence], modules: dict[str, ModuleResult], limitations: list[str],
@@ -45,16 +67,31 @@ def analyze_text(raw: str, input_type: str = "text", extra_modules: dict[str, Mo
                  extra_limitations: list[str] | None = None) -> AnalysisResult:
     text = normalize_text(raw)
     modules: dict[str, ModuleResult] = dict(extra_modules or {})
-    if len(text) < MIN_TEXT_CHARS:
-        modules["text_rules"] = ModuleResult(status="failed", detail=f"Input shorter than {MIN_TEXT_CHARS} characters")
-        return _finish(input_type, [], modules, ["The input is too short to analyze reliably."] + list(extra_limitations or []), input_ok=False, module_quality=module_quality)
+    token_count = alphanumeric_token_count(text)
+    if token_count == 0:
+        modules["text_rules"] = ModuleResult(status="failed", detail="No alphanumeric token was found after normalization")
+        modules["ml"] = ModuleResult(status="not_run", detail="No analyzable text was available for ML")
+        return _finish(input_type, [], modules,
+                       ["No analyzable alphanumeric text was found after normalization."] + list(extra_limitations or []),
+                       input_ok=False, module_quality=module_quality)
 
+    context_quality = text_context_quality(text)
+    quality = dict(module_quality or {})
+    quality["text_rules"] = context_quality
     evidence = run_text_rules(text)
-    modules["text_rules"] = ModuleResult(status="completed", data={"rules_matched": len(evidence)})
+    modules["text_rules"] = ModuleResult(status="completed", data={
+        "rules_matched": len(evidence),
+        "alphanumeric_token_count": token_count,
+        "context_quality": context_quality,
+    })
 
     urls = extract_urls(text)
-    limitations = [LIMIT_ML] + list(extra_limitations or [])
-    modules["ml"] = ModuleResult(status="unavailable", detail="Classifier not yet trained/loaded")
+    ml_module, ml_items, ml_completed = _run_ml(text)
+    evidence += ml_items
+    modules["ml"] = ml_module
+    limitations = ([] if ml_completed or ml_module.status == "not_run" else [LIMIT_ML]) + list(extra_limitations or [])
+    if context_quality < 1.0:
+        limitations.append(LIMIT_SHORT_CONTEXT)
     if urls:
         claims = claimed_brands(text)
         analyzed = []
@@ -74,7 +111,7 @@ def analyze_text(raw: str, input_type: str = "text", extra_modules: dict[str, Mo
         modules["url_static"] = ModuleResult(status="completed", data={"domains": analyzed})
         modules["reputation"] = ModuleResult(status="unavailable", detail="No reputation provider configured")
         limitations += [LIMIT_REP, LIMIT_SANDBOX]
-    return _finish(input_type, evidence, modules, limitations, module_quality=module_quality)
+    return _finish(input_type, evidence, modules, limitations, module_quality=quality)
 
 
 def analyze_url(raw: str, input_type: str = "url", extra_modules: dict[str, ModuleResult] | None = None,
@@ -244,12 +281,18 @@ def analyze_qr(data: bytes, declared_mime: str | None = None, filename: str | No
         upi, evidence, limitations = _parse_upi(payload)
         qr_module.data["upi"] = upi
         modules = {"qr": qr_module}
-        if upi.get("note") and len(upi["note"].strip()) >= MIN_TEXT_CHARS:
+        note_quality = None
+        if upi.get("note") and alphanumeric_token_count(upi["note"]):
             note = analyze_text(upi["note"], input_type="qr")
             evidence += note.evidence
             modules.update(note.modules)
+            limitations.extend(item for item in note.limitations if item not in limitations)
+            note_quality = text_context_quality(upi["note"])
+        quality = {"qr": 0.8 if decoded.warnings else 1.0}
+        if note_quality is not None:
+            quality["text_rules"] = note_quality
         return _finish("qr", evidence, modules, limitations + ["UPI fields were parsed structurally; no payment action was performed."],
-                       module_quality={"qr": 0.8 if decoded.warnings else 1.0})
+                       module_quality=quality)
     evidence = [_qr_evidence("qr_non_web_payload", Severity.informational, 0.9, "QR contains a non-web payload",
                              "This QR payload was not opened or executed; verify its meaning before using it.", payload_type=decoded.payload_type)]
     return _finish("qr", evidence, {"qr": qr_module}, ["The QR payload is not a web URL and was not executed."],

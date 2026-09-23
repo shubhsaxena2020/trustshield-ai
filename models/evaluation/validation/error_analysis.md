@@ -1,0 +1,63 @@
+# Error analysis
+
+Heuristics are a first pass only; a human/agent review must follow.
+
+Tags: security-warning language, banking vocabulary, urgency, payment terminology, short text, no link, obfuscation, other.
+
+## False positives
+
+- `agy-gen-legit-v1-083a7ecb` (banking vocabulary, no link)
+- `agy-gen-legit-v1-146a8376` (urgency, no link)
+- `agy-gen-legit-v1-207e7d1d` (payment terminology, short text, no link)
+- `agy-gen-legit-v1-21ac24c6` (no link)
+- `agy-gen-legit-v1-29eb82c1` (no link)
+- `agy-gen-legit-v1-29fb7c61` (no link)
+- `agy-gen-legit-v1-3f62680a` (banking vocabulary, urgency, no link)
+- `agy-gen-legit-v1-40682a16` (payment terminology, no link)
+- `agy-gen-legit-v1-46450a90` (no link)
+- `agy-gen-legit-v1-53963822` (banking vocabulary, no link)
+- `agy-gen-legit-v1-570e53c2` (no link)
+- `agy-gen-legit-v1-71b51f0b` (no link)
+- `agy-gen-legit-v1-7603bba5` (urgency)
+- `agy-gen-legit-v1-80aa9fbb` (banking vocabulary, no link)
+- `agy-gen-legit-v1-85fb00c4` (banking vocabulary, payment terminology, no link)
+- `agy-gen-legit-v1-8cd94163` (banking vocabulary, no link)
+- `agy-gen-legit-v1-8da1b820` (no link)
+- `agy-gen-legit-v1-a205fc6e` (payment terminology, no link)
+- `agy-gen-legit-v1-a98be237` (urgency)
+- `agy-gen-legit-v1-acbac1f8` (banking vocabulary, payment terminology, no link)
+- `agy-gen-legit-v1-bcdf2ed6` (payment terminology, no link)
+- `agy-gen-legit-v1-cca49792` (no link)
+- `agy-gen-legit-v1-cf7af645` (no link)
+- `agy-gen-legit-v1-d46db2f3` (urgency)
+- `agy-gen-legit-v1-e863b105` (banking vocabulary, no link)
+- `agy-gen-legit-v1-eb6603ce` (banking vocabulary, no link)
+- `agy-gen-legit-v1-eea7c893` (banking vocabulary, urgency, no link)
+- `agy-gen-legit-v1-fb546497` (no link)
+- `indiaspam-09f404d0` (no link)
+- `indiaspam-17972a3a` (other)
+- `indiaspam-da3151d0` (urgency, short text, no link)
+- `indiaspam-f15adfe0` (short text, no link)
+- `ucisms-0569d750` (urgency, no link)
+- `ucisms-14f98515` (no link)
+- `ucisms-172ff90e` (short text, no link)
+- `ucisms-31fa323c` (no link)
+- `ucisms-54395984` (urgency, no link)
+- `ucisms-619fa5eb` (urgency, no link)
+- `ucisms-6c3a5395` (no link)
+- `ucisms-84f4cf86` (no link)
+- `ucisms-93579e6b` (no link)
+- `ucisms-b09f6908` (short text, no link)
+- `ucisms-b317a756` (urgency, no link)
+- `ucisms-c50115de` (no link)
+- `ucisms-c68119af` (short text, no link)
+- `ucisms-d5c4d082` (short text, no link)
+- `ucisms-f4e43f80` (urgency, no link)
+- `ucisms-f6d80f76` (no link)
+
+## False negatives
+
+- `agy-gen-fraud-v1-28df6cf1` (banking vocabulary, payment terminology, no link)
+- `agy-gen-fraud-v1-807159cc` (banking vocabulary, no link)
+- `agy-gen-fraud-v1-e683ee16` (no link)
+- `ucisms-c479165f` (no link)

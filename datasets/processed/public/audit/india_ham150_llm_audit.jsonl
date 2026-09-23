@@ -1,0 +1,150 @@
+{"source_row_id":"india-000732","verdict":"legit","category":"legitimate","rationale":"Reports that a recent call rang for two minutes; ordinary personal conversation.","confidence":"high"}
+{"source_row_id":"india-000435","verdict":"legit","category":"legitimate","rationale":"Notifies a team about logging in thirty minutes late.","confidence":"high"}
+{"source_row_id":"india-001035","verdict":"exclude","category":"corrupted","rationale":"The message is empty and contains no auditable content.","confidence":"high"}
+{"source_row_id":"india-000169","verdict":"legit","category":"legitimate","rationale":"Acknowledges a person by name in ordinary conversation.","confidence":"high"}
+{"source_row_id":"india-000968","verdict":"legit","category":"legitimate","rationale":"Discusses power returning before a future time; ordinary planning conversation.","confidence":"high"}
+{"source_row_id":"india-000882","verdict":"legit","category":"legitimate","rationale":"Acknowledges Rithika’s message in ordinary workplace conversation.","confidence":"high"}
+{"source_row_id":"india-001447","verdict":"legit","category":"legitimate","rationale":"Briefly references a laptop and initials in ordinary conversation.","confidence":"high"}
+{"source_row_id":"india-001167","verdict":"legit","category":"legitimate","rationale":"Discusses joining tomorrow depending on weather and electricity.","confidence":"high"}
+{"source_row_id":"india-000867","verdict":"legit","category":"legitimate","rationale":"Comments on market movement after release of the Hindenburg study.","confidence":"high"}
+{"source_row_id":"india-000514","verdict":"legit","category":"legitimate","rationale":"States that something did not work earlier; ordinary troubleshooting message.","confidence":"high"}
+{"source_row_id":"india-001428","verdict":"legit","category":"legitimate","rationale":"Replies briefly to Ranjit in ordinary conversation.","confidence":"high"}
+{"source_row_id":"india-001404","verdict":"legit","category":"legitimate","rationale":"Greets a team in ordinary workplace conversation.","confidence":"high"}
+{"source_row_id":"india-000518","verdict":"legit","category":"legitimate","rationale":"Explains secondary market trends and temporary corrections in educational text.","confidence":"high"}
+{"source_row_id":"india-000937","verdict":"legit","category":"legitimate","rationale":"Briefly acknowledges a prior message in ordinary conversation.","confidence":"high"}
+{"source_row_id":"india-001877","verdict":"exclude","category":"corrupted","rationale":"The message is empty and contains no auditable content.","confidence":"high"}
+{"source_row_id":"india-002210","verdict":"exclude","category":"corrupted","rationale":"The message is empty and contains no auditable content.","confidence":"high"}
+{"source_row_id":"india-001501","verdict":"exclude","category":"corrupted","rationale":"The message is empty and contains no auditable content.","confidence":"high"}
+{"source_row_id":"india-001439","verdict":"legit","category":"legitimate","rationale":"Mentions a laptop update in ordinary workplace conversation.","confidence":"high"}
+{"source_row_id":"india-000829","verdict":"exclude","category":"non_english","rationale":"The brief phrase is Hindi rather than English.","confidence":"high"}
+{"source_row_id":"india-000076","verdict":"legit","category":"legitimate","rationale":"Provides a simple negative reply in ordinary conversation.","confidence":"high"}
+{"source_row_id":"india-000201","verdict":"legit","category":"legitimate","rationale":"Asks about whether Chandler tunnels should be operational; ordinary technical discussion.","confidence":"high"}
+{"source_row_id":"india-001044","verdict":"exclude","category":"corrupted","rationale":"The message is empty and contains no auditable content.","confidence":"high"}
+{"source_row_id":"india-000753","verdict":"legit","category":"legitimate","rationale":"Comments on group participation in a stock discussion.","confidence":"high"}
+{"source_row_id":"india-001265","verdict":"exclude","category":"corrupted","rationale":"Only question marks are present, so the content is unintelligible.","confidence":"high"}
+{"source_row_id":"india-002146","verdict":"exclude","category":"corrupted","rationale":"The message is empty and contains no auditable content.","confidence":"high"}
+{"source_row_id":"india-001741","verdict":"legit","category":"legitimate","rationale":"Asks about opening a put option at a stated market level.","confidence":"high"}
+{"source_row_id":"india-001394","verdict":"legit","category":"legitimate","rationale":"Notes that a professor is still in a meeting; ordinary scheduling message.","confidence":"high"}
+{"source_row_id":"india-001533","verdict":"legit","category":"legitimate","rationale":"States that the stock market has closed for the day.","confidence":"high"}
+{"source_row_id":"india-000640","verdict":"legit","category":"legitimate","rationale":"Discusses long-term money-making rather than relying on one trade.","confidence":"high"}
+{"source_row_id":"india-000611","verdict":"legit","category":"legitimate","rationale":"Explains how analysts draw trend lines using price peaks and troughs.","confidence":"high"}
+{"source_row_id":"india-000604","verdict":"legit","category":"legitimate","rationale":"Notifies a team about arriving forty minutes late.","confidence":"high"}
+{"source_row_id":"india-001341","verdict":"legit","category":"legitimate","rationale":"Says the sender will try to return and join by nine.","confidence":"high"}
+{"source_row_id":"india-000314","verdict":"legit","category":"legitimate","rationale":"Asks a simple follow-up question in ordinary conversation.","confidence":"high"}
+{"source_row_id":"india-000427","verdict":"exclude","category":"corrupted","rationale":"The message is empty and contains no auditable content.","confidence":"high"}
+{"source_row_id":"india-000082","verdict":"exclude","category":"corrupted","rationale":"The message is empty and contains no auditable content.","confidence":"high"}
+{"source_row_id":"india-000941","verdict":"legit","category":"legitimate","rationale":"Comments on the likely strength of today’s market close.","confidence":"high"}
+{"source_row_id":"india-001860","verdict":"legit","category":"legitimate","rationale":"States that an automatic sell order was set at a price.","confidence":"high"}
+{"source_row_id":"india-001618","verdict":"legit","category":"legitimate","rationale":"Comments on institutional and retail behavior in the market.","confidence":"high"}
+{"source_row_id":"india-001142","verdict":"exclude","category":"corrupted","rationale":"Only a VCF attachment filename is present, without auditable message content.","confidence":"high"}
+{"source_row_id":"india-001575","verdict":"exclude","category":"corrupted","rationale":"The message is empty and contains no auditable content.","confidence":"high"}
+{"source_row_id":"india-000292","verdict":"exclude","category":"corrupted","rationale":"The message is empty and contains no auditable content.","confidence":"high"}
+{"source_row_id":"india-000524","verdict":"legit","category":"legitimate","rationale":"Asks whether the market is closed tomorrow in ordinary conversation.","confidence":"high"}
+{"source_row_id":"india-000983","verdict":"legit","category":"legitimate","rationale":"Comments on recent weakness in bank stocks without soliciting action.","confidence":"high"}
+{"source_row_id":"india-001695","verdict":"exclude","category":"corrupted","rationale":"Only question marks are present, so the content is unintelligible.","confidence":"high"}
+{"source_row_id":"india-001238","verdict":"exclude","category":"corrupted","rationale":"Only an omitted-image marker is present, without auditable message content.","confidence":"high"}
+{"source_row_id":"india-000079","verdict":"legit","category":"legitimate","rationale":"Asks Shivam what happened in ordinary personal conversation.","confidence":"high"}
+{"source_row_id":"india-000145","verdict":"fraud","category":"investment_scam","rationale":"Directs the recipient to a WhatsApp assistant for stock names and trading points.","confidence":"medium"}
+{"source_row_id":"india-001652","verdict":"legit","category":"legitimate","rationale":"Names the foreign-exchange market as an ordinary discussion topic.","confidence":"high"}
+{"source_row_id":"india-002082","verdict":"legit","category":"legitimate","rationale":"Sends a Diwali greeting to a group.","confidence":"high"}
+{"source_row_id":"india-001094","verdict":"legit","category":"legitimate","rationale":"Agrees with a prior message in ordinary conversation.","confidence":"high"}
+{"source_row_id":"india-001525","verdict":"exclude","category":"corrupted","rationale":"The message is empty and contains no auditable content.","confidence":"high"}
+{"source_row_id":"india-001834","verdict":"exclude","category":"corrupted","rationale":"Only question marks are present, so the content is unintelligible.","confidence":"high"}
+{"source_row_id":"india-000593","verdict":"legit","category":"legitimate","rationale":"Agrees with another speaker in ordinary conversation.","confidence":"high"}
+{"source_row_id":"india-000372","verdict":"legit","category":"legitimate","rationale":"Discusses reviewing a shift handover report with a colleague.","confidence":"high"}
+{"source_row_id":"india-000617","verdict":"legit","category":"legitimate","rationale":"Invites a team to join a meeting.","confidence":"high"}
+{"source_row_id":"india-000084","verdict":"legit","category":"legitimate","rationale":"Asks how everyone is doing in ordinary conversation.","confidence":"high"}
+{"source_row_id":"india-001353","verdict":"legit","category":"legitimate","rationale":"Requests confirmation of an appointment-scheduling message from Mr. Arvind Singh.","confidence":"high"}
+{"source_row_id":"india-002124","verdict":"legit","category":"legitimate","rationale":"Offers encouragement about leading a team to victory.","confidence":"high"}
+{"source_row_id":"india-000585","verdict":"legit","category":"legitimate","rationale":"Explains a power shutdown and joining a meeting through a laptop backup.","confidence":"high"}
+{"source_row_id":"india-000151","verdict":"exclude","category":"corrupted","rationale":"Only an omitted-image marker is present, without auditable message content.","confidence":"high"}
+{"source_row_id":"india-001493","verdict":"legit","category":"legitimate","rationale":"Acknowledges a prior message in ordinary conversation.","confidence":"high"}
+{"source_row_id":"india-001799","verdict":"legit","category":"legitimate","rationale":"Discusses how unfavorable data could worsen panic in ordinary analysis.","confidence":"high"}
+{"source_row_id":"india-002065","verdict":"legit","category":"legitimate","rationale":"Confirms that a private message was already sent.","confidence":"high"}
+{"source_row_id":"india-000922","verdict":"legit","category":"legitimate","rationale":"Explains attending for project learning and future support.","confidence":"high"}
+{"source_row_id":"india-001608","verdict":"legit","category":"legitimate","rationale":"Suggests waiting to see what happens in ordinary conversation.","confidence":"high"}
+{"source_row_id":"india-000838","verdict":"legit","category":"legitimate","rationale":"Asks whether anyone has been informed.","confidence":"high"}
+{"source_row_id":"india-000533","verdict":"exclude","category":"corrupted","rationale":"Only an omitted-image marker is present, without auditable message content.","confidence":"high"}
+{"source_row_id":"india-000572","verdict":"legit","category":"legitimate","rationale":"Provides a meeting or event time in ordinary conversation.","confidence":"high"}
+{"source_row_id":"india-000586","verdict":"legit","category":"legitimate","rationale":"Sends a Diwali greeting.","confidence":"high"}
+{"source_row_id":"india-001355","verdict":"legit","category":"legitimate","rationale":"Comments on India’s position in the MSCI emerging-markets index.","confidence":"high"}
+{"source_row_id":"india-000662","verdict":"legit","category":"legitimate","rationale":"Comments that the market is rallying across sectors.","confidence":"high"}
+{"source_row_id":"india-002147","verdict":"legit","category":"legitimate","rationale":"Asks whether something works on a mobile device.","confidence":"high"}
+{"source_row_id":"india-000728","verdict":"legit","category":"legitimate","rationale":"Asks how someone’s weekend was in ordinary conversation.","confidence":"high"}
+{"source_row_id":"india-000486","verdict":"legit","category":"legitimate","rationale":"Provides a simple affirmative reply.","confidence":"high"}
+{"source_row_id":"india-000141","verdict":"exclude","category":"corrupted","rationale":"Only an omitted-image marker is present, without auditable message content.","confidence":"high"}
+{"source_row_id":"india-001416","verdict":"exclude","category":"corrupted","rationale":"The message is empty and contains no auditable content.","confidence":"high"}
+{"source_row_id":"india-000481","verdict":"legit","category":"legitimate","rationale":"Provides a brief acknowledgment in ordinary conversation.","confidence":"high"}
+{"source_row_id":"india-000664","verdict":"legit","category":"legitimate","rationale":"Gives a workplace instruction to answer calls while on shift.","confidence":"high"}
+{"source_row_id":"india-000852","verdict":"legit","category":"legitimate","rationale":"Comments critically on support responsibilities in workplace conversation.","confidence":"high"}
+{"source_row_id":"india-000316","verdict":"legit","category":"legitimate","rationale":"Reports a stock gain and sale to a professor.","confidence":"high"}
+{"source_row_id":"india-001611","verdict":"legit","category":"legitimate","rationale":"Discusses selling a position if the market does not rise by session end.","confidence":"high"}
+{"source_row_id":"india-001367","verdict":"legit","category":"legitimate","rationale":"Discusses interest-rate timing and acknowledges associated risks.","confidence":"high"}
+{"source_row_id":"india-001892","verdict":"legit","category":"legitimate","rationale":"Reflects on learning a new skill like returning to student days.","confidence":"high"}
+{"source_row_id":"india-000766","verdict":"legit","category":"legitimate","rationale":"Provides a brief acknowledgment in ordinary conversation.","confidence":"high"}
+{"source_row_id":"india-002219","verdict":"legit","category":"legitimate","rationale":"Notifies a team about joining thirty minutes late.","confidence":"high"}
+{"source_row_id":"india-001098","verdict":"legit","category":"legitimate","rationale":"Informs others about a situation in ordinary workplace conversation.","confidence":"high"}
+{"source_row_id":"india-001692","verdict":"legit","category":"legitimate","rationale":"References the ESP night shift in ordinary workplace scheduling.","confidence":"high"}
+{"source_row_id":"india-001980","verdict":"legit","category":"legitimate","rationale":"Shares instructions for downloading and saving an OVF file before a walkthrough.","confidence":"high"}
+{"source_row_id":"india-001166","verdict":"legit","category":"legitimate","rationale":"States an intention to trade based on another person’s advice.","confidence":"high"}
+{"source_row_id":"india-001679","verdict":"legit","category":"legitimate","rationale":"Offers an ordinary market prediction about Nifty reclaiming a level.","confidence":"high"}
+{"source_row_id":"india-001175","verdict":"exclude","category":"corrupted","rationale":"The message is empty and contains no auditable content.","confidence":"high"}
+{"source_row_id":"india-001013","verdict":"legit","category":"legitimate","rationale":"Asks whether a named stock’s rise should prompt a sale.","confidence":"high"}
+{"source_row_id":"india-001397","verdict":"legit","category":"legitimate","rationale":"Discusses a rising trend and advises against rushing to sell.","confidence":"high"}
+{"source_row_id":"india-001702","verdict":"legit","category":"legitimate","rationale":"Asks for the status of a laptop in ordinary workplace conversation.","confidence":"high"}
+{"source_row_id":"india-001887","verdict":"legit","category":"legitimate","rationale":"Promises to create a support ticket for Jerold.","confidence":"high"}
+{"source_row_id":"india-002201","verdict":"exclude","category":"corrupted","rationale":"The message is empty and contains no auditable content.","confidence":"high"}
+{"source_row_id":"india-000655","verdict":"legit","category":"legitimate","rationale":"Sends a morning greeting to a colleague.","confidence":"high"}
+{"source_row_id":"india-000875","verdict":"legit","category":"legitimate","rationale":"Reports facing an unspecified issue in ordinary conversation.","confidence":"high"}
+{"source_row_id":"india-000985","verdict":"legit","category":"legitimate","rationale":"Greets a team in ordinary workplace conversation.","confidence":"high"}
+{"source_row_id":"india-001200","verdict":"exclude","category":"corrupted","rationale":"The message is empty and contains no auditable content.","confidence":"high"}
+{"source_row_id":"india-000567","verdict":"exclude","category":"corrupted","rationale":"Only an omitted GIF marker is present, without auditable message content.","confidence":"high"}
+{"source_row_id":"india-001470","verdict":"legit","category":"legitimate","rationale":"Provides a brief acknowledgment in ordinary conversation.","confidence":"high"}
+{"source_row_id":"india-000036","verdict":"legit","category":"legitimate","rationale":"Asks for a location in ordinary conversation.","confidence":"high"}
+{"source_row_id":"india-001448","verdict":"legit","category":"legitimate","rationale":"Requests that someone join without missing the event.","confidence":"high"}
+{"source_row_id":"india-000978","verdict":"legit","category":"legitimate","rationale":"Provides a brief acknowledgment in ordinary conversation.","confidence":"high"}
+{"source_row_id":"india-000220","verdict":"legit","category":"legitimate","rationale":"Expresses patience about the Indian market while awaiting further instruction.","confidence":"high"}
+{"source_row_id":"india-001977","verdict":"legit","category":"legitimate","rationale":"Expresses concern for civilians and families in a discussion about war.","confidence":"high"}
+{"source_row_id":"india-000733","verdict":"legit","category":"legitimate","rationale":"Notifies a team about joining late.","confidence":"high"}
+{"source_row_id":"india-001287","verdict":"legit","category":"legitimate","rationale":"Confirms a technical issue was fixed after resetting a password.","confidence":"high"}
+{"source_row_id":"india-001037","verdict":"exclude","category":"corrupted","rationale":"The message is empty and contains no auditable content.","confidence":"high"}
+{"source_row_id":"india-001427","verdict":"exclude","category":"corrupted","rationale":"The message is empty and contains no auditable content.","confidence":"high"}
+{"source_row_id":"india-001549","verdict":"legit","category":"legitimate","rationale":"Explains that a power grid was affected by a pre-cyclone event.","confidence":"high"}
+{"source_row_id":"india-002182","verdict":"legit","category":"legitimate","rationale":"Greets a team in ordinary workplace conversation.","confidence":"high"}
+{"source_row_id":"india-000488","verdict":"exclude","category":"corrupted","rationale":"The message is empty and contains no auditable content.","confidence":"high"}
+{"source_row_id":"india-000008","verdict":"exclude","category":"corrupted","rationale":"Only an omitted-image marker is present, without auditable message content.","confidence":"high"}
+{"source_row_id":"india-001300","verdict":"legit","category":"legitimate","rationale":"Notifies others that the sender will join in twenty minutes.","confidence":"high"}
+{"source_row_id":"india-001503","verdict":"exclude","category":"corrupted","rationale":"The message is empty and contains no auditable content.","confidence":"high"}
+{"source_row_id":"india-002162","verdict":"exclude","category":"corrupted","rationale":"The message is empty and contains no auditable content.","confidence":"high"}
+{"source_row_id":"india-001254","verdict":"legit","category":"legitimate","rationale":"Provides a brief acknowledgment in ordinary conversation.","confidence":"high"}
+{"source_row_id":"india-001719","verdict":"legit","category":"legitimate","rationale":"Explains bond risks and returns as general investment education.","confidence":"high"}
+{"source_row_id":"india-002199","verdict":"legit","category":"legitimate","rationale":"Comments that a broad US market rally could support the local market.","confidence":"high"}
+{"source_row_id":"india-000559","verdict":"legit","category":"legitimate","rationale":"Says the sender will check something later in ordinary conversation.","confidence":"high"}
+{"source_row_id":"india-000286","verdict":"legit","category":"legitimate","rationale":"Names MACD as a topic of ordinary financial learning.","confidence":"high"}
+{"source_row_id":"india-000242","verdict":"exclude","category":"corrupted","rationale":"Only an omitted-image marker is present, without auditable message content.","confidence":"high"}
+{"source_row_id":"india-000712","verdict":"legit","category":"legitimate","rationale":"Confirms that the sender has joined.","confidence":"high"}
+{"source_row_id":"india-001600","verdict":"legit","category":"legitimate","rationale":"Reports a network issue in ordinary troubleshooting conversation.","confidence":"high"}
+{"source_row_id":"india-000993","verdict":"legit","category":"legitimate","rationale":"Confirms agreement with KK in ordinary conversation.","confidence":"high"}
+{"source_row_id":"india-001307","verdict":"legit","category":"legitimate","rationale":"Asks why something happened in ordinary conversation.","confidence":"high"}
+{"source_row_id":"india-001373","verdict":"legit","category":"legitimate","rationale":"Comments that taking opportunities is important in ordinary discussion.","confidence":"high"}
+{"source_row_id":"india-001127","verdict":"legit","category":"legitimate","rationale":"Discusses a recent decline in previously purchased bank stocks.","confidence":"high"}
+{"source_row_id":"india-001279","verdict":"legit","category":"legitimate","rationale":"Provides a brief affirmative response.","confidence":"high"}
+{"source_row_id":"india-000708","verdict":"legit","category":"legitimate","rationale":"Acknowledges a positive update in ordinary conversation.","confidence":"high"}
+{"source_row_id":"india-000964","verdict":"legit","category":"legitimate","rationale":"Notifies others that the sender is restarting a laptop.","confidence":"high"}
+{"source_row_id":"india-000761","verdict":"exclude","category":"corrupted","rationale":"The message is empty and contains no auditable content.","confidence":"high"}
+{"source_row_id":"india-000781","verdict":"legit","category":"legitimate","rationale":"Requests suggestions in ordinary conversation.","confidence":"high"}
+{"source_row_id":"india-000808","verdict":"legit","category":"legitimate","rationale":"Mentions IRFC as a topic or stock in ordinary discussion.","confidence":"high"}
+{"source_row_id":"india-000200","verdict":"legit","category":"legitimate","rationale":"Confirms that something was sent privately.","confidence":"high"}
+{"source_row_id":"india-001076","verdict":"legit","category":"legitimate","rationale":"Comments that a behavior is a good habit.","confidence":"high"}
+{"source_row_id":"india-000470","verdict":"exclude","category":"corrupted","rationale":"The message is empty and contains no auditable content.","confidence":"high"}
+{"source_row_id":"india-000455","verdict":"legit","category":"legitimate","rationale":"Offers a general expectation about weekly market performance.","confidence":"high"}
+{"source_row_id":"india-000105","verdict":"legit","category":"legitimate","rationale":"Says the sender is trying in ordinary conversation.","confidence":"high"}
+{"source_row_id":"india-002121","verdict":"exclude","category":"corrupted","rationale":"The message is empty and contains no auditable content.","confidence":"high"}
+{"source_row_id":"india-001535","verdict":"exclude","category":"corrupted","rationale":"The message contains only the literal null value.","confidence":"high"}
+{"source_row_id":"india-000644","verdict":"legit","category":"legitimate","rationale":"Provides a detailed market-news summary with index movements and named stocks.","confidence":"high"}
+{"source_row_id":"india-000527","verdict":"legit","category":"legitimate","rationale":"Encourages someone to join by nine after a shift exchange.","confidence":"high"}
+{"source_row_id":"india-000196","verdict":"exclude","category":"corrupted","rationale":"The message is empty and contains no auditable content.","confidence":"high"}
+{"source_row_id":"india-002015","verdict":"legit","category":"legitimate","rationale":"Comments on the recent inability of banking stocks to rise.","confidence":"high"}
+{"source_row_id":"india-002019","verdict":"legit","category":"legitimate","rationale":"Notifies others that the sender is restarting a laptop.","confidence":"high"}
+{"source_row_id":"india-001854","verdict":"legit","category":"legitimate","rationale":"Discusses selling cautiously to lock in profits.","confidence":"high"}
+{"source_row_id":"india-000862","verdict":"legit","category":"legitimate","rationale":"Notifies others that the sender will join in two or three minutes.","confidence":"high"}

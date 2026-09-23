@@ -8,13 +8,19 @@ TrustShield analyzes suspicious text, screenshots, URLs, and QR codes before the
 
 ## Non-negotiables
 
-- Detection is deterministic rules plus static URL analysis in the current implementation. The LLM never decides a verdict.
+- Detection is deterministic rules plus static URL analysis and a calibrated text classifier used as provisional evidence. No LLM decides a verdict at request time.
 - Risk score and confidence are separate. `unable_to_verify` is a valid outcome.
 - Mocked or unavailable modules are labelled as such.
-- No fraud-detection accuracy or performance claims are made; OCR measurements are confined to the recorded validation benchmark.
+- No real-world fraud-detection accuracy or performance claims are made; the recorded dataset metrics are confined to the Phase 3 report, and OCR measurements are confined to the recorded validation benchmark.
 - Unknown URLs are never opened in the user's normal browser; QR payloads are not launched; malware is never executed on the development machine.
 
-## Status — IMPLEMENTED
+## Status — PHASE 3 CLOSED
+
+Phase 3 text ML integration and the single coordinator-owned v1 held-out test
+evaluation are closed. The v1 test record is frozen under
+`models/evaluation/test_v1_frozen/`; its original files remain under
+`models/evaluation/test/` for existing scripts and documentation. Future model
+evaluation must use a new `trustshield-text-v2-holdout` and a new access log.
 
 | Capability | Status |
 |---|---|
@@ -32,6 +38,9 @@ TrustShield analyzes suspicious text, screenshots, URLs, and QR codes before the
 | Frontend Text, URL, Screenshot, and QR Code tabs | Implemented (Phase 2) |
 | OCR/QR result panels and technical JSON | Implemented (Phase 2) |
 | Synthetic local demo fixtures and generator | Implemented (Phase 2) |
+| Dataset v1 curation, caps, provenance, and leakage assertions | Closed (Phase 3; v1 provenance recorded) |
+| Calibrated ML classifier, safe loading, pipeline/API integration, and evaluation | Closed (Phase 3; v1 model/threshold frozen) |
+| Final-test reporting from saved predictions, calibration, cluster bootstrap, slices, and manual review | Closed (Phase 3 reporting; no re-tuning; v1 test frozen) |
 
 ## Status — PLANNED
 
@@ -39,7 +48,6 @@ TrustShield analyzes suspicious text, screenshots, URLs, and QR codes before the
 |---|---|
 | PaddleOCR provider | Planned |
 | Hindi OCR | Planned |
-| ML classifier and evaluation | Planned |
 | Isolated web sandbox | Planned |
 | External reputation providers | Planned |
 | Ollama-backed explanation support | Planned |

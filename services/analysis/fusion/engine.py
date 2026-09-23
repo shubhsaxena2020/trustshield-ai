@@ -34,6 +34,17 @@ CATEGORY_PRIORITY = [
     ("executable_download", "malware_delivery"),
 ]
 
+# ML availability must not be treated as calibration or detector agreement.
+# This cap is lifted only after a later evaluation of calibration and agreement.
+CONFIDENCE_CAP = "medium"
+_CONFIDENCE_RANK = {"low": 0, "medium": 1, "high": 2}
+ML_CATEGORY_MAP = {
+    "phishing": "phishing", "credential_theft": "credential_theft", "payment_fraud": "payment_fraud",
+    "fake_job": "fake_job", "investment_scam": "investment_fraud", "impersonation": "impersonation",
+    "digital_arrest": "digital_arrest", "delivery_scam": "delivery_scam",
+    "prize_lottery_scam": "prize_scam", "other_fraud": "other_fraud",
+}
+
 
 @dataclass
 class Fusion:
@@ -62,7 +73,14 @@ def classify(evidence: list[Evidence]) -> tuple[str, list[str]]:
     for cat, name in CATEGORY_PRIORITY:
         if cat in cats and name not in matched:
             matched.append(name)
-    return (matched[0], matched[1:]) if matched else ("none_detected", [])
+    if matched:
+        return matched[0], matched[1:]
+    for item in evidence:
+        if item.source == "ml_classifier" and item.severity != Severity.informational:
+            category = ML_CATEGORY_MAP.get(str(item.metadata.get("category", "")))
+            if category:
+                return category, []
+    return "none_detected", []
 
 
 def assess_confidence(module_status: dict[str, str], input_ok: bool = True,
@@ -81,7 +99,20 @@ def assess_confidence(module_status: dict[str, str], input_ok: bool = True,
         # confidence even when the downstream deterministic rules completed.
         quality_avg = sum(max(0.0, min(1.0, value)) for value in quality.values()) / len(quality)
         cov *= 0.5 + 0.5 * quality_avg
-    return "high" if cov >= 0.85 else "medium" if cov >= 0.55 else "low"
+    result = "high" if cov >= 0.85 else "medium" if cov >= 0.55 else "low"
+    return result if _CONFIDENCE_RANK[result] <= _CONFIDENCE_RANK[CONFIDENCE_CAP] else CONFIDENCE_CAP
+
+
+def _limited_context_is_only_low_confidence_cause(
+    module_status: dict[str, str], input_ok: bool, module_quality: dict[str, float] | None,
+) -> bool:
+    """Allow analyzed short text to keep its score-based label when context alone lowers confidence."""
+    quality = module_quality or {}
+    text_quality = quality.get("text_rules")
+    if module_status.get("text_rules") != "completed" or text_quality is None or text_quality >= 1.0:
+        return False
+    without_text_context = {name: value for name, value in quality.items() if name != "text_rules"}
+    return assess_confidence(module_status, input_ok, without_text_context) != "low"
 
 
 def fuse(evidence: list[Evidence], module_status: dict[str, str], input_ok: bool = True,
@@ -90,7 +121,8 @@ def fuse(evidence: list[Evidence], module_status: dict[str, str], input_ok: bool
     confidence = assess_confidence(module_status, input_ok, module_quality)
     label = label_for(score)
     completed = any(s == "completed" for s in module_status.values())
-    if not input_ok or not completed or (confidence == "low" and score < 50):
+    context_is_only_low_cause = _limited_context_is_only_low_confidence_cause(module_status, input_ok, module_quality)
+    if not input_ok or not completed or (confidence == "low" and score < 50 and not context_is_only_low_cause):
         label = "unable_to_verify"
     primary, secondary = classify(evidence)
     return Fusion(score, label, confidence, primary, secondary)

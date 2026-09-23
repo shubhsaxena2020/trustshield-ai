@@ -10,6 +10,7 @@ _URL_RE = re.compile(
     r"(?i)\b(?:https?://|www\.)[^\s<>\"'()]+"
     r"|\b[a-z0-9-]+(?:\.[a-z0-9-]+)*\.(?:com|in|co\.in|net|org|xyz|top|click|link|info|online|site|shop|club|vip|icu|cc|tk|ly|gl|me)(?:/[^\s<>\"'()]*)?"
 )
+_ALNUM_TOKEN_RE = re.compile(r"[^\W_]+", re.UNICODE)
 
 
 class InvalidInput(ValueError):
@@ -25,6 +26,18 @@ def normalize_text(raw: str) -> str:
     text = unicodedata.normalize("NFKC", raw).translate(_ZERO_WIDTH)
     text = "".join(ch for ch in text if ch in "\n\t" or unicodedata.category(ch)[0] != "C")
     return re.sub(r"[ \t\r\f\v]+", " ", text).strip()
+
+
+def alphanumeric_token_count(text: str) -> int:
+    """Count runs of letters/digits used to decide whether text is analyzable."""
+    return len(_ALNUM_TOKEN_RE.findall(text))
+
+
+def text_context_quality(text: str, full_context_tokens: int = 8) -> float:
+    """Return a context factor that reaches 1.0 at eight alphanumeric tokens."""
+    if full_context_tokens <= 0:
+        return 1.0
+    return min(1.0, alphanumeric_token_count(text) / full_context_tokens)
 
 
 def extract_urls(text: str) -> list[str]:

@@ -1,10 +1,28 @@
-import { AnalysisResult } from "./types";
+import { AnalysisResult, MlModuleData, ModuleResult } from "./types";
 import { LABELS, SEV_BADGE, pretty } from "./utils";
 import { OcrPanel } from "./OcrPanel";
 import { QrPanel } from "./QrPanel";
+import { MlPanel } from "./MlPanel";
 
 interface ResultDashboardProps {
   result: AnalysisResult;
+}
+
+function getModuleDetail(name: string, module: ModuleResult): string | undefined {
+  if (name === "ml") {
+    const mlData = (module.data ?? {}) as MlModuleData;
+    if (module.status === "completed") {
+      const modelInfo = [mlData.model_name, mlData.model_version].filter(Boolean).join(" ");
+      return modelInfo || module.detail || undefined;
+    }
+    if (module.status === "unavailable") {
+      return module.detail || "Module is currently unavailable";
+    }
+    if (module.status === "not_run") {
+      return module.detail || "Not run for this input";
+    }
+  }
+  return module.detail || undefined;
 }
 
 export function ResultDashboard({ result }: ResultDashboardProps) {
@@ -17,10 +35,12 @@ export function ResultDashboard({ result }: ResultDashboardProps) {
 
   const showOcr = Boolean(result.modules?.ocr || result.input_type === "image");
   const showQr = Boolean(result.modules?.qr || result.input_type === "qr");
+  const showMl = Boolean(result.modules?.ml);
   const evidenceList = result.evidence ?? [];
   const recommendedActions = result.recommended_actions ?? [];
   const limitations = result.limitations ?? [];
   const moduleEntries = Object.entries(result.modules ?? {});
+
 
   return (
     <section aria-labelledby="result-h" className="mt-8 space-y-6">
@@ -60,6 +80,8 @@ export function ResultDashboard({ result }: ResultDashboardProps) {
 
       {showQr && result.modules?.qr && <QrPanel qr={result.modules.qr} />}
 
+      {showMl && result.modules?.ml && <MlPanel ml={result.modules.ml} />}
+
       <div>
         <h3 className="font-semibold">Evidence ({evidenceList.length})</h3>
         {evidenceList.length === 0 && (
@@ -79,6 +101,14 @@ export function ResultDashboard({ result }: ResultDashboardProps) {
                   >
                     {pretty(ev.severity)}
                   </span>
+                  {ev.source === "ml_classifier" && (
+                    <span
+                      className="mr-2 inline-flex items-center rounded border border-slate-300 bg-slate-100 px-1.5 py-0.5 text-xs font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                      title="Machine learning classifier"
+                    >
+                      ML
+                    </span>
+                  )}
                   {ev.title}
                 </summary>
                 <p className="mt-2 text-sm">{ev.description}</p>
@@ -109,12 +139,15 @@ export function ResultDashboard({ result }: ResultDashboardProps) {
       <div>
         <h3 className="font-semibold">Analysis coverage</h3>
         <ul className="mt-1 text-sm space-y-1">
-          {moduleEntries.map(([k, m]) => (
-            <li key={k}>
-              <span className="font-mono">{k}</span>: {pretty(m.status)}
-              {m.detail ? ` — ${m.detail}` : ""}
-            </li>
-          ))}
+          {moduleEntries.map(([k, m]) => {
+            const detail = getModuleDetail(k, m);
+            return (
+              <li key={k}>
+                <span className="font-mono">{k}</span>: {pretty(m.status)}
+                {detail ? ` — ${detail}` : ""}
+              </li>
+            );
+          })}
         </ul>
         {limitations.length > 0 && (
           <ul className="mt-2 list-disc pl-5 text-sm text-slate-700 dark:text-slate-300">

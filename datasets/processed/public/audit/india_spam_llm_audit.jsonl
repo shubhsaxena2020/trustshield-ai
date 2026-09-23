@@ -1,0 +1,745 @@
+{"source_row_id":"india-000002","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises a free data benefit through its named customer app.","confidence":"high"}
+{"source_row_id":"india-000003","verdict":"legit_promo","category":"legitimate","rationale":"Vi requests customer feedback and identifies its telecom brand and survey purpose.","confidence":"high"}
+{"source_row_id":"india-000004","verdict":"legit_promo","category":"legitimate","rationale":"CERT-In gives a named government cyber-safety advisory and links its bot-removal tool.","confidence":"high"}
+{"source_row_id":"india-000006","verdict":"legit_promo","category":"legitimate","rationale":"Vi promotes free educational programming through its named Movies and TV application.","confidence":"high"}
+{"source_row_id":"india-000010","verdict":"legit_promo","category":"legitimate","rationale":"The message advertises a named Vi home-loan offer with rates and application link.","confidence":"medium"}
+{"source_row_id":"india-000011","verdict":"legit_promo","category":"legitimate","rationale":"Federal Bank promotes debit-card EMI purchases and clearly names the bank.","confidence":"high"}
+{"source_row_id":"india-000012","verdict":"legit_promo","category":"legitimate","rationale":"Airtel markets its Xsafe surveillance service with installation promotion and product details.","confidence":"high"}
+{"source_row_id":"india-000013","verdict":"legit_promo","category":"legitimate","rationale":"Vi advertises a recharge bundle with named entertainment subscriptions and data benefits.","confidence":"high"}
+{"source_row_id":"india-000015","verdict":"legit_promo","category":"legitimate","rationale":"Airtel offers fiber service with pricing, speed, and a free-router promotion.","confidence":"high"}
+{"source_row_id":"india-000020","verdict":"legit_promo","category":"legitimate","rationale":"Refyne is identified and advertises a time-limited salary-withdrawal offer.","confidence":"medium"}
+{"source_row_id":"india-000027","verdict":"legit_promo","category":"legitimate","rationale":"Vi promotes a recharge plan with specific Hotstar, data, and calling benefits.","confidence":"high"}
+{"source_row_id":"india-000028","verdict":"legit_promo","category":"legitimate","rationale":"Vishal advertises discounted merchandise, gifts, and SBI cashback with product pricing.","confidence":"high"}
+{"source_row_id":"india-000029","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises app rewards and directs customers to its named Thanks app.","confidence":"high"}
+{"source_row_id":"india-000037","verdict":"legit_promo","category":"legitimate","rationale":"Flipkart Axis Bank identifies its card and describes cashback and gift-card benefits.","confidence":"high"}
+{"source_row_id":"india-000038","verdict":"legit_promo","category":"legitimate","rationale":"Lenskart names its membership offer, products, cashback, and family package pricing.","confidence":"high"}
+{"source_row_id":"india-000039","verdict":"legit_promo","category":"legitimate","rationale":"Pantaloons clearly advertises a dated sale with discount and merchandise details.","confidence":"high"}
+{"source_row_id":"india-000040","verdict":"legit_promo","category":"legitimate","rationale":"Dunzo identifies its grocery delivery service and launch sale in a neighborhood promotion.","confidence":"high"}
+{"source_row_id":"india-000045","verdict":"legit_promo","category":"legitimate","rationale":"The message promotes a callertune feature without requesting payment or sensitive information.","confidence":"high"}
+{"source_row_id":"india-000046","verdict":"legit_promo","category":"legitimate","rationale":"Airtel offers SIM gifting and free delivery to existing prepaid customers.","confidence":"high"}
+{"source_row_id":"india-000047","verdict":"legit_promo","category":"legitimate","rationale":"A credit-card promotion names the limit, smartwatch incentive, and SmartCardon sender.","confidence":"medium"}
+{"source_row_id":"india-000049","verdict":"legit_promo","category":"legitimate","rationale":"Unlimited Fashion Store advertises credited shopping points and identifies the redemption store.","confidence":"high"}
+{"source_row_id":"india-000052","verdict":"legit_promo","category":"legitimate","rationale":"Shoppers Stop identifies its sale, discount code, qualifying spend, and beauty gifts.","confidence":"high"}
+{"source_row_id":"india-000053","verdict":"legit_promo","category":"legitimate","rationale":"Shoppers Stop names its sale, discount code, qualifying spend, and store destination.","confidence":"high"}
+{"source_row_id":"india-000057","verdict":"legit_promo","category":"legitimate","rationale":"Vishal gives named products, prices, gifts, and SBI cashback details for a sale.","confidence":"high"}
+{"source_row_id":"india-000061","verdict":"legit_promo","category":"legitimate","rationale":"Vishal advertises a fashion buy-one-get-one sale with named gifts and cashback.","confidence":"high"}
+{"source_row_id":"india-000064","verdict":"legit_promo","category":"legitimate","rationale":"Vi identifies its reward store and lists voucher partners for customers.","confidence":"high"}
+{"source_row_id":"india-000071","verdict":"legit_promo","category":"legitimate","rationale":"Vi directs customers to vaccination-slot information through its app.","confidence":"high"}
+{"source_row_id":"india-000086","verdict":"legit_promo","category":"legitimate","rationale":"Shoppers Stop names its menswear sale, discount code, qualifying spend, and rewards.","confidence":"high"}
+{"source_row_id":"india-000093","verdict":"legit_promo","category":"legitimate","rationale":"Flipkart Axis Bank identifies its card and advertises cashback and a limited offer.","confidence":"high"}
+{"source_row_id":"india-000094","verdict":"legit_promo","category":"legitimate","rationale":"Vi describes a named family postpaid plan with lines, price, data, and services.","confidence":"high"}
+{"source_row_id":"india-000100","verdict":"legit_promo","category":"legitimate","rationale":"Vishal provides store-sale dates, product prices, shopping code, and gift conditions.","confidence":"high"}
+{"source_row_id":"india-000102","verdict":"legit_promo","category":"legitimate","rationale":"Smart Point Store lists specific grocery discounts and identifies its shopping promotion.","confidence":"high"}
+{"source_row_id":"india-000104","verdict":"legit_promo","category":"legitimate","rationale":"Unlimited Fashion Stores advertise a clearly described buy-two-get-two offer.","confidence":"high"}
+{"source_row_id":"india-000108","verdict":"legit_promo","category":"legitimate","rationale":"The advisory identifies toll-free reporting numbers for suspicious international calls.","confidence":"high"}
+{"source_row_id":"india-000111","verdict":"legit_promo","category":"legitimate","rationale":"TrueBalance is named and advertises a specific cash-loan amount and approval process.","confidence":"medium"}
+{"source_row_id":"india-000115","verdict":"legit_promo","category":"legitimate","rationale":"Vi promotes a recharge bundle with Friends, ZEE5, data, and unlimited calls.","confidence":"high"}
+{"source_row_id":"india-000116","verdict":"legit_promo","category":"legitimate","rationale":"Shoppers Stop advertises named apparel discounts, a code, and qualifying spend.","confidence":"high"}
+{"source_row_id":"india-000117","verdict":"legit_promo","category":"legitimate","rationale":"Vi describes an additional data benefit after recharge and names entertainment content.","confidence":"high"}
+{"source_row_id":"india-000118","verdict":"legit_promo","category":"legitimate","rationale":"Vi promotes named movies and shows through its Movies and TV application.","confidence":"high"}
+{"source_row_id":"india-000119","verdict":"fraud","category":"phishing","rationale":"Claims a Pantaloons profile is incomplete and urges a link to unlock benefits.","confidence":"medium"}
+{"source_row_id":"india-000124","verdict":"legit_promo","category":"legitimate","rationale":"Vi names its contest and describes prizes for participating through its service.","confidence":"high"}
+{"source_row_id":"india-000126","verdict":"exclude","category":"corrupted","rationale":"The message is empty and contains no auditable content.","confidence":"high"}
+{"source_row_id":"india-000128","verdict":"legit_promo","category":"legitimate","rationale":"Airtel identifies the expiring pack and offers a priced Wynk/data recharge.","confidence":"high"}
+{"source_row_id":"india-000131","verdict":"legit_promo","category":"legitimate","rationale":"Vi promotes named entertainment content through its Movies and TV application.","confidence":"high"}
+{"source_row_id":"india-000135","verdict":"legit_promo","category":"legitimate","rationale":"Unlimited Fashion Store describes credited points and identifies the shopping redemption context.","confidence":"high"}
+{"source_row_id":"india-000139","verdict":"legit_promo","category":"legitimate","rationale":"Vishal lists a priced product, discount, gifts, and SBI cashback for Diwali.","confidence":"high"}
+{"source_row_id":"india-000142","verdict":"legit_promo","category":"legitimate","rationale":"Flipkart Axis Bank names its card and gives cashback, gift-card, and Times benefits.","confidence":"high"}
+{"source_row_id":"india-000144","verdict":"legit_promo","category":"legitimate","rationale":"Smart Point identifies its store and lists specific Women’s Day product promotions.","confidence":"high"}
+{"source_row_id":"india-000149","verdict":"legit_promo","category":"legitimate","rationale":"Kerala Tourism offers a named WhatsApp guide for personalized travel planning.","confidence":"high"}
+{"source_row_id":"india-000150","verdict":"legit_promo","category":"legitimate","rationale":"PVR supplies booking details, venue, seats, cancellation policy, and digital ticket instructions.","confidence":"high"}
+{"source_row_id":"india-000154","verdict":"legit_promo","category":"legitimate","rationale":"Airtel promotes a 5G handset upgrade and names the recharge eligibility condition.","confidence":"high"}
+{"source_row_id":"india-000158","verdict":"legit_promo","category":"legitimate","rationale":"The message invites users to a named WhatsApp channel for balance and telecom services.","confidence":"high"}
+{"source_row_id":"india-000160","verdict":"legit_promo","category":"legitimate","rationale":"The message advertises a home-loan rate and identifies application terms without a payment demand.","confidence":"medium"}
+{"source_row_id":"india-000164","verdict":"legit_promo","category":"legitimate","rationale":"RBI gives a safety advisory about unknown callers, investment portals, and urgent money requests.","confidence":"high"}
+{"source_row_id":"india-000165","verdict":"legit_promo","category":"legitimate","rationale":"Vedix identifies its hair-and-skin sale, price, and limited-period shopping offer.","confidence":"high"}
+{"source_row_id":"india-000172","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises a new SIM with 5G data, OTT subscriptions, and free delivery.","confidence":"high"}
+{"source_row_id":"india-000174","verdict":"legit_promo","category":"legitimate","rationale":"Vi confirms a named entertainment membership activated with a recharge.","confidence":"high"}
+{"source_row_id":"india-000175","verdict":"legit_promo","category":"legitimate","rationale":"Vi promotes Bigg Boss access tied to its named recharge and application.","confidence":"high"}
+{"source_row_id":"india-000176","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises free data through its named Thanks app after recharge.","confidence":"high"}
+{"source_row_id":"india-000178","verdict":"legit_promo","category":"legitimate","rationale":"Airtel offers a device compatibility check for its 5G network.","confidence":"high"}
+{"source_row_id":"india-000185","verdict":"legit_promo","category":"legitimate","rationale":"The message invites WhatsApp contact for telecom offers and account services.","confidence":"high"}
+{"source_row_id":"india-000188","verdict":"legit_promo","category":"legitimate","rationale":"Vi describes a named postpaid plan with data, calls, subscriptions, and store contact.","confidence":"high"}
+{"source_row_id":"india-000189","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Black promotion identifies subscriptions, DTH benefit, phone contact, and service link.","confidence":"high"}
+{"source_row_id":"india-000192","verdict":"legit_promo","category":"legitimate","rationale":"Dunzo advertises grocery delivery discounts and identifies the delivery service.","confidence":"high"}
+{"source_row_id":"india-000194","verdict":"exclude","category":"corrupted","rationale":"The message is empty and contains no auditable content.","confidence":"high"}
+{"source_row_id":"india-000198","verdict":"legit_promo","category":"legitimate","rationale":"R&B identifies its fashion store location and gives a conditional shopping gift.","confidence":"high"}
+{"source_row_id":"india-000202","verdict":"legit_promo","category":"legitimate","rationale":"Lenskart names its Diwali sale and describes buy-one-get-one and discount terms.","confidence":"high"}
+{"source_row_id":"india-000204","verdict":"legit_promo","category":"legitimate","rationale":"Wynk advertises a priced premium subscription with music features.","confidence":"high"}
+{"source_row_id":"india-000205","verdict":"fraud","category":"prize_lottery_scam","rationale":"Promises a Kia car while charging Rs.5 per answer through a paid-response trap.","confidence":"high"}
+{"source_row_id":"india-000209","verdict":"legit_promo","category":"legitimate","rationale":"Reliance Smart Point advertises medicines at its named Netmeds pharmacy service.","confidence":"high"}
+{"source_row_id":"india-000211","verdict":"legit_promo","category":"legitimate","rationale":"Lifestyle sends a shopping e-invoice notification addressed to a named customer.","confidence":"high"}
+{"source_row_id":"india-000213","verdict":"legit_promo","category":"legitimate","rationale":"Dunzo advertises discounted grocery delivery with a named service and delivery time.","confidence":"high"}
+{"source_row_id":"india-000216","verdict":"legit_promo","category":"legitimate","rationale":"Pantaloons promotes its denim collection and provides catalogue and store-shopping options.","confidence":"high"}
+{"source_row_id":"india-000221","verdict":"legit_promo","category":"legitimate","rationale":"Vi confirms entertainment membership benefits associated with its recharge.","confidence":"high"}
+{"source_row_id":"india-000222","verdict":"legit_promo","category":"legitimate","rationale":"Airtel confirms free Xstream access and lists included streaming services.","confidence":"high"}
+{"source_row_id":"india-000230","verdict":"legit_promo","category":"legitimate","rationale":"Insider sends a membership-renewal reminder and identifies the existing membership context.","confidence":"high"}
+{"source_row_id":"india-000231","verdict":"legit_promo","category":"legitimate","rationale":"AJIO advertises a cart-specific shopping offer and identifies stock urgency.","confidence":"high"}
+{"source_row_id":"india-000234","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises a priced one-day data pack with its recharge link.","confidence":"high"}
+{"source_row_id":"india-000240","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Black advertises named streaming subscriptions and a new-service trial.","confidence":"high"}
+{"source_row_id":"india-000241","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Xstream Fiber promotion states speed, streaming, and free-router benefits.","confidence":"high"}
+{"source_row_id":"india-000244","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises a prepaid SIM with 5G data, OTT subscriptions, and free delivery.","confidence":"high"}
+{"source_row_id":"india-000245","verdict":"legit_promo","category":"legitimate","rationale":"Wynk confirms free premium access and lists its ad-free music features.","confidence":"high"}
+{"source_row_id":"india-000248","verdict":"legit_promo","category":"legitimate","rationale":"Airtel provides activation instructions and identifies its app, offers, and account-management steps.","confidence":"high"}
+{"source_row_id":"india-000259","verdict":"legit_promo","category":"legitimate","rationale":"Junglee Rummy advertises a named game, welcome bonus, and first-deposit condition.","confidence":"medium"}
+{"source_row_id":"india-000262","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises rewards tied to the next recharge through its named app.","confidence":"high"}
+{"source_row_id":"india-000264","verdict":"legit_promo","category":"legitimate","rationale":"BigBasket sends a dated delivery notification with prepaid and contactless-delivery instructions.","confidence":"high"}
+{"source_row_id":"india-000275","verdict":"legit_promo","category":"legitimate","rationale":"Airtel describes remaining data and a priced top-up available through its app.","confidence":"high"}
+{"source_row_id":"india-000277","verdict":"legit_promo","category":"legitimate","rationale":"Shoppers Stop names its sale, discount code, categories, and qualifying purchase benefits.","confidence":"high"}
+{"source_row_id":"india-000278","verdict":"legit_promo","category":"legitimate","rationale":"Airtel promotes a 5G-ready prepaid SIM with home delivery at no extra cost.","confidence":"high"}
+{"source_row_id":"india-000280","verdict":"legit_promo","category":"legitimate","rationale":"Max Fashion identifies a storewide sale and its stated seasonal discount.","confidence":"high"}
+{"source_row_id":"india-000284","verdict":"legit_promo","category":"legitimate","rationale":"Pantaloons promotes holiday clothing and an EaseMyTrip voucher tied to shopping.","confidence":"high"}
+{"source_row_id":"india-000285","verdict":"legit_promo","category":"legitimate","rationale":"Airtel invites customers to claim benefits through its named Thanks app.","confidence":"high"}
+{"source_row_id":"india-000288","verdict":"legit_promo","category":"legitimate","rationale":"Vi advertises an annual recharge plan with named Hotstar, data, and calling benefits.","confidence":"high"}
+{"source_row_id":"india-000291","verdict":"legit_promo","category":"legitimate","rationale":"Bajaj Finance identifies its consumer-finance follow-up and links to further offers.","confidence":"high"}
+{"source_row_id":"india-000298","verdict":"legit_promo","category":"legitimate","rationale":"The telecom reminder identifies an expiring pack and directs recharge through an app.","confidence":"high"}
+{"source_row_id":"india-000300","verdict":"legit_promo","category":"legitimate","rationale":"Vi advertises its callertune app and explains the feature being promoted.","confidence":"high"}
+{"source_row_id":"india-000306","verdict":"legit_promo","category":"legitimate","rationale":"Vi promotes Bigg Boss access tied to a named recharge and application.","confidence":"high"}
+{"source_row_id":"india-000308","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Xstream promotes live sports viewing and identifies the streaming service.","confidence":"high"}
+{"source_row_id":"india-000317","verdict":"legit_promo","category":"legitimate","rationale":"Vodafone advises using its named app to manage the mobile account during Covid.","confidence":"high"}
+{"source_row_id":"india-000318","verdict":"legit_promo","category":"legitimate","rationale":"Airtel describes a recharge pack with calls, data, SMS, and Prime trial benefits.","confidence":"high"}
+{"source_row_id":"india-000320","verdict":"legit_promo","category":"legitimate","rationale":"The telecom reminder identifies an expiring pack and directs recharge through an app.","confidence":"high"}
+{"source_row_id":"india-000330","verdict":"legit_promo","category":"legitimate","rationale":"Vishal lists a priced mixer, discount, gifts, and SBI cashback for Diwali.","confidence":"high"}
+{"source_row_id":"india-000336","verdict":"legit_promo","category":"legitimate","rationale":"Vi advertises named Disney content and subscription eligibility through specified recharges.","confidence":"high"}
+{"source_row_id":"india-000340","verdict":"legit_promo","category":"legitimate","rationale":"The message advertises a pre-approved credit limit with amount and terms, identifying card context.","confidence":"medium"}
+{"source_row_id":"india-000342","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises free data on selected recharges through its named Thanks app.","confidence":"high"}
+{"source_row_id":"india-000343","verdict":"legit_promo","category":"legitimate","rationale":"Aadhaar OTP notification states enrollment and biometric updates are free with a listed fee exception.","confidence":"high"}
+{"source_row_id":"india-000346","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises a one-day priced data pack with validity and recharge link.","confidence":"high"}
+{"source_row_id":"india-000348","verdict":"legit_promo","category":"legitimate","rationale":"Vi promotes unclaimed ZEE5 access tied to an existing recharge and named app.","confidence":"high"}
+{"source_row_id":"india-000349","verdict":"legit_promo","category":"legitimate","rationale":"Wynk advertises its premium music subscription and lists catalog and download features.","confidence":"high"}
+{"source_row_id":"india-000351","verdict":"legit_promo","category":"legitimate","rationale":"Lenskart names its sale, discount, buy-one-get-one offer, and membership condition.","confidence":"high"}
+{"source_row_id":"india-000352","verdict":"legit_promo","category":"legitimate","rationale":"Vi sends a data-usage alert with pack-purchase options and a dial code.","confidence":"high"}
+{"source_row_id":"india-000363","verdict":"legit_promo","category":"legitimate","rationale":"Vi promotes weekend data rollover and provides app and customer-service access.","confidence":"high"}
+{"source_row_id":"india-000364","verdict":"legit_promo","category":"legitimate","rationale":"Shoppers Stop names its beauty sale, discount scope, app, and personal-shopping channel.","confidence":"high"}
+{"source_row_id":"india-000368","verdict":"legit_promo","category":"legitimate","rationale":"Junglee Rummy advertises a named tournament and welcome bonus without an impersonation claim.","confidence":"medium"}
+{"source_row_id":"india-000370","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises free data and directs customers to register in its Thanks app.","confidence":"high"}
+{"source_row_id":"india-000374","verdict":"legit_promo","category":"legitimate","rationale":"Shoppers Stop invites identified First Citizen members to a named shopping event.","confidence":"high"}
+{"source_row_id":"india-000375","verdict":"legit_promo","category":"legitimate","rationale":"Vi advertises a priced recharge with data, calls, overnight use, and rollover benefits.","confidence":"high"}
+{"source_row_id":"india-000376","verdict":"legit_promo","category":"legitimate","rationale":"Vi warns of pack expiry and offers a named plan with price and benefits.","confidence":"high"}
+{"source_row_id":"india-000382","verdict":"legit_promo","category":"legitimate","rationale":"Pantaloons requests customer feedback after shopping and identifies the store context.","confidence":"high"}
+{"source_row_id":"india-000386","verdict":"legit_promo","category":"legitimate","rationale":"Epic Fashion Sale advertises discounted branded clothing and free shipping.","confidence":"medium"}
+{"source_row_id":"india-000387","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises free data through its named Thanks app.","confidence":"high"}
+{"source_row_id":"india-000388","verdict":"legit_promo","category":"legitimate","rationale":"Vi sends a data-usage alert with pack-purchase options and a dial code.","confidence":"high"}
+{"source_row_id":"india-000390","verdict":"legit_promo","category":"legitimate","rationale":"Airtel describes ongoing recharge rewards and identifies the continuing pack condition.","confidence":"high"}
+{"source_row_id":"india-000392","verdict":"legit_promo","category":"legitimate","rationale":"Vi warns of pack expiry and lists three priced recharge choices.","confidence":"high"}
+{"source_row_id":"india-000395","verdict":"legit_promo","category":"legitimate","rationale":"Airtel sends a callback-availability notification and provides its callback link.","confidence":"high"}
+{"source_row_id":"india-000397","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises an IPL bundle with named streaming, data, and calling benefits.","confidence":"high"}
+{"source_row_id":"india-000399","verdict":"legit_promo","category":"legitimate","rationale":"Refyne is identified and advertises a dated salary-withdrawal discount.","confidence":"medium"}
+{"source_row_id":"india-000402","verdict":"legit_promo","category":"legitimate","rationale":"Shoppers Stop promotes watches and identifies reward-point benefits through its site and app.","confidence":"high"}
+{"source_row_id":"india-000404","verdict":"legit_promo","category":"legitimate","rationale":"Shoppers Stop promotes a Mother’s Day shopping event with named reward benefits.","confidence":"high"}
+{"source_row_id":"india-000408","verdict":"legit_promo","category":"legitimate","rationale":"Shoppers Stop advertises a watch sale and specifies its reward-point bonuses.","confidence":"high"}
+{"source_row_id":"india-000416","verdict":"legit_promo","category":"legitimate","rationale":"Smart Point names its store and lists specific buy-more-get-more grocery offers.","confidence":"high"}
+{"source_row_id":"india-000421","verdict":"legit_promo","category":"legitimate","rationale":"Vi identifies its WhatsApp service and lists balance, usage, and account functions.","confidence":"high"}
+{"source_row_id":"india-000425","verdict":"legit_promo","category":"legitimate","rationale":"Unlimited Fashion Stores advertise a storewide buy-two-get-one offer and vaccination discount.","confidence":"high"}
+{"source_row_id":"india-000426","verdict":"legit_promo","category":"legitimate","rationale":"Unlimited Fashion Store advertises credited shopping points with validity and redemption terms.","confidence":"high"}
+{"source_row_id":"india-000437","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises a Wynk subscription, data benefit, price, and validity period.","confidence":"high"}
+{"source_row_id":"india-000438","verdict":"legit_promo","category":"legitimate","rationale":"Unlimited Fashion Store advertises credited points and identifies the store redemption context.","confidence":"high"}
+{"source_row_id":"india-000439","verdict":"legit_promo","category":"legitimate","rationale":"Dunzo advertises grocery delivery speed, discount, and free delivery through its named service.","confidence":"high"}
+{"source_row_id":"india-000440","verdict":"legit_promo","category":"legitimate","rationale":"The message identifies a government vigilance campaign and links its official pledge.","confidence":"high"}
+{"source_row_id":"india-000445","verdict":"legit_promo","category":"legitimate","rationale":"Unlimited Fashion Store invites local customers to claim an in-store promotional gift.","confidence":"medium"}
+{"source_row_id":"india-000447","verdict":"legit_promo","category":"legitimate","rationale":"Smart Point names its store and lists specific Durga Puja grocery offers.","confidence":"high"}
+{"source_row_id":"india-000448","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Black advertises streaming, fiber, and cashback benefits for switching service.","confidence":"high"}
+{"source_row_id":"india-000450","verdict":"legit_promo","category":"legitimate","rationale":"Refyne is identified and advertises a dated salary-withdrawal discount.","confidence":"medium"}
+{"source_row_id":"india-000452","verdict":"legit_promo","category":"legitimate","rationale":"JioMart and Smart Point identify a dated Bangalore grocery promotion with prices.","confidence":"high"}
+{"source_row_id":"india-000456","verdict":"legit_promo","category":"legitimate","rationale":"Airtel reports data consumption and offers a priced top-up through its service link.","confidence":"high"}
+{"source_row_id":"india-000457","verdict":"legit_promo","category":"legitimate","rationale":"Vi notifies customers of expired data validity and provides recharge options.","confidence":"high"}
+{"source_row_id":"india-000458","verdict":"legit_promo","category":"legitimate","rationale":"Kotak811 advertises named digital savings-account features and identifies the bank sender.","confidence":"high"}
+{"source_row_id":"india-000460","verdict":"legit_promo","category":"legitimate","rationale":"Vi sends a data-usage alert with pack-purchase options and a dial code.","confidence":"high"}
+{"source_row_id":"india-000462","verdict":"legit_promo","category":"legitimate","rationale":"Unlimited Fashion Stores advertise a character-themed shopping discount with a minimum spend.","confidence":"high"}
+{"source_row_id":"india-000471","verdict":"legit_promo","category":"legitimate","rationale":"Baskin Robbins identifies a free scoop reward and its redemption deadline.","confidence":"high"}
+{"source_row_id":"india-000472","verdict":"legit_promo","category":"legitimate","rationale":"Star identifies a dated grocery promotion with products, prices, and store link.","confidence":"high"}
+{"source_row_id":"india-000480","verdict":"legit_promo","category":"legitimate","rationale":"Vi sends a data-usage alert with pack-purchase options and a dial code.","confidence":"high"}
+{"source_row_id":"india-000482","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises free data through its named Thanks app.","confidence":"high"}
+{"source_row_id":"india-000484","verdict":"legit_promo","category":"legitimate","rationale":"Flipkart Axis Bank advertises card discounts and cashback with a named shopping event.","confidence":"high"}
+{"source_row_id":"india-000485","verdict":"legit_promo","category":"legitimate","rationale":"Junglee Rummy advertises a named welcome bonus tied to first deposit.","confidence":"medium"}
+{"source_row_id":"india-000487","verdict":"legit_promo","category":"legitimate","rationale":"Vi identifies WhatsApp account services for recharge tracking and history.","confidence":"high"}
+{"source_row_id":"india-000492","verdict":"legit_promo","category":"legitimate","rationale":"The telecom reminder identifies an expiring pack and directs recharge through an app.","confidence":"high"}
+{"source_row_id":"india-000493","verdict":"legit_promo","category":"legitimate","rationale":"Vi identifies its WhatsApp balance-check service and contact method.","confidence":"high"}
+{"source_row_id":"india-000494","verdict":"legit_promo","category":"legitimate","rationale":"Vi identifies its WhatsApp balance-check service and customer-service channel.","confidence":"high"}
+{"source_row_id":"india-000498","verdict":"legit_promo","category":"legitimate","rationale":"Style Union sends a purchase e-receipt notification and identifies the customer context.","confidence":"high"}
+{"source_row_id":"india-000502","verdict":"legit_promo","category":"legitimate","rationale":"Vi confirms a recharge and lists the activated calling, data, and weekend benefits.","confidence":"high"}
+{"source_row_id":"india-000506","verdict":"legit_promo","category":"legitimate","rationale":"Smart Point identifies its store and lists specific grocery discounts and prices.","confidence":"high"}
+{"source_row_id":"india-000509","verdict":"legit_promo","category":"legitimate","rationale":"The message advertises a named chatbot service and explains its customer-assistance purpose.","confidence":"medium"}
+{"source_row_id":"india-000511","verdict":"legit_promo","category":"legitimate","rationale":"The message advertises a small recharge prize through a simple knowledge question.","confidence":"medium"}
+{"source_row_id":"india-000513","verdict":"legit_promo","category":"legitimate","rationale":"Pantaloons confirms Greencard activation and provides program terms and detail verification.","confidence":"high"}
+{"source_row_id":"india-000516","verdict":"legit_promo","category":"legitimate","rationale":"Vi identifies its WhatsApp balance-check service and contact method.","confidence":"high"}
+{"source_row_id":"india-000521","verdict":"legit_promo","category":"legitimate","rationale":"Lenskart names its Diwali sale and describes buy-one-get-one and discount terms.","confidence":"high"}
+{"source_row_id":"india-000537","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises free data tied to a recharge through its named Thanks app.","confidence":"high"}
+{"source_row_id":"india-000539","verdict":"exclude","category":"corrupted","rationale":"The text is largely unreadable encoding and cannot be reliably interpreted.","confidence":"high"}
+{"source_row_id":"india-000549","verdict":"legit_promo","category":"legitimate","rationale":"Airtel offers a clearly described one-day validity loan with dial-to-claim instructions.","confidence":"high"}
+{"source_row_id":"india-000554","verdict":"legit_promo","category":"legitimate","rationale":"Flipkart Axis Bank names its card and advertises cashback and gift-card benefits.","confidence":"high"}
+{"source_row_id":"india-000556","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises a postpaid plan with stated data, OTT, price, and service details.","confidence":"high"}
+{"source_row_id":"india-000558","verdict":"fraud","category":"other_fraud","rationale":"Promises an instant Rs.3,99,999 loan transfer through an unidentified short-link sender.","confidence":"medium"}
+{"source_row_id":"india-000563","verdict":"legit_promo","category":"legitimate","rationale":"Refyne is identified and advertises a dated salary-withdrawal discount.","confidence":"medium"}
+{"source_row_id":"india-000571","verdict":"legit_promo","category":"legitimate","rationale":"Vi promotes named movies and news through its Movies and TV application.","confidence":"high"}
+{"source_row_id":"india-000573","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Black advertises streaming, fiber, and cashback benefits for switching service.","confidence":"high"}
+{"source_row_id":"india-000578","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Xstream Fiber advertises speed, pricing, and home internet use cases.","confidence":"high"}
+{"source_row_id":"india-000579","verdict":"legit_promo","category":"legitimate","rationale":"Vedix requests a customer follow-up quiz and explains its customized haircare feedback.","confidence":"high"}
+{"source_row_id":"india-000583","verdict":"legit_promo","category":"legitimate","rationale":"Xpressbees sends shipment-pickup and feedback links for an identified online order.","confidence":"high"}
+{"source_row_id":"india-000584","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Black advertises Amazon, Hotstar, and DTH benefits for switching service.","confidence":"high"}
+{"source_row_id":"india-000590","verdict":"legit_promo","category":"legitimate","rationale":"Samsung promotes named Galaxy wearables with a product code and shopping offer.","confidence":"high"}
+{"source_row_id":"india-000592","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises a priced recharge with specific data, calls, and validity benefits.","confidence":"high"}
+{"source_row_id":"india-000594","verdict":"legit_promo","category":"legitimate","rationale":"Dhani is named and advertises a credit card with a stated interest offer.","confidence":"medium"}
+{"source_row_id":"india-000596","verdict":"legit_promo","category":"legitimate","rationale":"Unlimited Fashion Store advertises credited shopping points with a time-limited redemption prompt.","confidence":"high"}
+{"source_row_id":"india-000597","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises free data through its named Thanks app.","confidence":"high"}
+{"source_row_id":"india-000599","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Xstream advertises an entertainment event and lists included OTT access.","confidence":"high"}
+{"source_row_id":"india-000600","verdict":"legit_promo","category":"legitimate","rationale":"Shoppers Stop promotes menswear shopping and identifies reward-point benefits.","confidence":"high"}
+{"source_row_id":"india-000605","verdict":"legit_promo","category":"legitimate","rationale":"Airtel offers a device compatibility check for its 5G network.","confidence":"high"}
+{"source_row_id":"india-000606","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises a priced one-day unlimited-data pack.","confidence":"high"}
+{"source_row_id":"india-000608","verdict":"legit_promo","category":"legitimate","rationale":"Vi identifies WhatsApp functions for balance viewing, payments, and account service.","confidence":"high"}
+{"source_row_id":"india-000613","verdict":"legit_promo","category":"legitimate","rationale":"Vi promotes unclaimed entertainment membership and names included movies and news.","confidence":"high"}
+{"source_row_id":"india-000614","verdict":"legit_promo","category":"legitimate","rationale":"Vi directs customers to its recommended-offer section before recharging through named apps.","confidence":"high"}
+{"source_row_id":"india-000616","verdict":"legit_promo","category":"legitimate","rationale":"Vi sends a data-usage alert with pack-purchase options and a dial code.","confidence":"high"}
+{"source_row_id":"india-000618","verdict":"legit_promo","category":"legitimate","rationale":"Digi Yatra Foundation sends an OTP for its named travel application.","confidence":"high"}
+{"source_row_id":"india-000620","verdict":"legit_promo","category":"legitimate","rationale":"Vi advertises named partner gifts tied to a recharge threshold.","confidence":"high"}
+{"source_row_id":"india-000621","verdict":"legit_promo","category":"legitimate","rationale":"Vi promotes overnight unlimited usage within an existing named pack.","confidence":"high"}
+{"source_row_id":"india-000626","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises a referral coupon tied to inviting friends and recharging.","confidence":"high"}
+{"source_row_id":"india-000627","verdict":"legit_promo","category":"legitimate","rationale":"Junglee Rummy advertises a named tournament with entry fee and prize-pool details.","confidence":"medium"}
+{"source_row_id":"india-000628","verdict":"legit_promo","category":"legitimate","rationale":"BigBasket advertises free delivery above a stated order value through its shopping service.","confidence":"high"}
+{"source_row_id":"india-000630","verdict":"legit_promo","category":"legitimate","rationale":"Wynk advertises premium music and data benefits with two claim links.","confidence":"high"}
+{"source_row_id":"india-000636","verdict":"legit_promo","category":"legitimate","rationale":"Shoppers Stop announces a dated First Citizen sale with HDFC card offers.","confidence":"high"}
+{"source_row_id":"india-000647","verdict":"legit_promo","category":"legitimate","rationale":"Airtel sends a pack-expiry reminder with priced service and entertainment benefits.","confidence":"high"}
+{"source_row_id":"india-000650","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Xstream promotes free access to named television and movie content.","confidence":"high"}
+{"source_row_id":"india-000665","verdict":"legit_promo","category":"legitimate","rationale":"The message advertises a stated home-loan rate, limit, tenure, and application terms.","confidence":"medium"}
+{"source_row_id":"india-000668","verdict":"legit_promo","category":"legitimate","rationale":"RBI gives a safety warning about links offering cashback, loans, jobs, or money requests.","confidence":"high"}
+{"source_row_id":"india-000669","verdict":"legit_promo","category":"legitimate","rationale":"Vi promotes weekend data rollover and provides app and customer-service access.","confidence":"high"}
+{"source_row_id":"india-000671","verdict":"legit_promo","category":"legitimate","rationale":"Vi promotes named news coverage through its Movies and TV application.","confidence":"high"}
+{"source_row_id":"india-000680","verdict":"legit_promo","category":"legitimate","rationale":"Pantaloons identifies Greencard membership and gives specific cashback, discount, and date terms.","confidence":"high"}
+{"source_row_id":"india-000681","verdict":"legit_promo","category":"legitimate","rationale":"Airtel describes an existing pack’s roaming, data, SMS, and 5G benefits.","confidence":"high"}
+{"source_row_id":"india-000682","verdict":"legit_promo","category":"legitimate","rationale":"Star Clubcard identifies a feedback promotion with points for winners and early responders.","confidence":"medium"}
+{"source_row_id":"india-000688","verdict":"legit_promo","category":"legitimate","rationale":"Unlimited Fashion Store advertises credited shopping points with a validity date.","confidence":"high"}
+{"source_row_id":"india-000692","verdict":"legit_promo","category":"legitimate","rationale":"Max Fashion names its dated buy-one-get-one sale and in-store or online shopping options.","confidence":"high"}
+{"source_row_id":"india-000700","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Xsafe advertises a named home-surveillance product with expert installation.","confidence":"high"}
+{"source_row_id":"india-000701","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Xstream promotes free live budget coverage on a named news channel.","confidence":"high"}
+{"source_row_id":"india-000709","verdict":"legit_promo","category":"legitimate","rationale":"Lenskart names its membership sale, discount, cashback, dates, and store contact.","confidence":"high"}
+{"source_row_id":"india-000711","verdict":"legit_promo","category":"legitimate","rationale":"JioMart and Smart Point identify a dated Bangalore grocery promotion with prices.","confidence":"high"}
+{"source_row_id":"india-000716","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises wallet cashback for recharges, bill payments, and shopping.","confidence":"high"}
+{"source_row_id":"india-000718","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises named customer rewards, including Amazon Prime, through its Thanks app.","confidence":"high"}
+{"source_row_id":"india-000719","verdict":"legit_promo","category":"legitimate","rationale":"Airtel offers a free data coupon through its named Thanks app.","confidence":"high"}
+{"source_row_id":"india-000721","verdict":"legit_promo","category":"legitimate","rationale":"JioCinema promotes free viewing of a named Bigg Boss finale.","confidence":"high"}
+{"source_row_id":"india-000725","verdict":"legit_promo","category":"legitimate","rationale":"Vishal advertises festival clothing gifts and SBI cashback with product conditions.","confidence":"high"}
+{"source_row_id":"india-000734","verdict":"legit_promo","category":"legitimate","rationale":"Airtel confirms recharge-linked access to named sports and movie content.","confidence":"high"}
+{"source_row_id":"india-000738","verdict":"legit_promo","category":"legitimate","rationale":"A named rummy service advertises a registration bonus and cash-game promotion.","confidence":"medium"}
+{"source_row_id":"india-000743","verdict":"legit_promo","category":"legitimate","rationale":"Junglee Rummy advertises a named game, welcome bonus, and first-deposit condition.","confidence":"medium"}
+{"source_row_id":"india-000744","verdict":"legit_promo","category":"legitimate","rationale":"The telecom reminder identifies an expiring pack and directs recharge through an app.","confidence":"high"}
+{"source_row_id":"india-000746","verdict":"legit_promo","category":"legitimate","rationale":"Vi advertises a cricket-viewing bundle with named subscription, data, and calling benefits.","confidence":"high"}
+{"source_row_id":"india-000749","verdict":"legit_promo","category":"legitimate","rationale":"Cloudnine sends a named administrator’s training-course assignment and completion deadline.","confidence":"high"}
+{"source_row_id":"india-000751","verdict":"legit_promo","category":"legitimate","rationale":"Shoppers Stop sends a personalized offer with discount code and minimum bill.","confidence":"high"}
+{"source_row_id":"india-000754","verdict":"legit_promo","category":"legitimate","rationale":"The telecom reminder identifies an expiring pack and directs recharge through an app.","confidence":"high"}
+{"source_row_id":"india-000755","verdict":"legit_promo","category":"legitimate","rationale":"Vi advertises a recharge with stated data, calls, extra data, and Hotstar benefits.","confidence":"high"}
+{"source_row_id":"india-000757","verdict":"legit_promo","category":"legitimate","rationale":"Unlimited Fashion Store advertises credited shopping points with a validity date and terms link.","confidence":"high"}
+{"source_row_id":"india-000758","verdict":"legit_promo","category":"legitimate","rationale":"Lenskart names its membership buy-one-get-one offer and product collection.","confidence":"high"}
+{"source_row_id":"india-000759","verdict":"legit_promo","category":"legitimate","rationale":"Unlimited Fashion Store advertises credited shopping points with a validity date.","confidence":"high"}
+{"source_row_id":"india-000762","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Xstream advertises named OTT access with a stated price and duration.","confidence":"high"}
+{"source_row_id":"india-000765","verdict":"legit_promo","category":"legitimate","rationale":"Style Union sends a purchase e-receipt notification and identifies the customer context.","confidence":"high"}
+{"source_row_id":"india-000769","verdict":"legit_promo","category":"legitimate","rationale":"Wynk advertises a priced annual premium subscription with listed music features.","confidence":"high"}
+{"source_row_id":"india-000772","verdict":"legit_promo","category":"legitimate","rationale":"Airtel lists multiple priced recharge plans and directs customers to its app or dial code.","confidence":"high"}
+{"source_row_id":"india-000775","verdict":"legit_promo","category":"legitimate","rationale":"Airtel reminds the customer about an incomplete recharge and provides a retry link.","confidence":"high"}
+{"source_row_id":"india-000776","verdict":"legit_promo","category":"legitimate","rationale":"Vi warns of pack expiry and lists two priced recharge offers.","confidence":"high"}
+{"source_row_id":"india-000783","verdict":"legit_promo","category":"legitimate","rationale":"Smart Point identifies its store and lists named grocery promotions and discounts.","confidence":"high"}
+{"source_row_id":"india-000784","verdict":"legit_promo","category":"legitimate","rationale":"Pantaloons advertises a stated shopping discount with code and minimum spend.","confidence":"high"}
+{"source_row_id":"india-000788","verdict":"legit_promo","category":"legitimate","rationale":"JioMart and Smart Point identify a dated Bangalore grocery promotion with prices.","confidence":"high"}
+{"source_row_id":"india-000793","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Black advertises a free trial with named OTT, television, and Wi-Fi benefits.","confidence":"high"}
+{"source_row_id":"india-000795","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Xstream confirms free access and lists included streaming services.","confidence":"high"}
+{"source_row_id":"india-000796","verdict":"legit_promo","category":"legitimate","rationale":"Airtel sends a pack-expiry reminder with priced service and entertainment benefits.","confidence":"high"}
+{"source_row_id":"india-000798","verdict":"legit_promo","category":"legitimate","rationale":"Vishal advertises a low-priced grocery item, gifts, and SBI cashback for a festival.","confidence":"high"}
+{"source_row_id":"india-000800","verdict":"legit_promo","category":"legitimate","rationale":"American Express is identified and advertises a stated credit limit with terms.","confidence":"medium"}
+{"source_row_id":"india-000801","verdict":"legit_promo","category":"legitimate","rationale":"Vi promotes named Covid news coverage through its Movies and TV application.","confidence":"high"}
+{"source_row_id":"india-000803","verdict":"legit_promo","category":"legitimate","rationale":"The telecom notification confirms credited calling, data, and SMS benefits for 28 days.","confidence":"medium"}
+{"source_row_id":"india-000810","verdict":"legit_promo","category":"legitimate","rationale":"Lenskart names its Diwali sale and describes buy-one-get-one and discount terms.","confidence":"high"}
+{"source_row_id":"india-000812","verdict":"legit_promo","category":"legitimate","rationale":"Vi explains roaming charges, included benefits, and caller-tune options for Karnataka customers.","confidence":"high"}
+{"source_row_id":"india-000822","verdict":"legit_promo","category":"legitimate","rationale":"Airtel describes a pack with calls, data, SMS, and Wynk benefits.","confidence":"high"}
+{"source_row_id":"india-000826","verdict":"legit_promo","category":"legitimate","rationale":"Airtel sends a callback-availability notification and provides its callback link.","confidence":"high"}
+{"source_row_id":"india-000828","verdict":"legit_promo","category":"legitimate","rationale":"Lenskart names its Father’s Day sale, discount, buy-one-get-one offer, and date.","confidence":"high"}
+{"source_row_id":"india-000834","verdict":"legit_promo","category":"legitimate","rationale":"The telecom reminder identifies an expiring pack and directs recharge through an app.","confidence":"high"}
+{"source_row_id":"india-000836","verdict":"legit_promo","category":"legitimate","rationale":"Vi promotes named Afghan-Taliban crisis coverage through its Movies and TV application.","confidence":"high"}
+{"source_row_id":"india-000840","verdict":"legit_promo","category":"legitimate","rationale":"Federal Bank advertises app-based digital-rupee cashback and identifies the bank.","confidence":"high"}
+{"source_row_id":"india-000845","verdict":"legit_promo","category":"legitimate","rationale":"Digi Yatra Foundation sends an OTP for its named travel application.","confidence":"high"}
+{"source_row_id":"india-000847","verdict":"legit_promo","category":"legitimate","rationale":"Star Clubcard identifies a feedback promotion with points for winners and early responders.","confidence":"medium"}
+{"source_row_id":"india-000849","verdict":"legit_promo","category":"legitimate","rationale":"Airtel promotes online prepaid-SIM switching with free delivery.","confidence":"high"}
+{"source_row_id":"india-000853","verdict":"legit_promo","category":"legitimate","rationale":"Shoppers Stop identifies its sale, discount codes, categories, and card offers.","confidence":"high"}
+{"source_row_id":"india-000855","verdict":"legit_promo","category":"legitimate","rationale":"Miniklub identifies its baby-products store and directs shoppers to its offer.","confidence":"medium"}
+{"source_row_id":"india-000857","verdict":"legit_promo","category":"legitimate","rationale":"Vi lists two priced recharge plans with calls, data, and validity periods.","confidence":"high"}
+{"source_row_id":"india-000860","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises cashback for first UPI transactions through its named Thanks app.","confidence":"high"}
+{"source_row_id":"india-000863","verdict":"legit_promo","category":"legitimate","rationale":"Vi promotes named films, news, and football through its Movies and TV app.","confidence":"high"}
+{"source_row_id":"india-000868","verdict":"legit_promo","category":"legitimate","rationale":"Vi explains roaming charges, included benefits, and caller-tune options for Tamil Nadu customers.","confidence":"high"}
+{"source_row_id":"india-000874","verdict":"legit_promo","category":"legitimate","rationale":"SBI requests transaction feedback through its official domain and says no personal information is captured.","confidence":"high"}
+{"source_row_id":"india-000881","verdict":"legit_promo","category":"legitimate","rationale":"Airtel describes a pack’s data and music benefits plus a referral coupon.","confidence":"high"}
+{"source_row_id":"india-000883","verdict":"legit_promo","category":"legitimate","rationale":"Vi promotes named lockdown news coverage through its Movies and TV application.","confidence":"high"}
+{"source_row_id":"india-000885","verdict":"legit_promo","category":"legitimate","rationale":"JioMart and Smart Point identify a dated Bangalore grocery promotion with prices.","confidence":"high"}
+{"source_row_id":"india-000887","verdict":"legit_promo","category":"legitimate","rationale":"Refyne is identified and advertises employee cashback and salary-access features after KYC.","confidence":"medium"}
+{"source_row_id":"india-000888","verdict":"legit_promo","category":"legitimate","rationale":"Vi advertises a recharge with named ZEE5, data, calling, and validity benefits.","confidence":"high"}
+{"source_row_id":"india-000901","verdict":"fraud","category":"fake_job","rationale":"Promises online earnings of 8,000–20,000 daily and directs applicants to WhatsApp.","confidence":"high"}
+{"source_row_id":"india-000903","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises 5G sports streaming and a priced extra-data pack.","confidence":"high"}
+{"source_row_id":"india-000905","verdict":"legit_promo","category":"legitimate","rationale":"Smart Point identifies its store and lists named milk products and prices.","confidence":"high"}
+{"source_row_id":"india-000906","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises current and future data benefits tied to a recharge.","confidence":"high"}
+{"source_row_id":"india-000907","verdict":"legit_promo","category":"legitimate","rationale":"Airtel describes a pack with calls, data, SMS, and Prime trial benefits.","confidence":"high"}
+{"source_row_id":"india-000914","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises free data on selected recharges through its named Thanks app.","confidence":"high"}
+{"source_row_id":"india-000915","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Black advertises streaming, fiber, cashback, and a customer-service phone number.","confidence":"high"}
+{"source_row_id":"india-000923","verdict":"legit_promo","category":"legitimate","rationale":"Vi sends a data-usage alert with pack-purchase options and a dial code.","confidence":"high"}
+{"source_row_id":"india-000925","verdict":"legit_promo","category":"legitimate","rationale":"Smart Point identifies its store and lists named grocery promotions and discounts.","confidence":"high"}
+{"source_row_id":"india-000926","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Black advertises a free trial with named OTT, television, and Wi-Fi benefits.","confidence":"high"}
+{"source_row_id":"india-000933","verdict":"legit_promo","category":"legitimate","rationale":"Vi promotes a recharge with named ZEE5, data, calling, and validity benefits.","confidence":"high"}
+{"source_row_id":"india-000936","verdict":"legit_promo","category":"legitimate","rationale":"Vi advertises a cricket bundle with named Hotstar, data, calling, and recharge details.","confidence":"high"}
+{"source_row_id":"india-000938","verdict":"legit_promo","category":"legitimate","rationale":"PVR supplies booking details, venue, seats, cancellation policy, and digital ticket instructions.","confidence":"high"}
+{"source_row_id":"india-000942","verdict":"legit_promo","category":"legitimate","rationale":"Vi identifies its WhatsApp service for offers, recharges, and account services.","confidence":"high"}
+{"source_row_id":"india-000949","verdict":"fraud","category":"fake_job","rationale":"Impersonates Amazon recruitment while promising daily part-time earnings through WhatsApp.","confidence":"high"}
+{"source_row_id":"india-000950","verdict":"legit_promo","category":"legitimate","rationale":"INSCOL identifies nursing-study programs in Canadian public colleges and provides a phone contact.","confidence":"high"}
+{"source_row_id":"india-000951","verdict":"legit_promo","category":"legitimate","rationale":"PhonePe advertises recharge-linked reward vouchers with a stated minimum recharge.","confidence":"high"}
+{"source_row_id":"india-000961","verdict":"legit_promo","category":"legitimate","rationale":"The message is an anti-fraud warning about suspicious job links and app downloads.","confidence":"high"}
+{"source_row_id":"india-000972","verdict":"legit_promo","category":"legitimate","rationale":"Vi advertises CRED Pay recharge cashback and identifies the payment-service context.","confidence":"high"}
+{"source_row_id":"india-000975","verdict":"legit_promo","category":"legitimate","rationale":"Shoppers Stop advertises First Citizen points tied to completing member details.","confidence":"high"}
+{"source_row_id":"india-000976","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Xstream Fiber advertises speed, pricing, and a free-router promotion.","confidence":"high"}
+{"source_row_id":"india-000982","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises a dated annual recharge with specified calls, data, SMS, and price.","confidence":"high"}
+{"source_row_id":"india-000988","verdict":"legit_promo","category":"legitimate","rationale":"Unlimited Fashion Stores advertise a clearly stated buy-one-get-one clothing offer.","confidence":"high"}
+{"source_row_id":"india-000991","verdict":"legit_promo","category":"legitimate","rationale":"Airtel describes a pack’s calls, data, SMS, 5G, and Xstream benefits.","confidence":"high"}
+{"source_row_id":"india-001001","verdict":"legit_promo","category":"legitimate","rationale":"Smart Point identifies its store and lists named grocery discounts and a buy-one-get-one offer.","confidence":"high"}
+{"source_row_id":"india-001002","verdict":"legit_promo","category":"legitimate","rationale":"Lenskart names its online sale and describes buy-one-get-one and discount terms.","confidence":"high"}
+{"source_row_id":"india-001003","verdict":"legit_promo","category":"legitimate","rationale":"Vi warns of pack expiry and lists three priced recharge choices.","confidence":"high"}
+{"source_row_id":"india-001005","verdict":"legit_promo","category":"legitimate","rationale":"The telecom reminder identifies an expired pack and directs recharge through an app.","confidence":"high"}
+{"source_row_id":"india-001017","verdict":"legit_promo","category":"legitimate","rationale":"Shoppers Stop names its sale, discount code, categories, and Axis Bank cashback offer.","confidence":"high"}
+{"source_row_id":"india-001021","verdict":"legit_promo","category":"legitimate","rationale":"Airtel reports data consumption and offers a priced top-up through its Thanks app.","confidence":"high"}
+{"source_row_id":"india-001022","verdict":"exclude","category":"non_english","rationale":"The message is primarily romanized Hindi rather than English.","confidence":"high"}
+{"source_row_id":"india-001023","verdict":"legit_promo","category":"legitimate","rationale":"Vi promotes overnight unlimited data usage within qualifying plans.","confidence":"high"}
+{"source_row_id":"india-001025","verdict":"legit_promo","category":"legitimate","rationale":"Lifestyle names its sale, brands, product categories, and stated discount.","confidence":"high"}
+{"source_row_id":"india-001031","verdict":"legit_promo","category":"legitimate","rationale":"Wynk advertises a priced premium subscription with music and download features.","confidence":"high"}
+{"source_row_id":"india-001033","verdict":"legit_promo","category":"legitimate","rationale":"Airtel promotes a 5G handset upgrade and names the recharge eligibility condition.","confidence":"high"}
+{"source_row_id":"india-001038","verdict":"legit_promo","category":"legitimate","rationale":"Vi promotes live LaLiga football through its Movies and TV application.","confidence":"high"}
+{"source_row_id":"india-001039","verdict":"legit_promo","category":"legitimate","rationale":"Vi advertises a cricket bundle with named Hotstar, data, calling, and recharge details.","confidence":"high"}
+{"source_row_id":"india-001040","verdict":"legit_promo","category":"legitimate","rationale":"Vishal advertises a discounted seasonal sweet and a conditional free gift.","confidence":"high"}
+{"source_row_id":"india-001043","verdict":"legit_promo","category":"legitimate","rationale":"UIDAI gives official Aadhaar document-update guidance, prices, and the official website.","confidence":"high"}
+{"source_row_id":"india-001048","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises priced data top-ups with a named telecom service link.","confidence":"high"}
+{"source_row_id":"india-001050","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Xstream Fiber advertises local availability, free installation, router, and plan price.","confidence":"high"}
+{"source_row_id":"india-001054","verdict":"legit_promo","category":"legitimate","rationale":"Vi promotes Bigg Boss access tied to qualifying daily-data recharges.","confidence":"high"}
+{"source_row_id":"india-001056","verdict":"legit_promo","category":"legitimate","rationale":"Beauty Blowout Sale advertises named discount percentages and a shopping code.","confidence":"medium"}
+{"source_row_id":"india-001058","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises a prepaid SIM with 5G data, OTT subscriptions, and free delivery.","confidence":"high"}
+{"source_row_id":"india-001059","verdict":"legit_promo","category":"legitimate","rationale":"Star Clubcard identifies a feedback promotion with points for winners and early responders.","confidence":"medium"}
+{"source_row_id":"india-001060","verdict":"legit_promo","category":"legitimate","rationale":"YES BANK advertises a named savings account and related banking offers.","confidence":"high"}
+{"source_row_id":"india-001061","verdict":"legit_promo","category":"legitimate","rationale":"Airtel describes a pack’s calls, data, SMS, and unlimited-5G benefit.","confidence":"high"}
+{"source_row_id":"india-001066","verdict":"legit_promo","category":"legitimate","rationale":"AJIO advertises a named sale with price ceiling and free shipping.","confidence":"high"}
+{"source_row_id":"india-001068","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Xstream Fiber advertises speed, OTT access, plan price, and free router.","confidence":"high"}
+{"source_row_id":"india-001069","verdict":"legit_promo","category":"legitimate","rationale":"Vi provides network settings and directs customers to data-offer information.","confidence":"high"}
+{"source_row_id":"india-001071","verdict":"legit_promo","category":"legitimate","rationale":"Unlimited Fashion Stores advertise a buy-one-get-one offer with HDFC cashback.","confidence":"high"}
+{"source_row_id":"india-001073","verdict":"legit_promo","category":"legitimate","rationale":"Vi advertises an app cashback coupon tied to qualifying plans and a validity period.","confidence":"high"}
+{"source_row_id":"india-001077","verdict":"legit_promo","category":"legitimate","rationale":"Lenskart names its sale, discount, buy-one-get-one offer, store, and chat support.","confidence":"high"}
+{"source_row_id":"india-001079","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Black advertises streaming and DTH benefits with phone and link contact.","confidence":"high"}
+{"source_row_id":"india-001080","verdict":"legit_promo","category":"legitimate","rationale":"The telecom department warns about fake blocking calls and names an official reporting site.","confidence":"high"}
+{"source_row_id":"india-001081","verdict":"legit_promo","category":"legitimate","rationale":"Vi identifies its WhatsApp balance-check service and customer-service channel.","confidence":"high"}
+{"source_row_id":"india-001084","verdict":"legit_promo","category":"legitimate","rationale":"Airtel warns of pack expiry and gives priced recharge benefits and link.","confidence":"high"}
+{"source_row_id":"india-001091","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises free data through its named Thanks app.","confidence":"high"}
+{"source_row_id":"india-001093","verdict":"legit_promo","category":"legitimate","rationale":"Airtel sends a callback-availability notification and provides its callback link.","confidence":"high"}
+{"source_row_id":"india-001095","verdict":"legit_promo","category":"legitimate","rationale":"Vedix reminds a customer about a follow-up quiz for personalized product recommendations.","confidence":"high"}
+{"source_row_id":"india-001096","verdict":"legit_promo","category":"legitimate","rationale":"Vi advertises free overnight data usage and gives dial and app instructions.","confidence":"high"}
+{"source_row_id":"india-001097","verdict":"legit_promo","category":"legitimate","rationale":"Shoppers Stop invites customers to a timed live shopping event with secret offers.","confidence":"high"}
+{"source_row_id":"india-001100","verdict":"legit_promo","category":"legitimate","rationale":"Vishal lists dated product discounts and a conditional free gift.","confidence":"high"}
+{"source_row_id":"india-001104","verdict":"legit_promo","category":"legitimate","rationale":"Vi promotes named lockdown news coverage through its Movies and TV application.","confidence":"high"}
+{"source_row_id":"india-001105","verdict":"legit_promo","category":"legitimate","rationale":"Pantaloons identifies its Greencard sale, dates, discounts, and shopping location.","confidence":"high"}
+{"source_row_id":"india-001108","verdict":"legit_promo","category":"legitimate","rationale":"Lenskart names its sale, discount, buy-one-get-one offer, store, and support contacts.","confidence":"high"}
+{"source_row_id":"india-001109","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises recharge-linked rewards, including Amazon Prime Video, through its app.","confidence":"high"}
+{"source_row_id":"india-001113","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises free data through its named Thanks app.","confidence":"high"}
+{"source_row_id":"india-001114","verdict":"legit_promo","category":"legitimate","rationale":"Vi promotes ad-free music and downloads through its named app service.","confidence":"high"}
+{"source_row_id":"india-001116","verdict":"exclude","category":"non_english","rationale":"The message is Malayalam rather than English and cannot support an in-scope audit.","confidence":"high"}
+{"source_row_id":"india-001122","verdict":"legit_promo","category":"legitimate","rationale":"Pantaloons advertises ethnicwear categories, sale discount, and named shopping catalogue.","confidence":"high"}
+{"source_row_id":"india-001125","verdict":"legit_promo","category":"legitimate","rationale":"Dunzo advertises grocery delivery discounts and identifies the delivery service.","confidence":"high"}
+{"source_row_id":"india-001126","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Black advertises a free trial with named OTT, television, and Wi-Fi benefits.","confidence":"high"}
+{"source_row_id":"india-001128","verdict":"legit_promo","category":"legitimate","rationale":"Vi provides network activation guidance and directs customers to data offers.","confidence":"high"}
+{"source_row_id":"india-001130","verdict":"legit_promo","category":"legitimate","rationale":"Samsung advertises a named Galaxy phone, price, specifications, and shopping contact.","confidence":"high"}
+{"source_row_id":"india-001131","verdict":"legit_promo","category":"legitimate","rationale":"Vi advertises a named callertune with monthly pricing and dial instructions.","confidence":"high"}
+{"source_row_id":"india-001132","verdict":"legit_promo","category":"legitimate","rationale":"Unlimited Fashion Store advertises credited shopping points with a time-limited redemption prompt.","confidence":"high"}
+{"source_row_id":"india-001134","verdict":"legit_promo","category":"legitimate","rationale":"Shoppers Stop advertises a watch sale with bank-card offers and store option.","confidence":"high"}
+{"source_row_id":"india-001137","verdict":"legit_promo","category":"legitimate","rationale":"Vi advertises named entertainment content and television access through its app.","confidence":"high"}
+{"source_row_id":"india-001143","verdict":"legit_promo","category":"legitimate","rationale":"Airtel sends a login OTP and explicitly warns not to share it.","confidence":"high"}
+{"source_row_id":"india-001145","verdict":"legit_promo","category":"legitimate","rationale":"Max Fashion advertises a dated buy-two-get-one storewide offer.","confidence":"high"}
+{"source_row_id":"india-001148","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises fixed cashback for first UPI transactions through its app.","confidence":"high"}
+{"source_row_id":"india-001149","verdict":"legit_promo","category":"legitimate","rationale":"BigBasket advertises a daily-essentials sale through its named shopping service.","confidence":"high"}
+{"source_row_id":"india-001151","verdict":"legit_promo","category":"legitimate","rationale":"American Express is identified and advertises a stated credit limit with terms.","confidence":"medium"}
+{"source_row_id":"india-001152","verdict":"legit_promo","category":"legitimate","rationale":"Vishal lists a priced cooker, discount, gifts, and SBI cashback for Diwali.","confidence":"high"}
+{"source_row_id":"india-001153","verdict":"legit_promo","category":"legitimate","rationale":"Vi advertises a cricket bundle with named Hotstar, data, calling, and recharge details.","confidence":"high"}
+{"source_row_id":"india-001157","verdict":"exclude","category":"non_english","rationale":"The entertainment promotion is partly Hindi and outside the English audit scope.","confidence":"medium"}
+{"source_row_id":"india-001158","verdict":"legit_promo","category":"legitimate","rationale":"Airtel promotes callback-availability alerts through its named Thanks app.","confidence":"high"}
+{"source_row_id":"india-001160","verdict":"legit_promo","category":"legitimate","rationale":"Refyne is identified and advertises a dated salary-withdrawal discount.","confidence":"medium"}
+{"source_row_id":"india-001162","verdict":"legit_promo","category":"legitimate","rationale":"Airtel promotes its named call-blocking feature for unwanted incoming calls.","confidence":"high"}
+{"source_row_id":"india-001163","verdict":"legit_promo","category":"legitimate","rationale":"Unlimited Fashion Store advertises credited shopping points with a validity date.","confidence":"high"}
+{"source_row_id":"india-001168","verdict":"legit_promo","category":"legitimate","rationale":"The telecom reminder identifies an expiring pack and directs recharge through an app.","confidence":"high"}
+{"source_row_id":"india-001171","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises a named Prime Video trial and identifies its entertainment offer.","confidence":"high"}
+{"source_row_id":"india-001176","verdict":"legit_promo","category":"legitimate","rationale":"Smart Point identifies its Bangalore store and lists dated grocery prices.","confidence":"high"}
+{"source_row_id":"india-001180","verdict":"legit_promo","category":"legitimate","rationale":"Vi identifies its contest and lists prizes for participating through its service.","confidence":"high"}
+{"source_row_id":"india-001183","verdict":"legit_promo","category":"legitimate","rationale":"Smart Point identifies its store and lists Valentine’s Day product discounts.","confidence":"high"}
+{"source_row_id":"india-001184","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Xsafe advertises Wi-Fi cameras, consultation, and installation.","confidence":"high"}
+{"source_row_id":"india-001187","verdict":"legit_promo","category":"legitimate","rationale":"Vi promotes named movies and sports through its Movies and TV application.","confidence":"high"}
+{"source_row_id":"india-001191","verdict":"legit_promo","category":"legitimate","rationale":"OlaMoney advertises named cashback and short-term credit with usage terms.","confidence":"high"}
+{"source_row_id":"india-001192","verdict":"legit_promo","category":"legitimate","rationale":"Unlimited Fashion Store advertises credited shopping points with a validity date.","confidence":"high"}
+{"source_row_id":"india-001193","verdict":"legit_promo","category":"legitimate","rationale":"Junglee Rummy advertises a named welcome bonus through its game download.","confidence":"medium"}
+{"source_row_id":"india-001197","verdict":"legit_promo","category":"legitimate","rationale":"Airtel reminds a customer about an incomplete recharge and provides a retry link.","confidence":"high"}
+{"source_row_id":"india-001202","verdict":"legit_promo","category":"legitimate","rationale":"Airtel reports data consumption and offers a priced top-up through its service link.","confidence":"high"}
+{"source_row_id":"india-001206","verdict":"legit_promo","category":"legitimate","rationale":"Max Fashion identifies its preview sale, discount, gift voucher, dates, and store.","confidence":"high"}
+{"source_row_id":"india-001207","verdict":"legit_promo","category":"legitimate","rationale":"Vi promotes a recharge with named Hotstar, data, calling, and validity benefits.","confidence":"high"}
+{"source_row_id":"india-001216","verdict":"legit_promo","category":"legitimate","rationale":"Vi advertises a cricket bundle with named Hotstar access and qualifying recharges.","confidence":"high"}
+{"source_row_id":"india-001222","verdict":"legit_promo","category":"legitimate","rationale":"Vi warns of pack expiry and lists three priced recharge choices.","confidence":"high"}
+{"source_row_id":"india-001224","verdict":"legit_promo","category":"legitimate","rationale":"Vi promotes named educational programming through its Movies and TV application.","confidence":"high"}
+{"source_row_id":"india-001225","verdict":"legit_promo","category":"legitimate","rationale":"JioMart and Smart Point identify a dated Bangalore grocery promotion with prices.","confidence":"high"}
+{"source_row_id":"india-001227","verdict":"legit_promo","category":"legitimate","rationale":"The message advertises a home-loan rate, limit, EMI, and application terms.","confidence":"medium"}
+{"source_row_id":"india-001231","verdict":"legit_promo","category":"legitimate","rationale":"R&B identifies its fashion store sale, discount, dates, and shopping link.","confidence":"high"}
+{"source_row_id":"india-001235","verdict":"legit_promo","category":"legitimate","rationale":"Vi identifies a customer coupon and directs users to its official reward page.","confidence":"high"}
+{"source_row_id":"india-001243","verdict":"legit_promo","category":"legitimate","rationale":"Shoppers Stop identifies its store and gives bonus-point terms tied to shopping.","confidence":"high"}
+{"source_row_id":"india-001246","verdict":"legit_promo","category":"legitimate","rationale":"Wynk advertises a free premium subscription with music and caller-tune benefits.","confidence":"high"}
+{"source_row_id":"india-001247","verdict":"legit_promo","category":"legitimate","rationale":"American Express is identified and advertises a stated credit limit with terms.","confidence":"medium"}
+{"source_row_id":"india-001248","verdict":"legit_promo","category":"legitimate","rationale":"Flipkart Axis Bank names its card and advertises cashback and gift-card benefits.","confidence":"high"}
+{"source_row_id":"india-001249","verdict":"legit_promo","category":"legitimate","rationale":"Vi promotes live television viewing through its named application.","confidence":"high"}
+{"source_row_id":"india-001250","verdict":"legit_promo","category":"legitimate","rationale":"Pantaloons addresses a Greencard member and promotes its store and online catalogue.","confidence":"high"}
+{"source_row_id":"india-001251","verdict":"legit_promo","category":"legitimate","rationale":"MynCash advertises a named shopping credit and free shipping during a sale.","confidence":"medium"}
+{"source_row_id":"india-001252","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Xstream Fiber advertises speed, pricing, and home internet use cases.","confidence":"high"}
+{"source_row_id":"india-001268","verdict":"legit_promo","category":"legitimate","rationale":"Vi promotes unclaimed ZEE5 access tied to an existing recharge and named app.","confidence":"high"}
+{"source_row_id":"india-001276","verdict":"legit_promo","category":"legitimate","rationale":"Nykaa names its sale and advertises a buy-one-get-one bath-and-body offer.","confidence":"high"}
+{"source_row_id":"india-001277","verdict":"legit_promo","category":"legitimate","rationale":"Vi advertises named Disney content and subscription eligibility through specified recharges.","confidence":"high"}
+{"source_row_id":"india-001278","verdict":"legit_promo","category":"legitimate","rationale":"Smart Point identifies its store and lists named grocery discounts and prices.","confidence":"high"}
+{"source_row_id":"india-001282","verdict":"legit_promo","category":"legitimate","rationale":"Cloudnine sends a named administrator’s training-course assignment and completion deadline.","confidence":"high"}
+{"source_row_id":"india-001286","verdict":"legit_promo","category":"legitimate","rationale":"R&B identifies its festive offer, purchase threshold, and free gift.","confidence":"high"}
+{"source_row_id":"india-001288","verdict":"legit_promo","category":"legitimate","rationale":"Wynk advertises a priced ringtone feature with a purchase link.","confidence":"high"}
+{"source_row_id":"india-001290","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises a priced pack with data, ad-free music, downloads, and validity.","confidence":"high"}
+{"source_row_id":"india-001291","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises a wallet sign-up bonus and identifies secure payment functionality.","confidence":"high"}
+{"source_row_id":"india-001293","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Xstream Fiber advertises named OTT, television, Wi-Fi, and price benefits.","confidence":"high"}
+{"source_row_id":"india-001296","verdict":"legit_promo","category":"legitimate","rationale":"Airtel and Google issue a safety warning against unknown links and bank-detail sharing.","confidence":"high"}
+{"source_row_id":"india-001298","verdict":"legit_promo","category":"legitimate","rationale":"Flipkart Axis Bank names its card and advertises cashback and a free-card offer.","confidence":"high"}
+{"source_row_id":"india-001302","verdict":"legit_promo","category":"legitimate","rationale":"Samsung advertises a named Galaxy phone, price, specifications, and shopping contact.","confidence":"high"}
+{"source_row_id":"india-001308","verdict":"legit_promo","category":"legitimate","rationale":"Vi confirms recharge-linked data, calls, SMS, and weekend rollover benefits.","confidence":"high"}
+{"source_row_id":"india-001310","verdict":"exclude","category":"corrupted","rationale":"The message is empty and contains no auditable content.","confidence":"high"}
+{"source_row_id":"india-001312","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Xstream promotes live sports viewing and identifies the streaming service.","confidence":"high"}
+{"source_row_id":"india-001313","verdict":"legit_promo","category":"legitimate","rationale":"Airtel offers free data through its named Thanks app.","confidence":"high"}
+{"source_row_id":"india-001318","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Black advertises a free Xstream box, postpaid connections, and television channels.","confidence":"high"}
+{"source_row_id":"india-001323","verdict":"legit_promo","category":"legitimate","rationale":"Shoppers Stop names its sale, store, membership, and bank-card offers.","confidence":"high"}
+{"source_row_id":"india-001325","verdict":"legit_promo","category":"legitimate","rationale":"Lenskart names its sale and describes buy-one-get-one and discount terms.","confidence":"high"}
+{"source_row_id":"india-001327","verdict":"legit_promo","category":"legitimate","rationale":"Vi warns of upcoming price increases and promotes annual recharge savings.","confidence":"high"}
+{"source_row_id":"india-001330","verdict":"legit_promo","category":"legitimate","rationale":"Airtel sends a callback-availability notification and provides its callback link.","confidence":"high"}
+{"source_row_id":"india-001335","verdict":"legit_promo","category":"legitimate","rationale":"Wynk advertises a named movie-set experience with a service link.","confidence":"medium"}
+{"source_row_id":"india-001339","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Xstream Fiber advertises speed, unlimited data, and a free router.","confidence":"high"}
+{"source_row_id":"india-001342","verdict":"legit_promo","category":"legitimate","rationale":"Shoppers Stop promotes a festival sale and identifies membership and bank-card offers.","confidence":"high"}
+{"source_row_id":"india-001343","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises a priced pack with data, ad-free music, downloads, and validity.","confidence":"high"}
+{"source_row_id":"india-001345","verdict":"legit_promo","category":"legitimate","rationale":"Airtel lists multiple priced recharge plans and directs customers to its app or dial code.","confidence":"high"}
+{"source_row_id":"india-001346","verdict":"legit_promo","category":"legitimate","rationale":"Pantaloons advertises shopping vouchers and a chance to win a trip during a sale.","confidence":"high"}
+{"source_row_id":"india-001348","verdict":"legit_promo","category":"legitimate","rationale":"JioMart and Smart Point identify a dated Bangalore grocery promotion with prices.","confidence":"high"}
+{"source_row_id":"india-001349","verdict":"legit_promo","category":"legitimate","rationale":"Vi advertises a recharge with named Hotstar, data, calling, and validity benefits.","confidence":"high"}
+{"source_row_id":"india-001351","verdict":"legit_promo","category":"legitimate","rationale":"Airtel reports data consumption and offers a priced top-up through its service link.","confidence":"high"}
+{"source_row_id":"india-001354","verdict":"legit_promo","category":"legitimate","rationale":"Unlimited Fashion Store advertises a buy-two-get-two offer with HDFC cashback.","confidence":"high"}
+{"source_row_id":"india-001358","verdict":"legit_promo","category":"legitimate","rationale":"Airtel lists multiple priced recharge plans and directs customers to its app or dial code.","confidence":"high"}
+{"source_row_id":"india-001359","verdict":"legit_promo","category":"legitimate","rationale":"Smart Point identifies its store and lists named winter grocery promotions and prices.","confidence":"high"}
+{"source_row_id":"india-001362","verdict":"legit_promo","category":"legitimate","rationale":"Airtel sends a callback-availability notification and provides its callback link.","confidence":"high"}
+{"source_row_id":"india-001365","verdict":"legit_promo","category":"legitimate","rationale":"Style Union requests shopping feedback and identifies the store context.","confidence":"high"}
+{"source_row_id":"india-001369","verdict":"legit_promo","category":"legitimate","rationale":"The sale advertises named discount percentages and an extra first-order offer.","confidence":"medium"}
+{"source_row_id":"india-001375","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises free rewards through its named Thanks app.","confidence":"high"}
+{"source_row_id":"india-001378","verdict":"legit_promo","category":"legitimate","rationale":"Junglee Rummy advertises a named tournament with entry fee and prize-pool details.","confidence":"medium"}
+{"source_row_id":"india-001381","verdict":"legit_promo","category":"legitimate","rationale":"Airtel promotes free prepaid-SIM delivery and home activation.","confidence":"high"}
+{"source_row_id":"india-001383","verdict":"fraud","category":"fake_job","rationale":"Promises online earnings of 200–3,000 daily without investment and directs applicants to WhatsApp.","confidence":"high"}
+{"source_row_id":"india-001403","verdict":"legit_promo","category":"legitimate","rationale":"Shoppers Stop advertises bonus points tied to a stated shopping bill and store.","confidence":"high"}
+{"source_row_id":"india-001405","verdict":"legit_promo","category":"legitimate","rationale":"Vi warns of pack expiry and lists priced recharge offers.","confidence":"high"}
+{"source_row_id":"india-001406","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises recharge-linked rewards, including Amazon Prime, through its app.","confidence":"high"}
+{"source_row_id":"india-001407","verdict":"legit_promo","category":"legitimate","rationale":"Vedix requests a follow-up quiz and explains free personalized product recommendations.","confidence":"high"}
+{"source_row_id":"india-001411","verdict":"legit_promo","category":"legitimate","rationale":"Vi identifies a customer coupon and directs users to its official reward page.","confidence":"high"}
+{"source_row_id":"india-001420","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises free data through its named Thanks app.","confidence":"high"}
+{"source_row_id":"india-001423","verdict":"legit_promo","category":"legitimate","rationale":"Unlimited Fashion Store advertises credited shopping points with a validity date.","confidence":"high"}
+{"source_row_id":"india-001424","verdict":"legit_promo","category":"legitimate","rationale":"Smart Point identifies its store and lists named festival grocery promotions.","confidence":"high"}
+{"source_row_id":"india-001426","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Xstream advertises an entertainment festival with named OTT access through its app.","confidence":"high"}
+{"source_row_id":"india-001429","verdict":"exclude","category":"corrupted","rationale":"The text is largely unreadable encoding and cannot be reliably interpreted.","confidence":"high"}
+{"source_row_id":"india-001430","verdict":"legit_promo","category":"legitimate","rationale":"Unlimited Fashion Store advertises credited shopping points with a time-limited redemption prompt.","confidence":"high"}
+{"source_row_id":"india-001450","verdict":"legit_promo","category":"legitimate","rationale":"JioMart and Smart Point identify a dated Bangalore grocery promotion with prices.","confidence":"high"}
+{"source_row_id":"india-001460","verdict":"legit_promo","category":"legitimate","rationale":"Vi identifies its WhatsApp balance-check service and contact method.","confidence":"high"}
+{"source_row_id":"india-001464","verdict":"exclude","category":"corrupted","rationale":"The message is largely unreadable encoding and cannot be reliably interpreted.","confidence":"high"}
+{"source_row_id":"india-001465","verdict":"legit_promo","category":"legitimate","rationale":"Lifestyle names its sale, discounts, voucher, code, dates, and shopping channels.","confidence":"high"}
+{"source_row_id":"india-001469","verdict":"legit_promo","category":"legitimate","rationale":"Vi promotes named movies and news through its Movies and TV application.","confidence":"high"}
+{"source_row_id":"india-001472","verdict":"legit_promo","category":"legitimate","rationale":"Smart Point identifies its store and lists festival grocery products and prices.","confidence":"high"}
+{"source_row_id":"india-001473","verdict":"legit_promo","category":"legitimate","rationale":"The telecom notification confirms an active movie-linked recharge benefit and validity.","confidence":"medium"}
+{"source_row_id":"india-001474","verdict":"legit_promo","category":"legitimate","rationale":"Shoppers Stop promotes a dated sale with a named coupon and shopping link.","confidence":"high"}
+{"source_row_id":"india-001477","verdict":"exclude","category":"ambiguous","rationale":"This is a personal emergency call request, not an identifiable promotion or fraud lure.","confidence":"high"}
+{"source_row_id":"india-001479","verdict":"legit_promo","category":"legitimate","rationale":"Cloudnine sends a named administrator’s training-course assignment and completion deadline.","confidence":"high"}
+{"source_row_id":"india-001480","verdict":"legit_promo","category":"legitimate","rationale":"Vishal lists a priced appliance, discount, gifts, and SBI cashback for Diwali.","confidence":"high"}
+{"source_row_id":"india-001482","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises a priced pack with data, ad-free music, downloads, and validity.","confidence":"high"}
+{"source_row_id":"india-001484","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises a free data coupon through its named Thanks app.","confidence":"high"}
+{"source_row_id":"india-001485","verdict":"legit_promo","category":"legitimate","rationale":"Vi identifies its WhatsApp balance-check service and contact method.","confidence":"high"}
+{"source_row_id":"india-001491","verdict":"legit_promo","category":"legitimate","rationale":"Vishal lists a priced appliance, discount, gifts, and shopping terms.","confidence":"high"}
+{"source_row_id":"india-001492","verdict":"legit_promo","category":"legitimate","rationale":"Ekart sends a delivered-order notification and requests shopping feedback.","confidence":"high"}
+{"source_row_id":"india-001495","verdict":"legit_promo","category":"legitimate","rationale":"RnBIndia sends an e-bill notification after shopping and identifies its service.","confidence":"high"}
+{"source_row_id":"india-001498","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises fixed cashback for first UPI transactions through its app.","confidence":"high"}
+{"source_row_id":"india-001499","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Digital TV advertises a priced service with free installation.","confidence":"high"}
+{"source_row_id":"india-001500","verdict":"legit_promo","category":"legitimate","rationale":"Dunzo advertises grocery delivery discounts and identifies the delivery service.","confidence":"high"}
+{"source_row_id":"india-001502","verdict":"legit_promo","category":"legitimate","rationale":"Vi sends a data-usage alert with pack-purchase options and a dial code.","confidence":"high"}
+{"source_row_id":"india-001508","verdict":"legit_promo","category":"legitimate","rationale":"Lenskart advertises a membership sale with buy-one-get-one and cashback benefits.","confidence":"high"}
+{"source_row_id":"india-001511","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Xstream confirms recharge-linked SonyLIV access and lists included OTT services.","confidence":"high"}
+{"source_row_id":"india-001513","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Xstream advertises a named trial with free entertainment access.","confidence":"high"}
+{"source_row_id":"india-001521","verdict":"legit_promo","category":"legitimate","rationale":"Wynk advertises a priced premium subscription with music and download features.","confidence":"high"}
+{"source_row_id":"india-001522","verdict":"legit_promo","category":"legitimate","rationale":"Smart Point identifies its Bangalore store and lists dated grocery prices.","confidence":"high"}
+{"source_row_id":"india-001528","verdict":"exclude","category":"non_english","rationale":"The message is primarily romanized Hindi rather than English.","confidence":"high"}
+{"source_row_id":"india-001529","verdict":"legit_promo","category":"legitimate","rationale":"Star Clubcard identifies a feedback promotion with points for winners and early responders.","confidence":"medium"}
+{"source_row_id":"india-001530","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises current and future data benefits tied to a recharge.","confidence":"high"}
+{"source_row_id":"india-001532","verdict":"legit_promo","category":"legitimate","rationale":"Shoppers Stop sends a personalized birthday discount with code and minimum spend.","confidence":"high"}
+{"source_row_id":"india-001538","verdict":"legit_promo","category":"legitimate","rationale":"Vi notifies the customer of expired data validity and provides recharge options.","confidence":"high"}
+{"source_row_id":"india-001542","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Xstream confirms free access and lists included streaming services.","confidence":"high"}
+{"source_row_id":"india-001545","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Digital TV advertises a discounted HD box and free installation.","confidence":"high"}
+{"source_row_id":"india-001547","verdict":"legit_promo","category":"legitimate","rationale":"Fi sends an OTP for account signup and identifies the financial service.","confidence":"high"}
+{"source_row_id":"india-001551","verdict":"legit_promo","category":"legitimate","rationale":"Unlimited Fashion Store advertises a buy-two-get-two offer with HDFC cashback.","confidence":"high"}
+{"source_row_id":"india-001553","verdict":"legit_promo","category":"legitimate","rationale":"Vi describes a named family postpaid plan with lines, price, data, and services.","confidence":"high"}
+{"source_row_id":"india-001561","verdict":"legit_promo","category":"legitimate","rationale":"Lenskart advertises its Pro Squad membership with a first-eyewear benefit and discount.","confidence":"high"}
+{"source_row_id":"india-001562","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises a referral coupon tied to inviting a friend and recharging.","confidence":"high"}
+{"source_row_id":"india-001563","verdict":"legit_promo","category":"legitimate","rationale":"Flipkart Axis Bank names its card and advertises discount and cashback benefits.","confidence":"high"}
+{"source_row_id":"india-001564","verdict":"legit_promo","category":"legitimate","rationale":"Shoppers Stop identifies its dated beauty sale and RuPay card discount.","confidence":"high"}
+{"source_row_id":"india-001565","verdict":"legit_promo","category":"legitimate","rationale":"Airtel promotes callback-availability alerts through its named Thanks app.","confidence":"high"}
+{"source_row_id":"india-001573","verdict":"legit_promo","category":"legitimate","rationale":"The message is an anti-fraud warning about suspicious job links and app downloads.","confidence":"high"}
+{"source_row_id":"india-001577","verdict":"legit_promo","category":"legitimate","rationale":"The telecom reminder identifies an expiring pack and directs recharge through an app.","confidence":"high"}
+{"source_row_id":"india-001582","verdict":"legit_promo","category":"legitimate","rationale":"Max Fashion identifies its preview sale, discount, gift voucher, dates, and store.","confidence":"high"}
+{"source_row_id":"india-001585","verdict":"legit_promo","category":"legitimate","rationale":"Vi gives a named anti-fraud warning about documents, links, freebies, and premium numbers.","confidence":"high"}
+{"source_row_id":"india-001586","verdict":"legit_promo","category":"legitimate","rationale":"Tata Neu advertises a named Vivo phone, discount, and NeuCoins reward.","confidence":"high"}
+{"source_row_id":"india-001588","verdict":"legit_promo","category":"legitimate","rationale":"Wynk promotes a named song and lists premium music subscription features.","confidence":"high"}
+{"source_row_id":"india-001589","verdict":"legit_promo","category":"legitimate","rationale":"Vi identifies its WhatsApp service for balance, offers, and usage tracking.","confidence":"high"}
+{"source_row_id":"india-001591","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Xstream promotes named live television and OTT access through its app.","confidence":"high"}
+{"source_row_id":"india-001592","verdict":"exclude","category":"corrupted","rationale":"The message is truncated to an incomplete phrase and lacks auditable context.","confidence":"high"}
+{"source_row_id":"india-001593","verdict":"legit_promo","category":"legitimate","rationale":"Shoppers Stop promotes reward points tied to shopping and a stated purchase threshold.","confidence":"high"}
+{"source_row_id":"india-001594","verdict":"legit_promo","category":"legitimate","rationale":"Vi promotes a recharge with named ZEE5, data, calling, and validity benefits.","confidence":"high"}
+{"source_row_id":"india-001598","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises a free data coupon through its named Thanks app.","confidence":"high"}
+{"source_row_id":"india-001603","verdict":"legit_promo","category":"legitimate","rationale":"Insider identifies points conversion into a Myntra voucher and clearance shopping.","confidence":"high"}
+{"source_row_id":"india-001604","verdict":"legit_promo","category":"legitimate","rationale":"Airtel offers SIM gifting and free delivery to existing prepaid customers.","confidence":"high"}
+{"source_row_id":"india-001606","verdict":"legit_promo","category":"legitimate","rationale":"JioMart and Smart Point identify a dated Bangalore grocery promotion with prices.","confidence":"high"}
+{"source_row_id":"india-001607","verdict":"legit_promo","category":"legitimate","rationale":"Vishal advertises festival food discounts, gifts, and SBI cashback.","confidence":"high"}
+{"source_row_id":"india-001610","verdict":"legit_promo","category":"legitimate","rationale":"Bajaj Finance sends an application-pending reminder and identifies its EMI card.","confidence":"high"}
+{"source_row_id":"india-001613","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises a prepaid SIM with 5G data, OTT subscriptions, and free delivery.","confidence":"high"}
+{"source_row_id":"india-001615","verdict":"legit_promo","category":"legitimate","rationale":"Airtel promotes named international-roaming packs with a stated starting price.","confidence":"high"}
+{"source_row_id":"india-001617","verdict":"legit_promo","category":"legitimate","rationale":"Airtel reports data consumption and offers a priced top-up through its Thanks app.","confidence":"high"}
+{"source_row_id":"india-001619","verdict":"legit_promo","category":"legitimate","rationale":"Shoppers Stop promotes an ethnicwear collaboration and personal-shopping appointment.","confidence":"high"}
+{"source_row_id":"india-001620","verdict":"legit_promo","category":"legitimate","rationale":"Pantaloons sends a shopping e-bill notification with a named customer-service context.","confidence":"high"}
+{"source_row_id":"india-001621","verdict":"legit_promo","category":"legitimate","rationale":"Samsung advertises named Galaxy foldables with cashback, upgrade, and care benefits.","confidence":"high"}
+{"source_row_id":"india-001625","verdict":"legit_promo","category":"legitimate","rationale":"Vi promotes a recharge with named ZEE5, data, calling, and validity benefits.","confidence":"high"}
+{"source_row_id":"india-001629","verdict":"legit_promo","category":"legitimate","rationale":"The telecom notification confirms an active movie-linked recharge benefit and validity.","confidence":"medium"}
+{"source_row_id":"india-001631","verdict":"exclude","category":"corrupted","rationale":"The message is empty and contains no auditable content.","confidence":"high"}
+{"source_row_id":"india-001632","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Xstream Fiber advertises speed, unlimited data, and a free router.","confidence":"high"}
+{"source_row_id":"india-001633","verdict":"legit_promo","category":"legitimate","rationale":"Shoppers Stop promotes a named styling event and personal-shopper appointment.","confidence":"high"}
+{"source_row_id":"india-001636","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises fixed cashback for first UPI transactions through its app.","confidence":"high"}
+{"source_row_id":"india-001638","verdict":"legit_promo","category":"legitimate","rationale":"Unlimited Fashion Store advertises a discounted cookware set tied to a shopping threshold.","confidence":"high"}
+{"source_row_id":"india-001639","verdict":"legit_promo","category":"legitimate","rationale":"The message advertises a home-loan rate, limit, EMI, and application terms.","confidence":"medium"}
+{"source_row_id":"india-001643","verdict":"legit_promo","category":"legitimate","rationale":"Airtel reports data consumption and offers a priced top-up through its service link.","confidence":"high"}
+{"source_row_id":"india-001645","verdict":"legit_promo","category":"legitimate","rationale":"CERT-In gives a named government cyber-safety advisory and links its bot-removal tool.","confidence":"high"}
+{"source_row_id":"india-001646","verdict":"legit_promo","category":"legitimate","rationale":"Star Bazaar advertises a dated Independence Day grocery sale with products and offers.","confidence":"high"}
+{"source_row_id":"india-001647","verdict":"legit_promo","category":"legitimate","rationale":"Star Bazaar advertises a named Rakhi sale with discounts and store invitation.","confidence":"high"}
+{"source_row_id":"india-001648","verdict":"legit_promo","category":"legitimate","rationale":"Shoppers Stop names its beauty sale, app, personal-shopping channel, and discount scope.","confidence":"high"}
+{"source_row_id":"india-001649","verdict":"legit_promo","category":"legitimate","rationale":"Dunzo advertises grocery delivery discount, free delivery, and a named delivery time.","confidence":"high"}
+{"source_row_id":"india-001660","verdict":"exclude","category":"corrupted","rationale":"The message is largely unreadable encoding and cannot be reliably interpreted.","confidence":"high"}
+{"source_row_id":"india-001663","verdict":"legit_promo","category":"legitimate","rationale":"Airtel reports data consumption and offers a priced top-up through its Thanks app.","confidence":"high"}
+{"source_row_id":"india-001665","verdict":"legit_promo","category":"legitimate","rationale":"Insider sends a membership-retention reminder and identifies the membership criteria.","confidence":"high"}
+{"source_row_id":"india-001666","verdict":"legit_promo","category":"legitimate","rationale":"Unlimited Fashion Store advertises credited shopping points with a time-limited redemption prompt.","confidence":"high"}
+{"source_row_id":"india-001669","verdict":"legit_promo","category":"legitimate","rationale":"Max Fashion sends a named personalized discount with code and product scope.","confidence":"high"}
+{"source_row_id":"india-001671","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Xstream promotes live cricket viewing through its named service.","confidence":"high"}
+{"source_row_id":"india-001672","verdict":"legit_promo","category":"legitimate","rationale":"Shoppers Stop names its dated member sale and explains wish-list and wallet offers.","confidence":"high"}
+{"source_row_id":"india-001673","verdict":"legit_promo","category":"legitimate","rationale":"Vi promotes overnight unlimited usage within an existing named pack.","confidence":"high"}
+{"source_row_id":"india-001674","verdict":"legit_promo","category":"legitimate","rationale":"Max Fashion identifies its dated buy-one-get-one sale and shopping options.","confidence":"high"}
+{"source_row_id":"india-001682","verdict":"legit_promo","category":"legitimate","rationale":"Pantaloons advertises an online sale with named discount scope and shopping link.","confidence":"high"}
+{"source_row_id":"india-001690","verdict":"legit_promo","category":"legitimate","rationale":"Flipkart Axis Bank names its card and advertises a voucher and cashback benefits.","confidence":"high"}
+{"source_row_id":"india-001696","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Xstream Fiber advertises a free router, speed, plan price, and eligibility reminder.","confidence":"high"}
+{"source_row_id":"india-001698","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises free data through its named Thanks app.","confidence":"high"}
+{"source_row_id":"india-001699","verdict":"legit_promo","category":"legitimate","rationale":"Airtel sends a callback-availability notification and provides its callback link.","confidence":"high"}
+{"source_row_id":"india-001700","verdict":"legit_promo","category":"legitimate","rationale":"Wynk advertises free music access and caller tunes through its named app.","confidence":"high"}
+{"source_row_id":"india-001701","verdict":"legit_promo","category":"legitimate","rationale":"Vi promotes live LaLiga football through its Movies and TV application.","confidence":"high"}
+{"source_row_id":"india-001707","verdict":"legit_promo","category":"legitimate","rationale":"Airtel reports data consumption and offers a priced top-up through its Thanks app.","confidence":"high"}
+{"source_row_id":"india-001708","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Xstream advertises named OTT access with a stated price and duration.","confidence":"high"}
+{"source_row_id":"india-001710","verdict":"legit_promo","category":"legitimate","rationale":"Vedix asks customers to confirm their next haircare box through its named service.","confidence":"medium"}
+{"source_row_id":"india-001711","verdict":"legit_promo","category":"legitimate","rationale":"Lenskart names its Independence Day sale and describes membership and product pricing.","confidence":"high"}
+{"source_row_id":"india-001712","verdict":"legit_promo","category":"legitimate","rationale":"Flipkart Axis Bank names its card and advertises cashback and a free-card offer.","confidence":"high"}
+{"source_row_id":"india-001716","verdict":"legit_promo","category":"legitimate","rationale":"Vishal advertises a discounted snack, gifts, and SBI cashback for Diwali.","confidence":"high"}
+{"source_row_id":"india-001723","verdict":"legit_promo","category":"legitimate","rationale":"Bajaj Finance sends an application-pending reminder and identifies its EMI card.","confidence":"high"}
+{"source_row_id":"india-001725","verdict":"legit_promo","category":"legitimate","rationale":"Shoppers Stop promotes a named celebrity-inspired styling event and personal-shopping appointment.","confidence":"high"}
+{"source_row_id":"india-001726","verdict":"legit_promo","category":"legitimate","rationale":"CERT-In gives a named government cyber-safety advisory and links its bot-removal tool.","confidence":"high"}
+{"source_row_id":"india-001729","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Xstream advertises free OTT access and a chance-based entertainment promotion.","confidence":"high"}
+{"source_row_id":"india-001731","verdict":"legit_promo","category":"legitimate","rationale":"Shoppers Stop names its Rakshabandhan sale, codes, discounts, and card offers.","confidence":"high"}
+{"source_row_id":"india-001735","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Black advertises streaming, broadband, cashback, and phone or link contact.","confidence":"high"}
+{"source_row_id":"india-001738","verdict":"legit_promo","category":"legitimate","rationale":"Vi warns of pack expiry and lists three priced recharge choices.","confidence":"high"}
+{"source_row_id":"india-001739","verdict":"legit_promo","category":"legitimate","rationale":"Smart Point identifies its store and lists named grocery discounts and prices.","confidence":"high"}
+{"source_row_id":"india-001742","verdict":"legit_promo","category":"legitimate","rationale":"Shoppers Stop invites First Citizen members to a named styling event.","confidence":"high"}
+{"source_row_id":"india-001747","verdict":"legit_promo","category":"legitimate","rationale":"Flipkart Axis Bank names its card and advertises cashback and a free-card offer.","confidence":"high"}
+{"source_row_id":"india-001754","verdict":"legit_promo","category":"legitimate","rationale":"Wynk promotes a named song and lists premium music subscription features.","confidence":"high"}
+{"source_row_id":"india-001756","verdict":"legit_promo","category":"legitimate","rationale":"Baskin Robbins identifies a free scoop reward and its redemption deadline.","confidence":"high"}
+{"source_row_id":"india-001763","verdict":"legit_promo","category":"legitimate","rationale":"Ola advertises discounted food delivery with named dishes, code, and app.","confidence":"high"}
+{"source_row_id":"india-001764","verdict":"legit_promo","category":"legitimate","rationale":"Vi identifies WhatsApp functions for balance, offers, and recharge services.","confidence":"high"}
+{"source_row_id":"india-001765","verdict":"legit_promo","category":"legitimate","rationale":"Flipkart Axis Bank names its card and advertises cashback and a free-card offer.","confidence":"high"}
+{"source_row_id":"india-001766","verdict":"legit_promo","category":"legitimate","rationale":"Smart Point identifies its store and lists named grocery discounts and prices.","confidence":"high"}
+{"source_row_id":"india-001767","verdict":"legit_promo","category":"legitimate","rationale":"Cloudnine sends a named administrator’s training-course assignment and completion deadline.","confidence":"high"}
+{"source_row_id":"india-001768","verdict":"legit_promo","category":"legitimate","rationale":"Airtel sends a callback-availability notification and provides its callback link.","confidence":"high"}
+{"source_row_id":"india-001775","verdict":"legit_promo","category":"legitimate","rationale":"Vi and PhonePe advertise a recharge cashback offer with a stated minimum.","confidence":"high"}
+{"source_row_id":"india-001786","verdict":"legit_promo","category":"legitimate","rationale":"Vishal lists discounted dry fruits, gifts, and SBI cashback for Diwali.","confidence":"high"}
+{"source_row_id":"india-001790","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Xstream promotes free access to named television and movie content.","confidence":"high"}
+{"source_row_id":"india-001791","verdict":"legit_promo","category":"legitimate","rationale":"Airtel reports data consumption and offers a priced top-up through its service link.","confidence":"high"}
+{"source_row_id":"india-001796","verdict":"legit_promo","category":"legitimate","rationale":"Shoppers Stop names its sale, stores, app, membership, and bank-card offers.","confidence":"high"}
+{"source_row_id":"india-001800","verdict":"legit_promo","category":"legitimate","rationale":"Airtel reports data consumption and offers a priced top-up through its service link.","confidence":"high"}
+{"source_row_id":"india-001802","verdict":"legit_promo","category":"legitimate","rationale":"Vi gives a named anti-fraud warning about documents, links, freebies, and premium numbers.","confidence":"high"}
+{"source_row_id":"india-001804","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises a named Prime Video trial and identifies its entertainment offer.","confidence":"high"}
+{"source_row_id":"india-001809","verdict":"fraud","category":"other_fraud","rationale":"Promises a quick no-paperwork personal loan through an unidentified short-link sender.","confidence":"medium"}
+{"source_row_id":"india-001813","verdict":"legit_promo","category":"legitimate","rationale":"The telecom advisory provides a toll-free process to cancel value-added subscriptions.","confidence":"high"}
+{"source_row_id":"india-001815","verdict":"legit_promo","category":"legitimate","rationale":"Star Bazaar advertises a dated festival sale with products, prices, and card offers.","confidence":"high"}
+{"source_row_id":"india-001817","verdict":"legit_promo","category":"legitimate","rationale":"Airtel lists multiple priced recharge plans and directs customers to its app or dial code.","confidence":"high"}
+{"source_row_id":"india-001820","verdict":"legit_promo","category":"legitimate","rationale":"Dunzo advertises grocery delivery discounts and identifies the delivery service.","confidence":"high"}
+{"source_row_id":"india-001822","verdict":"legit_promo","category":"legitimate","rationale":"Vi advertises unused coupons tied to a named recharge plan and app.","confidence":"high"}
+{"source_row_id":"india-001824","verdict":"legit_promo","category":"legitimate","rationale":"Lenskart advertises a membership buy-one-get-one offer and names its eyewear collection.","confidence":"high"}
+{"source_row_id":"india-001826","verdict":"legit_promo","category":"legitimate","rationale":"Vi and CRED Pay advertise recharge cashback with a stated cap and deadline.","confidence":"high"}
+{"source_row_id":"india-001830","verdict":"legit_promo","category":"legitimate","rationale":"Vi identifies its anniversary message and links to a communication from its leadership.","confidence":"high"}
+{"source_row_id":"india-001831","verdict":"fraud","category":"fake_job","rationale":"Promises online part-time earnings up to 10,000 daily and directs applicants to WhatsApp.","confidence":"high"}
+{"source_row_id":"india-001832","verdict":"legit_promo","category":"legitimate","rationale":"Airtel announces a named nearby store and lists products and services available there.","confidence":"high"}
+{"source_row_id":"india-001835","verdict":"legit_promo","category":"legitimate","rationale":"Myntra advertises a named sale with discount, free shipping, and purchase code.","confidence":"high"}
+{"source_row_id":"india-001838","verdict":"legit_promo","category":"legitimate","rationale":"TRAI issues an anti-impersonation warning and names official reporting channels.","confidence":"high"}
+{"source_row_id":"india-001841","verdict":"legit_promo","category":"legitimate","rationale":"Smart Point identifies its store and lists named grocery discounts and prices.","confidence":"high"}
+{"source_row_id":"india-001842","verdict":"legit_promo","category":"legitimate","rationale":"Wynk confirms recharge-linked premium access and lists music features.","confidence":"high"}
+{"source_row_id":"india-001845","verdict":"legit_promo","category":"legitimate","rationale":"Lenskart names its sale and describes buy-one-get-one and discount terms.","confidence":"high"}
+{"source_row_id":"india-001846","verdict":"legit_promo","category":"legitimate","rationale":"RnBIndia sends an e-bill notification after shopping and identifies its service.","confidence":"high"}
+{"source_row_id":"india-001847","verdict":"fraud","category":"prize_lottery_scam","rationale":"Claims a Rs.10,000 welcome cash credit and urges claiming it through an unidentified link.","confidence":"medium"}
+{"source_row_id":"india-001849","verdict":"exclude","category":"corrupted","rationale":"The message is largely unreadable encoding and cannot be reliably interpreted.","confidence":"high"}
+{"source_row_id":"india-001850","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Xstream promotes live cricket viewing through its named service.","confidence":"high"}
+{"source_row_id":"india-001853","verdict":"legit_promo","category":"legitimate","rationale":"Airtel sends a callback-availability notification and provides its callback link.","confidence":"high"}
+{"source_row_id":"india-001862","verdict":"legit_promo","category":"legitimate","rationale":"Vi describes a named postpaid plan with data, calls, and multiple subscriptions.","confidence":"high"}
+{"source_row_id":"india-001863","verdict":"legit_promo","category":"legitimate","rationale":"Shoppers Stop sends a personalized Valentine’s sale with discount and store links.","confidence":"high"}
+{"source_row_id":"india-001873","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Xstream Fiber advertises a free trial, television channels, and OTT access.","confidence":"high"}
+{"source_row_id":"india-001882","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Xstream promotes named OTT access and states it is included at no extra cost.","confidence":"high"}
+{"source_row_id":"india-001883","verdict":"legit_promo","category":"legitimate","rationale":"Airtel describes a pack with calls, data, SMS, and Wynk benefits.","confidence":"high"}
+{"source_row_id":"india-001886","verdict":"legit_promo","category":"legitimate","rationale":"Vi advertises a recharge with named Hotstar, data, calling, and validity benefits.","confidence":"high"}
+{"source_row_id":"india-001895","verdict":"legit_promo","category":"legitimate","rationale":"Shoppers Stop requests a member email to send points and offer communications.","confidence":"medium"}
+{"source_row_id":"india-001897","verdict":"legit_promo","category":"legitimate","rationale":"Pantaloons identifies a Greencard cashback offer with shopping threshold and expiry date.","confidence":"high"}
+{"source_row_id":"india-001899","verdict":"legit_promo","category":"legitimate","rationale":"Flipkart advertises a first-purchase fashion discount with a shopping link.","confidence":"medium"}
+{"source_row_id":"india-001902","verdict":"legit_promo","category":"legitimate","rationale":"Lenskart advertises a Gold membership buy-one-get-one offer and names product styles.","confidence":"high"}
+{"source_row_id":"india-001903","verdict":"legit_promo","category":"legitimate","rationale":"Vi advertises an app cashback coupon tied to qualifying plans and a validity period.","confidence":"high"}
+{"source_row_id":"india-001905","verdict":"legit_promo","category":"legitimate","rationale":"Airtel offers a device compatibility check for its 5G network.","confidence":"high"}
+{"source_row_id":"india-001909","verdict":"legit_promo","category":"legitimate","rationale":"Shoppers Stop names its dated member sale, store, discount, and bank offers.","confidence":"high"}
+{"source_row_id":"india-001910","verdict":"legit_promo","category":"legitimate","rationale":"Airtel sends a callback-availability notification and provides its callback link.","confidence":"high"}
+{"source_row_id":"india-001914","verdict":"legit_promo","category":"legitimate","rationale":"Airtel warns of pack expiry and gives priced recharge benefits and link.","confidence":"high"}
+{"source_row_id":"india-001916","verdict":"legit_promo","category":"legitimate","rationale":"Vi sends a data-usage alert with pack-purchase options and a dial code.","confidence":"high"}
+{"source_row_id":"india-001918","verdict":"legit_promo","category":"legitimate","rationale":"Shoppers Stop advertises a named Valentine’s event with store location and offers.","confidence":"high"}
+{"source_row_id":"india-001921","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Xstream TV advertises a priced set-top box with named OTT services.","confidence":"high"}
+{"source_row_id":"india-001926","verdict":"legit_promo","category":"legitimate","rationale":"Burger King advertises a dated app discount with a named order channel.","confidence":"high"}
+{"source_row_id":"india-001929","verdict":"legit_promo","category":"legitimate","rationale":"Fresh Signature advertises a named store’s grocery-shopping offers.","confidence":"medium"}
+{"source_row_id":"india-001932","verdict":"legit_promo","category":"legitimate","rationale":"JioCinema promotes free viewing of a named web series and cast.","confidence":"high"}
+{"source_row_id":"india-001934","verdict":"legit_promo","category":"legitimate","rationale":"Max Fashion identifies a storewide sale, extra discount, and promotional code.","confidence":"high"}
+{"source_row_id":"india-001937","verdict":"legit_promo","category":"legitimate","rationale":"Flipkart Pay Later advertises stated credit and discount benefits with activation link.","confidence":"high"}
+{"source_row_id":"india-001940","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises free data on selected prepaid recharges.","confidence":"high"}
+{"source_row_id":"india-001941","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Xstream promotes named OTT access and states it is included at no extra cost.","confidence":"high"}
+{"source_row_id":"india-001942","verdict":"legit_promo","category":"legitimate","rationale":"Smart Point identifies its store and lists named festival grocery promotions.","confidence":"high"}
+{"source_row_id":"india-001944","verdict":"legit_promo","category":"legitimate","rationale":"Airtel confirms recharge-linked access to named sports and movie content.","confidence":"high"}
+{"source_row_id":"india-001951","verdict":"legit_promo","category":"legitimate","rationale":"Shoppers Stop promotes watch shopping with stated reward-point benefits.","confidence":"high"}
+{"source_row_id":"india-001952","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises an IPL bundle with named streaming, data, and calling benefits.","confidence":"high"}
+{"source_row_id":"india-001953","verdict":"legit_promo","category":"legitimate","rationale":"Smart Point identifies its store and lists named grocery discounts and a buy-one-get-one offer.","confidence":"high"}
+{"source_row_id":"india-001955","verdict":"legit_promo","category":"legitimate","rationale":"Vi identifies WhatsApp functions for balance viewing, payments, and account service.","confidence":"high"}
+{"source_row_id":"india-001958","verdict":"legit_promo","category":"legitimate","rationale":"Vi sends a data-usage alert with pack-purchase options and a dial code.","confidence":"high"}
+{"source_row_id":"india-001967","verdict":"legit_promo","category":"legitimate","rationale":"Vishal lists named grocery prices, discounts, and a conditional free gift.","confidence":"high"}
+{"source_row_id":"india-001969","verdict":"legit_promo","category":"legitimate","rationale":"Vi promotes live election news through its named Movies and TV application.","confidence":"high"}
+{"source_row_id":"india-001970","verdict":"legit_promo","category":"legitimate","rationale":"Airtel promotes online prepaid-SIM ordering with free delivery and no paperwork.","confidence":"high"}
+{"source_row_id":"india-001971","verdict":"legit_promo","category":"legitimate","rationale":"Dunzo advertises grocery delivery discounts and identifies the delivery service.","confidence":"high"}
+{"source_row_id":"india-001972","verdict":"legit_promo","category":"legitimate","rationale":"Airtel sends a callback-availability notification and provides its callback link.","confidence":"high"}
+{"source_row_id":"india-001976","verdict":"legit_promo","category":"legitimate","rationale":"The message advertises a named Valentine’s delivery discount with code and deadline.","confidence":"medium"}
+{"source_row_id":"india-001979","verdict":"legit_promo","category":"legitimate","rationale":"Vi advertises a recharge with named ZEE5, data, calling, and validity benefits.","confidence":"high"}
+{"source_row_id":"india-001982","verdict":"legit_promo","category":"legitimate","rationale":"Shoppers Stop promotes named Father’s Day products and app shopping.","confidence":"high"}
+{"source_row_id":"india-001983","verdict":"legit_promo","category":"legitimate","rationale":"Vedix invites customers to reorder haircare through its named service.","confidence":"high"}
+{"source_row_id":"india-001988","verdict":"legit_promo","category":"legitimate","rationale":"Vi advertises recharge-linked cashback and lists the qualifying plans.","confidence":"high"}
+{"source_row_id":"india-001993","verdict":"legit_promo","category":"legitimate","rationale":"Pantaloons identifies a Greencard cashback offer with shopping threshold and expiry date.","confidence":"high"}
+{"source_row_id":"india-001996","verdict":"legit_promo","category":"legitimate","rationale":"Pantaloons promotes a holiday shopping contest and assured vouchers with purchase details.","confidence":"high"}
+{"source_row_id":"india-002002","verdict":"legit_promo","category":"legitimate","rationale":"The advisory identifies toll-free reporting numbers for suspicious international calls.","confidence":"high"}
+{"source_row_id":"india-002004","verdict":"legit_promo","category":"legitimate","rationale":"Airtel offers a device compatibility check for its 5G network.","confidence":"high"}
+{"source_row_id":"india-002007","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Black advertises a free trial with named OTT services.","confidence":"high"}
+{"source_row_id":"india-002011","verdict":"legit_promo","category":"legitimate","rationale":"Cloudnine sends a named administrator’s training-course assignment and completion deadline.","confidence":"high"}
+{"source_row_id":"india-002017","verdict":"legit_promo","category":"legitimate","rationale":"Airtel sends a pack reminder with price, data, calls, and Xstream benefit.","confidence":"high"}
+{"source_row_id":"india-002018","verdict":"legit_promo","category":"legitimate","rationale":"Shoppers Stop promotes Father’s Day products, shopping channels, and store offers.","confidence":"high"}
+{"source_row_id":"india-002022","verdict":"legit_promo","category":"legitimate","rationale":"Vi advertises a priced data recharge with stated validity for cricket viewing.","confidence":"high"}
+{"source_row_id":"india-002025","verdict":"legit_promo","category":"legitimate","rationale":"Airtel promotes Wi-Fi calling and provides smartphone-setting instructions.","confidence":"high"}
+{"source_row_id":"india-002029","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Xstream advertises a named trial with free entertainment access.","confidence":"high"}
+{"source_row_id":"india-002030","verdict":"legit_promo","category":"legitimate","rationale":"Shoppers Stop names its Raksha Bandhan sale, codes, discounts, and card offers.","confidence":"high"}
+{"source_row_id":"india-002032","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Xstream Fiber advertises a priced plan with free trial, channels, and OTTs.","confidence":"high"}
+{"source_row_id":"india-002035","verdict":"legit_promo","category":"legitimate","rationale":"Vishal lists a priced appliance, discount, gifts, and SBI cashback for Diwali.","confidence":"high"}
+{"source_row_id":"india-002036","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Black advertises a free trial with named OTT services.","confidence":"high"}
+{"source_row_id":"india-002042","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Black advertises a free trial with named channels and OTT subscriptions.","confidence":"high"}
+{"source_row_id":"india-002043","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Xstream TV advertises a priced set-top box with named OTT services.","confidence":"high"}
+{"source_row_id":"india-002044","verdict":"legit_promo","category":"legitimate","rationale":"Pantaloons advertises a seasonal sale with named apparel categories and discount scope.","confidence":"high"}
+{"source_row_id":"india-002047","verdict":"legit_promo","category":"legitimate","rationale":"BigBasket advertises named grocery products at a promotional rupee price.","confidence":"high"}
+{"source_row_id":"india-002049","verdict":"legit_promo","category":"legitimate","rationale":"Shoppers Stop advertises named apparel discounts, a code, and qualifying spend.","confidence":"high"}
+{"source_row_id":"india-002050","verdict":"legit_promo","category":"legitimate","rationale":"My11Circle advertises a named cricket contest with bonus, entry fee, and prize pool.","confidence":"medium"}
+{"source_row_id":"india-002051","verdict":"legit_promo","category":"legitimate","rationale":"Shoppers Stop sends a birthday discount with named app, code, and product conditions.","confidence":"high"}
+{"source_row_id":"india-002056","verdict":"legit_promo","category":"legitimate","rationale":"Dunzo advertises discounted grocery delivery with a named service and delivery time.","confidence":"high"}
+{"source_row_id":"india-002057","verdict":"legit_promo","category":"legitimate","rationale":"The message invites WhatsApp contact for telecom offers and account services.","confidence":"high"}
+{"source_row_id":"india-002060","verdict":"legit_promo","category":"legitimate","rationale":"Wynk advertises a priced annual premium subscription with listed music features.","confidence":"high"}
+{"source_row_id":"india-002061","verdict":"legit_promo","category":"legitimate","rationale":"Wynk advertises free premium access with music and caller-tune benefits.","confidence":"high"}
+{"source_row_id":"india-002067","verdict":"legit_promo","category":"legitimate","rationale":"Wynk promotes its premium music subscription and lists catalog and download features.","confidence":"high"}
+{"source_row_id":"india-002071","verdict":"legit_promo","category":"legitimate","rationale":"Vi and Paytm advertise recharge cashback with named plans and code.","confidence":"high"}
+{"source_row_id":"india-002074","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises current and extra data benefits tied to a recharge.","confidence":"high"}
+{"source_row_id":"india-002077","verdict":"legit_promo","category":"legitimate","rationale":"Lenskart advertises a membership buy-one-get-one offer with Valentine’s cashback.","confidence":"high"}
+{"source_row_id":"india-002078","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises a referral coupon tied to inviting a prepaid customer.","confidence":"high"}
+{"source_row_id":"india-002084","verdict":"legit_promo","category":"legitimate","rationale":"JioMart and Smart Point identify a dated Bangalore grocery promotion with prices.","confidence":"high"}
+{"source_row_id":"india-002085","verdict":"legit_promo","category":"legitimate","rationale":"The telecom notice explains a pending paid service and offers caller-tune and contest options.","confidence":"medium"}
+{"source_row_id":"india-002086","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Xstream promotes live sports viewing and identifies the streaming service.","confidence":"high"}
+{"source_row_id":"india-002092","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Xstream promotes free television, movies, and live channels through its app.","confidence":"high"}
+{"source_row_id":"india-002096","verdict":"legit_promo","category":"legitimate","rationale":"Airtel sends a Wynk subscription-expiry reminder with priced recharge benefits.","confidence":"high"}
+{"source_row_id":"india-002097","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises free data through its named Thanks app and states eligibility.","confidence":"high"}
+{"source_row_id":"india-002099","verdict":"legit_promo","category":"legitimate","rationale":"Federal Bank advertises a named health-insurance EMI payment feature.","confidence":"high"}
+{"source_row_id":"india-002102","verdict":"legit_promo","category":"legitimate","rationale":"Dunzo advertises grocery discounts, free delivery, and a named delivery time.","confidence":"high"}
+{"source_row_id":"india-002103","verdict":"legit_promo","category":"legitimate","rationale":"Unlimited Fashion Store advertises credited shopping points with a validity date.","confidence":"high"}
+{"source_row_id":"india-002105","verdict":"fraud","category":"fake_job","rationale":"Impersonates Amazon recruitment while promising daily part-time earnings through WhatsApp.","confidence":"high"}
+{"source_row_id":"india-002106","verdict":"legit_promo","category":"legitimate","rationale":"Airtel sends a callback-availability notification and provides its callback link.","confidence":"high"}
+{"source_row_id":"india-002107","verdict":"legit_promo","category":"legitimate","rationale":"Airtel sends a callback-availability notification and provides its callback link.","confidence":"high"}
+{"source_row_id":"india-002109","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Xstream promotes named OTT access and states it is included at no extra cost.","confidence":"high"}
+{"source_row_id":"india-002111","verdict":"legit_promo","category":"legitimate","rationale":"Cloudnine sends a named administrator’s training-course assignment and completion deadline.","confidence":"high"}
+{"source_row_id":"india-002125","verdict":"exclude","category":"corrupted","rationale":"The message is largely unreadable encoding and cannot be reliably interpreted.","confidence":"high"}
+{"source_row_id":"india-002133","verdict":"legit_promo","category":"legitimate","rationale":"Unlimited Fashion Store advertises credited shopping points with a time-limited redemption prompt.","confidence":"high"}
+{"source_row_id":"india-002136","verdict":"legit_promo","category":"legitimate","rationale":"Smart Point identifies its store and lists named grocery discounts and prices.","confidence":"high"}
+{"source_row_id":"india-002140","verdict":"legit_promo","category":"legitimate","rationale":"Vi advertises a cricket bundle with named Hotstar, data, calling, and validity benefits.","confidence":"high"}
+{"source_row_id":"india-002149","verdict":"legit_promo","category":"legitimate","rationale":"Shoppers Stop sends a birthday discount with code and minimum shopping amount.","confidence":"high"}
+{"source_row_id":"india-002151","verdict":"legit_promo","category":"legitimate","rationale":"Redcliffe Labs advertises a named health checkup with parameters and doctor consultation.","confidence":"high"}
+{"source_row_id":"india-002153","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Xsafe advertises home-security alerts and free installation for a named service.","confidence":"high"}
+{"source_row_id":"india-002159","verdict":"legit_promo","category":"legitimate","rationale":"Vi describes a named postpaid plan with data, calls, and Prime and Hotstar subscriptions.","confidence":"high"}
+{"source_row_id":"india-002160","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises fixed cashback for bill payments through its named wallet app.","confidence":"high"}
+{"source_row_id":"india-002161","verdict":"legit_promo","category":"legitimate","rationale":"Wynk advertises a priced premium subscription with music and caller-tune features.","confidence":"high"}
+{"source_row_id":"india-002166","verdict":"legit_promo","category":"legitimate","rationale":"Vi identifies WhatsApp support for immediate customer assistance.","confidence":"high"}
+{"source_row_id":"india-002171","verdict":"legit_promo","category":"legitimate","rationale":"Vishal lists a discounted appliance, gifts, and SBI cashback for Dhanteras.","confidence":"high"}
+{"source_row_id":"india-002176","verdict":"legit_promo","category":"legitimate","rationale":"Star Bazaar advertises a dated festival grocery sale with products and card offers.","confidence":"high"}
+{"source_row_id":"india-002178","verdict":"legit_promo","category":"legitimate","rationale":"Airtel advertises a named Prime Video trial and identifies its entertainment offer.","confidence":"high"}
+{"source_row_id":"india-002179","verdict":"legit_promo","category":"legitimate","rationale":"Samsung advertises named Galaxy foldables with cashback, upgrade, and care benefits.","confidence":"high"}
+{"source_row_id":"india-002186","verdict":"legit_promo","category":"legitimate","rationale":"Wynk promotes free caller tunes and music access through its named app.","confidence":"high"}
+{"source_row_id":"india-002188","verdict":"legit_promo","category":"legitimate","rationale":"Shoppers Stop names its sale, discount codes, categories, and bank-card offers.","confidence":"high"}
+{"source_row_id":"india-002195","verdict":"legit_promo","category":"legitimate","rationale":"Shoppers Stop identifies its dated homeware sale, brands, and extra discount.","confidence":"high"}
+{"source_row_id":"india-002197","verdict":"legit_promo","category":"legitimate","rationale":"Shoppers Stop advertises bonus points tied to a stated shopping bill and store.","confidence":"high"}
+{"source_row_id":"india-002207","verdict":"legit_promo","category":"legitimate","rationale":"Style Union sends a purchase e-receipt notification and identifies the customer context.","confidence":"high"}
+{"source_row_id":"india-002208","verdict":"legit_promo","category":"legitimate","rationale":"Shoppers Stop promotes a named styling festival and social-media participation.","confidence":"high"}
+{"source_row_id":"india-002212","verdict":"legit_promo","category":"legitimate","rationale":"Wynk advertises a named contest with vouchers and a caller-tune participation condition.","confidence":"medium"}
+{"source_row_id":"india-002216","verdict":"legit_promo","category":"legitimate","rationale":"JioMart and Smart Point identify a dated Bangalore grocery promotion with prices.","confidence":"high"}
+{"source_row_id":"india-002217","verdict":"legit_promo","category":"legitimate","rationale":"mPokket sends an identified overdue-loan reminder with repayment support contact.","confidence":"medium"}
+{"source_row_id":"india-002221","verdict":"legit_promo","category":"legitimate","rationale":"Shoppers Stop sends a personalized sale reminder with discount code and minimum bill.","confidence":"high"}
+{"source_row_id":"india-002225","verdict":"legit_promo","category":"legitimate","rationale":"Airtel describes a pack’s calls, data, SMS, and unlimited-5G benefit.","confidence":"high"}
+{"source_row_id":"india-002227","verdict":"legit_promo","category":"legitimate","rationale":"Airtel Black advertises a free trial with named channels and OTT subscriptions.","confidence":"high"}
+{"source_row_id":"india-002228","verdict":"legit_promo","category":"legitimate","rationale":"Xpressbees sends a pickup-status notification with phone and feedback contacts.","confidence":"high"}
+{"source_row_id":"india-002229","verdict":"fraud","category":"payment_fraud","rationale":"Claims an unexpected Rs.38,000 wallet credit and urges withdrawal through an obfuscated link.","confidence":"high"}
+{"source_row_id":"india-002230","verdict":"fraud","category":"payment_fraud","rationale":"Claims an unexpected Rs.38,000 wallet credit and urges withdrawal through an obfuscated link.","confidence":"high"}
+{"source_row_id":"india-002231","verdict":"legit_promo","category":"legitimate","rationale":"Olyv is identified and advertises a loan with a stated processing-fee discount.","confidence":"medium"}
+{"source_row_id":"india-002232","verdict":"legit_promo","category":"legitimate","rationale":"KreditBee confirms registration and identifies its loan-application service.","confidence":"medium"}
+{"source_row_id":"india-002233","verdict":"legit_promo","category":"legitimate","rationale":"Google Pay and Jio advertise a named recharge reward with plan details.","confidence":"high"}
+{"source_row_id":"india-002234","verdict":"legit_promo","category":"legitimate","rationale":"Tipplr sends an OTP for access to its named service.","confidence":"high"}
+{"source_row_id":"india-002235","verdict":"legit_promo","category":"legitimate","rationale":"Tipplr sends an OTP for access to its named service.","confidence":"high"}
+{"source_row_id":"india-002236","verdict":"fraud","category":"payment_fraud","rationale":"Claims an unexpected Rs.56,600 wallet bonus and urges bank withdrawal through an obfuscated link.","confidence":"high"}
+{"source_row_id":"india-002237","verdict":"legit_promo","category":"legitimate","rationale":"Jio sends a named plan-expiry reminder with recharge and customer-service details.","confidence":"high"}
+{"source_row_id":"india-002238","verdict":"fraud","category":"prize_lottery_scam","rationale":"Claims a winning Apple parcel is arriving without identifying any legitimate purchase or contest.","confidence":"high"}
+{"source_row_id":"india-002239","verdict":"fraud","category":"prize_lottery_scam","rationale":"Claims a one-crore winning fund and iPhone delivery without any legitimate contest context.","confidence":"high"}
+{"source_row_id":"india-002240","verdict":"legit_promo","category":"legitimate","rationale":"Jio sends a data-usage alert with named app and customer-service details.","confidence":"high"}
+{"source_row_id":"india-002241","verdict":"legit_promo","category":"legitimate","rationale":"Jio sends a data-usage alert with named app and customer-service details.","confidence":"high"}
+{"source_row_id":"india-002242","verdict":"legit_promo","category":"legitimate","rationale":"Jio and PhonePe advertise a recharge plan and new-user cashback.","confidence":"high"}
+{"source_row_id":"india-002243","verdict":"fraud","category":"payment_fraud","rationale":"Claims an unexpected Rs.44,000 wallet credit and urges instant withdrawal through an obfuscated link.","confidence":"high"}
+{"source_row_id":"india-002244","verdict":"legit_promo","category":"legitimate","rationale":"Jio sends a named plan-expiry reminder with recharge and customer-service details.","confidence":"high"}
+{"source_row_id":"india-002245","verdict":"fraud","category":"payment_fraud","rationale":"Claims an unexpected Rs.51,000 wallet bonus and urges bank transfer through an obfuscated link.","confidence":"high"}
+{"source_row_id":"india-002246","verdict":"fraud","category":"phishing","rationale":"Impersonates Apple and requests a re-verification form to release an unspecified payment.","confidence":"high"}
+{"source_row_id":"india-002247","verdict":"legit_promo","category":"legitimate","rationale":"Jio sends a missed-call notification with timestamp and identifies its telecom service.","confidence":"high"}
+{"source_row_id":"india-002248","verdict":"legit_promo","category":"legitimate","rationale":"Sports League advertises a named rummy-wallet bonus tied to continued play.","confidence":"medium"}
+{"source_row_id":"india-002249","verdict":"fraud","category":"payment_fraud","rationale":"Claims an unexpected Rs.15,000 wallet credit and urges withdrawal through an obfuscated link.","confidence":"high"}
+{"source_row_id":"india-002250","verdict":"legit_promo","category":"legitimate","rationale":"Jio sends a missed-call notification with timestamp and identifies its telecom service.","confidence":"high"}
+{"source_row_id":"india-002251","verdict":"legit_promo","category":"legitimate","rationale":"Jio and Paytm advertise a named recharge plan with data and rewards.","confidence":"high"}
+{"source_row_id":"india-002252","verdict":"legit_promo","category":"legitimate","rationale":"Junglee Rummy advertises a named welcome bonus tied to first deposit.","confidence":"medium"}
+{"source_row_id":"india-002253","verdict":"legit_promo","category":"legitimate","rationale":"SBI and Smart Cardon advertise a credit card with stated limit and delivery.","confidence":"medium"}
+{"source_row_id":"india-002254","verdict":"legit_promo","category":"legitimate","rationale":"Jio and Google Pay advertise a named recharge plan with stated data and validity.","confidence":"high"}
+{"source_row_id":"india-002255","verdict":"legit_promo","category":"legitimate","rationale":"Jio promotes a caller-tune feature through its named MyJio application.","confidence":"high"}
+{"source_row_id":"india-002256","verdict":"legit_promo","category":"legitimate","rationale":"Jio sends a missed-call notification with timestamp and identifies its telecom service.","confidence":"high"}
+{"source_row_id":"india-002257","verdict":"legit_promo","category":"legitimate","rationale":"Jio sends a missed-call notification with timestamp and identifies its telecom service.","confidence":"high"}
+{"source_row_id":"india-002258","verdict":"fraud","category":"payment_fraud","rationale":"Claims an unexpected Rs.55,900 wallet bonus and urges bank transfer through an obfuscated link.","confidence":"high"}
+{"source_row_id":"india-002259","verdict":"legit_promo","category":"legitimate","rationale":"Jio and Amazon Pay advertise a named recharge plan with rewards and cashback.","confidence":"high"}
+{"source_row_id":"india-002260","verdict":"fraud","category":"payment_fraud","rationale":"Promises an unexplained Rs.10,000 wallet transfer through a generic Finance Guru link.","confidence":"high"}
+{"source_row_id":"india-002261","verdict":"legit_promo","category":"legitimate","rationale":"Olyv is identified and advertises a loan with a stated processing-fee discount.","confidence":"medium"}
+{"source_row_id":"india-002262","verdict":"fraud","category":"payment_fraud","rationale":"Claims an unexpected Rs.15,000 wallet credit and urges withdrawal through an obfuscated link.","confidence":"high"}
+{"source_row_id":"india-002263","verdict":"legit_promo","category":"legitimate","rationale":"Olyv is identified and advertises a loan with a stated processing-fee discount.","confidence":"medium"}
+{"source_row_id":"india-002264","verdict":"legit_promo","category":"legitimate","rationale":"Jio sends a missed-call notification with timestamp and identifies its telecom service.","confidence":"high"}
+{"source_row_id":"india-002265","verdict":"fraud","category":"other_fraud","rationale":"Promises a ready Rs.2,50,000 loan transfer through a generic Fast Loans link.","confidence":"high"}
+{"source_row_id":"india-002266","verdict":"fraud","category":"other_fraud","rationale":"Claims a Rs.592,000 zero-documentation loan approval and urges bank withdrawal through a short link.","confidence":"high"}
+{"source_row_id":"india-002267","verdict":"legit_promo","category":"legitimate","rationale":"Olyv is identified and advertises a time-limited loan processing-fee discount.","confidence":"medium"}
+{"source_row_id":"india-002268","verdict":"fraud","category":"payment_fraud","rationale":"Claims an unexpected Rs.15,000 wallet bonus and urges bank transfer through an obfuscated link.","confidence":"high"}
