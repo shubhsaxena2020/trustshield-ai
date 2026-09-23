@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+pydantic
+pydantic-settings
+python-multipart
+tldextract
+opencv-python-headless
+pillow
+numpy
+pandas
+scikit-learn
+joblib
+pytest
+httpx
