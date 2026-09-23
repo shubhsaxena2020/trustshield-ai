@@ -1,13 +1,34 @@
-# Threat model (initial)
+# Threat model
+
+TrustShield accepts attacker-controlled text, URLs, QR payloads, and image bytes. The current design favors local static analysis and explicit uncertainty. It does not claim to prove that content is safe.
+
+## IMPLEMENTED controls
+
 | Threat | Mitigation | Status |
 |---|---|---|
-| SSRF / internal network via URL fetch | `validate_public_url`: http/https only, blocks localhost, private/link-local/metadata, numeric-IP tricks, credentials in URL, DNS-resolved private IPs | Implemented + tested (`tests/security`) |
-| Redirect to private IP | Re-validate every hop | Planned with sandbox |
-| Oversized / malformed input | 20k char text limit, 2048 char URL limit, Pydantic validation | Implemented |
-| Prompt injection from webpage text | LLM receives structured evidence only; raw page text marked untrusted | Planned |
-| Malicious downloads | Hash + static analysis only; no execution on host | Planned |
-| Malware detonation | Only in a dedicated disposable VM; Docker alone is not isolation | Out of scope for MVP |
-| Secret leakage | `.env` ignored, `.env.example` only; no raw content persisted | Implemented |
-| Wrong verdict | Confidence separate from score; Unable to Verify state; measured FN/FP rates | Partial (metrics pending) |
+| Image decompression bomb | Pillow bomb warnings/errors are converted into a structured rejection; decoded dimensions and pixel count are checked before extraction. | Implemented and covered by tests |
+| Polyglot image or wrong declared MIME | The filename is not used to select a decoder. The server decodes the bytes, checks the actual format, and rejects a declared MIME mismatch. | Implemented and covered by tests |
+| Oversized upload | The API reads only up to the configured upload limit plus a detection byte; the validator also checks decoded dimensions. | Implemented and covered by tests |
+| Corrupt or undecodable image | Pillow decoding errors become HTTP 422 with an explicit error code; OCR/QR extraction is not reached. | Implemented and covered by tests |
+| Malicious URL in a QR code | OpenCV decodes locally. URL payloads go to string-only static URL analysis; destinations are never fetched. | Implemented and covered by tests |
+| `javascript:` or `data:` QR payload | The payload is classified as a URL-like payload and routed to the static analyzer as an unsupported scheme. It is never launched. | Implemented and covered by tests |
+| UPI QR as a payment attack vector | UPI values are parsed structurally and surfaced as evidence and fields. No payment app, payment intent, or payment action is launched. | Implemented and covered by tests |
+| OCR text containing instructions or prompt injection | OCR output is treated as untrusted data. It is normalized and passed to deterministic rules/static URL analysis; it is not executed as instructions. | Implemented |
+| Mock-provider misuse | The provider name is exposed, the UI displays the demo warning, and the provider reads only the explicit demo metadata field. It is documented as test/demo-only. | Implemented; operational discipline still required |
+| URL SSRF if a future fetch is added | `validate_public_url` blocks disallowed schemes, internal names, private/link-local/metadata destinations, numeric-IP tricks, credentials, and private DNS results. | Guard implemented and tested; no current fetch path |
+| Raw content leakage through result storage | The API stores structured results in a bounded in-memory store; raw upload bytes are not persisted. | Implemented |
 
-Known gaps: CORS limited to http://localhost:3000; no rate limiting yet.
+## PLANNED or not enabled
+
+- A web sandbox for inspecting page content is not enabled. The current application does not fetch QR or user-supplied URLs.
+- External reputation providers are not configured.
+- ML classification is not trained or loaded.
+- Ollama explanations, SQLite persistence, PaddleOCR, and Hindi OCR are not implemented.
+
+## Residual gaps
+
+- There is no rate limiting. An exposed deployment needs an edge/API rate limiter and request-level abuse controls.
+- Analysis results are held in memory only. A process restart loses them, and the store is not a multi-instance persistence layer.
+- Tesseract parses untrusted image data in the API process. The current validation limits exposure, but production hardening should isolate OCR work and enforce process/resource limits.
+- OCR can misread text, and QR decoding can fail or select the first payload when multiple codes are present. The result therefore keeps provider/decoder warnings and separate confidence rather than claiming certainty.
+- The mock provider can make a fixture look successfully extracted without recognising its pixels. It must never be used to assess real-world OCR quality.

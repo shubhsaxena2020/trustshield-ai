@@ -65,20 +65,29 @@ def classify(evidence: list[Evidence]) -> tuple[str, list[str]]:
     return (matched[0], matched[1:]) if matched else ("none_detected", [])
 
 
-def assess_confidence(module_status: dict[str, str], input_ok: bool = True) -> str:
-    """High/medium/low from module coverage. 'unavailable'/'not_run' modules reduce coverage; failures reduce it more."""
+def assess_confidence(module_status: dict[str, str], input_ok: bool = True,
+                      module_quality: dict[str, float] | None = None) -> str:
+    """High/medium/low from module coverage, optionally discounted by modality quality."""
     if not input_ok:
         return "low"
     if not module_status:
         return "low"
     weights = {"completed": 1.0, "not_run": 0.5, "unavailable": 0.4, "failed": 0.0, "timeout": 0.0}
-    cov = sum(weights.get(s, 0.0) for s in module_status.values()) / len(module_status)
+    quality = module_quality or {}
+    cov = sum(weights.get(s, 0.0) * max(0.0, min(1.0, quality.get(name, 1.0)))
+               for name, s in module_status.items()) / len(module_status)
+    if quality:
+        # A modality that reports poor recognition quality must lower the aggregate
+        # confidence even when the downstream deterministic rules completed.
+        quality_avg = sum(max(0.0, min(1.0, value)) for value in quality.values()) / len(quality)
+        cov *= 0.5 + 0.5 * quality_avg
     return "high" if cov >= 0.85 else "medium" if cov >= 0.55 else "low"
 
 
-def fuse(evidence: list[Evidence], module_status: dict[str, str], input_ok: bool = True) -> Fusion:
+def fuse(evidence: list[Evidence], module_status: dict[str, str], input_ok: bool = True,
+         module_quality: dict[str, float] | None = None) -> Fusion:
     score = risk_score(evidence)
-    confidence = assess_confidence(module_status, input_ok)
+    confidence = assess_confidence(module_status, input_ok, module_quality)
     label = label_for(score)
     completed = any(s == "completed" for s in module_status.values())
     if not input_ok or not completed or (confidence == "low" and score < 50):

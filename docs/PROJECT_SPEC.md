@@ -1,29 +1,45 @@
-# TrustShield AI — Project Spec (canonical scope)
+# TrustShield AI — Project Spec
 
-**Team:** Scam Scan · **Event:** PSIT Tech Expo 2026 (Software / Cybersecurity Innovations) · **Tagline:** Think Before You Trust.
-**Official title:** TrustShield AI — Privacy-First Multimodal Cyber-Fraud & Phishing Risk Analyzer.
-Screening ≈ 9–10 Oct 2026; finale ≈ 23–24 Oct 2026.
+**Team:** Scam Scan · **Event:** PSIT Tech Expo 2026 · **Tagline:** Think Before You Trust.
 
 ## Product definition
-Analyzes suspicious **text, screenshots, URLs and QR codes** *before* the user interacts. Independent detectors emit structured **evidence**; fusion turns evidence into a **risk score** and a separate **confidence**; an explanation layer restates that evidence in plain language.
+
+TrustShield analyzes suspicious text, screenshots, URLs, and QR codes before the user interacts. Independent detectors emit structured evidence; fusion produces a risk score and separate confidence; the explanation layer restates evidence in plain language.
 
 ## Non-negotiables
-- Detection = rules + ML + URL analysis (+ reputation, isolated web inspection). The LLM never decides; it only explains supplied evidence.
-- Risk score and confidence are separate. "Unable to Verify" is a valid outcome.
-- Mocked/unavailable modules are labelled as such. No fabricated accuracy numbers — only held-out-test results.
-- Unknown URLs are never opened in the user's normal browser; malware is never executed on the dev machine.
 
-## Status (update as work lands)
+- Detection is deterministic rules plus static URL analysis in the current implementation. The LLM never decides a verdict.
+- Risk score and confidence are separate. `unable_to_verify` is a valid outcome.
+- Mocked or unavailable modules are labelled as such.
+- No accuracy or performance numbers are claimed in project documentation.
+- Unknown URLs are never opened in the user's normal browser; QR payloads are not launched; malware is never executed on the development machine.
+
+## Status — IMPLEMENTED
+
 | Capability | Status |
 |---|---|
-| Text rules, normalization | Done (Phase 1) |
-| URL static analysis, brand/domain logic | Done (Phase 1) |
-| SSRF guard (for future sandbox) | Done, tested |
-| Evidence schema, fusion, confidence, template explanation | Done (provisional weights) |
-| FastAPI: health, text, url, analysis/{id} | Done |
-| Frontend shell (Text + URL) | Done |
-| OCR / screenshot, QR | Phase 2 — not started |
-| ML classifier + evaluation | Phase 3 — not started |
-| Web sandbox (Playwright) | Phase 5 — not started |
-| Reputation providers, Ollama | Not started |
-| SQLite persistence | Not started (in-memory store only) |
+| Text normalization and scam rules | Implemented (Phase 1) |
+| URL static analysis and brand/domain logic | Implemented (Phase 1) |
+| SSRF guard for a future fetch path | Implemented and tested; no current URL fetch |
+| Evidence schema, fusion, confidence, and template explanation | Implemented |
+| FastAPI health, text, URL, image, QR, and analysis retrieval | Implemented |
+| Image validation and safety checks | Implemented (Phase 2) |
+| OCRProvider, TesseractProvider, and demo-only MockOCRProvider | Implemented (Phase 2) |
+| OpenCV QR decoding and payload classification | Implemented (Phase 2) |
+| UPI structural parsing without payment execution | Implemented (Phase 2) |
+| OCR-quality-aware confidence | Implemented (Phase 2) |
+| Frontend Text, URL, Screenshot, and QR Code tabs | Implemented (Phase 2) |
+| OCR/QR result panels and technical JSON | Implemented (Phase 2) |
+| Synthetic local demo fixtures and generator | Implemented (Phase 2) |
+
+## Status — PLANNED
+
+| Capability | Status |
+|---|---|
+| PaddleOCR provider | Planned |
+| Hindi OCR | Planned |
+| ML classifier and evaluation | Planned |
+| Isolated web sandbox | Planned |
+| External reputation providers | Planned |
+| Ollama-backed explanation support | Planned |
+| SQLite persistence | Planned; current store is bounded in-memory |

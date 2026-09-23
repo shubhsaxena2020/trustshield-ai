@@ -6,6 +6,7 @@ python-multipart
 tldextract
 opencv-python-headless
 pillow
+pytesseract
 numpy
 pandas
 scikit-learn
