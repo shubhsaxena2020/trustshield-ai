@@ -1,0 +1,232 @@
+{
+  "version": 1,
+  "synthetic": true,
+  "font_files_used": [
+    "C:\\Windows\\Fonts\\arial.ttf"
+  ],
+  "fixtures": [
+    {
+      "id": "benign_control",
+      "file": "benign_control.png",
+      "description": "Benign bank debit alert control",
+      "degradation": "none",
+      "critical_tokens": [
+        {
+          "category": "org",
+          "value": "DEMO BANK"
+        },
+        {
+          "category": "amount",
+          "value": "Rs 500.00"
+        },
+        {
+          "category": "otp",
+          "value": "OTP"
+        },
+        {
+          "category": "pin",
+          "value": "PIN"
+        }
+      ],
+      "font_file": "C:\\Windows\\Fonts\\arial.ttf"
+    },
+    {
+      "id": "clean_screenshot",
+      "file": "clean_screenshot.png",
+      "description": "Clean screenshot with large chat text",
+      "degradation": "none",
+      "critical_tokens": [
+        {
+          "category": "org",
+          "value": "DEMO BANK"
+        },
+        {
+          "category": "url",
+          "value": "https://notice.example/review"
+        }
+      ],
+      "font_file": "C:\\Windows\\Fonts\\arial.ttf"
+    },
+    {
+      "id": "demo_job",
+      "file": "demo_job.png",
+      "description": "Fresh corpus rendering of the existing job demo screen",
+      "degradation": "none",
+      "critical_tokens": [
+        {
+          "category": "amount",
+          "value": "Rs 5000"
+        }
+      ],
+      "font_file": "C:\\Windows\\Fonts\\arial.ttf"
+    },
+    {
+      "id": "demo_kyc",
+      "file": "demo_kyc.png",
+      "description": "Fresh corpus rendering of the existing KYC demo screen",
+      "degradation": "none",
+      "critical_tokens": [
+        {
+          "category": "org",
+          "value": "SBI"
+        },
+        {
+          "category": "url",
+          "value": "http://sbi-kyc-update.xyz/login"
+        }
+      ],
+      "font_file": "C:\\Windows\\Fonts\\arial.ttf"
+    },
+    {
+      "id": "demo_legit",
+      "file": "demo_legit.png",
+      "description": "Fresh corpus rendering of the existing legitimate control screen",
+      "degradation": "none",
+      "critical_tokens": [
+        {
+          "category": "amount",
+          "value": "Rs 500.00"
+        },
+        {
+          "category": "otp",
+          "value": "OTP"
+        },
+        {
+          "category": "pin",
+          "value": "PIN"
+        }
+      ],
+      "font_file": "C:\\Windows\\Fonts\\arial.ttf"
+    },
+    {
+      "id": "hard_small_compressed_lowres",
+      "file": "hard_small_compressed_lowres.jpg",
+      "description": "Combined small-text, low-resolution, and JPEG-compressed case",
+      "degradation": "11px + 0.5x + JPEG quality 25",
+      "critical_tokens": [
+        {
+          "category": "org",
+          "value": "DEMOPAY"
+        },
+        {
+          "category": "otp",
+          "value": "481926"
+        },
+        {
+          "category": "pin",
+          "value": "7391"
+        },
+        {
+          "category": "amount",
+          "value": "Rs 1250.50"
+        },
+        {
+          "category": "url",
+          "value": "https://pay.invalid/go"
+        }
+      ],
+      "font_file": "C:\\Windows\\Fonts\\arial.ttf"
+    },
+    {
+      "id": "jpeg_compressed",
+      "file": "jpeg_compressed.jpg",
+      "description": "JPEG-compressed screenshot",
+      "degradation": "JPEG quality 25",
+      "critical_tokens": [
+        {
+          "category": "org",
+          "value": "Demo Bank"
+        },
+        {
+          "category": "amount",
+          "value": "Rs 1250.50"
+        }
+      ],
+      "font_file": "C:\\Windows\\Fonts\\arial.ttf"
+    },
+    {
+      "id": "low_contrast",
+      "file": "low_contrast.png",
+      "description": "Low-contrast chat screenshot",
+      "degradation": "light gray text and background",
+      "critical_tokens": [
+        {
+          "category": "url",
+          "value": "https://status.example/check"
+        }
+      ],
+      "font_file": "C:\\Windows\\Fonts\\arial.ttf"
+    },
+    {
+      "id": "lower_resolution",
+      "file": "lower_resolution.png",
+      "description": "Screenshot downscaled to approximately half width and height",
+      "degradation": "0.5x downscale",
+      "critical_tokens": [],
+      "font_file": "C:\\Windows\\Fonts\\arial.ttf"
+    },
+    {
+      "id": "phishing_url",
+      "file": "phishing_url.png",
+      "description": "Phishing-style message with a synthetic invalid URL",
+      "degradation": "none",
+      "critical_tokens": [
+        {
+          "category": "org",
+          "value": "DEMO BANK"
+        },
+        {
+          "category": "url",
+          "value": "https://demobank-login.invalid/secure"
+        }
+      ],
+      "font_file": "C:\\Windows\\Fonts\\arial.ttf"
+    },
+    {
+      "id": "small_text",
+      "file": "small_text.png",
+      "description": "Chat screenshot rendered with approximately 11px text",
+      "degradation": "small text",
+      "critical_tokens": [
+        {
+          "category": "url",
+          "value": "https://small.example/id"
+        }
+      ],
+      "font_file": "C:\\Windows\\Fonts\\arial.ttf"
+    },
+    {
+      "id": "token_bundle",
+      "file": "token_bundle.png",
+      "description": "Synthetic message containing OTP, PIN, CVV, amount, and phone",
+      "degradation": "none",
+      "critical_tokens": [
+        {
+          "category": "org",
+          "value": "DEMOPAY"
+        },
+        {
+          "category": "otp",
+          "value": "481926"
+        },
+        {
+          "category": "pin",
+          "value": "7391"
+        },
+        {
+          "category": "cvv",
+          "value": "284"
+        },
+        {
+          "category": "amount",
+          "value": "Rs 1250.50"
+        },
+        {
+          "category": "phone",
+          "value": "9876500000"
+        }
+      ],
+      "font_file": "C:\\Windows\\Fonts\\arial.ttf"
+    }
+  ]
+}

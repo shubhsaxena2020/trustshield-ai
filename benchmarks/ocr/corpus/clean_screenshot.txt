@@ -1,0 +1,4 @@
+Synthetic TrustShield chat
+DEMO BANK ALERT
+Your account needs a security review.
+Open https://notice.example/review

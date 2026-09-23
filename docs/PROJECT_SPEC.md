@@ -11,7 +11,7 @@ TrustShield analyzes suspicious text, screenshots, URLs, and QR codes before the
 - Detection is deterministic rules plus static URL analysis in the current implementation. The LLM never decides a verdict.
 - Risk score and confidence are separate. `unable_to_verify` is a valid outcome.
 - Mocked or unavailable modules are labelled as such.
-- No accuracy or performance numbers are claimed in project documentation.
+- No fraud-detection accuracy or performance claims are made; OCR measurements are confined to the recorded validation benchmark.
 - Unknown URLs are never opened in the user's normal browser; QR payloads are not launched; malware is never executed on the development machine.
 
 ## Status — IMPLEMENTED
@@ -24,10 +24,11 @@ TrustShield analyzes suspicious text, screenshots, URLs, and QR codes before the
 | Evidence schema, fusion, confidence, and template explanation | Implemented |
 | FastAPI health, text, URL, image, QR, and analysis retrieval | Implemented |
 | Image validation and safety checks | Implemented (Phase 2) |
-| OCRProvider, TesseractProvider, and demo-only MockOCRProvider | Implemented (Phase 2) |
+| OCRProvider, real TesseractProvider, and strictly demo/test-only MockOCRProvider | Implemented (Phase 2.1) |
 | OpenCV QR decoding and payload classification | Implemented (Phase 2) |
 | UPI structural parsing without payment execution | Implemented (Phase 2) |
-| OCR-quality-aware confidence | Implemented (Phase 2) |
+| OCR-quality-aware confidence and OCR provenance | Implemented (Phase 2.1) |
+| Synthetic OCR corpus, WER/CER/token metrics, and real-Tesseract benchmark | Implemented (Phase 2.1) |
 | Frontend Text, URL, Screenshot, and QR Code tabs | Implemented (Phase 2) |
 | OCR/QR result panels and technical JSON | Implemented (Phase 2) |
 | Synthetic local demo fixtures and generator | Implemented (Phase 2) |

@@ -2,7 +2,7 @@
 
 Base URL for local development: `http://localhost:8000`.
 
-Every successful analysis endpoint returns the versioned `AnalysisResult` shape. The server keeps the result in a bounded in-memory store and does not persist raw input content.
+Every successful analysis endpoint returns the versioned `AnalysisResult` shape. Raw image bytes are never stored. The server retains each structured result, including OCR `raw_text` and `normalized_text` when present, in a bounded in-memory store of 200 results; entries are lost on restart.
 
 ## IMPLEMENTED endpoints
 
@@ -56,6 +56,7 @@ file=<PNG, JPEG, or WebP image>
 ```
 
 The server validates the decoded image, then runs the selected OCR provider and sends extracted text through the shared text/static URL pipeline. If Tesseract is unavailable, the HTTP request can still succeed with a structured `unable_to_verify` result and `modules.ocr.status: "unavailable"`.
+OCR text shorter than the shared 15-character minimum follows the same rule as pasted text: text rules fail and the image can resolve to `unable_to_verify`.
 
 ### `POST /api/v1/analyze/qr`
 
@@ -106,14 +107,18 @@ For an image analysis, `modules.ocr` has this data shape:
     "provider": "tesseract|mock",
     "provider_version": "...",
     "confidence": 87.5,
-    "text": "extracted text",
+    "raw_text": "engine output",
+    "normalized_text": "text passed to text rules",
+    "text": "engine output",
     "warnings": [],
+    "preprocessing": "current",
+    "tesseract_cmd_source": "env:TESSERACT_CMD|path|default-location",
     "image": {"width": 1500, "height": 900, "format": "PNG"}
   }
 }
 ```
 
-`provider_version` and `confidence` can be `null`. The mock provider reports a demo warning and does not produce a pixel-recognition confidence. Extracted text is bounded in the response. A failed/unavailable OCR module has the same fields where available and an explanatory `detail`.
+`provider_version` and `confidence` can be `null`; confidence is the mean of usable word-level engine confidences on a 0–100 scale. The real Tesseract provider invokes the text and confidence paths separately, so one request can launch two engine processes; if the confidence path fails, extracted text is retained with `confidence: null` and a warning. `raw_text` is the bounded engine output (up to 20,000 characters), and `text` is its backwards-compatible alias. `normalized_text` is the exact normalized string sent to the text rules, also bounded. `preprocessing` records the selected mode: `none`, `current`, `gray`, `gray_autocontrast`, or `gray_resize2x`. `tesseract_cmd_source` is only a source label and never exposes a filesystem path: `env:TESSERACT_CMD`, `path`, or `default-location`. The mock provider reports a demo warning and does not produce a pixel-recognition confidence. A failed/unavailable OCR module has the same fields where available and an explanatory `detail`.
 
 ### `modules.qr`
 

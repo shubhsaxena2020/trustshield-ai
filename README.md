@@ -8,10 +8,10 @@ Phase 2 is implemented for screenshot OCR and QR decoding. The system reports st
 
 - Text normalization, deterministic scam rules, static URL analysis, evidence, fusion, explanations, and recommended actions.
 - Image validation before extraction. PNG, JPEG, and WebP are decoded and checked against the declared MIME type, upload-size limit, dimensions, and Pillow decoding safeguards.
-- `OCRProvider`, `TesseractProvider`, and `MockOCRProvider`. Tesseract is the default provider. The mock provider is for tests and deterministic demos only; it reads the `trustshield_demo_text` PNG metadata field and does not recognise text from pixels.
+- `OCRProvider`, real `TesseractProvider`, and strictly test/demo-only `MockOCRProvider`. Tesseract is the default provider. The mock reads the `trustshield_demo_text` PNG metadata field and does not recognise text from pixels; unset, unknown, and `tesseract` provider settings never select it.
 - `QRDecoder` and `OpenCVQRDecoder`, payload classification, static URL analysis, `javascript:`/`data:` routing to the static analyzer, and structural UPI parsing.
 - OCR-quality-aware confidence: reported OCR confidence affects fusion confidence; providers without a confidence value use a conservative quality factor.
-- FastAPI endpoints for text, URL, screenshot, QR, health, and retrieving a bounded in-memory analysis result.
+- FastAPI endpoints for text, URL, screenshot, QR, health, and retrieving a bounded in-memory analysis result, including extracted OCR text when present; results are lost on restart.
 - Next.js UI tabs for Text, URL, Screenshot, and QR Code, plus OCR/QR result panels and technical JSON.
 - Synthetic, local-only demo fixtures under `demo/fixtures`.
 
@@ -35,15 +35,27 @@ python -m venv .venv
 .venv\Scripts\pip install -r requirements.txt
 ```
 
-### Optional Tesseract OCR on Windows
+### Real Tesseract OCR on Windows
 
-Tesseract is not installed automatically by this project. For real screenshot OCR, manually install a Windows Tesseract build from UB Mannheim. Add the Tesseract installation directory to `PATH`, or point TrustShield at the executable:
+Tesseract is not installed automatically by this project. For real screenshot OCR, manually install a Windows Tesseract build from UB Mannheim. The recommended explicit configuration is `TESSERACT_CMD`; this avoids accidentally benchmarking another installation:
 
 ```powershell
-$env:TESSERACT_CMD = 'C:\Program Files\Tesseract-OCR\tesseract.exe'
+$env:TESSERACT_CMD = 'C:\Path\To\Tesseract-OCR\tesseract.exe'
 ```
 
-The provider also checks `C:\Program Files\Tesseract-OCR\tesseract.exe` by default. If Tesseract is unavailable, `/api/v1/analyze/image` returns an explicit structured result with `risk.label` set to `unable_to_verify` and `modules.ocr.status` set to `unavailable`. No OCR recognition is performed in that case.
+Resolution order is `TESSERACT_CMD`, then `PATH`, then the default Windows installation location. If Tesseract is unavailable, `/api/v1/analyze/image` returns an explicit structured result with `risk.label` set to `unable_to_verify` and `modules.ocr.status` set to `unavailable`. No OCR recognition is performed in that case. OCR calls use `TRUSTSHIELD_OCR_TIMEOUT` when set, and preprocessing can be selected with `TRUSTSHIELD_OCR_PREPROCESS` (`none`, `current`, `gray`, `gray_autocontrast`, or `gray_resize2x`); the default remains `current`.
+
+### OCR validation benchmark
+
+The corpus is synthetic and committed under `benchmarks/ocr/corpus`; real-world screenshots will differ. Generate it and run the real binary explicitly:
+
+```powershell
+.venv\Scripts\python scripts\make_ocr_corpus.py
+$env:TESSERACT_CMD = 'C:\Path\To\Tesseract-OCR\tesseract.exe'
+.venv\Scripts\python scripts\ocr_benchmark.py
+```
+
+The benchmark refuses to fall back to mock OCR, records the resolved binary path and version in `benchmarks/ocr/results.json`, and prints a markdown summary. See `docs/OCR_VALIDATION.md` for the results from the recorded run.
 
 ### Deterministic demo OCR
 

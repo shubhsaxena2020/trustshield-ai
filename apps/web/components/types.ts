@@ -14,6 +14,10 @@ export type OcrModuleData = {
   provider_version?: string | null;
   confidence?: number | null;
   text?: string;
+  raw_text?: string;
+  normalized_text?: string;
+  preprocessing?: string;
+  tesseract_cmd_source?: string;
   warnings?: string[];
   image?: {
     width?: number;

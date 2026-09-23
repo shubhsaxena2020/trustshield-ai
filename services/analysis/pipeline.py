@@ -99,12 +99,18 @@ def analyze_url(raw: str, input_type: str = "url", extra_modules: dict[str, Modu
 
 
 def _ocr_module(result: OCRResult, image) -> ModuleResult:
+    raw_text = result.raw_text[:MAX_TEXT_CHARS]
+    normalized_text = normalize_text(raw_text)
     return ModuleResult(status=result.status, detail=result.detail, data={
         "provider": result.provider,
         "provider_version": result.provider_version,
         "confidence": result.confidence,
-        "text": result.text[:20_000],
+        "raw_text": raw_text,
+        "normalized_text": normalized_text,
+        "text": raw_text,
         "warnings": result.warnings,
+        "preprocessing": result.preprocessing,
+        "tesseract_cmd_source": result.tesseract_cmd_source,
         "image": {"width": image.width, "height": image.height, "format": image.format},
     })
 
@@ -124,21 +130,25 @@ def analyze_image(data: bytes, declared_mime: str | None = None, filename: str |
     provider = get_ocr_provider()
     try:
         ocr = provider.extract(validated.image)
-    except Exception as exc:  # provider failures become a structured result, never an API 500
-        ocr = OCRResult("failed", "", getattr(provider, "name", "unknown"), None, None, [], f"OCR failed: {exc}")
+    except Exception:  # provider failures become a structured result, never an API 500
+        ocr = OCRResult("failed", "", getattr(provider, "name", "unknown"), None, None, [], "OCR failed while processing the image.")
     quality, warnings = _ocr_quality(ocr)
     if warnings != ocr.warnings:
-        ocr = OCRResult(ocr.status, ocr.text, ocr.provider, ocr.provider_version, ocr.confidence, warnings, ocr.detail)
+        ocr = OCRResult(
+            ocr.status, ocr.text, ocr.provider, ocr.provider_version, ocr.confidence, warnings, ocr.detail,
+            normalized_text=ocr.normalized_text, preprocessing=ocr.preprocessing,
+            tesseract_cmd_source=ocr.tesseract_cmd_source,
+        )
     module = _ocr_module(ocr, validated.image)
     if ocr.status != "completed":
         limitation = "OCR was unavailable; the image could not be verified." if ocr.status == "unavailable" else "OCR failed; the image could not be verified."
         return _finish("image", [], {"ocr": module}, [limitation], input_ok=False, module_quality={"ocr": quality})
-    if not ocr.text.strip():
+    normalized_text = module.data["normalized_text"]
+    if not normalized_text:
         return _finish("image", [], {"ocr": module}, ["No readable text was found in the image."], input_ok=False, module_quality={"ocr": quality})
-    ocr_text = ocr.text
+    ocr_text = normalized_text
     limitations = ["Text was extracted by OCR and may contain recognition errors."]
-    if len(ocr_text) > MAX_TEXT_CHARS:
-        ocr_text = ocr_text[:MAX_TEXT_CHARS]
+    if len(ocr.raw_text) > MAX_TEXT_CHARS:
         limitations.append("OCR text was truncated to the text-analysis limit.")
     return analyze_text(
         ocr_text, input_type="image", extra_modules={"ocr": module},

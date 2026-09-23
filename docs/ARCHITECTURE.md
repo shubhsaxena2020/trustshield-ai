@@ -22,7 +22,7 @@ input -> validate -> extract -> normalize/analyze -> evidence -> fusion -> expla
 
 1. `image_validation.py` reads the bounded upload, ignores the filename as a decoder hint, checks the declared MIME type, decodes the actual image format, checks dimensions, handles EXIF orientation, and produces an RGB image.
 2. `ocr.py` selects the provider from `TRUSTSHIELD_OCR_PROVIDER`; the default is `TesseractProvider`, and `MockOCRProvider` is explicitly intended for tests/demos.
-3. The OCR module records provider, provider version, extracted text, provider confidence when available, warnings, and image dimensions/format.
+3. The OCR module records provider, provider version, bounded raw engine text, normalized text actually sent to text rules, the backwards-compatible `text` alias, word-level mean confidence when available, warnings, preprocessing mode, a non-path command-source label, and image dimensions/format.
 4. OCR text is passed to the shared text and static URL analyzers. If OCR is unavailable, fails, or returns no text, the result is structured as unable to verify rather than treated as verified content.
 
 ### QR path
@@ -47,6 +47,14 @@ input -> validate -> extract -> normalize/analyze -> evidence -> fusion -> expla
 The following are future seams or product work, not current execution paths:
 
 - `PaddleOCRProvider` and Hindi OCR.
+
+## PLANNED: isolated OCR worker boundary
+
+The production hardening boundary is planned, not implemented:
+
+`API -> isolated OCR worker (separate process/container, no network, resource limits, temp-dir cleanup, timeouts) -> Tesseract`
+
+Arbitrary user images should not be parsed inside the main API process because an OCR engine and image decoders process attacker-controlled bytes. A separate worker limits the blast radius of parser bugs, enforces CPU/memory/time budgets, keeps temporary files isolated and disposable, and prevents OCR work from consuming API process resources. The current implementation has input validation and an OCR timeout seam, but still runs Tesseract in-process.
 - A trained ML classifier.
 - An isolated web sandbox for destination inspection.
 - External reputation lookups.

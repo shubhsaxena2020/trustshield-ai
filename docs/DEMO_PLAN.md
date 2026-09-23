@@ -32,7 +32,7 @@ The UI result is evidence-first: show the risk label, separate confidence, evide
 
 ## Mock versus real OCR
 
-With `TRUSTSHIELD_OCR_PROVIDER=mock`, the screenshot fixtures are deterministic because their PNG metadata contains the source text. The mock does not recognise pixels and is not a production OCR provider. To demonstrate the real path, unset the variable, install Tesseract separately, and rerun the same screenshot fixtures. Real OCR output, warnings, and confidence can differ; if Tesseract is unavailable, the expected result is `unable_to_verify` with OCR status `unavailable`.
+With `TRUSTSHIELD_OCR_PROVIDER=mock`, the screenshot fixtures are deterministic because their PNG metadata contains the source text. The mock does not recognise pixels and is not a production OCR provider. To demonstrate the real path, unset the variable, set `TESSERACT_CMD` to the intended executable, and rerun the same screenshot fixtures. The validation benchmark records the selected binary and version, and the canonical OCR module records raw/normalized text, preprocessing, confidence, and command-source provenance. Real OCR output, warnings, and confidence can differ; if Tesseract is unavailable, the expected result is `unable_to_verify` with OCR status `unavailable`.
 
 ## PLANNED demo extensions
 

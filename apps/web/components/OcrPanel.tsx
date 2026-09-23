@@ -13,8 +13,12 @@ export function OcrPanel({ ocr }: OcrPanelProps) {
   const version = data.provider_version;
   const isMock = provider?.toLowerCase() === "mock";
   const confidence = data.confidence;
+  const preprocessing = data.preprocessing;
   const warnings = data.warnings ?? [];
-  const text = data.text;
+  const rawText = data.raw_text ?? data.text ?? "";
+  const normalizedText = data.normalized_text;
+  const hasNormalized = normalizedText !== undefined && normalizedText !== null;
+  const hasDifference = hasNormalized && rawText !== normalizedText;
   const isFailedOrUnavailable = ocr.status === "failed" || ocr.status === "unavailable";
 
   return (
@@ -36,7 +40,7 @@ export function OcrPanel({ ocr }: OcrPanelProps) {
         </div>
       )}
 
-      <dl className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 text-xs">
+      <dl className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3 text-xs">
         <div>
           <dt className="text-slate-500 dark:text-slate-400">Engine / Provider</dt>
           <dd className="mt-0.5 font-medium text-slate-900 dark:text-slate-100">
@@ -53,14 +57,25 @@ export function OcrPanel({ ocr }: OcrPanelProps) {
         <div>
           <dt className="text-slate-500 dark:text-slate-400">Extraction Confidence</dt>
           <dd className="mt-0.5 font-medium text-slate-900 dark:text-slate-100">
-            {confidence != null ? `${Math.round(confidence)}%` : "Not reported by this OCR engine"}
+            {typeof confidence === "number" && !Number.isNaN(confidence)
+              ? `${confidence.toFixed(1)}% (mean word confidence)`
+              : "Not reported by this OCR engine"}
+          </dd>
+        </div>
+        <div>
+          <dt className="text-slate-500 dark:text-slate-400">Preprocessing Mode</dt>
+          <dd className="mt-0.5 font-medium text-slate-900 dark:text-slate-100">
+            {preprocessing || "Not specified"}
           </dd>
         </div>
       </dl>
 
       {warnings.length > 0 && (
         <div className="mt-3 rounded-md border border-amber-300 bg-amber-50/50 p-2.5 dark:border-amber-800 dark:bg-amber-950/30">
-          <p className="text-xs font-medium text-amber-900 dark:text-amber-200">Warnings:</p>
+          <p className="flex items-center gap-1.5 text-xs font-medium text-amber-900 dark:text-amber-200">
+            <span aria-hidden>⚠</span>
+            <span>Warnings:</span>
+          </p>
           <ul className="mt-1 list-disc pl-5 text-xs text-amber-800 dark:text-amber-300 space-y-0.5">
             {warnings.map((warning, idx) => (
               <li key={idx}>{warning}</li>
@@ -81,11 +96,34 @@ export function OcrPanel({ ocr }: OcrPanelProps) {
       )}
 
       {ocr.status === "completed" && (
-        <div className="mt-3">
+        <div className="mt-3 space-y-2">
           <h4 className="text-xs font-semibold text-slate-700 dark:text-slate-300">Extracted Text</h4>
-          <pre className="mt-1 max-h-60 overflow-auto whitespace-pre-wrap rounded-md border border-slate-300 bg-slate-50 p-3 font-mono text-xs text-slate-800 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
-            {text && text.trim() ? text : "(No text detected in image)"}
-          </pre>
+          {hasDifference && (
+            <p className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400">
+              <span aria-hidden>ℹ</span>
+              <span>Normalization changed the text (whitespace / character cleanup)</span>
+            </p>
+          )}
+
+          <details className="rounded-md border border-slate-300 p-2.5 text-xs dark:border-slate-700">
+            <summary className="cursor-pointer font-semibold text-slate-700 dark:text-slate-300">
+              Raw extracted text
+            </summary>
+            <pre className="mt-2 max-h-60 overflow-auto whitespace-pre-wrap break-words rounded border border-slate-200 bg-slate-50 p-2.5 font-mono text-xs text-slate-800 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+              {rawText && rawText.trim() ? rawText : "(No text detected in image)"}
+            </pre>
+          </details>
+
+          {hasNormalized && (
+            <details className="rounded-md border border-slate-300 p-2.5 text-xs dark:border-slate-700">
+              <summary className="cursor-pointer font-semibold text-slate-700 dark:text-slate-300">
+                Normalized text used for analysis
+              </summary>
+              <pre className="mt-2 max-h-60 overflow-auto whitespace-pre-wrap break-words rounded border border-slate-200 bg-slate-50 p-2.5 font-mono text-xs text-slate-800 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+                {normalizedText && normalizedText.trim() ? normalizedText : "(No text detected in image)"}
+              </pre>
+            </details>
+          )}
         </div>
       )}
     </div>

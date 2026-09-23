@@ -8,6 +8,12 @@ from PIL import Image, ImageDraw, ImageFont, PngImagePlugin
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "demo" / "fixtures"
+DEMO_HEADER = "TrustShield demo chat"
+
+
+def visible_transcription(text: str) -> str:
+    """Return the reading-order text visibly drawn by ``screenshot``."""
+    return "\n".join([DEMO_HEADER, *text.splitlines()])
 
 
 def font(size: int):
@@ -26,7 +32,7 @@ def screenshot(name: str, text: str) -> None:
     image = Image.new("RGB", (1500, 900), "#f4f5f7")
     draw = ImageDraw.Draw(image)
     draw.rounded_rectangle((80, 55, 1420, 845), radius=28, fill="white", outline="#d8dce3", width=3)
-    draw.text((125, 100), "TrustShield demo chat", fill="#253047", font=font(32))
+    draw.text((125, 100), DEMO_HEADER, fill="#253047", font=font(32))
     y = 180
     for line in text.splitlines():
         draw.rounded_rectangle((125, y - 12, 1375, y + 52), radius=16, fill="#eaf1ff")

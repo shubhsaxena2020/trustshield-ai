@@ -16,7 +16,7 @@ from services.analysis.pipeline import analyze_image, analyze_qr, analyze_text, 
 app = FastAPI(title="TrustShield AI", version="0.1.0")
 app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:3000"], allow_methods=["GET", "POST"], allow_headers=["*"])
 
-# MVP in-memory store (bounded). SQLite persistence of metadata only is planned; raw content is never stored.
+# MVP result store: bounded in-memory AnalysisResult objects retain extracted text but never raw image bytes; all entries are lost on restart.
 _STORE: "OrderedDict[str, AnalysisResult]" = OrderedDict()
 _STORE_MAX = 200
 
