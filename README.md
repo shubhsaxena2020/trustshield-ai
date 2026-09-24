@@ -139,6 +139,8 @@ The web app is served at `http://localhost:3000` and calls the API at `http://lo
 - [ML pipeline](docs/ML_PIPELINE.md)
 - [Risk-fusion analysis](docs/RISK_FUSION_ANALYSIS.md)
 - [Risk-fusion design](docs/RISK_FUSION_DESIGN.md)
+- [Sealed v2 holdout plan](docs/HOLDOUT_V2_PLAN.md) (evaluation pending lead approval)
+- [Web sandbox design](docs/WEB_SANDBOX_DESIGN.md) (Phase 5, design only)
 
 Validation outputs live under `models/evaluation/validation/`; the original
 test evaluation and reporting-only outputs remain under `models/evaluation/test/`.
