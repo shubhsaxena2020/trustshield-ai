@@ -20,6 +20,11 @@ async def _upstream(reader, writer):
     await writer.wait_closed()
 
 
+def _auth(proxy, request: bytes) -> bytes:
+    """Insert the per-job proxy credential before the blank line that ends the headers."""
+    return request.replace(b"\r\n\r\n", b"\r\n" + proxy.auth_header + b"\r\n\r\n", 1)
+
+
 def test_proxy_pins_first_dns_answer_and_does_not_resolve_again(monkeypatch):
     async def scenario():
         server = await asyncio.start_server(_upstream, "127.0.0.1", 0)
@@ -36,7 +41,7 @@ def test_proxy_pins_first_dns_answer_and_does_not_resolve_again(monkeypatch):
         proxy = ValidatingEgressProxy(guard, SandboxPolicy(total_bytes=1024, subresource_bytes=1024, idle_timeout_s=1))
         host, proxy_port = await proxy.start()
         reader, writer = await asyncio.open_connection(host, proxy_port)
-        writer.write(f"GET http://public.test:{port}/ HTTP/1.1\r\nHost: public.test\r\n\r\n".encode())
+        writer.write(_auth(proxy, f"GET http://public.test:{port}/ HTTP/1.1\r\nHost: public.test\r\n\r\n".encode()))
         await writer.drain()
         data = await reader.read(4096)
         writer.close()
@@ -57,7 +62,7 @@ def test_proxy_rejects_private_target_and_blocked_connect_port(monkeypatch):
         proxy = ValidatingEgressProxy(guard, SandboxPolicy(idle_timeout_s=1))
         host, port = await proxy.start()
         reader, writer = await asyncio.open_connection(host, port)
-        writer.write(b"GET http://private.example/ HTTP/1.1\r\nHost: private.example\r\n\r\n")
+        writer.write(_auth(proxy, b"GET http://private.example/ HTTP/1.1\r\nHost: private.example\r\n\r\n"))
         await writer.drain()
         assert b"403" in await reader.read(1024)
         writer.close(); await writer.wait_closed()
@@ -67,7 +72,7 @@ def test_proxy_rejects_private_target_and_blocked_connect_port(monkeypatch):
         proxy = ValidatingEgressProxy(public_guard, SandboxPolicy(idle_timeout_s=1))
         host, port = await proxy.start()
         reader, writer = await asyncio.open_connection(host, port)
-        writer.write(b"CONNECT example.com:22 HTTP/1.1\r\nHost: example.com\r\n\r\n")
+        writer.write(_auth(proxy, b"CONNECT example.com:22 HTTP/1.1\r\nHost: example.com\r\n\r\n"))
         await writer.drain()
         assert b"403" in await reader.read(1024)
         writer.close(); await writer.wait_closed()
@@ -90,7 +95,7 @@ def test_proxy_enforces_byte_and_idle_caps(monkeypatch):
         proxy = ValidatingEgressProxy(guard, SandboxPolicy(total_bytes=8, subresource_bytes=8, idle_timeout_s=0.2))
         host, proxy_port = await proxy.start()
         reader, writer = await asyncio.open_connection(host, proxy_port)
-        writer.write(f"GET http://public.test:{upstream_port}/ HTTP/1.1\r\nHost: public.test\r\n\r\n".encode()); await writer.drain()
+        writer.write(_auth(proxy, f"GET http://public.test:{upstream_port}/ HTTP/1.1\r\nHost: public.test\r\n\r\n".encode())); await writer.drain()
         data = await reader.read(4096)
         assert len(data) <= 8
         writer.close(); await writer.wait_closed()
@@ -106,10 +111,35 @@ def test_proxy_refuses_connect_on_port_80(monkeypatch):
         proxy = ValidatingEgressProxy(guard, SandboxPolicy(idle_timeout_s=1))
         host, port = await proxy.start()
         reader, writer = await asyncio.open_connection(host, port)
-        writer.write(b"CONNECT example.com:80 HTTP/1.1\r\nHost: example.com\r\n\r\n")
+        writer.write(_auth(proxy, b"CONNECT example.com:80 HTTP/1.1\r\nHost: example.com\r\n\r\n"))
         await writer.drain()
         assert b"403" in await reader.read(1024)
         writer.close(); await writer.wait_closed()
         await proxy.close()
+
+    _run(scenario())
+
+
+def test_proxy_requires_credentials_and_never_dials_upstream(monkeypatch):
+    async def scenario():
+        monkeypatch.setenv("TRUSTSHIELD_ENV", "test")
+        dialed = []
+
+        def resolver(host):
+            dialed.append(host)
+            return ["127.0.0.1"]
+
+        guard = SandboxGuard(resolver=resolver, test_allowlist=["public.test:80"])
+        proxy = ValidatingEgressProxy(guard, SandboxPolicy(idle_timeout_s=1))
+        host, port = await proxy.start()
+        for extra in (b"", b"Proxy-Authorization: Basic d3Jvbmc6Y3JlZHM=\r\n"):
+            reader, writer = await asyncio.open_connection(host, port)
+            writer.write(b"GET http://public.test:80/ HTTP/1.1\r\nHost: public.test\r\n" + extra + b"\r\n")
+            await writer.drain()
+            assert b"407" in await reader.read(1024)
+            writer.close(); await writer.wait_closed()
+        await proxy.close()
+        assert dialed == []
+        assert len(proxy.password) >= 24
 
     _run(scenario())

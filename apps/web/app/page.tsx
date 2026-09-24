@@ -25,6 +25,8 @@ export default function Home() {
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [ocrHealthy, setOcrHealthy] = useState<boolean | null>(null);
   const [mlHealthy, setMlHealthy] = useState<boolean | null>(null);
+  const [sandboxAvailable, setSandboxAvailable] = useState(false);
+  const [useSandbox, setUseSandbox] = useState(false);
 
   // Check backend health for optional OCR and ML module status notice
   useEffect(() => {
@@ -36,6 +38,8 @@ export default function Home() {
         const ocr = data?.modules?.ocr;
         if (typeof ocr === "boolean") setOcrHealthy(ocr);
         else if (ocr && typeof ocr.available === "boolean") setOcrHealthy(ocr.available);
+
+        setSandboxAvailable(data?.modules?.web_sandbox === true);
 
         const ml = data?.modules?.ml;
         if (typeof ml === "boolean") setMlHealthy(ml);
@@ -57,6 +61,7 @@ export default function Home() {
     setFile(null);
     setError("");
     setResult(null);
+    setUseSandbox(false);
   }
 
   async function analyze(e: React.FormEvent) {
@@ -78,7 +83,7 @@ export default function Home() {
         res = await fetch(`${API}/api/v1/analyze/url`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ url: value }),
+          body: JSON.stringify({ url: value, sandbox: useSandbox && sandboxAvailable }),
         });
       } else {
         if (!file) {
@@ -112,8 +117,16 @@ export default function Home() {
         throw new Error(detailMsg);
       }
 
-      const data: AnalysisResult = await res.json();
+      let data: AnalysisResult = await res.json();
       setResult(data);
+      // The isolated-browser inspection finishes in the background; poll until it settles.
+      for (let attempt = 0; data.status === "sandboxing" && attempt < 40; attempt++) {
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+        const poll = await fetch(`${API}/api/v1/analysis/${data.analysis_id}`);
+        if (!poll.ok) break;
+        data = await poll.json();
+        setResult(data);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not reach the analysis service.");
     } finally {
@@ -207,6 +220,21 @@ export default function Home() {
                 className="w-full rounded-md border border-slate-300 bg-transparent p-3 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-500"
                 placeholder="https://..."
               />
+              {sandboxAvailable && (
+                <label className="mt-3 flex items-start gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={useSandbox}
+                    onChange={(e) => setUseSandbox(e.target.checked)}
+                    disabled={busy}
+                    className="mt-1"
+                  />
+                  <span>
+                    Also inspect the page in an isolated server-side browser. It never fills or
+                    submits forms and blocks private addresses.
+                  </span>
+                </label>
+              )}
             </div>
           )}
 

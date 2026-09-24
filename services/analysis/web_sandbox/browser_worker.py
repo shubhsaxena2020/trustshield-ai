@@ -66,7 +66,7 @@ async def run_browser(job: dict) -> dict:
                     maps.append(f"MAP {host} {addresses[0]}")
                 if maps:
                     args.append("--host-resolver-rules=" + ",".join(maps))
-            browser = await pw.chromium.launch(headless=True, proxy={"server": f"http://{proxy_host}:{proxy_port}"}, args=args)
+            browser = await pw.chromium.launch(headless=True, proxy={"server": f"http://{proxy_host}:{proxy_port}", "username": proxy.username, "password": proxy.password}, args=args)
             context = await browser.new_context(
                 service_workers="block", accept_downloads=True,
                 viewport={"width": 1280, "height": 800},

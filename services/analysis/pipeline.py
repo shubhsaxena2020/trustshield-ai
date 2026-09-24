@@ -170,6 +170,7 @@ def merge_sandbox_result(result: AnalysisResult, outcome: dict) -> AnalysisResul
         modules["web_sandbox"] = ModuleResult(status="failed", detail=str(outcome.get("detail", "Sandbox worker failed")))
         extra = []
         limitations = [item for item in result.limitations if item != LIMIT_SANDBOX] + ["The isolated browser inspection failed; page behavior was not inspected."]
+    limitations = [item for item in limitations if "inspection is still in progress" not in item]
     merged = _finish(result.input_type, list(result.evidence) + extra, modules, limitations, input_ok=True)
     # Job polling keys remain stable while fusion is recomputed.
     return merged.model_copy(update={"analysis_id": result.analysis_id, "created_at": result.created_at})

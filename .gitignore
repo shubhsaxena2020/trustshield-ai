@@ -16,3 +16,4 @@ models/trained/*.joblib
 graphify-out/
 .playwright-browsers/
 .DS_Store
+tests/e2e/screenshots/

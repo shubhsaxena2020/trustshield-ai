@@ -113,3 +113,22 @@ def test_semaphore_is_thread_safe_across_event_loops():
     client = SandboxClient(SandboxPolicy(max_concurrency=1))
     assert isinstance(SandboxClient._semaphore, type(th.BoundedSemaphore()))
     assert client is not None
+
+
+def test_full_subprocess_path_runs_chromium_under_job_object_and_proxy_auth(monkeypatch):
+    _browser_available()
+    server = start_site()
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    port = server.server_address[1]
+    monkeypatch.setenv("TRUSTSHIELD_ENV", "test")
+    try:
+        result = SandboxClient(SandboxPolicy())._run_process(
+            f"http://bank-login.test:{port}/bank-login", [f"bank-login.test:{port}"],
+            {"bank-login.test": ["127.0.0.1"]}, False)
+    finally:
+        server.shutdown(); server.server_close(); thread.join(timeout=1)
+    assert result["status"] == "completed", result
+    assert result["telemetry"]["forms"]
+    if __import__("sys").platform == "win32":
+        assert result["isolation"]["job_object"] is True

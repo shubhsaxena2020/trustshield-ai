@@ -71,10 +71,18 @@ The following security boundary is planned and is not implemented in this phase:
 
 Arbitrary user images should not be parsed inside the main API process. Image decoding and OCR are complex parsers of untrusted bytes; a separate process or container can enforce resource and timeout limits, deny network access, clean temporary files, and contain a parser compromise without taking down the API process.
 
-## Sandbox known limitations (Phase 5 MVP)
+## Sandbox containment and known limitations (Phase 5)
 
-- The loopback egress proxy has no per-job authentication; any local process could use its ephemeral port while a job runs. It still validates every destination, so it cannot reach private ranges, but a shared host should add a proxy token before production use.
-- The sandbox is process-isolated (scrubbed-environment subprocess, temp dir, project-local Chromium), not container or VM isolated. Chromium runs with WebRTC disabled and non-proxied UDP blocked.
-- The web UI does not yet request sandbox analysis or poll the `sandboxing` status; it is API-only.
-- `ENABLE_WEB_SANDBOX` and `TRUSTSHIELD_SANDBOX_ALLOW_EXTERNAL` default to off; live external browsing has not been exercised.
-- Job dispatch is one thread per accepted job behind a thread-safe concurrency gate and a per-client rate limit; there is no persistent queue.
+Implemented:
+
+- The loopback egress proxy requires a per-job random Basic credential (`Proxy-Authorization`, constant-time compare, 407 challenge). Chromium is given the credential through Playwright; unauthenticated or wrong-credential requests never trigger DNS resolution or an upstream connection (tested).
+- On Windows the worker process tree runs inside a Job Object: kill-on-close (timeout, crash or API exit leaves no orphan Chromium), 3 GiB job memory cap, 64-process cap. Containment is reported in the result (`isolation.job_object`). Verified by a test that closes the job and checks a grandchild process dies.
+- Chromium runs with WebRTC disabled and non-proxied UDP blocked, a scrubbed environment, a temp directory removed afterwards, and a project-local browser.
+- Job dispatch uses a thread-safe concurrency gate and a bounded per-client rate limiter.
+
+Known limitations:
+
+- The sandbox is process- and Job-Object-isolated, not container/VM/AppContainer isolated. On non-Windows hosts there is no Job Object; only the wall-clock kill applies. Run the worker in a container or VM before exposing external browsing to untrusted users.
+- The Job Object is assigned just after the worker starts, so a very brief window precedes containment.
+- `ENABLE_WEB_SANDBOX` and `TRUSTSHIELD_SANDBOX_ALLOW_EXTERNAL` default to off; live external browsing has not been exercised. The browser E2E confirms the UI opt-in is refused safely with external browsing off.
+- Job dispatch is one thread per accepted job; there is no persistent queue.

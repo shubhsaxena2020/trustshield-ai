@@ -11,6 +11,7 @@ import sys
 import tempfile
 from pathlib import Path
 
+from .jobobject import Containment, contain
 from .policy import SandboxPolicy
 from .policy import external_allowed
 from .telemetry import bounded_telemetry, clean_text
@@ -60,17 +61,20 @@ class SandboxClient:
                    "resolver_map": resolver_map or {}, "production": production,
                    "allow_external": external_allowed()}
         process = None
+        containment = Containment(False, "not started")
         try:
             process = subprocess.Popen(
                 [sys.executable, "-m", "services.worker.sandbox_worker"],
                 cwd=str(root), env=env, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE, text=True,
             )
+            containment = contain(process)
             stdout, stderr = process.communicate(json.dumps(payload), timeout=self.policy.total_timeout_s)
             lines = [line for line in stdout.splitlines() if line.strip()]
             data = json.loads(lines[-1]) if lines else {"status": "failed", "detail": "worker returned no JSON"}
             if process.returncode != 0 and data.get("status") == "completed":
                 data = {"status": "failed", "detail": "worker exited non-zero"}
+            data["isolation"] = {"job_object": containment.applied, "detail": containment.detail}
             return data
         except subprocess.TimeoutExpired:
             if process is not None:
@@ -80,6 +84,7 @@ class SandboxClient:
         except (OSError, json.JSONDecodeError) as exc:
             return {"status": "failed", "detail": clean_text(exc, 500)}
         finally:
+            containment.close()
             shutil.rmtree(temp_root, ignore_errors=True)
 
 

@@ -78,3 +78,22 @@ def test_malformed_url_never_becomes_500(monkeypatch):
 def test_request_cannot_supply_fixture_allowlist():
     assert "test_allowlist" not in api.UrlIn.model_fields
     assert "resolver_map" not in api.UrlIn.model_fields
+
+
+def test_finished_job_no_longer_claims_inspection_in_progress(monkeypatch):
+    monkeypatch.setenv("ENABLE_WEB_SANDBOX", "true")
+    api._SANDBOX_BUCKETS.clear()
+
+    async def fake_run(url, **kwargs):
+        return {"status": "failed", "detail": "external browsing is disabled by policy"}
+
+    monkeypatch.setattr(api, "run_sandbox", fake_run)
+    first = client.post("/api/v1/analyze/url", json={"url": "https://example.com/", "sandbox": True}).json()
+    assert any("still in progress" in item for item in first["limitations"])
+    for _ in range(50):
+        current = client.get(f"/api/v1/analysis/{first['analysis_id']}").json()
+        if current["status"] != "sandboxing":
+            break
+        time.sleep(0.02)
+    assert not any("still in progress" in item for item in current["limitations"])
+    assert any("failed" in item for item in current["limitations"])

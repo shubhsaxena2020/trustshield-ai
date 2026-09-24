@@ -2,7 +2,10 @@
 from __future__ import annotations
 
 import asyncio
+import base64
+import hmac
 import re
+import secrets
 from dataclasses import dataclass
 from urllib.parse import urlsplit
 
@@ -15,6 +18,10 @@ _CONNECT_RE = re.compile(r"^CONNECT\s+([^\s]+)\s+HTTP/", re.I)
 
 
 class ProxyRejected(Exception):
+    pass
+
+
+class ProxyAuthRequired(Exception):
     pass
 
 
@@ -36,6 +43,22 @@ class ValidatingEgressProxy:
         self.policy = policy or SandboxPolicy.from_env()
         self.budget = ByteBudget(self.policy.total_bytes)
         self.server: asyncio.AbstractServer | None = None
+        # Per-job credential: other local processes cannot use this loopback port.
+        self.username = "trustshield"
+        self.password = secrets.token_urlsafe(24)
+
+    @property
+    def auth_header(self) -> bytes:
+        return b"Proxy-Authorization: Basic " + base64.b64encode(f"{self.username}:{self.password}".encode())
+
+    def _authorized(self, header: bytes) -> bool:
+        expected = base64.b64encode(f"{self.username}:{self.password}".encode())
+        for line in header.split(b"\r\n")[1:]:
+            name, _, value = line.partition(b":")
+            if name.strip().lower() == b"proxy-authorization":
+                scheme, _, credential = value.strip().partition(b" ")
+                return scheme.lower() == b"basic" and hmac.compare_digest(credential.strip(), expected)
+        return False
 
     async def start(self) -> tuple[str, int]:
         self.server = await asyncio.start_server(self._handle, "127.0.0.1", 0)
@@ -53,6 +76,8 @@ class ValidatingEgressProxy:
             header = await asyncio.wait_for(reader.readuntil(b"\r\n\r\n"), self.policy.idle_timeout_s)
             if len(header) > _HEADER_LIMIT:
                 raise ProxyRejected("headers too large")
+            if not self._authorized(header):
+                raise ProxyAuthRequired()
             first = header.split(b"\r\n", 1)[0].decode("latin-1", "replace")
             match = _CONNECT_RE.match(first)
             if match:
@@ -70,6 +95,12 @@ class ValidatingEgressProxy:
             upstream[1].write(rewritten)
             await upstream[1].drain()
             await self._relay(upstream[0], writer, None)
+        except ProxyAuthRequired:
+            try:
+                writer.write(b'HTTP/1.1 407 Proxy Authentication Required\r\nProxy-Authenticate: Basic realm="trustshield"\r\nContent-Length: 0\r\nConnection: close\r\n\r\n')
+                await writer.drain()
+            except (OSError, ConnectionError):
+                pass
         except (asyncio.IncompleteReadError, asyncio.TimeoutError, OSError, ValueError, UnsafeURL, ProxyRejected):
             try:
                 writer.write(b"HTTP/1.1 403 Forbidden\r\nContent-Length: 0\r\nConnection: close\r\n\r\n")
