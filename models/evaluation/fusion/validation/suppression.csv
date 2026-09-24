@@ -1,7 +1,7 @@
 candidate,operating_point,ml_positive,suppressed,suppression_pct,malicious_ml_positive,malicious_suppressed,malicious_suppression_pct
 legacy,caution,168,105,62.5,120,58,48.333333333333336
 legacy,suspicious,168,162,96.42857142857143,120,115,95.83333333333334
-ml_aware_weighted,caution,168,0,0.0,120,0,0.0
+ml_aware_weighted,caution,168,1,0.5952380952380952,120,0,0.0
 ml_aware_weighted,suspicious,168,69,41.07142857142857,120,25,20.833333333333336
-strength_gated,caution,168,0,0.0,120,0,0.0
+strength_gated,caution,168,1,0.5952380952380952,120,0,0.0
 strength_gated,suspicious,168,69,41.07142857142857,120,25,20.833333333333336

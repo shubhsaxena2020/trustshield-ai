@@ -1,5 +1,6 @@
 from services.analysis.evidence.models import Evidence, Severity
-from services.analysis.fusion.engine import fuse, risk_score
+from services.analysis.fusion.engine import CONFIDENCE_CAP, fuse, risk_score
+from services.analysis.explanation.template import explain
 from services.analysis.fusion.strategies import evidence_strength, ml_aware_weighted, strength_gated
 
 
@@ -39,6 +40,53 @@ def test_weighted_strategy_keeps_the_required_ml_floor():
     assert result.score >= 25
 
 
+def test_ml_weighted_contribution_is_monotone_and_below_threshold_has_no_floor():
+    lower = ml_aware_weighted([ev("ml_malicious_content", Severity.medium, 0.05, "ml_classifier")], statuses())
+    higher = ml_aware_weighted([ev("ml_malicious_content", Severity.medium, 0.10, "ml_classifier")], statuses())
+    assert higher.score > lower.score
+    assert higher.score < 25
+
+
+def test_short_moderate_ml_does_not_establish_floor_but_long_text_does():
+    short = ml_aware_weighted([ev("ml_malicious_content", Severity.medium, 0.31, "ml_classifier")], statuses(), input_token_count=2)
+    long = ml_aware_weighted([ev("ml_malicious_content", Severity.medium, 0.31, "ml_classifier")], statuses(), input_token_count=8)
+    assert short.score < 25
+    assert long.score >= 25
+
+
+def test_strong_ml_floor_and_strong_evidence_are_not_cancelled_by_weak_evidence():
+    strong_ml = ml_aware_weighted([ev("ml_malicious_content", Severity.high, 0.95, "ml_classifier")], statuses(), input_token_count=2)
+    strong_rules = ml_aware_weighted([ev("digital_arrest", Severity.critical)], statuses())
+    with_weak = ml_aware_weighted([ev("digital_arrest", Severity.critical), ev("urgency", Severity.low, 0.9)], statuses())
+    assert strong_ml.score >= 50
+    assert with_weak.score >= strong_rules.score >= 50
+
+
+def test_agreement_is_not_applicable_when_ml_did_not_complete():
+    result = ml_aware_weighted([ev("urgency", Severity.low)], {"text_rules": "completed", "ml": "not_run"})
+    assert result.data["agreement"] == "not_applicable"
+    assert result.data["disagreement"] is False
+
+
+def test_completed_ml_disagreement_lowers_confidence():
+    result = ml_aware_weighted([ev("ml_malicious_content", Severity.medium, 0.4, "ml_classifier")], statuses())
+    assert result.data["agreement"] == "ml_only"
+    assert result.data["disagreement"] is True
+    assert result.confidence == "low"
+
+
+def test_drivers_are_rendered_in_explanation():
+    result = ml_aware_weighted([ev("ml_malicious_content", Severity.medium, 0.4, "ml_classifier")], statuses())
+    explanation, _ = explain(result.label, [ev("ml_malicious_content", Severity.medium, 0.4, "ml_classifier")], result.primary, [], result.data)
+    assert "moderate_ml" in explanation
+
+
+def test_confidence_remains_capped():
+    modules = {name: "completed" for name in ("text_rules", "ml", "url_static", "reputation", "web_sandbox", "ocr", "qr")}
+    result = ml_aware_weighted([], modules)
+    assert result.confidence == CONFIDENCE_CAP == "medium"
+
+
 def test_strong_ml_and_strong_deterministic_evidence_are_high_risk():
     result = strength_gated([
         ev("ml_malicious_content", Severity.high, 0.95, "ml_classifier"),
@@ -61,6 +109,20 @@ def test_rules_strong_with_ml_negative_keeps_risk_and_reduces_confidence():
 def test_insufficient_coverage_is_unable_to_verify():
     result = strength_gated([], {"text_rules": "failed", "ml": "unavailable"}, input_ok=False)
     assert result.label == "unable_to_verify"
+
+
+def test_low_coverage_from_failed_modules_is_unable_to_verify_even_when_input_is_valid():
+    result = ml_aware_weighted([], {
+        "text_rules": "completed", "ml": "failed", "url_static": "failed", "reputation": "unavailable",
+    }, input_ok=True)
+    assert result.label == "unable_to_verify"
+
+
+def test_limited_context_can_keep_score_based_label():
+    result = ml_aware_weighted([ev("urgency", Severity.low)], {
+        "text_rules": "completed", "ml": "not_run",
+    }, module_quality={"text_rules": 0.25})
+    assert result.label == "low_risk"
 
 
 def test_legacy_fusion_remains_the_existing_noisy_or():

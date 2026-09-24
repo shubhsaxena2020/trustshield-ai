@@ -118,21 +118,34 @@ def _limited_context_is_only_low_confidence_cause(
     return assess_confidence(module_status, input_ok, without_text_context) != "low"
 
 
+def coverage_requires_unable_to_verify(score: int, confidence: str, module_status: dict[str, str],
+                                      input_ok: bool, module_quality: dict[str, float] | None) -> bool:
+    """Apply the shared insufficient-coverage rule used by every strategy."""
+    completed = any(status == "completed" for status in module_status.values())
+    # Agreement is an output-confidence adjustment, not module coverage.  Use
+    # the coverage-only confidence here so ML/rules disagreement does not turn
+    # an otherwise completed analysis into unable_to_verify.
+    coverage_confidence = assess_confidence(module_status, input_ok, module_quality)
+    context_is_only_low_cause = _limited_context_is_only_low_confidence_cause(
+        module_status, input_ok, module_quality,
+    )
+    return not input_ok or not completed or (coverage_confidence == "low" and score < 50 and not context_is_only_low_cause)
+
+
 def fuse(evidence: list[Evidence], module_status: dict[str, str], input_ok: bool = True,
          module_quality: dict[str, float] | None = None, strategy_name: str | None = None,
-         strategy_params: dict[str, Any] | None = None) -> Fusion:
+         strategy_params: dict[str, Any] | None = None, input_token_count: int | None = None) -> Fusion:
     strategy_name = strategy_name or os.getenv("TRUSTSHIELD_FUSION", DEFAULT_FUSION_STRATEGY).strip().lower()
     if strategy_name != "legacy":
         from services.analysis.fusion.strategies import apply_strategy
         result = apply_strategy(strategy_name, evidence, module_status, input_ok, module_quality,
-                                severity_weight=SEVERITY_WEIGHT, **(strategy_params or {}))
+                                severity_weight=SEVERITY_WEIGHT, input_token_count=input_token_count,
+                                **(strategy_params or {}))
         return Fusion(result.score, result.label, result.confidence, result.primary, result.secondary, result.data)
     score = risk_score(evidence)
     confidence = assess_confidence(module_status, input_ok, module_quality)
     label = label_for(score)
-    completed = any(s == "completed" for s in module_status.values())
-    context_is_only_low_cause = _limited_context_is_only_low_confidence_cause(module_status, input_ok, module_quality)
-    if not input_ok or not completed or (confidence == "low" and score < 50 and not context_is_only_low_cause):
+    if coverage_requires_unable_to_verify(score, confidence, module_status, input_ok, module_quality):
         label = "unable_to_verify"
     primary, secondary = classify(evidence)
     return Fusion(score, label, confidence, primary, secondary)

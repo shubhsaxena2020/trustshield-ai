@@ -3,7 +3,8 @@
   "train_oof_rows": 2918,
   "moderate_ml_cut": 0.12,
   "ml_aware_weighted": {
-    "ml_weight": 0.5
+    "ml_weight": 0.5,
+    "min_tokens_for_moderate_ml_floor": 3
   },
   "strength_gated": {
     "strong_ml_cut": 0.7,
@@ -11,9 +12,17 @@
       "weak": 0,
       "moderate": 25,
       "strong": 50
-    }
+    },
+    "min_tokens_for_moderate_ml_floor": 3
   },
-  "selection_rule": "highest train-OOf caution F1 subject to specificity >= 0.85; ties prefer simpler/lower parameter values",
+  "selection_rule": "highest train OOF caution F1 subject to specificity >= 0.85; ties prefer simpler strategy",
+  "short_text_floor": {
+    "min_tokens_for_moderate_ml_floor": 3,
+    "strong_ml_cut": 0.7,
+    "analysis_file": "models/evaluation/fusion/short_text_floor_analysis.csv",
+    "selection_rule": "minimize observed malicious moderate-ML floor removals; within that set maximize legitimate floor removals; ties choose the smallest tested N.",
+    "provenance": "Chosen from train OOF rows only using alphanumeric_token_count(text) from train.jsonl; no validation rows used."
+  },
   "learned_meta": {
     "status": "skipped",
     "reason": "No new trained production artifact is permitted in Phase 4; a runtime-loaded meta model would violate the frozen-artifact boundary."

@@ -57,10 +57,28 @@ export type MlModuleData = {
   latency_ms?: number;
 };
 
+export type StrengthCounts = {
+  weak?: number;
+  moderate?: number;
+  strong?: number;
+};
+
+export type FusionModuleData = {
+  strategy?: "ml_aware_weighted" | "strength_gated" | "legacy" | string;
+  version?: string;
+  agreement?: "agree" | "ml_only" | "rules_only" | "both_negative" | string;
+  disagreement?: boolean;
+  strength_counts?: StrengthCounts;
+  strength_class_counts?: StrengthCounts;
+  drivers?: string[];
+  parameters?: Record<string, unknown>;
+  [key: string]: unknown;
+};
+
 export type ModuleResult = {
   status: "completed" | "unavailable" | "failed" | "not_run" | "timeout" | string;
   detail?: string;
-  data?: (OcrModuleData & QrModuleData & MlModuleData) | Record<string, unknown>;
+  data?: (OcrModuleData & QrModuleData & MlModuleData & FusionModuleData) | Record<string, unknown>;
 };
 
 

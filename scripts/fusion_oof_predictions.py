@@ -9,6 +9,7 @@ import argparse
 import csv
 import hashlib
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -36,14 +37,18 @@ def validate_split(value: str) -> str:
 
 def _safe_dataset_dir(path: Path) -> Path:
     resolved = path.resolve()
-    parts = {part.lower() for part in resolved.parts}
-    if "holdout" in parts or "test" in parts:
+    if any(_is_sealed_component(part) for part in resolved.parts):
         raise ValueError("sealed test/holdout paths are not allowed")
     return resolved
 
 
+def _is_sealed_component(part: str) -> bool:
+    value = part.lower()
+    return "holdout" in value or value in {"test", "test_v1_frozen"} or re.match(r"^test(?:_|-)?v\d", value) is not None
+
+
 def _read_train(path: Path) -> list[dict]:
-    path = path.resolve()
+    path = _safe_dataset_dir(path)
     if path.name != "train.jsonl":
         raise ValueError("OOF generation may open only train.jsonl")
     with path.open(encoding="utf-8") as handle:

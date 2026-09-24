@@ -324,7 +324,7 @@ indiaspam-d0b32ded,legitimate,india_spam_sms,0.014307142332894648,10,low_risk,10
 indiaspam-d5037485,legitimate,india_spam_sms,0.0008912074789359457,10,low_risk,10,low_risk,10,low_risk
 indiaspam-d6e9bc34,legitimate,india_spam_sms,0.000419351728893761,0,low_risk,0,low_risk,0,low_risk
 indiaspam-d7105040,legitimate,india_spam_sms,0.02153842831948573,32,caution,32,caution,32,caution
-indiaspam-da3151d0,legitimate,india_spam_sms,0.12876091115461566,2,low_risk,25,caution,25,caution
+indiaspam-da3151d0,legitimate,india_spam_sms,0.12876091115461566,2,low_risk,6,low_risk,2,low_risk
 indiaspam-dbee550a,legitimate,india_spam_sms,0.032667076266965446,0,low_risk,0,low_risk,0,low_risk
 indiaspam-de9d3b41,legitimate,india_spam_sms,0.0005415437241745936,0,low_risk,0,low_risk,0,low_risk
 indiaspam-dee4bd33,legitimate,india_spam_sms,0.02609452646758505,0,low_risk,0,low_risk,0,low_risk

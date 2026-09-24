@@ -29,8 +29,8 @@
         1.0
       ],
       "specificity": [
-        0.8669436573670445,
-        0.9200779727095516
+        0.8688508294495323,
+        0.9220272904483431
       ],
       "groups": 625,
       "samples": 2000,
@@ -38,7 +38,7 @@
     },
     "point_difference": {
       "recall": 0.467741935483871,
-      "specificity": -0.09381237524950103
+      "specificity": -0.09181636726546905
     },
     "difference_exceeds_noise": {
       "recall": true,

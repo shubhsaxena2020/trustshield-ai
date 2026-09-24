@@ -4,6 +4,7 @@ from __future__ import annotations
 import re
 import unicodedata
 import os
+import math
 from functools import lru_cache
 
 from services.analysis.evidence.models import Evidence, Severity
@@ -41,13 +42,21 @@ def _run_ml(text: str) -> tuple[ModuleResult, list[Evidence], bool]:
     if os.getenv("TRUSTSHIELD_ML", "on").strip().lower() == "off":
         return ModuleResult(status="not_run", detail="Disabled by TRUSTSHIELD_ML=off"), [], False
     prediction = _text_classifier().predict(text)
+    probability = prediction.p_malicious
+    if not math.isfinite(probability) or not 0.0 <= probability <= 1.0:
+        return ModuleResult(
+            status="failed",
+            detail=f"Invalid p_malicious={probability!r}; expected a finite value in [0, 1]",
+        ), [], False
     module = ml_module_result(prediction)
     return module, ml_evidence(prediction), module.status == "completed"
 
 
 def _finish(input_type: str, evidence: list[Evidence], modules: dict[str, ModuleResult], limitations: list[str],
-            input_ok: bool = True, module_quality: dict[str, float] | None = None) -> AnalysisResult:
-    fusion = fuse(evidence, {k: v.status for k, v in modules.items()}, input_ok, module_quality)
+            input_ok: bool = True, module_quality: dict[str, float] | None = None,
+            input_token_count: int | None = None) -> AnalysisResult:
+    fusion = fuse(evidence, {k: v.status for k, v in modules.items()}, input_ok, module_quality,
+                  input_token_count=input_token_count)
     if fusion.data:
         modules["fusion"] = ModuleResult(status="completed", data=fusion.data)
     explanation, actions = explain(fusion.label, evidence, fusion.primary, limitations, fusion.data)
@@ -113,7 +122,8 @@ def analyze_text(raw: str, input_type: str = "text", extra_modules: dict[str, Mo
         modules["url_static"] = ModuleResult(status="completed", data={"domains": analyzed})
         modules["reputation"] = ModuleResult(status="unavailable", detail="No reputation provider configured")
         limitations += [LIMIT_REP, LIMIT_SANDBOX]
-    return _finish(input_type, evidence, modules, limitations, module_quality=quality)
+    return _finish(input_type, evidence, modules, limitations, module_quality=quality,
+                   input_token_count=token_count)
 
 
 def analyze_url(raw: str, input_type: str = "url", extra_modules: dict[str, ModuleResult] | None = None,
@@ -294,7 +304,8 @@ def analyze_qr(data: bytes, declared_mime: str | None = None, filename: str | No
         if note_quality is not None:
             quality["text_rules"] = note_quality
         return _finish("qr", evidence, modules, limitations + ["UPI fields were parsed structurally; no payment action was performed."],
-                       module_quality=quality)
+                       module_quality=quality,
+                       input_token_count=alphanumeric_token_count(upi["note"]) if upi.get("note") else None)
     evidence = [_qr_evidence("qr_non_web_payload", Severity.informational, 0.9, "QR contains a non-web payload",
                              "This QR payload was not opened or executed; verify its meaning before using it.", payload_type=decoded.payload_type)]
     return _finish("qr", evidence, {"qr": qr_module}, ["The QR payload is not a web URL and was not executed."],

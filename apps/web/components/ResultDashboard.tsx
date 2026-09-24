@@ -1,8 +1,9 @@
-import { AnalysisResult, MlModuleData, ModuleResult } from "./types";
+import { AnalysisResult, FusionModuleData, MlModuleData, ModuleResult } from "./types";
 import { LABELS, SEV_BADGE, pretty } from "./utils";
 import { OcrPanel } from "./OcrPanel";
 import { QrPanel } from "./QrPanel";
 import { MlPanel } from "./MlPanel";
+import { FusionPanel } from "./FusionPanel";
 
 interface ResultDashboardProps {
   result: AnalysisResult;
@@ -22,6 +23,13 @@ function getModuleDetail(name: string, module: ModuleResult): string | undefined
       return module.detail || "Not run for this input";
     }
   }
+  if (name === "fusion") {
+    const fusionData = (module.data ?? {}) as FusionModuleData;
+    if (module.status === "completed") {
+      const info = [fusionData.strategy, fusionData.version].filter(Boolean).join(" ");
+      return info || module.detail || undefined;
+    }
+  }
   return module.detail || undefined;
 }
 
@@ -36,6 +44,7 @@ export function ResultDashboard({ result }: ResultDashboardProps) {
   const showOcr = Boolean(result.modules?.ocr || result.input_type === "image");
   const showQr = Boolean(result.modules?.qr || result.input_type === "qr");
   const showMl = Boolean(result.modules?.ml);
+  const showFusion = Boolean(result.modules?.fusion);
   const evidenceList = result.evidence ?? [];
   const recommendedActions = result.recommended_actions ?? [];
   const limitations = result.limitations ?? [];
@@ -61,6 +70,11 @@ export function ResultDashboard({ result }: ResultDashboardProps) {
           <div>
             <dt className="opacity-80">Confidence</dt>
             <dd className="text-lg font-semibold">{pretty(result.risk.confidence || "")}</dd>
+            {result.risk.confidence?.toLowerCase() === "low" && (
+              <p className="mt-1 text-xs opacity-90 leading-normal">
+                Lower confidence means less independent evidence agrees or coverage is limited — verify independently.
+              </p>
+            )}
           </div>
           <div>
             <dt className="opacity-80">Possible category</dt>
@@ -75,6 +89,8 @@ export function ResultDashboard({ result }: ResultDashboardProps) {
         <h3 className="font-semibold">Explanation</h3>
         <p className="mt-1 text-slate-800 dark:text-slate-200">{result.explanation}</p>
       </div>
+
+      {showFusion && result.modules?.fusion && <FusionPanel fusion={result.modules.fusion} />}
 
       {showOcr && result.modules?.ocr && <OcrPanel ocr={result.modules.ocr} />}
 

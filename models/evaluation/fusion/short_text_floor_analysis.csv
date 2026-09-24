@@ -1,0 +1,7 @@
+max_alphanumeric_tokens,moderate_ml_rows,legitimate_rows,malicious_rows,legitimate_floor_rows_removed,malicious_floor_rows_removed,malicious_recall_cost_pct_of_moderate_ml,moderate_ml_cut,strong_ml_cut,source
+1,0,0,0,0,0,0.0,0.12,0.7,train_oof_predictions.csv + train.jsonl
+2,1,1,0,1,0,0.0,0.12,0.7,train_oof_predictions.csv + train.jsonl
+3,2,2,0,2,0,0.0,0.12,0.7,train_oof_predictions.csv + train.jsonl
+4,7,6,1,6,1,0.8849557522123894,0.12,0.7,train_oof_predictions.csv + train.jsonl
+5,11,9,2,9,1,0.8849557522123894,0.12,0.7,train_oof_predictions.csv + train.jsonl
+6,23,20,3,19,1,0.8849557522123894,0.12,0.7,train_oof_predictions.csv + train.jsonl

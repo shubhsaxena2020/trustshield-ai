@@ -2,11 +2,11 @@ candidate,label,count
 legacy,caution,63
 legacy,low_risk,556
 legacy,suspicious,6
-ml_aware_weighted,caution,75
+ml_aware_weighted,caution,74
 ml_aware_weighted,high_risk,3
-ml_aware_weighted,low_risk,451
+ml_aware_weighted,low_risk,452
 ml_aware_weighted,suspicious,96
-strength_gated,caution,75
+strength_gated,caution,74
 strength_gated,high_risk,2
-strength_gated,low_risk,451
+strength_gated,low_risk,452
 strength_gated,suspicious,97

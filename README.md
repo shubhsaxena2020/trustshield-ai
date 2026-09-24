@@ -137,6 +137,8 @@ The web app is served at `http://localhost:3000` and calls the API at `http://lo
 - [Phase 3 validation and final-test report](docs/PHASE3_VALIDATION_REPORT.md)
 - [Tech Expo summary](docs/TECH_EXPO_SUMMARY.md)
 - [ML pipeline](docs/ML_PIPELINE.md)
+- [Risk-fusion analysis](docs/RISK_FUSION_ANALYSIS.md)
+- [Risk-fusion design](docs/RISK_FUSION_DESIGN.md)
 
 Validation outputs live under `models/evaluation/validation/`; the original
 test evaluation and reporting-only outputs remain under `models/evaluation/test/`.

@@ -1399,7 +1399,7 @@ indiaspam-bffe5234,legitimate,india_spam_sms,0.01414500506125716,0,low_risk,0,lo
 indiaspam-c0016fab,legitimate,india_spam_sms,0.06406319181018591,2,low_risk,2,low_risk,2,low_risk
 indiaspam-c016ba51,legitimate,india_spam_sms,0.0029015094301502115,0,low_risk,0,low_risk,0,low_risk
 indiaspam-c01a01f0,legitimate,india_spam_sms,0.051581418713527116,0,low_risk,0,low_risk,0,low_risk
-indiaspam-c05a3e1f,legitimate,india_spam_sms,0.18170981618157483,3,low_risk,25,caution,25,caution
+indiaspam-c05a3e1f,legitimate,india_spam_sms,0.18170981618157483,3,low_risk,9,low_risk,3,low_risk
 indiaspam-c08ee784,legitimate,india_spam_sms,0.15840733287349945,3,low_risk,25,caution,25,caution
 indiaspam-c0978c5d,legitimate,india_spam_sms,0.003131208743658355,18,low_risk,18,low_risk,18,low_risk
 indiaspam-c0f4ee9b,legitimate,india_spam_sms,0.009373362231599942,0,low_risk,0,low_risk,0,low_risk

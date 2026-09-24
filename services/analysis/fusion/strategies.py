@@ -15,6 +15,7 @@ STRATEGY_VERSION = "phase4-1"
 MODERATE_ML_CUT = 0.12
 DEFAULT_STRONG_ML_CUT = 0.70
 DEFAULT_ML_WEIGHT = 0.50
+DEFAULT_MIN_TOKENS_FOR_MODERATE_ML_FLOOR = 6
 TIER_MINIMUM_SCORES = {"weak": 0, "moderate": 25, "strong": 50}
 
 # This is deliberately a data table.  Adding a detector category requires one
@@ -142,7 +143,7 @@ def _confidence(module_status: dict[str, str], evidence: list[Evidence], input_o
         base = "medium"  # preserve the documented cap for new strategies too
     ml_positive = any(item.source == "ml_classifier" and item.severity != Severity.informational for item in evidence)
     deterministic_positive = any(item.source != "ml_classifier" and item.severity != Severity.informational for item in evidence)
-    if ml_positive != deterministic_positive:
+    if module_status.get("ml") == "completed" and ml_positive != deterministic_positive:
         base = {"high": "medium", "medium": "low", "low": "low"}[base]
     return base
 
@@ -151,8 +152,8 @@ def _result(score: int, evidence: list[Evidence], module_status: dict[str, str],
             module_quality: dict[str, float] | None, *, parameters: dict[str, Any],
             drivers: list[str], agreement: str, extra: dict[str, Any] | None = None) -> StrategyResult:
     confidence = _confidence(module_status, evidence, input_ok, module_quality)
-    completed = any(status == "completed" for status in module_status.values())
-    if not input_ok or not completed:
+    from services.analysis.fusion.engine import coverage_requires_unable_to_verify
+    if coverage_requires_unable_to_verify(score, confidence, module_status, input_ok, module_quality):
         label = "unable_to_verify"
     else:
         label = _label(score)
@@ -170,7 +171,9 @@ def _result(score: int, evidence: list[Evidence], module_status: dict[str, str],
                           primary=primary, secondary=secondary, data=data)
 
 
-def _agreement(evidence: list[Evidence]) -> tuple[str, bool, bool]:
+def _agreement(evidence: list[Evidence], module_status: dict[str, str]) -> tuple[str, bool, bool]:
+    if module_status.get("ml") != "completed":
+        return "not_applicable", False, False
     ml = any(item.source == "ml_classifier" and item.severity != Severity.informational for item in evidence)
     rules = any(item.source != "ml_classifier" and item.severity != Severity.informational for item in evidence)
     if ml and rules:
@@ -184,7 +187,10 @@ def _agreement(evidence: list[Evidence]) -> tuple[str, bool, bool]:
 
 def ml_aware_weighted(evidence: list[Evidence], module_status: dict[str, str], input_ok: bool = True,
                       module_quality: dict[str, float] | None = None, *, ml_weight: float = DEFAULT_ML_WEIGHT,
-                      strong_ml_cut: float = DEFAULT_STRONG_ML_CUT, severity_weight: dict[Severity, float] | None = None) -> StrategyResult:
+                      strong_ml_cut: float = DEFAULT_STRONG_ML_CUT,
+                      min_tokens_for_moderate_ml_floor: int = DEFAULT_MIN_TOKENS_FOR_MODERATE_ML_FLOOR,
+                      input_token_count: int | None = None,
+                      severity_weight: dict[Severity, float] | None = None) -> StrategyResult:
     """Legacy rule noisy-OR plus one explicitly tunable ML weight."""
     from services.analysis.fusion.engine import SEVERITY_WEIGHT
     weights = severity_weight or SEVERITY_WEIGHT
@@ -200,13 +206,13 @@ def ml_aware_weighted(evidence: list[Evidence], module_status: dict[str, str], i
     strong_deterministic = any(item.source != "ml_classifier" for item in classes["strong"])
     if strong_ml:
         score = max(score, TIER_MINIMUM_SCORES["strong"])
-    elif moderate_ml:
+    elif moderate_ml and (input_token_count is None or input_token_count >= min_tokens_for_moderate_ml_floor):
         score = max(score, TIER_MINIMUM_SCORES["moderate"])
     if strong_deterministic:
         score = max(score, TIER_MINIMUM_SCORES["strong"])
     if strong_deterministic and ml:
         score = max(score, 70)
-    agreement, _, _ = _agreement(evidence)
+    agreement, _, _ = _agreement(evidence, module_status)
     drivers = ["deterministic_evidence"] if rules else []
     if strong_ml:
         drivers.append("strong_ml")
@@ -215,12 +221,15 @@ def ml_aware_weighted(evidence: list[Evidence], module_status: dict[str, str], i
     if strong_deterministic:
         drivers.append("strong_deterministic")
     return _result(score, evidence, module_status, input_ok, module_quality,
-                   parameters={"strategy": "ml_aware_weighted", "ml_weight": ml_weight, "strong_ml_cut": strong_ml_cut},
+                   parameters={"strategy": "ml_aware_weighted", "ml_weight": ml_weight, "strong_ml_cut": strong_ml_cut,
+                               "min_tokens_for_moderate_ml_floor": min_tokens_for_moderate_ml_floor},
                    drivers=drivers, agreement=agreement)
 
 
 def strength_gated(evidence: list[Evidence], module_status: dict[str, str], input_ok: bool = True,
                    module_quality: dict[str, float] | None = None, *, strong_ml_cut: float = DEFAULT_STRONG_ML_CUT,
+                   min_tokens_for_moderate_ml_floor: int = DEFAULT_MIN_TOKENS_FOR_MODERATE_ML_FLOOR,
+                   input_token_count: int | None = None,
                    tier_minimum_scores: dict[str, int] | None = None,
                    severity_weight: dict[Severity, float] | None = None) -> StrategyResult:
     """Fuse evidence with explicit strength floors and agreement semantics."""
@@ -235,13 +244,13 @@ def strength_gated(evidence: list[Evidence], module_status: dict[str, str], inpu
     strong_deterministic = bool([item for item in classes["strong"] if item.source != "ml_classifier"])
     if strong_ml:
         score = max(score, minimums["strong"])
-    elif moderate_ml:
+    elif moderate_ml and (input_token_count is None or input_token_count >= min_tokens_for_moderate_ml_floor):
         score = max(score, minimums["moderate"])
     if strong_deterministic:
         score = max(score, minimums["strong"])
     if strong_deterministic and has_ml:
         score = max(score, 70)
-    agreement, _, _ = _agreement(evidence)
+    agreement, _, _ = _agreement(evidence, module_status)
     drivers = []
     if strong_ml:
         drivers.append("strong_ml")
@@ -253,19 +262,27 @@ def strength_gated(evidence: list[Evidence], module_status: dict[str, str], inpu
         drivers.append("weak_indicators")
     return _result(score, evidence, module_status, input_ok, module_quality,
                    parameters={"strategy": "strength_gated", "moderate_ml_cut": MODERATE_ML_CUT,
-                               "strong_ml_cut": strong_ml_cut, "tier_minimum_scores": minimums},
+                               "strong_ml_cut": strong_ml_cut,
+                               "min_tokens_for_moderate_ml_floor": min_tokens_for_moderate_ml_floor,
+                               "tier_minimum_scores": minimums},
                    drivers=drivers, agreement=agreement)
 
 
 def apply_strategy(name: str, evidence: list[Evidence], module_status: dict[str, str], input_ok: bool = True,
                    module_quality: dict[str, float] | None = None, *, ml_weight: float = DEFAULT_ML_WEIGHT,
                    strong_ml_cut: float = DEFAULT_STRONG_ML_CUT,
+                   min_tokens_for_moderate_ml_floor: int = DEFAULT_MIN_TOKENS_FOR_MODERATE_ML_FLOOR,
+                   input_token_count: int | None = None,
                    tier_minimum_scores: dict[str, int] | None = None,
                    severity_weight: dict[Severity, float] | None = None) -> StrategyResult:
     if name == "ml_aware_weighted":
         return ml_aware_weighted(evidence, module_status, input_ok, module_quality, ml_weight=ml_weight,
-                                 strong_ml_cut=strong_ml_cut, severity_weight=severity_weight)
+                                 strong_ml_cut=strong_ml_cut,
+                                 min_tokens_for_moderate_ml_floor=min_tokens_for_moderate_ml_floor,
+                                 input_token_count=input_token_count, severity_weight=severity_weight)
     if name == "strength_gated":
         return strength_gated(evidence, module_status, input_ok, module_quality, strong_ml_cut=strong_ml_cut,
+                              min_tokens_for_moderate_ml_floor=min_tokens_for_moderate_ml_floor,
+                              input_token_count=input_token_count,
                               tier_minimum_scores=tier_minimum_scores, severity_weight=severity_weight)
     raise ValueError(f"unknown fusion strategy: {name}")

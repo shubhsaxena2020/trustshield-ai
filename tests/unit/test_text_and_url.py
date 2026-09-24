@@ -67,6 +67,15 @@ def test_short_benign_input_is_analyzed_with_low_confidence(monkeypatch):
     assert any("Limited context" in limitation for limitation in r.limitations)
 
 
+def test_rule_only_completed_text_keeps_score_based_label(monkeypatch):
+    monkeypatch.setenv("TRUSTSHIELD_ML", "off")
+    result = analyze_text("Your account will be blocked today")
+    assert result.modules["text_rules"].status == "completed"
+    assert result.modules["ml"].status == "not_run"
+    assert result.risk.label == "low_risk"
+    assert result.risk.label != "unable_to_verify"
+
+
 @pytest.mark.parametrize("text, expected_category", [
     ("OTP 481926", None),
     ("Enter CVV", "credential_request"),

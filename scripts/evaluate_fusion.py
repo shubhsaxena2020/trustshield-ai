@@ -10,6 +10,7 @@ import argparse
 import csv
 import json
 import os
+import re
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -23,7 +24,8 @@ if str(ROOT) not in sys.path:
 from services.analysis.evidence.models import Evidence, Severity
 from services.analysis.fusion.engine import fuse, risk_score
 from services.analysis.pipeline import analyze_text
-from services.analysis.fusion.strategies import DEFAULT_STRONG_ML_CUT, MODERATE_ML_CUT
+from services.analysis.fusion.strategies import DEFAULT_ML_WEIGHT, DEFAULT_STRONG_ML_CUT, MODERATE_ML_CUT
+from services.analysis.normalization.text import alphanumeric_token_count
 
 SEED = 42
 ML_THRESHOLD = 0.12
@@ -39,24 +41,29 @@ def validate_split(value: str) -> str:
 
 def _safe_dataset_dir(path: Path) -> Path:
     resolved = path.resolve()
-    parts = {part.lower() for part in resolved.parts}
-    if "holdout" in parts or "test" in parts:
+    if any(_is_sealed_component(part) for part in resolved.parts):
         raise ValueError("sealed test/holdout paths are not allowed")
     return resolved
 
 
+def _is_sealed_component(part: str) -> bool:
+    value = part.lower()
+    return "holdout" in value or value in {"test", "test_v1_frozen"} or re.match(r"^test(?:_|-)?v\d", value) is not None
+
+
 def _read_csv(path: Path) -> list[dict]:
-    resolved = path.resolve()
-    if resolved.name.startswith("predictions_test") or "test" in {part.lower() for part in resolved.parts}:
+    resolved = _safe_dataset_dir(path)
+    if resolved.name.lower().startswith("predictions_test"):
         raise ValueError("test predictions are sealed")
     with resolved.open(encoding="utf-8", newline="") as handle:
         return list(csv.DictReader(handle))
 
 
 def _read_jsonl(path: Path, expected_name: str) -> list[dict]:
-    if path.name != expected_name:
+    resolved = _safe_dataset_dir(path)
+    if resolved.name != expected_name:
         raise ValueError(f"may open only {expected_name}")
-    with path.open(encoding="utf-8") as handle:
+    with resolved.open(encoding="utf-8") as handle:
         return [json.loads(line) for line in handle if line.strip()]
 
 
@@ -128,7 +135,12 @@ def _load_rows(split: str, dataset_dir: Path, project_root: Path) -> tuple[list[
     if split == "train_oof":
         path = project_root / "models" / "evaluation" / "fusion" / "train_oof_predictions.csv"
         rows = _read_csv(path)
-        input_files = [str(path)]
+        train_path = dataset_dir / "train.jsonl"
+        train_rows = _read_jsonl(train_path, "train.jsonl")
+        texts = {row["id"]: row["text"] for row in train_rows}
+        for row in rows:
+            row["text"] = texts[row["id"]]
+        input_files = [str(path), str(train_path)]
     else:
         path = project_root / "models" / "evaluation" / "validation" / "predictions_validation.csv"
         rows = _read_csv(path)
@@ -151,12 +163,15 @@ def _make_evidence(rows: list[dict]) -> list[tuple[list[Evidence], dict[str, str
 
 def _evaluate_candidate(name: str, rows: list[dict], evidence_rows: list[tuple[list[Evidence], dict[str, str]]],
                         *, ml_weight: float = 1.0, strong_ml_cut: float = DEFAULT_STRONG_ML_CUT,
-                        tier_minimum_scores: dict[str, int] | None = None) -> list[dict]:
+                        tier_minimum_scores: dict[str, int] | None = None,
+                        min_tokens_for_moderate_ml_floor: int = 6) -> list[dict]:
     output = []
     for row, (evidence, statuses) in zip(rows, evidence_rows):
         result = fuse(evidence, statuses, strategy_name=name, module_quality=None,
+                      input_token_count=alphanumeric_token_count(row["text"]),
                       strategy_params={"ml_weight": ml_weight, "strong_ml_cut": strong_ml_cut,
-                                       "tier_minimum_scores": tier_minimum_scores} if name != "legacy" else None)
+                                       "tier_minimum_scores": tier_minimum_scores,
+                                       "min_tokens_for_moderate_ml_floor": min_tokens_for_moderate_ml_floor} if name != "legacy" else None)
         output.append({"id": row["id"], "score": result.score, "label": result.label,
                        "ml_p": row["ml_p"], "binary": row["binary"],
                        "rule_score": risk_score([item for item in evidence if item.source != "ml_classifier"]),
@@ -165,11 +180,53 @@ def _evaluate_candidate(name: str, rows: list[dict], evidence_rows: list[tuple[l
     return output
 
 
-def _tune_parameters(rows: list[dict], evidence_rows: list[tuple[list[Evidence], dict[str, str]]]) -> dict:
+def _short_text_floor_analysis(rows: list[dict], evidence_rows: list[tuple[list[Evidence], dict[str, str]]],
+                               strong_ml_cut: float = DEFAULT_STRONG_ML_CUT) -> tuple[list[dict], int]:
+    moderate = [
+        (row, evidence, alphanumeric_token_count(row["text"]))
+        for row, (evidence, _) in zip(rows, evidence_rows)
+        if MODERATE_ML_CUT <= row["ml_p"] < strong_ml_cut
+    ]
+    table = []
+    for maximum_tokens in range(1, 7):
+        selected = [(row, evidence, tokens) for row, evidence, tokens in moderate if tokens <= maximum_tokens]
+        benign = [item for item in selected if item[0]["binary"] == 0]
+        malicious = [item for item in selected if item[0]["binary"] == 1]
+        floorless = _evaluate_candidate(
+            "ml_aware_weighted", [item[0] for item in selected],
+            [(item[1], {"text_rules": "completed", "ml": "completed"}) for item in selected],
+            ml_weight=DEFAULT_ML_WEIGHT, strong_ml_cut=strong_ml_cut,
+            min_tokens_for_moderate_ml_floor=maximum_tokens + 1,
+        )
+        benign_floor = sum(item["binary"] == 0 and item["score"] < 25 for item in floorless)
+        malicious_floor = sum(item["binary"] == 1 and item["score"] < 25 for item in floorless)
+        table.append({
+            "max_alphanumeric_tokens": maximum_tokens,
+            "moderate_ml_rows": len(selected),
+            "legitimate_rows": len(benign),
+            "malicious_rows": len(malicious),
+            "legitimate_floor_rows_removed": benign_floor,
+            "malicious_floor_rows_removed": malicious_floor,
+            "malicious_recall_cost_pct_of_moderate_ml": malicious_floor / max(1, sum(item[0]["binary"] == 1 for item in moderate)) * 100,
+            "moderate_ml_cut": MODERATE_ML_CUT,
+            "strong_ml_cut": strong_ml_cut,
+            "source": "train_oof_predictions.csv + train.jsonl",
+        })
+    selected_n = min(table, key=lambda item: (
+        item["malicious_floor_rows_removed"],
+        -item["legitimate_floor_rows_removed"],
+        item["max_alphanumeric_tokens"],
+    ))["max_alphanumeric_tokens"]
+    return table, selected_n
+
+
+def _tune_parameters(rows: list[dict], evidence_rows: list[tuple[list[Evidence], dict[str, str]]]) -> tuple[dict, list[dict]]:
+    short_analysis, short_floor_tokens = _short_text_floor_analysis(rows, evidence_rows)
     labels = [row["binary"] for row in rows]
     candidates = []
     for weight in (0.50, 0.75, 1.00, 1.25, 1.50, 2.00):
-        values = _evaluate_candidate("ml_aware_weighted", rows, evidence_rows, ml_weight=weight)
+        values = _evaluate_candidate("ml_aware_weighted", rows, evidence_rows, ml_weight=weight,
+                                     min_tokens_for_moderate_ml_floor=short_floor_tokens)
         scores = [item["score"] for item in values]
         metrics = _binary_metrics(labels, scores, 25)
         candidates.append((metrics["specificity"] >= 0.85, metrics["F1"], -weight, "ml_aware_weighted", {"ml_weight": weight}))
@@ -179,14 +236,24 @@ def _tune_parameters(rows: list[dict], evidence_rows: list[tuple[list[Evidence],
         for moderate_floor in (25, 30):
             for strong_floor in (50, 60):
                 params = {"strong_ml_cut": cut, "tier_minimum_scores": {"weak": 0, "moderate": moderate_floor, "strong": strong_floor}}
-                values = _evaluate_candidate("strength_gated", rows, evidence_rows, **params)
+                values = _evaluate_candidate("strength_gated", rows, evidence_rows,
+                                             min_tokens_for_moderate_ml_floor=short_floor_tokens, **params)
                 metrics = _binary_metrics(labels, [item["score"] for item in values], 25)
                 gated.append((metrics["specificity"] >= 0.85, metrics["F1"], -cut, -moderate_floor, -strong_floor, params))
     c = max(gated, key=lambda item: item[:-1])
-    return {"seed": SEED, "train_oof_rows": len(rows), "moderate_ml_cut": MODERATE_ML_CUT,
-            "ml_aware_weighted": b[4], "strength_gated": c[-1],
-            "selection_rule": "highest train-OOf caution F1 subject to specificity >= 0.85; ties prefer simpler/lower parameter values",
-            "learned_meta": {"status": "skipped", "reason": "No new trained production artifact is permitted in Phase 4; a runtime-loaded meta model would violate the frozen-artifact boundary."}}
+    b[4]["min_tokens_for_moderate_ml_floor"] = short_floor_tokens
+    c[-1]["min_tokens_for_moderate_ml_floor"] = short_floor_tokens
+    return ({"seed": SEED, "train_oof_rows": len(rows), "moderate_ml_cut": MODERATE_ML_CUT,
+             "ml_aware_weighted": b[4], "strength_gated": c[-1],
+             "selection_rule": _selection_rule("train_oof"),
+             "short_text_floor": {
+                 "min_tokens_for_moderate_ml_floor": short_floor_tokens,
+                 "strong_ml_cut": DEFAULT_STRONG_ML_CUT,
+                 "analysis_file": "models/evaluation/fusion/short_text_floor_analysis.csv",
+                 "selection_rule": "minimize observed malicious moderate-ML floor removals; within that set maximize legitimate floor removals; ties choose the smallest tested N.",
+                 "provenance": "Chosen from train OOF rows only using alphanumeric_token_count(text) from train.jsonl; no validation rows used.",
+             },
+             "learned_meta": {"status": "skipped", "reason": "No new trained production artifact is permitted in Phase 4; a runtime-loaded meta model would violate the frozen-artifact boundary."}}, short_analysis)
 
 
 def _agreement_rows(values: list[dict], candidate: str, malicious_total: int) -> list[dict]:
@@ -233,6 +300,11 @@ def _selection(comparison: list[dict]) -> str:
     return selected["candidate"]
 
 
+def _selection_rule(split: str) -> str:
+    scope = "train OOF" if split == "train_oof" else "validation"
+    return f"highest {scope} caution F1 subject to specificity >= 0.85; ties prefer simpler strategy"
+
+
 def evaluate(split: str, dataset_dir: str | Path, project_root: str | Path | None = None) -> dict:
     split = validate_split(split)
     project_root = Path(project_root or ROOT).resolve()
@@ -241,10 +313,11 @@ def evaluate(split: str, dataset_dir: str | Path, project_root: str | Path | Non
     evidence_rows = _make_evidence(rows)
     tuning = None
     if split == "train_oof":
-        tuning = _tune_parameters(rows, evidence_rows)
+        tuning, short_analysis = _tune_parameters(rows, evidence_rows)
         tuning_path = project_root / "models" / "evaluation" / "fusion" / "tuning.json"
         tuning_path.parent.mkdir(parents=True, exist_ok=True)
         tuning_path.write_text(json.dumps(tuning, indent=2) + "\n", encoding="utf-8")
+        _write_csv(project_root / "models" / "evaluation" / "fusion" / "short_text_floor_analysis.csv", short_analysis)
     else:
         tuning_path = project_root / "models" / "evaluation" / "fusion" / "tuning.json"
         if not tuning_path.is_file():
@@ -291,7 +364,7 @@ def evaluate(split: str, dataset_dir: str | Path, project_root: str | Path | Non
 
     comparison.append({"split": split, "candidate": "learned_meta", "status": "skipped",
                        "operating_point": "not_evaluated", "reason": tuning["learned_meta"]["reason"]})
-    selected = _selection(comparison) if split == "validation" else "strength_gated"
+    selected = _selection(comparison)
     selected_values = candidate_values[selected]
     selected_pred = [{**item, "prediction": int(item["score"] >= 25)} for item in selected_values]
     legacy_pred = [{**item, "prediction": int(item["score"] >= 25)} for item in candidate_values["legacy"]]
@@ -333,12 +406,12 @@ def evaluate(split: str, dataset_dir: str | Path, project_root: str | Path | Non
             ])
     (out_dir / "bootstrap_confidence_intervals.json").write_text(json.dumps(bootstrap, indent=2) + "\n", encoding="utf-8")
     summary = {"split": split, "candidate_count": len(CANDIDATES), "selected_candidate": selected,
-               "selection_rule": "highest validation caution F1 subject to specificity >= 0.85; ties prefer simpler strategy",
+               "selection_rule": _selection_rule(split),
                "input_files": input_files, "tuning_file": str(tuning_path), "bootstrap": bootstrap,
                "learned_meta": tuning["learned_meta"]}
     (out_dir / "evaluation.json").write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
     markdown = [f"# Fusion evaluation: {split}", "", f"Selected candidate: `{selected}`", "",
-                "Selection: highest caution+ F1 subject to specificity >= 0.85; ties prefer simpler strategy.", "",
+                f"Selection: {_selection_rule(split)}.", "",
                 "Learned meta: skipped because Phase 4 does not add a trained production artifact.", "",
                 "Input files:"]
     markdown.extend(f"- `{path}`" for path in input_files)

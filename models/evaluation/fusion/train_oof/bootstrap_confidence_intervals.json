@@ -1,5 +1,5 @@
 {
-  "selected_candidate": "strength_gated",
+  "selected_candidate": "ml_aware_weighted",
   "legacy": {
     "recall": [
       0.4521716485507246,
@@ -19,8 +19,8 @@
       0.984438802337635
     ],
     "specificity": [
-      0.8822536319624867,
-      0.9070533103808831
+      0.8825760562975923,
+      0.9074951268672283
     ],
     "groups": 2918,
     "samples": 2000,
@@ -28,7 +28,7 @@
   },
   "point_difference": {
     "recall": 0.47326732673267324,
-    "specificity": -0.09034397016162454
+    "specificity": -0.08992954828014921
   },
   "difference_exceeds_noise": {
     "recall": true,

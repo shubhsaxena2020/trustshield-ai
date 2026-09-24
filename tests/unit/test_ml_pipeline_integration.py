@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from fastapi.testclient import TestClient
+import pytest
 
 import services.analysis.fusion.engine as fusion_engine
 from services.analysis.fusion.engine import CONFIDENCE_CAP
@@ -63,6 +64,35 @@ def test_ml_off_is_rule_only_and_url_does_not_run_text_model(monkeypatch):
     assert result.modules["ml"].status == "not_run"
     url_result = analyze_url("https://example.invalid/login")
     assert "ml" not in url_result.modules
+
+
+def test_url_without_ml_reports_non_applicable_agreement(monkeypatch):
+    monkeypatch.delenv("TRUSTSHIELD_FUSION", raising=False)
+    result = analyze_url("https://user:pass@evil.example.com")
+    assert result.modules["fusion"].data["agreement"] == "not_applicable"
+    assert result.modules["fusion"].data["disagreement"] is False
+
+
+def test_short_benign_text_does_not_get_moderate_ml_floor(monkeypatch):
+    monkeypatch.setenv("TRUSTSHIELD_ML", "on")
+    monkeypatch.delenv("TRUSTSHIELD_FUSION", raising=False)
+    monkeypatch.setattr(pipeline, "_text_classifier", lambda: FakeClassifier(_prediction(0.31, None)))
+    short = analyze_text("hello there")
+    long = analyze_text("this is a longer ordinary message with enough context for analysis")
+    assert short.risk.label == "low_risk"
+    assert short.risk.score < 25
+    assert long.risk.label == "caution"
+    assert long.risk.score >= 25
+
+
+@pytest.mark.parametrize("probability", [float("nan"), float("inf"), -0.1, 1.5])
+def test_nonfinite_or_out_of_range_ml_probability_fails_closed(monkeypatch, probability):
+    monkeypatch.setenv("TRUSTSHIELD_ML", "on")
+    monkeypatch.setattr(pipeline, "_text_classifier", lambda: FakeClassifier(_prediction(probability, None)))
+    result = analyze_text("ordinary words with no deterministic rule trigger")
+    assert result.modules["ml"].status == "failed"
+    assert "p_malicious" in result.modules["ml"].detail
+    assert result.risk.label == "unable_to_verify"
 
 
 def test_missing_model_degrades_to_unavailable_without_raising(monkeypatch, tmp_path):

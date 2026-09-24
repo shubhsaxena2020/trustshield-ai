@@ -2,7 +2,7 @@
 
 Selected candidate: `ml_aware_weighted`
 
-Selection: highest caution+ F1 subject to specificity >= 0.85; ties prefer simpler strategy.
+Selection: highest validation caution F1 subject to specificity >= 0.85; ties prefer simpler strategy.
 
 Learned meta: skipped because Phase 4 does not add a trained production artifact.
 
