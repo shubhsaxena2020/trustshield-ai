@@ -1,0 +1,14 @@
+{
+  "split": "train_oof",
+  "seed": 42,
+  "folds": 5,
+  "group_field": "duplicate_group",
+  "architecture": "combined-feature LinearSVC(C=1.0) with sigmoid calibration cv=5",
+  "dataset_dir": "C:\\Users\\shubh\\trustshield-ai\\datasets\\processed\\trustshield-text-v1",
+  "train_row_count": 2918,
+  "input_files": [
+    "C:\\Users\\shubh\\trustshield-ai\\datasets\\processed\\trustshield-text-v1\\train.jsonl"
+  ],
+  "prediction_file": "C:\\Users\\shubh\\trustshield-ai\\models\\evaluation\\fusion\\train_oof_predictions.csv",
+  "prediction_sha256": "47e2c79920c8e2b4fec71404c6282104d622954563d799c190a7961a544dc865"
+}

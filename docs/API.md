@@ -101,6 +101,29 @@ Returns a previously stored `AnalysisResult`, or HTTP 404 when the ID is not in 
 
 `score` is an implementation output, not an accuracy or probability claim. Evidence entries contain detector source, category, severity, detector confidence, title, description, and optional metadata.
 
+With the Phase 4 default fusion, `modules.fusion` is an additive optional
+module. Its data shape is:
+
+```json
+{
+  "status": "completed",
+  "detail": "",
+  "data": {
+    "strategy": "ml_aware_weighted",
+    "version": "phase4-1",
+    "strength_class_counts": {"weak": 0, "moderate": 1, "strong": 0},
+    "agreement": "agree|ml_only|rules_only|both_negative",
+    "disagreement": true,
+    "drivers": ["moderate_ml"],
+    "parameters": {"ml_weight": 0.5, "strong_ml_cut": 0.7}
+  }
+}
+```
+
+Set `TRUSTSHIELD_FUSION=legacy` to omit this optional module and retain the
+legacy noisy-OR fusion. The existing `risk.score`, `risk.label`,
+`risk.confidence`, evidence, and other module shapes remain unchanged.
+
 ## Nested image and QR module data
 
 Each module has `status`, `detail`, and `data`. Module statuses are `completed`, `not_run`, `unavailable`, `failed`, or `timeout`.

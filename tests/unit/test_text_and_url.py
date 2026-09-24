@@ -51,13 +51,15 @@ def test_fake_job_with_fee():
     assert {"fake_job", "payment_request", "job_fee_scam"} <= cats(r.evidence)
 
 
-def test_single_keyword_not_decisive():
+def test_single_keyword_not_decisive(monkeypatch):
+    monkeypatch.setenv("TRUSTSHIELD_ML", "off")
     ev = run_text_rules("we will review this immediately and get back to you tomorrow")
     r = analyze_text("Hi Rahul, the class notes are uploaded. Please check them immediately when free.")
     assert r.risk.score < 25
 
 
-def test_short_benign_input_is_analyzed_with_low_confidence():
+def test_short_benign_input_is_analyzed_with_low_confidence(monkeypatch):
+    monkeypatch.setenv("TRUSTSHIELD_ML", "off")
     r = analyze_text("hello there")
     assert r.status != "failed"
     assert r.risk.label == "low_risk"

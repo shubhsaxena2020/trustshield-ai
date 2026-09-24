@@ -28,12 +28,17 @@ ACTIONS = {
 GENERIC = ["Verify the sender independently through an official contact channel.", "If you already interacted, contact your bank and report at cybercrime.gov.in or call 1930."]
 
 
-def explain(label: str, evidence: list[Evidence], primary: str, limitations: list[str]) -> tuple[str, list[str]]:
+def explain(label: str, evidence: list[Evidence], primary: str, limitations: list[str],
+            fusion_data: dict | None = None) -> tuple[str, list[str]]:
     material = [e for e in evidence if e.severity != Severity.informational]
     parts = [LABEL_TEXT[label]]
     if material and label != "unable_to_verify":
         top = sorted(material, key=lambda e: (list(Severity).index(e.severity), e.confidence), reverse=True)[:4]
         parts.append("Main findings: " + "; ".join(e.title.rstrip(".") for e in top) + ".")
+    if fusion_data and label != "unable_to_verify":
+        drivers = fusion_data.get("drivers") or []
+        if drivers:
+            parts.append("Evidence strength classes driving this level: " + ", ".join(drivers) + ".")
     if limitations:
         parts.append("Limitations: " + " ".join(limitations))
     actions = list(ACTIONS.get(primary, []))

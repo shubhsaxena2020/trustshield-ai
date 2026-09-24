@@ -1,9 +1,12 @@
-"""Risk fusion + confidence. Provisional weights/bands: to be tuned on validation data (docs/ACCURACY_VALIDATION.md)."""
+"""Risk fusion + confidence. Legacy behavior is preserved for compatibility."""
 from __future__ import annotations
 
 from dataclasses import dataclass
+import os
+from typing import Any
 
 from services.analysis.evidence.models import Evidence, Severity
+from services.analysis.fusion.config import RISK_BANDS as BANDS
 
 # Probability-like weight a single piece of evidence contributes at confidence 1.0.
 SEVERITY_WEIGHT = {
@@ -13,8 +16,6 @@ SEVERITY_WEIGHT = {
     Severity.high: 0.38,
     Severity.critical: 0.55,
 }
-BANDS = [(70, "high_risk"), (50, "suspicious"), (25, "caution"), (0, "low_risk")]  # provisional
-
 CATEGORY_PRIORITY = [
     ("digital_arrest", "digital_arrest"),
     ("credential_pressure", "credential_phishing"),
@@ -37,6 +38,7 @@ CATEGORY_PRIORITY = [
 # ML availability must not be treated as calibration or detector agreement.
 # This cap is lifted only after a later evaluation of calibration and agreement.
 CONFIDENCE_CAP = "medium"
+DEFAULT_FUSION_STRATEGY = "ml_aware_weighted"
 _CONFIDENCE_RANK = {"low": 0, "medium": 1, "high": 2}
 ML_CATEGORY_MAP = {
     "phishing": "phishing", "credential_theft": "credential_theft", "payment_fraud": "payment_fraud",
@@ -53,6 +55,7 @@ class Fusion:
     confidence: str
     primary: str
     secondary: list[str]
+    data: dict[str, Any] | None = None
 
 
 def risk_score(evidence: list[Evidence]) -> int:
@@ -116,7 +119,14 @@ def _limited_context_is_only_low_confidence_cause(
 
 
 def fuse(evidence: list[Evidence], module_status: dict[str, str], input_ok: bool = True,
-         module_quality: dict[str, float] | None = None) -> Fusion:
+         module_quality: dict[str, float] | None = None, strategy_name: str | None = None,
+         strategy_params: dict[str, Any] | None = None) -> Fusion:
+    strategy_name = strategy_name or os.getenv("TRUSTSHIELD_FUSION", DEFAULT_FUSION_STRATEGY).strip().lower()
+    if strategy_name != "legacy":
+        from services.analysis.fusion.strategies import apply_strategy
+        result = apply_strategy(strategy_name, evidence, module_status, input_ok, module_quality,
+                                severity_weight=SEVERITY_WEIGHT, **(strategy_params or {}))
+        return Fusion(result.score, result.label, result.confidence, result.primary, result.secondary, result.data)
     score = risk_score(evidence)
     confidence = assess_confidence(module_status, input_ok, module_quality)
     label = label_for(score)

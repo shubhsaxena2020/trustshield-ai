@@ -48,7 +48,9 @@ def _run_ml(text: str) -> tuple[ModuleResult, list[Evidence], bool]:
 def _finish(input_type: str, evidence: list[Evidence], modules: dict[str, ModuleResult], limitations: list[str],
             input_ok: bool = True, module_quality: dict[str, float] | None = None) -> AnalysisResult:
     fusion = fuse(evidence, {k: v.status for k, v in modules.items()}, input_ok, module_quality)
-    explanation, actions = explain(fusion.label, evidence, fusion.primary, limitations)
+    if fusion.data:
+        modules["fusion"] = ModuleResult(status="completed", data=fusion.data)
+    explanation, actions = explain(fusion.label, evidence, fusion.primary, limitations, fusion.data)
     bad = any(m.status in {"failed", "timeout"} for m in modules.values())
     status = "failed" if not input_ok else "partial" if bad else "completed"
     order = list(Severity)

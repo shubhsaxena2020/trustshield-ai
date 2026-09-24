@@ -37,6 +37,26 @@ def test_ml_provenance_and_category_fill_ruleless_classification(monkeypatch):
     assert result.evidence[0].source == "ml_classifier"
 
 
+def test_nonlegacy_fusion_is_exposed_as_optional_module_data(monkeypatch):
+    monkeypatch.setenv("TRUSTSHIELD_ML", "on")
+    monkeypatch.setenv("TRUSTSHIELD_FUSION", "strength_gated")
+    monkeypatch.setattr(pipeline, "_text_classifier", lambda: FakeClassifier(_prediction(0.95)))
+    result = analyze_text("ordinary words with no deterministic rule trigger")
+    assert result.modules["fusion"].status == "completed"
+    assert result.modules["fusion"].data["strategy"] == "strength_gated"
+    assert result.modules["fusion"].data["agreement"] == "ml_only"
+    assert result.risk.score >= 50
+
+
+def test_selected_nonlegacy_fusion_is_the_default(monkeypatch):
+    monkeypatch.delenv("TRUSTSHIELD_FUSION", raising=False)
+    monkeypatch.setenv("TRUSTSHIELD_ML", "on")
+    monkeypatch.setattr(pipeline, "_text_classifier", lambda: FakeClassifier(_prediction(0.40)))
+    result = analyze_text("ordinary words with no deterministic rule trigger")
+    assert result.modules["fusion"].data["strategy"] == "ml_aware_weighted"
+    assert result.risk.label in {"caution", "suspicious", "high_risk"}
+
+
 def test_ml_off_is_rule_only_and_url_does_not_run_text_model(monkeypatch):
     monkeypatch.setenv("TRUSTSHIELD_ML", "off")
     result = analyze_text("verify account now")

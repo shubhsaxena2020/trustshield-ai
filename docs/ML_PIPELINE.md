@@ -129,3 +129,28 @@ and new reporting-only artifacts: `test_reporting_summary.json`,
 uses saved predictions only and never runs the test evaluator. Threshold
 sensitivity is post-hoc, not used for selection; the operating threshold
 remains `0.12`.
+
+## Phase 4 risk fusion
+
+Phase 4 keeps the frozen model, rules, evidence definitions, and ML threshold
+unchanged. It adds pluggable fusion strategies selected by
+`TRUSTSHIELD_FUSION=legacy|ml_aware_weighted|strength_gated`; the validation-
+selected default is `ml_aware_weighted`, and `legacy` is the compatibility
+escape hatch. Risk and confidence remain separate. New fusion outputs are
+written only under `models/evaluation/fusion/`.
+
+Reproducible validation-only commands are:
+
+```powershell
+python scripts/fusion_oof_predictions.py --split train_oof --dataset-dir datasets/processed/trustshield-text-v1
+python scripts/evaluate_fusion.py --split train_oof --dataset-dir datasets/processed/trustshield-text-v1
+python scripts/evaluate_fusion.py --split validation --dataset-dir datasets/processed/trustshield-text-v1
+```
+
+The OOF script uses five grouped folds, seed 42, and refits the frozen
+combined-feature LinearSVC + sigmoid calibration architecture per fold. The
+evaluator refuses `--split test`, never opens `test.jsonl` or holdout data, and
+uses train OOF only for parameter tuning. Validation is evaluated once per
+candidate and selected by caution+ F1 subject to specificity at least 0.85,
+with simplicity as the tie-break. `learned_meta` is skipped because no new
+trained production artifact/loading contract is allowed in this phase.

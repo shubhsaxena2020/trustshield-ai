@@ -1,0 +1,51 @@
+{
+  "split": "train_oof",
+  "candidate_count": 3,
+  "selected_candidate": "strength_gated",
+  "selection_rule": "highest validation caution F1 subject to specificity >= 0.85; ties prefer simpler strategy",
+  "input_files": [
+    "C:\\Users\\shubh\\trustshield-ai\\models\\evaluation\\fusion\\train_oof_predictions.csv"
+  ],
+  "tuning_file": "C:\\Users\\shubh\\trustshield-ai\\models\\evaluation\\fusion\\tuning.json",
+  "bootstrap": {
+    "selected_candidate": "strength_gated",
+    "legacy": {
+      "recall": [
+        0.4521716485507246,
+        0.5412707702321384
+      ],
+      "specificity": [
+        0.9806981131750309,
+        0.9900083263946711
+      ],
+      "groups": 2918,
+      "samples": 2000,
+      "seed": 42
+    },
+    "selected": {
+      "recall": [
+        0.9547150359852169,
+        0.984438802337635
+      ],
+      "specificity": [
+        0.8822536319624867,
+        0.9070533103808831
+      ],
+      "groups": 2918,
+      "samples": 2000,
+      "seed": 42
+    },
+    "point_difference": {
+      "recall": 0.47326732673267324,
+      "specificity": -0.09034397016162454
+    },
+    "difference_exceeds_noise": {
+      "recall": true,
+      "specificity": true
+    }
+  },
+  "learned_meta": {
+    "status": "skipped",
+    "reason": "No new trained production artifact is permitted in Phase 4; a runtime-loaded meta model would violate the frozen-artifact boundary."
+  }
+}

@@ -105,6 +105,7 @@ def test_mime_parameters_are_accepted():
 def test_low_quality_ocr_has_lower_confidence_than_direct_text(monkeypatch):
     monkeypatch.setenv("TRUSTSHIELD_OCR_PROVIDER", "mock")
     monkeypatch.setenv("TRUSTSHIELD_ML", "off")
+    monkeypatch.setenv("TRUSTSHIELD_FUSION", "legacy")
     text = "Your account will be blocked today. Share OTP now at http://sbi-kyc-update.xyz/login"
     monkeypatch.setattr(
         "services.analysis.pipeline.get_ocr_provider",

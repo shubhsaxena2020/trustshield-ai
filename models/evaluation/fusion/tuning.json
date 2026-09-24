@@ -1,0 +1,21 @@
+{
+  "seed": 42,
+  "train_oof_rows": 2918,
+  "moderate_ml_cut": 0.12,
+  "ml_aware_weighted": {
+    "ml_weight": 0.5
+  },
+  "strength_gated": {
+    "strong_ml_cut": 0.7,
+    "tier_minimum_scores": {
+      "weak": 0,
+      "moderate": 25,
+      "strong": 50
+    }
+  },
+  "selection_rule": "highest train-OOf caution F1 subject to specificity >= 0.85; ties prefer simpler/lower parameter values",
+  "learned_meta": {
+    "status": "skipped",
+    "reason": "No new trained production artifact is permitted in Phase 4; a runtime-loaded meta model would violate the frozen-artifact boundary."
+  }
+}
