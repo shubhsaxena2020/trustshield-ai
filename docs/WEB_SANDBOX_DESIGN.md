@@ -1,6 +1,6 @@
 # TrustShield AI — Phase 5: Web Sandbox Architecture & Design Specification
 
-> **STATUS: PLANNED / DESIGN SPECIFICATION ONLY**  
+> **STATUS: MVP IMPLEMENTED / HARDENING AND PRODUCTION ISOLATION PLANNED**
 > **Target Repo:** `trustshield-ai`  
 > **Target Release:** Phase 5  
 > **Team Level:** BCA / Undergraduate Senior Project (Implementation Target: 1–2 Weeks)  
@@ -703,7 +703,7 @@ gantt
 
 ### 9.3 Dependencies & Platform Instructions
 > [!NOTE]
-> **No installation commands have been executed during this design phase.** When implementation commences, the team will need the following dependencies:
+> **MVP installation completed locally (2026-09-24).** The project-local dependencies and Chromium path are documented in `requirements-sandbox.txt` and the repository README.
 - Python dependencies: `playwright>=1.40.0`.
 - Browser binaries: `playwright install chromium` (installs isolated headless Chromium binary).
 - **Windows Local Dev Setup:** Runs directly via PowerShell. Requires Chromium installed to local AppData cache via Playwright CLI.
@@ -752,3 +752,17 @@ Before kicking off Phase 5 implementation, the project lead should review and de
 4. **Bot Challenge Classification:**  
    *Question:* When Cloudflare or Datadome intercepts the sandbox, should the primary classification be labeled as `"anti_analysis_detected"` or `"unable_to_verify"`?  
    *Recommendation:* Label as `"unable_to_verify"` with `"page_blocks_automation"` in evidence, keeping with TrustShield's philosophy of explicit uncertainty.
+
+## 12. MVP implementation status (2026-09-24)
+
+| Area | Status | Notes |
+|---|---|---|
+| API/static integration and polling | IMPLEMENTED | `sandbox` is opt-in; static result is returned immediately with HTTP 202 while the worker runs. |
+| Separate worker process and scrubbed environment | IMPLEMENTED | API launches `python -m services.worker.sandbox_worker`; parent wall-clock kills its own child. |
+| SSRF guard and DNS-pinning validating proxy | IMPLEMENTED for MVP | Proxy connects to the already-validated address; Playwright route checks are a second layer. |
+| Form observation, dialog/popup blocking, quarantine hashing | IMPLEMENTED | No form filling or submission is performed. |
+| Evidence and fusion categories | IMPLEMENTED | Sandbox categories are registered in non-legacy strength classes; legacy fusion code is untouched. |
+| Local fixture harness and security tests | IMPLEMENTED | No real website is used by the tests. |
+| Docker/microVM isolation, reputation, detonation | PLANNED | This MVP is not a malware-grade isolation boundary. |
+
+Deviations from the original design: the MVP uses a lightweight asyncio proxy rather than Smokescreen; it uses a daemon thread only to keep the API job registry alive while the actual browser remains a subprocess; and screenshots are bounded in-memory base64 only. Chromium `--no-sandbox` is not used on the Windows development host. Browser-exploit, Windows process, and network-stack residual risks remain; production deployment should add a container or microVM, OS-level egress deny rules, resource quotas, and an external rate limiter.

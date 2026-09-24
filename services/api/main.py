@@ -1,18 +1,24 @@
 """TrustShield AI API. Run: uvicorn services.api.main:app --reload"""
 from __future__ import annotations
 
+import asyncio
+import threading
+import time
 from collections import OrderedDict
 
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import FastAPI, File, HTTPException, Request, Response, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from services.analysis.fusion.result import SCHEMA_VERSION, AnalysisResult
+from services.analysis.fusion.result import SCHEMA_VERSION, AnalysisResult, ModuleResult
 from services.analysis.normalization.text import InvalidInput
 from services.analysis.extractors.image_validation import ImageRejected, max_upload_size
 from services.analysis.extractors.ocr import get_ocr_provider
-from services.analysis.pipeline import analyze_image, analyze_qr, analyze_text, analyze_url
+from services.analysis.pipeline import analyze_image, analyze_qr, analyze_text, analyze_url, merge_sandbox_result
 from services.analysis import pipeline as analysis_pipeline
+from services.analysis.web_sandbox.client import run_sandbox
+from services.analysis.url_analysis.ssrf import UnsafeURL, validate_public_url
+from services.analysis.web_sandbox.policy import feature_enabled
 
 app = FastAPI(title="TrustShield AI", version="0.1.0")
 app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:3000"], allow_methods=["GET", "POST"], allow_headers=["*"])
@@ -20,6 +26,9 @@ app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:3000"], allo
 # MVP result store: bounded in-memory AnalysisResult objects retain extracted text but never raw image bytes; all entries are lost on restart.
 _STORE: "OrderedDict[str, AnalysisResult]" = OrderedDict()
 _STORE_MAX = 200
+_SANDBOX_BUCKETS: dict[str, tuple[float, float]] = {}
+_SANDBOX_RATE = 5.0
+_SANDBOX_WINDOW = 60.0
 
 
 class TextIn(BaseModel):
@@ -28,6 +37,7 @@ class TextIn(BaseModel):
 
 class UrlIn(BaseModel):
     url: str = Field(max_length=2048)
+    sandbox: bool = False
 
 
 def _remember(r: AnalysisResult) -> AnalysisResult:
@@ -52,7 +62,7 @@ def health():
         "text": True, "url_static": True,
         "ml": ml,
         "ocr": {"available": ocr.is_available(), "provider": ocr.name},
-        "qr": True, "web_sandbox": False,
+        "qr": True, "web_sandbox": feature_enabled(),
     }}
 
 
@@ -64,9 +74,71 @@ def analyze_text_endpoint(body: TextIn):
         raise HTTPException(422, str(e))
 
 
+def _sandbox_rate_allowed(client_key: str) -> bool:
+    now = time.monotonic()
+    if len(_SANDBOX_BUCKETS) > 5000:
+        for key in [k for k, (t, _) in _SANDBOX_BUCKETS.items() if now - t > _SANDBOX_WINDOW]:
+            del _SANDBOX_BUCKETS[key]
+    started, tokens = _SANDBOX_BUCKETS.get(client_key, (now, _SANDBOX_RATE))
+    elapsed = max(0.0, now - started)
+    tokens = min(_SANDBOX_RATE, tokens + elapsed * (_SANDBOX_RATE / _SANDBOX_WINDOW))
+    if tokens < 1.0:
+        _SANDBOX_BUCKETS[client_key] = (now, tokens)
+        return False
+    _SANDBOX_BUCKETS[client_key] = (now, tokens - 1.0)
+    return True
+
+
+async def _finish_sandbox_job(analysis_id: str, url: str) -> None:
+    try:
+        outcome = await run_sandbox(url)
+        current = _STORE.get(analysis_id)
+        if current is not None:
+            _remember(merge_sandbox_result(current, outcome))
+    except Exception as exc:  # background failures become structured module failures
+        current = _STORE.get(analysis_id)
+        if current is not None:
+            _remember(merge_sandbox_result(current, {"status": "failed", "detail": str(exc)}))
+
+
+def _start_sandbox_job(analysis_id: str, url: str) -> None:
+    threading.Thread(
+        target=lambda: asyncio.run(_finish_sandbox_job(analysis_id, url)),
+        name="trustshield-sandbox-job", daemon=True,
+    ).start()
+
+
 @app.post("/api/v1/analyze/url", response_model=AnalysisResult)
-def analyze_url_endpoint(body: UrlIn):
-    return _remember(analyze_url(body.url))
+async def analyze_url_endpoint(body: UrlIn, request: Request, response: Response):
+    static = analyze_url(body.url)
+    if not body.sandbox:
+        return _remember(static)
+    if not feature_enabled():
+        modules = dict(static.modules)
+        modules["web_sandbox"] = ModuleResult(status="unavailable", detail="Disabled by ENABLE_WEB_SANDBOX=false")
+        result = static.model_copy(update={"modules": modules})
+        return _remember(result)
+    if (static.modules.get("url_static", ModuleResult(status="failed")).status != "completed" or
+            static.modules.get("url_static").detail):
+        modules = dict(static.modules)
+        modules["web_sandbox"] = ModuleResult(status="unavailable", detail="URL is malformed or unsupported")
+        return _remember(static.model_copy(update={"modules": modules}))
+    try:
+        validate_public_url(body.url)
+    except UnsafeURL as exc:
+        raise HTTPException(422, f"URL not eligible for sandbox: {exc}")
+    client_key = request.client.host if request.client else "unknown"
+    if not _sandbox_rate_allowed(client_key):
+        raise HTTPException(429, "sandbox rate limit exceeded; try again later")
+    modules = dict(static.modules)
+    modules["web_sandbox"] = ModuleResult(status="sandboxing", detail="Sandbox worker is running")
+    limitations = [item for item in static.limitations if "not inspected in an isolated browser" not in item]
+    limitations.append("The isolated browser inspection is still in progress.")
+    in_progress = static.model_copy(update={"status": "sandboxing", "modules": modules, "limitations": limitations})
+    _remember(in_progress)
+    _start_sandbox_job(in_progress.analysis_id, body.url)
+    response.status_code = 202
+    return in_progress
 
 
 def _read_upload(upload: UploadFile) -> bytes:

@@ -147,6 +147,34 @@ def analyze_url(raw: str, input_type: str = "url", extra_modules: dict[str, Modu
     return _finish(input_type, r.evidence, modules, [LIMIT_REP, LIMIT_SANDBOX] + list(extra_limitations or []), module_quality=module_quality)
 
 
+def merge_sandbox_result(result: AnalysisResult, outcome: dict) -> AnalysisResult:
+    """Fuse worker telemetry into the already-computed static URL result."""
+    from services.analysis.web_sandbox.evidence import telemetry_to_evidence
+
+    modules = dict(result.modules)
+    status = str(outcome.get("status", "failed"))
+    if status == "completed":
+        telemetry = outcome.get("telemetry") or {}
+        modules["web_sandbox"] = ModuleResult(status="completed", detail="Isolated browser observation completed", data=telemetry)
+        extra = telemetry_to_evidence(telemetry, initial_url=telemetry.get("initial_url"))
+        limitations = [item for item in result.limitations if item != LIMIT_SANDBOX]
+    elif status == "timeout":
+        modules["web_sandbox"] = ModuleResult(status="timeout", detail="Sandbox wall-clock limit exceeded")
+        extra = []
+        limitations = [item for item in result.limitations if item != LIMIT_SANDBOX] + ["The isolated browser inspection timed out; risk confidence was reduced."]
+    elif status == "unavailable":
+        modules["web_sandbox"] = ModuleResult(status="unavailable", detail=str(outcome.get("detail", "Sandbox unavailable")))
+        extra = []
+        limitations = [item for item in result.limitations if item != LIMIT_SANDBOX] + ["The isolated browser was unavailable; page behavior was not inspected."]
+    else:
+        modules["web_sandbox"] = ModuleResult(status="failed", detail=str(outcome.get("detail", "Sandbox worker failed")))
+        extra = []
+        limitations = [item for item in result.limitations if item != LIMIT_SANDBOX] + ["The isolated browser inspection failed; page behavior was not inspected."]
+    merged = _finish(result.input_type, list(result.evidence) + extra, modules, limitations, input_ok=True)
+    # Job polling keys remain stable while fusion is recomputed.
+    return merged.model_copy(update={"analysis_id": result.analysis_id, "created_at": result.created_at})
+
+
 def _ocr_module(result: OCRResult, image) -> ModuleResult:
     raw_text = result.raw_text[:MAX_TEXT_CHARS]
     normalized_text = normalize_text(raw_text)

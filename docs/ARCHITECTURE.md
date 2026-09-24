@@ -46,6 +46,23 @@ input -> validate -> extract -> normalize/analyze -> evidence -> fusion -> expla
 - `OcrPanel.tsx`, `QrPanel.tsx`, and `ResultDashboard.tsx` display module status, extracted/decoded data, warnings, evidence, limitations, and technical JSON.
 - `demo/fixtures` and `scripts/make_demo_fixtures.py` provide synthetic screenshots and QR images generated locally.
 
+### Isolated web sandbox (Phase 5 MVP)
+
+`POST /api/v1/analyze/url` always runs the existing string-only URL analyzer.
+With the opt-in `sandbox` flag and feature flag enabled, the API stores a
+`sandboxing` result and starts a bounded in-memory job. A scrubbed subprocess
+(`python -m services.worker.sandbox_worker`) launches an ephemeral Playwright
+context behind `services/analysis/web_sandbox/egress_proxy.py`. The proxy
+resolves and validates each hostname, connects to the validated address, and
+enforces byte/idle budgets. Playwright route interception, redirect checks,
+form observation, download quarantine, and telemetry sanitization run inside
+that worker. The parent merges canonical `web_sandbox` evidence through the
+existing fusion strategies; `legacy` fusion remains bit-identical.
+
+The browser path is intentionally application-level isolation only. Docker or
+microVM isolation, reputation, detonation, and durable screenshot storage are
+future work.
+
 ## PLANNED
 
 The following are future seams or product work, not current execution paths:
@@ -59,7 +76,6 @@ The production hardening boundary is planned, not implemented:
 `API -> isolated OCR worker (separate process/container, no network, resource limits, temp-dir cleanup, timeouts) -> Tesseract`
 
 Arbitrary user images should not be parsed inside the main API process because an OCR engine and image decoders process attacker-controlled bytes. A separate worker limits the blast radius of parser bugs, enforces CPU/memory/time budgets, keeps temporary files isolated and disposable, and prevents OCR work from consuming API process resources. The current implementation has input validation and an OCR timeout seam, but still runs Tesseract in-process.
-- An isolated web sandbox for destination inspection.
 - External reputation lookups.
 - Ollama-backed explanations.
 - SQLite metadata persistence.

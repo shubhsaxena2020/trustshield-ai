@@ -33,6 +33,21 @@ class UrlStaticResult:
     evidence: list[Evidence] = field(default_factory=list)
 
 
+_NUMERIC_PART = re.compile(r"^(?:0x[0-9a-f]+|0[0-7]*|[1-9][0-9]*)$", re.IGNORECASE)
+
+
+def _is_legacy_numeric_ip(host: str) -> bool:
+    """True for hex/octal/decimal IPv4 spellings such as 0x7f000001, 2130706433 or 0177.0.0.1."""
+    parts = host.split(".")
+    if not 1 <= len(parts) <= 4 or not all(_NUMERIC_PART.match(part) for part in parts):
+        return False
+    try:
+        values = [int(part, 16 if part.lower().startswith("0x") else 8 if len(part) > 1 and part.startswith("0") else 10) for part in parts]
+    except ValueError:
+        return False
+    return all(v < 256 for v in values[:-1]) and values[-1] < 256 ** (5 - len(parts))
+
+
 def _ev(category: str, sev: Severity, conf: float, title: str, desc: str, **meta) -> Evidence:
     return Evidence(source="url_static", category=category, severity=sev, confidence=conf, title=title, description=desc, metadata=meta)
 
@@ -109,7 +124,8 @@ def analyze_url_static(url: str) -> UrlStaticResult:
         ipaddress.ip_address(host)
         ev.append(_ev("ip_address_host", Severity.high, 0.85, "URL uses a raw IP address", "Legitimate services almost always use domain names; raw IPs are common in phishing and malware links.", host=host))
     except ValueError:
-        pass
+        if _is_legacy_numeric_ip(host):
+            ev.append(_ev("ip_address_host", Severity.high, 0.85, "URL uses an obfuscated numeric IP address", "Hex, octal or single-number IP forms are browser-accepted spellings of raw IPs and are used to hide the destination.", host=host))
 
     # --- misleading userinfo (user@host)
     if parts.username:

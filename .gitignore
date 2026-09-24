@@ -14,4 +14,5 @@ datasets/raw/holdout_v2/*
 !datasets/raw/holdout_v2/codex_holdout2.jsonl
 models/trained/*.joblib
 graphify-out/
+.playwright-browsers/
 .DS_Store

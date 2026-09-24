@@ -29,6 +29,31 @@ TrustShield accepts attacker-controlled text, URLs, QR payloads, and image bytes
 - The final test-set ML evaluation is frozen and was accessed once by the coordinator. Further reporting reads saved predictions only; the primary numbers remain affected by cross-split near-duplicate templates.
 - Ollama explanations, SQLite persistence, PaddleOCR, and Hindi OCR are not implemented.
 
+## Phase 5 web-sandbox controls
+
+The sandbox is disabled unless `ENABLE_WEB_SANDBOX=true`, and external browsing
+also requires `TRUSTSHIELD_SANDBOX_ALLOW_EXTERNAL=true`. The API never imports
+Playwright; a scrubbed child process owns the ephemeral browser, proxy, temp
+directory, and bounded telemetry. The guard rejects non-HTTP(S), credentials,
+numeric-IP tricks, private/reserved/mapped/link-local/multicast/metadata
+addresses, and non-80/443 ports in production. Every DNS answer is validated
+before the proxy connects directly to the selected validated address, and
+Playwright revalidates requests and redirect destinations.
+
+The worker observes forms but never fills or submits them; non-GET/HEAD traffic
+is aborted. Dialogs and popups are dismissed/closed, downloads are quarantined,
+hashed, capped, and deleted, visible text is bounded and marked untrusted, and
+worker failures reduce confidence through `partial`/`timeout` module status.
+The explicit loopback fixture allowance is accepted only in test mode and only
+through the test harness constructor; it is not an API field.
+
+Residual risks: a Chromium exploit can still escape an application-level
+worker; this Windows development setup has no Docker/microVM profile, kernel
+egress firewall, reputation service, malware detonation, or persistent
+screenshot policy. `--no-sandbox` is deliberately not used. Production must
+add OS/container isolation and resource controls before enabling external
+browsing.
+
 ## Residual gaps
 
 - There is no rate limiting. An exposed deployment needs an edge/API rate limiter and request-level abuse controls.
@@ -45,3 +70,11 @@ The following security boundary is planned and is not implemented in this phase:
 `API -> isolated OCR worker (separate process/container, no network, resource limits, temp-dir cleanup, timeouts) -> Tesseract`
 
 Arbitrary user images should not be parsed inside the main API process. Image decoding and OCR are complex parsers of untrusted bytes; a separate process or container can enforce resource and timeout limits, deny network access, clean temporary files, and contain a parser compromise without taking down the API process.
+
+## Sandbox known limitations (Phase 5 MVP)
+
+- The loopback egress proxy has no per-job authentication; any local process could use its ephemeral port while a job runs. It still validates every destination, so it cannot reach private ranges, but a shared host should add a proxy token before production use.
+- The sandbox is process-isolated (scrubbed-environment subprocess, temp dir, project-local Chromium), not container or VM isolated. Chromium runs with WebRTC disabled and non-proxied UDP blocked.
+- The web UI does not yet request sandbox analysis or poll the `sandboxing` status; it is API-only.
+- `ENABLE_WEB_SANDBOX` and `TRUSTSHIELD_SANDBOX_ALLOW_EXTERNAL` default to off; live external browsing has not been exercised.
+- Job dispatch is one thread per accepted job behind a thread-safe concurrency gate and a per-client rate limit; there is no persistent queue.

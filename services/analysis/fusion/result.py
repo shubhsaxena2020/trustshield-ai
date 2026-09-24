@@ -12,7 +12,7 @@ from services.analysis.evidence.models import Evidence
 SCHEMA_VERSION = "1.0"
 
 RiskLabel = Literal["low_risk", "caution", "suspicious", "high_risk", "unable_to_verify"]
-ModuleState = Literal["completed", "not_run", "unavailable", "failed", "timeout"]
+ModuleState = Literal["completed", "not_run", "unavailable", "failed", "timeout", "queued", "sandboxing"]
 
 
 class Risk(BaseModel):
@@ -37,7 +37,7 @@ class AnalysisResult(BaseModel):
     analysis_id: str = Field(default_factory=lambda: uuid.uuid4().hex)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     input_type: Literal["text", "url", "image", "qr"]
-    status: Literal["completed", "partial", "failed"]
+    status: Literal["completed", "partial", "failed", "queued", "sandboxing"]
     risk: Risk
     classification: Classification
     evidence: list[Evidence]

@@ -52,10 +52,18 @@ The text field is limited by the API model. The result uses `input_type: "text"`
 JSON request:
 
 ```json
-{"url": "https://example.com/path"}
+{"url": "https://example.com/path", "sandbox": false}
 ```
 
 The URL is parsed and analyzed as a string. It is not fetched. The result uses `input_type: "url"`.
+
+Set `sandbox: true` to request the opt-in isolated browser probe. If
+`ENABLE_WEB_SANDBOX` is disabled, the request remains static-only and reports
+`modules.web_sandbox.status: unavailable`. When enabled, valid requests return
+HTTP `202` with `status: sandboxing`; poll `GET /api/v1/analysis/{id}` until
+the result is `completed` or `partial`. External browsing remains blocked
+unless `TRUSTSHIELD_SANDBOX_ALLOW_EXTERNAL=true`; tests use a private,
+programmatic fixture allow-list that the API does not accept from callers.
 
 ### `POST /api/v1/analyze/image`
 
@@ -84,7 +92,7 @@ Returns a previously stored `AnalysisResult`, or HTTP 404 when the ID is not in 
   "analysis_id": "...",
   "created_at": "...",
   "input_type": "text|url|image|qr",
-  "status": "completed|partial|failed",
+  "status": "completed|partial|failed|sandboxing|queued",
   "risk": {
     "score": 0,
     "label": "low_risk|caution|suspicious|high_risk|unable_to_verify",
@@ -126,7 +134,7 @@ legacy noisy-OR fusion. The existing `risk.score`, `risk.label`,
 
 ## Nested image and QR module data
 
-Each module has `status`, `detail`, and `data`. Module statuses are `completed`, `not_run`, `unavailable`, `failed`, or `timeout`.
+Each module has `status`, `detail`, and `data`. Module statuses are `completed`, `not_run`, `unavailable`, `failed`, `timeout`, `queued`, or `sandboxing`.
 
 ### `modules.ocr`
 
@@ -218,4 +226,4 @@ FastAPI validation, including a missing multipart `file`, also uses HTTP 422. Th
 
 ## PLANNED
 
-There are no implemented API routes for PaddleOCR, web sandbox inspection, reputation services, Ollama, SQLite persistence, or Hindi OCR. The text ML classifier is an internal analysis module, not a separate route; the final test-set evaluation remains pending.
+There are no implemented API routes for PaddleOCR, reputation services, Ollama, SQLite persistence, or Hindi OCR. The opt-in web sandbox inspection is described above; the text ML classifier is an internal analysis module, not a separate route; the final test-set evaluation remains pending.

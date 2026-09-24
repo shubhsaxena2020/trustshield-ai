@@ -158,3 +158,14 @@ def test_url_endpoint_result_shape():
     assert r.modules["web_sandbox"].status == "not_run"
     assert r.risk.label in {"low_risk", "unable_to_verify"}
     assert any("not the same as" in l for l in r.limitations)
+
+
+@pytest.mark.parametrize("host", ["0x7f000001", "2130706433", "0177.0.0.1", "0x7f.0.0.1", "017700000001"])
+def test_numeric_encoded_ip_hosts_get_ip_evidence(host):
+    result = analyze_url(f"http://{host}/login")
+    assert any(e.category == "ip_address_host" for e in result.evidence)
+
+
+def test_ordinary_numeric_looking_domains_are_not_ip_hosts():
+    result = analyze_url("https://example.com/2130706433")
+    assert not any(e.category == "ip_address_host" for e in result.evidence)

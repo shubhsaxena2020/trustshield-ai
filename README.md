@@ -105,6 +105,26 @@ Regenerate the synthetic fixtures locally, without network access:
 .venv\Scripts\python -m pytest -q
 ```
 
+### Optional isolated web sandbox
+
+Install Playwright in the project virtual environment and keep Chromium under
+the repository (never system-wide):
+
+```powershell
+.venv\Scripts\pip install -r requirements-sandbox.txt
+$env:PLAYWRIGHT_BROWSERS_PATH = (Join-Path (Get-Location) '.playwright-browsers')
+.venv\Scripts\python -m playwright install chromium
+```
+
+The sandbox is opt-in per request (`{"sandbox": true}`), disabled by default,
+and external browsing is blocked by default. Use `ENABLE_WEB_SANDBOX=true` to
+enable the path; only explicitly approved deployments should also set
+`TRUSTSHIELD_SANDBOX_ALLOW_EXTERNAL=true`. Run the sandbox tests with
+`$env:TESSERACT_CMD='C:\\Users\\shubh\\Tools\\Tesseract-OCR\\tesseract.exe'; .venv\\Scripts\\python -m pytest -q tests/security tests/integration`.
+This Windows MVP is not a malware-grade sandbox: it has no Docker/microVM,
+reputation, detonation, or persistent screenshot storage policy, and browser
+zero-day risk remains.
+
 ## Run the API
 
 ```powershell
@@ -140,7 +160,7 @@ The web app is served at `http://localhost:3000` and calls the API at `http://lo
 - [Risk-fusion analysis](docs/RISK_FUSION_ANALYSIS.md)
 - [Risk-fusion design](docs/RISK_FUSION_DESIGN.md)
 - [Sealed v2 holdout plan](docs/HOLDOUT_V2_PLAN.md) (evaluation pending lead approval)
-- [Web sandbox design](docs/WEB_SANDBOX_DESIGN.md) (Phase 5, design only)
+- [Web sandbox design](docs/WEB_SANDBOX_DESIGN.md) (Phase 5 MVP status and residual risks)
 
 Validation outputs live under `models/evaluation/validation/`; the original
 test evaluation and reporting-only outputs remain under `models/evaluation/test/`.

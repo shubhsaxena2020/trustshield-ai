@@ -8,7 +8,7 @@ from __future__ import annotations
 import ipaddress
 import re
 import socket
-from typing import Callable
+from typing import Callable, Iterable
 from urllib.parse import urlsplit
 
 ALLOWED_SCHEMES = {"http", "https"}
@@ -50,7 +50,8 @@ def _is_public(ip: ipaddress._BaseAddress) -> bool:
     return ip.is_global and not (ip.is_multicast or ip.is_loopback or ip.is_link_local or ip.is_private or ip.is_reserved or ip.is_unspecified)
 
 
-def validate_public_url(url: str, resolver: Resolver | None = None) -> str:
+def validate_public_url(url: str, resolver: Resolver | None = None,
+                        allowed_test_hosts: Iterable[str] | None = None) -> str:
     """Return the URL unchanged if it is safe to fetch, else raise UnsafeURL."""
     resolver = resolver or _default_resolver
     if not isinstance(url, str) or not url.strip() or len(url) > 2048:
@@ -74,7 +75,13 @@ def validate_public_url(url: str, resolver: Resolver | None = None) -> str:
     addrs = [str(literal)] if literal else resolver(host)
     if not addrs:
         raise UnsafeURL("hostname resolved to no addresses")
+    test_host = f"{host}:{parts.port or (443 if parts.scheme.lower() == 'https' else 80)}"
+    allow_test_loopback = (test_host in set(allowed_test_hosts or ()) and
+                           __import__("os").environ.get("TRUSTSHIELD_ENV", "").lower() == "test")
     for a in addrs:
-        if not _is_public(ipaddress.ip_address(a)):
+        address = ipaddress.ip_address(a)
+        if allow_test_loopback and address.is_loopback:
+            continue
+        if not _is_public(address):
             raise UnsafeURL("destination resolves to a private, loopback, link-local or reserved address")
     return url

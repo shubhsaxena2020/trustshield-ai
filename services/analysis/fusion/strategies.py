@@ -25,16 +25,21 @@ EVIDENCE_STRENGTH_CLASSES = {
         "urgency", "no_https", "url_shortener", "very_long_url", "long_hostname",
         "suspicious_tld", "excessive_hyphens", "encoded_characters", "excessive_subdomains",
         "punycode_host", "impersonation_authority", "authority_impersonation",
+        "page_blocks_automation", "load_timeout", "tls_error", "blocked_by_policy",
     }),
     "moderate": frozenset({
         "payment_request", "domain_mismatch", "credential_request", "account_threat",
         "delivery_scam", "fake_job", "investment_scam", "lottery_prize", "job_fee_scam",
         "investment_pressure", "archive_download", "unusual_port", "qr_payment",
+        "redirect_chain_unexpected", "cross_domain_redirect", "dialog_abuse", "popup_storm",
+        "non_https_login_form",
     }),
     "strong": frozenset({
         "credential_pressure", "digital_arrest", "homograph_domain", "lookalike_domain",
         "executable_download", "ip_address_host", "userinfo_in_url", "unsupported_scheme",
         "known_malicious_reputation", "credential_harvesting_sandbox",
+        "credential_form_detected", "password_field", "otp_field", "card_field",
+        "brand_domain_mismatch_page", "js_auto_download", "hidden_iframe_form", "download_attempt",
     }),
 }
 
