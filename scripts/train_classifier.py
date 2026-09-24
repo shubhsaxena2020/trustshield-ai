@@ -223,7 +223,8 @@ def _write_plot(path: Path, kind: str, labels: list[int], scores: list[float], c
         path.write_bytes(base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII="))
 
 
-def train(dataset_dir: str | Path, project_root: str | Path | None = None, model_name: str = "trustshield_text_v1") -> dict:
+def train(dataset_dir: str | Path, project_root: str | Path | None = None, model_name: str = "trustshield_text_v1",
+          eval_dir: str | Path | None = None) -> dict:
     dataset_dir = Path(dataset_dir).resolve()
     root = Path(project_root or Path(__file__).resolve().parents[1]).resolve()
     train_rows = _read_rows(dataset_dir / "train.jsonl")
@@ -276,9 +277,9 @@ def train(dataset_dir: str | Path, project_root: str | Path | None = None, model
     if (single_row["pr_auc"], single_row["F1"], -single_row["model_size_bytes"]) > (selected_detail["row"]["pr_auc"], selected_detail["row"]["F1"], -selected_detail["row"]["model_size_bytes"]):
         selected_payload = {"multiclass_model": single_model, "binary_model": None, "category_model": None, "category_merge_map": single_merge}
         selected_detail = {"row": single_row, "scores": single_scores.tolist(), "sweep": single_sweep, "selected": single_selected}
-    eval_dir = root / "models" / "evaluation" / "validation"
-    eval_dir.mkdir(parents=True, exist_ok=True)
-    _write_csv(eval_dir / "model_comparison.csv", candidates)
+    evaluation_dir = Path(eval_dir).resolve() if eval_dir is not None else root / "models" / "evaluation" / "validation"
+    evaluation_dir.mkdir(parents=True, exist_ok=True)
+    _write_csv(evaluation_dir / "model_comparison.csv", candidates)
     selected_scores = selected_detail["scores"]
     selected_row = selected_detail["row"]
     selected_labels = val_binary
@@ -322,19 +323,19 @@ def train(dataset_dir: str | Path, project_root: str | Path | None = None, model
                "ece": __import__("services.analysis.ml.metrics", fromlist=["expected_calibration_error"]).expected_calibration_error(selected_labels, selected_scores),
                "per_source_name": source_metrics,
                "threshold_rule": selected_detail["selected"]["rule"], "threshold_sweep": selected_detail["sweep"]}
-    (eval_dir / "validation_metrics.json").write_text(json.dumps(metrics, indent=2, sort_keys=True), encoding="utf-8")
-    _write_csv(eval_dir / "threshold_sweep.csv", selected_detail["sweep"])
+    (evaluation_dir / "validation_metrics.json").write_text(json.dumps(metrics, indent=2, sort_keys=True), encoding="utf-8")
+    _write_csv(evaluation_dir / "threshold_sweep.csv", selected_detail["sweep"])
     cm = binary_metrics(selected_labels, selected_scores, selected_row["threshold"])
-    _write_csv(eval_dir / "confusion_matrix_binary.csv", [{"actual": "legitimate", "predicted_legitimate": cm["TN"], "predicted_malicious": cm["FP"]}, {"actual": "malicious_or_fraudulent", "predicted_legitimate": cm["FN"], "predicted_malicious": cm["TP"]}])
-    _write_csv(eval_dir / "per_class_metrics.csv", [{"class": "legitimate", "precision": 0, "recall": cm["specificity"], "f1": 0}, {"class": "malicious_or_fraudulent", "precision": cm["precision"], "recall": cm["recall"], "f1": cm["F1"]}])
-    _write_csv(eval_dir / "confusion_matrix_multiclass.csv", [])
-    _write_csv(eval_dir / "class_distribution.csv", [{"split": split_name, "category": category, "count": sum(row["category_label"] == category for row in split_rows)}
+    _write_csv(evaluation_dir / "confusion_matrix_binary.csv", [{"actual": "legitimate", "predicted_legitimate": cm["TN"], "predicted_malicious": cm["FP"]}, {"actual": "malicious_or_fraudulent", "predicted_legitimate": cm["FN"], "predicted_malicious": cm["TP"]}])
+    _write_csv(evaluation_dir / "per_class_metrics.csv", [{"class": "legitimate", "precision": 0, "recall": cm["specificity"], "f1": 0}, {"class": "malicious_or_fraudulent", "precision": cm["precision"], "recall": cm["recall"], "f1": cm["F1"]}])
+    _write_csv(evaluation_dir / "confusion_matrix_multiclass.csv", [])
+    _write_csv(evaluation_dir / "class_distribution.csv", [{"split": split_name, "category": category, "count": sum(row["category_label"] == category for row in split_rows)}
                                                         for split_name, split_rows in (("train", train_rows), ("validation", validation_rows))
                                                         for category in sorted({row["category_label"] for row in split_rows})])
     roc_curve_data, pr_curve_data = curve_points(selected_labels, selected_scores)
-    _write_plot(eval_dir / "roc_curve.png", "roc", selected_labels, selected_scores, roc_curve_data)
-    _write_plot(eval_dir / "pr_curve.png", "pr", selected_labels, selected_scores, pr_curve_data)
-    _write_plot(eval_dir / "calibration_curve.png", "calibration", selected_labels, selected_scores)
+    _write_plot(evaluation_dir / "roc_curve.png", "roc", selected_labels, selected_scores, roc_curve_data)
+    _write_plot(evaluation_dir / "pr_curve.png", "pr", selected_labels, selected_scores, pr_curve_data)
+    _write_plot(evaluation_dir / "calibration_curve.png", "calibration", selected_labels, selected_scores)
     trained_dir, metadata_dir = root / "models" / "trained", root / "models" / "metadata"
     trained_dir.mkdir(parents=True, exist_ok=True); metadata_dir.mkdir(parents=True, exist_ok=True)
     artifact_path = trained_dir / f"{model_name}.joblib"
@@ -360,9 +361,11 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dataset-dir", type=Path, required=True)
     parser.add_argument("--model-name", default="trustshield_text_v1")
+    parser.add_argument("--eval-dir", type=Path, help="evaluation output directory; default preserves v1 behavior")
     parser.add_argument("--project-root", type=Path)
     args = parser.parse_args()
-    print(json.dumps(train(args.dataset_dir, project_root=args.project_root, model_name=args.model_name), indent=2, default=str))
+    print(json.dumps(train(args.dataset_dir, project_root=args.project_root, model_name=args.model_name,
+                           eval_dir=args.eval_dir), indent=2, default=str))
 
 
 if __name__ == "__main__":

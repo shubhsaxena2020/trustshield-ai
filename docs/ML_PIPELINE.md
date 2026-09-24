@@ -154,3 +154,33 @@ uses train OOF only for parameter tuning. Validation is evaluated once per
 candidate and selected by caution+ F1 subject to specificity at least 0.85,
 with simplicity as the tie-break. `learned_meta` is skipped because no new
 trained production artifact/loading contract is allowed in this phase.
+
+## Data-hardening step 2: v3 commands
+
+The v3 build preserves the exact v1 validation bytes, creates no test split,
+and writes only to new v3 paths. Its holdout operation is the documented
+remove-only, text-only similarity filter; no holdout labels are used.
+
+```powershell
+$env:TESSERACT_CMD = 'C:\Users\shubh\Tools\Tesseract-OCR\tesseract.exe'
+python scripts/prepare_dataset_v3.py --output-dir datasets/processed/trustshield-text-v3
+python scripts/train_classifier.py --dataset-dir datasets/processed/trustshield-text-v3 `
+  --model-name trustshield_text_v3 --eval-dir models/evaluation/hardening_v3/train
+python scripts/evaluate_model.py --split validation --systems ml `
+  --dataset-dir datasets/processed/trustshield-text-v3 --model-name trustshield_text_v3 `
+  --eval-dir models/evaluation/hardening_v3/validation
+python scripts/fusion_oof_predictions.py --split train_oof `
+  --dataset-dir datasets/processed/trustshield-text-v3 --model-name trustshield_text_v3 `
+  --eval-dir models/evaluation/hardening_v3/fusion
+python scripts/evaluate_fusion.py --split train_oof `
+  --dataset-dir datasets/processed/trustshield-text-v3 --model-name trustshield_text_v3 `
+  --eval-dir models/evaluation/hardening_v3/fusion
+python scripts/evaluate_fusion.py --split validation `
+  --dataset-dir datasets/processed/trustshield-text-v3 --model-name trustshield_text_v3 `
+  --eval-dir models/evaluation/hardening_v3/fusion
+python scripts/evaluate_hardening.py --out-dir models/evaluation/hardening_v3
+```
+
+The generated v3 metadata records threshold `0.14` and the dataset manifest
+SHA-256. The comparison report is validation-only and does not change the
+default model name or fusion parameters.

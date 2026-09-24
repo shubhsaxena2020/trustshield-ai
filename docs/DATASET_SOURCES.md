@@ -32,3 +32,26 @@ An earlier revision used regex rules for the spam audits, fabricated `reviewed; 
 - UCI: `datasets/raw/ucI_sms_spam/SOURCE.md`
 - India: `datasets/raw/india_spam_sms/SOURCE.md`
 - Excluded Hugging Face source: `datasets/raw/ealvaradob_phishing-dataset/SOURCE.md`
+
+## Data hardening step 1 sources and artifacts
+
+- `ucI_sms_spam` and `india_spam_sms` legitimate rows are retained as
+  hard-negative candidates only when they are absent by normalized text from
+  v1 train and validation. Their source/audit labels are unchanged; bucket
+  tags are selection statistics, not relabeling.
+- `ealvaradob/phishing-dataset` (`texts` config) is used only for a blind
+  audit sample. Its dataset card declares `apache-2.0` / Apache License 2.0
+  ([license](https://www.apache.org/licenses/LICENSE-2.0)); the card describes
+  a multi-source compilation, so individual-row provenance is unclear.
+  The sample is filtered to cleaned English rows of at most 60 words, then
+  exact/normalized and char-TF-IDF cosine >= 0.60 duplicates against v1
+  train+validation are removed. It is not trusted training data.
+- The Mendeley financial-scams dataset and
+  `reportsmishing/Smishing-Dataset-IMC25` are reserved for the sealed v2
+  holdout and are not used. Codex-authored data is excluded from training so
+  the holdout remains independent.
+
+The reproducible step-1 outputs, filtering counts, source license text, and
+SHA-256 values are recorded in
+`datasets/raw/hardening/hf_blind_metadata.json`. The generator is
+`scripts/prepare_hardening_candidates.py` (seed 42).

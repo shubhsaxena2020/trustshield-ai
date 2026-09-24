@@ -1,0 +1,13 @@
+candidate,label,count
+legacy,caution,418
+legacy,high_risk,10
+legacy,low_risk,3506
+legacy,suspicious,70
+ml_aware_weighted,caution,422
+ml_aware_weighted,high_risk,37
+ml_aware_weighted,low_risk,2872
+ml_aware_weighted,suspicious,673
+strength_gated,caution,434
+strength_gated,high_risk,27
+strength_gated,low_risk,2872
+strength_gated,suspicious,671

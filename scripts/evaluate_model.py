@@ -21,7 +21,6 @@ from services.analysis.ml.classifier import TextClassifier
 from services.analysis.ml.metrics import (
     binary_metrics, category_scope_metrics, curve_points, multiclass_metrics, per_class_metrics, pr_auc, roc_auc, threshold_sweep,
 )
-from services.analysis.pipeline import analyze_text
 
 RULE_CATEGORY_MAP = {
     "phishing": "phishing", "credential_phishing": "credential_theft", "credential_theft": "credential_theft",
@@ -41,6 +40,7 @@ def _read_rows(path: Path) -> list[dict]:
 
 
 def _rule_result(text: str):
+    from services.analysis.pipeline import analyze_text
     previous = os.environ.get("TRUSTSHIELD_ML")
     os.environ["TRUSTSHIELD_ML"] = "off"
     try:
@@ -53,6 +53,7 @@ def _rule_result(text: str):
 
 
 def _combined_result(text: str):
+    from services.analysis.pipeline import analyze_text
     previous = os.environ.get("TRUSTSHIELD_ML")
     os.environ["TRUSTSHIELD_ML"] = "on"
     try:
@@ -75,7 +76,8 @@ def _system_metrics(labels: list[int], scores: list[float], threshold: float) ->
 
 
 def evaluate(split: str, systems: list[str], dataset_dir: str | Path, project_root: str | Path | None = None,
-             model_name: str = "trustshield_text_v1", confirm_final_test: bool = False) -> dict:
+             model_name: str = "trustshield_text_v1", confirm_final_test: bool = False,
+             eval_dir: str | Path | None = None) -> dict:
     if split not in {"validation", "test"}:
         raise ValueError("split must be validation or test")
     dataset_dir = Path(dataset_dir).resolve()
@@ -96,7 +98,7 @@ def evaluate(split: str, systems: list[str], dataset_dir: str | Path, project_ro
         access_count = len(log)
     else:
         access_count = 0
-    output_dir = root / "models" / "evaluation" / split
+    output_dir = Path(eval_dir).resolve() if eval_dir is not None else root / "models" / "evaluation" / split
     output_dir.mkdir(parents=True, exist_ok=True)
     labels = [int(row["binary_label"] == "malicious_or_fraudulent") for row in rows]
     predictions = []
@@ -104,9 +106,13 @@ def evaluate(split: str, systems: list[str], dataset_dir: str | Path, project_ro
     raw = {system: {"scores": [], "alerts": [], "categories": []} for system in systems}
     messages = []
     for row in rows:
-        rule_start = time.perf_counter(); rule = _rule_result(row["text"]); rule_latency = (time.perf_counter() - rule_start) * 1000
-        rule_score, rule_label = float(rule.risk.score) / 100.0, rule.risk.score >= 25
-        rule_categories = [rule.classification.primary, *rule.classification.secondary]
+        rule = None
+        rule_latency = 0.0
+        if "rules" in systems or "combined" in systems:
+            rule_start = time.perf_counter(); rule = _rule_result(row["text"]); rule_latency = (time.perf_counter() - rule_start) * 1000
+        rule_score = float(rule.risk.score) / 100.0 if rule is not None else 0.0
+        rule_label = rule.risk.score >= 25 if rule is not None else False
+        rule_categories = [rule.classification.primary, *rule.classification.secondary] if rule is not None else []
         ml_prediction = classifier.predict(row["text"]) if classifier else None
         combined = None
         combined_detail = ""
@@ -123,7 +129,7 @@ def evaluate(split: str, systems: list[str], dataset_dir: str | Path, project_ro
             raw["combined"]["scores"].append(combined_score); raw["combined"]["alerts"].append(combined.risk.score >= 25); raw["combined"]["categories"].append(RULE_CATEGORY_MAP.get(combined.classification.primary, "other_fraud")); latencies["combined"].append(combined_latency := (time.perf_counter() - rule_start) * 1000)
         predictions.append({"id": row["id"], "text_hash": hashlib.sha256(row["text"].encode()).hexdigest(), "text": row["text"],
                             "binary_label": row["binary_label"], "category_label": row["category_label"], "source_type": row["source_type"], "synthetic": row.get("synthetic", False),
-                            "source_name": row["source_name"], "rule_score": rule.risk.score, "rule_label": rule_label, "rule_categories": "|".join(rule_categories),
+                            "source_name": row["source_name"], "rule_score": int(round(rule_score * 100)), "rule_label": rule_label, "rule_categories": "|".join(rule_categories),
                             "ml_p": ml_prediction.p_malicious if ml_prediction else "", "ml_category": ml_prediction.category if ml_prediction else "",
                             "combined_score": combined.risk.score if combined else "", "combined_label": combined.risk.score >= 25 if combined else ""})
     _write_predictions(output_dir / f"predictions_{split}.csv", predictions)
@@ -205,9 +211,16 @@ def main() -> None:
     parser.add_argument("--dataset-dir", type=Path, required=True)
     parser.add_argument("--model-name", default="trustshield_text_v1")
     parser.add_argument("--project-root", type=Path)
+    parser.add_argument("--eval-dir", type=Path, help="evaluation output directory; default preserves v1 behavior")
+    parser.add_argument("--out-dir", type=Path, help="alias for --eval-dir")
     parser.add_argument("--confirm-final-test", action="store_true")
     args = parser.parse_args()
-    report = evaluate(args.split, [value for value in args.systems.split(",") if value], args.dataset_dir, project_root=args.project_root, model_name=args.model_name, confirm_final_test=args.confirm_final_test)
+    if args.eval_dir is not None and args.out_dir is not None and args.eval_dir.resolve() != args.out_dir.resolve():
+        parser.error("--eval-dir and --out-dir must refer to the same directory when both are supplied")
+    report = evaluate(args.split, [value for value in args.systems.split(",") if value], args.dataset_dir,
+                      project_root=args.project_root, model_name=args.model_name,
+                      confirm_final_test=args.confirm_final_test,
+                      eval_dir=args.eval_dir or args.out_dir)
     print(json.dumps({"split": args.split, "access_count": report["access_count"], "systems": list(report["systems"])}, indent=2))
 
 

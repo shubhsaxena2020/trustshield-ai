@@ -4,6 +4,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import os
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -38,9 +39,10 @@ def _sha256(path: Path) -> str:
 
 
 class TextClassifier:
-    def __init__(self, model_name: str = "trustshield_text_v1", project_root: str | Path | None = None):
+    def __init__(self, model_name: str | None = None, project_root: str | Path | None = None):
         self.project_root = Path(project_root or Path(__file__).resolve().parents[3]).resolve()
-        self.model_name = model_name
+        configured_name = os.getenv("TRUSTSHIELD_ML_MODEL", "").strip()
+        self.model_name = model_name or configured_name or "trustshield_text_v1"
         self.available = False
         self.reason = ""
         self.metadata: dict[str, Any] = {}

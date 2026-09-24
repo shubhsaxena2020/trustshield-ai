@@ -23,9 +23,12 @@ if str(ROOT) not in sys.path:
 
 from services.analysis.evidence.models import Evidence, Severity
 from services.analysis.fusion.engine import fuse, risk_score
-from services.analysis.pipeline import analyze_text
+from services.analysis.fusion import strategies as fusion_strategies
 from services.analysis.fusion.strategies import DEFAULT_ML_WEIGHT, DEFAULT_STRONG_ML_CUT, MODERATE_ML_CUT
-from services.analysis.normalization.text import alphanumeric_token_count
+from services.analysis.normalization.text import alphanumeric_token_count, extract_urls, normalize_text
+from services.analysis.rules.text_rules import brand_name, claimed_brands, run_text_rules
+from services.analysis.url_analysis.brands import is_official
+from services.analysis.url_analysis.static import analyze_url_static
 
 SEED = 42
 ML_THRESHOLD = 0.12
@@ -97,25 +100,34 @@ def _curve_metrics(labels: list[int], scores: list[float]) -> dict:
 
 
 def _deterministic_evidence(text: str) -> list[Evidence]:
-    # Disable ML while replaying only the deterministic evidence path.  The
-    # saved p_malicious column is then attached below, avoiding a second model
-    # inference and keeping evaluation tied to the saved validation prediction.
-    previous = os.environ.get("TRUSTSHIELD_ML")
-    os.environ["TRUSTSHIELD_ML"] = "off"
-    try:
-        result = analyze_text(text)
-    finally:
-        if previous is None:
-            os.environ.pop("TRUSTSHIELD_ML", None)
-        else:
-            os.environ["TRUSTSHIELD_ML"] = previous
-    return [item for item in result.evidence if item.source != "ml_classifier"]
+    # Replay the deterministic text and static-URL evidence directly.  This
+    # avoids importing the online pipeline (and its optional OpenCV QR module)
+    # during an offline text-only fusion evaluation.
+    normalized = normalize_text(text)
+    evidence = list(run_text_rules(normalized))
+    urls = extract_urls(normalized)
+    if urls:
+        claims = claimed_brands(normalized)
+        for url in urls[:10]:
+            result = analyze_url_static(url)
+            if not result.valid:
+                continue
+            evidence.extend(result.evidence)
+            flagged = any(item.category in {"domain_mismatch", "lookalike_domain"} for item in result.evidence)
+            if claims and not flagged and not any(is_official(claim, result.facts["registered_domain"]) for claim in claims):
+                names = ", ".join(brand_name(claim) for claim in claims)
+                evidence.append(Evidence(source="brand_check", category="domain_mismatch", severity=Severity.high,
+                                         confidence=0.85,
+                                         title="Claimed organization does not match the link's domain",
+                                         description=f"The message mentions {names}, but the link points to '{result.facts['registered_domain']}', which is not an official domain.",
+                                         metadata={"claimed": claims, "registered_domain": result.facts["registered_domain"]}))
+    return evidence
 
 
-def _evidence_for(row: dict) -> tuple[list[Evidence], dict[str, str]]:
+def _evidence_for(row: dict, ml_threshold: float = ML_THRESHOLD) -> tuple[list[Evidence], dict[str, str]]:
     evidence = _deterministic_evidence(row["text"])
     probability = float(row["ml_p"])
-    if probability >= ML_THRESHOLD:
+    if probability >= ml_threshold:
         category = row.get("ml_category") or None
         evidence.append(Evidence(
             source="ml_classifier", category=f"ml_{category}_pattern" if category else "ml_malicious_content",
@@ -126,14 +138,15 @@ def _evidence_for(row: dict) -> tuple[list[Evidence], dict[str, str]]:
             confidence=probability,
             title="Machine-learning classifier detected malicious content",
             description="Statistical classifier signal used for fusion evaluation.",
-            metadata={"category": category, "threshold": ML_THRESHOLD},
+            metadata={"category": category, "threshold": ml_threshold},
         ))
     return evidence, {"text_rules": "completed", "ml": "completed"}
 
 
-def _load_rows(split: str, dataset_dir: Path, project_root: Path) -> tuple[list[dict], list[str]]:
+def _load_rows(split: str, dataset_dir: Path, project_root: Path, eval_dir: Path | None = None) -> tuple[list[dict], list[str]]:
+    fusion_dir = eval_dir or project_root / "models" / "evaluation" / "fusion"
     if split == "train_oof":
-        path = project_root / "models" / "evaluation" / "fusion" / "train_oof_predictions.csv"
+        path = fusion_dir / "train_oof_predictions.csv"
         rows = _read_csv(path)
         train_path = dataset_dir / "train.jsonl"
         train_rows = _read_jsonl(train_path, "train.jsonl")
@@ -142,7 +155,8 @@ def _load_rows(split: str, dataset_dir: Path, project_root: Path) -> tuple[list[
             row["text"] = texts[row["id"]]
         input_files = [str(path), str(train_path)]
     else:
-        path = project_root / "models" / "evaluation" / "validation" / "predictions_validation.csv"
+        path = (project_root / "models" / "evaluation" / "validation" / "predictions_validation.csv"
+                if eval_dir is None else eval_dir.parent / "validation" / "predictions_validation.csv")
         rows = _read_csv(path)
         validation_path = dataset_dir / "validation.jsonl"
         validation_rows = _read_jsonl(validation_path, "validation.jsonl")
@@ -157,35 +171,42 @@ def _load_rows(split: str, dataset_dir: Path, project_root: Path) -> tuple[list[
     return rows, input_files
 
 
-def _make_evidence(rows: list[dict]) -> list[tuple[list[Evidence], dict[str, str]]]:
-    return [_evidence_for(row) for row in rows]
+def _make_evidence(rows: list[dict], ml_threshold: float = ML_THRESHOLD) -> list[tuple[list[Evidence], dict[str, str]]]:
+    return [_evidence_for(row, ml_threshold) for row in rows]
 
 
 def _evaluate_candidate(name: str, rows: list[dict], evidence_rows: list[tuple[list[Evidence], dict[str, str]]],
                         *, ml_weight: float = 1.0, strong_ml_cut: float = DEFAULT_STRONG_ML_CUT,
                         tier_minimum_scores: dict[str, int] | None = None,
-                        min_tokens_for_moderate_ml_floor: int = 6) -> list[dict]:
+                        min_tokens_for_moderate_ml_floor: int = 6,
+                        moderate_ml_cut: float = ML_THRESHOLD) -> list[dict]:
     output = []
-    for row, (evidence, statuses) in zip(rows, evidence_rows):
-        result = fuse(evidence, statuses, strategy_name=name, module_quality=None,
-                      input_token_count=alphanumeric_token_count(row["text"]),
-                      strategy_params={"ml_weight": ml_weight, "strong_ml_cut": strong_ml_cut,
-                                       "tier_minimum_scores": tier_minimum_scores,
-                                       "min_tokens_for_moderate_ml_floor": min_tokens_for_moderate_ml_floor} if name != "legacy" else None)
-        output.append({"id": row["id"], "score": result.score, "label": result.label,
-                       "ml_p": row["ml_p"], "binary": row["binary"],
-                       "rule_score": risk_score([item for item in evidence if item.source != "ml_classifier"]),
-                       "duplicate_group": row.get("duplicate_group", row["id"]),
-                       "source_name": row.get("source_name", ""), "fusion_data": result.data or {}})
+    previous_cut = fusion_strategies.MODERATE_ML_CUT
+    fusion_strategies.MODERATE_ML_CUT = moderate_ml_cut
+    try:
+        for row, (evidence, statuses) in zip(rows, evidence_rows):
+            result = fuse(evidence, statuses, strategy_name=name, module_quality=None,
+                          input_token_count=alphanumeric_token_count(row["text"]),
+                          strategy_params={"ml_weight": ml_weight, "strong_ml_cut": strong_ml_cut,
+                                           "tier_minimum_scores": tier_minimum_scores,
+                                           "min_tokens_for_moderate_ml_floor": min_tokens_for_moderate_ml_floor} if name != "legacy" else None)
+            output.append({"id": row["id"], "score": result.score, "label": result.label,
+                           "ml_p": row["ml_p"], "binary": row["binary"],
+                           "rule_score": risk_score([item for item in evidence if item.source != "ml_classifier"]),
+                           "duplicate_group": row.get("duplicate_group", row["id"]),
+                           "source_name": row.get("source_name", ""), "fusion_data": result.data or {}})
+    finally:
+        fusion_strategies.MODERATE_ML_CUT = previous_cut
     return output
 
 
 def _short_text_floor_analysis(rows: list[dict], evidence_rows: list[tuple[list[Evidence], dict[str, str]]],
-                               strong_ml_cut: float = DEFAULT_STRONG_ML_CUT) -> tuple[list[dict], int]:
+                               strong_ml_cut: float = DEFAULT_STRONG_ML_CUT,
+                               moderate_ml_cut: float = ML_THRESHOLD) -> tuple[list[dict], int]:
     moderate = [
         (row, evidence, alphanumeric_token_count(row["text"]))
         for row, (evidence, _) in zip(rows, evidence_rows)
-        if MODERATE_ML_CUT <= row["ml_p"] < strong_ml_cut
+        if moderate_ml_cut <= row["ml_p"] < strong_ml_cut
     ]
     table = []
     for maximum_tokens in range(1, 7):
@@ -197,6 +218,7 @@ def _short_text_floor_analysis(rows: list[dict], evidence_rows: list[tuple[list[
             [(item[1], {"text_rules": "completed", "ml": "completed"}) for item in selected],
             ml_weight=DEFAULT_ML_WEIGHT, strong_ml_cut=strong_ml_cut,
             min_tokens_for_moderate_ml_floor=maximum_tokens + 1,
+            moderate_ml_cut=moderate_ml_cut,
         )
         benign_floor = sum(item["binary"] == 0 and item["score"] < 25 for item in floorless)
         malicious_floor = sum(item["binary"] == 1 and item["score"] < 25 for item in floorless)
@@ -208,7 +230,7 @@ def _short_text_floor_analysis(rows: list[dict], evidence_rows: list[tuple[list[
             "legitimate_floor_rows_removed": benign_floor,
             "malicious_floor_rows_removed": malicious_floor,
             "malicious_recall_cost_pct_of_moderate_ml": malicious_floor / max(1, sum(item[0]["binary"] == 1 for item in moderate)) * 100,
-            "moderate_ml_cut": MODERATE_ML_CUT,
+            "moderate_ml_cut": moderate_ml_cut,
             "strong_ml_cut": strong_ml_cut,
             "source": "train_oof_predictions.csv + train.jsonl",
         })
@@ -220,13 +242,16 @@ def _short_text_floor_analysis(rows: list[dict], evidence_rows: list[tuple[list[
     return table, selected_n
 
 
-def _tune_parameters(rows: list[dict], evidence_rows: list[tuple[list[Evidence], dict[str, str]]]) -> tuple[dict, list[dict]]:
-    short_analysis, short_floor_tokens = _short_text_floor_analysis(rows, evidence_rows)
+def _tune_parameters(rows: list[dict], evidence_rows: list[tuple[list[Evidence], dict[str, str]]],
+                     moderate_ml_cut: float = ML_THRESHOLD,
+                     analysis_dir: Path = Path("models/evaluation/fusion")) -> tuple[dict, list[dict]]:
+    short_analysis, short_floor_tokens = _short_text_floor_analysis(rows, evidence_rows, moderate_ml_cut=moderate_ml_cut)
     labels = [row["binary"] for row in rows]
     candidates = []
     for weight in (0.50, 0.75, 1.00, 1.25, 1.50, 2.00):
         values = _evaluate_candidate("ml_aware_weighted", rows, evidence_rows, ml_weight=weight,
-                                     min_tokens_for_moderate_ml_floor=short_floor_tokens)
+                                     min_tokens_for_moderate_ml_floor=short_floor_tokens,
+                                     moderate_ml_cut=moderate_ml_cut)
         scores = [item["score"] for item in values]
         metrics = _binary_metrics(labels, scores, 25)
         candidates.append((metrics["specificity"] >= 0.85, metrics["F1"], -weight, "ml_aware_weighted", {"ml_weight": weight}))
@@ -237,30 +262,32 @@ def _tune_parameters(rows: list[dict], evidence_rows: list[tuple[list[Evidence],
             for strong_floor in (50, 60):
                 params = {"strong_ml_cut": cut, "tier_minimum_scores": {"weak": 0, "moderate": moderate_floor, "strong": strong_floor}}
                 values = _evaluate_candidate("strength_gated", rows, evidence_rows,
-                                             min_tokens_for_moderate_ml_floor=short_floor_tokens, **params)
+                                             min_tokens_for_moderate_ml_floor=short_floor_tokens,
+                                             moderate_ml_cut=moderate_ml_cut, **params)
                 metrics = _binary_metrics(labels, [item["score"] for item in values], 25)
                 gated.append((metrics["specificity"] >= 0.85, metrics["F1"], -cut, -moderate_floor, -strong_floor, params))
     c = max(gated, key=lambda item: item[:-1])
     b[4]["min_tokens_for_moderate_ml_floor"] = short_floor_tokens
     c[-1]["min_tokens_for_moderate_ml_floor"] = short_floor_tokens
-    return ({"seed": SEED, "train_oof_rows": len(rows), "moderate_ml_cut": MODERATE_ML_CUT,
+    return ({"seed": SEED, "train_oof_rows": len(rows), "moderate_ml_cut": moderate_ml_cut,
              "ml_aware_weighted": b[4], "strength_gated": c[-1],
              "selection_rule": _selection_rule("train_oof"),
              "short_text_floor": {
                  "min_tokens_for_moderate_ml_floor": short_floor_tokens,
                  "strong_ml_cut": DEFAULT_STRONG_ML_CUT,
-                 "analysis_file": "models/evaluation/fusion/short_text_floor_analysis.csv",
+                 "analysis_file": (analysis_dir / "short_text_floor_analysis.csv").as_posix(),
                  "selection_rule": "minimize observed malicious moderate-ML floor removals; within that set maximize legitimate floor removals; ties choose the smallest tested N.",
                  "provenance": "Chosen from train OOF rows only using alphanumeric_token_count(text) from train.jsonl; no validation rows used.",
              },
              "learned_meta": {"status": "skipped", "reason": "No new trained production artifact is permitted in Phase 4; a runtime-loaded meta model would violate the frozen-artifact boundary."}}, short_analysis)
 
 
-def _agreement_rows(values: list[dict], candidate: str, malicious_total: int) -> list[dict]:
-    cells = {"agree_malicious": lambda item: item["ml_p"] >= ML_THRESHOLD and item["rule_score"] >= 25,
-             "ml_only": lambda item: item["ml_p"] >= ML_THRESHOLD and item["rule_score"] < 25,
-             "rules_only": lambda item: item["ml_p"] < ML_THRESHOLD and item["rule_score"] >= 25,
-             "both_negative": lambda item: item["ml_p"] < ML_THRESHOLD and item["rule_score"] < 25}
+def _agreement_rows(values: list[dict], candidate: str, malicious_total: int,
+                    ml_threshold: float = ML_THRESHOLD) -> list[dict]:
+    cells = {"agree_malicious": lambda item: item["ml_p"] >= ml_threshold and item["rule_score"] >= 25,
+             "ml_only": lambda item: item["ml_p"] >= ml_threshold and item["rule_score"] < 25,
+             "rules_only": lambda item: item["ml_p"] < ml_threshold and item["rule_score"] >= 25,
+             "both_negative": lambda item: item["ml_p"] < ml_threshold and item["rule_score"] < 25}
     output = []
     for name, predicate in cells.items():
         subset = [item for item in values if predicate(item)]
@@ -305,29 +332,36 @@ def _selection_rule(split: str) -> str:
     return f"highest {scope} caution F1 subject to specificity >= 0.85; ties prefer simpler strategy"
 
 
-def evaluate(split: str, dataset_dir: str | Path, project_root: str | Path | None = None) -> dict:
+def evaluate(split: str, dataset_dir: str | Path, project_root: str | Path | None = None,
+             eval_dir: str | Path | None = None, model_name: str = "trustshield_text_v1") -> dict:
     split = validate_split(split)
     project_root = Path(project_root or ROOT).resolve()
     dataset_dir = _safe_dataset_dir(Path(dataset_dir))
-    rows, input_files = _load_rows(split, dataset_dir, project_root)
-    evidence_rows = _make_evidence(rows)
+    fusion_dir = Path(eval_dir).resolve() if eval_dir is not None else project_root / "models" / "evaluation" / "fusion"
+    metadata_path = project_root / "models" / "metadata" / f"{model_name}.json"
+    model_metadata = json.loads(metadata_path.read_text(encoding="utf-8")) if metadata_path.is_file() else {}
+    ml_threshold = float(model_metadata.get("threshold", ML_THRESHOLD))
+    rows, input_files = _load_rows(split, dataset_dir, project_root, fusion_dir if eval_dir is not None else None)
+    evidence_rows = _make_evidence(rows, ml_threshold)
     tuning = None
+    tuning_path = fusion_dir / ("tuning_v3.json" if eval_dir is not None or model_name != "trustshield_text_v1" else "tuning.json")
     if split == "train_oof":
-        tuning, short_analysis = _tune_parameters(rows, evidence_rows)
-        tuning_path = project_root / "models" / "evaluation" / "fusion" / "tuning.json"
+        tuning, short_analysis = _tune_parameters(rows, evidence_rows, moderate_ml_cut=ml_threshold,
+                                                  analysis_dir=fusion_dir.relative_to(project_root) if fusion_dir.is_relative_to(project_root) else fusion_dir)
         tuning_path.parent.mkdir(parents=True, exist_ok=True)
         tuning_path.write_text(json.dumps(tuning, indent=2) + "\n", encoding="utf-8")
-        _write_csv(project_root / "models" / "evaluation" / "fusion" / "short_text_floor_analysis.csv", short_analysis)
+        _write_csv(fusion_dir / "short_text_floor_analysis.csv", short_analysis)
     else:
-        tuning_path = project_root / "models" / "evaluation" / "fusion" / "tuning.json"
         if not tuning_path.is_file():
-            raise FileNotFoundError("run fusion_oof_predictions.py and evaluate_fusion.py --split train_oof first")
+            raise FileNotFoundError(f"run fusion OOF tuning first: {tuning_path}")
         tuning = json.loads(tuning_path.read_text(encoding="utf-8"))
 
     parameter_map = {"legacy": {}, "ml_aware_weighted": tuning["ml_aware_weighted"], "strength_gated": tuning["strength_gated"]}
     candidate_values = {}
     for candidate in CANDIDATES:
-        candidate_values[candidate] = _evaluate_candidate(candidate, rows, evidence_rows, **parameter_map[candidate])
+        candidate_values[candidate] = _evaluate_candidate(candidate, rows, evidence_rows,
+                                                           moderate_ml_cut=ml_threshold,
+                                                           **parameter_map[candidate])
     labels = [row["binary"] for row in rows]
     malicious_total = sum(labels)
     comparison = []
@@ -346,9 +380,9 @@ def evaluate(split: str, dataset_dir: str | Path, project_root: str | Path | Non
                 indexes = [index for index, row in enumerate(rows) if row.get("source_name", "") == source]
                 source_metrics = _binary_metrics([labels[index] for index in indexes], [scores[index] for index in indexes], threshold)
                 source_rows.append({"candidate": candidate, "operating_point": operating_point, "source_name": source, **source_metrics})
-        agreement.extend(_agreement_rows(values, candidate, malicious_total))
+        agreement.extend(_agreement_rows(values, candidate, malicious_total, ml_threshold))
         for threshold_name, threshold in (("caution", 25), ("suspicious", 50)):
-            ml_positive = [item for item in values if item["ml_p"] >= ML_THRESHOLD]
+            ml_positive = [item for item in values if item["ml_p"] >= ml_threshold]
             suppressed = [item for item in ml_positive if item["score"] < threshold]
             malicious_ml = [item for item in ml_positive if item["binary"]]
             malicious_suppressed = [item for item in suppressed if item["binary"]]
@@ -381,7 +415,7 @@ def evaluate(split: str, dataset_dir: str | Path, project_root: str | Path | Non
                      "specificity": selected_ci["specificity"][0] > legacy_ci["specificity"][1] or legacy_ci["specificity"][0] > selected_ci["specificity"][1],
                  }}
 
-    out_dir = project_root / "models" / "evaluation" / "fusion" / split
+    out_dir = fusion_dir / split
     out_dir.mkdir(parents=True, exist_ok=True)
     pred_rows = []
     for index, row in enumerate(rows):
@@ -409,6 +443,8 @@ def evaluate(split: str, dataset_dir: str | Path, project_root: str | Path | Non
                "selection_rule": _selection_rule(split),
                "input_files": input_files, "tuning_file": str(tuning_path), "bootstrap": bootstrap,
                "learned_meta": tuning["learned_meta"]}
+    if eval_dir is not None or model_name != "trustshield_text_v1":
+        summary.update({"model_name": model_name, "moderate_ml_cut": ml_threshold})
     (out_dir / "evaluation.json").write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
     markdown = [f"# Fusion evaluation: {split}", "", f"Selected candidate: `{selected}`", "",
                 f"Selection: {_selection_rule(split)}.", "",
@@ -424,9 +460,15 @@ def main() -> None:
     parser.add_argument("--split", required=True)
     parser.add_argument("--dataset-dir", type=Path, required=True)
     parser.add_argument("--project-root", type=Path)
+    parser.add_argument("--model-name", default="trustshield_text_v1")
+    parser.add_argument("--eval-dir", type=Path, help="fusion evaluation root; default preserves v1 behavior")
+    parser.add_argument("--out-dir", type=Path, help="alias for --eval-dir")
     args = parser.parse_args()
+    if args.eval_dir is not None and args.out_dir is not None and args.eval_dir.resolve() != args.out_dir.resolve():
+        parser.error("--eval-dir and --out-dir must refer to the same directory when both are supplied")
     try:
-        summary = evaluate(args.split, args.dataset_dir, args.project_root)
+        summary = evaluate(args.split, args.dataset_dir, args.project_root,
+                           eval_dir=args.eval_dir or args.out_dir, model_name=args.model_name)
     except (ValueError, FileNotFoundError) as exc:
         parser.error(str(exc))
     print(json.dumps(summary, indent=2))

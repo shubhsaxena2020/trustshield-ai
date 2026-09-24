@@ -1,0 +1,662 @@
+{
+  "composition": {
+    "all": {
+      "binary_label": {
+        "legitimate": 3675,
+        "malicious_or_fraudulent": 954
+      },
+      "category_label": {
+        "credential_theft": 70,
+        "delivery_scam": 66,
+        "digital_arrest": 68,
+        "fake_job": 82,
+        "impersonation": 76,
+        "investment_scam": 72,
+        "legitimate": 3675,
+        "other_fraud": 132,
+        "payment_fraud": 88,
+        "phishing": 82,
+        "prize_lottery_scam": 218
+      },
+      "hardneg_bucket_by_synthetic": {
+        "bank_account::False": 95,
+        "bank_account::True": 188,
+        "delivery::False": 52,
+        "delivery::True": 115,
+        "job::False": 51,
+        "job::True": 28,
+        "otp_pin::False": 17,
+        "otp_pin::True": 75,
+        "payment::False": 49,
+        "payment::True": 133,
+        "telecom::False": 358,
+        "telecom::True": 88,
+        "urgent_service::False": 54,
+        "urgent_service::True": 107
+      },
+      "hardneg_bucket_counts": {
+        "bank_account": 283,
+        "delivery": 167,
+        "job": 79,
+        "otp_pin": 92,
+        "payment": 182,
+        "telecom": 446,
+        "urgent_service": 161
+      },
+      "source_name": {
+        "agy-gen-fraud-v1": 400,
+        "agy-gen-hardening-v2": 612,
+        "agy-gen-legit-v1": 398,
+        "ealvaradob_phishing-dataset_texts": 212,
+        "india_spam_sms": 1358,
+        "ucI_sms_spam": 1649
+      },
+      "source_type": {
+        "legitimate_control": 747,
+        "public_dataset": 3219,
+        "synthetic": 663
+      },
+      "synthetic": {
+        "False": 3219,
+        "True": 1410
+      },
+      "under_supported_categories": []
+    },
+    "hf": {
+      "agreement_kept_before_message_filter": 465,
+      "audit_quality": {
+        "audit_counts": {
+          "hf_blind_audit_A_agy.jsonl": 360,
+          "hf_blind_audit_A_rest_agy.jsonl": 40,
+          "hf_blind_audit_B_agy.jsonl": 400
+        },
+        "input_counts": {
+          "hf_blind_input_A.jsonl": 400,
+          "hf_blind_input_A_rest.jsonl": 40,
+          "hf_blind_input_B.jsonl": 400
+        },
+        "quality": {
+          "A_360": {
+            "audit_rows": 360,
+            "confidence_values": {
+              "high": 290,
+              "medium": 70
+            },
+            "distinct_rationale_ratio": 1.0,
+            "duplicate_audit_ids": 0,
+            "input_rows": 360,
+            "matched_ids": 360,
+            "nonempty_rationales": 360
+          },
+          "A_rest": {
+            "audit_rows": 40,
+            "confidence_values": {
+              "high": 30,
+              "medium": 10
+            },
+            "distinct_rationale_ratio": 1.0,
+            "duplicate_audit_ids": 0,
+            "input_rows": 40,
+            "matched_ids": 40,
+            "nonempty_rationales": 40
+          },
+          "B": {
+            "audit_rows": 400,
+            "confidence_values": {
+              "high": 348,
+              "low": 2,
+              "medium": 50
+            },
+            "distinct_rationale_ratio": 1.0,
+            "duplicate_audit_ids": 0,
+            "input_rows": 400,
+            "matched_ids": 400,
+            "nonempty_rationales": 400
+          }
+        }
+      },
+      "audited_rows": 800,
+      "composition_after_cap": {
+        "legitimate": 150,
+        "malicious_or_fraudulent": 77
+      },
+      "composition_after_message_filter_before_cap": {
+        "legitimate": 269,
+        "malicious_or_fraudulent": 77
+      },
+      "composition_before_message_filter": {
+        "legitimate": 388,
+        "malicious_or_fraudulent": 77
+      },
+      "discarded": {
+        "disagreement": 51,
+        "exclude": 284,
+        "legitimate_cap": 119,
+        "legitimate_message_likeness": 119
+      },
+      "kept_rows": 227,
+      "legitimate_cap": 150,
+      "legitimate_cap_removed": 119,
+      "legitimate_message_filter_removed": 119,
+      "lengths_after_message_filter_and_cap": {
+        "max": 60,
+        "mean": 24.44,
+        "median": 22.0,
+        "min": 2,
+        "n": 227,
+        "p95": 55
+      },
+      "lengths_before_message_filter": {
+        "max": 60,
+        "mean": 25.38,
+        "median": 24.0,
+        "min": 1,
+        "n": 465,
+        "p95": 56
+      },
+      "mapping_rows": 800,
+      "no_verdict_rows": 0,
+      "per_source_after": {
+        "ealvaradob_phishing-dataset_texts": {
+          "max": 60,
+          "mean": 24.44,
+          "median": 22.0,
+          "min": 2,
+          "n": 227,
+          "p95": 55
+        }
+      },
+      "per_source_before": {
+        "ealvaradob_phishing-dataset_texts": {
+          "max": 60,
+          "mean": 25.38,
+          "median": 24.0,
+          "min": 1,
+          "n": 465,
+          "p95": 56
+        }
+      },
+      "verdict_counts": {
+        "source_label_0::exclude": 12,
+        "source_label_0::legit": 388,
+        "source_label_1::exclude": 272,
+        "source_label_1::fraud": 77,
+        "source_label_1::legit": 51
+      }
+    },
+    "new_candidates_kept": {
+      "binary_label": {
+        "legitimate": 761,
+        "malicious_or_fraudulent": 325
+      },
+      "category_label": {
+        "credential_theft": 29,
+        "delivery_scam": 24,
+        "digital_arrest": 28,
+        "fake_job": 35,
+        "impersonation": 29,
+        "investment_scam": 31,
+        "legitimate": 761,
+        "other_fraud": 27,
+        "payment_fraud": 33,
+        "phishing": 38,
+        "prize_lottery_scam": 51
+      },
+      "hardneg_bucket_by_synthetic": {
+        "bank_account::False": 36,
+        "bank_account::True": 93,
+        "delivery::False": 25,
+        "delivery::True": 58,
+        "job::False": 35,
+        "job::True": 14,
+        "otp_pin::False": 10,
+        "otp_pin::True": 43,
+        "payment::False": 17,
+        "payment::True": 57,
+        "telecom::False": 151,
+        "telecom::True": 60,
+        "urgent_service::False": 19,
+        "urgent_service::True": 60
+      },
+      "hardneg_bucket_counts": {
+        "bank_account": 129,
+        "delivery": 83,
+        "job": 49,
+        "otp_pin": 53,
+        "payment": 74,
+        "telecom": 211,
+        "urgent_service": 79
+      },
+      "source_name": {
+        "agy-gen-hardening-v2": 612,
+        "ealvaradob_phishing-dataset_texts": 212,
+        "india_spam_sms": 147,
+        "ucI_sms_spam": 115
+      },
+      "source_type": {
+        "legitimate_control": 349,
+        "public_dataset": 474,
+        "synthetic": 263
+      },
+      "synthetic": {
+        "False": 474,
+        "True": 612
+      },
+      "under_supported_categories": [
+        "credential_theft",
+        "delivery_scam",
+        "digital_arrest",
+        "impersonation",
+        "other_fraud"
+      ]
+    },
+    "train": {
+      "binary_label": {
+        "legitimate": 3174,
+        "malicious_or_fraudulent": 830
+      },
+      "category_label": {
+        "credential_theft": 64,
+        "delivery_scam": 56,
+        "digital_arrest": 61,
+        "fake_job": 73,
+        "impersonation": 66,
+        "investment_scam": 66,
+        "legitimate": 3174,
+        "other_fraud": 104,
+        "payment_fraud": 78,
+        "phishing": 73,
+        "prize_lottery_scam": 189
+      },
+      "hardneg_bucket_by_synthetic": {
+        "bank_account::False": 86,
+        "bank_account::True": 172,
+        "delivery::False": 49,
+        "delivery::True": 99,
+        "job::False": 48,
+        "job::True": 23,
+        "otp_pin::False": 16,
+        "otp_pin::True": 71,
+        "payment::False": 43,
+        "payment::True": 116,
+        "telecom::False": 321,
+        "telecom::True": 84,
+        "urgent_service::False": 50,
+        "urgent_service::True": 101
+      },
+      "hardneg_bucket_counts": {
+        "bank_account": 258,
+        "delivery": 148,
+        "job": 71,
+        "otp_pin": 87,
+        "payment": 159,
+        "telecom": 405,
+        "urgent_service": 151
+      },
+      "source_name": {
+        "agy-gen-fraud-v1": 321,
+        "agy-gen-hardening-v2": 612,
+        "agy-gen-legit-v1": 321,
+        "ealvaradob_phishing-dataset_texts": 212,
+        "india_spam_sms": 1154,
+        "ucI_sms_spam": 1384
+      },
+      "source_type": {
+        "legitimate_control": 670,
+        "public_dataset": 2750,
+        "synthetic": 584
+      },
+      "synthetic": {
+        "False": 2750,
+        "True": 1254
+      },
+      "under_supported_categories": []
+    },
+    "validation": {
+      "binary_label": {
+        "legitimate": 501,
+        "malicious_or_fraudulent": 124
+      },
+      "category_label": {
+        "credential_theft": 6,
+        "delivery_scam": 10,
+        "digital_arrest": 7,
+        "fake_job": 9,
+        "impersonation": 10,
+        "investment_scam": 6,
+        "legitimate": 501,
+        "other_fraud": 28,
+        "payment_fraud": 10,
+        "phishing": 9,
+        "prize_lottery_scam": 29
+      },
+      "hardneg_bucket_by_synthetic": {
+        "bank_account::False": 9,
+        "bank_account::True": 16,
+        "delivery::False": 3,
+        "delivery::True": 16,
+        "job::False": 3,
+        "job::True": 5,
+        "otp_pin::False": 1,
+        "otp_pin::True": 4,
+        "payment::False": 6,
+        "payment::True": 17,
+        "telecom::False": 37,
+        "telecom::True": 4,
+        "urgent_service::False": 4,
+        "urgent_service::True": 6
+      },
+      "hardneg_bucket_counts": {
+        "bank_account": 25,
+        "delivery": 19,
+        "job": 8,
+        "otp_pin": 5,
+        "payment": 23,
+        "telecom": 41,
+        "urgent_service": 10
+      },
+      "source_name": {
+        "agy-gen-fraud-v1": 79,
+        "agy-gen-legit-v1": 77,
+        "india_spam_sms": 204,
+        "ucI_sms_spam": 265
+      },
+      "source_type": {
+        "legitimate_control": 77,
+        "public_dataset": 469,
+        "synthetic": 79
+      },
+      "synthetic": {
+        "False": 469,
+        "True": 156
+      },
+      "under_supported_categories": [
+        "credential_theft",
+        "delivery_scam",
+        "digital_arrest",
+        "fake_job",
+        "impersonation",
+        "investment_scam",
+        "other_fraud",
+        "payment_fraud",
+        "phishing",
+        "prize_lottery_scam"
+      ]
+    }
+  },
+  "counts": {
+    "hf_audited_agreed_candidates": 227,
+    "new_candidates_after_dedup": 1106,
+    "new_candidates_after_holdout": 1148,
+    "new_candidates_after_validation_filters": 1086,
+    "new_candidates_before_filters": 1152,
+    "real_raw": 310,
+    "synthetic_raw": 615,
+    "v1_train": 2918,
+    "v1_validation": 625,
+    "v3_all": 4629,
+    "v3_train": 4004,
+    "v3_validation": 625
+  },
+  "dataset_version": "trustshield-text-v3",
+  "date_built": "2026-09-25",
+  "final_evaluation_reserved_for_sealed_v2_holdout_after_lead_approval": true,
+  "forbidden_inputs_not_read": [
+    "C:\\Users\\shubh\\trustshield-ai\\datasets\\processed\\trustshield-text-v1\\test.jsonl",
+    "datasets/raw/synthetic/codex_holdout.jsonl",
+    "datasets/holdout/** labels/non-text fields",
+    "datasets/raw/holdout_v2/**"
+  ],
+  "group_report": {
+    "groups": 3936,
+    "pair_counts": {
+      "0.6": 234,
+      "0.7": 133,
+      "0.8": 65,
+      "0.85": 44,
+      "0.9": 28
+    },
+    "template_signatures": 3989
+  },
+  "hf_audit": {
+    "agreement_kept_before_message_filter": 465,
+    "audit_quality": {
+      "audit_counts": {
+        "hf_blind_audit_A_agy.jsonl": 360,
+        "hf_blind_audit_A_rest_agy.jsonl": 40,
+        "hf_blind_audit_B_agy.jsonl": 400
+      },
+      "input_counts": {
+        "hf_blind_input_A.jsonl": 400,
+        "hf_blind_input_A_rest.jsonl": 40,
+        "hf_blind_input_B.jsonl": 400
+      },
+      "quality": {
+        "A_360": {
+          "audit_rows": 360,
+          "confidence_values": {
+            "high": 290,
+            "medium": 70
+          },
+          "distinct_rationale_ratio": 1.0,
+          "duplicate_audit_ids": 0,
+          "input_rows": 360,
+          "matched_ids": 360,
+          "nonempty_rationales": 360
+        },
+        "A_rest": {
+          "audit_rows": 40,
+          "confidence_values": {
+            "high": 30,
+            "medium": 10
+          },
+          "distinct_rationale_ratio": 1.0,
+          "duplicate_audit_ids": 0,
+          "input_rows": 40,
+          "matched_ids": 40,
+          "nonempty_rationales": 40
+        },
+        "B": {
+          "audit_rows": 400,
+          "confidence_values": {
+            "high": 348,
+            "low": 2,
+            "medium": 50
+          },
+          "distinct_rationale_ratio": 1.0,
+          "duplicate_audit_ids": 0,
+          "input_rows": 400,
+          "matched_ids": 400,
+          "nonempty_rationales": 400
+        }
+      }
+    },
+    "audited_rows": 800,
+    "composition_after_cap": {
+      "legitimate": 150,
+      "malicious_or_fraudulent": 77
+    },
+    "composition_after_message_filter_before_cap": {
+      "legitimate": 269,
+      "malicious_or_fraudulent": 77
+    },
+    "composition_before_message_filter": {
+      "legitimate": 388,
+      "malicious_or_fraudulent": 77
+    },
+    "discarded": {
+      "disagreement": 51,
+      "exclude": 284,
+      "legitimate_cap": 119,
+      "legitimate_message_likeness": 119
+    },
+    "kept_rows": 227,
+    "legitimate_cap": 150,
+    "legitimate_cap_removed": 119,
+    "legitimate_message_filter_removed": 119,
+    "lengths_after_message_filter_and_cap": {
+      "max": 60,
+      "mean": 24.44,
+      "median": 22.0,
+      "min": 2,
+      "n": 227,
+      "p95": 55
+    },
+    "lengths_before_message_filter": {
+      "max": 60,
+      "mean": 25.38,
+      "median": 24.0,
+      "min": 1,
+      "n": 465,
+      "p95": 56
+    },
+    "mapping_rows": 800,
+    "no_verdict_rows": 0,
+    "per_source_after": {
+      "ealvaradob_phishing-dataset_texts": {
+        "max": 60,
+        "mean": 24.44,
+        "median": 22.0,
+        "min": 2,
+        "n": 227,
+        "p95": 55
+      }
+    },
+    "per_source_before": {
+      "ealvaradob_phishing-dataset_texts": {
+        "max": 60,
+        "mean": 25.38,
+        "median": 24.0,
+        "min": 1,
+        "n": 465,
+        "p95": 56
+      }
+    },
+    "verdict_counts": {
+      "source_label_0::exclude": 12,
+      "source_label_0::legit": 388,
+      "source_label_1::exclude": 272,
+      "source_label_1::fraud": 77,
+      "source_label_1::legit": 51
+    }
+  },
+  "holdout_text_filter_input": {
+    "path": "C:\\Users\\shubh\\trustshield-ai\\datasets\\holdout\\trustshield-text-v2-holdout\\holdout.jsonl",
+    "sha256": "not computed; text-only remove-only protocol"
+  },
+  "input_files": [
+    {
+      "path": "C:\\Users\\shubh\\trustshield-ai\\datasets\\processed\\trustshield-text-v1\\train.jsonl",
+      "sha256": "0cd9babfe20e79049747215a3598a151b3d75865806004185c3a2d7855377436"
+    },
+    {
+      "path": "C:\\Users\\shubh\\trustshield-ai\\datasets\\processed\\trustshield-text-v1\\validation.jsonl",
+      "sha256": "9d469dc7ebb3409cc2c0b7b60f73d78fd956143669d0626333f1286e8380b59e"
+    },
+    {
+      "path": "C:\\Users\\shubh\\trustshield-ai\\datasets\\raw\\hardening\\real_hardneg_candidates.jsonl",
+      "sha256": "2fa56aa9ce4879517fef6eeeadf127a241ac5d2c0c6bc43b0bec52b0307e7bb4"
+    },
+    {
+      "path": "C:\\Users\\shubh\\trustshield-ai\\datasets\\raw\\synthetic\\agy_hardening_v2.jsonl",
+      "sha256": "b1a18232d56f6bded682ff5aae95f11967022bd7110346af3b696dc8b2aed0c2"
+    },
+    {
+      "path": "C:\\Users\\shubh\\trustshield-ai\\datasets\\raw\\hardening\\hf_sample_map.jsonl",
+      "sha256": "75c58806228dbce7221d657475e586abf3d7b34bccd2eca8f09dc8cac1a7608b"
+    },
+    {
+      "path": "C:\\Users\\shubh\\trustshield-ai\\datasets\\raw\\hardening\\hf_blind_input_A.jsonl",
+      "sha256": "f4bdbef0439851b0f2e6db7ad31ae60f2e5494c4d364ebdcd7eae0e0230ed31b"
+    },
+    {
+      "path": "C:\\Users\\shubh\\trustshield-ai\\datasets\\raw\\hardening\\hf_blind_input_A_rest.jsonl",
+      "sha256": "abf377a45aae11b3826d29445c9839205f971a3f2aaf89fc522973b7b5ccfc44"
+    },
+    {
+      "path": "C:\\Users\\shubh\\trustshield-ai\\datasets\\raw\\hardening\\hf_blind_input_B.jsonl",
+      "sha256": "468825f786c7d82bafc8a9d536505a805b320d5e59dafe7e4c2ec00d88d2a1c4"
+    },
+    {
+      "path": "C:\\Users\\shubh\\trustshield-ai\\datasets\\raw\\hardening\\hf_blind_audit_A_agy.jsonl",
+      "sha256": "222dcfb16a02675c8463410918314bab93e66f14801c51bf64fe5edde865b061"
+    },
+    {
+      "path": "C:\\Users\\shubh\\trustshield-ai\\datasets\\raw\\hardening\\hf_blind_audit_A_rest_agy.jsonl",
+      "sha256": "43c3373c08a5523e804cc12bda53fabf34971611f8570caaaa3341735b358ba0"
+    },
+    {
+      "path": "C:\\Users\\shubh\\trustshield-ai\\datasets\\raw\\hardening\\hf_blind_audit_B_agy.jsonl",
+      "sha256": "d5b513a896fadf1670d674e9e42508a50d9cff88208e4c0491234edbd3e1cfd3"
+    }
+  ],
+  "leakage": {
+    "group_overlap_asserted_zero": true,
+    "holdout_removed_candidate_ids_count_only": 2,
+    "holdout_text_filter": {
+      "cosine_removed": 4,
+      "exact_removed": 0,
+      "holdout_rows_read": 979,
+      "normalized_removed": 0,
+      "removed_total": 4
+    },
+    "v1_train_vs_v1_validation": {
+      "cosine_pair_counts": {
+        "0.6": 64,
+        "0.7": 29,
+        "0.8": 11,
+        "0.85": 0,
+        "0.9": 0
+      },
+      "duplicate_group_overlap": 0,
+      "exact_pairs": 0,
+      "normalized_pairs": 0
+    },
+    "v3_train_vs_v3_validation": {
+      "cosine_pair_counts": {
+        "0.6": 61,
+        "0.7": 29,
+        "0.8": 10,
+        "0.85": 0,
+        "0.9": 0
+      },
+      "duplicate_group_overlap": 0,
+      "exact_pairs": 0,
+      "normalized_pairs": 0
+    }
+  },
+  "no_test_split_created": true,
+  "output_sha256": {
+    "all.jsonl": "34f3e292f22572b644b1a46228a395044620879d1d7ac43ea7bb5c0a7fffe8ba",
+    "composition.json": "f12d744dec0be1ce2b81482cf76e68fdb8d03313eb5172403b3f1eac67e04c6e",
+    "dedup_report.md": "74e363c225884851ac6649f0575f1af53c4bba9f61eb20fd6697719b75e58b37",
+    "leakage_report.md": "11b1b7b193670b526f75fa41681a61a6d726dfdcae407e8506313d0a7da9077b",
+    "train.jsonl": "40fdf0b5bde8543d0a63f84f4281850ec18a2e3d9697871a44dcda4033a63701",
+    "validation.jsonl": "9d469dc7ebb3409cc2c0b7b60f73d78fd956143669d0626333f1286e8380b59e"
+  },
+  "removal_counts": {
+    "exact_normalized_dedup": {
+      "new_normalized_duplicate": 38,
+      "new_normalized_label_conflict": 4
+    },
+    "holdout_text_filter": {
+      "cosine_removed": 4,
+      "exact_removed": 0,
+      "holdout_rows_read": 979,
+      "normalized_removed": 0,
+      "removed_total": 4
+    },
+    "schema_rejections": {},
+    "v1_validation_filters": {
+      "near_duplicate_validation_cosine_ge_0.60": 20
+    }
+  },
+  "seed": 42,
+  "under_supported_categories": [],
+  "validation_is_exact_v1_copy": true,
+  "validation_v1_sha256": "9d469dc7ebb3409cc2c0b7b60f73d78fd956143669d0626333f1286e8380b59e",
+  "validation_v3_sha256": "9d469dc7ebb3409cc2c0b7b60f73d78fd956143669d0626333f1286e8380b59e",
+  "verified_v1_train_codex_rows": 0,
+  "verified_v1_train_holdout_rows": 0,
+  "verified_v1_train_rows": 2918
+}
