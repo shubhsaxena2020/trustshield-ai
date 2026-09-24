@@ -1,0 +1,1669 @@
+{
+  "n": 979,
+  "slice_metrics": {
+    "v1": {
+      "ALL": {
+        "n": 979,
+        "pos": 537,
+        "neg": 442,
+        "TP": 436,
+        "TN": 326,
+        "FP": 116,
+        "FN": 101,
+        "accuracy": 0.7783452502553626,
+        "precision": 0.7898550724637681,
+        "recall": 0.8119180633147114,
+        "specificity": 0.7375565610859729,
+        "F1": 0.800734618916437,
+        "FPR": 0.2624434389140271,
+        "FNR": 0.1880819366852886,
+        "roc_auc_ml_p": 0.8522586516342677,
+        "pr_auc_ml_p": 0.8773551204592079,
+        "roc_auc_fused": 0.8245553055773234,
+        "brier_ml_p": 0.2317350164640608
+      },
+      "REAL": {
+        "n": 349,
+        "pos": 237,
+        "neg": 112,
+        "TP": 209,
+        "TN": 61,
+        "FP": 51,
+        "FN": 28,
+        "accuracy": 0.7736389684813754,
+        "precision": 0.8038461538461539,
+        "recall": 0.8818565400843882,
+        "specificity": 0.5446428571428571,
+        "F1": 0.841046277665996,
+        "FPR": 0.4553571428571429,
+        "FNR": 0.11814345991561181,
+        "roc_auc_ml_p": 0.8169077757685352,
+        "pr_auc_ml_p": 0.9012863250747506,
+        "roc_auc_fused": 0.8140822784810127,
+        "brier_ml_p": 0.2349605773435788
+      },
+      "SYNTHETIC": {
+        "n": 630,
+        "pos": 300,
+        "neg": 330,
+        "TP": 227,
+        "TN": 265,
+        "FP": 65,
+        "FN": 73,
+        "accuracy": 0.780952380952381,
+        "precision": 0.7773972602739726,
+        "recall": 0.7566666666666667,
+        "specificity": 0.803030303030303,
+        "F1": 0.766891891891892,
+        "FPR": 0.19696969696969702,
+        "FNR": 0.2433333333333333,
+        "roc_auc_ml_p": 0.8564343434343434,
+        "pr_auc_ml_p": 0.8607189541707299,
+        "roc_auc_fused": 0.8145151515151515,
+        "brier_ml_p": 0.22994815813556593
+      },
+      "REAL_LEGIT": {
+        "n": 112,
+        "pos": 0,
+        "neg": 112,
+        "TP": 0,
+        "TN": 61,
+        "FP": 51,
+        "FN": 0,
+        "accuracy": 0.5446428571428571,
+        "precision": 0.0,
+        "recall": null,
+        "specificity": 0.5446428571428571,
+        "F1": null,
+        "FPR": 0.4553571428571429,
+        "FNR": null,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      },
+      "REAL_FRAUD": {
+        "n": 237,
+        "pos": 237,
+        "neg": 0,
+        "TP": 209,
+        "TN": 0,
+        "FP": 0,
+        "FN": 28,
+        "accuracy": 0.8818565400843882,
+        "precision": 1.0,
+        "recall": 0.8818565400843882,
+        "specificity": null,
+        "F1": 0.937219730941704,
+        "FPR": null,
+        "FNR": 0.11814345991561181,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      },
+      "source=holdout2-codex-v1": {
+        "n": 630,
+        "pos": 300,
+        "neg": 330,
+        "TP": 227,
+        "TN": 265,
+        "FP": 65,
+        "FN": 73,
+        "accuracy": 0.780952380952381,
+        "precision": 0.7773972602739726,
+        "recall": 0.7566666666666667,
+        "specificity": 0.803030303030303,
+        "F1": 0.766891891891892,
+        "FPR": 0.19696969696969702,
+        "FNR": 0.2433333333333333,
+        "roc_auc_ml_p": 0.8564343434343434,
+        "pr_auc_ml_p": 0.8607189541707299,
+        "roc_auc_fused": 0.8145151515151515,
+        "brier_ml_p": 0.22994815813556593
+      },
+      "source=mendeley_financial_scams": {
+        "n": 126,
+        "pos": 14,
+        "neg": 112,
+        "TP": 11,
+        "TN": 61,
+        "FP": 51,
+        "FN": 3,
+        "accuracy": 0.5714285714285714,
+        "precision": 0.1774193548387097,
+        "recall": 0.7857142857142857,
+        "specificity": 0.5446428571428571,
+        "F1": 0.2894736842105263,
+        "FPR": 0.4553571428571429,
+        "FNR": 0.2142857142857143,
+        "roc_auc_ml_p": 0.7270408163265306,
+        "pr_auc_ml_p": 0.3595153201072888,
+        "roc_auc_fused": 0.7767857142857143,
+        "brier_ml_p": 0.1298041498068763
+      },
+      "source=reportsmishing_imc25": {
+        "n": 223,
+        "pos": 223,
+        "neg": 0,
+        "TP": 198,
+        "TN": 0,
+        "FP": 0,
+        "FN": 25,
+        "accuracy": 0.8878923766816144,
+        "precision": 1.0,
+        "recall": 0.8878923766816144,
+        "specificity": null,
+        "F1": 0.9406175771971497,
+        "FPR": null,
+        "FNR": 0.11210762331838564,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      },
+      "source=holdout2-codex-v1/fraud": {
+        "n": 300,
+        "pos": 300,
+        "neg": 0,
+        "TP": 227,
+        "TN": 0,
+        "FP": 0,
+        "FN": 73,
+        "accuracy": 0.7566666666666667,
+        "precision": 1.0,
+        "recall": 0.7566666666666667,
+        "specificity": null,
+        "F1": 0.8614800759013282,
+        "FPR": null,
+        "FNR": 0.2433333333333333,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      },
+      "source=holdout2-codex-v1/legit": {
+        "n": 330,
+        "pos": 0,
+        "neg": 330,
+        "TP": 0,
+        "TN": 265,
+        "FP": 65,
+        "FN": 0,
+        "accuracy": 0.803030303030303,
+        "precision": 0.0,
+        "recall": null,
+        "specificity": 0.803030303030303,
+        "F1": null,
+        "FPR": 0.19696969696969702,
+        "FNR": null,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      },
+      "source=mendeley_financial_scams/fraud": {
+        "n": 14,
+        "pos": 14,
+        "neg": 0,
+        "TP": 11,
+        "TN": 0,
+        "FP": 0,
+        "FN": 3,
+        "accuracy": 0.7857142857142857,
+        "precision": 1.0,
+        "recall": 0.7857142857142857,
+        "specificity": null,
+        "F1": 0.88,
+        "FPR": null,
+        "FNR": 0.2142857142857143,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      },
+      "source=mendeley_financial_scams/legit": {
+        "n": 112,
+        "pos": 0,
+        "neg": 112,
+        "TP": 0,
+        "TN": 61,
+        "FP": 51,
+        "FN": 0,
+        "accuracy": 0.5446428571428571,
+        "precision": 0.0,
+        "recall": null,
+        "specificity": 0.5446428571428571,
+        "F1": null,
+        "FPR": 0.4553571428571429,
+        "FNR": null,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      },
+      "source=reportsmishing_imc25/fraud": {
+        "n": 223,
+        "pos": 223,
+        "neg": 0,
+        "TP": 198,
+        "TN": 0,
+        "FP": 0,
+        "FN": 25,
+        "accuracy": 0.8878923766816144,
+        "precision": 1.0,
+        "recall": 0.8878923766816144,
+        "specificity": null,
+        "F1": 0.9406175771971497,
+        "FPR": null,
+        "FNR": 0.11210762331838564,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      },
+      "fraud_category=credential_theft": {
+        "n": 41,
+        "pos": 41,
+        "neg": 0,
+        "TP": 32,
+        "TN": 0,
+        "FP": 0,
+        "FN": 9,
+        "accuracy": 0.7804878048780488,
+        "precision": 1.0,
+        "recall": 0.7804878048780488,
+        "specificity": null,
+        "F1": 0.8767123287671234,
+        "FPR": null,
+        "FNR": 0.2195121951219512,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      },
+      "fraud_category=delivery_scam": {
+        "n": 46,
+        "pos": 46,
+        "neg": 0,
+        "TP": 39,
+        "TN": 0,
+        "FP": 0,
+        "FN": 7,
+        "accuracy": 0.8478260869565217,
+        "precision": 1.0,
+        "recall": 0.8478260869565217,
+        "specificity": null,
+        "F1": 0.9176470588235294,
+        "FPR": null,
+        "FNR": 0.15217391304347827,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      },
+      "fraud_category=digital_arrest": {
+        "n": 30,
+        "pos": 30,
+        "neg": 0,
+        "TP": 26,
+        "TN": 0,
+        "FP": 0,
+        "FN": 4,
+        "accuracy": 0.8666666666666667,
+        "precision": 1.0,
+        "recall": 0.8666666666666667,
+        "specificity": null,
+        "F1": 0.9285714285714286,
+        "FPR": null,
+        "FNR": 0.1333333333333333,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      },
+      "fraud_category=fake_job": {
+        "n": 34,
+        "pos": 34,
+        "neg": 0,
+        "TP": 21,
+        "TN": 0,
+        "FP": 0,
+        "FN": 13,
+        "accuracy": 0.6176470588235294,
+        "precision": 1.0,
+        "recall": 0.6176470588235294,
+        "specificity": null,
+        "F1": 0.7636363636363637,
+        "FPR": null,
+        "FNR": 0.38235294117647056,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      },
+      "fraud_category=impersonation": {
+        "n": 68,
+        "pos": 68,
+        "neg": 0,
+        "TP": 58,
+        "TN": 0,
+        "FP": 0,
+        "FN": 10,
+        "accuracy": 0.8529411764705882,
+        "precision": 1.0,
+        "recall": 0.8529411764705882,
+        "specificity": null,
+        "F1": 0.9206349206349206,
+        "FPR": null,
+        "FNR": 0.1470588235294118,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      },
+      "fraud_category=investment_scam": {
+        "n": 33,
+        "pos": 33,
+        "neg": 0,
+        "TP": 22,
+        "TN": 0,
+        "FP": 0,
+        "FN": 11,
+        "accuracy": 0.6666666666666666,
+        "precision": 1.0,
+        "recall": 0.6666666666666666,
+        "specificity": null,
+        "F1": 0.8,
+        "FPR": null,
+        "FNR": 0.33333333333333337,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      },
+      "fraud_category=other_fraud": {
+        "n": 35,
+        "pos": 35,
+        "neg": 0,
+        "TP": 24,
+        "TN": 0,
+        "FP": 0,
+        "FN": 11,
+        "accuracy": 0.6857142857142857,
+        "precision": 1.0,
+        "recall": 0.6857142857142857,
+        "specificity": null,
+        "F1": 0.8135593220338984,
+        "FPR": null,
+        "FNR": 0.3142857142857143,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      },
+      "fraud_category=payment_fraud": {
+        "n": 37,
+        "pos": 37,
+        "neg": 0,
+        "TP": 27,
+        "TN": 0,
+        "FP": 0,
+        "FN": 10,
+        "accuracy": 0.7297297297297297,
+        "precision": 1.0,
+        "recall": 0.7297297297297297,
+        "specificity": null,
+        "F1": 0.8437499999999999,
+        "FPR": null,
+        "FNR": 0.2702702702702703,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      },
+      "fraud_category=phishing": {
+        "n": 159,
+        "pos": 159,
+        "neg": 0,
+        "TP": 140,
+        "TN": 0,
+        "FP": 0,
+        "FN": 19,
+        "accuracy": 0.8805031446540881,
+        "precision": 1.0,
+        "recall": 0.8805031446540881,
+        "specificity": null,
+        "F1": 0.9364548494983278,
+        "FPR": null,
+        "FNR": 0.11949685534591192,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      },
+      "fraud_category=prize_lottery_scam": {
+        "n": 54,
+        "pos": 54,
+        "neg": 0,
+        "TP": 47,
+        "TN": 0,
+        "FP": 0,
+        "FN": 7,
+        "accuracy": 0.8703703703703703,
+        "precision": 1.0,
+        "recall": 0.8703703703703703,
+        "specificity": null,
+        "F1": 0.9306930693069307,
+        "FPR": null,
+        "FNR": 0.12962962962962965,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      },
+      "hard_negative_legit=anti_fraud": {
+        "n": 30,
+        "pos": 0,
+        "neg": 30,
+        "TP": 0,
+        "TN": 23,
+        "FP": 7,
+        "FN": 0,
+        "accuracy": 0.7666666666666667,
+        "precision": 0.0,
+        "recall": null,
+        "specificity": 0.7666666666666667,
+        "F1": null,
+        "FPR": 0.23333333333333328,
+        "FNR": null,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      },
+      "hard_negative_legit=bank_alert": {
+        "n": 30,
+        "pos": 0,
+        "neg": 30,
+        "TP": 0,
+        "TN": 20,
+        "FP": 10,
+        "FN": 0,
+        "accuracy": 0.6666666666666666,
+        "precision": 0.0,
+        "recall": null,
+        "specificity": 0.6666666666666666,
+        "F1": null,
+        "FPR": 0.33333333333333337,
+        "FNR": null,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      },
+      "hard_negative_legit=college": {
+        "n": 30,
+        "pos": 0,
+        "neg": 30,
+        "TP": 0,
+        "TN": 26,
+        "FP": 4,
+        "FN": 0,
+        "accuracy": 0.8666666666666667,
+        "precision": 0.0,
+        "recall": null,
+        "specificity": 0.8666666666666667,
+        "F1": null,
+        "FPR": 0.1333333333333333,
+        "FNR": null,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      },
+      "hard_negative_legit=courier": {
+        "n": 30,
+        "pos": 0,
+        "neg": 30,
+        "TP": 0,
+        "TN": 17,
+        "FP": 13,
+        "FN": 0,
+        "accuracy": 0.5666666666666667,
+        "precision": 0.0,
+        "recall": null,
+        "specificity": 0.5666666666666667,
+        "F1": null,
+        "FPR": 0.43333333333333335,
+        "FNR": null,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      },
+      "hard_negative_legit=hr_interview": {
+        "n": 30,
+        "pos": 0,
+        "neg": 30,
+        "TP": 0,
+        "TN": 27,
+        "FP": 3,
+        "FN": 0,
+        "accuracy": 0.9,
+        "precision": 0.0,
+        "recall": null,
+        "specificity": 0.9,
+        "F1": null,
+        "FPR": 0.09999999999999998,
+        "FNR": null,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      },
+      "hard_negative_legit=insurance_utility": {
+        "n": 30,
+        "pos": 0,
+        "neg": 30,
+        "TP": 0,
+        "TN": 27,
+        "FP": 3,
+        "FN": 0,
+        "accuracy": 0.9,
+        "precision": 0.0,
+        "recall": null,
+        "specificity": 0.9,
+        "F1": null,
+        "FPR": 0.09999999999999998,
+        "FNR": null,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      },
+      "hard_negative_legit=kyc_2fa": {
+        "n": 30,
+        "pos": 0,
+        "neg": 30,
+        "TP": 0,
+        "TN": 18,
+        "FP": 12,
+        "FN": 0,
+        "accuracy": 0.6,
+        "precision": 0.0,
+        "recall": null,
+        "specificity": 0.6,
+        "F1": null,
+        "FPR": 0.4,
+        "FNR": null,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      },
+      "hard_negative_legit=otp": {
+        "n": 30,
+        "pos": 0,
+        "neg": 30,
+        "TP": 0,
+        "TN": 25,
+        "FP": 5,
+        "FN": 0,
+        "accuracy": 0.8333333333333334,
+        "precision": 0.0,
+        "recall": null,
+        "specificity": 0.8333333333333334,
+        "F1": null,
+        "FPR": 0.16666666666666663,
+        "FNR": null,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      },
+      "hard_negative_legit=receipt_refund": {
+        "n": 30,
+        "pos": 0,
+        "neg": 30,
+        "TP": 0,
+        "TN": 26,
+        "FP": 4,
+        "FN": 0,
+        "accuracy": 0.8666666666666667,
+        "precision": 0.0,
+        "recall": null,
+        "specificity": 0.8666666666666667,
+        "F1": null,
+        "FPR": 0.1333333333333333,
+        "FNR": null,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      }
+    },
+    "v3": {
+      "ALL": {
+        "n": 979,
+        "pos": 537,
+        "neg": 442,
+        "TP": 441,
+        "TN": 346,
+        "FP": 96,
+        "FN": 96,
+        "accuracy": 0.8038815117466803,
+        "precision": 0.8212290502793296,
+        "recall": 0.8212290502793296,
+        "specificity": 0.7828054298642534,
+        "F1": 0.8212290502793297,
+        "FPR": 0.2171945701357466,
+        "FNR": 0.17877094972067042,
+        "roc_auc_ml_p": 0.8765409472770631,
+        "pr_auc_ml_p": 0.8978250387807396,
+        "roc_auc_fused": 0.8494316506146938,
+        "brier_ml_p": 0.20643235722695097
+      },
+      "REAL": {
+        "n": 349,
+        "pos": 237,
+        "neg": 112,
+        "TP": 207,
+        "TN": 68,
+        "FP": 44,
+        "FN": 30,
+        "accuracy": 0.7879656160458453,
+        "precision": 0.8247011952191236,
+        "recall": 0.8734177215189873,
+        "specificity": 0.6071428571428571,
+        "F1": 0.848360655737705,
+        "FPR": 0.3928571428571429,
+        "FNR": 0.12658227848101267,
+        "roc_auc_ml_p": 0.8256856540084387,
+        "pr_auc_ml_p": 0.9048391924916869,
+        "roc_auc_fused": 0.8285488245931285,
+        "brier_ml_p": 0.22570128702667214
+      },
+      "SYNTHETIC": {
+        "n": 630,
+        "pos": 300,
+        "neg": 330,
+        "TP": 234,
+        "TN": 278,
+        "FP": 52,
+        "FN": 66,
+        "accuracy": 0.8126984126984127,
+        "precision": 0.8181818181818182,
+        "recall": 0.78,
+        "specificity": 0.8424242424242424,
+        "F1": 0.7986348122866895,
+        "FPR": 0.1575757575757576,
+        "FNR": 0.21999999999999997,
+        "roc_auc_ml_p": 0.8893686868686869,
+        "pr_auc_ml_p": 0.8965161265569136,
+        "roc_auc_fused": 0.8466414141414141,
+        "brier_ml_p": 0.1957579818299626
+      },
+      "REAL_LEGIT": {
+        "n": 112,
+        "pos": 0,
+        "neg": 112,
+        "TP": 0,
+        "TN": 68,
+        "FP": 44,
+        "FN": 0,
+        "accuracy": 0.6071428571428571,
+        "precision": 0.0,
+        "recall": null,
+        "specificity": 0.6071428571428571,
+        "F1": null,
+        "FPR": 0.3928571428571429,
+        "FNR": null,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      },
+      "REAL_FRAUD": {
+        "n": 237,
+        "pos": 237,
+        "neg": 0,
+        "TP": 207,
+        "TN": 0,
+        "FP": 0,
+        "FN": 30,
+        "accuracy": 0.8734177215189873,
+        "precision": 1.0,
+        "recall": 0.8734177215189873,
+        "specificity": null,
+        "F1": 0.9324324324324325,
+        "FPR": null,
+        "FNR": 0.12658227848101267,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      },
+      "source=holdout2-codex-v1": {
+        "n": 630,
+        "pos": 300,
+        "neg": 330,
+        "TP": 234,
+        "TN": 278,
+        "FP": 52,
+        "FN": 66,
+        "accuracy": 0.8126984126984127,
+        "precision": 0.8181818181818182,
+        "recall": 0.78,
+        "specificity": 0.8424242424242424,
+        "F1": 0.7986348122866895,
+        "FPR": 0.1575757575757576,
+        "FNR": 0.21999999999999997,
+        "roc_auc_ml_p": 0.8893686868686869,
+        "pr_auc_ml_p": 0.8965161265569136,
+        "roc_auc_fused": 0.8466414141414141,
+        "brier_ml_p": 0.1957579818299626
+      },
+      "source=mendeley_financial_scams": {
+        "n": 126,
+        "pos": 14,
+        "neg": 112,
+        "TP": 13,
+        "TN": 68,
+        "FP": 44,
+        "FN": 1,
+        "accuracy": 0.6428571428571429,
+        "precision": 0.22807017543859648,
+        "recall": 0.9285714285714286,
+        "specificity": 0.6071428571428571,
+        "F1": 0.3661971830985915,
+        "FPR": 0.3928571428571429,
+        "FNR": 0.0714285714285714,
+        "roc_auc_ml_p": 0.8338647959183674,
+        "pr_auc_ml_p": 0.44196413444533744,
+        "roc_auc_fused": 0.8845663265306122,
+        "brier_ml_p": 0.1143580625910011
+      },
+      "source=reportsmishing_imc25": {
+        "n": 223,
+        "pos": 223,
+        "neg": 0,
+        "TP": 194,
+        "TN": 0,
+        "FP": 0,
+        "FN": 29,
+        "accuracy": 0.8699551569506726,
+        "precision": 1.0,
+        "recall": 0.8699551569506726,
+        "specificity": null,
+        "F1": 0.9304556354916067,
+        "FPR": null,
+        "FNR": 0.1300448430493274,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      },
+      "source=holdout2-codex-v1/fraud": {
+        "n": 300,
+        "pos": 300,
+        "neg": 0,
+        "TP": 234,
+        "TN": 0,
+        "FP": 0,
+        "FN": 66,
+        "accuracy": 0.78,
+        "precision": 1.0,
+        "recall": 0.78,
+        "specificity": null,
+        "F1": 0.8764044943820225,
+        "FPR": null,
+        "FNR": 0.21999999999999997,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      },
+      "source=holdout2-codex-v1/legit": {
+        "n": 330,
+        "pos": 0,
+        "neg": 330,
+        "TP": 0,
+        "TN": 278,
+        "FP": 52,
+        "FN": 0,
+        "accuracy": 0.8424242424242424,
+        "precision": 0.0,
+        "recall": null,
+        "specificity": 0.8424242424242424,
+        "F1": null,
+        "FPR": 0.1575757575757576,
+        "FNR": null,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      },
+      "source=mendeley_financial_scams/fraud": {
+        "n": 14,
+        "pos": 14,
+        "neg": 0,
+        "TP": 13,
+        "TN": 0,
+        "FP": 0,
+        "FN": 1,
+        "accuracy": 0.9285714285714286,
+        "precision": 1.0,
+        "recall": 0.9285714285714286,
+        "specificity": null,
+        "F1": 0.962962962962963,
+        "FPR": null,
+        "FNR": 0.0714285714285714,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      },
+      "source=mendeley_financial_scams/legit": {
+        "n": 112,
+        "pos": 0,
+        "neg": 112,
+        "TP": 0,
+        "TN": 68,
+        "FP": 44,
+        "FN": 0,
+        "accuracy": 0.6071428571428571,
+        "precision": 0.0,
+        "recall": null,
+        "specificity": 0.6071428571428571,
+        "F1": null,
+        "FPR": 0.3928571428571429,
+        "FNR": null,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      },
+      "source=reportsmishing_imc25/fraud": {
+        "n": 223,
+        "pos": 223,
+        "neg": 0,
+        "TP": 194,
+        "TN": 0,
+        "FP": 0,
+        "FN": 29,
+        "accuracy": 0.8699551569506726,
+        "precision": 1.0,
+        "recall": 0.8699551569506726,
+        "specificity": null,
+        "F1": 0.9304556354916067,
+        "FPR": null,
+        "FNR": 0.1300448430493274,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      },
+      "fraud_category=credential_theft": {
+        "n": 41,
+        "pos": 41,
+        "neg": 0,
+        "TP": 30,
+        "TN": 0,
+        "FP": 0,
+        "FN": 11,
+        "accuracy": 0.7317073170731707,
+        "precision": 1.0,
+        "recall": 0.7317073170731707,
+        "specificity": null,
+        "F1": 0.8450704225352113,
+        "FPR": null,
+        "FNR": 0.2682926829268293,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      },
+      "fraud_category=delivery_scam": {
+        "n": 46,
+        "pos": 46,
+        "neg": 0,
+        "TP": 39,
+        "TN": 0,
+        "FP": 0,
+        "FN": 7,
+        "accuracy": 0.8478260869565217,
+        "precision": 1.0,
+        "recall": 0.8478260869565217,
+        "specificity": null,
+        "F1": 0.9176470588235294,
+        "FPR": null,
+        "FNR": 0.15217391304347827,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      },
+      "fraud_category=digital_arrest": {
+        "n": 30,
+        "pos": 30,
+        "neg": 0,
+        "TP": 30,
+        "TN": 0,
+        "FP": 0,
+        "FN": 0,
+        "accuracy": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "specificity": null,
+        "F1": 1.0,
+        "FPR": null,
+        "FNR": 0.0,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      },
+      "fraud_category=fake_job": {
+        "n": 34,
+        "pos": 34,
+        "neg": 0,
+        "TP": 19,
+        "TN": 0,
+        "FP": 0,
+        "FN": 15,
+        "accuracy": 0.5588235294117647,
+        "precision": 1.0,
+        "recall": 0.5588235294117647,
+        "specificity": null,
+        "F1": 0.7169811320754718,
+        "FPR": null,
+        "FNR": 0.4411764705882353,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      },
+      "fraud_category=impersonation": {
+        "n": 68,
+        "pos": 68,
+        "neg": 0,
+        "TP": 58,
+        "TN": 0,
+        "FP": 0,
+        "FN": 10,
+        "accuracy": 0.8529411764705882,
+        "precision": 1.0,
+        "recall": 0.8529411764705882,
+        "specificity": null,
+        "F1": 0.9206349206349206,
+        "FPR": null,
+        "FNR": 0.1470588235294118,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      },
+      "fraud_category=investment_scam": {
+        "n": 33,
+        "pos": 33,
+        "neg": 0,
+        "TP": 22,
+        "TN": 0,
+        "FP": 0,
+        "FN": 11,
+        "accuracy": 0.6666666666666666,
+        "precision": 1.0,
+        "recall": 0.6666666666666666,
+        "specificity": null,
+        "F1": 0.8,
+        "FPR": null,
+        "FNR": 0.33333333333333337,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      },
+      "fraud_category=other_fraud": {
+        "n": 35,
+        "pos": 35,
+        "neg": 0,
+        "TP": 26,
+        "TN": 0,
+        "FP": 0,
+        "FN": 9,
+        "accuracy": 0.7428571428571429,
+        "precision": 1.0,
+        "recall": 0.7428571428571429,
+        "specificity": null,
+        "F1": 0.8524590163934427,
+        "FPR": null,
+        "FNR": 0.2571428571428571,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      },
+      "fraud_category=payment_fraud": {
+        "n": 37,
+        "pos": 37,
+        "neg": 0,
+        "TP": 31,
+        "TN": 0,
+        "FP": 0,
+        "FN": 6,
+        "accuracy": 0.8378378378378378,
+        "precision": 1.0,
+        "recall": 0.8378378378378378,
+        "specificity": null,
+        "F1": 0.911764705882353,
+        "FPR": null,
+        "FNR": 0.16216216216216217,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      },
+      "fraud_category=phishing": {
+        "n": 159,
+        "pos": 159,
+        "neg": 0,
+        "TP": 138,
+        "TN": 0,
+        "FP": 0,
+        "FN": 21,
+        "accuracy": 0.8679245283018868,
+        "precision": 1.0,
+        "recall": 0.8679245283018868,
+        "specificity": null,
+        "F1": 0.9292929292929293,
+        "FPR": null,
+        "FNR": 0.13207547169811318,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      },
+      "fraud_category=prize_lottery_scam": {
+        "n": 54,
+        "pos": 54,
+        "neg": 0,
+        "TP": 48,
+        "TN": 0,
+        "FP": 0,
+        "FN": 6,
+        "accuracy": 0.8888888888888888,
+        "precision": 1.0,
+        "recall": 0.8888888888888888,
+        "specificity": null,
+        "F1": 0.9411764705882353,
+        "FPR": null,
+        "FNR": 0.11111111111111116,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      },
+      "hard_negative_legit=anti_fraud": {
+        "n": 30,
+        "pos": 0,
+        "neg": 30,
+        "TP": 0,
+        "TN": 23,
+        "FP": 7,
+        "FN": 0,
+        "accuracy": 0.7666666666666667,
+        "precision": 0.0,
+        "recall": null,
+        "specificity": 0.7666666666666667,
+        "F1": null,
+        "FPR": 0.23333333333333328,
+        "FNR": null,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      },
+      "hard_negative_legit=bank_alert": {
+        "n": 30,
+        "pos": 0,
+        "neg": 30,
+        "TP": 0,
+        "TN": 25,
+        "FP": 5,
+        "FN": 0,
+        "accuracy": 0.8333333333333334,
+        "precision": 0.0,
+        "recall": null,
+        "specificity": 0.8333333333333334,
+        "F1": null,
+        "FPR": 0.16666666666666663,
+        "FNR": null,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      },
+      "hard_negative_legit=college": {
+        "n": 30,
+        "pos": 0,
+        "neg": 30,
+        "TP": 0,
+        "TN": 23,
+        "FP": 7,
+        "FN": 0,
+        "accuracy": 0.7666666666666667,
+        "precision": 0.0,
+        "recall": null,
+        "specificity": 0.7666666666666667,
+        "F1": null,
+        "FPR": 0.23333333333333328,
+        "FNR": null,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      },
+      "hard_negative_legit=courier": {
+        "n": 30,
+        "pos": 0,
+        "neg": 30,
+        "TP": 0,
+        "TN": 21,
+        "FP": 9,
+        "FN": 0,
+        "accuracy": 0.7,
+        "precision": 0.0,
+        "recall": null,
+        "specificity": 0.7,
+        "F1": null,
+        "FPR": 0.30000000000000004,
+        "FNR": null,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      },
+      "hard_negative_legit=hr_interview": {
+        "n": 30,
+        "pos": 0,
+        "neg": 30,
+        "TP": 0,
+        "TN": 27,
+        "FP": 3,
+        "FN": 0,
+        "accuracy": 0.9,
+        "precision": 0.0,
+        "recall": null,
+        "specificity": 0.9,
+        "F1": null,
+        "FPR": 0.09999999999999998,
+        "FNR": null,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      },
+      "hard_negative_legit=insurance_utility": {
+        "n": 30,
+        "pos": 0,
+        "neg": 30,
+        "TP": 0,
+        "TN": 27,
+        "FP": 3,
+        "FN": 0,
+        "accuracy": 0.9,
+        "precision": 0.0,
+        "recall": null,
+        "specificity": 0.9,
+        "F1": null,
+        "FPR": 0.09999999999999998,
+        "FNR": null,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      },
+      "hard_negative_legit=kyc_2fa": {
+        "n": 30,
+        "pos": 0,
+        "neg": 30,
+        "TP": 0,
+        "TN": 20,
+        "FP": 10,
+        "FN": 0,
+        "accuracy": 0.6666666666666666,
+        "precision": 0.0,
+        "recall": null,
+        "specificity": 0.6666666666666666,
+        "F1": null,
+        "FPR": 0.33333333333333337,
+        "FNR": null,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      },
+      "hard_negative_legit=otp": {
+        "n": 30,
+        "pos": 0,
+        "neg": 30,
+        "TP": 0,
+        "TN": 29,
+        "FP": 1,
+        "FN": 0,
+        "accuracy": 0.9666666666666667,
+        "precision": 0.0,
+        "recall": null,
+        "specificity": 0.9666666666666667,
+        "F1": null,
+        "FPR": 0.033333333333333326,
+        "FNR": null,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      },
+      "hard_negative_legit=receipt_refund": {
+        "n": 30,
+        "pos": 0,
+        "neg": 30,
+        "TP": 0,
+        "TN": 28,
+        "FP": 2,
+        "FN": 0,
+        "accuracy": 0.9333333333333333,
+        "precision": 0.0,
+        "recall": null,
+        "specificity": 0.9333333333333333,
+        "F1": null,
+        "FPR": 0.06666666666666665,
+        "FNR": null,
+        "roc_auc_ml_p": null,
+        "pr_auc_ml_p": null,
+        "roc_auc_fused": null,
+        "brier_ml_p": null
+      }
+    }
+  },
+  "latency": {
+    "v1": {
+      "median_ms": 20.530199995846488,
+      "mean_ms": 22.03567732374999,
+      "p95_ms": 34.700839996366994
+    },
+    "v3": {
+      "median_ms": 22.43309999903431,
+      "mean_ms": 23.79659999997943,
+      "p95_ms": 38.751269999920616
+    }
+  },
+  "bootstrap_95ci": {
+    "ALL": {
+      "v1_recall": {
+        "mean": 0.8119633007445171,
+        "ci95": [
+          0.7796255809040981,
+          0.8446100727544293
+        ]
+      },
+      "v3_recall": {
+        "mean": 0.8210987733565112,
+        "ci95": [
+          0.7890879709643968,
+          0.8529411764705882
+        ]
+      },
+      "v1_fpr": {
+        "mean": 0.2626430598261455,
+        "ci95": [
+          0.22352808391979817,
+          0.3034953992514036
+        ]
+      },
+      "v3_fpr": {
+        "mean": 0.21693175624896105,
+        "ci95": [
+          0.18080293294377248,
+          0.25446529118404115
+        ]
+      },
+      "v1_f1": {
+        "mean": 0.8006116104640145,
+        "ci95": [
+          0.7753950698533146,
+          0.825479930191972
+        ]
+      },
+      "v3_f1": {
+        "mean": 0.8211564285575019,
+        "ci95": [
+          0.795819439962712,
+          0.8443740582348382
+        ]
+      },
+      "d_recall": {
+        "mean": 0.009135472611994154,
+        "ci95": [
+          -0.013186440677966127,
+          0.0320754716981132
+        ]
+      },
+      "d_fpr": {
+        "mean": -0.045711303577184406,
+        "ci95": [
+          -0.07534569656241925,
+          -0.016388699149969686
+        ]
+      },
+      "d_f1": {
+        "mean": 0.020544818093487356,
+        "ci95": [
+          0.004403540761319746,
+          0.03785731115094652
+        ]
+      }
+    },
+    "REAL": {
+      "v1_recall": {
+        "mean": 0.8815361716651898,
+        "ci95": [
+          0.8421052631578947,
+          0.9198479953392298
+        ]
+      },
+      "v3_recall": {
+        "mean": 0.8731421052475014,
+        "ci95": [
+          0.8318822704611549,
+          0.9122807017543859
+        ]
+      },
+      "v1_fpr": {
+        "mean": 0.45478581507430965,
+        "ci95": [
+          0.36206486042692937,
+          0.5438631578947368
+        ]
+      },
+      "v3_fpr": {
+        "mean": 0.3932354364497694,
+        "ci95": [
+          0.30642921146953406,
+          0.4845438925335832
+        ]
+      },
+      "v1_f1": {
+        "mean": 0.8410489001508877,
+        "ci95": [
+          0.8084146079484426,
+          0.8749999999999999
+        ]
+      },
+      "v3_f1": {
+        "mean": 0.8481792626591187,
+        "ci95": [
+          0.8141925757863318,
+          0.880169270615057
+        ]
+      },
+      "d_recall": {
+        "mean": -0.008394066417688443,
+        "ci95": [
+          -0.04065455450472872,
+          0.022126352015732566
+        ]
+      },
+      "d_fpr": {
+        "mean": -0.06155037862454027,
+        "ci95": [
+          -0.13084112149532712,
+          0.009259259259259191
+        ]
+      },
+      "d_f1": {
+        "mean": 0.007130362508230851,
+        "ci95": [
+          -0.014615319237815188,
+          0.029144130844992157
+        ]
+      }
+    },
+    "REAL_LEGIT": {
+      "v1_recall": {
+        "mean": null,
+        "ci95": null
+      },
+      "v3_recall": {
+        "mean": null,
+        "ci95": null
+      },
+      "v1_fpr": {
+        "mean": 0.45525446428571426,
+        "ci95": [
+          0.3658482142857143,
+          0.5446428571428571
+        ]
+      },
+      "v3_fpr": {
+        "mean": 0.39199553571428575,
+        "ci95": [
+          0.30357142857142855,
+          0.49107142857142855
+        ]
+      },
+      "v1_f1": {
+        "mean": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ]
+      },
+      "v3_f1": {
+        "mean": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ]
+      },
+      "d_recall": {
+        "mean": null,
+        "ci95": null
+      },
+      "d_fpr": {
+        "mean": -0.06325892857142856,
+        "ci95": [
+          -0.13392857142857145,
+          0.0
+        ]
+      },
+      "d_f1": {
+        "mean": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "REAL_FRAUD": {
+      "v1_recall": {
+        "mean": 0.8810021097046413,
+        "ci95": [
+          0.8396624472573839,
+          0.919831223628692
+        ]
+      },
+      "v3_recall": {
+        "mean": 0.8724789029535865,
+        "ci95": [
+          0.8270042194092827,
+          0.9113924050632911
+        ]
+      },
+      "v1_fpr": {
+        "mean": null,
+        "ci95": null
+      },
+      "v3_fpr": {
+        "mean": null,
+        "ci95": null
+      },
+      "v1_f1": {
+        "mean": 0.9366106473943249,
+        "ci95": [
+          0.9128440366972477,
+          0.9582417582417583
+        ]
+      },
+      "v3_f1": {
+        "mean": 0.9317574467155006,
+        "ci95": [
+          0.905311778290993,
+          0.9536423841059603
+        ]
+      },
+      "d_recall": {
+        "mean": -0.008523206751054852,
+        "ci95": [
+          -0.03797468354430389,
+          0.021097046413502185
+        ]
+      },
+      "d_fpr": {
+        "mean": null,
+        "ci95": null
+      },
+      "d_f1": {
+        "mean": -0.004853200678824095,
+        "ci95": [
+          -0.022604167749201723,
+          0.012214354185349108
+        ]
+      }
+    },
+    "SYNTHETIC": {
+      "v1_recall": {
+        "mean": 0.75663692299407,
+        "ci95": [
+          0.7083160299003323,
+          0.8034015477682707
+        ]
+      },
+      "v3_recall": {
+        "mean": 0.7797519726016964,
+        "ci95": [
+          0.7337554112554112,
+          0.8231605825609987
+        ]
+      },
+      "v1_fpr": {
+        "mean": 0.1972166397719128,
+        "ci95": [
+          0.15576137444736693,
+          0.24261322789360165
+        ]
+      },
+      "v3_fpr": {
+        "mean": 0.15733688345783678,
+        "ci95": [
+          0.11801242236024845,
+          0.19867755337090204
+        ]
+      },
+      "v1_f1": {
+        "mean": 0.7665771077094526,
+        "ci95": [
+          0.7272641670946755,
+          0.8033635178209216
+        ]
+      },
+      "v3_f1": {
+        "mean": 0.7984191436222766,
+        "ci95": [
+          0.7634349068527778,
+          0.8341105148081893
+        ]
+      },
+      "d_recall": {
+        "mean": 0.02311504960762628,
+        "ci95": [
+          -0.01023978446865215,
+          0.05776326776197836
+        ]
+      },
+      "d_fpr": {
+        "mean": -0.039879756314076045,
+        "ci95": [
+          -0.07267717839269944,
+          -0.006096637102734674
+        ]
+      },
+      "d_f1": {
+        "mean": 0.031842035912823946,
+        "ci95": [
+          0.006907281580928746,
+          0.05776196866782544
+        ]
+      }
+    }
+  },
+  "criteria": [
+    {
+      "criterion": "C1a recall (ALL) drop",
+      "required": "<= 0.02",
+      "observed": "v1 0.8119 -> v3 0.8212 (drop -0.0093)",
+      "pass": true
+    },
+    {
+      "criterion": "C1b recall (REAL_FRAUD) drop",
+      "required": "<= 0.02",
+      "observed": "v1 0.8819 -> v3 0.8734 (drop +0.0084)",
+      "pass": true
+    },
+    {
+      "criterion": "C2 REAL_LEGIT FPR not higher and CI upper <= +0.03",
+      "required": "diff <= 0 and upper <= 0.03",
+      "observed": "v1 0.4554 -> v3 0.3929; diff CI [-0.13392857142857145, 0.0]",
+      "pass": true
+    },
+    {
+      "criterion": "C3 overall FPR increase",
+      "required": "<= 0.01",
+      "observed": "v1 0.2624 -> v3 0.2172",
+      "pass": true
+    },
+    {
+      "criterion": "C4 real gain (REAL_LEGIT FPR fall >= 0.02 OR REAL F1 gain >= 0.02)",
+      "required": ">= 0.02",
+      "observed": "REAL_LEGIT FPR fall +0.0625; REAL F1 gain +0.0073",
+      "pass": true
+    },
+    {
+      "criterion": "C5a ROC-AUC (ML p, ALL) drop",
+      "required": "<= 0.01",
+      "observed": "v1 0.8523 -> v3 0.8765",
+      "pass": true
+    },
+    {
+      "criterion": "C5b Brier (ML p, ALL) increase",
+      "required": "<= 0.01",
+      "observed": "v1 0.2317 -> v3 0.2064",
+      "pass": true
+    },
+    {
+      "criterion": "C6 median latency",
+      "required": "<= 2x v1",
+      "observed": "v1 20.5 ms -> v3 22.4 ms",
+      "pass": true
+    },
+    {
+      "criterion": "size REAL/REAL_LEGIT/REAL_FRAUD n >= 30",
+      "required": ">= 30",
+      "observed": "349 / 112 / 237",
+      "pass": true
+    }
+  ],
+  "mechanical_verdict": "PROMOTE",
+  "script_verdict": "PROMOTE",
+  "independent_vs_script_confusion_and_auc_mismatches": []
+}

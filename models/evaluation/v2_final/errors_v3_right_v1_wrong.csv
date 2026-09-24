@@ -1,0 +1,58 @@
+id,source,category,y_true,v1_score,v1_p,v3_score,v3_p,text
+holdout2-codex-v1-03f78e3e,holdout2-codex-v1,payment_fraud,1,10,0.053,31,0.467,Payment correction: scan the QR sent by the new accounts contact.
+holdout2-codex-v1-0f70cc0d,holdout2-codex-v1,impersonation,1,0,0.092,25,0.371,The caller says they are your manager and need gift cards now.
+holdout2-codex-v1-174b5b26,holdout2-codex-v1,legitimate,0,25,0.161,0,0.121,Kabir: I received my login OTP and ignored the strange call.
+holdout2-codex-v1-258b6148,holdout2-codex-v1,legitimate,0,25,0.202,0,0.121,Kotak Bank posts a KYC reminder without asking for a reply.
+holdout2-codex-v1-29ab6848,holdout2-codex-v1,fake_job,1,0,0.053,25,0.195,Book an interview at https://northstar-gigs.example/interview after payment.
+holdout2-codex-v1-367f11a9,holdout2-codex-v1,digital_arrest,1,0,0.086,25,0.163,A fake court clerk asks for a secrecy fee before closing the file.
+holdout2-codex-v1-3a3d4ee9,holdout2-codex-v1,credential_theft,1,0,0.097,25,0.194,Your login will be restored after you reveal the authenticator code.
+holdout2-codex-v1-41d379a5,holdout2-codex-v1,payment_fraud,1,0,0.113,25,0.425,A project client says bank details changed; use https://nimbus-collect.example/new.
+holdout2-codex-v1-4864d167,holdout2-codex-v1,legitimate,0,25,0.210,0,0.084,India Post reports a parcel ready for local delivery.
+holdout2-codex-v1-4a90e5b0,holdout2-codex-v1,legitimate,0,25,0.393,0,0.152,SBI asks customers to complete a KYC review in YONO or at a branch.
+holdout2-codex-v1-4b8b3746,holdout2-codex-v1,other_fraud,1,0,0.112,27,0.540,The technician asks for an access code at https://northstar-support.example/fix.
+holdout2-codex-v1-4cc01213,holdout2-codex-v1,legitimate,0,25,0.381,0,0.025,Axis Bank asks you to visit a branch for a KYC correction.
+holdout2-codex-v1-5038818b,holdout2-codex-v1,prize_lottery_scam,1,0,0.096,25,0.175,A rewards coordinator requests a receipt number before explaining a promotion.
+holdout2-codex-v1-518297fa,holdout2-codex-v1,legitimate,0,25,0.145,0,0.020,SBI generated this one-time code after your password request.
+holdout2-codex-v1-767c5262,holdout2-codex-v1,payment_fraud,1,0,0.084,25,0.177,The BlueCedar seller asks for a QR payment to reserve an order.
+holdout2-codex-v1-7759dee9,holdout2-codex-v1,legitimate,0,25,0.130,0,0.060,Blue Dart records a delivery attempt with a tracking note.
+holdout2-codex-v1-913b23d9,holdout2-codex-v1,prize_lottery_scam,1,0,0.074,25,0.403,The promotion says cashback is ready at https://bluecedar-prizes.example/cashback.
+holdout2-codex-v1-918b914e,holdout2-codex-v1,investment_scam,1,0,0.072,25,0.239,The investment coordinator says a few guaranteed slots remain.
+holdout2-codex-v1-a012e8b7,holdout2-codex-v1,legitimate,0,25,0.355,0,0.097,Amazon India posts a festival sale announcement.
+holdout2-codex-v1-a7e133a5,holdout2-codex-v1,digital_arrest,1,3,0.057,25,0.163,A police impersonator says your name appeared in a report and asks for cooperation.
+holdout2-codex-v1-aad58953,holdout2-codex-v1,legitimate,0,25,0.183,0,0.126,ICICI Bank OTP 674320 is for the transfer you initiated.
+holdout2-codex-v1-afa051f7,holdout2-codex-v1,legitimate,0,25,0.243,0,0.008,HDFC Bank reports a cash withdrawal with its transaction reference.
+holdout2-codex-v1-b426345b,holdout2-codex-v1,legitimate,0,25,0.124,3,0.016,Axis Bank cautions that urgent calls demanding secrecy are fraudulent.
+holdout2-codex-v1-b8ca9df6,holdout2-codex-v1,legitimate,0,25,0.206,0,0.122,SBI reports a UPI collect request was declined in your settings.
+holdout2-codex-v1-c04c7213,holdout2-codex-v1,legitimate,0,25,0.165,0,0.063,SBI confirms a credit of INR 2450 through the YONO service.
+holdout2-codex-v1-c681c40e,holdout2-codex-v1,legitimate,0,25,0.426,0,0.086,Kotak Mahindra Bank confirms a cash withdrawal at the Pune ATM.
+holdout2-codex-v1-d1faf467,holdout2-codex-v1,impersonation,1,0,0.100,25,0.163,The help desk introduces itself as Northstar Wallet support and asks about a ticket.
+holdout2-codex-v1-d2124bf7,holdout2-codex-v1,legitimate,0,25,0.157,0,0.041,India Post shows parcel tracking at indiapost.gov.in.
+holdout2-codex-v1-e192b4d1,holdout2-codex-v1,digital_arrest,1,3,0.080,25,0.183,The caller threatens police action unless you share your bank balance.
+holdout2-codex-v1-e3967fb9,holdout2-codex-v1,legitimate,0,25,0.150,3,0.138,FedEx shows a customs document request in the account.
+holdout2-codex-v1-e52944ab,holdout2-codex-v1,other_fraud,1,0,0.065,25,0.233,Asterline Loan says approval is ready at https://asterline-loan.example/approve.
+holdout2-codex-v1-e84ed4e9,holdout2-codex-v1,impersonation,1,0,0.115,25,0.175,"A colleague asks whether you can discuss a confidential purchase after the meeting, then requests that the invoice be paid to a different account because the office finance desk is unavailable."
+holdout2-codex-v1-e9a2ac52,holdout2-codex-v1,legitimate,0,25,0.120,0,0.028,Axis Bank OTP 741209 is tied to your account update.
+holdout2-codex-v1-eaea4e98,holdout2-codex-v1,legitimate,0,25,0.231,0,0.107,Axis Bank asks you to review recent app sessions.
+holdout2-codex-v1-eb8adcd6,holdout2-codex-v1,legitimate,0,25,0.290,0,0.074,Amazon India has posted a delivery receipt under order history.
+holdout2-codex-v1-ec9cc2b7,holdout2-codex-v1,legitimate,0,25,0.150,0,0.056,Kotak Mahindra Bank reports a deposit has cleared.
+holdout2-codex-v1-efcead44,holdout2-codex-v1,legitimate,0,25,0.234,0,0.068,Amazon India says the replacement parcel has been dispatched.
+holdout2-codex-v1-f4c4300e,holdout2-codex-v1,digital_arrest,1,0,0.080,25,0.163,The officer says every family member must remain silent while funds move.
+holdout2-codex-v1-f89b65e4,holdout2-codex-v1,legitimate,0,25,0.160,0,0.158,Axis Bank sent a secure code for your app registration.
+mendeley-000015,mendeley_financial_scams,phishing,1,0,0.076,25,0.177,Account hacked! Open the app now to secure it.
+mendeley-000018,mendeley_financial_scams,phishing,1,0,0.117,25,0.375,Update your account details to avoid suspension.
+mendeley-000062,mendeley_financial_scams,legitimate,0,25,0.269,0,0.126,Your account balance is low. Add funds to continue service.
+mendeley-000068,mendeley_financial_scams,legitimate,0,25,0.180,0,0.108,Your request to withdraw 5000 taka was successful.
+mendeley-000083,mendeley_financial_scams,legitimate,0,25,0.135,0,0.129,"Your BDT 2,000 refund has been processed successfully."
+mendeley-000162,mendeley_financial_scams,legitimate,0,25,0.159,0,0.049,Your recent transaction of BDT 4200 was successfully processed.
+mendeley-000234,mendeley_financial_scams,legitimate,0,25,0.250,0,0.051,Your appointment with Dr. Rahman has been confirmed for tomorrow.
+mendeley-000267,mendeley_financial_scams,legitimate,0,25,0.155,0,0.096,Your parcel #AB123 is out for delivery.
+mendeley-000283,mendeley_financial_scams,legitimate,0,25,0.192,0,0.125,Payment reminder: Your internet bill of BDT 1200 is due.
+mendeley-000296,mendeley_financial_scams,legitimate,0,25,0.198,0,0.124,Your recent grocery order #78345 has been delivered. Enjoy your purchase!
+mendeley-000386,mendeley_financial_scams,legitimate,0,25,0.178,0,0.084,"Payment confirmation: Received 4,200 BDT for the event booking. Thanks for the prompt payment"
+mendeley-000394,mendeley_financial_scams,legitimate,0,25,0.203,10,0.152,Sent the advance payment of $200 via Wise. Check your email for confirmation
+mendeley-000398,mendeley_financial_scams,legitimate,0,25,0.209,0,0.103,"Final payment of 12,600 BDT processed successfully. Kindly send delivery schedule"
+mendeley-000498,mendeley_financial_scams,legitimate,0,25,0.121,0,0.018,Your package delivery is scheduled for tomorrow. Track here: tracking-link.com
+reportsmishing-01637,reportsmishing_imc25,prize_lottery_scam,1,0,0.026,25,0.193,$100 Store Credit for Finishing Quick Walmart Survey 🎁
+reportsmishing-09226,reportsmishing_imc25,payment_fraud,1,3,0.119,25,0.177,LinKt reminder: Please pay your toll bill $6.95 ASAP. Click <URL> for details.
+reportsmishing-22892,reportsmishing_imc25,delivery_scam,1,0,0.110,25,0.171,<NAMED_ENTITY>: Your package with <NAMED_ENTITY> is on its wag! <NAMED_ENTITY> to track
+reportsmishing-32363,reportsmishing_imc25,phishing,1,0,0.044,25,0.270,"[EE]:We were unable to process your latest bill. In order to avoid fees, update your billing information via:"

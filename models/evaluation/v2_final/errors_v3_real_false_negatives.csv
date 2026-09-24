@@ -1,0 +1,31 @@
+id,source,category,y_true,v1_score,v1_p,v3_score,v3_p,text
+mendeley-000006,mendeley_financial_scams,credential_theft,1,0,0.080,0,0.117,Click here to reset your banking password.
+reportsmishing-00768,reportsmishing_imc25,fake_job,1,0,0.012,0,0.018,"Home Depot Study, Get Paid <DATE_TIME>"
+reportsmishing-01517,reportsmishing_imc25,other_fraud,1,0,0.015,0,0.007,Hey 👋 Am an artist If you don’t mind one of your picture could be my inspiring muse for an art project i’m working on for a client💖 You will totally get paid for it as well as a bonus; you’ll also get credits🤍
+reportsmishing-02198,reportsmishing_imc25,other_fraud,1,0,0.011,0,0.007,Organic Oxycodone tablets on Sale cyberr <DATE_TIME>
+reportsmishing-03662,reportsmishing_imc25,phishing,1,0,0.094,0,0.074,Congratulations !You are eligible for IDFC Bank Credit Card LIFE TIME FREE with limit upto 5 Lakhs.T&C Applied. Apply Now <URL> <NAMED_ENTITY>
+reportsmishing-04333,reportsmishing_imc25,impersonation,1,25,0.148,0,0.008,Santander: Your One Time Passcode is 72518 for a purchase of 199.99 to WAITROSE. If this was NOT you get in touch with us: <PHONE_NUMBER> REF: 4830GB
+reportsmishing-06756,reportsmishing_imc25,payment_fraud,1,0,0.010,0,0.011,NZTA -You have tolls that have not been paid and are overdue. Click:<URL> to update the information and pay the toll.
+reportsmishing-07242,reportsmishing_imc25,prize_lottery_scam,1,25,0.155,0,0.019,Hi <PHONE_NUMBER> Transaction successfully done of Rs.96793 to your Rummy A/C. Click <URL>ine/27tgm!93 to withdraw it Now.
+reportsmishing-09936,reportsmishing_imc25,phishing,1,0,0.102,0,0.133,Citi Bank AU: A new device has been registered to your Online Banking. If you do not recognise this activity please visit us at: <URL>
+reportsmishing-10299,reportsmishing_imc25,prize_lottery_scam,1,25,0.133,0,0.018,Shipped: Your Amazon package with $103 loyalty reward will be delivered Sat <DATE_TIME> <NAMED_ENTITY>. <URL>
+reportsmishing-10818,reportsmishing_imc25,prize_lottery_scam,1,0,0.048,0,0.019,Hi 971******93. Transaction successfully done of Rs.96793 to your Rummy A/C. Click <URL>ine/1c76lk!91 to withdraw it Now.
+reportsmishing-11849,reportsmishing_imc25,impersonation,1,0,0.075,0,0.024,RM0.00 R H B: <US_DRIVER_LICENSE>.00 Was Charged On Your Card Num**09 at CITY CHAIN-KLIA2 On <DATE_TIME> 14:37:<URL>F Code:<US_DRIVER_LICENSE> Call <PHONE_NUMBER> if u did NOT perform this Txn.
+reportsmishing-14296,reportsmishing_imc25,investment_scam,1,0,0.072,0,0.034,Good News..!! Your Loan Amount for Rs.15000 Is Successfully Approved Check Your Loan Status Here
+reportsmishing-14468,reportsmishing_imc25,phishing,1,25,0.245,0,0.024,Your DBS Debit Card ending 6463 has been unused for some time for online/contactless/international transactions. To prevent misuse we've disabled these features. To enable click
+reportsmishing-16243,reportsmishing_imc25,phishing,1,25,0.185,0,0.038,"GibintBank: New payee request to MR C <NAMED_ENTITY> through your GIB mobile banking app. If this was NOT you, please visit:"
+reportsmishing-16485,reportsmishing_imc25,impersonation,1,25,0.157,0,0.079,<NAMED_ENTITY>-Did You Attempt A Zelle Payment For The Amount of $5000.00? Reply YES or NO Or 1 To Decline Fraud Alerts
+reportsmishing-16602,reportsmishing_imc25,investment_scam,1,0,0.035,0,0.017,MSME Business loan Ref. No. is LN57-121Z62-XXX6 Generated successfully. Verify your details Now -
+reportsmishing-21235,reportsmishing_imc25,impersonation,1,0,0.029,0,0.005,<NAMED_ENTITY> : TQ for using card ending <DATE_TIME> for <US_DRIVER_LICENSE> AT shopee. Pls contact CS <PHONE_NUMBER> if you didn't use it
+reportsmishing-23243,reportsmishing_imc25,payment_fraud,1,0,0.010,0,0.000,"Your Order Successfully Placed, AMZ#901-5VX1481 Amt. $2099.00 for Apple MacBook Pro [33cm] <US_DRIVER_LICENSE> on <DATE_TIME>, Call TFN: <PHONE_NUMBER> if any query, Thank you"
+reportsmishing-25256,reportsmishing_imc25,phishing,1,0,0.014,0,0.073,Our systems show that your eligible for a Covid Pass. To apply please fill out the application via : <URL>
+reportsmishing-25826,reportsmishing_imc25,phishing,1,0,0.020,0,0.018,"You are able to get your NHS COVID pass which proves that you have had the vaccine against COVID-19, through <URL> now."
+reportsmishing-26256,reportsmishing_imc25,impersonation,1,0,0.113,0,0.066,"Hey mum, my phone has water damage. That is why i have this temporary number. It felt in my sink😞 how are you doing?"
+reportsmishing-27236,reportsmishing_imc25,prize_lottery_scam,1,0,0.119,0,0.022,"Congratulations, Dear Customer, Only You Got Xiaomi Special offer Buy Latest Redmi Note 7 Pro At Just Rs.11/- Only, Hurry Click Now-"
+reportsmishing-27741,reportsmishing_imc25,phishing,1,25,0.122,0,0.056,Dear Please visit <URL> website and update <NAMED_ENTITY> firmware as the previous one has a bug with the risk of losing assets
+reportsmishing-27860,reportsmishing_imc25,phishing,1,0,0.091,0,0.025,There was an issue with your most recent bill. Please visit the website below.
+reportsmishing-27927,reportsmishing_imc25,payment_fraud,1,0,0.076,0,0.024,"Cäsh In received GH₵150.00 from GOD IS LOVE BOOKSHOP ENTERPRIS <URL>rrectbalance605.68 Available605.60ID5804673189 Dear customer, you are not allow to use Your '<NAMED_ENTITY>' pin code at this moment 'thank you."
+reportsmishing-29381,reportsmishing_imc25,phishing,1,0,0.002,0,0.002,"Done, click on the link and get your money"
+reportsmishing-30333,reportsmishing_imc25,phishing,1,25,0.156,0,0.060,"A login attempt from an unrecognised device has been made on your account. If NOT you, visit:"
+reportsmishing-31839,reportsmishing_imc25,phishing,1,0,0.051,0,0.062,"<NAMED_ENTITY>: The account associated to (XXXX) has been Overcharged, follow the instructions: <URL>"
+reportsmishing-32447,reportsmishing_imc25,phishing,1,0,0.111,0,0.007,MTNL KYC FORM INDIA <URL> /ql4pYLlRs3DI MTNL KYC FORM INDIA <URL> /ql4pYLlRs3DI

@@ -1,0 +1,45 @@
+id,source,category,y_true,v1_score,v1_p,v3_score,v3_p,text
+mendeley-000048,mendeley_financial_scams,legitimate,0,25,0.286,26,0.516,"Your OTP is 789654, keep it confidential to secure your account."
+mendeley-000057,mendeley_financial_scams,legitimate,0,25,0.258,25,0.380,Refund of 100 taka has been processed to your account.
+mendeley-000072,mendeley_financial_scams,legitimate,0,27,0.531,27,0.530,"Your BDT 10,000 wallet transfer was successful. Thank you for using our service."
+mendeley-000080,mendeley_financial_scams,legitimate,0,28,0.559,25,0.220,"Your account balance is BDT 8,200."
+mendeley-000086,mendeley_financial_scams,legitimate,0,50,0.740,27,0.540,"Your recent transaction of BDT 7,500 has been verified"
+mendeley-000088,mendeley_financial_scams,legitimate,0,50,0.882,50,0.938,"BDT 15,000 payment received from your account."
+mendeley-000098,mendeley_financial_scams,legitimate,0,25,0.313,26,0.346,Your KYC verification is complete. Thank you for your cooperation.
+mendeley-000108,mendeley_financial_scams,legitimate,0,25,0.384,31,0.611,Your health insurance claim has been approved. Contact for details.
+mendeley-000110,mendeley_financial_scams,legitimate,0,25,0.341,25,0.270,"Reminder: Electricity bill payment of BDT 3,500 is due tomorrow."
+mendeley-000152,mendeley_financial_scams,legitimate,0,0,0.015,25,0.169,Your online order is ready. View details here.
+mendeley-000196,mendeley_financial_scams,legitimate,0,25,0.397,25,0.388,Your parcel has been dispatched. Track with tracking number XYZ123.
+mendeley-000220,mendeley_financial_scams,legitimate,0,26,0.522,28,0.564,Your electricity bill of BDT 1500 is due tomorrow. Please pay on time.
+mendeley-000268,mendeley_financial_scams,legitimate,0,25,0.156,25,0.352,Your electricity bill of BDT 800 is due tomorrow.
+mendeley-000273,mendeley_financial_scams,legitimate,0,25,0.285,25,0.238,Thank you for your recent bank deposit of BDT 5000.
+mendeley-000337,mendeley_financial_scams,legitimate,0,28,0.559,25,0.399,"Your bank transfer of BDT 10,000 has been successfully processed"
+mendeley-000357,mendeley_financial_scams,legitimate,0,25,0.320,25,0.278,"Bhai, I sent you 1500 taka via bKash. Check and confirm"
+mendeley-000361,mendeley_financial_scams,legitimate,0,50,0.786,30,0.592,"Salary credited: 35,000 BDT has been deposited to your account"
+mendeley-000366,mendeley_financial_scams,legitimate,0,27,0.543,35,0.692,"Please approve the 12,500 BDT payment request I sent on Payoneer."
+mendeley-000373,mendeley_financial_scams,legitimate,0,33,0.657,34,0.687,"Sent 2,500 BDT via bKash just now. Please confirm when you get it"
+mendeley-000377,mendeley_financial_scams,legitimate,0,25,0.303,31,0.618,"I transferred the rent 12,000 BDT to your account. Check and tell me if it cleared"
+mendeley-000379,mendeley_financial_scams,legitimate,0,32,0.642,35,0.691,"Company salary transfer of 45,000 BDT processed today. Payslip sent to your inbox"
+mendeley-000383,mendeley_financial_scams,legitimate,0,25,0.158,25,0.296,"Shared the invoice for last month. Please approve payment of 22,500 BDT by Friday"
+mendeley-000388,mendeley_financial_scams,legitimate,0,25,0.491,26,0.515,"I sent the freelance payment of $150 via Payoneer. Check and confirm receipt, please"
+mendeley-000390,mendeley_financial_scams,legitimate,0,30,0.598,27,0.536,"Reminder: Utility bill of 1,250 BDT due tomorrow. Please pay to avoid late fee"
+mendeley-000396,mendeley_financial_scams,legitimate,0,25,0.181,25,0.221,I refunded the extra 850 BDT you sent earlier. Please recheck your balance
+mendeley-000402,mendeley_financial_scams,legitimate,0,50,0.765,50,0.798,"Paid the tuition installment of 15,000 BDT today. Please confirm on your side"
+mendeley-000404,mendeley_financial_scams,legitimate,0,30,0.550,30,0.555,"Can you send 2,300 BDT by evening? Need to settle an urgent bill"
+mendeley-000410,mendeley_financial_scams,legitimate,0,0,0.040,25,0.189,"Received 1,100 BDT on Rocket just now. Sending receipt shortly"
+mendeley-000418,mendeley_financial_scams,legitimate,0,25,0.355,25,0.444,"I will return your 1,500 BDT tomorrow once my salary arrives"
+mendeley-000420,mendeley_financial_scams,legitimate,0,25,0.189,25,0.398,"Sent the advance booking amount of 5,500 BDT. Please reserve the slot"
+mendeley-000424,mendeley_financial_scams,legitimate,0,29,0.589,25,0.272,"The vendor confirmed receipt of 22,000 BDT. Delivery will be dispatched tomorrow"
+mendeley-000436,mendeley_financial_scams,legitimate,0,25,0.356,26,0.525,"I transferred 5,500 BDT for the office stationery. Confirm receipt"
+mendeley-000440,mendeley_financial_scams,legitimate,0,27,0.539,32,0.645,"I repaid the 2,300 BDT loan you gave last week. Please confirm"
+mendeley-000442,mendeley_financial_scams,legitimate,0,25,0.256,25,0.346,"I transferred 2,800 BDT for the monthly internet bill. Check and confirm receipt"
+mendeley-000446,mendeley_financial_scams,legitimate,0,0,0.066,25,0.177,"Paid the school fees of 12,500 BDT today. Please acknowledge"
+mendeley-000450,mendeley_financial_scams,legitimate,0,25,0.257,25,0.216,"Salary of 45,000 BDT has been credited. Check your payroll slip"
+mendeley-000471,mendeley_financial_scams,legitimate,0,25,0.349,25,0.252,Monthly subscription payment received. Thank you for your service usage.
+mendeley-000484,mendeley_financial_scams,legitimate,0,25,0.458,32,0.638,New mobile plan launched. Contact customer care for details.
+mendeley-000485,mendeley_financial_scams,legitimate,0,25,0.391,25,0.258,OTP verification failed. Please try again.
+mendeley-000501,mendeley_financial_scams,legitimate,0,26,0.518,29,0.571,"Team meeting is rescheduled to 3 PM, please confirm your availability."
+mendeley-000508,mendeley_financial_scams,legitimate,0,0,0.024,25,0.175,New message from support team. Check your inbox for details.
+mendeley-000517,mendeley_financial_scams,legitimate,0,0,0.118,25,0.272,Your software update is ready to install. Proceed now.
+mendeley-000520,mendeley_financial_scams,legitimate,0,27,0.550,25,0.465,Your subscription will expire tomorrow. Renew to continue service.
+mendeley-000522,mendeley_financial_scams,legitimate,0,26,0.513,26,0.523,Friend request from Rafi Ahmed. Accept to connect.

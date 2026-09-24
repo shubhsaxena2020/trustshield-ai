@@ -1,0 +1,33 @@
+id,source,category,y_true,v1_score,v1_p,v3_score,v3_p,text
+holdout2-codex-v1-0f2a5836,holdout2-codex-v1,phishing,1,25,0.247,0,0.146,Asterline Finance says the customer record needs a correction.
+holdout2-codex-v1-339b7a15,holdout2-codex-v1,legitimate,0,0,0.111,25,0.177,IIT Delhi confirms a scholarship-form submission.
+holdout2-codex-v1-3d95bc5e,holdout2-codex-v1,legitimate,0,9,0.049,25,0.209,SBI warns that lottery winnings and refund fees are common scams.
+holdout2-codex-v1-4de1e1aa,holdout2-codex-v1,legitimate,0,0,0.093,25,0.177,University of Delhi confirms a payment receipt in the fee portal.
+holdout2-codex-v1-5bf2a740,holdout2-codex-v1,credential_theft,1,25,0.141,0,0.120,HarborMint needs the phone code before the file is released.
+holdout2-codex-v1-60286bfc,holdout2-codex-v1,legitimate,0,0,0.071,25,0.317,Swiggy offers a restaurant voucher in the customer account.
+holdout2-codex-v1-65ce8ef7,holdout2-codex-v1,fake_job,1,25,0.184,0,0.120,A recruiter requests a crypto top-up before showing the contract.
+holdout2-codex-v1-673f81a1,holdout2-codex-v1,impersonation,1,25,0.223,0,0.107,A familiar-voice caller asks for emergency travel money.
+holdout2-codex-v1-6a1250ff,holdout2-codex-v1,legitimate,0,0,0.081,25,0.177,A local club shares a verified event-registration page.
+holdout2-codex-v1-6acd9042,holdout2-codex-v1,delivery_scam,1,25,0.354,0,0.014,A delivery agent asks for a safe time to call about a parcel.
+holdout2-codex-v1-7607b80d,holdout2-codex-v1,legitimate,0,0,0.107,25,0.164,Kotak Mahindra Bank provides an in-app document-renewal notice.
+holdout2-codex-v1-b3ef7522,holdout2-codex-v1,fake_job,1,25,0.133,0,0.121,Northstar Media says your writing sample fits a contractor position.
+holdout2-codex-v1-baeb7d3f,holdout2-codex-v1,fake_job,1,25,0.122,0,0.140,BrightField Labs has a support-analyst opening with normal salary discussion.
+holdout2-codex-v1-bb4b2581,holdout2-codex-v1,credential_theft,1,25,0.174,0,0.019,The Nimbus operator wants the passcode and recovery phrase on a call.
+holdout2-codex-v1-bc3c42a1,holdout2-codex-v1,investment_scam,1,25,0.200,0,0.107,A portfolio group requests a withdrawal tax before releasing profits.
+holdout2-codex-v1-bef6dc90,holdout2-codex-v1,credential_theft,1,25,0.284,0,0.121,Nimbus Savings requests your net-banking password for confirmation.
+holdout2-codex-v1-dbe91dad,holdout2-codex-v1,legitimate,0,0,0.110,25,0.278,IIT Delhi provides official convocation-registration details.
+holdout2-codex-v1-e7bdb032,holdout2-codex-v1,legitimate,0,0,0.106,25,0.304,Nisha: please send the class notes; I join after lunch.
+holdout2-codex-v1-f2c7cdea,holdout2-codex-v1,legitimate,0,0,0.085,25,0.309,HDFC Bank records a successful contact-detail update.
+mendeley-000152,mendeley_financial_scams,legitimate,0,0,0.015,25,0.169,Your online order is ready. View details here.
+mendeley-000410,mendeley_financial_scams,legitimate,0,0,0.040,25,0.189,"Received 1,100 BDT on Rocket just now. Sending receipt shortly"
+mendeley-000446,mendeley_financial_scams,legitimate,0,0,0.066,25,0.177,"Paid the school fees of 12,500 BDT today. Please acknowledge"
+mendeley-000508,mendeley_financial_scams,legitimate,0,0,0.024,25,0.175,New message from support team. Check your inbox for details.
+mendeley-000517,mendeley_financial_scams,legitimate,0,0,0.118,25,0.272,Your software update is ready to install. Proceed now.
+reportsmishing-04333,reportsmishing_imc25,impersonation,1,25,0.148,0,0.008,Santander: Your One Time Passcode is 72518 for a purchase of 199.99 to WAITROSE. If this was NOT you get in touch with us: <PHONE_NUMBER> REF: 4830GB
+reportsmishing-07242,reportsmishing_imc25,prize_lottery_scam,1,25,0.155,0,0.019,Hi <PHONE_NUMBER> Transaction successfully done of Rs.96793 to your Rummy A/C. Click <URL>ine/27tgm!93 to withdraw it Now.
+reportsmishing-10299,reportsmishing_imc25,prize_lottery_scam,1,25,0.133,0,0.018,Shipped: Your Amazon package with $103 loyalty reward will be delivered Sat <DATE_TIME> <NAMED_ENTITY>. <URL>
+reportsmishing-14468,reportsmishing_imc25,phishing,1,25,0.245,0,0.024,Your DBS Debit Card ending 6463 has been unused for some time for online/contactless/international transactions. To prevent misuse we've disabled these features. To enable click
+reportsmishing-16243,reportsmishing_imc25,phishing,1,25,0.185,0,0.038,"GibintBank: New payee request to MR C <NAMED_ENTITY> through your GIB mobile banking app. If this was NOT you, please visit:"
+reportsmishing-16485,reportsmishing_imc25,impersonation,1,25,0.157,0,0.079,<NAMED_ENTITY>-Did You Attempt A Zelle Payment For The Amount of $5000.00? Reply YES or NO Or 1 To Decline Fraud Alerts
+reportsmishing-27741,reportsmishing_imc25,phishing,1,25,0.122,0,0.056,Dear Please visit <URL> website and update <NAMED_ENTITY> firmware as the previous one has a bug with the risk of losing assets
+reportsmishing-30333,reportsmishing_imc25,phishing,1,25,0.156,0,0.060,"A login attempt from an unrecognised device has been made on your account. If NOT you, visit:"
