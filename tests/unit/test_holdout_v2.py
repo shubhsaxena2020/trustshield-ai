@@ -179,7 +179,10 @@ def test_holdout_guard_requires_confirmation_and_logs_access(tmp_path: Path):
     holdout.write_text('{"text":"toy"}\n', encoding="utf-8")
     model.write_bytes(b"toy-model")
     script = Path("scripts/evaluate_holdout_v2.py")
-    base = [sys.executable, str(script), "--holdout-v2", str(holdout), "--model-artifact", str(model), "--access-log", str(log)]
+    plain = [sys.executable, str(script), "--holdout-v2", str(holdout), "--model-artifact", str(model), "--access-log", str(log)]
+    spent = subprocess.run(plain + ["--confirm-final-holdout"], capture_output=True, text=True, check=False)
+    assert spent.returncode == 3 and "v2 is spent" in spent.stderr and not log.exists()
+    base = plain + ["--archival-override-v2-spent"]
     refused = subprocess.run(base, capture_output=True, text=True, check=False)
     assert refused.returncode != 0
     assert not log.exists()

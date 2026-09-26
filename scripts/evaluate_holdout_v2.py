@@ -18,6 +18,9 @@ def sha256(path: Path) -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    from scripts._v2_spent_guard import require_archival_override
+    argv = require_archival_override(argv)
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--holdout-v2", type=Path, required=True)
     parser.add_argument("--model-artifact", type=Path, required=True)

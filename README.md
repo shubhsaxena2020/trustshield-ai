@@ -101,6 +101,19 @@ Regenerate the synthetic fixtures locally, without network access:
 .venv\Scripts\python scripts\make_demo_fixtures.py
 ```
 
+## Preflight (run before every demo)
+
+```powershell
+python scripts/preflight.py          # add --json for machine-readable output
+```
+
+Checks that the default model is v3, the v3 artifact exists, loads and has threshold 0.16, Tesseract works, API/frontend
+prerequisites are present, sandbox external browsing is disabled, and ports 8000/3000 are free. A missing v3 artifact is a
+loud FAIL ("ML IS UNAVAILABLE"), never a silent rules-only run. The `.joblib` files are git-ignored; regenerate them from
+committed data with `requirements-lock.txt` as described in `docs/REPRODUCIBILITY.md` (functionally identical, not byte-identical).
+Release evidence: `models/release/v3_release_manifest.json` (the earlier `v3_rc_manifest.json` is immutable history).
+The v2 holdout scripts are historical and refuse to run (`v2 is spent`).
+
 ## Run the tests
 
 ```powershell

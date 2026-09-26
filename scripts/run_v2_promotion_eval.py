@@ -119,6 +119,9 @@ def score_model(model_name: str, rows: list[dict]) -> tuple[list[int], list[floa
 
 
 def main(argv: list[str] | None = None) -> int:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    from scripts._v2_spent_guard import require_archival_override
+    argv = require_archival_override(argv)
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--holdout", type=Path, required=True)
     parser.add_argument("--rc-manifest", type=Path, required=True)

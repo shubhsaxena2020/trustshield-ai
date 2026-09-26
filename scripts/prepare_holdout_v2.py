@@ -659,7 +659,8 @@ def main() -> None:
     parser.add_argument("--v1-dir", type=Path, default=Path("datasets/processed/trustshield-text-v1"))
     parser.add_argument("--output-dir", type=Path, default=Path("datasets/holdout/trustshield-text-v2-holdout"))
     parser.add_argument("--previous-manifest-sha256", help="Override the prior manifest hash recorded in supersedes")
-    args = parser.parse_args()
+    from scripts._v2_spent_guard import require_archival_override
+    args = parser.parse_args(require_archival_override(None))
     print(json.dumps(prepare_holdout_v2(args.input, args.v1_dir, args.output_dir, previous_manifest_sha256=args.previous_manifest_sha256), indent=2))
 
 

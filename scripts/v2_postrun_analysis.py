@@ -102,6 +102,9 @@ def boot(y, f1_, f3_, idx):
 
 
 def main():
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    from scripts._v2_spent_guard import require_archival_override
+    require_archival_override(None)
     OUT.mkdir(parents=True, exist_ok=True)
     rows = load()
     pred = {tag: score(name, rows) for tag, name in MODELS.items()}

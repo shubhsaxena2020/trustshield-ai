@@ -1,0 +1,118 @@
+{
+  "name": "trustshield-text-v3-release",
+  "promoted_at_commit": "d239ca3df0d524d7335ae16946820803fe984ea2",
+  "promoted_commit_verified": true,
+  "rc_reference": {
+    "tag": "v3-rc1",
+    "commit": "5548b2f5463daea8804dc4f4076067ea0df24904",
+    "manifest": "models/release/v3_rc_manifest.json",
+    "manifest_sha256": "081f8818f633f7605bf45d2158f4791285d064f4598168c0dd32506ddb258b86",
+    "note": "immutable historical RC evidence; never edited"
+  },
+  "default_model": "trustshield_text_v3",
+  "rollback_model": "trustshield_text_v1",
+  "rollback_how": "TRUSTSHIELD_ML_MODEL=trustshield_text_v1",
+  "models": {
+    "trustshield_text_v3": {
+      "artifact": "models/trained/trustshield_text_v3.joblib",
+      "artifact_sha256": "d69aadbb758d186c8b33946895b456588cf8f5ce5eca504647d9e7a009c1189a",
+      "metadata": "models/metadata/trustshield_text_v3.json",
+      "metadata_sha256": "59158261cf12e4def294e17c51f7a816f9e57e264aea20db9322fc4bb1e64dcb",
+      "threshold": 0.16,
+      "sklearn_version": "1.9.1",
+      "model_version": "phase3-1",
+      "byte_reproducible": false,
+      "reproducibility": "docs/REPRODUCIBILITY.md (functionally identical on regeneration; bytes differ by embedded timestamps/timings)"
+    },
+    "trustshield_text_v1": {
+      "artifact": "models/trained/trustshield_text_v1.joblib",
+      "artifact_sha256": "4daac40049baa3622d4b7acbad309ef001456d04f029e361dcd67be186e130ea",
+      "metadata": "models/metadata/trustshield_text_v1.json",
+      "metadata_sha256": "01b7d811428fe371f336fb535f31af693cae84c9e8a3d0a223f2b8f819722f90",
+      "threshold": 0.12,
+      "sklearn_version": "1.9.1",
+      "model_version": "phase3-1"
+    }
+  },
+  "fusion": {
+    "default_strategy": "ml_aware_weighted",
+    "strategy_version": "phase4-1",
+    "parameters": {
+      "ml_weight": 0.5,
+      "strong_ml_cut": 0.7,
+      "min_tokens_for_moderate_ml_floor": 3,
+      "operating_point": "risk score >= 25 (caution+)"
+    },
+    "unchanged_by_promotion": true
+  },
+  "data": {
+    "train": "datasets/processed/trustshield-text-v3/train.jsonl",
+    "train_sha256": "40fdf0b5bde8543d0a63f84f4281850ec18a2e3d9697871a44dcda4033a63701",
+    "validation": "datasets/processed/trustshield-text-v3/validation.jsonl",
+    "validation_sha256": "9d469dc7ebb3409cc2c0b7b60f73d78fd956143669d0626333f1286e8380b59e",
+    "manifest_sha256": "5226121da8ea0f66f06516cfd71846c4ecf38bc057105aedc2e5e522c8891ded"
+  },
+  "environment": {
+    "python": "3.13.14",
+    "scikit_learn": "1.9.1",
+    "numpy": "2.5.3",
+    "scipy": "1.18.1",
+    "joblib": "1.6.0",
+    "lock_file": "requirements-lock.txt",
+    "lock_file_sha256": "88585389f7a16dafd1c8809fadf342286a651c9c1634db58feb33a05b6fdbc6c"
+  },
+  "sealed_v2_evaluation": {
+    "status": "spent - permanently; never use for v4 development, tuning or model selection",
+    "holdout_sha256": "2a6c066fc978c062211b6f2b1f1a9c6935ac0a9ef8e6283fdc0ed12d835fb3a7",
+    "holdout_manifest_sha256": "52b134f0c9d14b3d1c669d0f400ca8d65f07bd5a3fbdabb55c63f281b27e98a8",
+    "access_log": "datasets/holdout/trustshield-text-v2-holdout/holdout_access_log.json",
+    "access_log_sha256": "49f884281e375d28edb81dd70821fb9eff65d071f21e0ee8ae5de8b7fc793c3c",
+    "access_log_entries": 1,
+    "evaluated_rc_tag": "v3-rc1",
+    "results_dir": "models/evaluation/v2_final/",
+    "results_hashes_file": "models/evaluation/v2_final/hashes.json",
+    "results_hashes_file_sha256": "e7cb1007973e6db53af5a405a90db7a52a78c79d94e3e8f18a5ffc7b6ddc4fb4",
+    "output_sha256": {
+      "errors_v1_right_v3_wrong.csv": "c7431dd8d604e74cc10ef30cd5868e67113fcf99af29fc0e705c1e28352f5296",
+      "errors_v3_real_false_negatives.csv": "e7f2ffe004717052e26c2aa48223e8842aa9cef2fc8061ae4c6342b291a929e5",
+      "errors_v3_real_legit_false_positives.csv": "36b03507eaf51583455b70b5093700543b9ba26aa149aa2bd5294621b992e34d",
+      "errors_v3_right_v1_wrong.csv": "5ad180c275ad587b74023154ada683e1a17984167de31d15aa06f6511f242b99",
+      "raw_predictions.csv": "a3320b716910f7095b54b54768604e578286a0ef06c11e1876d0d3bcad7c8aea",
+      "results.json": "b608b3173d39702808ed7b98736802ada0482486d48f732d6df20bb2278649c9",
+      "slice_metrics.csv": "2321108d602b888264140a679c92f15ba6bb04107f5b6e480d22413e49757163",
+      "slice_metrics_and_decision.json": "e7093830875b8823cfab13892be02651781f7097c1b73c85eb522a94f9e279a9"
+    },
+    "report": "docs/V2_EVALUATION_REPORT.md",
+    "promotion_criteria": "docs/V2_PROMOTION_CRITERIA.md",
+    "headline_v3": {
+      "n": 979,
+      "recall": 0.821,
+      "specificity": 0.783,
+      "precision": 0.821,
+      "f1": 0.821,
+      "roc_auc": 0.877
+    },
+    "headline_v1": {
+      "n": 979,
+      "recall": 0.812,
+      "specificity": 0.738,
+      "precision": 0.79,
+      "f1": 0.801,
+      "roc_auc": 0.852
+    },
+    "goal_met": "no - below the aspirational 90% recall/specificity goals",
+    "spent_scripts": {
+      "policy": "refuse to run without --archival-override-v2-spent; results were not altered or regenerated",
+      "scripts_sha256_at_time_of_v2_run": {
+        "scripts/run_v2_promotion_eval.py": "dfd513ce743bd1da4d184c8cf580441d0016871f8831c8a5c2b185b7bbe2c329",
+        "scripts/v2_postrun_analysis.py": "6f5a106891465bb5eec8cfd68ebedf5c2e871819124cb05bc12971a3174a9e07",
+        "scripts/evaluate_holdout_v2.py": "9981589469db68e46da42b1fa91b6f12677adc70c3283e134d6fccc8de9ce007",
+        "scripts/prepare_holdout_v2.py": "0126cbcae26524f192e91c50ab80c8be2a351d18ea68243ee88445330d21b230"
+      },
+      "only_change_since": "an archival-override guard at the start of main(); see scripts/_v2_spent_guard.py"
+    }
+  },
+  "sandbox_state": {
+    "external_browsing": "disabled (gate: independent adversarial review, see docs/THREAT_MODEL.md)"
+  }
+}
