@@ -12,7 +12,9 @@ import time
 from contextlib import asynccontextmanager
 from urllib.parse import urlsplit
 
-from fastapi import APIRouter, Depends, FastAPI, File, HTTPException, Request, Response, UploadFile
+from typing import Literal
+
+from fastapi import APIRouter, Depends, FastAPI, File, Form, HTTPException, Request, Response, UploadFile
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -28,6 +30,11 @@ from services.analysis.pipeline import analyze_image, analyze_qr, analyze_text, 
 from services.analysis.url_analysis.ssrf import UnsafeURL, validate_public_url
 from services.analysis.web_sandbox.client import run_sandbox
 from services.analysis.web_sandbox.policy import SandboxPolicy, feature_enabled
+
+from services.chat.contract import ChatAnalysis, to_contract
+from services.chat.explain import Reply, followup_intent, get_provider
+from services.chat.orchestrator import analyze_turn
+from services.chat.router import MAX_MESSAGE_CHARS, route
 
 from .security import BodyLimitMiddleware, ObservabilityMiddleware, RateLimiter, ResultStore, client_key, event_log
 from .settings import Settings
@@ -267,6 +274,83 @@ def get_analysis(analysis_id: str, request: Request):
     if result is None:
         raise HTTPException(404, "analysis not found (results are short-lived and not kept after a restart)")
     return result
+
+
+# ---- conversational API (v1 endpoints above are unchanged) ----------------------------------------------------------------------
+
+class Turn(BaseModel):
+    role: Literal["user", "assistant"]
+    text: str = Field(max_length=2000)
+
+
+class ChatIn(BaseModel):
+    message: str = Field(default="", max_length=MAX_MESSAGE_CHARS)
+    context: ChatAnalysis | None = None  # the previous analysis, sent back by the browser (the server stores no conversation)
+    history: list[Turn] = Field(default_factory=list, max_length=6)
+
+
+class ReplyOut(BaseModel):
+    text: str
+    cited_evidence: list[str] = Field(default_factory=list)
+    provider: str
+    grounded: bool = True
+
+
+class ChatOut(BaseModel):
+    kind: Literal["analysis", "followup"]
+    route: dict
+    reply: ReplyOut
+    analysis: ChatAnalysis | None = None
+    legacy_result: AnalysisResult | None = None
+
+
+def _reply_out(reply: Reply) -> ReplyOut:
+    return ReplyOut(text=reply.text, cited_evidence=reply.cited_evidence[:10], provider=reply.provider, grounded=reply.grounded)
+
+
+async def _chat_turn(request: Request, response: Response, message: str, context: ChatAnalysis | None, history: list[Turn],
+                     image: tuple[bytes, str | None, str | None] | None) -> ChatOut:
+    if sum(len(t.text) for t in history) > 12_000:
+        raise HTTPException(422, "conversation context is too large; start a new chat")
+    plan = route(message, image is not None, context is not None, followup_intent)
+    provider = get_provider()
+    if plan.kind == "empty":
+        raise HTTPException(422, "Send a message, link, screenshot or QR code to analyse.")
+    if plan.kind == "followup":
+        assert context is not None and plan.intent is not None
+        return ChatOut(kind="followup", route=plan.public(), reply=_reply_out(provider.reply_for_followup(plan.intent, message, context)))
+    try:
+        if image is not None:
+            result, types = await run_heavy(request, analyze_turn, message, image, plan)
+        else:
+            result, types = await run_in_threadpool(analyze_turn, message, None, plan)
+    except ImageRejected as exc:
+        raise _image_error(exc)
+    except InvalidInput as exc:
+        raise HTTPException(422, str(exc))
+    _publish(request, response, result)
+    analysis = to_contract(result, types, plan.urls)
+    return ChatOut(kind="analysis", route=plan.public(), reply=_reply_out(provider.reply_for_analysis(analysis)),
+                   analysis=analysis, legacy_result=result)
+
+
+@router.post("/api/v1/chat", response_model=ChatOut, dependencies=[Depends(limit_light)])
+async def chat_endpoint(body: ChatIn, request: Request, response: Response):
+    return await _chat_turn(request, response, body.message, body.context, body.history, None)
+
+
+@router.post("/api/v1/chat/upload", response_model=ChatOut, dependencies=[Depends(limit_heavy)])
+async def chat_upload_endpoint(request: Request, response: Response, file: UploadFile = File(...),
+                               message: str = Form(default="", max_length=MAX_MESSAGE_CHARS), context: str = Form(default="")):
+    try:
+        parsed = ChatAnalysis.model_validate_json(context) if context.strip() else None
+    except ValueError:
+        raise HTTPException(422, "invalid conversation context")
+    try:
+        data = await file.read(max_upload_size() + 1)
+        return await _chat_turn(request, response, message, parsed, [], (data, file.content_type, file.filename))
+    finally:
+        await file.close()
 
 
 # ---- application factory -------------------------------------------------------------------------------------------
