@@ -12,13 +12,20 @@ def _sha(path: str) -> str:
     return hashlib.sha256((ROOT / path).read_bytes()).hexdigest()
 
 
+def _same(path: str, digest: str) -> bool:
+    """Recorded text-file hashes must survive Git's line-ending normalisation (Windows CRLF working copies vs LF checkouts)."""
+    raw = (ROOT / path).read_bytes()
+    lf = raw.replace(b"\r\n", b"\n")
+    return digest in {hashlib.sha256(v).hexdigest() for v in (raw, lf, lf.replace(b"\n", b"\r\n"))}
+
+
 @pytest.fixture(scope="module")
 def manifest():
     return json.loads((ROOT / "models/release/v3_release_manifest.json").read_text(encoding="utf-8"))
 
 
 def test_rc_manifest_is_immutable_historical_evidence(manifest):
-    assert _sha("models/release/v3_rc_manifest.json") == RC_MANIFEST_SHA256
+    assert _same("models/release/v3_rc_manifest.json", RC_MANIFEST_SHA256)
     assert manifest["rc_reference"]["manifest_sha256"] == RC_MANIFEST_SHA256
     assert manifest["rc_reference"]["commit"] == "5548b2f5463daea8804dc4f4076067ea0df24904"
 
@@ -37,7 +44,7 @@ def test_recorded_hashes_match_files(manifest):
     def verify(path, digest):
         nonlocal checked
         if (ROOT / path).exists():
-            assert _sha(path) == digest, path
+            assert _same(path, digest), path
             checked += 1
 
     for model in manifest["models"].values():
@@ -65,4 +72,4 @@ def test_v2_is_recorded_as_spent(manifest):
     v2 = manifest["sealed_v2_evaluation"]
     assert v2["access_log_entries"] == 1 and "spent" in v2["status"]
     log = json.loads((ROOT / v2["access_log"]).read_text(encoding="utf-8"))
-    assert len(log) == 1 and _sha(v2["access_log"]) == v2["access_log_sha256"]
+    assert len(log) == 1 and _same(v2["access_log"], v2["access_log_sha256"])
