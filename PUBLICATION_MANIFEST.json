@@ -428,7 +428,7 @@
     "scripts/prepare_holdout_v2.py": "400bfa1a6c83bee74da2f1b4df5bcafb37f8848beb5e55ab2b32d2cfaafa6614",
     "scripts/run_v2_promotion_eval.py": "bf1119e460df59bd3aeebfd441534aab2c8db4333fc1b3aacfc5cb83f48e94cf",
     "scripts/scan_secrets.py": "196908fa3530a206a2c1911921edf752b27b1eec4ae47c498b58a92cd883eb35",
-    "scripts/smoke_remote.py": "bbe726b706cef02f8a4d349c0c72a4ec5c7f7d7f0fa5ccfea7d7bd5617728215",
+    "scripts/smoke_remote.py": "a520f059fa20f58a57e9b2eeee0b4c2fa8c0469f46fb33df633297fc6e72a1f3",
     "scripts/sync_public_repo.py": "b5aad37ff4711bef26e21d6cf48364c8d555d5afa84ec8666af69b17c2e70b59",
     "scripts/train_classifier.py": "de987b22df327b12881a1f5bb1fb294f13de44b2db0420e1604aefdb7ad1dfe9",
     "scripts/v2_postrun_analysis.py": "4223fa9f48738ba82d174d7da6bd803615d5b95675df335eb85a9c4eb3b638d7",
