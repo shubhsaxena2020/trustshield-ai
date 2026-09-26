@@ -41,3 +41,16 @@ The demo runs `trustshield_text_v3` by default (`GET /api/v1/health` shows `modu
 ## PLANNED demo extensions
 
 Future demos may cover PaddleOCR/Hindi OCR, a trained ML classifier, isolated web inspection, reputation lookups, Ollama explanations, and SQLite-backed history. None of those are part of the current demo.
+
+
+## CURRENT (conversational branch): five-minute conversational demo
+
+Open `/` and use the starter prompts (they only fill the composer; the audience sees the real pipeline run):
+1. Scam SMS (bank/KYC) -> risk card, evidence accordion, "Analysis coverage".
+2. Ask "Why is this suspicious?" -> answered from the stored evidence, no new analysis.
+3. Ask "Did you open the website?" -> honest "No"; ask "Is it definitely fraud?" -> refuses certainty.
+4. Attach a QR fixture (`demo/fixtures/qr_suspicious_url.png`) -> payload shown as *not opened*.
+5. Attach a blank image -> **Unable to Verify** (the system says when it cannot tell).
+6. Show `/analyzer` (the original four-tab analyzer) for the detailed per-module panels.
+Every score shown comes from the real pipeline; there are no canned results. Talking points: an LLM never decides the verdict; risk and
+confidence are separate; capability disclosure lists what was and was not used.

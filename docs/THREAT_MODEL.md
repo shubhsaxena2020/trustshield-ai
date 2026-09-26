@@ -108,3 +108,17 @@ verified findings were fixed with regression tests (mutation-checked):
 Residual limitations after the fixes: GET navigations to validated public hosts are inherently possible (loading a page is a GET);
 form-submit blocking is in-page best effort layered over the network-level POST block; no container/VM isolation; no non-Windows
 containment beyond the wall-clock kill; live external browsing has still never been exercised and stays disabled.
+
+
+## Conversational layer (branch `feature/trustshield-conversational-next`)
+
+| Threat | Control |
+|--------|---------|
+| Prompt injection via message, OCR text, QR payload | All such text is data: bounded, control-char-cleaned, never in instructions, rendered as text; verdict is computed by rules/ML/fusion, not by a language model; regression tests |
+| Model/explanation claims certainty or an action not taken | Deterministic explanations from contract fields; `grounding_violations` blocks certainty, "opened the page", reputation claims and a different level/score; production is always deterministic |
+| Oversized/forged conversation context | pydantic-validated `ChatAnalysis` (bounded lists/strings), message <= 5000 chars, history <= 6 turns; server stores nothing |
+| Third-party disclosure of user URLs | External providers are interface-only; refused without ENHANCED mode + explicit opt-in (tested); none enabled |
+| Upload abuse | Same image validation, 4 MB app limit, rate limits and heavy-work gate as the v1 endpoints |
+| Hostile browsing from the API | Unchanged: sandbox disabled; the chat path performs no network fetch of user URLs |
+
+Residual: rate limiting is per instance, not global; the client-held context can be edited by the client (it only affects that client's own follow-up answers).

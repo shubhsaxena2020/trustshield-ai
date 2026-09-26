@@ -70,3 +70,14 @@ combined system, the controlled counts are TP 43, TN 290, FP 7, FN 199,
 while the overall counts are TP 78, TN 318, FP 10, FN 219. These measurements
 include the synthetic holdout and public-message mix and are not claims about
 live screenshots or all real-world fraud.”
+
+
+## Conversational assistant (CURRENT / PLANNED / EXPERIMENTAL)
+
+**CURRENT (built and locally tested, not yet in production):** chat-style assistant at `/` over the unchanged detection core; deterministic
+input routing; text / URL / screenshot / QR analysis in one conversation; grounded follow-up answers; evidence cards; risk and confidence
+shown separately; analysis-coverage disclosure; original analyzer kept at `/analyzer`. **Story:** the language layer explains, it never
+decides; every claim traces to evidence; the system says "Unable to Verify" instead of guessing.
+**EXPERIMENTAL:** optional local Ollama phrasing (dev only, grounding-checked, falls back to deterministic); v4 research benchmark on development data.
+**PLANNED:** reputation/threat-intelligence providers (opt-in, privacy-disclosed), isolated URL inspection, embedding/transformer candidates, a new sealed holdout.
+v3 numbers above stand unchanged: sealed-holdout recall 82.1%, specificity 78.3%, precision 82.1%, F1 82.1%; the 90% goals were not met.

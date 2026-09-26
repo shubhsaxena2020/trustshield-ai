@@ -1,0 +1,180 @@
+{
+  "protocol": "fixed hyper-parameters, one fit on train, one score on validation; development data only",
+  "data": {
+    "train": 4004,
+    "validation": 625,
+    "validation_real": 469,
+    "validation_synthetic": 156
+  },
+  "candidates": {
+    "A_word_tfidf_svc": {
+      "all": {
+        "n": 625,
+        "positives": 124,
+        "tp": 114,
+        "fn": 10,
+        "tn": 493,
+        "fp": 8,
+        "recall": 0.9194,
+        "specificity": 0.984,
+        "precision": 0.9344,
+        "f1": 0.9268,
+        "roc_auc": 0.9917
+      },
+      "real": {
+        "n": 469,
+        "positives": 45,
+        "tp": 40,
+        "fn": 5,
+        "tn": 417,
+        "fp": 7,
+        "recall": 0.8889,
+        "specificity": 0.9835,
+        "precision": 0.8511,
+        "f1": 0.8696,
+        "roc_auc": 0.994
+      },
+      "synthetic": {
+        "n": 156,
+        "positives": 79,
+        "tp": 74,
+        "fn": 5,
+        "tn": 76,
+        "fp": 1,
+        "recall": 0.9367,
+        "specificity": 0.987,
+        "precision": 0.9867,
+        "f1": 0.961,
+        "roc_auc": 0.985
+      }
+    },
+    "B_char_tfidf_svc": {
+      "all": {
+        "n": 625,
+        "positives": 124,
+        "tp": 115,
+        "fn": 9,
+        "tn": 495,
+        "fp": 6,
+        "recall": 0.9274,
+        "specificity": 0.988,
+        "precision": 0.9504,
+        "f1": 0.9388,
+        "roc_auc": 0.9902
+      },
+      "real": {
+        "n": 469,
+        "positives": 45,
+        "tp": 41,
+        "fn": 4,
+        "tn": 419,
+        "fp": 5,
+        "recall": 0.9111,
+        "specificity": 0.9882,
+        "precision": 0.8913,
+        "f1": 0.9011,
+        "roc_auc": 0.9902
+      },
+      "synthetic": {
+        "n": 156,
+        "positives": 79,
+        "tp": 74,
+        "fn": 5,
+        "tn": 76,
+        "fp": 1,
+        "recall": 0.9367,
+        "specificity": 0.987,
+        "precision": 0.9867,
+        "f1": 0.961,
+        "roc_auc": 0.9864
+      }
+    },
+    "C_word_char_svc": {
+      "all": {
+        "n": 625,
+        "positives": 124,
+        "tp": 114,
+        "fn": 10,
+        "tn": 496,
+        "fp": 5,
+        "recall": 0.9194,
+        "specificity": 0.99,
+        "precision": 0.958,
+        "f1": 0.9383,
+        "roc_auc": 0.9932
+      },
+      "real": {
+        "n": 469,
+        "positives": 45,
+        "tp": 41,
+        "fn": 4,
+        "tn": 419,
+        "fp": 5,
+        "recall": 0.9111,
+        "specificity": 0.9882,
+        "precision": 0.8913,
+        "f1": 0.9011,
+        "roc_auc": 0.994
+      },
+      "synthetic": {
+        "n": 156,
+        "positives": 79,
+        "tp": 73,
+        "fn": 6,
+        "tn": 77,
+        "fp": 0,
+        "recall": 0.9241,
+        "specificity": 1.0,
+        "precision": 1.0,
+        "f1": 0.9605,
+        "roc_auc": 0.9905
+      }
+    },
+    "F_word_char_svc_calibrated": {
+      "all": {
+        "n": 625,
+        "positives": 124,
+        "tp": 115,
+        "fn": 9,
+        "tn": 496,
+        "fp": 5,
+        "recall": 0.9274,
+        "specificity": 0.99,
+        "precision": 0.9583,
+        "f1": 0.9426,
+        "roc_auc": 0.9935
+      },
+      "real": {
+        "n": 469,
+        "positives": 45,
+        "tp": 42,
+        "fn": 3,
+        "tn": 419,
+        "fp": 5,
+        "recall": 0.9333,
+        "specificity": 0.9882,
+        "precision": 0.8936,
+        "f1": 0.913,
+        "roc_auc": 0.994
+      },
+      "synthetic": {
+        "n": 156,
+        "positives": 79,
+        "tp": 73,
+        "fn": 6,
+        "tn": 77,
+        "fp": 0,
+        "recall": 0.9241,
+        "specificity": 1.0,
+        "precision": 1.0,
+        "f1": 0.9605,
+        "roc_auc": 0.9898
+      }
+    }
+  },
+  "not_run": {
+    "D_minilm_embeddings_classifier": "sentence-transformers / torch are not installed in this environment; planned, see docs/V4_RESEARCH_PLAN.md",
+    "E_compact_transformer_finetune": "needs a GPU-class fine-tune and torch/transformers; planned, see docs/V4_RESEARCH_PLAN.md"
+  },
+  "uses_spent_data": false
+}

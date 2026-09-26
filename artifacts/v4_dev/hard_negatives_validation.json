@@ -1,0 +1,506 @@
+{
+  "A_word_tfidf_svc": [
+    {
+      "id": "agy-gen-fraud-v1-64b0f9b9",
+      "true": 1,
+      "score": -0.2909,
+      "synthetic": true,
+      "category": "investment_scam",
+      "text": "Earn passive income mining Ethereum cloud contracts. Start with just $50."
+    },
+    {
+      "id": "agy-gen-fraud-v1-6696049e",
+      "true": 1,
+      "score": -0.3435,
+      "synthetic": true,
+      "category": "phishing",
+      "text": "Your Netflix membership renewal failed. Update billing details: netflix-billing-update.top"
+    },
+    {
+      "id": "agy-gen-fraud-v1-807159cc",
+      "true": 1,
+      "score": -0.5004,
+      "synthetic": true,
+      "category": "impersonation",
+      "text": "Hey, it is Sarah from accounting. Do you have a quick minute?"
+    },
+    {
+      "id": "agy-gen-fraud-v1-9de729b5",
+      "true": 1,
+      "score": -0.2033,
+      "synthetic": true,
+      "category": "impersonation",
+      "text": "Hi Grandma! It's your grandson Tyler. I went on a spring break road trip to Mexico with friends and we got into a minor car bumper collision. The local rental agency says I need to pay $850 for insura"
+    },
+    {
+      "id": "agy-gen-fraud-v1-e683ee16",
+      "true": 1,
+      "score": -0.4787,
+      "synthetic": true,
+      "category": "impersonation",
+      "text": "Hi Dad, my laptop screen broke. Can you wire $400 for repair?"
+    },
+    {
+      "id": "agy-gen-legit-v1-207e7d1d",
+      "true": 0,
+      "score": 0.1358,
+      "synthetic": true,
+      "category": "legitimate",
+      "text": "Apple Pay: $18.20 paid to Trader Joe's."
+    },
+    {
+      "id": "indiaspam-09f404d0",
+      "true": 0,
+      "score": 0.0049,
+      "synthetic": false,
+      "category": "legitimate",
+      "text": "Dear Customer, You have a missed call from +911244451660 The last missed call was at 07:50 PM on 26-Aug-2024 Thankyou, Team Jio."
+    },
+    {
+      "id": "ucisms-0569d750",
+      "true": 0,
+      "score": 0.1299,
+      "synthetic": false,
+      "category": "legitimate",
+      "text": "Auction round 4. The highest bid is now £54. Next maximum bid is £71. To bid, send BIDS e. g. 10 (to bid £10) to 83383. Good luck."
+    },
+    {
+      "id": "ucisms-079cc0c6",
+      "true": 1,
+      "score": -0.1557,
+      "synthetic": false,
+      "category": "other_fraud",
+      "text": "Guess what! Somebody you know secretly fancies you! Wanna find out who it is? Give us a call on 09065394973 from Landline DATEBox1282EssexCM61XN 150p/min 18"
+    },
+    {
+      "id": "ucisms-2202ea09",
+      "true": 1,
+      "score": -0.1624,
+      "synthetic": false,
+      "category": "other_fraud",
+      "text": "100 dating service cal;l 09064012103 box334sk38ch"
+    },
+    {
+      "id": "ucisms-41cc8b94",
+      "true": 1,
+      "score": -0.2675,
+      "synthetic": false,
+      "category": "other_fraud",
+      "text": "Oh my god! I've found your number again! I'm so glad, text me back xafter this msgs cst std ntwk chg £1.50"
+    },
+    {
+      "id": "ucisms-6c3a5395",
+      "true": 0,
+      "score": 0.0466,
+      "synthetic": false,
+      "category": "legitimate",
+      "text": "This msg is for your mobile content order It has been resent as previous attempt failed due to network error Queries to <EMAIL>"
+    },
+    {
+      "id": "ucisms-93579e6b",
+      "true": 0,
+      "score": 0.9196,
+      "synthetic": false,
+      "category": "legitimate",
+      "text": "Sunshine Hols. To claim ur med holiday send a stamped self address envelope to Drinks on Us UK, PO Box 113, Bray, Wicklow, Eire. Quiz Starts Saturday! Unsub Stop"
+    },
+    {
+      "id": "ucisms-b317a756",
+      "true": 0,
+      "score": 0.1694,
+      "synthetic": false,
+      "category": "legitimate",
+      "text": "3 FREE TAROT TEXTS! Find out about your love life now! TRY 3 FOR FREE! Text CHANCE to 85555 16 only! After 3 Free, Msgs £1.50 each"
+    },
+    {
+      "id": "ucisms-bfa43e68",
+      "true": 1,
+      "score": -0.0888,
+      "synthetic": false,
+      "category": "prize_lottery_scam",
+      "text": "83039 62735=£450 UK Break AccommodationVouchers terms & conditions apply. 2 claim you mustprovide your claim number which is 15541"
+    },
+    {
+      "id": "ucisms-c479165f",
+      "true": 1,
+      "score": -0.267,
+      "synthetic": false,
+      "category": "other_fraud",
+      "text": "Will u meet ur dream partner soon? Is ur career off 2 a flyng start? 2 find out free, txt HORO followed by ur star sign, e. g. HORO ARIES"
+    },
+    {
+      "id": "ucisms-c50115de",
+      "true": 0,
+      "score": 0.8573,
+      "synthetic": false,
+      "category": "legitimate",
+      "text": "Free tones Hope you enjoyed your new content. text stop to 61610 to unsubscribe. help:08712400602450p Provided by tones2you.co.uk"
+    },
+    {
+      "id": "ucisms-f4e43f80",
+      "true": 0,
+      "score": 0.2239,
+      "synthetic": false,
+      "category": "legitimate",
+      "text": "Last chance 2 claim ur £150 worth of discount vouchers-Text YES to 85023 now!SavaMob-member offers mobile T Cs 08717898035. £3.00 Sub. 16 . Remove txt X or STOP"
+    }
+  ],
+  "B_char_tfidf_svc": [
+    {
+      "id": "agy-gen-fraud-v1-34afea20",
+      "true": 1,
+      "score": -0.4463,
+      "synthetic": true,
+      "category": "payment_fraud",
+      "text": "Outstanding utility bill Rs 1,480. Pay to avoid power cutoff tonight."
+    },
+    {
+      "id": "agy-gen-fraud-v1-64b0f9b9",
+      "true": 1,
+      "score": -0.3015,
+      "synthetic": true,
+      "category": "investment_scam",
+      "text": "Earn passive income mining Ethereum cloud contracts. Start with just $50."
+    },
+    {
+      "id": "agy-gen-fraud-v1-6696049e",
+      "true": 1,
+      "score": -0.3896,
+      "synthetic": true,
+      "category": "phishing",
+      "text": "Your Netflix membership renewal failed. Update billing details: netflix-billing-update.top"
+    },
+    {
+      "id": "agy-gen-fraud-v1-807159cc",
+      "true": 1,
+      "score": -0.6742,
+      "synthetic": true,
+      "category": "impersonation",
+      "text": "Hey, it is Sarah from accounting. Do you have a quick minute?"
+    },
+    {
+      "id": "agy-gen-fraud-v1-e683ee16",
+      "true": 1,
+      "score": -0.2385,
+      "synthetic": true,
+      "category": "impersonation",
+      "text": "Hi Dad, my laptop screen broke. Can you wire $400 for repair?"
+    },
+    {
+      "id": "agy-gen-legit-v1-40682a16",
+      "true": 0,
+      "score": 0.0763,
+      "synthetic": true,
+      "category": "legitimate",
+      "text": "Your payment of $14.00 to Figma was received."
+    },
+    {
+      "id": "indiaspam-7000dc84",
+      "true": 1,
+      "score": -0.0526,
+      "synthetic": false,
+      "category": "other_fraud",
+      "text": "Get Personal Loan in just 5 mins, no paperwork needed. It is secure, quick and hassle-free. Loan limit: upto Rs. 50,000/-. Apply now http://qz6.in/eFBQnY nc"
+    },
+    {
+      "id": "indiaspam-ef664958",
+      "true": 1,
+      "score": -0.15,
+      "synthetic": false,
+      "category": "phishing",
+      "text": "Dear Greencard member, Your profile seems to be incomplete Some of your Greencard benefits may be locked due to missing information. Click s.cplry.com/MjEwMjk0MDQ3KzE to review ur membership details &"
+    },
+    {
+      "id": "ucisms-172ff90e",
+      "true": 0,
+      "score": 0.0969,
+      "synthetic": false,
+      "category": "legitimate",
+      "text": "Tell me again what your address is"
+    },
+    {
+      "id": "ucisms-41cc8b94",
+      "true": 1,
+      "score": -0.1171,
+      "synthetic": false,
+      "category": "other_fraud",
+      "text": "Oh my god! I've found your number again! I'm so glad, text me back xafter this msgs cst std ntwk chg £1.50"
+    },
+    {
+      "id": "ucisms-93579e6b",
+      "true": 0,
+      "score": 0.3862,
+      "synthetic": false,
+      "category": "legitimate",
+      "text": "Sunshine Hols. To claim ur med holiday send a stamped self address envelope to Drinks on Us UK, PO Box 113, Bray, Wicklow, Eire. Quiz Starts Saturday! Unsub Stop"
+    },
+    {
+      "id": "ucisms-b317a756",
+      "true": 0,
+      "score": 0.2598,
+      "synthetic": false,
+      "category": "legitimate",
+      "text": "3 FREE TAROT TEXTS! Find out about your love life now! TRY 3 FOR FREE! Text CHANCE to 85555 16 only! After 3 Free, Msgs £1.50 each"
+    },
+    {
+      "id": "ucisms-c479165f",
+      "true": 1,
+      "score": -0.796,
+      "synthetic": false,
+      "category": "other_fraud",
+      "text": "Will u meet ur dream partner soon? Is ur career off 2 a flyng start? 2 find out free, txt HORO followed by ur star sign, e. g. HORO ARIES"
+    },
+    {
+      "id": "ucisms-c50115de",
+      "true": 0,
+      "score": 1.2185,
+      "synthetic": false,
+      "category": "legitimate",
+      "text": "Free tones Hope you enjoyed your new content. text stop to 61610 to unsubscribe. help:08712400602450p Provided by tones2you.co.uk"
+    },
+    {
+      "id": "ucisms-f4e43f80",
+      "true": 0,
+      "score": 1.0631,
+      "synthetic": false,
+      "category": "legitimate",
+      "text": "Last chance 2 claim ur £150 worth of discount vouchers-Text YES to 85023 now!SavaMob-member offers mobile T Cs 08717898035. £3.00 Sub. 16 . Remove txt X or STOP"
+    }
+  ],
+  "C_word_char_svc": [
+    {
+      "id": "agy-gen-fraud-v1-34afea20",
+      "true": 1,
+      "score": -0.2656,
+      "synthetic": true,
+      "category": "payment_fraud",
+      "text": "Outstanding utility bill Rs 1,480. Pay to avoid power cutoff tonight."
+    },
+    {
+      "id": "agy-gen-fraud-v1-64b0f9b9",
+      "true": 1,
+      "score": -0.3608,
+      "synthetic": true,
+      "category": "investment_scam",
+      "text": "Earn passive income mining Ethereum cloud contracts. Start with just $50."
+    },
+    {
+      "id": "agy-gen-fraud-v1-6696049e",
+      "true": 1,
+      "score": -0.4293,
+      "synthetic": true,
+      "category": "phishing",
+      "text": "Your Netflix membership renewal failed. Update billing details: netflix-billing-update.top"
+    },
+    {
+      "id": "agy-gen-fraud-v1-807159cc",
+      "true": 1,
+      "score": -0.5056,
+      "synthetic": true,
+      "category": "impersonation",
+      "text": "Hey, it is Sarah from accounting. Do you have a quick minute?"
+    },
+    {
+      "id": "agy-gen-fraud-v1-b3d0804d",
+      "true": 1,
+      "score": -0.0292,
+      "synthetic": true,
+      "category": "credential_theft",
+      "text": "Reply YES followed by your 0TP to approve card limit upgrade."
+    },
+    {
+      "id": "agy-gen-fraud-v1-e683ee16",
+      "true": 1,
+      "score": -0.3442,
+      "synthetic": true,
+      "category": "impersonation",
+      "text": "Hi Dad, my laptop screen broke. Can you wire $400 for repair?"
+    },
+    {
+      "id": "indiaspam-ef664958",
+      "true": 1,
+      "score": -0.0548,
+      "synthetic": false,
+      "category": "phishing",
+      "text": "Dear Greencard member, Your profile seems to be incomplete Some of your Greencard benefits may be locked due to missing information. Click s.cplry.com/MjEwMjk0MDQ3KzE to review ur membership details &"
+    },
+    {
+      "id": "ucisms-172ff90e",
+      "true": 0,
+      "score": 0.0388,
+      "synthetic": false,
+      "category": "legitimate",
+      "text": "Tell me again what your address is"
+    },
+    {
+      "id": "ucisms-2202ea09",
+      "true": 1,
+      "score": -0.0048,
+      "synthetic": false,
+      "category": "other_fraud",
+      "text": "100 dating service cal;l 09064012103 box334sk38ch"
+    },
+    {
+      "id": "ucisms-41cc8b94",
+      "true": 1,
+      "score": -0.1354,
+      "synthetic": false,
+      "category": "other_fraud",
+      "text": "Oh my god! I've found your number again! I'm so glad, text me back xafter this msgs cst std ntwk chg £1.50"
+    },
+    {
+      "id": "ucisms-93579e6b",
+      "true": 0,
+      "score": 0.6595,
+      "synthetic": false,
+      "category": "legitimate",
+      "text": "Sunshine Hols. To claim ur med holiday send a stamped self address envelope to Drinks on Us UK, PO Box 113, Bray, Wicklow, Eire. Quiz Starts Saturday! Unsub Stop"
+    },
+    {
+      "id": "ucisms-b317a756",
+      "true": 0,
+      "score": 0.2807,
+      "synthetic": false,
+      "category": "legitimate",
+      "text": "3 FREE TAROT TEXTS! Find out about your love life now! TRY 3 FOR FREE! Text CHANCE to 85555 16 only! After 3 Free, Msgs £1.50 each"
+    },
+    {
+      "id": "ucisms-c479165f",
+      "true": 1,
+      "score": -0.5769,
+      "synthetic": false,
+      "category": "other_fraud",
+      "text": "Will u meet ur dream partner soon? Is ur career off 2 a flyng start? 2 find out free, txt HORO followed by ur star sign, e. g. HORO ARIES"
+    },
+    {
+      "id": "ucisms-c50115de",
+      "true": 0,
+      "score": 1.161,
+      "synthetic": false,
+      "category": "legitimate",
+      "text": "Free tones Hope you enjoyed your new content. text stop to 61610 to unsubscribe. help:08712400602450p Provided by tones2you.co.uk"
+    },
+    {
+      "id": "ucisms-f4e43f80",
+      "true": 0,
+      "score": 0.6445,
+      "synthetic": false,
+      "category": "legitimate",
+      "text": "Last chance 2 claim ur £150 worth of discount vouchers-Text YES to 85023 now!SavaMob-member offers mobile T Cs 08717898035. £3.00 Sub. 16 . Remove txt X or STOP"
+    }
+  ],
+  "F_word_char_svc_calibrated": [
+    {
+      "id": "agy-gen-fraud-v1-34afea20",
+      "true": 1,
+      "score": 0.2808,
+      "synthetic": true,
+      "category": "payment_fraud",
+      "text": "Outstanding utility bill Rs 1,480. Pay to avoid power cutoff tonight."
+    },
+    {
+      "id": "agy-gen-fraud-v1-64b0f9b9",
+      "true": 1,
+      "score": 0.2199,
+      "synthetic": true,
+      "category": "investment_scam",
+      "text": "Earn passive income mining Ethereum cloud contracts. Start with just $50."
+    },
+    {
+      "id": "agy-gen-fraud-v1-6696049e",
+      "true": 1,
+      "score": 0.1898,
+      "synthetic": true,
+      "category": "phishing",
+      "text": "Your Netflix membership renewal failed. Update billing details: netflix-billing-update.top"
+    },
+    {
+      "id": "agy-gen-fraud-v1-807159cc",
+      "true": 1,
+      "score": 0.1208,
+      "synthetic": true,
+      "category": "impersonation",
+      "text": "Hey, it is Sarah from accounting. Do you have a quick minute?"
+    },
+    {
+      "id": "agy-gen-fraud-v1-b3d0804d",
+      "true": 1,
+      "score": 0.4417,
+      "synthetic": true,
+      "category": "credential_theft",
+      "text": "Reply YES followed by your 0TP to approve card limit upgrade."
+    },
+    {
+      "id": "agy-gen-fraud-v1-e683ee16",
+      "true": 1,
+      "score": 0.1744,
+      "synthetic": true,
+      "category": "impersonation",
+      "text": "Hi Dad, my laptop screen broke. Can you wire $400 for repair?"
+    },
+    {
+      "id": "ucisms-172ff90e",
+      "true": 0,
+      "score": 0.5263,
+      "synthetic": false,
+      "category": "legitimate",
+      "text": "Tell me again what your address is"
+    },
+    {
+      "id": "ucisms-2202ea09",
+      "true": 1,
+      "score": 0.4755,
+      "synthetic": false,
+      "category": "other_fraud",
+      "text": "100 dating service cal;l 09064012103 box334sk38ch"
+    },
+    {
+      "id": "ucisms-41cc8b94",
+      "true": 1,
+      "score": 0.3735,
+      "synthetic": false,
+      "category": "other_fraud",
+      "text": "Oh my god! I've found your number again! I'm so glad, text me back xafter this msgs cst std ntwk chg £1.50"
+    },
+    {
+      "id": "ucisms-93579e6b",
+      "true": 0,
+      "score": 0.8432,
+      "synthetic": false,
+      "category": "legitimate",
+      "text": "Sunshine Hols. To claim ur med holiday send a stamped self address envelope to Drinks on Us UK, PO Box 113, Bray, Wicklow, Eire. Quiz Starts Saturday! Unsub Stop"
+    },
+    {
+      "id": "ucisms-b317a756",
+      "true": 0,
+      "score": 0.6485,
+      "synthetic": false,
+      "category": "legitimate",
+      "text": "3 FREE TAROT TEXTS! Find out about your love life now! TRY 3 FOR FREE! Text CHANCE to 85555 16 only! After 3 Free, Msgs £1.50 each"
+    },
+    {
+      "id": "ucisms-c479165f",
+      "true": 1,
+      "score": 0.0709,
+      "synthetic": false,
+      "category": "other_fraud",
+      "text": "Will u meet ur dream partner soon? Is ur career off 2 a flyng start? 2 find out free, txt HORO followed by ur star sign, e. g. HORO ARIES"
+    },
+    {
+      "id": "ucisms-c50115de",
+      "true": 0,
+      "score": 0.9715,
+      "synthetic": false,
+      "category": "legitimate",
+      "text": "Free tones Hope you enjoyed your new content. text stop to 61610 to unsubscribe. help:08712400602450p Provided by tones2you.co.uk"
+    },
+    {
+      "id": "ucisms-f4e43f80",
+      "true": 0,
+      "score": 0.8912,
+      "synthetic": false,
+      "category": "legitimate",
+      "text": "Last chance 2 claim ur £150 worth of discount vouchers-Text YES to 85023 now!SavaMob-member offers mobile T Cs 08717898035. £3.00 Sub. 16 . Remove txt X or STOP"
+    }
+  ]
+}

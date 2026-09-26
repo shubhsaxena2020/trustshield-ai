@@ -99,3 +99,11 @@ Beta features (Services, Container Images, large functions) can change; cold sta
 not kept (stateless; `GET /api/v1/analysis/{id}` only serves sandbox jobs, which are disabled); degraded ML mode is unreachable in
 production by design (startup refuses to run without v3), and is covered by local tests and the local browser E2E; the sandbox stays
 disabled and external browsing is not enabled.
+
+
+## Conversational build (Preview only)
+
+The conversational assistant lives on branch `feature/trustshield-conversational-next` and is **not promoted**. It is deployed, if at all, as a
+Vercel **Preview** using the same bundle/`vercel.json`; production keeps serving the four-tab app until a final report is approved. No
+new environment variables are required (`TRUSTSHIELD_EXPLANATION_PROVIDER` is ignored in production). Same limits as before: Hobby, 2 GiB / 1 vCPU,
+~4 MiB uploads, sandbox disabled, stateless, per-instance rate limits. Promotion: `vercel promote <preview>` (rebuilds) after approval.
