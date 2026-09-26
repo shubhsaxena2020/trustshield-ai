@@ -1,0 +1,40 @@
+# TrustShield API container for Vercel Services (backend service `api`, routed from /api/*). No secrets are needed or present:
+# the exact promoted artifacts are placed in release-artifacts/ by scripts/build_vercel_bundle.py (after downloading them from the
+# private GitHub release locally and verifying SHA-256), and are re-verified against models/release/v3_release_manifest.json here.
+# The build FAILS unless both artifacts match. ENABLE_WEB_SANDBOX stays false; there is no Chromium in this image.
+FROM python:3.13-slim-bookworm@sha256:2325bb286ec344af3e5898cc224b5844e2707ac6e26b1632516fd3edc84a5e26
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    TRUSTSHIELD_ENV=production \
+    TESSERACT_CMD=/usr/bin/tesseract \
+    MAX_UPLOAD_SIZE=4194304 \
+    OMP_NUM_THREADS=1 \
+    OPENBLAS_NUM_THREADS=1
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends tesseract-ocr tesseract-ocr-eng libglib2.0-0 \
+ && rm -rf /var/lib/apt/lists/* \
+ && useradd --system --uid 10001 --no-create-home --shell /usr/sbin/nologin trustshield
+
+WORKDIR /app
+COPY requirements-api.lock.txt ./
+RUN pip install -r requirements-api.lock.txt
+
+COPY services ./services
+COPY models/metadata ./models/metadata
+COPY models/release/v3_release_manifest.json ./models/release/v3_release_manifest.json
+COPY scripts/fetch_model_artifact.py ./scripts/fetch_model_artifact.py
+COPY release-artifacts ./release-artifacts
+
+RUN python scripts/fetch_model_artifact.py --from-dir release-artifacts \
+ && python scripts/fetch_model_artifact.py --model trustshield_text_v1 --from-dir release-artifacts \
+ && rm -rf release-artifacts scripts \
+ && mkdir -p /tmp/trustshield && chown -R trustshield:trustshield /tmp/trustshield
+
+USER 10001
+EXPOSE 8000
+# Vercel supplies the listening port through $PORT (set to 8000 in the project settings so the non-root user can bind it).
+CMD ["sh", "-c", "exec python -m uvicorn services.api.main:app --host 0.0.0.0 --port ${PORT:-8000} --workers 1 --no-access-log --no-server-header --timeout-keep-alive 5 --limit-concurrency 40"]

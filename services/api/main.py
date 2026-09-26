@@ -127,11 +127,13 @@ def health():
 
 
 @router.get("/healthz", include_in_schema=False)
+@router.get("/api/v1/healthz", include_in_schema=False)
 def liveness():
     return {"status": "alive"}
 
 
 @router.get("/readyz", include_in_schema=False)
+@router.get("/api/v1/readyz", include_in_schema=False)
 def readiness(response: Response):
     reasons: list[str] = []
     classifier = analysis_pipeline._text_classifier()
@@ -318,12 +320,21 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     app.include_router(router)
     if os.getenv("TRUSTSHIELD_DEBUG_PROXY", "").strip() == "1":
-        # Temporary observation window only (scripts/observe_proxy_chain.py): reveals the peer address and forwarding headers.
-        @app.get("/debug/proxy", include_in_schema=False)
+        # Temporary observation window only (scripts/observe_proxy_chain.py, scripts/stress_remote.py): peer address, forwarding
+        # headers and container memory counters. Never enabled in production (the production preflight fails if it is set).
+        def cgroup(name: str):
+            try:
+                with open(f"/sys/fs/cgroup/{name}", encoding="utf-8") as handle:
+                    return handle.read().strip()
+            except OSError:
+                return None
+
+        @app.get("/api/v1/debug/proxy", include_in_schema=False)
         def debug_proxy(request: Request):
             return {"peer": request.client.host if request.client else None,
                     "x_forwarded_for": request.headers.get("x-forwarded-for", ""),
-                    "x_forwarded_proto": request.headers.get("x-forwarded-proto", "")}
+                    "x_forwarded_proto": request.headers.get("x-forwarded-proto", ""),
+                    "memory": {"current": cgroup("memory.current"), "peak": cgroup("memory.peak"), "max": cgroup("memory.max")}}
 
     app.add_middleware(BodyLimitMiddleware, max_bytes=settings.max_body_bytes)
     app.add_middleware(ObservabilityMiddleware, settings=settings)

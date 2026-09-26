@@ -36,13 +36,13 @@ def test_valid_production_configuration_passes_deployment_checks():
     failed = _failures()
     # Tesseract is installed on the dev machine via TESSERACT_CMD; only that environment-specific check may differ.
     assert failed <= {"API environment (CORS, ML, sandbox, OCR, fusion, tmp)"}, failed
-    assert _status("PUBLIC_API_URL is https") == "PASS" and _status("frontend API URL matches PUBLIC_API_URL") == "PASS"
+    assert _status("PUBLIC_API_URL is https (or unset for a same-origin deployment)") == "PASS" and _status("frontend API URL is same-origin or matches PUBLIC_API_URL") == "PASS"
     assert _status("no development configuration enabled") == "PASS" and _status("database") == "PASS"
 
 
 @pytest.mark.parametrize("name,value,check", [
-    ("PUBLIC_API_URL", "http://api.example.com", "PUBLIC_API_URL is https"),
-    ("NEXT_PUBLIC_API_URL", "https://other.example.com", "frontend API URL matches PUBLIC_API_URL"),
+    ("PUBLIC_API_URL", "http://api.example.com", "PUBLIC_API_URL is https (or unset for a same-origin deployment)"),
+    ("NEXT_PUBLIC_API_URL", "https://other.example.com", "frontend API URL is same-origin or matches PUBLIC_API_URL"),
     ("TRUSTSHIELD_ENV", "development", "TRUSTSHIELD_ENV is staging or production"),
     ("ENABLE_WEB_SANDBOX", "true", "no development configuration enabled"),
     ("TRUSTSHIELD_OCR_PROVIDER", "mock", "no development configuration enabled"),

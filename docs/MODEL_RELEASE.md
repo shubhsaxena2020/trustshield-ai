@@ -30,6 +30,14 @@ secret; revoke it in GitHub if exposed.
 | install | SHA-256 must equal the release manifest, otherwise nothing is installed and the build fails |
 | API startup (staging/production) | re-verifies hash, load, identity, threshold 0.16 and sklearn; aborts on any mismatch |
 
+## Vercel delivery (current): no credential on the platform
+
+Vercel container builds receive project variables only as build `ARG`s (no BuildKit secret mounts), so the token is **not** given to
+Vercel. The artifacts are fetched locally from the private release with the authenticated fetcher, verified, and shipped inside the
+CLI-uploaded deployment bundle (`scripts/build_vercel_bundle.py`); `docker/Dockerfile.vercel` and API startup verify the hashes again.
+Details: `docs/VERCEL_DEPLOYMENT.md`. The Render/BuildKit-secret path above remains valid for any host that supports secret mounts
+(GitHub Actions, local Docker).
+
 ## Recovery only
 
 If the release asset is lost, `docs/REPRODUCIBILITY.md` describes deterministic functional regeneration from the committed data.

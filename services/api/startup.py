@@ -26,31 +26,35 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def model_problems(root: Path = ROOT) -> list[str]:
+def model_problems(root: Path = ROOT, model: str | None = None) -> list[str]:
     """Absent artifact, hash mismatch, load failure, sklearn incompatibility, wrong identity or threshold."""
     from services.analysis.ml.classifier import TextClassifier
 
+    model = model or (os.getenv("TRUSTSHIELD_ML_MODEL", "").strip() or EXPECTED_MODEL)
     problems: list[str] = []
     manifest_path = root / "models" / "release" / "v3_release_manifest.json"
     if not manifest_path.is_file():
         return [f"release manifest missing: {manifest_path.name}"]
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    expected = manifest["models"][EXPECTED_MODEL]
+    if model not in manifest["models"]:
+        return [f"model {model!r} is not in the release manifest"]
+    expected = manifest["models"][model]
     artifact = root / expected["artifact"]
     if not artifact.is_file():
         return [f"MODEL ARTIFACT MISSING: {expected['artifact']} (ML would be unavailable)"]
     actual = _sha256(artifact)
     if actual != expected["artifact_sha256"]:
         problems.append(f"model artifact SHA-256 {actual[:12]}... differs from the promoted release {expected['artifact_sha256'][:12]}...")
-    classifier = TextClassifier(EXPECTED_MODEL, project_root=root)
+    classifier = TextClassifier(model, project_root=root)
     if not classifier.available:
         problems.append(f"model failed to load: {classifier.reason}")
         return problems
-    if classifier.model_name != EXPECTED_MODEL:
-        problems.append(f"model identity {classifier.model_name!r} != {EXPECTED_MODEL!r}")
+    if classifier.model_name != model:
+        problems.append(f"model identity {classifier.model_name!r} != {model!r}")
     threshold = float(classifier.metadata.get("threshold", -1))
-    if threshold != EXPECTED_THRESHOLD or threshold != float(expected["threshold"]):
-        problems.append(f"model threshold {threshold} != expected {EXPECTED_THRESHOLD}")
+    pinned = EXPECTED_THRESHOLD if model == EXPECTED_MODEL else float(expected["threshold"])
+    if threshold != pinned or threshold != float(expected["threshold"]):
+        problems.append(f"model threshold {threshold} != expected {pinned}")
     if classifier.metadata.get("sklearn_version") != expected["sklearn_version"]:
         problems.append("model metadata sklearn version differs from the release manifest")
     probe = classifier.predict("URGENT: your account is blocked, share the OTP at http://kyc-update.xyz")

@@ -1,8 +1,8 @@
 """Observe the real reverse-proxy chain in front of a deployed API instead of guessing TRUSTSHIELD_TRUSTED_PROXY_HOPS.
 
-    python scripts/observe_proxy_chain.py --base https://<api>.onrender.com [--my-ip 203.0.113.9]
+    python scripts/observe_proxy_chain.py --base https://<site>.vercel.app [--my-ip 203.0.113.9]
 
-Requires the API to run briefly with TRUSTSHIELD_DEBUG_PROXY=1 (exposes GET /debug/proxy: peer address and forwarding headers only).
+Requires the API to run briefly with TRUSTSHIELD_DEBUG_PROXY=1 (exposes GET /api/v1/debug/proxy: peer address, forwarding headers, container memory counters).
 The script sends a spoofed X-Forwarded-For, reads what the API received, and reports how many entries the platform appended. The
 client is the Nth entry from the right, so hops = number of appended entries; if --my-ip (or a public-IP lookup) does not equal the
 first appended entry the observation is flagged as inconclusive. Remove the debug flag afterwards.
@@ -20,6 +20,9 @@ SPOOF = ["203.0.113.7", "198.51.100.9"]
 def analyse(received: str, my_ip: str | None) -> dict:
     seen = [item.strip() for item in received.split(",") if item.strip()]
     if seen[: len(SPOOF)] != SPOOF:
+        if my_ip is not None and seen == [my_ip]:
+            # e.g. Vercel: the edge discards client-supplied X-Forwarded-For and sets exactly the client address.
+            return {"conclusive": True, "platform_overwrites_xff": True, "seen": seen, "appended": seen, "hops": 1, "client_entry": my_ip}
         return {"conclusive": False, "reason": "the platform did not preserve the spoofed entries in order", "seen": seen}
     appended = seen[len(SPOOF):]
     if not appended:
@@ -41,7 +44,7 @@ def main(argv: list[str] | None = None) -> int:
             my_ip = urllib.request.urlopen("https://api.ipify.org", timeout=10).read().decode().strip()
         except Exception:
             my_ip = None
-    request = urllib.request.Request(args.base.rstrip("/") + "/debug/proxy", headers={"X-Forwarded-For": ", ".join(SPOOF)})
+    request = urllib.request.Request(args.base.rstrip("/") + "/api/v1/debug/proxy", headers={"X-Forwarded-For": ", ".join(SPOOF)})
     with urllib.request.urlopen(request, timeout=30) as response:
         observed = json.loads(response.read())
     outcome = analyse(observed.get("x_forwarded_for", ""), my_ip)

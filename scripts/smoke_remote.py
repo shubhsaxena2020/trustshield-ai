@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 import urllib.error
 import urllib.request
@@ -18,11 +19,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 FIX = ROOT / "demo" / "fixtures"
 results: list[tuple[str, bool, str]] = []
+DEFAULT_HEADERS: dict[str, str] = {}
 
 
 def call(base, path, *, method="GET", body=None, headers=None, raw=None):
     data = raw if raw is not None else (json.dumps(body).encode() if body is not None else None)
-    request = urllib.request.Request(base + path, data=data, method=method, headers=headers or {})
+    request = urllib.request.Request(base + path, data=data, method=method, headers={**DEFAULT_HEADERS, **(headers or {})})
     try:
         with urllib.request.urlopen(request, timeout=90) as response:
             return response.status, dict(response.headers), response.read()
@@ -54,10 +56,13 @@ def main() -> int:
     parser.add_argument("--base", required=True)
     parser.add_argument("--origin", default="")
     parser.add_argument("--expect-sandbox", default="false")
+    parser.add_argument("--bypass-token", default=os.environ.get("VERCEL_AUTOMATION_BYPASS_SECRET", ""), help="Vercel Deployment Protection bypass secret for Preview URLs")
     parser.add_argument("--skip-limits", action="store_true", help="skip the oversize/rate-limit probes")
     args = parser.parse_args()
     base = args.base.rstrip("/")
     origin_headers = {"Origin": args.origin} if args.origin else {}
+    if args.bypass_token:
+        DEFAULT_HEADERS["x-vercel-protection-bypass"] = args.bypass_token
 
     status, headers, body = call(base, "/api/v1/health")
     health = js(body) if status == 200 else {}
@@ -66,7 +71,7 @@ def main() -> int:
     check("ML is trustshield_text_v3 and available", modules.get("ml", {}).get("model_name") == "trustshield_text_v3" and modules.get("ml", {}).get("available") is True)
     check("Tesseract OCR available", modules.get("ocr", {}).get("available") is True and modules["ocr"].get("provider") == "tesseract")
     check("web sandbox disabled", modules.get("web_sandbox") is False)
-    status, _, body = call(base, "/readyz")
+    status, _, body = call(base, "/api/v1/readyz")
     check("readyz ready", status == 200 and js(body).get("ready") is True)
     status, headers, _ = call(base, "/api/v1/health")
     low = {k.lower(): v for k, v in headers.items()}
