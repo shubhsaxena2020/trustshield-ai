@@ -1,5 +1,20 @@
 # TrustShield AI — Tech Expo summary
 
+## Current headline: v3 on the sealed holdout (default model)
+
+The default model `trustshield_text_v3` was evaluated once on a sealed 979-message holdout (537 fraud, 442 legitimate; 349 real-source and 630 author-labelled synthetic rows) at the caution-and-above operating point (risk score >= 25): TP 441, TN 346, FP 96, FN 96; recall 82.1%, specificity 78.3%, precision 82.1%, F1 82.1%; ROC-AUC 0.877. The previous v1 model scored recall 81.2%, specificity 73.8%, precision 79.0%, F1 80.1% on the same rows.
+
+Statements to keep in all Tech Expo material:
+
+- v3 final sealed-holdout performance (v2 holdout, 979 messages, caution-and-above operating point): recall 82.1%, specificity 78.3%, precision 82.1%, F1 82.1%.
+- It did not meet the project's aspirational 90% recall/specificity goals.
+- Real-data performance remains source-limited and domain-sensitive.
+- TrustShield therefore reports risk evidence and uncertainty, not guarantees of safety.
+
+Extra context: on the 112 real legitimate rows (one source, Bangladeshi financial SMS) the false-positive rate was 39.3% for v3 versus 45.5% for v1; real-fraud recall was 87.3% versus 88.2%. The improvement is modest and most visible on synthetic rows, which is why TrustShield presents evidence and confidence rather than a verdict of safety. The holdout is now spent.
+
+The sections below are the earlier frozen-v1 test results (kept for history; v1 is the rollback model).
+
 This summary uses only the saved final-test outputs for the frozen model and
 threshold. The test set has 625 messages: 297 malicious/fraudulent and 328
 legitimate. The ML operating point remains `ml_p >= 0.12`.

@@ -4,6 +4,8 @@
 
 Phase 4 risk fusion is implemented on top of the frozen Phase 3 text model. The validation-selected `ml_aware_weighted` strategy is the default, with explicit evidence-strength gates and separate confidence; `TRUSTSHIELD_FUSION=legacy` preserves the Phase 3 noisy-OR behavior. Dataset metrics are validation-only engineering measurements, not real-world accuracy claims.
 
+**Default ML model: `trustshield_text_v3`** (promoted 2026-09-26 after the one-time sealed-holdout evaluation; threshold 0.16). `trustshield_text_v1` stays selectable as a rollback: set `TRUSTSHIELD_ML_MODEL=trustshield_text_v1` and restart. See `docs/RELEASE_NOTES.md` and `docs/V2_EVALUATION_REPORT.md`. The v2 holdout is spent; any future replacement model needs a new sealed holdout.
+
 ## IMPLEMENTED
 
 - Text normalization, deterministic scam rules, static URL analysis, evidence, fusion, explanations, and recommended actions.
@@ -22,7 +24,7 @@ Phase 4 risk fusion is implemented on top of the frozen Phase 3 text model. The 
 These are not active capabilities in the current code:
 
 - `PaddleOCRProvider` and Hindi OCR.
-- An isolated web sandbox.
+- Live external browsing in the isolated web sandbox (the sandbox itself is implemented but off by default; external browsing stays disabled until the sandbox/UI changes get a fresh adversarial review).
 - External reputation providers.
 - Ollama-backed explanation support.
 - SQLite persistence.

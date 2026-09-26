@@ -86,3 +86,4 @@ Known limitations:
 - The Job Object is assigned just after the worker starts, so a very brief window precedes containment.
 - `ENABLE_WEB_SANDBOX` and `TRUSTSHIELD_SANDBOX_ALLOW_EXTERNAL` default to off; live external browsing has not been exercised. The browser E2E confirms the UI opt-in is refused safely with external browsing off.
 - Job dispatch is one thread per accepted job; there is no persistent queue.
+- **Gate:** external live browsing (`TRUSTSHIELD_SANDBOX_ALLOW_EXTERNAL`) stays disabled until the sandbox and UI changes receive a fresh adversarial review; this is independent of the ML model promotion.

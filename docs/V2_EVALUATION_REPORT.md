@@ -135,3 +135,11 @@ overlapping genres in opposite directions - transactional-payment SMS (fewer
 false alarms) and bank-alert-style phishing (more misses). Net effect on real
 data is small and mixed; the headline gain is driven by the synthetic slice and
 by one real legitimate source.
+
+## Decision (2026-09-26)
+
+The project lead reviewed this report and **promoted `trustshield_text_v3` to the default model**; `trustshield_text_v1` stays selectable as a rollback. No model, threshold, fusion or data change accompanied the promotion.
+
+- **Second scoring pass, stated plainly.** The official script scored each holdout row once per model and saved only aggregates. The companion script re-scored the same rows (deterministic inference) to save raw predictions and recompute metrics independently; its counts matched exactly. The v2 rows were therefore inferred twice. That second pass was verification, not tuning, and informed no decision beyond what the pre-registered criteria already gave.
+- **v2 is permanently spent.** It must not be used for v4 development, tuning, error-driven fixes or model selection. Any model intended to replace v3 needs a new sealed holdout with its own pre-registered criteria.
+- The evaluation scripts (`run_v2_promotion_eval.py`, `v2_postrun_analysis.py`) encode the pre-promotion default (they select v1 by clearing `TRUSTSHIELD_ML_MODEL`) and the frozen manifest hashes; they are historical records and must not be re-run.

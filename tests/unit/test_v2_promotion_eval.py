@@ -94,4 +94,6 @@ def test_end_to_end_on_toy_holdout_never_touches_real_holdout(tmp_path):
     assert code == 0 and len(json.loads(log.read_text())) == 1
     result = json.loads((tmp_path / "out/results.json").read_text())
     assert result["verdict"] == "DO_NOT_PROMOTE"  # toy slices are below the minimum size
-    assert (ROOT / "datasets/holdout/trustshield-text-v2-holdout/holdout_access_log.json").read_text().strip() == "[]"
+    # The real holdout is spent: exactly the one historical entry, never touched by the toy run.
+    real_log = json.loads((ROOT / "datasets/holdout/trustshield-text-v2-holdout/holdout_access_log.json").read_text())
+    assert len(real_log) == 1 and real_log[0]["rc_commit"] == "31b8143e269ebca70c2c033133be78cbcf4938ae"

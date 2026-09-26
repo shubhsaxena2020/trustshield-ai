@@ -17,13 +17,15 @@ Returns capability information:
   "modules": {
     "text": true,
     "url_static": true,
-    "ml": {"available": true, "model_name": "trustshield_text_v1", "model_version": "phase3-1"},
+    "ml": {"available": true, "model_name": "trustshield_text_v3", "model_version": "phase3-1"},
     "ocr": {"available": true, "provider": "tesseract"},
     "qr": true,
     "web_sandbox": false
   }
 }
 ```
+
+`modules.ml.model_name` reports the active model: `trustshield_text_v3` by default, `trustshield_text_v1` when rolled back with `TRUSTSHIELD_ML_MODEL=trustshield_text_v1`.
 
 `modules.ocr.available` reflects the selected provider. Its provider is normally `tesseract`, or `mock` when `TRUSTSHIELD_OCR_PROVIDER=mock` is set. The mock is a demo/test provider and is not real OCR.
 

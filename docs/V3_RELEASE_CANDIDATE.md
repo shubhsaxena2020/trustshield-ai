@@ -1,7 +1,6 @@
 # trustshield_text_v3 release candidate (rc1) — frozen
 
-**Status: frozen, awaiting explicit approval for the one-time v2 evaluation.**
-Default model remains `trustshield_text_v1`. v2 is sealed (`holdout_access_log.json` is `[]`).
+**Status: historical. rc1 was evaluated once on v2 and then promoted to default (2026-09-26).** See `docs/V2_EVALUATION_REPORT.md` and `docs/RELEASE_NOTES.md`. The frozen model, data and threshold are unchanged; the promotion edited `classifier.py` (default constant), so that file's hash in `models/release/v3_rc_manifest.json` no longer matches by design. v2 is spent.
 
 Frozen artifact hashes and the code commit are in
 `models/release/v3_rc_manifest.json`; `scripts/run_v2_promotion_eval.py`

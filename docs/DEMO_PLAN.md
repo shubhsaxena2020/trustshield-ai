@@ -34,6 +34,10 @@ The UI result is evidence-first: show the risk label, separate confidence, evide
 
 With `TRUSTSHIELD_OCR_PROVIDER=mock`, the screenshot fixtures are deterministic because their PNG metadata contains the source text. The mock does not recognise pixels and is not a production OCR provider. To demonstrate the real path, unset the variable, set `TESSERACT_CMD` to the intended executable, and rerun the same screenshot fixtures. The validation benchmark records the selected binary and version, and the canonical OCR module records raw/normalized text, preprocessing, confidence, and command-source provenance. Real OCR output, warnings, and confidence can differ; if Tesseract is unavailable, the expected result is `unable_to_verify` with OCR status `unavailable`.
 
+## Active ML model in the demo
+
+The demo runs `trustshield_text_v3` by default (`GET /api/v1/health` shows `modules.ml.model_name`). To demo or fall back to the previous model, restart the API with `TRUSTSHIELD_ML_MODEL=trustshield_text_v1`. Say plainly on stage: sealed-holdout recall 82.1%, specificity 78.3%, below our 90% goals; TrustShield reports risk evidence and uncertainty, not guarantees of safety. The web sandbox stays off in the demo (external live browsing is disabled pending fresh adversarial review).
+
 ## PLANNED demo extensions
 
 Future demos may cover PaddleOCR/Hindi OCR, a trained ML classifier, isolated web inspection, reputation lookups, Ollama explanations, and SQLite-backed history. None of those are part of the current demo.

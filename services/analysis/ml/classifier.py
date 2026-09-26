@@ -38,11 +38,15 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+DEFAULT_MODEL = "trustshield_text_v3"
+ROLLBACK_MODEL = "trustshield_text_v1"  # select with TRUSTSHIELD_ML_MODEL=trustshield_text_v1
+
+
 class TextClassifier:
     def __init__(self, model_name: str | None = None, project_root: str | Path | None = None):
         self.project_root = Path(project_root or Path(__file__).resolve().parents[3]).resolve()
         configured_name = os.getenv("TRUSTSHIELD_ML_MODEL", "").strip()
-        self.model_name = model_name or configured_name or "trustshield_text_v1"
+        self.model_name = model_name or configured_name or DEFAULT_MODEL
         self.available = False
         self.reason = ""
         self.metadata: dict[str, Any] = {}

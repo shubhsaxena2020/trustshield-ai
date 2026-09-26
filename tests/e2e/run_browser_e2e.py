@@ -52,8 +52,8 @@ def main() -> int:
         wait("http://localhost:8000/api/v1/health")
         wait("http://localhost:3000/")
         health = json.load(urllib.request.urlopen("http://localhost:8000/api/v1/health"))
-        check("health reports sandbox enabled and default ML v1",
-              health["modules"]["web_sandbox"] is True and health["modules"]["ml"]["model_name"] == "trustshield_text_v1")
+        check("health reports sandbox enabled and default ML v3",
+              health["modules"]["web_sandbox"] is True and health["modules"]["ml"]["model_name"] == "trustshield_text_v3")
         with sync_playwright() as pw:
             browser = pw.chromium.launch()
             page = browser.new_page(viewport={"width": 1100, "height": 900})

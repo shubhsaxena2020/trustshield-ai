@@ -1,5 +1,7 @@
 # TrustShield ML pipeline (Phase 3)
 
+> **Current default (2026-09-26): `trustshield_text_v3`**, threshold `0.16`, artifact SHA-256 `d69aadbb758d186c8b33946895b456588cf8f5ce5eca504647d9e7a009c1189a`. It was promoted after the pre-registered criteria (`docs/V2_PROMOTION_CRITERIA.md`) passed on the sealed v2 holdout (`docs/V2_EVALUATION_REPORT.md`). The default is the `DEFAULT_MODEL` constant in `services/analysis/ml/classifier.py`; `TRUSTSHIELD_ML_MODEL=trustshield_text_v1` (or `TextClassifier("trustshield_text_v1")`) selects the v1 rollback (threshold `0.12`, hash below). Fusion parameters are identical for both models. The v2 holdout is a spent benchmark: it must not be used for v4 development, tuning or model selection, and any model intended to replace v3 needs a new sealed holdout. The sections below describe v1 (frozen, still valid for rollback) and the v3 build commands.
+
 The text model is a calibrated statistical signal layered beside the existing
 rules. It does not tune `SEVERITY_WEIGHT`, `BANDS`, evidence weights, rule
 regexes, or rule severities. Training and selection use only `train.jsonl` and
