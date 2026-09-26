@@ -1,0 +1,7 @@
+candidate,operating_point,ml_positive,suppressed,suppression_pct,malicious_ml_positive,malicious_suppressed,malicious_suppression_pct
+legacy,caution,158,85,53.79746835443038,122,50,40.98360655737705
+legacy,suspicious,158,152,96.20253164556962,122,117,95.90163934426229
+ml_aware_weighted,caution,158,0,0.0,122,0,0.0
+ml_aware_weighted,suspicious,158,54,34.177215189873415,122,22,18.0327868852459
+strength_gated,caution,158,0,0.0,122,0,0.0
+strength_gated,suspicious,158,56,35.44303797468354,122,24,19.672131147540984

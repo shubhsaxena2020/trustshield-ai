@@ -1,0 +1,37 @@
+{
+  "selected_candidate": "ml_aware_weighted",
+  "legacy": {
+    "recall": [
+      0.4521716485507246,
+      0.5412707702321384
+    ],
+    "specificity": [
+      0.9806981131750309,
+      0.9900083263946711
+    ],
+    "groups": 2918,
+    "samples": 2000,
+    "seed": 42
+  },
+  "selected": {
+    "recall": [
+      0.9547150359852169,
+      0.984438802337635
+    ],
+    "specificity": [
+      0.8825760562975923,
+      0.9074951268672283
+    ],
+    "groups": 2918,
+    "samples": 2000,
+    "seed": 42
+  },
+  "point_difference": {
+    "recall": 0.47326732673267324,
+    "specificity": -0.08992954828014921
+  },
+  "difference_exceeds_noise": {
+    "recall": true,
+    "specificity": true
+  }
+}

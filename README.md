@@ -1,0 +1,192 @@
+# TrustShield AI — Team Scam Scan
+
+*Think Before You Trust.* TrustShield AI is a privacy-first multimodal cyber-fraud and phishing risk analyzer for text, URLs, screenshots, and QR codes. It is the PSIT Tech Expo 2026 project.
+
+Phase 4 risk fusion is implemented on top of the frozen Phase 3 text model. The validation-selected `ml_aware_weighted` strategy is the default, with explicit evidence-strength gates and separate confidence; `TRUSTSHIELD_FUSION=legacy` preserves the Phase 3 noisy-OR behavior. Dataset metrics are validation-only engineering measurements, not real-world accuracy claims.
+
+**Default ML model: `trustshield_text_v3`** (promoted 2026-09-26 after the one-time sealed-holdout evaluation; threshold 0.16). `trustshield_text_v1` stays selectable as a rollback: set `TRUSTSHIELD_ML_MODEL=trustshield_text_v1` and restart. See `docs/RELEASE_NOTES.md` and `docs/V2_EVALUATION_REPORT.md`. The v2 holdout is spent; any future replacement model needs a new sealed holdout.
+
+## IMPLEMENTED
+
+- Text normalization, deterministic scam rules, static URL analysis, evidence, fusion, explanations, and recommended actions.
+- Image validation before extraction. PNG, JPEG, and WebP are decoded and checked against the declared MIME type, upload-size limit, dimensions, and Pillow decoding safeguards.
+- `OCRProvider`, real `TesseractProvider`, and strictly test/demo-only `MockOCRProvider`. Tesseract is the default provider. The mock reads the `trustshield_demo_text` PNG metadata field and does not recognise text from pixels; unset, unknown, and `tesseract` provider settings never select it.
+- `QRDecoder` and `OpenCVQRDecoder`, payload classification, static URL analysis, `javascript:`/`data:` routing to the static analyzer, and structural UPI parsing.
+- OCR-quality-aware confidence: reported OCR confidence affects fusion confidence; providers without a confidence value use a conservative quality factor.
+- FastAPI endpoints for text, URL, screenshot, QR, health, and retrieving a bounded in-memory analysis result, including extracted OCR text when present; results are lost on restart.
+- Next.js UI tabs for Text, URL, Screenshot, and QR Code, plus OCR/QR result panels and technical JSON.
+- Synthetic, local-only demo fixtures under `demo/fixtures`.
+- Dataset v1 curation, seeded pre-dedup legitimate caps, calibrated text classifier, safe pipeline integration, validation evaluation, and reporting from the single frozen test evaluation.
+- Validation-only Phase 4 OOF fusion tuning and candidate evaluation under `models/evaluation/fusion/`, with grouped bootstrap intervals and a documented strength-class design.
+
+## PLANNED
+
+These are not active capabilities in the current code:
+
+- `PaddleOCRProvider` and Hindi OCR.
+- Live external browsing in the isolated web sandbox (the sandbox itself is implemented but off by default; external browsing stays disabled until the sandbox/UI changes get a fresh adversarial review).
+- External reputation providers.
+- Ollama-backed explanation support.
+- SQLite persistence.
+
+## Setup
+
+From PowerShell in the repository root:
+
+```powershell
+python -m venv .venv
+.venv\Scripts\pip install -r requirements.txt
+```
+
+### Real Tesseract OCR on Windows
+
+Tesseract is not installed automatically by this project. For real screenshot OCR, manually install a Windows Tesseract build from UB Mannheim. The recommended explicit configuration is `TESSERACT_CMD`; this avoids accidentally benchmarking another installation:
+
+```powershell
+$env:TESSERACT_CMD = 'C:\Path\To\Tesseract-OCR\tesseract.exe'
+```
+
+Resolution order is `TESSERACT_CMD`, then `PATH`, then the default Windows installation location. If Tesseract is unavailable, `/api/v1/analyze/image` returns an explicit structured result with `risk.label` set to `unable_to_verify` and `modules.ocr.status` set to `unavailable`. No OCR recognition is performed in that case. OCR calls use `TRUSTSHIELD_OCR_TIMEOUT` when set, and preprocessing can be selected with `TRUSTSHIELD_OCR_PREPROCESS` (`none`, `current`, `gray`, `gray_autocontrast`, or `gray_resize2x`); the default remains `current`.
+
+### OCR validation benchmark
+
+The corpus is synthetic and committed under `benchmarks/ocr/corpus`; real-world screenshots will differ. Generate it and run the real binary explicitly:
+
+```powershell
+.venv\Scripts\python scripts\make_ocr_corpus.py
+$env:TESSERACT_CMD = 'C:\Path\To\Tesseract-OCR\tesseract.exe'
+.venv\Scripts\python scripts\ocr_benchmark.py
+```
+
+The benchmark refuses to fall back to mock OCR, records the resolved binary path and version in `benchmarks/ocr/results.json`, and prints a markdown summary. See `docs/OCR_VALIDATION.md` for the results from the recorded run.
+
+### Phase 3 text ML validation
+
+```powershell
+python scripts/curate_public_datasets.py
+python scripts/prepare_dataset.py --output-dir datasets/processed/trustshield-text-v1 `
+  --cap ucI_sms_spam:legitimate=1500 `
+  --cap india_spam_sms:legitimate=1500
+python scripts/train_classifier.py --dataset-dir datasets/processed/trustshield-text-v1
+python scripts/evaluate_model.py --split validation --systems rules,ml,combined --dataset-dir datasets/processed/trustshield-text-v1
+
+python scripts/fusion_oof_predictions.py --split train_oof --dataset-dir datasets/processed/trustshield-text-v1
+python scripts/evaluate_fusion.py --split train_oof --dataset-dir datasets/processed/trustshield-text-v1
+python scripts/evaluate_fusion.py --split validation --dataset-dir datasets/processed/trustshield-text-v1
+```
+
+The selected artifact is above the commit-sized limit and is regenerated by
+the training command. The coordinator's authorized test evaluation is already
+recorded once in `models/evaluation/test_access_log.json`; do not run the test
+evaluator again. The additional report metrics are recomputed from the saved
+`predictions_test.csv` without loading or running the model:
+
+```powershell
+python scripts/analyze_final_test_reporting.py
+```
+
+### Deterministic demo OCR
+
+To use the opt-in demo provider:
+
+```powershell
+$env:TRUSTSHIELD_OCR_PROVIDER = 'mock'
+```
+
+This is not real recognition. The mock reads text embedded in the generated screenshot metadata, so it should only be used with the synthetic fixtures or tests. It must not be treated as evidence that arbitrary pixels were read correctly.
+
+Regenerate the synthetic fixtures locally, without network access:
+
+```powershell
+.venv\Scripts\python scripts\make_demo_fixtures.py
+```
+
+## Preflight (run before every demo)
+
+```powershell
+python scripts/preflight.py          # add --json for machine-readable output
+```
+
+Checks that the default model is v3, the v3 artifact exists, loads and has threshold 0.16, Tesseract works, API/frontend
+prerequisites are present, sandbox external browsing is disabled, and ports 8000/3000 are free. A missing v3 artifact is a
+loud FAIL ("ML IS UNAVAILABLE"), never a silent rules-only run. The `.joblib` files are git-ignored; regenerate them from
+committed data with `requirements-lock.txt` as described in `docs/REPRODUCIBILITY.md` (functionally identical, not byte-identical).
+Release evidence: `models/release/v3_release_manifest.json` (the earlier `v3_rc_manifest.json` is immutable history).
+The v2 holdout scripts are historical and refuse to run (`v2 is spent`).
+
+## Run the tests
+
+```powershell
+.venv\Scripts\python -m pytest -q
+```
+
+### Optional isolated web sandbox
+
+Install Playwright in the project virtual environment and keep Chromium under
+the repository (never system-wide):
+
+```powershell
+.venv\Scripts\pip install -r requirements-sandbox.txt
+$env:PLAYWRIGHT_BROWSERS_PATH = (Join-Path (Get-Location) '.playwright-browsers')
+.venv\Scripts\python -m playwright install chromium
+```
+
+The sandbox is opt-in per request (`{"sandbox": true}`), disabled by default,
+and external browsing is blocked by default. Use `ENABLE_WEB_SANDBOX=true` to
+enable the path; only explicitly approved deployments should also set
+`TRUSTSHIELD_SANDBOX_ALLOW_EXTERNAL=true`. Run the sandbox tests with
+`$env:TESSERACT_CMD='C:\\Users\\shubh\\Tools\\Tesseract-OCR\\tesseract.exe'; .venv\\Scripts\\python -m pytest -q tests/security tests/integration`.
+This Windows MVP is not a malware-grade sandbox: it has no Docker/microVM,
+reputation, detonation, or persistent screenshot storage policy, and browser
+zero-day risk remains.
+
+## Run the API
+
+```powershell
+.venv\Scripts\python -m uvicorn services.api.main:app --reload --port 8000
+```
+
+The API is served at `http://localhost:8000`. See [docs/API.md](docs/API.md) for the request and response contracts.
+
+## Run the web app
+
+In a second terminal:
+
+```powershell
+cd apps/web
+npm install
+npm run dev
+```
+
+The web app is served at `http://localhost:3000` and calls the API at `http://localhost:8000` by default. The browser UI does not open submitted URLs; QR destinations are analyzed as payloads only.
+
+## Documentation
+
+- [Architecture](docs/ARCHITECTURE.md)
+- [Workflow](docs/WORKFLOW.md)
+- [API](docs/API.md)
+- [Threat model](docs/THREAT_MODEL.md)
+- [Demo plan](docs/DEMO_PLAN.md)
+- [Project specification](docs/PROJECT_SPEC.md)
+- [Phase 3 closure report](docs/PHASE3_CLOSURE_REPORT.md)
+- [Phase 3 validation and final-test report](docs/PHASE3_VALIDATION_REPORT.md)
+- [Tech Expo summary](docs/TECH_EXPO_SUMMARY.md)
+- [ML pipeline](docs/ML_PIPELINE.md)
+- [Risk-fusion analysis](docs/RISK_FUSION_ANALYSIS.md)
+- [Risk-fusion design](docs/RISK_FUSION_DESIGN.md)
+- [Sealed v2 holdout plan](docs/HOLDOUT_V2_PLAN.md) (evaluation pending lead approval)
+- [Web sandbox design](docs/WEB_SANDBOX_DESIGN.md) (Phase 5 MVP status and residual risks)
+
+Validation outputs live under `models/evaluation/validation/`; the original
+test evaluation and reporting-only outputs remain under `models/evaluation/test/`.
+The immutable historical copy is under `models/evaluation/test_v1_frozen/`.
+Future evaluations must use a new `trustshield-text-v2-holdout` and a new
+access log.
+
+## Deployment (Milestone A: public MVP)
+
+Frontend on Vercel, API in a Docker container on Render, stateless, sandbox disabled. See `docs/DEPLOYMENT_ARCHITECTURE.md`
+(measured sizing, configuration, hardening), `docs/MODEL_RELEASE.md` (trusted model artifact), `.env.example`, `docker/api.Dockerfile`,
+`docker-compose.yml` (local production-like run), `.github/workflows/ci.yml` (deployment gate), `scripts/smoke_remote.py` and
+`tests/e2e/run_remote_e2e.py` (verify a deployed API/site), and `python scripts/preflight.py --profile production`.
+Spent-data rules: `docs/SPENT_DATA_POLICY.md`.

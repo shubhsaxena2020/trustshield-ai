@@ -1,0 +1,809 @@
+id,binary_label,source_name,style,image,ocr_status,ocr_text,wer,cer,clean_ml,ocr_ml,clean_combined,ocr_combined
+indiaspam-1c107e39,legitimate,india_spam_sms,whatsapp,models\evaluation\validation\ocr_end_to_end\renders\000_indiaspam-1c107e39.jpg,completed,,1.0,1.0,False,False,False,False
+ucisms-faf65e9b,malicious_or_fraudulent,ucI_sms_spam,sms,models\evaluation\validation\ocr_end_to_end\renders\001_ucisms-faf65e9b.jpg,completed,"Messages @ 09:41
+
+Hack Chat. Get backdoor entry into 121 chat
+rooms at a fraction of the cost. Reply NEO69
+
+or call 09050280520, to subscribe 25p pm. DPS,
+Bcm box 8027 Ldn, wc1n3xx",0.1,0.10559006211180125,True,True,False,False
+agy-gen-fraud-v1-6696049e,malicious_or_fraudulent,agy-gen-fraud-v1,email,models\evaluation\validation\ocr_end_to_end\renders\002_agy-gen-fraud-v1-6696049e.jpg,completed,"Inbox « TrustShield demo
+
+From: service@example.invalid
+Subject: Account message
+
+Your Netflix membership renewal failed. Update
+billing details: netflix-billing-update.top",1.0,0.8888888888888888,True,True,True,True
+indiaspam-635fce57,legitimate,india_spam_sms,notification,models\evaluation\validation\ocr_end_to_end\renders\003_indiaspam-635fce57.jpg,completed,"O Notification
+
+The underlying logic of the DIF (Difference)
+is that the short-term Exponential Moving
+Average (EMA) reflects the current price
+trend, while the long-term EMA reflects
+earlier price trends. Therefore, if there is a
+significant gap between these two EMAs, it
+indicates that the market is trending either
+upwards or downwards. The MACD Histogram
+\. oscillating near the zero line indicates the
+
+strength of the trend",0.046875,0.04390243902439024,False,False,False,False
+agy-gen-legit-v1-acbac1f8,legitimate,agy-gen-legit-v1,whatsapp,models\evaluation\validation\ocr_end_to_end\renders\004_agy-gen-legit-v1-acbac1f8.jpg,completed,"TrustShield contact
+
+Axis Bank Caution: Beware of fake SMS messages
+regarding electricity bill payment
+disconnection. Power distribution companies
+
+never ask you to call personal mobile numbers
+or download remote access apps. Pay bills only
+via official utility websites.",0.05555555555555555,0.08032128514056225,True,True,False,False
+ucisms-29939d47,malicious_or_fraudulent,ucI_sms_spam,sms,models\evaluation\validation\ocr_end_to_end\renders\005_ucisms-29939d47.jpg,completed,"Messages e 09:41
+
+We tried to contact you re your reply to our
+offer of a Video Phone 75@ anytime any network
+mins Half Price Line Rental Camcorder Reply or
+call 908000930705",0.1724137931034483,0.12258064516129032,True,True,False,False
+ucisms-36eb59f0,legitimate,ucI_sms_spam,email,models\evaluation\validation\ocr_end_to_end\renders\006_ucisms-36eb59f0.jpg,completed,"Inbox * TrustShield demo
+
+From: service@example.invalid
+Subject: Account message
+
+Good morning pookie pie! Lol hope | didn't wake u up",0.9090909090909091,1.5576923076923077,False,False,False,False
+ucisms-c0b1f62d,legitimate,ucI_sms_spam,notification,models\evaluation\validation\ocr_end_to_end\renders\007_ucisms-c0b1f62d.jpg,completed,"C) Notification
+
+Thank you. And by the way, | just lost.",0.3333333333333333,0.4358974358974359,False,False,False,False
+ucisms-bad09098,malicious_or_fraudulent,ucI_sms_spam,whatsapp,models\evaluation\validation\ocr_end_to_end\renders\008_ucisms-bad09098.jpg,completed,"TrustShield contact
+
+URGENT! Your Mobile No 07808726822 was awarded
+a £2,000 Bonus Caller Prize on 02/09/03! This
+
+is our 2nd attempt to contact YOU! Call
+<PHONE> BOX95QU",0.08,0.13513513513513514,True,True,True,True
+ucisms-054654cc,legitimate,ucI_sms_spam,sms,models\evaluation\validation\ocr_end_to_end\renders\009_ucisms-054654cc.jpg,completed,"i
+
+Messages ¢ 09:41
+
+Get your garden ready for summer with a FREE
+selection of summer bulbs and seeds worth
+£33:50 only with The Scotsman this Saturday.
+To stop go2 notxt.co.uk",0.14814814814814814,0.12258064516129032,False,False,False,False
+agy-gen-fraud-v1-c1cfbbda,malicious_or_fraudulent,agy-gen-fraud-v1,email,models\evaluation\validation\ocr_end_to_end\renders\010_agy-gen-fraud-v1-c1cfbbda.jpg,completed,"Inbox e TrustShield demo
+
+From: service@example.invalid
+Subject: Account message
+
+Judicial Magistrate First Class, Rohini Court,
+
+Delhi: Electronic Summons for immediate appearance.
+You have been placed under electronic supervisory
+remand in Case #4418/2026. You are instructed to
+download Microsoft Teams, enter meeting ID
+982-104-891, and remain on audio-video standby until
+Chief Judicial Magistrate reviews your declaration.",0.1956521739130435,0.2318840579710145,True,True,False,True
+ucisms-2ede93ec,malicious_or_fraudulent,ucI_sms_spam,notification,models\evaluation\validation\ocr_end_to_end\renders\011_ucisms-2ede93ec.jpg,completed,"©) Notification
+
+URGENT! Your Mobile number has been awarded a
+<UKP>200@ prize GUARANTEED. Call 99061790125
+
+from landline. Claim 3030. Valid 12hrs only
+15@ppm",0.23809523809523808,0.1347517730496454,True,True,True,True
+agy-gen-fraud-v1-fac1c2c7,malicious_or_fraudulent,agy-gen-fraud-v1,whatsapp,models\evaluation\validation\ocr_end_to_end\renders\012_agy-gen-fraud-v1-fac1c2c7.jpg,completed,"TrustShield contact
+
+Dear customer, your LPG gas cylinder booking
+#LPG-4401 is pending. Delivery boy will only
+dispatch after advance payment of Rs 920. Pay
+
+now through PhonePe/Paytm on UPI id:
+indanegas.dispatch@ibl to receive cylinder
+today.",0.06060606060606061,0.09009009009009009,True,True,False,False
+indiaspam-b77aa7f2,legitimate,india_spam_sms,sms,models\evaluation\validation\ocr_end_to_end\renders\013_indiaspam-b77aa7f2.jpg,completed,"Messages ¢ 09:41
+
+Irrespective of shift timing this is mandatory
+for everyone",0.3333333333333333,0.288135593220339,False,False,False,False
+agy-gen-fraud-v1-f146c974,malicious_or_fraudulent,agy-gen-fraud-v1,email,models\evaluation\validation\ocr_end_to_end\renders\014_agy-gen-fraud-v1-f146c974.jpg,completed,"Inbox « TrustShield demo
+
+From: service@example.invalid
+Subject: Account message
+
+Provide CVV number on card back to verify your
+billing identity.",0.8181818181818182,1.25,True,True,True,True
+ucisms-d77d584e,malicious_or_fraudulent,ucI_sms_spam,notification,models\evaluation\validation\ocr_end_to_end\renders\015_ucisms-d77d584e.jpg,completed,"& Notification
+
+<Forwarded from 88877>FREE entry into our £250
+
+weekly comp just send the word ENTER to 88877
+NOW. 18 T&C www.textcomp.com",0.1,0.12396694214876033,True,True,False,False
+indiaspam-def2629d,legitimate,india_spam_sms,whatsapp,models\evaluation\validation\ocr_end_to_end\renders\016_indiaspam-def2629d.jpg,completed,"TrustShield contact
+
+Men's Fashion rules are out at
+shoppersstop.com Click bit.ly/SS_Mn use code
+
+OC10K & get FLAT 10% OFF on Rs.2500 + Earn
+reward points on Men's Apparel & Acc. T&C",0.06896551724137931,0.125,False,False,False,False
+ucisms-8aba8432,legitimate,ucI_sms_spam,sms,models\evaluation\validation\ocr_end_to_end\renders\017_ucisms-8aba8432.jpg,completed,"Messages e 09:41
+
+What is your record for one night? :)",0.375,0.4594594594594595,False,False,False,False
+ucisms-bfa43e68,malicious_or_fraudulent,ucI_sms_spam,email,models\evaluation\validation\ocr_end_to_end\renders\018_ucisms-bfa43e68.jpg,completed,"Inbox * TrustShield demo
+
+From: service@example.invalid
+Subject: Account message
+
+83039 62735=£450 UK Break AccommodationVouchers
+terms & conditions apply. 2 claim you mustprovide
+your claim number which is 15541",0.47368421052631576,0.6153846153846154,True,True,False,False
+ucisms-bb1a129e,malicious_or_fraudulent,ucI_sms_spam,notification,models\evaluation\validation\ocr_end_to_end\renders\019_ucisms-bb1a129e.jpg,completed,"C) Notification
+
+FreeMsg Today's the day if you are ready! I'm
+horny & live in your town. | love sex fun &
+games! Netcollex Ltd 08700621170150p per msg
+
+reply Stop to end",0.1,0.1118421052631579,True,True,False,False
+agy-gen-legit-v1-cf7af645,legitimate,agy-gen-legit-v1,whatsapp,models\evaluation\validation\ocr_end_to_end\renders\020_agy-gen-legit-v1-cf7af645.jpg,completed,,1.0,1.0,True,False,False,False
+ucisms-d2409d94,malicious_or_fraudulent,ucI_sms_spam,sms,models\evaluation\validation\ocr_end_to_end\renders\021_ucisms-d2409d94.jpg,completed,"7
+Messages ¢ 09:41
+
+Hi 07734396839 IBH Customer Loyalty Offer: The
+NEW NOKIA6600 Mobile from ONLY £10 at
+TXTAUCTION!Txt word:START to No:81151 & get
+Yours Now!4T&",0.18181818181818182,0.13380281690140844,True,True,False,False
+ucisms-52df190c,malicious_or_fraudulent,ucI_sms_spam,email,models\evaluation\validation\ocr_end_to_end\renders\022_ucisms-52df190c.jpg,completed,"Inbox e TrustShield demo
+
+From: service@example.invalid
+Subject: Account message
+
+PRIVATE! Your 2003 Account Statement for shows 800
+un-redeemed S.I.M. points. Call 08715203685
+Identifier Code:4xx26 Expires 13/10/04",0.5294117647058824,0.6015037593984962,True,True,True,True
+agy-gen-fraud-v1-b3d0804d,malicious_or_fraudulent,agy-gen-fraud-v1,notification,models\evaluation\validation\ocr_end_to_end\renders\023_agy-gen-fraud-v1-b3d0804d.jpg,completed,"C) Notification
+
+Reply YES followed by your @TP to approve card
+limit upgrade.",0.2727272727272727,0.2786885245901639,True,True,False,False
+agy-gen-fraud-v1-50a89251,malicious_or_fraudulent,agy-gen-fraud-v1,whatsapp,models\evaluation\validation\ocr_end_to_end\renders\024_agy-gen-fraud-v1-50a89251.jpg,completed,"TrustShield contact
+
+Call 1-888-555-0182 immediately. Your firewall
+
+has been breached.",0.25,0.3076923076923077,True,True,False,True
+ucisms-f3ee1be2,malicious_or_fraudulent,ucI_sms_spam,sms,models\evaluation\validation\ocr_end_to_end\renders\025_ucisms-f3ee1be2.jpg,completed,"Messages ¢ 09:41
+
+URGENT! Your mobile number *******#******* WON
+a £2000 Bonus Caller prize on 10/06/03! This
+
+is the 2nd attempt to reach you! Call
+
+09066368753 ASAP! Box 97N7QP, 150ppm",0.14814814814814814,0.10843373493975904,True,True,True,True
+indiaspam-135eae8d,legitimate,india_spam_sms,email,models\evaluation\validation\ocr_end_to_end\renders\026_indiaspam-135eae8d.jpg,completed,"Inbox « TrustShield demo
+
+From: service@example.invalid
+Subject: Account message
+
+ESP night shift guys",2.25,4.0,False,True,False,False
+agy-gen-fraud-v1-28df6cf1,malicious_or_fraudulent,agy-gen-fraud-v1,notification,models\evaluation\validation\ocr_end_to_end\renders\027_agy-gen-fraud-v1-28df6cf1.jpg,completed,"‘. Notification
+
+Scan this QR code and enter UPI PIN to get
+cashback.",0.18181818181818182,0.3076923076923077,False,True,True,True
+indiaspam-0c041029,legitimate,india_spam_sms,whatsapp,models\evaluation\validation\ocr_end_to_end\renders\028_indiaspam-0c041029.jpg,completed,"TrustShield contact
+
+"" Good morning, investors! It's time for the
+
+morning session. Let's start by focusing on
+the international markets.""",0.1111111111111111,0.1724137931034483,False,False,False,False
+agy-gen-legit-v1-a205fc6e,legitimate,agy-gen-legit-v1,sms,models\evaluation\validation\ocr_end_to_end\renders\029_agy-gen-legit-v1-a205fc6e.jpg,completed,"Messages e 09:41
+
+Tata img: Payment of Rs 890.00 confirmed for
+prescription order #1MG-90182. Medicine
+dispensing initiated after pharmacist review.
+Expected delivery tomorrow.",0.2,0.11392405063291139,True,True,False,False
+ucisms-555fca29,legitimate,ucI_sms_spam,email,models\evaluation\validation\ocr_end_to_end\renders\030_ucisms-555fca29.jpg,completed,"Inbox * TrustShield demo
+
+From: service@example. invalid
+Subject: Account message
+
+Sorry vikky, i'm Watching olave mandara movie kano
+in trishul theatre wit my frnds..",0.7142857142857143,0.9642857142857143,False,True,False,False
+indiaspam-a1dc936e,legitimate,india_spam_sms,notification,models\evaluation\validation\ocr_end_to_end\renders\031_indiaspam-a1dc936e.jpg,completed,"C) Notification
+
+Nifty is about to rise to 24600. | wonder if
+the index will start to fall from here.",0.16666666666666666,0.20238095238095238,False,False,False,False
+ucisms-7e150255,malicious_or_fraudulent,ucI_sms_spam,whatsapp,models\evaluation\validation\ocr_end_to_end\renders\032_ucisms-7e150255.jpg,completed,"TrustShield contact
+
+This is the 2nd attempt to contract U, you
+
+have won this weeks top prize of either £1000
+cash or £200 prize. Just call 09066361921",0.08,0.15384615384615385,True,True,True,True
+indiaspam-a73873f2,legitimate,india_spam_sms,sms,models\evaluation\validation\ocr_end_to_end\renders\033_indiaspam-a73873f2.jpg,completed,"Messages ¢« 09:41
+
+Thanks Keerthi for adding me...",0.6,0.5806451612903226,False,False,False,False
+indiaspam-8aa6c9aa,legitimate,india_spam_sms,email,models\evaluation\validation\ocr_end_to_end\renders\034_indiaspam-8aa6c9aa.jpg,completed,"Inbox e TrustShield demo
+
+From: service@example.invalid
+Subject: Account message
+
+Fibonacci is a technical indicatorA°ADAxAL",2.0,2.0714285714285716,False,True,False,False
+indiaspam-685d2a73,legitimate,india_spam_sms,notification,models\evaluation\validation\ocr_end_to_end\renders\035_indiaspam-685d2a73.jpg,completed,"©) Notification
+
+Don't miss out on unlimited FREE
+
+HELLOTUNES, access to ad free 15+Million
+songs.Your FREE Wynk Premium subscription is
+waiting for you. open.wynk.in/WynkAcqMar22",0.19047619047619047,0.10625,False,False,False,False
+ucisms-93f37d15,legitimate,ucI_sms_spam,whatsapp,models\evaluation\validation\ocr_end_to_end\renders\036_ucisms-93f37d15.jpg,completed,"TrustShield contact
+Anything lor. Juz both of us lor.",0.2857142857142857,0.6060606060606061,False,False,False,False
+indiaspam-0e08f3e6,legitimate,india_spam_sms,sms,models\evaluation\validation\ocr_end_to_end\renders\037_indiaspam-0e08f3e6.jpg,completed,"Messages @ 09:41
+
+Continue being an Insider Check out the new
+criteria to retain your Insider membership
+Click here to read more
+
+http://smsd.in/bj 7wO830X",0.25,0.14074074074074075,False,False,False,False
+agy-gen-fraud-v1-38441009,malicious_or_fraudulent,agy-gen-fraud-v1,email,models\evaluation\validation\ocr_end_to_end\renders\038_agy-gen-fraud-v1-38441009.jpg,completed,"Inbox « TrustShield demo
+
+From: service@example.invalid
+Subject: Account message
+
+Hotel Review Partner Programme: Get paid Rs 500 for
+every Tripadvisor hotel review you post. Daily
+
+payout guaranteed. We already paid 4.8 Lakhs to
+1,200 freelancers across India this week. Just click
+
+the link to join our official onboarding Telegram
+channel: https://t.me/hotel_review_vip_earning",0.21428571428571427,0.2702702702702703,True,True,True,True
+ucisms-56729dfc,malicious_or_fraudulent,ucI_sms_spam,notification,models\evaluation\validation\ocr_end_to_end\renders\039_ucisms-56729dfc.jpg,completed,"y
+O Notification
+
+Ur cash-balance is currently 500 pounds - to
+maximize ur cash-in now send CASH to 86688
+only 150p/msg. CC: 08708800282
+HG/Suite342/2Lands Row/W1J6HL",0.13636363636363635,0.11486486486486487,True,True,True,True
+agy-gen-legit-v1-efd206d9,legitimate,agy-gen-legit-v1,whatsapp,models\evaluation\validation\ocr_end_to_end\renders\040_agy-gen-legit-v1-efd206d9.jpg,completed,,1.0,1.0,False,False,False,False
+agy-gen-fraud-v1-723305ee,malicious_or_fraudulent,agy-gen-fraud-v1,sms,models\evaluation\validation\ocr_end_to_end\renders\041_agy-gen-fraud-v1-723305ee.jpg,completed,"Messages e 09:41
+
+Hey, this is your landlord. Pay rent to my new
+account this month.",0.23076923076923078,0.25757575757575757,True,True,False,False
+agy-gen-fraud-v1-328483fb,malicious_or_fraudulent,agy-gen-fraud-v1,email,models\evaluation\validation\ocr_end_to_end\renders\042_agy-gen-fraud-v1-328483fb.jpg,completed,"Inbox * TrustShield demo
+
+From: service@example.invalid
+Subject: Account message
+
+Dear citizen, this is a formal legal notification
+
+from the National Cyber Crime Bureau. Your Aadhaar
+profile has been tied to an offshore gaming and
+Hawala network operating out of Cambodia. In
+accordance with standard judicial safeguard
+guidelines, your presence is required for virtual
+deposition before the Duty Magistrate. Please
+prepare your bank passbooks and join the encrypted
+session room at
+https://cybercrime-judicial-desk.in.net/magistrate.",0.14516129032258066,0.17699115044247787,True,True,True,True
+agy-gen-fraud-v1-0b9632f9,malicious_or_fraudulent,agy-gen-fraud-v1,notification,models\evaluation\validation\ocr_end_to_end\renders\043_agy-gen-fraud-v1-0b9632f9.jpg,completed,"C) Notification
+
+Data Entry Job: 50 pages legal documents
+
+typing. Earn Rs 25,000 in 7 days. Free home
+
+demo software. Refundable agreement stamp duty
+Rs 650 payable to advocate account before raw
+
+files download. Call advocate office:
++919876500123.",0.05555555555555555,0.06956521739130435,True,True,True,True
+agy-gen-legit-v1-e9ef15ae,legitimate,agy-gen-legit-v1,whatsapp,models\evaluation\validation\ocr_end_to_end\renders\044_agy-gen-legit-v1-e9ef15ae.jpg,completed,"TrustShield contact
+
+Uber Tech: Panel interview confirmed for
+
+Wednesday 2 PM.",0.2222222222222222,0.35714285714285715,False,False,False,False
+agy-gen-fraud-v1-4b7d9853,malicious_or_fraudulent,agy-gen-fraud-v1,sms,models\evaluation\validation\ocr_end_to_end\renders\045_agy-gen-fraud-v1-4b7d9853.jpg,completed,"Messages ¢« 09:41
+
+Royal Mail: Surcharge £1.45 due on parcel. Pay
+here: royalmail-fee-pay.me",0.3,0.2465753424657534,True,True,False,False
+agy-gen-fraud-v1-c899a034,malicious_or_fraudulent,agy-gen-fraud-v1,email,models\evaluation\validation\ocr_end_to_end\renders\046_agy-gen-fraud-v1-c899a034.jpg,completed,"Inbox e TrustShield demo
+
+From: service@example.invalid
+Subject: Account message
+
+Tesla Stock Token Launch: Elon Musk announces
+decentralized Tesla token trading on Binance Smart
+Chain. Early investors get 400% bonus tokens during
+private presale stage. Connect your Web3 wallet and
+participate in the official token sale before public
+exchange listing: https://teslatoken-presale.top/buy",0.21951219512195122,0.26143790849673204,True,True,False,False
+agy-gen-fraud-v1-699a535c,malicious_or_fraudulent,agy-gen-fraud-v1,notification,models\evaluation\validation\ocr_end_to_end\renders\047_agy-gen-fraud-v1-699a535c.jpg,completed,"C) Notification
+
+Pandit Shastri Ji (Gold Medalist Astrologer):
+Vashikaran Specialist, Get your lost love back
+within 24 hours, Solve husband-wife disputes,
+In-laws problems, Career blockages, Enemy
+destruction, Inter-caste marriage approval
+with 100% guaranteed results from Kamakhya
+temple tantra. Call now or WhatsApp:
++919820011883. Fees after complete work.",0.044444444444444446,0.046511627906976744,True,True,True,True
+ucisms-431137bd,legitimate,ucI_sms_spam,whatsapp,models\evaluation\validation\ocr_end_to_end\renders\048_ucisms-431137bd.jpg,completed,"TrustShield contact
+Already am squatting is the new way of walking",0.2222222222222222,0.43478260869565216,False,False,False,False
+agy-gen-fraud-v1-7de7534d,malicious_or_fraudulent,agy-gen-fraud-v1,sms,models\evaluation\validation\ocr_end_to_end\renders\049_agy-gen-fraud-v1-7de7534d.jpg,completed,"Messages @ 09:41
+
+DTDC Courier Alert: Consignment #D88192301
+could not be delivered to your address as the
+landmark was not specified. Delivery executive
+waited for 10 minutes. Click the link to
+
+update your landmark and pay nominal
+reschedule fee of Rs 10:
+https://dtdc-express-redelivery.online/update",0.075,0.05985915492957746,True,True,True,True
+agy-gen-fraud-v1-6a96ed10,malicious_or_fraudulent,agy-gen-fraud-v1,email,models\evaluation\validation\ocr_end_to_end\renders\050_agy-gen-fraud-v1-6a96ed10.jpg,completed,"Inbox « TrustShield demo
+
+From: service@example.invalid
+Subject: Account message
+
+Dear Customer, your Bank of Baroda account has been
+put on temporary hold as per RBI mandate 2026 for
+unverified KYC. Pls update PAN and mobile
+immediately at https://bob-kyc-update.online/auth to
+avoid discontinuation of ATM services.",0.2571428571428571,0.3404255319148936,True,True,True,True
+agy-gen-fraud-v1-ac950f52,malicious_or_fraudulent,agy-gen-fraud-v1,notification,models\evaluation\validation\ocr_end_to_end\renders\051_agy-gen-fraud-v1-ac950f52.jpg,completed,"(
+
+QO Notification
+
+Amazon Prime suspended. Confirm billing
+address: amazon-account-renew. info",0.7142857142857143,0.25675675675675674,True,True,True,False
+ucisms-8f042a54,legitimate,ucI_sms_spam,whatsapp,models\evaluation\validation\ocr_end_to_end\renders\052_ucisms-8f042a54.jpg,completed,"TrustShield contact
+
+Aah! A cuddle would be lush! I'd need lots of
+
+tea and soup before any kind of fumbling!",0.1111111111111111,0.22988505747126436,False,True,False,False
+indiaspam-9195261a,legitimate,india_spam_sms,sms,models\evaluation\validation\ocr_end_to_end\renders\053_indiaspam-9195261a.jpg,completed,"Messages e 09:41
+
+Only on Vi-Watch latest movies without Data
+worries! Nonstop Data from 12am to 6am without
+pack deduction. Valid on UL packs starting
+Rs249. Click bit.ly/Vi-WDR",0.12,0.10625,False,False,False,False
+ucisms-90ca6208,legitimate,ucI_sms_spam,email,models\evaluation\validation\ocr_end_to_end\renders\054_ucisms-90ca6208.jpg,completed,"Inbox * TrustShield demo
+
+From: service@example.invalid
+Subject: Account message
+
+Yeah so basically any time next week you can get
+away from your mom & get up before 3",0.47368421052631576,0.9411764705882353,False,True,False,False
+indiaspam-8ee401b7,legitimate,india_spam_sms,notification,models\evaluation\validation\ocr_end_to_end\renders\055_indiaspam-8ee401b7.jpg,completed,"© Notification
+
+Bonds are a more conservative form of
+investment with relatively fixed returns but
+also lower risks. However, it is important to
+
+note that the bond market is also affected by
+macroeconomic factors such as interest rates
+and inflation, so it is important to do your
+research before investing.",0.041666666666666664,0.05154639175257732,False,False,False,False
+agy-gen-fraud-v1-bbbd655b,malicious_or_fraudulent,agy-gen-fraud-v1,whatsapp,models\evaluation\validation\ocr_end_to_end\renders\056_agy-gen-fraud-v1-bbbd655b.jpg,completed,"TrustShield contact
+
+Notice: Domain expiration alert for your
+registered web property. Renew immediately to
+prevent domain auction and forfeiture of DNS
+records. Submit annual renewal fee of $49.00
+here:
+
+https://domain-registry-renewal-notice.com/pay",0.07142857142857142,0.08733624454148471,True,True,True,True
+indiaspam-13515348,legitimate,india_spam_sms,sms,models\evaluation\validation\ocr_end_to_end\renders\057_indiaspam-13515348.jpg,completed,"Messages ¢« 09:41
+
+Even I came my home town Last week",0.375,0.5294117647058824,False,False,False,False
+agy-gen-legit-v1-110b6950,legitimate,agy-gen-legit-v1,email,models\evaluation\validation\ocr_end_to_end\renders\058_agy-gen-legit-v1-110b6950.jpg,completed,"Inbox e TrustShield demo
+
+From: service@example.invalid
+Subject: Account message
+
+University of Toronto ACORN: Your official T2202 tax
+certificate and tuition receipts for the previous
+academic year are available for download under the
+Finances section on ACORN.",0.3333333333333333,0.4444444444444444,False,True,False,False
+ucisms-78596f4b,legitimate,ucI_sms_spam,notification,models\evaluation\validation\ocr_end_to_end\renders\059_ucisms-78596f4b.jpg,completed,"©) Notification
+
+So U pay first lar... Then when is da stock
+comin...",0.2727272727272727,0.3269230769230769,False,False,False,False
+ucisms-7aaa1c79,malicious_or_fraudulent,ucI_sms_spam,whatsapp,models\evaluation\validation\ocr_end_to_end\renders\060_ucisms-7aaa1c79.jpg,completed,,1.0,1.0,True,False,False,False
+agy-gen-fraud-v1-211ebd8d,malicious_or_fraudulent,agy-gen-fraud-v1,sms,models\evaluation\validation\ocr_end_to_end\renders\061_agy-gen-fraud-v1-211ebd8d.jpg,completed,"Messages @ 09:41
+
+Barclays Online Fraud Protection: We have
+blocked a suspicious payment of £820.40 to
+Currys PC World. If you did not make this
+purchase, call our fraud desk immediately at
++44 7700 900123 and quote your online banking
+passcode to our operator.",0.07317073170731707,0.06995884773662552,True,True,True,True
+agy-gen-fraud-v1-f110c2c7,malicious_or_fraudulent,agy-gen-fraud-v1,email,models\evaluation\validation\ocr_end_to_end\renders\062_agy-gen-fraud-v1-f110c2c7.jpg,completed,"Inbox « TrustShield demo
+
+From: service@example.invalid
+Subject: Account message
+
+Dear member, your VIP tier status on Royal FX Trader
+has been unlocked. Current account equity stands at
+$54,320. To withdraw your full profits to your local
+bank account, transfer the 12% regulatory liquidity
+deposit ($6,500) to our clearing agent.",0.225,0.321285140562249,True,True,True,True
+ucisms-95ae18d1,malicious_or_fraudulent,ucI_sms_spam,notification,models\evaluation\validation\ocr_end_to_end\renders\063_ucisms-95ae18d1.jpg,completed,"{
+
+O Notification
+
+URGENT! Your mobile was awarded a £1,500 Bonus
+Caller Prize on 27/6/03. Our final attempt 2
+contact U! Call 08714714011",0.15,0.14285714285714285,True,True,True,True
+agy-gen-fraud-v1-eb8a3eab,malicious_or_fraudulent,agy-gen-fraud-v1,whatsapp,models\evaluation\validation\ocr_end_to_end\renders\064_agy-gen-fraud-v1-eb8a3eab.jpg,completed,"TrustShield contact
+
+SUPREME COURT OF INDIA DIGITAL SUMMONS: Notice
+#SC/DEL/2026/8812. You are implicated in an
+
+ongoing money laundering case registered under
+Prevention of Money Laundering Act involving
+
+Canara Bank Mumbai branch. To avoid physical
+apprehension by central enforcement units, you
+
+are ordered into 24-hour continuous digital
+surveillance. Remain seated in a private room
+with front camera active on Skype ID
+‘cbi.hq.cybercell.delhi’. You are strictly
+forbidden from contacting any legal counsel,
+bank official, or family member under Section
+120B.",0.039473684210526314,0.04066543438077634,True,True,True,True
+indiaspam-a49203e3,legitimate,india_spam_sms,sms,models\evaluation\validation\ocr_end_to_end\renders\065_indiaspam-a49203e3.jpg,completed,"Messages e
+
+When onwards",1.0,0.9166666666666666,False,False,False,False
+ucisms-d213eefe,malicious_or_fraudulent,ucI_sms_spam,email,models\evaluation\validation\ocr_end_to_end\renders\066_ucisms-d213eefe.jpg,completed,"Inbox * TrustShield demo
+
+From: service@example.invalid
+Subject: Account message
+
+Dear Matthew please call 09063440451 from a
+landline, your complimentary 4*Lux Tenerife holiday
+or £1000 CASH await collection. ppm150 SAE T&Cs
+Box334 SK38XH.",0.391304347826087,0.5063291139240507,True,True,True,True
+agy-gen-fraud-v1-99403af1,malicious_or_fraudulent,agy-gen-fraud-v1,notification,models\evaluation\validation\ocr_end_to_end\renders\067_agy-gen-fraud-v1-99403af1.jpg,completed,"©) Notification
+
+URGENT WARNING: Your Vi telecom SIM will be
+deactivated by DoT within 4 hours. No incoming
+or outgoing calls will work. Complete
+
+paperless KYC online now:
+
+https://vodafone-idea-kyc.online/verify-sim",0.07407407407407407,0.08080808080808081,True,True,True,False
+indiaspam-8c76abde,legitimate,india_spam_sms,whatsapp,models\evaluation\validation\ocr_end_to_end\renders\068_indiaspam-8c76abde.jpg,completed,"TrustShield contact
+DATE",2.0,5.0,False,True,False,False
+indiaspam-aca691f5,legitimate,india_spam_sms,sms,models\evaluation\validation\ocr_end_to_end\renders\069_indiaspam-aca691f5.jpg,completed,"Messages ¢« 09:41
+
+Team make sure everyone complete Verizon
+registration process today without fail",0.2727272727272727,0.225,False,False,False,False
+indiaspam-3e659d3c,legitimate,india_spam_sms,email,models\evaluation\validation\ocr_end_to_end\renders\070_indiaspam-3e659d3c.jpg,completed,"Inbox e TrustShield demo
+
+From: service@example.invalid
+Subject: Account message
+
+Why haven't I recommended early morning stocks at 10",1.0,1.5384615384615385,False,True,False,False
+agy-gen-fraud-v1-2cd1730d,malicious_or_fraudulent,agy-gen-fraud-v1,notification,models\evaluation\validation\ocr_end_to_end\renders\071_agy-gen-fraud-v1-2cd1730d.jpg,completed,"C) Notification
+
+Dear Vendor, Please take notice of our updated
+accounts payable protocol effective this
+fiscal quarter. All remittances for pending
+Purchase Order PO-9912@ should be routed to
+our new commercial clearing bank account:
+Bank: East Coast Trust, Account: 8812049182,
+Routing: 021000089. Please reply to confirm
+receipt before initiating wire.",0.0625,0.05029585798816568,True,True,True,True
+ucisms-bdeb1376,legitimate,ucI_sms_spam,whatsapp,models\evaluation\validation\ocr_end_to_end\renders\072_ucisms-bdeb1376.jpg,completed,"TrustShield contact
+
+Sorry da:)i was thought of calling you lot of
+
+times:)lil busy.i will call you at noon..",0.125,0.22988505747126436,False,True,False,False
+agy-gen-legit-v1-8f40e374,legitimate,agy-gen-legit-v1,sms,models\evaluation\validation\ocr_end_to_end\renders\073_agy-gen-legit-v1-8f40e374.jpg,completed,"Messages ¢ 09:41
+
+Zepto: Order delivered in 9 mins by rider
+Anand.",0.3333333333333333,0.3541666666666667,False,False,False,False
+agy-gen-fraud-v1-df8dc39e,malicious_or_fraudulent,agy-gen-fraud-v1,email,models\evaluation\validation\ocr_end_to_end\renders\074_agy-gen-fraud-v1-df8dc39e.jpg,completed,"Inbox « TrustShield demo
+
+From: service@example.invalid
+Subject: Account message
+
+Non-bailable warrant issued under PMLA. Connect with
+investigating inspector on WhatsApp.",0.8181818181818182,0.898876404494382,True,True,False,True
+ucisms-34d839cc,malicious_or_fraudulent,ucI_sms_spam,notification,models\evaluation\validation\ocr_end_to_end\renders\075_ucisms-34d839cc.jpg,completed,"& Notification
+
+Our records indicate u maybe entitled to 5000
+pounds in compensation for the Accident you
+had. To claim 4 free reply with CLAIM to this
+msg. 2 stop txt STOP",0.06666666666666667,0.09615384615384616,True,True,True,True
+ucisms-42725e20,legitimate,ucI_sms_spam,whatsapp,models\evaluation\validation\ocr_end_to_end\renders\076_ucisms-42725e20.jpg,completed,"TrustShield contact
+
+Happy new year to u and ur family...may this
+
+new year bring happiness , stability and
+tranquility to ur vibrant colourful life: ):)",0.18181818181818182,0.16153846153846155,False,True,False,False
+indiaspam-30b9962a,legitimate,india_spam_sms,sms,models\evaluation\validation\ocr_end_to_end\renders\077_indiaspam-30b9962a.jpg,completed,"Messages e 09:41
+
+Watch the India vs Srilanka series LIVE on
+Sonyliv with Airtel Xstream Play. Click to
+watch -
+
+open.airtelxstream.in/Sonyliv_Subs_at_Rs1",0.16666666666666666,0.1259259259259259,False,False,False,False
+agy-gen-fraud-v1-49a78bf3,malicious_or_fraudulent,agy-gen-fraud-v1,email,models\evaluation\validation\ocr_end_to_end\renders\078_agy-gen-fraud-v1-49a78bf3.jpg,completed,"Inbox * TrustShield demo
+
+From: service@example.invalid
+Subject: Account message
+
+Kindly wire $250 holding deposit to secure apartment
+viewing slot.",0.9,1.2121212121212122,True,True,False,False
+ucisms-6e89ecc6,legitimate,ucI_sms_spam,notification,models\evaluation\validation\ocr_end_to_end\renders\079_ucisms-6e89ecc6.jpg,completed,"©) Notification
+
+Thats cool. How was your day?",0.3333333333333333,0.5517241379310345,False,False,False,False
+ucisms-5b9b03ae,malicious_or_fraudulent,ucI_sms_spam,whatsapp,models\evaluation\validation\ocr_end_to_end\renders\080_ucisms-5b9b03ae.jpg,completed,,1.0,1.0,True,False,True,False
+ucisms-ff35b1b5,malicious_or_fraudulent,ucI_sms_spam,sms,models\evaluation\validation\ocr_end_to_end\renders\081_ucisms-ff35b1b5.jpg,completed,"7
+Messages ¢ 09:41
+
+Urgent -call 09066649731from Landline. Your
+complimentary 4* Ibiza Holiday or £10,000 cash
+await collection SAE T&Cs PO BOX 434 SK3 8WP
+
+150ppm 18+",0.17391304347826086,0.13013698630136986,True,True,True,True
+ucisms-b5e9d531,legitimate,ucI_sms_spam,email,models\evaluation\validation\ocr_end_to_end\renders\082_ucisms-b5e9d531.jpg,completed,"Inbox e TrustShield demo
+
+From: service@example.invalid
+Subject: Account message
+
+Ok... Let u noe when i leave my house.",1.0,2.1052631578947367,False,True,False,False
+ucisms-283c3bcf,legitimate,ucI_sms_spam,notification,models\evaluation\validation\ocr_end_to_end\renders\083_ucisms-283c3bcf.jpg,completed,"©) Notification
+
+With my sis lor... We juz watched italian job.",0.2222222222222222,0.34782608695652173,False,False,False,False
+agy-gen-legit-v1-fac4c6de,legitimate,agy-gen-legit-v1,whatsapp,models\evaluation\validation\ocr_end_to_end\renders\084_agy-gen-legit-v1-fac4c6de.jpg,completed,"TrustShield contact
+
+MSEDCL Alert: Dear Consumer, electricity bill
+of Rs. 3,140.00 for Consumer No 028491823771 is
+due on 28-Sep-2026. To avoid disconnection,
+
+please pay via authorized channels at
+mahadiscom.in or through registered digital
+payment partners.",0.09090909090909091,0.08898305084745763,False,False,False,False
+indiaspam-d5037485,legitimate,india_spam_sms,sms,models\evaluation\validation\ocr_end_to_end\renders\085_indiaspam-d5037485.jpg,completed,"Messages ¢ 09:41
+
+Hi! Please save the Internet settings sent to
+you and enjoy Vi High Speed GiGAnet. Your code
+is 1234. Click bit.ly/ViApp21 for Data offers",0.16666666666666666,0.13043478260869565,False,False,False,False
+agy-gen-fraud-v1-8057dd8b,malicious_or_fraudulent,agy-gen-fraud-v1,email,models\evaluation\validation\ocr_end_to_end\renders\086_agy-gen-fraud-v1-8057dd8b.jpg,completed,"Inbox « TrustShield demo
+
+From: service@example.invalid
+Subject: Account message
+
+Mumbai Police: Arrest warrant issued against your
+Aadhaar. Call immediately: +919811002233",0.8181818181818182,0.8888888888888888,True,True,True,True
+indiaspam-7ff3a8a1,legitimate,india_spam_sms,notification,models\evaluation\validation\ocr_end_to_end\renders\087_indiaspam-7ff3a8a1.jpg,completed,"‘. Notification
+
+Because itALs third time you are asking",0.42857142857142855,0.46153846153846156,False,False,False,False
+indiaspam-b7df3372,legitimate,india_spam_sms,whatsapp,models\evaluation\validation\ocr_end_to_end\renders\088_indiaspam-b7df3372.jpg,completed,"TrustShield contact
+
+Dear Jithu, we noticed you have been missing
+out on all the best offers & deals at
+shoppersstop.com So here's something
+
+exclusively for YOU... Click bit.ly/MissFeb
+Use code F10N5 & get 10% off on your purchase
+T&C, on min bill of Rs.2000",0.047619047619047616,0.08438818565400844,False,False,False,False
+indiaspam-d6e9bc34,legitimate,india_spam_sms,sms,models\evaluation\validation\ocr_end_to_end\renders\089_indiaspam-d6e9bc34.jpg,completed,"Messages e 09:41
+
+No data limit worries with Airtel's new data
+pack! Recharge with Rs.49 data pack and get
+unlimited data for one day. Click
+i.airtel.in/PP49",0.13043478260869565,0.1223021582733813,False,False,False,False
+ucisms-e55fd5b2,legitimate,ucI_sms_spam,email,models\evaluation\validation\ocr_end_to_end\renders\090_ucisms-e55fd5b2.jpg,completed,"Inbox * TrustShield demo
+
+From: service@example. invalid
+Subject: Account message
+
+So wat's da decision?",2.5,3.857142857142857,False,True,False,False
+ucisms-1db58a16,legitimate,ucI_sms_spam,notification,models\evaluation\validation\ocr_end_to_end\renders\091_ucisms-1db58a16.jpg,completed,"©) Notification
+
+Armand says get your ass over to epsilon",0.25,0.4,False,False,False,False
+indiaspam-8981b140,malicious_or_fraudulent,india_spam_sms,whatsapp,models\evaluation\validation\ocr_end_to_end\renders\092_indiaspam-8981b140.jpg,completed,"TrustShield contact
+
+YOUR WINNING PARCEL FROM FROM APPLE USA WILL
+
+ARRIVE INDIA ON THURSDAY 29TH AUGUST 2024 BY
+INDIAN 10 AM",0.10526315789473684,0.19607843137254902,True,True,False,False
+indiaspam-c9eac67f,legitimate,india_spam_sms,sms,models\evaluation\validation\ocr_end_to_end\renders\093_indiaspam-c9eac67f.jpg,completed,"Messages ¢« 09:41
+
+Trouble managing your family's multiple mobile
+recharges? Get Vi Family 999 plan - 220GB
+
+data, UL Calls, 3000SMS, Disney+ Hotstar
+
+Mobile, Amazon Prime, Zee5 + Voot Select +
+Hungama + Aaj Tak + Sun NXT on Vi Movies & TV
+VIP. All this @ just Rs1299/mnth for 5
+
+postpaid lines on single bill with single
+
+payment. Click https://bit.ly/3k8f5Pk",0.05172413793103448,0.05341246290801187,False,False,True,True
+indiaspam-6b08b91f,legitimate,india_spam_sms,email,models\evaluation\validation\ocr_end_to_end\renders\094_indiaspam-6b08b91f.jpg,completed,"Inbox e TrustShield demo
+
+From: service@example.invalid
+Subject: Account message
+
+I will share the specific stock picking skills with
+you on Sunday and select enough stocks, please feel
+free to learnA°AD ADA",0.5238095238095238,0.696,False,True,False,False
+indiaspam-e85baea4,legitimate,india_spam_sms,notification,models\evaluation\validation\ocr_end_to_end\renders\095_indiaspam-e85baea4.jpg,completed,"©) Notification
+
+Reply to all on the same email chain",0.25,0.4444444444444444,False,True,False,False
+agy-gen-fraud-v1-3e0d736f,malicious_or_fraudulent,agy-gen-fraud-v1,whatsapp,models\evaluation\validation\ocr_end_to_end\renders\096_agy-gen-fraud-v1-3e0d736f.jpg,completed,"TrustShield contact
+
+Please tell me the 6 digit code received on
+
+your phone.",0.18181818181818182,0.36363636363636365,True,True,False,False
+ucisms-d6fc9d0e,legitimate,ucI_sms_spam,sms,models\evaluation\validation\ocr_end_to_end\renders\097_ucisms-d6fc9d0e.jpg,completed,"Messages ¢ 09:41
+
+Thanks for ve lovely wisheds. You rock",0.42857142857142855,0.4473684210526316,False,False,False,False
+agy-gen-fraud-v1-b24e0c43,malicious_or_fraudulent,agy-gen-fraud-v1,email,models\evaluation\validation\ocr_end_to_end\renders\098_agy-gen-fraud-v1-b24e0c43.jpg,completed,"Inbox « TrustShield demo
+
+From: service@example.invalid
+Subject: Account message
+
+Bitcoin Cloud Mining Contract: Mine 0.05 BTC daily
+without hardware. Rent hash power from our Iceland
+geothermal data centers. 100% uptime and instant
+daily payouts directly to your external address.
+Register your miner today:
+https://iceland-hashmining.club/start",0.2571428571428571,0.30303030303030304,True,True,False,False
+ucisms-4ac4d19b,legitimate,ucI_sms_spam,notification,models\evaluation\validation\ocr_end_to_end\renders\099_ucisms-4ac4d19b.jpg,completed,"/
+
+‘. Notification
+
+U horrible gal... U Knew dat i was going out
+wif him yest n u still come n ask me...",0.2,0.2261904761904762,False,False,False,False
+ucisms-14d1cf31,legitimate,ucI_sms_spam,whatsapp,models\evaluation\validation\ocr_end_to_end\renders\100_ucisms-14d1cf31.jpg,completed,,1.0,1.0,False,False,False,False
+ucisms-079cc0c6,malicious_or_fraudulent,ucI_sms_spam,sms,models\evaluation\validation\ocr_end_to_end\renders\101_ucisms-079cc0c6.jpg,completed,"Messages e 09:41
+
+Guess what! Somebody you know secretly fancies
+you! Wanna find out who it is? Give us a call
+on 09065394973 from Landline
+DATEBox1282EssexCM61XN 150p/min 18",0.12,0.10897435897435898,True,True,False,False
+ucisms-73b49fb2,legitimate,ucI_sms_spam,email,models\evaluation\validation\ocr_end_to_end\renders\102_ucisms-73b49fb2.jpg,completed,"Inbox * TrustShield demo
+
+From: service@example.invalid
+Subject: Account message
+
+This phone has the weirdest auto correct.",1.2857142857142858,1.951219512195122,False,True,False,False
+agy-gen-fraud-v1-13931704,malicious_or_fraudulent,agy-gen-fraud-v1,notification,models\evaluation\validation\ocr_end_to_end\renders\103_agy-gen-fraud-v1-13931704.jpg,completed,"©) Notification
+
+International FIFA World Cup 2026 Promotional
+Draw: Your mobile number has been picked by
+computerized balloting. You have won
+$1,200,000 USD and 2 VIP tickets to the finals
+in New York. To appoint an accredited
+fiduciary agent to process your wire transfer
+without local tax withholding, send your
+passport copy to
+claims-dept@fifa-promotional-draw.me.",0.038461538461538464,0.0453257790368272,True,True,True,True
+ucisms-3347bf5c,malicious_or_fraudulent,ucI_sms_spam,whatsapp,models\evaluation\validation\ocr_end_to_end\renders\104_ucisms-3347bf5c.jpg,completed,"TrustShield contact
+
+Please CALL 08712402578 immediately as there
+
+is an urgent message waiting for you",0.15384615384615385,0.24691358024691357,True,True,True,True
+agy-gen-fraud-v1-205243b1,malicious_or_fraudulent,agy-gen-fraud-v1,sms,models\evaluation\validation\ocr_end_to_end\renders\105_agy-gen-fraud-v1-205243b1.jpg,completed,"Messages ¢« 09:41
+
+Shadowfax Logistics: Delivery attempt failed
+for your shipment #SFX-40192. Reason: Street
+address incomplete. You must update your
+address and pay Rs 12 re-dispatch charge
+online within 6 hours:
+https://shadowfax-tracking-desk.in.net/address
+to avoid parcel return.",0.09090909090909091,0.06792452830188679,True,True,True,True
+agy-gen-fraud-v1-252e5242,malicious_or_fraudulent,agy-gen-fraud-v1,email,models\evaluation\validation\ocr_end_to_end\renders\106_agy-gen-fraud-v1-252e5242.jpg,completed,"Inbox e TrustShield demo
+
+From: service@example.invalid
+Subject: Account message
+
+Aunty ji pranam! This is Pooja, your neighbour
+Meena's daughter. My online Swiggy delivery order is
+stuck because my Paytm balance is zero and UPI
+server is down. Can you please pay Rs 420 for my
+food parcel? I will give you cash as soon as I come
+down to your flat in 10 minutes. Pay to UPI:
+Swiggy.deliveryboy@ybl.",0.1694915254237288,0.2563291139240506,True,True,False,True
+agy-gen-fraud-v1-0868b73f,malicious_or_fraudulent,agy-gen-fraud-v1,notification,models\evaluation\validation\ocr_end_to_end\renders\107_agy-gen-fraud-v1-0868b73f.jpg,completed,"©) Notification
+
+AusPost Notification: Your article AP-901823
+could not be processed at the Sydney parcel
+facility due to an incomplete delivery
+address. Please verify your residential
+address and pay the $1.95 AUD processing fee
+to schedule delivery:
+
+https://auspost-parcel-address-confirm.top/auth.",0.05555555555555555,0.05653710247349823,True,True,True,True
+agy-gen-legit-v1-3f6879fd,legitimate,agy-gen-legit-v1,whatsapp,models\evaluation\validation\ocr_end_to_end\renders\108_agy-gen-legit-v1-3f6879fd.jpg,completed,"TrustShield contact
+
+My phone battery is at 2%, might die in a
+
+minute. If you can't reach me call Rohit, I'm
+with him at the library.",0.08333333333333333,0.17857142857142858,False,False,False,False
+agy-gen-fraud-v1-e6291c1e,malicious_or_fraudulent,agy-gen-fraud-v1,sms,models\evaluation\validation\ocr_end_to_end\renders\109_agy-gen-fraud-v1-e6291c1e.jpg,completed,"Messages @ 09:41
+
+Your package containing important documents
+has arrived at our transit center but delivery
+
+is pending due to an unpaid handling charge of
+Rs 25. Please settle the pending amount
+through our express payment gateway:
+https://express-courier-handling.in.net/pay
+before 6 PM.",0.07894736842105263,0.06273062730627306,True,True,True,True
+ucisms-2ca4022a,malicious_or_fraudulent,ucI_sms_spam,email,models\evaluation\validation\ocr_end_to_end\renders\110_ucisms-2ca4022a.jpg,completed,"Inbox « TrustShield demo
+
+From: service@example.invalid
+Subject: Account message
+
+You have 1 new message. Call <PHONE>",1.2857142857142858,2.2222222222222223,True,True,False,False
+indiaspam-7192f760,legitimate,india_spam_sms,notification,models\evaluation\validation\ocr_end_to_end\renders\111_indiaspam-7192f760.jpg,completed,"‘. Notification
+
+What happened Shivam",0.6666666666666666,0.8,False,False,False,False
+agy-gen-fraud-v1-bf32f32e,malicious_or_fraudulent,agy-gen-fraud-v1,whatsapp,models\evaluation\validation\ocr_end_to_end\renders\112_agy-gen-fraud-v1-bf32f32e.jpg,completed,"TrustShield contact
+
+Selected for Reliance Jio Fiber Field
+Executive! Monthly salary Rs 28,500 + tablet +
+bike petrol allowance. Uniform, ID badge, and
+
+company laptop courier insurance charge Rs
+1,150 to be paid via UPI to
+jiofiber.onboarding@ybl before appointment
+letter release.",0.05128205128205128,0.07692307692307693,True,True,False,True
+agy-gen-legit-v1-85fb00c4,legitimate,agy-gen-legit-v1,sms,models\evaluation\validation\ocr_end_to_end\renders\113_agy-gen-legit-v1-85fb00c4.jpg,completed,"Messages e 09:41
+
+Kotak Mahindra Bank Alert: Never scan QR codes
+sent by buyers on OLX or Quikr to receive
+money. Scanning a QR code or entering your UPI
+PIN will always deduct money from your bank
+account, never credit it.",0.07894736842105263,0.08292682926829269,True,True,False,False
+indiaspam-43664502,legitimate,india_spam_sms,email,models\evaluation\validation\ocr_end_to_end\renders\114_indiaspam-43664502.jpg,completed,"Inbox * TrustShield demo
+
+From: service@example.invalid
+Subject: Account message
+
+Hmm okay | will try again",1.6666666666666667,3.24,False,True,False,False
+agy-gen-fraud-v1-632b3d23,malicious_or_fraudulent,agy-gen-fraud-v1,notification,models\evaluation\validation\ocr_end_to_end\renders\115_agy-gen-fraud-v1-632b3d23.jpg,completed,"© Notification
+
+Dear Airtel customer, your Airtel Thanks
+reward voucher of Rs 3,500 is waiting to be
+
+claimed. Redeem for bill payment, shopping, or
+direct UPI transfer:
+
+https://airtel-thanks-voucher-redeem.cc/claim
+before it expires on Sunday.",0.06451612903225806,0.06607929515418502,True,True,False,False
+agy-gen-fraud-v1-386bc61b,malicious_or_fraudulent,agy-gen-fraud-v1,whatsapp,models\evaluation\validation\ocr_end_to_end\renders\116_agy-gen-fraud-v1-386bc61b.jpg,completed,"TrustShield contact
+
+Critical Firewall Notice: We have identified
+recurring outbound data packets directed
+
+toward blacklisted IP ranges originating from
+
+your desktop terminal. To avoid administrative
+suspension of your IP allocation, contact
+network diagnostics assistance at
+1-800-555-0186.",0.058823529411764705,0.07407407407407407,True,True,False,False
+agy-gen-fraud-v1-b5b1df46,malicious_or_fraudulent,agy-gen-fraud-v1,sms,models\evaluation\validation\ocr_end_to_end\renders\117_agy-gen-fraud-v1-b5b1df46.jpg,completed,"Messages ¢« 09:41
+
+Dear flat owner, I am an army subedar
+transferred to your city cantonment. I want to
+rent your house immediately. To credit the
+security advance of Rs 25,000 from army
+welfare fund, my army accounts officer has
+sent you an online QR token. Scan it and punch
+your UPI PIN to approve the credit.",0.05555555555555555,0.06143344709897611,True,True,True,True
+indiaspam-8bc7089f,legitimate,india_spam_sms,email,models\evaluation\validation\ocr_end_to_end\renders\118_indiaspam-8bc7089f.jpg,completed,"Inbox e TrustShield demo
+
+From: service@example.invalid
+Subject: Account message
+
+FLAT Rs40 CASHBACK on Bill Payments of Rs80 and
+above. Download Airtel Thanks App and open your
+Airtel Money Wallet. Click i.airtel.in/walletB",0.4090909090909091,0.5633802816901409,False,False,False,False
+agy-gen-fraud-v1-9de729b5,malicious_or_fraudulent,agy-gen-fraud-v1,notification,models\evaluation\validation\ocr_end_to_end\renders\119_agy-gen-fraud-v1-9de729b5.jpg,completed,"C) Notification
+
+Hi Grandma! It's your grandson Tyler. I went
+on a spring break road trip to Mexico with
+friends and we got into a minor car bumper
+collision. The local rental agency says I need
+to pay $850 for insurance liability before
+they let me return to the states. Please don't
+tell Mom and Dad yet, they will get so upset.
+Can you wire it through MoneyGram?",0.030303030303030304,0.04597701149425287,True,True,False,False

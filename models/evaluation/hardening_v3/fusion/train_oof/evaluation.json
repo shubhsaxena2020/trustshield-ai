@@ -1,0 +1,54 @@
+{
+  "split": "train_oof",
+  "candidate_count": 3,
+  "selected_candidate": "ml_aware_weighted",
+  "selection_rule": "highest train OOF caution F1 subject to specificity >= 0.85; ties prefer simpler strategy",
+  "input_files": [
+    "C:\\Users\\shubh\\trustshield-ai\\models\\evaluation\\hardening_v3\\fusion\\train_oof_predictions.csv",
+    "C:\\Users\\shubh\\trustshield-ai\\datasets\\processed\\trustshield-text-v3\\train.jsonl"
+  ],
+  "tuning_file": "C:\\Users\\shubh\\trustshield-ai\\models\\evaluation\\hardening_v3\\fusion\\tuning_v3.json",
+  "bootstrap": {
+    "selected_candidate": "ml_aware_weighted",
+    "legacy": {
+      "recall": [
+        0.47799376168560337,
+        0.5485041644327989
+      ],
+      "specificity": [
+        0.9711681547064408,
+        0.9830932999373826
+      ],
+      "groups": 3936,
+      "samples": 2000,
+      "seed": 42
+    },
+    "selected": {
+      "recall": [
+        0.960713769611891,
+        0.982653403093304
+      ],
+      "specificity": [
+        0.8865349631275118,
+        0.9082086649291362
+      ],
+      "groups": 3936,
+      "samples": 2000,
+      "seed": 42
+    },
+    "point_difference": {
+      "recall": 0.4590361445783133,
+      "specificity": -0.07971014492753625
+    },
+    "difference_exceeds_noise": {
+      "recall": true,
+      "specificity": true
+    }
+  },
+  "learned_meta": {
+    "status": "skipped",
+    "reason": "No new trained production artifact is permitted in Phase 4; a runtime-loaded meta model would violate the frozen-artifact boundary."
+  },
+  "model_name": "trustshield_text_v3",
+  "moderate_ml_cut": 0.16
+}

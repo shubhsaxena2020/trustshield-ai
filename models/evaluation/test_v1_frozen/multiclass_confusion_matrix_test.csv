@@ -1,0 +1,12 @@
+actual,predicted_credential_theft,predicted_delivery_scam,predicted_digital_arrest,predicted_fake_job,predicted_impersonation,predicted_investment_scam,predicted_legitimate,predicted_other_fraud,predicted_payment_fraud,predicted_phishing,predicted_prize_lottery_scam
+credential_theft,14,0,0,0,0,0,3,1,2,0,0
+delivery_scam,0,7,0,0,0,0,0,2,5,0,6
+digital_arrest,0,0,14,0,0,0,0,1,3,0,2
+fake_job,0,0,0,9,0,0,2,3,2,0,4
+impersonation,0,0,0,0,11,0,2,6,4,0,4
+investment_scam,0,0,0,1,0,5,5,5,1,0,5
+legitimate,7,4,2,1,1,0,245,18,19,6,25
+other_fraud,1,0,0,0,1,0,2,17,4,0,12
+payment_fraud,0,0,0,0,2,0,2,0,20,0,0
+phishing,0,1,0,0,0,0,2,2,0,14,1
+prize_lottery_scam,1,0,0,0,0,0,2,0,1,0,83

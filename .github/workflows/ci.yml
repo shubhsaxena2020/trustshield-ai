@@ -1,0 +1,109 @@
+name: CI and deployment gate
+
+# Every push and pull request runs the full gate. Render (API) and Vercel (frontend) must be configured to deploy only when these
+# checks pass (Render: Auto-Deploy "After CI Checks Pass"; Vercel/GitHub: production branch protected, required status "gate").
+on:
+  push:
+    branches: [main, production]
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  PYTHON_VERSION: "3.13"
+  NODE_VERSION: "24"
+  # The promoted artifacts live in a PRIVATE release of this repository. CI reads them with the job's own read-only GITHUB_TOKEN
+  # (never printed, dropped on the redirect to the signed download host) and verifies SHA-256 against
+  # models/release/v3_release_manifest.json before use; nothing is trained in CI.
+  MODEL_RELEASE: ${{ github.repository }}@model-v3
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  backend:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "${{ env.PYTHON_VERSION }}", cache: pip }
+      - name: System packages (Tesseract)
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends tesseract-ocr tesseract-ocr-eng
+      - name: Install Python dependencies (pinned)
+        run: pip install -r requirements-lock.txt
+      - name: Install Chromium for sandbox tests (sandbox stays disabled in deployments)
+        run: python -m playwright install --with-deps chromium
+      - name: Fetch and verify promoted model artifacts
+        run: |
+          python scripts/fetch_model_artifact.py --github-release "$MODEL_RELEASE"
+          python scripts/fetch_model_artifact.py --model trustshield_text_v1 --github-release "$MODEL_RELEASE"
+      - name: pytest
+        run: python -m pytest tests -q
+      - name: Production preflight (deployment profile with the intended configuration shape)
+        env:
+          TRUSTSHIELD_ENV: production
+          CORS_ALLOWED_ORIGINS: https://trustshield.example.app
+          PUBLIC_API_URL: https://trustshield-api.example.com
+          NEXT_PUBLIC_API_URL: https://trustshield-api.example.com
+          TRUSTSHIELD_RESULT_STORE: sandbox_only
+          TESSERACT_CMD: /usr/bin/tesseract
+        run: python scripts/preflight.py --profile production --ports
+
+  frontend:
+    runs-on: ubuntu-24.04
+    defaults: { run: { working-directory: apps/web } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "${{ env.NODE_VERSION }}", cache: npm, cache-dependency-path: apps/web/package-lock.json }
+      - run: npm ci
+      - name: TypeScript
+        run: npx tsc --noEmit
+      - name: Lint
+        run: npm run lint
+      - name: Production build
+        env:
+          NEXT_PUBLIC_API_URL: https://trustshield-api.example.com
+        run: npm run build
+
+  security:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "${{ env.PYTHON_VERSION }}" }
+      - name: Secret scan (tracked files)
+        run: python scripts/scan_secrets.py
+      - name: Python dependency audit
+        run: pip install pip-audit && pip-audit -r requirements-api.lock.txt
+      - uses: actions/setup-node@v4
+        with: { node-version: "${{ env.NODE_VERSION }}" }
+      - name: npm audit (production dependencies, high and above)
+        run: cd apps/web && npm audit --omit=dev --audit-level=high
+
+  container:
+    runs-on: ubuntu-24.04
+    needs: [backend]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "${{ env.PYTHON_VERSION }}" }
+      - name: Build the API image (fails unless the model artifact matches the release manifest)
+        run: |
+          python scripts/fetch_model_artifact.py --github-release "$MODEL_RELEASE" --dest release-artifacts
+          docker build -f docker/api.Dockerfile -t trustshield-api:ci .
+      - name: Run the container with production hardening and smoke-test it
+        run: |
+          docker run -d --name api -p 8000:8000 --memory 2g --cpus 1 --read-only --tmpfs /tmp:rw,size=128m \
+            --cap-drop ALL --security-opt no-new-privileges \
+            -e CORS_ALLOWED_ORIGINS=https://trustshield.example.app trustshield-api:ci
+          for i in $(seq 1 40); do curl -sf http://localhost:8000/readyz && break; sleep 2; done
+          python scripts/smoke_remote.py --base http://localhost:8000 --origin https://trustshield.example.app
+      - if: failure()
+        run: docker logs api | tail -50
+
+  gate:
+    # The single required status for branch protection / deploy hooks.
+    runs-on: ubuntu-24.04
+    needs: [backend, frontend, security, container]
+    steps:
+      - run: echo "All deployment gates passed"

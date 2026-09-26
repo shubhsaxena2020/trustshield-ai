@@ -1,0 +1,341 @@
+{
+  "split": "train_oof",
+  "seed": 42,
+  "folds": 5,
+  "group_field": "duplicate_group",
+  "architecture": {
+    "C": 0.5,
+    "F1": 0.8652482269503546,
+    "FN": 2,
+    "FNR": 0.016129032258064502,
+    "FP": 36,
+    "FPR": 0.07185628742514971,
+    "TN": 465,
+    "TP": 122,
+    "accuracy": 0.9392,
+    "architecture": "two_stage",
+    "brier": 0.02322679809100144,
+    "calibration": "isotonic",
+    "calibration_cv": 5,
+    "category_f1_scopes": {
+      "merged": {
+        "all_labelled_incl_legitimate": {
+          "legitimate": 501,
+          "macro_f1": 0.7934454881758973,
+          "malicious": 124,
+          "per_class": {
+            "credential_theft": {
+              "f1": 0.7272727272727272,
+              "precision": 0.8,
+              "recall": 0.6666666666666666,
+              "support": 6
+            },
+            "delivery_scam": {
+              "f1": 0.7272727272727272,
+              "precision": 0.6666666666666666,
+              "recall": 0.8,
+              "support": 10
+            },
+            "digital_arrest": {
+              "f1": 0.9333333333333333,
+              "precision": 0.875,
+              "recall": 1.0,
+              "support": 7
+            },
+            "fake_job": {
+              "f1": 0.9473684210526316,
+              "precision": 0.9,
+              "recall": 1.0,
+              "support": 9
+            },
+            "impersonation": {
+              "f1": 0.6,
+              "precision": 0.6,
+              "recall": 0.6,
+              "support": 10
+            },
+            "investment_scam": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 6
+            },
+            "legitimate": {
+              "f1": 0.9607438016528926,
+              "precision": 0.9957173447537473,
+              "recall": 0.9281437125748503,
+              "support": 501
+            },
+            "other_fraud": {
+              "f1": 0.6557377049180327,
+              "precision": 0.6060606060606061,
+              "recall": 0.7142857142857143,
+              "support": 28
+            },
+            "payment_fraud": {
+              "f1": 0.6956521739130435,
+              "precision": 0.6153846153846154,
+              "recall": 0.8,
+              "support": 10
+            },
+            "phishing": {
+              "f1": 0.7272727272727274,
+              "precision": 0.6153846153846154,
+              "recall": 0.8888888888888888,
+              "support": 9
+            },
+            "prize_lottery_scam": {
+              "f1": 0.7532467532467533,
+              "precision": 0.6041666666666666,
+              "recall": 1.0,
+              "support": 29
+            }
+          },
+          "support": 625,
+          "weighted_f1": 0.9179767124059446
+        },
+        "fraud_only": {
+          "legitimate": 0,
+          "macro_f1": 0.8605346700083543,
+          "malicious": 124,
+          "per_class": {
+            "credential_theft": {
+              "f1": 0.8,
+              "precision": 1.0,
+              "recall": 0.6666666666666666,
+              "support": 6
+            },
+            "delivery_scam": {
+              "f1": 0.888888888888889,
+              "precision": 1.0,
+              "recall": 0.8,
+              "support": 10
+            },
+            "digital_arrest": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 7
+            },
+            "fake_job": {
+              "f1": 0.9473684210526316,
+              "precision": 0.9,
+              "recall": 1.0,
+              "support": 9
+            },
+            "impersonation": {
+              "f1": 0.6666666666666665,
+              "precision": 0.75,
+              "recall": 0.6,
+              "support": 10
+            },
+            "investment_scam": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 6
+            },
+            "other_fraud": {
+              "f1": 0.7777777777777779,
+              "precision": 0.8076923076923077,
+              "recall": 0.75,
+              "support": 28
+            },
+            "payment_fraud": {
+              "f1": 0.761904761904762,
+              "precision": 0.7272727272727273,
+              "recall": 0.8,
+              "support": 10
+            },
+            "phishing": {
+              "f1": 0.8421052631578948,
+              "precision": 0.8,
+              "recall": 0.8888888888888888,
+              "support": 9
+            },
+            "prize_lottery_scam": {
+              "f1": 0.9206349206349206,
+              "precision": 0.8529411764705882,
+              "recall": 1.0,
+              "support": 29
+            }
+          },
+          "support": 124,
+          "weighted_f1": 0.8512585226507129
+        }
+      },
+      "unmerged": {
+        "all_labelled_incl_legitimate": {
+          "legitimate": 501,
+          "macro_f1": 0.7934454881758973,
+          "malicious": 124,
+          "per_class": {
+            "credential_theft": {
+              "f1": 0.7272727272727272,
+              "precision": 0.8,
+              "recall": 0.6666666666666666,
+              "support": 6
+            },
+            "delivery_scam": {
+              "f1": 0.7272727272727272,
+              "precision": 0.6666666666666666,
+              "recall": 0.8,
+              "support": 10
+            },
+            "digital_arrest": {
+              "f1": 0.9333333333333333,
+              "precision": 0.875,
+              "recall": 1.0,
+              "support": 7
+            },
+            "fake_job": {
+              "f1": 0.9473684210526316,
+              "precision": 0.9,
+              "recall": 1.0,
+              "support": 9
+            },
+            "impersonation": {
+              "f1": 0.6,
+              "precision": 0.6,
+              "recall": 0.6,
+              "support": 10
+            },
+            "investment_scam": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 6
+            },
+            "legitimate": {
+              "f1": 0.9607438016528926,
+              "precision": 0.9957173447537473,
+              "recall": 0.9281437125748503,
+              "support": 501
+            },
+            "other_fraud": {
+              "f1": 0.6557377049180327,
+              "precision": 0.6060606060606061,
+              "recall": 0.7142857142857143,
+              "support": 28
+            },
+            "payment_fraud": {
+              "f1": 0.6956521739130435,
+              "precision": 0.6153846153846154,
+              "recall": 0.8,
+              "support": 10
+            },
+            "phishing": {
+              "f1": 0.7272727272727274,
+              "precision": 0.6153846153846154,
+              "recall": 0.8888888888888888,
+              "support": 9
+            },
+            "prize_lottery_scam": {
+              "f1": 0.7532467532467533,
+              "precision": 0.6041666666666666,
+              "recall": 1.0,
+              "support": 29
+            }
+          },
+          "support": 625,
+          "weighted_f1": 0.9179767124059446
+        },
+        "fraud_only": {
+          "legitimate": 0,
+          "macro_f1": 0.8605346700083543,
+          "malicious": 124,
+          "per_class": {
+            "credential_theft": {
+              "f1": 0.8,
+              "precision": 1.0,
+              "recall": 0.6666666666666666,
+              "support": 6
+            },
+            "delivery_scam": {
+              "f1": 0.888888888888889,
+              "precision": 1.0,
+              "recall": 0.8,
+              "support": 10
+            },
+            "digital_arrest": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 7
+            },
+            "fake_job": {
+              "f1": 0.9473684210526316,
+              "precision": 0.9,
+              "recall": 1.0,
+              "support": 9
+            },
+            "impersonation": {
+              "f1": 0.6666666666666665,
+              "precision": 0.75,
+              "recall": 0.6,
+              "support": 10
+            },
+            "investment_scam": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 6
+            },
+            "other_fraud": {
+              "f1": 0.7777777777777779,
+              "precision": 0.8076923076923077,
+              "recall": 0.75,
+              "support": 28
+            },
+            "payment_fraud": {
+              "f1": 0.761904761904762,
+              "precision": 0.7272727272727273,
+              "recall": 0.8,
+              "support": 10
+            },
+            "phishing": {
+              "f1": 0.8421052631578948,
+              "precision": 0.8,
+              "recall": 0.8888888888888888,
+              "support": 9
+            },
+            "prize_lottery_scam": {
+              "f1": 0.9206349206349206,
+              "precision": 0.8529411764705882,
+              "recall": 1.0,
+              "support": 29
+            }
+          },
+          "support": 124,
+          "weighted_f1": 0.8512585226507129
+        }
+      }
+    },
+    "category_macro_f1": 0.8605346700083543,
+    "category_weighted_f1": 0.8512585226507129,
+    "class_weight": null,
+    "family": "linear_svc",
+    "feature_set": "combined",
+    "fit_seconds": 10.468287800002145,
+    "latency_mean_ms": 18.72470079991035,
+    "latency_median_ms": 18.358199995418545,
+    "latency_p95_ms": 29.637600001296956,
+    "model_size_bytes": 7231000,
+    "pr_auc": 0.9778221044600136,
+    "precision": 0.7721518987341772,
+    "recall": 0.9838709677419355,
+    "roc_auc": 0.9941246539179706,
+    "selected_rule": "highest malicious recall subject to specificity >= 0.90; tie-break higher precision",
+    "spec_target_met": true,
+    "specificity": 0.9281437125748503,
+    "threshold": 0.16
+  },
+  "model_name": "trustshield_text_v3",
+  "dataset_dir": "C:\\Users\\shubh\\trustshield-ai\\datasets\\processed\\trustshield-text-v3",
+  "train_row_count": 4004,
+  "input_files": [
+    "C:\\Users\\shubh\\trustshield-ai\\datasets\\processed\\trustshield-text-v3\\train.jsonl"
+  ],
+  "prediction_file": "C:\\Users\\shubh\\trustshield-ai\\models\\evaluation\\hardening_v3\\fusion\\train_oof_predictions.csv",
+  "prediction_sha256": "280505cbe41f6b700506654f8973a96728a8a2896b35448a465e15c648fbdbb4"
+}

@@ -1,0 +1,3 @@
+actual,predicted_legitimate,predicted_malicious
+legitimate,497,4
+malicious_or_fraudulent,26,98

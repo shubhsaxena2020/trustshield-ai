@@ -1,0 +1,8 @@
+[
+  {
+    "timestamp": "2026-09-24T21:09:05.365835+00:00",
+    "holdout_sha256": "2a6c066fc978c062211b6f2b1f1a9c6935ac0a9ef8e6283fdc0ed12d835fb3a7",
+    "rc_commit": "31b8143e269ebca70c2c033133be78cbcf4938ae",
+    "command": "C:\\Users\\shubh\\trustshield-ai\\.venv\\Scripts\\python.exe scripts/run_v2_promotion_eval.py --holdout datasets/holdout/trustshield-text-v2-holdout/holdout.jsonl --rc-manifest models/release/v3_rc_manifest.json --access-log datasets/holdout/trustshield-text-v2-holdout/holdout_access_log.json --confirm-final-holdout"
+  }
+]

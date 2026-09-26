@@ -1,0 +1,159 @@
+{
+  "validation_identical_to_v1": true,
+  "exact_overlap_train_val": 0,
+  "normalized_overlap_train_val": 1,
+  "duplicate_group_overlap_train_val": 0,
+  "exact_dups_within_train": 0,
+  "normalized_dups_within_train": 8,
+  "label_conflicts_within_train": 0,
+  "forbidden_source_rows_in_train": 537,
+  "cosine_train_val_pairs": {
+    "0.6": 96,
+    "0.7": 50,
+    "0.8": 19,
+    "0.85": 11,
+    "0.9": 8
+  },
+  "new_rows_vs_v1_train": 1086,
+  "new_rows_by_source": {
+    "agy-gen-hardening-v2": 612,
+    "ealvaradob_phishing-dataset_texts": 212,
+    "india_spam_sms": 147,
+    "ucI_sms_spam": 115
+  },
+  "new_rows_max_cosine_to_validation": 0.7034453030060983,
+  "new_rows_ge_0.60_to_validation": 10,
+  "real_vs_synthetic_train": {
+    "real": 2750,
+    "synthetic": 1254
+  },
+  "train_rows_with_spaced_phone_or_listinfo_or_enron": 0,
+  "thresholds": {
+    "v1": 0.12,
+    "v3": 0.16
+  },
+  "hard_negative_evaluation": {
+    "all_legit": {
+      "n": 501,
+      "fusion_fpr_v1": 0.10379241516966067,
+      "fusion_fpr_v3": 0.08183632734530938,
+      "ml_fpr_v1": 0.09580838323353294,
+      "ml_fpr_v3": 0.0718562874251497
+    },
+    "real_legit": {
+      "n": 424,
+      "fusion_fpr_v1": 0.05188679245283019,
+      "fusion_fpr_v3": 0.054245283018867926,
+      "ml_fpr_v1": 0.04716981132075472,
+      "ml_fpr_v3": 0.04716981132075472
+    },
+    "synthetic_legit": {
+      "n": 77,
+      "fusion_fpr_v1": 0.38961038961038963,
+      "fusion_fpr_v3": 0.23376623376623376,
+      "ml_fpr_v1": 0.36363636363636365,
+      "ml_fpr_v3": 0.2077922077922078
+    },
+    "buckets": {
+      "bank_account/all": {
+        "n": 25,
+        "fpr_v1": 0.36,
+        "fpr_v3": 0.24
+      },
+      "bank_account/real": {
+        "n": 9,
+        "fpr_v1": 0.1111111111111111,
+        "fpr_v3": 0.1111111111111111
+      },
+      "otp_pin/all": {
+        "n": 5,
+        "fpr_v1": 0.8,
+        "fpr_v3": 0.4
+      },
+      "otp_pin/real": {
+        "n": 1,
+        "fpr_v1": 0.0,
+        "fpr_v3": 0.0
+      },
+      "payment/all": {
+        "n": 23,
+        "fpr_v1": 0.2608695652173913,
+        "fpr_v3": 0.17391304347826086
+      },
+      "payment/real": {
+        "n": 6,
+        "fpr_v1": 0.16666666666666666,
+        "fpr_v3": 0.16666666666666666
+      },
+      "urgent_service/all": {
+        "n": 10,
+        "fpr_v1": 0.3,
+        "fpr_v3": 0.2
+      },
+      "urgent_service/real": {
+        "n": 4,
+        "fpr_v1": 0.25,
+        "fpr_v3": 0.25
+      },
+      "job/all": {
+        "n": 8,
+        "fpr_v1": 0.25,
+        "fpr_v3": 0.0
+      },
+      "job/real": {
+        "n": 3,
+        "fpr_v1": 0.0,
+        "fpr_v3": 0.0
+      },
+      "delivery/all": {
+        "n": 19,
+        "fpr_v1": 0.47368421052631576,
+        "fpr_v3": 0.2631578947368421
+      },
+      "delivery/real": {
+        "n": 3,
+        "fpr_v1": 0.3333333333333333,
+        "fpr_v3": 0.3333333333333333
+      },
+      "telecom/all": {
+        "n": 41,
+        "fpr_v1": 0.12195121951219512,
+        "fpr_v3": 0.0975609756097561
+      },
+      "telecom/real": {
+        "n": 37,
+        "fpr_v1": 0.10810810810810811,
+        "fpr_v3": 0.10810810810810811
+      },
+      "union/all": {
+        "n": 105,
+        "fpr_v1": 0.2761904761904762,
+        "fpr_v3": 0.17142857142857143
+      },
+      "union/real": {
+        "n": 54,
+        "fpr_v1": 0.1111111111111111,
+        "fpr_v3": 0.1111111111111111
+      }
+    },
+    "real_legit_fusion_fpr_diff_v3_minus_v1": {
+      "mean": 0.0023349056603773582,
+      "ci95": [
+        -0.014150943396226412,
+        0.018867924528301883
+      ]
+    },
+    "malicious_recall_fusion": {
+      "real": {
+        "n": 45,
+        "v1": 0.9777777777777777,
+        "v3": 0.9777777777777777
+      },
+      "synthetic": {
+        "n": 79,
+        "v1": 0.9746835443037974,
+        "v3": 0.9873417721518988
+      }
+    }
+  }
+}

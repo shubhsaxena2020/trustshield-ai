@@ -1,0 +1,2481 @@
+{
+  "brier": 0.02322679809100144,
+  "calibration_curve": [
+    {
+      "bin": 0,
+      "count": 448,
+      "fraction_positive": 0.002232142857142857,
+      "lower": 0.0,
+      "mean_predicted": 0.011441352350307797,
+      "upper": 0.1
+    },
+    {
+      "bin": 1,
+      "count": 34,
+      "fraction_positive": 0.08823529411764706,
+      "lower": 0.1,
+      "mean_predicted": 0.14983027750924546,
+      "upper": 0.2
+    },
+    {
+      "bin": 2,
+      "count": 13,
+      "fraction_positive": 0.15384615384615385,
+      "lower": 0.2,
+      "mean_predicted": 0.22753562865505803,
+      "upper": 0.3
+    },
+    {
+      "bin": 3,
+      "count": 8,
+      "fraction_positive": 0.125,
+      "lower": 0.3,
+      "mean_predicted": 0.356571832986067,
+      "upper": 0.4
+    },
+    {
+      "bin": 4,
+      "count": 5,
+      "fraction_positive": 0.8,
+      "lower": 0.4,
+      "mean_predicted": 0.4394153357778685,
+      "upper": 0.5
+    },
+    {
+      "bin": 5,
+      "count": 7,
+      "fraction_positive": 1.0,
+      "lower": 0.5,
+      "mean_predicted": 0.5597918723250302,
+      "upper": 0.6
+    },
+    {
+      "bin": 6,
+      "count": 9,
+      "fraction_positive": 0.8888888888888888,
+      "lower": 0.6,
+      "mean_predicted": 0.6432807872720577,
+      "upper": 0.7
+    },
+    {
+      "bin": 7,
+      "count": 9,
+      "fraction_positive": 1.0,
+      "lower": 0.7,
+      "mean_predicted": 0.760671994841545,
+      "upper": 0.8
+    },
+    {
+      "bin": 8,
+      "count": 25,
+      "fraction_positive": 0.88,
+      "lower": 0.8,
+      "mean_predicted": 0.8537074597372813,
+      "upper": 0.9
+    },
+    {
+      "bin": 9,
+      "count": 67,
+      "fraction_positive": 1.0,
+      "lower": 0.9,
+      "mean_predicted": 0.972347068849358,
+      "upper": 1.0
+    }
+  ],
+  "category_f1_scopes": {
+    "merged": {
+      "all_labelled_incl_legitimate": {
+        "legitimate": 501,
+        "macro_f1": 0.7934454881758973,
+        "malicious": 124,
+        "per_class": {
+          "credential_theft": {
+            "f1": 0.7272727272727272,
+            "precision": 0.8,
+            "recall": 0.6666666666666666,
+            "support": 6
+          },
+          "delivery_scam": {
+            "f1": 0.7272727272727272,
+            "precision": 0.6666666666666666,
+            "recall": 0.8,
+            "support": 10
+          },
+          "digital_arrest": {
+            "f1": 0.9333333333333333,
+            "precision": 0.875,
+            "recall": 1.0,
+            "support": 7
+          },
+          "fake_job": {
+            "f1": 0.9473684210526316,
+            "precision": 0.9,
+            "recall": 1.0,
+            "support": 9
+          },
+          "impersonation": {
+            "f1": 0.6,
+            "precision": 0.6,
+            "recall": 0.6,
+            "support": 10
+          },
+          "investment_scam": {
+            "f1": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "support": 6
+          },
+          "legitimate": {
+            "f1": 0.9607438016528926,
+            "precision": 0.9957173447537473,
+            "recall": 0.9281437125748503,
+            "support": 501
+          },
+          "other_fraud": {
+            "f1": 0.6557377049180327,
+            "precision": 0.6060606060606061,
+            "recall": 0.7142857142857143,
+            "support": 28
+          },
+          "payment_fraud": {
+            "f1": 0.6956521739130435,
+            "precision": 0.6153846153846154,
+            "recall": 0.8,
+            "support": 10
+          },
+          "phishing": {
+            "f1": 0.7272727272727274,
+            "precision": 0.6153846153846154,
+            "recall": 0.8888888888888888,
+            "support": 9
+          },
+          "prize_lottery_scam": {
+            "f1": 0.7532467532467533,
+            "precision": 0.6041666666666666,
+            "recall": 1.0,
+            "support": 29
+          }
+        },
+        "support": 625,
+        "weighted_f1": 0.9179767124059446
+      },
+      "fraud_only": {
+        "legitimate": 0,
+        "macro_f1": 0.8605346700083543,
+        "malicious": 124,
+        "per_class": {
+          "credential_theft": {
+            "f1": 0.8,
+            "precision": 1.0,
+            "recall": 0.6666666666666666,
+            "support": 6
+          },
+          "delivery_scam": {
+            "f1": 0.888888888888889,
+            "precision": 1.0,
+            "recall": 0.8,
+            "support": 10
+          },
+          "digital_arrest": {
+            "f1": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "support": 7
+          },
+          "fake_job": {
+            "f1": 0.9473684210526316,
+            "precision": 0.9,
+            "recall": 1.0,
+            "support": 9
+          },
+          "impersonation": {
+            "f1": 0.6666666666666665,
+            "precision": 0.75,
+            "recall": 0.6,
+            "support": 10
+          },
+          "investment_scam": {
+            "f1": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "support": 6
+          },
+          "other_fraud": {
+            "f1": 0.7777777777777779,
+            "precision": 0.8076923076923077,
+            "recall": 0.75,
+            "support": 28
+          },
+          "payment_fraud": {
+            "f1": 0.761904761904762,
+            "precision": 0.7272727272727273,
+            "recall": 0.8,
+            "support": 10
+          },
+          "phishing": {
+            "f1": 0.8421052631578948,
+            "precision": 0.8,
+            "recall": 0.8888888888888888,
+            "support": 9
+          },
+          "prize_lottery_scam": {
+            "f1": 0.9206349206349206,
+            "precision": 0.8529411764705882,
+            "recall": 1.0,
+            "support": 29
+          }
+        },
+        "support": 124,
+        "weighted_f1": 0.8512585226507129
+      }
+    },
+    "unmerged": {
+      "all_labelled_incl_legitimate": {
+        "legitimate": 501,
+        "macro_f1": 0.7934454881758973,
+        "malicious": 124,
+        "per_class": {
+          "credential_theft": {
+            "f1": 0.7272727272727272,
+            "precision": 0.8,
+            "recall": 0.6666666666666666,
+            "support": 6
+          },
+          "delivery_scam": {
+            "f1": 0.7272727272727272,
+            "precision": 0.6666666666666666,
+            "recall": 0.8,
+            "support": 10
+          },
+          "digital_arrest": {
+            "f1": 0.9333333333333333,
+            "precision": 0.875,
+            "recall": 1.0,
+            "support": 7
+          },
+          "fake_job": {
+            "f1": 0.9473684210526316,
+            "precision": 0.9,
+            "recall": 1.0,
+            "support": 9
+          },
+          "impersonation": {
+            "f1": 0.6,
+            "precision": 0.6,
+            "recall": 0.6,
+            "support": 10
+          },
+          "investment_scam": {
+            "f1": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "support": 6
+          },
+          "legitimate": {
+            "f1": 0.9607438016528926,
+            "precision": 0.9957173447537473,
+            "recall": 0.9281437125748503,
+            "support": 501
+          },
+          "other_fraud": {
+            "f1": 0.6557377049180327,
+            "precision": 0.6060606060606061,
+            "recall": 0.7142857142857143,
+            "support": 28
+          },
+          "payment_fraud": {
+            "f1": 0.6956521739130435,
+            "precision": 0.6153846153846154,
+            "recall": 0.8,
+            "support": 10
+          },
+          "phishing": {
+            "f1": 0.7272727272727274,
+            "precision": 0.6153846153846154,
+            "recall": 0.8888888888888888,
+            "support": 9
+          },
+          "prize_lottery_scam": {
+            "f1": 0.7532467532467533,
+            "precision": 0.6041666666666666,
+            "recall": 1.0,
+            "support": 29
+          }
+        },
+        "support": 625,
+        "weighted_f1": 0.9179767124059446
+      },
+      "fraud_only": {
+        "legitimate": 0,
+        "macro_f1": 0.8605346700083543,
+        "malicious": 124,
+        "per_class": {
+          "credential_theft": {
+            "f1": 0.8,
+            "precision": 1.0,
+            "recall": 0.6666666666666666,
+            "support": 6
+          },
+          "delivery_scam": {
+            "f1": 0.888888888888889,
+            "precision": 1.0,
+            "recall": 0.8,
+            "support": 10
+          },
+          "digital_arrest": {
+            "f1": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "support": 7
+          },
+          "fake_job": {
+            "f1": 0.9473684210526316,
+            "precision": 0.9,
+            "recall": 1.0,
+            "support": 9
+          },
+          "impersonation": {
+            "f1": 0.6666666666666665,
+            "precision": 0.75,
+            "recall": 0.6,
+            "support": 10
+          },
+          "investment_scam": {
+            "f1": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "support": 6
+          },
+          "other_fraud": {
+            "f1": 0.7777777777777779,
+            "precision": 0.8076923076923077,
+            "recall": 0.75,
+            "support": 28
+          },
+          "payment_fraud": {
+            "f1": 0.761904761904762,
+            "precision": 0.7272727272727273,
+            "recall": 0.8,
+            "support": 10
+          },
+          "phishing": {
+            "f1": 0.8421052631578948,
+            "precision": 0.8,
+            "recall": 0.8888888888888888,
+            "support": 9
+          },
+          "prize_lottery_scam": {
+            "f1": 0.9206349206349206,
+            "precision": 0.8529411764705882,
+            "recall": 1.0,
+            "support": 29
+          }
+        },
+        "support": 124,
+        "weighted_f1": 0.8512585226507129
+      }
+    }
+  },
+  "category_macro_f1": 0.8605346700083543,
+  "category_weighted_f1": 0.8512585226507129,
+  "ece": 0.03326297311060885,
+  "model_name": "trustshield_text_v3",
+  "per_source_name": {
+    "agy-gen-fraud-v1": {
+      "F1": 0.9936305732484078,
+      "FN": 1,
+      "FNR": 0.012658227848101222,
+      "FP": 0,
+      "FPR": 1.0,
+      "TN": 0,
+      "TP": 78,
+      "accuracy": 0.9873417721518988,
+      "count": 79,
+      "pr_auc": null,
+      "precision": 1.0,
+      "recall": 0.9873417721518988,
+      "roc_auc": null,
+      "specificity": 0.0,
+      "threshold": 0.16
+    },
+    "agy-gen-legit-v1": {
+      "F1": 0.0,
+      "FN": 0,
+      "FNR": 1.0,
+      "FP": 16,
+      "FPR": 0.20779220779220775,
+      "TN": 61,
+      "TP": 0,
+      "accuracy": 0.7922077922077922,
+      "count": 77,
+      "pr_auc": null,
+      "precision": 0.0,
+      "recall": 0.0,
+      "roc_auc": null,
+      "specificity": 0.7922077922077922,
+      "threshold": 0.16
+    },
+    "india_spam_sms": {
+      "F1": 0.7272727272727273,
+      "FN": 0,
+      "FNR": 0.0,
+      "FP": 3,
+      "FPR": 0.015000000000000013,
+      "TN": 197,
+      "TP": 4,
+      "accuracy": 0.9852941176470589,
+      "count": 204,
+      "pr_auc": 1.0,
+      "precision": 0.5714285714285714,
+      "recall": 1.0,
+      "roc_auc": 1.0,
+      "specificity": 0.985,
+      "threshold": 0.16
+    },
+    "ucI_sms_spam": {
+      "F1": 0.8163265306122448,
+      "FN": 1,
+      "FNR": 0.024390243902439046,
+      "FP": 17,
+      "FPR": 0.0758928571428571,
+      "TN": 207,
+      "TP": 40,
+      "accuracy": 0.9320754716981132,
+      "count": 265,
+      "pr_auc": 0.9640836962465278,
+      "precision": 0.7017543859649122,
+      "recall": 0.975609756097561,
+      "roc_auc": 0.9924869337979094,
+      "specificity": 0.9241071428571429,
+      "threshold": 0.16
+    }
+  },
+  "pr_auc": 0.9778221044600136,
+  "roc_auc": 0.9941246539179706,
+  "selected_candidate": {
+    "C": 0.5,
+    "F1": 0.8652482269503546,
+    "FN": 2,
+    "FNR": 0.016129032258064502,
+    "FP": 36,
+    "FPR": 0.07185628742514971,
+    "TN": 465,
+    "TP": 122,
+    "accuracy": 0.9392,
+    "architecture": "two_stage",
+    "brier": 0.02322679809100144,
+    "calibration": "isotonic",
+    "calibration_cv": 5,
+    "category_f1_scopes": {
+      "merged": {
+        "all_labelled_incl_legitimate": {
+          "legitimate": 501,
+          "macro_f1": 0.7934454881758973,
+          "malicious": 124,
+          "per_class": {
+            "credential_theft": {
+              "f1": 0.7272727272727272,
+              "precision": 0.8,
+              "recall": 0.6666666666666666,
+              "support": 6
+            },
+            "delivery_scam": {
+              "f1": 0.7272727272727272,
+              "precision": 0.6666666666666666,
+              "recall": 0.8,
+              "support": 10
+            },
+            "digital_arrest": {
+              "f1": 0.9333333333333333,
+              "precision": 0.875,
+              "recall": 1.0,
+              "support": 7
+            },
+            "fake_job": {
+              "f1": 0.9473684210526316,
+              "precision": 0.9,
+              "recall": 1.0,
+              "support": 9
+            },
+            "impersonation": {
+              "f1": 0.6,
+              "precision": 0.6,
+              "recall": 0.6,
+              "support": 10
+            },
+            "investment_scam": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 6
+            },
+            "legitimate": {
+              "f1": 0.9607438016528926,
+              "precision": 0.9957173447537473,
+              "recall": 0.9281437125748503,
+              "support": 501
+            },
+            "other_fraud": {
+              "f1": 0.6557377049180327,
+              "precision": 0.6060606060606061,
+              "recall": 0.7142857142857143,
+              "support": 28
+            },
+            "payment_fraud": {
+              "f1": 0.6956521739130435,
+              "precision": 0.6153846153846154,
+              "recall": 0.8,
+              "support": 10
+            },
+            "phishing": {
+              "f1": 0.7272727272727274,
+              "precision": 0.6153846153846154,
+              "recall": 0.8888888888888888,
+              "support": 9
+            },
+            "prize_lottery_scam": {
+              "f1": 0.7532467532467533,
+              "precision": 0.6041666666666666,
+              "recall": 1.0,
+              "support": 29
+            }
+          },
+          "support": 625,
+          "weighted_f1": 0.9179767124059446
+        },
+        "fraud_only": {
+          "legitimate": 0,
+          "macro_f1": 0.8605346700083543,
+          "malicious": 124,
+          "per_class": {
+            "credential_theft": {
+              "f1": 0.8,
+              "precision": 1.0,
+              "recall": 0.6666666666666666,
+              "support": 6
+            },
+            "delivery_scam": {
+              "f1": 0.888888888888889,
+              "precision": 1.0,
+              "recall": 0.8,
+              "support": 10
+            },
+            "digital_arrest": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 7
+            },
+            "fake_job": {
+              "f1": 0.9473684210526316,
+              "precision": 0.9,
+              "recall": 1.0,
+              "support": 9
+            },
+            "impersonation": {
+              "f1": 0.6666666666666665,
+              "precision": 0.75,
+              "recall": 0.6,
+              "support": 10
+            },
+            "investment_scam": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 6
+            },
+            "other_fraud": {
+              "f1": 0.7777777777777779,
+              "precision": 0.8076923076923077,
+              "recall": 0.75,
+              "support": 28
+            },
+            "payment_fraud": {
+              "f1": 0.761904761904762,
+              "precision": 0.7272727272727273,
+              "recall": 0.8,
+              "support": 10
+            },
+            "phishing": {
+              "f1": 0.8421052631578948,
+              "precision": 0.8,
+              "recall": 0.8888888888888888,
+              "support": 9
+            },
+            "prize_lottery_scam": {
+              "f1": 0.9206349206349206,
+              "precision": 0.8529411764705882,
+              "recall": 1.0,
+              "support": 29
+            }
+          },
+          "support": 124,
+          "weighted_f1": 0.8512585226507129
+        }
+      },
+      "unmerged": {
+        "all_labelled_incl_legitimate": {
+          "legitimate": 501,
+          "macro_f1": 0.7934454881758973,
+          "malicious": 124,
+          "per_class": {
+            "credential_theft": {
+              "f1": 0.7272727272727272,
+              "precision": 0.8,
+              "recall": 0.6666666666666666,
+              "support": 6
+            },
+            "delivery_scam": {
+              "f1": 0.7272727272727272,
+              "precision": 0.6666666666666666,
+              "recall": 0.8,
+              "support": 10
+            },
+            "digital_arrest": {
+              "f1": 0.9333333333333333,
+              "precision": 0.875,
+              "recall": 1.0,
+              "support": 7
+            },
+            "fake_job": {
+              "f1": 0.9473684210526316,
+              "precision": 0.9,
+              "recall": 1.0,
+              "support": 9
+            },
+            "impersonation": {
+              "f1": 0.6,
+              "precision": 0.6,
+              "recall": 0.6,
+              "support": 10
+            },
+            "investment_scam": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 6
+            },
+            "legitimate": {
+              "f1": 0.9607438016528926,
+              "precision": 0.9957173447537473,
+              "recall": 0.9281437125748503,
+              "support": 501
+            },
+            "other_fraud": {
+              "f1": 0.6557377049180327,
+              "precision": 0.6060606060606061,
+              "recall": 0.7142857142857143,
+              "support": 28
+            },
+            "payment_fraud": {
+              "f1": 0.6956521739130435,
+              "precision": 0.6153846153846154,
+              "recall": 0.8,
+              "support": 10
+            },
+            "phishing": {
+              "f1": 0.7272727272727274,
+              "precision": 0.6153846153846154,
+              "recall": 0.8888888888888888,
+              "support": 9
+            },
+            "prize_lottery_scam": {
+              "f1": 0.7532467532467533,
+              "precision": 0.6041666666666666,
+              "recall": 1.0,
+              "support": 29
+            }
+          },
+          "support": 625,
+          "weighted_f1": 0.9179767124059446
+        },
+        "fraud_only": {
+          "legitimate": 0,
+          "macro_f1": 0.8605346700083543,
+          "malicious": 124,
+          "per_class": {
+            "credential_theft": {
+              "f1": 0.8,
+              "precision": 1.0,
+              "recall": 0.6666666666666666,
+              "support": 6
+            },
+            "delivery_scam": {
+              "f1": 0.888888888888889,
+              "precision": 1.0,
+              "recall": 0.8,
+              "support": 10
+            },
+            "digital_arrest": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 7
+            },
+            "fake_job": {
+              "f1": 0.9473684210526316,
+              "precision": 0.9,
+              "recall": 1.0,
+              "support": 9
+            },
+            "impersonation": {
+              "f1": 0.6666666666666665,
+              "precision": 0.75,
+              "recall": 0.6,
+              "support": 10
+            },
+            "investment_scam": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 6
+            },
+            "other_fraud": {
+              "f1": 0.7777777777777779,
+              "precision": 0.8076923076923077,
+              "recall": 0.75,
+              "support": 28
+            },
+            "payment_fraud": {
+              "f1": 0.761904761904762,
+              "precision": 0.7272727272727273,
+              "recall": 0.8,
+              "support": 10
+            },
+            "phishing": {
+              "f1": 0.8421052631578948,
+              "precision": 0.8,
+              "recall": 0.8888888888888888,
+              "support": 9
+            },
+            "prize_lottery_scam": {
+              "f1": 0.9206349206349206,
+              "precision": 0.8529411764705882,
+              "recall": 1.0,
+              "support": 29
+            }
+          },
+          "support": 124,
+          "weighted_f1": 0.8512585226507129
+        }
+      }
+    },
+    "category_macro_f1": 0.8605346700083543,
+    "category_weighted_f1": 0.8512585226507129,
+    "class_weight": null,
+    "family": "linear_svc",
+    "feature_set": "combined",
+    "fit_seconds": 10.468287800002145,
+    "latency_mean_ms": 18.72470079991035,
+    "latency_median_ms": 18.358199995418545,
+    "latency_p95_ms": 29.637600001296956,
+    "model_size_bytes": 7231000,
+    "pr_auc": 0.9778221044600136,
+    "precision": 0.7721518987341772,
+    "recall": 0.9838709677419355,
+    "roc_auc": 0.9941246539179706,
+    "selected_rule": "highest malicious recall subject to specificity >= 0.90; tie-break higher precision",
+    "spec_target_met": true,
+    "specificity": 0.9281437125748503,
+    "threshold": 0.16
+  },
+  "threshold_rule": "highest malicious recall subject to specificity >= 0.90; tie-break higher precision",
+  "threshold_sweep": [
+    {
+      "F1": 0.6138613861386139,
+      "FN": 0,
+      "FNR": 0.0,
+      "FP": 156,
+      "FPR": 0.31137724550898205,
+      "TN": 345,
+      "TP": 124,
+      "accuracy": 0.7504,
+      "precision": 0.44285714285714284,
+      "recall": 1.0,
+      "specificity": 0.688622754491018,
+      "threshold": 0.01
+    },
+    {
+      "F1": 0.6775956284153004,
+      "FN": 0,
+      "FNR": 0.0,
+      "FP": 118,
+      "FPR": 0.23552894211576847,
+      "TN": 383,
+      "TP": 124,
+      "accuracy": 0.8112,
+      "precision": 0.512396694214876,
+      "recall": 1.0,
+      "specificity": 0.7644710578842315,
+      "threshold": 0.02
+    },
+    {
+      "F1": 0.7146974063400576,
+      "FN": 0,
+      "FNR": 0.0,
+      "FP": 99,
+      "FPR": 0.19760479041916168,
+      "TN": 402,
+      "TP": 124,
+      "accuracy": 0.8416,
+      "precision": 0.5560538116591929,
+      "recall": 1.0,
+      "specificity": 0.8023952095808383,
+      "threshold": 0.03
+    },
+    {
+      "F1": 0.7315634218289085,
+      "FN": 0,
+      "FNR": 0.0,
+      "FP": 91,
+      "FPR": 0.1816367265469062,
+      "TN": 410,
+      "TP": 124,
+      "accuracy": 0.8544,
+      "precision": 0.5767441860465117,
+      "recall": 1.0,
+      "specificity": 0.8183632734530938,
+      "threshold": 0.04
+    },
+    {
+      "F1": 0.7337278106508875,
+      "FN": 0,
+      "FNR": 0.0,
+      "FP": 90,
+      "FPR": 0.17964071856287422,
+      "TN": 411,
+      "TP": 124,
+      "accuracy": 0.856,
+      "precision": 0.5794392523364486,
+      "recall": 1.0,
+      "specificity": 0.8203592814371258,
+      "threshold": 0.05
+    },
+    {
+      "F1": 0.7515151515151515,
+      "FN": 0,
+      "FNR": 0.0,
+      "FP": 82,
+      "FPR": 0.16367265469061876,
+      "TN": 419,
+      "TP": 124,
+      "accuracy": 0.8688,
+      "precision": 0.6019417475728155,
+      "recall": 1.0,
+      "specificity": 0.8363273453093812,
+      "threshold": 0.060000000000000005
+    },
+    {
+      "F1": 0.7774294670846394,
+      "FN": 0,
+      "FNR": 0.0,
+      "FP": 71,
+      "FPR": 0.14171656686626743,
+      "TN": 430,
+      "TP": 124,
+      "accuracy": 0.8864,
+      "precision": 0.6358974358974359,
+      "recall": 1.0,
+      "specificity": 0.8582834331337326,
+      "threshold": 0.06999999999999999
+    },
+    {
+      "F1": 0.7935483870967741,
+      "FN": 1,
+      "FNR": 0.008064516129032251,
+      "FP": 63,
+      "FPR": 0.12574850299401197,
+      "TN": 438,
+      "TP": 123,
+      "accuracy": 0.8976,
+      "precision": 0.6612903225806451,
+      "recall": 0.9919354838709677,
+      "specificity": 0.874251497005988,
+      "threshold": 0.08
+    },
+    {
+      "F1": 0.8092105263157895,
+      "FN": 1,
+      "FNR": 0.008064516129032251,
+      "FP": 57,
+      "FPR": 0.11377245508982037,
+      "TN": 444,
+      "TP": 123,
+      "accuracy": 0.9072,
+      "precision": 0.6833333333333333,
+      "recall": 0.9919354838709677,
+      "specificity": 0.8862275449101796,
+      "threshold": 0.09
+    },
+    {
+      "F1": 0.8172757475083057,
+      "FN": 1,
+      "FNR": 0.008064516129032251,
+      "FP": 54,
+      "FPR": 0.10778443113772451,
+      "TN": 447,
+      "TP": 123,
+      "accuracy": 0.912,
+      "precision": 0.6949152542372882,
+      "recall": 0.9919354838709677,
+      "specificity": 0.8922155688622755,
+      "threshold": 0.09999999999999999
+    },
+    {
+      "F1": 0.8271186440677967,
+      "FN": 2,
+      "FNR": 0.016129032258064502,
+      "FP": 49,
+      "FPR": 0.0978043912175649,
+      "TN": 452,
+      "TP": 122,
+      "accuracy": 0.9184,
+      "precision": 0.7134502923976608,
+      "recall": 0.9838709677419355,
+      "specificity": 0.9021956087824351,
+      "threshold": 0.11
+    },
+    {
+      "F1": 0.8356164383561643,
+      "FN": 2,
+      "FNR": 0.016129032258064502,
+      "FP": 46,
+      "FPR": 0.09181636726546905,
+      "TN": 455,
+      "TP": 122,
+      "accuracy": 0.9232,
+      "precision": 0.7261904761904762,
+      "recall": 0.9838709677419355,
+      "specificity": 0.908183632734531,
+      "threshold": 0.12
+    },
+    {
+      "F1": 0.8472222222222222,
+      "FN": 2,
+      "FNR": 0.016129032258064502,
+      "FP": 42,
+      "FPR": 0.08383233532934131,
+      "TN": 459,
+      "TP": 122,
+      "accuracy": 0.9296,
+      "precision": 0.7439024390243902,
+      "recall": 0.9838709677419355,
+      "specificity": 0.9161676646706587,
+      "threshold": 0.13
+    },
+    {
+      "F1": 0.8531468531468532,
+      "FN": 2,
+      "FNR": 0.016129032258064502,
+      "FP": 40,
+      "FPR": 0.07984031936127745,
+      "TN": 461,
+      "TP": 122,
+      "accuracy": 0.9328,
+      "precision": 0.7530864197530864,
+      "recall": 0.9838709677419355,
+      "specificity": 0.9201596806387226,
+      "threshold": 0.14
+    },
+    {
+      "F1": 0.8591549295774648,
+      "FN": 2,
+      "FNR": 0.016129032258064502,
+      "FP": 38,
+      "FPR": 0.07584830339321358,
+      "TN": 463,
+      "TP": 122,
+      "accuracy": 0.936,
+      "precision": 0.7625,
+      "recall": 0.9838709677419355,
+      "specificity": 0.9241516966067864,
+      "threshold": 0.15000000000000002
+    },
+    {
+      "F1": 0.8652482269503546,
+      "FN": 2,
+      "FNR": 0.016129032258064502,
+      "FP": 36,
+      "FPR": 0.07185628742514971,
+      "TN": 465,
+      "TP": 122,
+      "accuracy": 0.9392,
+      "precision": 0.7721518987341772,
+      "recall": 0.9838709677419355,
+      "specificity": 0.9281437125748503,
+      "threshold": 0.16
+    },
+    {
+      "F1": 0.867383512544803,
+      "FN": 3,
+      "FNR": 0.024193548387096753,
+      "FP": 34,
+      "FPR": 0.06786427145708585,
+      "TN": 467,
+      "TP": 121,
+      "accuracy": 0.9408,
+      "precision": 0.7806451612903226,
+      "recall": 0.9758064516129032,
+      "specificity": 0.9321357285429142,
+      "threshold": 0.17
+    },
+    {
+      "F1": 0.8768115942028986,
+      "FN": 3,
+      "FNR": 0.024193548387096753,
+      "FP": 31,
+      "FPR": 0.06187624750498999,
+      "TN": 470,
+      "TP": 121,
+      "accuracy": 0.9456,
+      "precision": 0.7960526315789473,
+      "recall": 0.9758064516129032,
+      "specificity": 0.93812375249501,
+      "threshold": 0.18000000000000002
+    },
+    {
+      "F1": 0.8856088560885609,
+      "FN": 4,
+      "FNR": 0.032258064516129004,
+      "FP": 27,
+      "FPR": 0.053892215568862256,
+      "TN": 474,
+      "TP": 120,
+      "accuracy": 0.9504,
+      "precision": 0.8163265306122449,
+      "recall": 0.967741935483871,
+      "specificity": 0.9461077844311377,
+      "threshold": 0.19
+    },
+    {
+      "F1": 0.898876404494382,
+      "FN": 4,
+      "FNR": 0.032258064516129004,
+      "FP": 23,
+      "FPR": 0.04590818363273452,
+      "TN": 478,
+      "TP": 120,
+      "accuracy": 0.9568,
+      "precision": 0.8391608391608392,
+      "recall": 0.967741935483871,
+      "specificity": 0.9540918163672655,
+      "threshold": 0.2
+    },
+    {
+      "F1": 0.9015151515151516,
+      "FN": 5,
+      "FNR": 0.040322580645161255,
+      "FP": 21,
+      "FPR": 0.041916167664670656,
+      "TN": 480,
+      "TP": 119,
+      "accuracy": 0.9584,
+      "precision": 0.85,
+      "recall": 0.9596774193548387,
+      "specificity": 0.9580838323353293,
+      "threshold": 0.21000000000000002
+    },
+    {
+      "F1": 0.9118773946360152,
+      "FN": 5,
+      "FNR": 0.040322580645161255,
+      "FP": 18,
+      "FPR": 0.0359281437125748,
+      "TN": 483,
+      "TP": 119,
+      "accuracy": 0.9632,
+      "precision": 0.8686131386861314,
+      "recall": 0.9596774193548387,
+      "specificity": 0.9640718562874252,
+      "threshold": 0.22
+    },
+    {
+      "F1": 0.918918918918919,
+      "FN": 5,
+      "FNR": 0.040322580645161255,
+      "FP": 16,
+      "FPR": 0.031936127744510934,
+      "TN": 485,
+      "TP": 119,
+      "accuracy": 0.9664,
+      "precision": 0.8814814814814815,
+      "recall": 0.9596774193548387,
+      "specificity": 0.9680638722554891,
+      "threshold": 0.23
+    },
+    {
+      "F1": 0.9260700389105059,
+      "FN": 5,
+      "FNR": 0.040322580645161255,
+      "FP": 14,
+      "FPR": 0.027944111776447067,
+      "TN": 487,
+      "TP": 119,
+      "accuracy": 0.9696,
+      "precision": 0.8947368421052632,
+      "recall": 0.9596774193548387,
+      "specificity": 0.9720558882235529,
+      "threshold": 0.24000000000000002
+    },
+    {
+      "F1": 0.9260700389105059,
+      "FN": 5,
+      "FNR": 0.040322580645161255,
+      "FP": 14,
+      "FPR": 0.027944111776447067,
+      "TN": 487,
+      "TP": 119,
+      "accuracy": 0.9696,
+      "precision": 0.8947368421052632,
+      "recall": 0.9596774193548387,
+      "specificity": 0.9720558882235529,
+      "threshold": 0.25
+    },
+    {
+      "F1": 0.9333333333333332,
+      "FN": 5,
+      "FNR": 0.040322580645161255,
+      "FP": 12,
+      "FPR": 0.0239520958083832,
+      "TN": 489,
+      "TP": 119,
+      "accuracy": 0.9728,
+      "precision": 0.9083969465648855,
+      "recall": 0.9596774193548387,
+      "specificity": 0.9760479041916168,
+      "threshold": 0.26
+    },
+    {
+      "F1": 0.9291338582677167,
+      "FN": 6,
+      "FNR": 0.048387096774193505,
+      "FP": 12,
+      "FPR": 0.0239520958083832,
+      "TN": 489,
+      "TP": 118,
+      "accuracy": 0.9712,
+      "precision": 0.9076923076923077,
+      "recall": 0.9516129032258065,
+      "specificity": 0.9760479041916168,
+      "threshold": 0.27
+    },
+    {
+      "F1": 0.9291338582677167,
+      "FN": 6,
+      "FNR": 0.048387096774193505,
+      "FP": 12,
+      "FPR": 0.0239520958083832,
+      "TN": 489,
+      "TP": 118,
+      "accuracy": 0.9712,
+      "precision": 0.9076923076923077,
+      "recall": 0.9516129032258065,
+      "specificity": 0.9760479041916168,
+      "threshold": 0.28
+    },
+    {
+      "F1": 0.9291338582677167,
+      "FN": 6,
+      "FNR": 0.048387096774193505,
+      "FP": 12,
+      "FPR": 0.0239520958083832,
+      "TN": 489,
+      "TP": 118,
+      "accuracy": 0.9712,
+      "precision": 0.9076923076923077,
+      "recall": 0.9516129032258065,
+      "specificity": 0.9760479041916168,
+      "threshold": 0.29000000000000004
+    },
+    {
+      "F1": 0.9291338582677167,
+      "FN": 6,
+      "FNR": 0.048387096774193505,
+      "FP": 12,
+      "FPR": 0.0239520958083832,
+      "TN": 489,
+      "TP": 118,
+      "accuracy": 0.9712,
+      "precision": 0.9076923076923077,
+      "recall": 0.9516129032258065,
+      "specificity": 0.9760479041916168,
+      "threshold": 0.3
+    },
+    {
+      "F1": 0.9291338582677167,
+      "FN": 6,
+      "FNR": 0.048387096774193505,
+      "FP": 12,
+      "FPR": 0.0239520958083832,
+      "TN": 489,
+      "TP": 118,
+      "accuracy": 0.9712,
+      "precision": 0.9076923076923077,
+      "recall": 0.9516129032258065,
+      "specificity": 0.9760479041916168,
+      "threshold": 0.31
+    },
+    {
+      "F1": 0.9291338582677167,
+      "FN": 6,
+      "FNR": 0.048387096774193505,
+      "FP": 12,
+      "FPR": 0.0239520958083832,
+      "TN": 489,
+      "TP": 118,
+      "accuracy": 0.9712,
+      "precision": 0.9076923076923077,
+      "recall": 0.9516129032258065,
+      "specificity": 0.9760479041916168,
+      "threshold": 0.32
+    },
+    {
+      "F1": 0.932806324110672,
+      "FN": 6,
+      "FNR": 0.048387096774193505,
+      "FP": 11,
+      "FPR": 0.021956087824351322,
+      "TN": 490,
+      "TP": 118,
+      "accuracy": 0.9728,
+      "precision": 0.9147286821705426,
+      "recall": 0.9516129032258065,
+      "specificity": 0.9780439121756487,
+      "threshold": 0.33
+    },
+    {
+      "F1": 0.9402390438247011,
+      "FN": 6,
+      "FNR": 0.048387096774193505,
+      "FP": 9,
+      "FPR": 0.017964071856287456,
+      "TN": 492,
+      "TP": 118,
+      "accuracy": 0.976,
+      "precision": 0.9291338582677166,
+      "recall": 0.9516129032258065,
+      "specificity": 0.9820359281437125,
+      "threshold": 0.34
+    },
+    {
+      "F1": 0.9402390438247011,
+      "FN": 6,
+      "FNR": 0.048387096774193505,
+      "FP": 9,
+      "FPR": 0.017964071856287456,
+      "TN": 492,
+      "TP": 118,
+      "accuracy": 0.976,
+      "precision": 0.9291338582677166,
+      "recall": 0.9516129032258065,
+      "specificity": 0.9820359281437125,
+      "threshold": 0.35000000000000003
+    },
+    {
+      "F1": 0.944,
+      "FN": 6,
+      "FNR": 0.048387096774193505,
+      "FP": 8,
+      "FPR": 0.015968063872255467,
+      "TN": 493,
+      "TP": 118,
+      "accuracy": 0.9776,
+      "precision": 0.9365079365079365,
+      "recall": 0.9516129032258065,
+      "specificity": 0.9840319361277445,
+      "threshold": 0.36000000000000004
+    },
+    {
+      "F1": 0.9473684210526316,
+      "FN": 7,
+      "FNR": 0.056451612903225756,
+      "FP": 6,
+      "FPR": 0.0119760479041916,
+      "TN": 495,
+      "TP": 117,
+      "accuracy": 0.9792,
+      "precision": 0.9512195121951219,
+      "recall": 0.9435483870967742,
+      "specificity": 0.9880239520958084,
+      "threshold": 0.37
+    },
+    {
+      "F1": 0.9473684210526316,
+      "FN": 7,
+      "FNR": 0.056451612903225756,
+      "FP": 6,
+      "FPR": 0.0119760479041916,
+      "TN": 495,
+      "TP": 117,
+      "accuracy": 0.9792,
+      "precision": 0.9512195121951219,
+      "recall": 0.9435483870967742,
+      "specificity": 0.9880239520958084,
+      "threshold": 0.38
+    },
+    {
+      "F1": 0.9473684210526316,
+      "FN": 7,
+      "FNR": 0.056451612903225756,
+      "FP": 6,
+      "FPR": 0.0119760479041916,
+      "TN": 495,
+      "TP": 117,
+      "accuracy": 0.9792,
+      "precision": 0.9512195121951219,
+      "recall": 0.9435483870967742,
+      "specificity": 0.9880239520958084,
+      "threshold": 0.39
+    },
+    {
+      "F1": 0.951219512195122,
+      "FN": 7,
+      "FNR": 0.056451612903225756,
+      "FP": 5,
+      "FPR": 0.009980039920159722,
+      "TN": 496,
+      "TP": 117,
+      "accuracy": 0.9808,
+      "precision": 0.9590163934426229,
+      "recall": 0.9435483870967742,
+      "specificity": 0.9900199600798403,
+      "threshold": 0.4
+    },
+    {
+      "F1": 0.9551020408163265,
+      "FN": 7,
+      "FNR": 0.056451612903225756,
+      "FP": 4,
+      "FPR": 0.007984031936127733,
+      "TN": 497,
+      "TP": 117,
+      "accuracy": 0.9824,
+      "precision": 0.9669421487603306,
+      "recall": 0.9435483870967742,
+      "specificity": 0.9920159680638723,
+      "threshold": 0.41000000000000003
+    },
+    {
+      "F1": 0.9551020408163265,
+      "FN": 7,
+      "FNR": 0.056451612903225756,
+      "FP": 4,
+      "FPR": 0.007984031936127733,
+      "TN": 497,
+      "TP": 117,
+      "accuracy": 0.9824,
+      "precision": 0.9669421487603306,
+      "recall": 0.9435483870967742,
+      "specificity": 0.9920159680638723,
+      "threshold": 0.42000000000000004
+    },
+    {
+      "F1": 0.9551020408163265,
+      "FN": 7,
+      "FNR": 0.056451612903225756,
+      "FP": 4,
+      "FPR": 0.007984031936127733,
+      "TN": 497,
+      "TP": 117,
+      "accuracy": 0.9824,
+      "precision": 0.9669421487603306,
+      "recall": 0.9435483870967742,
+      "specificity": 0.9920159680638723,
+      "threshold": 0.43
+    },
+    {
+      "F1": 0.9508196721311476,
+      "FN": 8,
+      "FNR": 0.06451612903225812,
+      "FP": 4,
+      "FPR": 0.007984031936127733,
+      "TN": 497,
+      "TP": 116,
+      "accuracy": 0.9808,
+      "precision": 0.9666666666666667,
+      "recall": 0.9354838709677419,
+      "specificity": 0.9920159680638723,
+      "threshold": 0.44
+    },
+    {
+      "F1": 0.9465020576131686,
+      "FN": 9,
+      "FNR": 0.07258064516129037,
+      "FP": 4,
+      "FPR": 0.007984031936127733,
+      "TN": 497,
+      "TP": 115,
+      "accuracy": 0.9792,
+      "precision": 0.9663865546218487,
+      "recall": 0.9274193548387096,
+      "specificity": 0.9920159680638723,
+      "threshold": 0.45
+    },
+    {
+      "F1": 0.9421487603305785,
+      "FN": 10,
+      "FNR": 0.08064516129032262,
+      "FP": 4,
+      "FPR": 0.007984031936127733,
+      "TN": 497,
+      "TP": 114,
+      "accuracy": 0.9776,
+      "precision": 0.9661016949152542,
+      "recall": 0.9193548387096774,
+      "specificity": 0.9920159680638723,
+      "threshold": 0.46
+    },
+    {
+      "F1": 0.9377593360995851,
+      "FN": 11,
+      "FNR": 0.08870967741935487,
+      "FP": 4,
+      "FPR": 0.007984031936127733,
+      "TN": 497,
+      "TP": 113,
+      "accuracy": 0.976,
+      "precision": 0.9658119658119658,
+      "recall": 0.9112903225806451,
+      "specificity": 0.9920159680638723,
+      "threshold": 0.47000000000000003
+    },
+    {
+      "F1": 0.9377593360995851,
+      "FN": 11,
+      "FNR": 0.08870967741935487,
+      "FP": 4,
+      "FPR": 0.007984031936127733,
+      "TN": 497,
+      "TP": 113,
+      "accuracy": 0.976,
+      "precision": 0.9658119658119658,
+      "recall": 0.9112903225806451,
+      "specificity": 0.9920159680638723,
+      "threshold": 0.48000000000000004
+    },
+    {
+      "F1": 0.9377593360995851,
+      "FN": 11,
+      "FNR": 0.08870967741935487,
+      "FP": 4,
+      "FPR": 0.007984031936127733,
+      "TN": 497,
+      "TP": 113,
+      "accuracy": 0.976,
+      "precision": 0.9658119658119658,
+      "recall": 0.9112903225806451,
+      "specificity": 0.9920159680638723,
+      "threshold": 0.49
+    },
+    {
+      "F1": 0.9377593360995851,
+      "FN": 11,
+      "FNR": 0.08870967741935487,
+      "FP": 4,
+      "FPR": 0.007984031936127733,
+      "TN": 497,
+      "TP": 113,
+      "accuracy": 0.976,
+      "precision": 0.9658119658119658,
+      "recall": 0.9112903225806451,
+      "specificity": 0.9920159680638723,
+      "threshold": 0.5
+    },
+    {
+      "F1": 0.9377593360995851,
+      "FN": 11,
+      "FNR": 0.08870967741935487,
+      "FP": 4,
+      "FPR": 0.007984031936127733,
+      "TN": 497,
+      "TP": 113,
+      "accuracy": 0.976,
+      "precision": 0.9658119658119658,
+      "recall": 0.9112903225806451,
+      "specificity": 0.9920159680638723,
+      "threshold": 0.51
+    },
+    {
+      "F1": 0.9377593360995851,
+      "FN": 11,
+      "FNR": 0.08870967741935487,
+      "FP": 4,
+      "FPR": 0.007984031936127733,
+      "TN": 497,
+      "TP": 113,
+      "accuracy": 0.976,
+      "precision": 0.9658119658119658,
+      "recall": 0.9112903225806451,
+      "specificity": 0.9920159680638723,
+      "threshold": 0.52
+    },
+    {
+      "F1": 0.9333333333333333,
+      "FN": 12,
+      "FNR": 0.09677419354838712,
+      "FP": 4,
+      "FPR": 0.007984031936127733,
+      "TN": 497,
+      "TP": 112,
+      "accuracy": 0.9744,
+      "precision": 0.9655172413793104,
+      "recall": 0.9032258064516129,
+      "specificity": 0.9920159680638723,
+      "threshold": 0.53
+    },
+    {
+      "F1": 0.9333333333333333,
+      "FN": 12,
+      "FNR": 0.09677419354838712,
+      "FP": 4,
+      "FPR": 0.007984031936127733,
+      "TN": 497,
+      "TP": 112,
+      "accuracy": 0.9744,
+      "precision": 0.9655172413793104,
+      "recall": 0.9032258064516129,
+      "specificity": 0.9920159680638723,
+      "threshold": 0.54
+    },
+    {
+      "F1": 0.9243697478991597,
+      "FN": 14,
+      "FNR": 0.11290322580645162,
+      "FP": 4,
+      "FPR": 0.007984031936127733,
+      "TN": 497,
+      "TP": 110,
+      "accuracy": 0.9712,
+      "precision": 0.9649122807017544,
+      "recall": 0.8870967741935484,
+      "specificity": 0.9920159680638723,
+      "threshold": 0.55
+    },
+    {
+      "F1": 0.919831223628692,
+      "FN": 15,
+      "FNR": 0.12096774193548387,
+      "FP": 4,
+      "FPR": 0.007984031936127733,
+      "TN": 497,
+      "TP": 109,
+      "accuracy": 0.9696,
+      "precision": 0.9646017699115044,
+      "recall": 0.8790322580645161,
+      "specificity": 0.9920159680638723,
+      "threshold": 0.56
+    },
+    {
+      "F1": 0.9152542372881356,
+      "FN": 16,
+      "FNR": 0.12903225806451613,
+      "FP": 4,
+      "FPR": 0.007984031936127733,
+      "TN": 497,
+      "TP": 108,
+      "accuracy": 0.968,
+      "precision": 0.9642857142857143,
+      "recall": 0.8709677419354839,
+      "specificity": 0.9920159680638723,
+      "threshold": 0.5700000000000001
+    },
+    {
+      "F1": 0.9152542372881356,
+      "FN": 16,
+      "FNR": 0.12903225806451613,
+      "FP": 4,
+      "FPR": 0.007984031936127733,
+      "TN": 497,
+      "TP": 108,
+      "accuracy": 0.968,
+      "precision": 0.9642857142857143,
+      "recall": 0.8709677419354839,
+      "specificity": 0.9920159680638723,
+      "threshold": 0.5800000000000001
+    },
+    {
+      "F1": 0.9106382978723404,
+      "FN": 17,
+      "FNR": 0.13709677419354838,
+      "FP": 4,
+      "FPR": 0.007984031936127733,
+      "TN": 497,
+      "TP": 107,
+      "accuracy": 0.9664,
+      "precision": 0.963963963963964,
+      "recall": 0.8629032258064516,
+      "specificity": 0.9920159680638723,
+      "threshold": 0.59
+    },
+    {
+      "F1": 0.905982905982906,
+      "FN": 18,
+      "FNR": 0.14516129032258063,
+      "FP": 4,
+      "FPR": 0.007984031936127733,
+      "TN": 497,
+      "TP": 106,
+      "accuracy": 0.9648,
+      "precision": 0.9636363636363636,
+      "recall": 0.8548387096774194,
+      "specificity": 0.9920159680638723,
+      "threshold": 0.6
+    },
+    {
+      "F1": 0.905982905982906,
+      "FN": 18,
+      "FNR": 0.14516129032258063,
+      "FP": 4,
+      "FPR": 0.007984031936127733,
+      "TN": 497,
+      "TP": 106,
+      "accuracy": 0.9648,
+      "precision": 0.9636363636363636,
+      "recall": 0.8548387096774194,
+      "specificity": 0.9920159680638723,
+      "threshold": 0.61
+    },
+    {
+      "F1": 0.9012875536480687,
+      "FN": 19,
+      "FNR": 0.15322580645161288,
+      "FP": 4,
+      "FPR": 0.007984031936127733,
+      "TN": 497,
+      "TP": 105,
+      "accuracy": 0.9632,
+      "precision": 0.963302752293578,
+      "recall": 0.8467741935483871,
+      "specificity": 0.9920159680638723,
+      "threshold": 0.62
+    },
+    {
+      "F1": 0.9012875536480687,
+      "FN": 19,
+      "FNR": 0.15322580645161288,
+      "FP": 4,
+      "FPR": 0.007984031936127733,
+      "TN": 497,
+      "TP": 105,
+      "accuracy": 0.9632,
+      "precision": 0.963302752293578,
+      "recall": 0.8467741935483871,
+      "specificity": 0.9920159680638723,
+      "threshold": 0.63
+    },
+    {
+      "F1": 0.8908296943231441,
+      "FN": 22,
+      "FNR": 0.17741935483870963,
+      "FP": 3,
+      "FPR": 0.005988023952095856,
+      "TN": 498,
+      "TP": 102,
+      "accuracy": 0.96,
+      "precision": 0.9714285714285714,
+      "recall": 0.8225806451612904,
+      "specificity": 0.9940119760479041,
+      "threshold": 0.64
+    },
+    {
+      "F1": 0.8859649122807017,
+      "FN": 23,
+      "FNR": 0.18548387096774188,
+      "FP": 3,
+      "FPR": 0.005988023952095856,
+      "TN": 498,
+      "TP": 101,
+      "accuracy": 0.9584,
+      "precision": 0.9711538461538461,
+      "recall": 0.8145161290322581,
+      "specificity": 0.9940119760479041,
+      "threshold": 0.65
+    },
+    {
+      "F1": 0.8761061946902654,
+      "FN": 25,
+      "FNR": 0.2016129032258065,
+      "FP": 3,
+      "FPR": 0.005988023952095856,
+      "TN": 498,
+      "TP": 99,
+      "accuracy": 0.9552,
+      "precision": 0.9705882352941176,
+      "recall": 0.7983870967741935,
+      "specificity": 0.9940119760479041,
+      "threshold": 0.66
+    },
+    {
+      "F1": 0.8761061946902654,
+      "FN": 25,
+      "FNR": 0.2016129032258065,
+      "FP": 3,
+      "FPR": 0.005988023952095856,
+      "TN": 498,
+      "TP": 99,
+      "accuracy": 0.9552,
+      "precision": 0.9705882352941176,
+      "recall": 0.7983870967741935,
+      "specificity": 0.9940119760479041,
+      "threshold": 0.67
+    },
+    {
+      "F1": 0.8711111111111111,
+      "FN": 26,
+      "FNR": 0.20967741935483875,
+      "FP": 3,
+      "FPR": 0.005988023952095856,
+      "TN": 498,
+      "TP": 98,
+      "accuracy": 0.9536,
+      "precision": 0.9702970297029703,
+      "recall": 0.7903225806451613,
+      "specificity": 0.9940119760479041,
+      "threshold": 0.68
+    },
+    {
+      "F1": 0.8711111111111111,
+      "FN": 26,
+      "FNR": 0.20967741935483875,
+      "FP": 3,
+      "FPR": 0.005988023952095856,
+      "TN": 498,
+      "TP": 98,
+      "accuracy": 0.9536,
+      "precision": 0.9702970297029703,
+      "recall": 0.7903225806451613,
+      "specificity": 0.9940119760479041,
+      "threshold": 0.6900000000000001
+    },
+    {
+      "F1": 0.8711111111111111,
+      "FN": 26,
+      "FNR": 0.20967741935483875,
+      "FP": 3,
+      "FPR": 0.005988023952095856,
+      "TN": 498,
+      "TP": 98,
+      "accuracy": 0.9536,
+      "precision": 0.9702970297029703,
+      "recall": 0.7903225806451613,
+      "specificity": 0.9940119760479041,
+      "threshold": 0.7000000000000001
+    },
+    {
+      "F1": 0.8711111111111111,
+      "FN": 26,
+      "FNR": 0.20967741935483875,
+      "FP": 3,
+      "FPR": 0.005988023952095856,
+      "TN": 498,
+      "TP": 98,
+      "accuracy": 0.9536,
+      "precision": 0.9702970297029703,
+      "recall": 0.7903225806451613,
+      "specificity": 0.9940119760479041,
+      "threshold": 0.7100000000000001
+    },
+    {
+      "F1": 0.8609865470852018,
+      "FN": 28,
+      "FNR": 0.22580645161290325,
+      "FP": 3,
+      "FPR": 0.005988023952095856,
+      "TN": 498,
+      "TP": 96,
+      "accuracy": 0.9504,
+      "precision": 0.9696969696969697,
+      "recall": 0.7741935483870968,
+      "specificity": 0.9940119760479041,
+      "threshold": 0.72
+    },
+    {
+      "F1": 0.8609865470852018,
+      "FN": 28,
+      "FNR": 0.22580645161290325,
+      "FP": 3,
+      "FPR": 0.005988023952095856,
+      "TN": 498,
+      "TP": 96,
+      "accuracy": 0.9504,
+      "precision": 0.9696969696969697,
+      "recall": 0.7741935483870968,
+      "specificity": 0.9940119760479041,
+      "threshold": 0.73
+    },
+    {
+      "F1": 0.8609865470852018,
+      "FN": 28,
+      "FNR": 0.22580645161290325,
+      "FP": 3,
+      "FPR": 0.005988023952095856,
+      "TN": 498,
+      "TP": 96,
+      "accuracy": 0.9504,
+      "precision": 0.9696969696969697,
+      "recall": 0.7741935483870968,
+      "specificity": 0.9940119760479041,
+      "threshold": 0.74
+    },
+    {
+      "F1": 0.8506787330316743,
+      "FN": 30,
+      "FNR": 0.24193548387096775,
+      "FP": 3,
+      "FPR": 0.005988023952095856,
+      "TN": 498,
+      "TP": 94,
+      "accuracy": 0.9472,
+      "precision": 0.9690721649484536,
+      "recall": 0.7580645161290323,
+      "specificity": 0.9940119760479041,
+      "threshold": 0.75
+    },
+    {
+      "F1": 0.8506787330316743,
+      "FN": 30,
+      "FNR": 0.24193548387096775,
+      "FP": 3,
+      "FPR": 0.005988023952095856,
+      "TN": 498,
+      "TP": 94,
+      "accuracy": 0.9472,
+      "precision": 0.9690721649484536,
+      "recall": 0.7580645161290323,
+      "specificity": 0.9940119760479041,
+      "threshold": 0.76
+    },
+    {
+      "F1": 0.8506787330316743,
+      "FN": 30,
+      "FNR": 0.24193548387096775,
+      "FP": 3,
+      "FPR": 0.005988023952095856,
+      "TN": 498,
+      "TP": 94,
+      "accuracy": 0.9472,
+      "precision": 0.9690721649484536,
+      "recall": 0.7580645161290323,
+      "specificity": 0.9940119760479041,
+      "threshold": 0.77
+    },
+    {
+      "F1": 0.8401826484018264,
+      "FN": 32,
+      "FNR": 0.25806451612903225,
+      "FP": 3,
+      "FPR": 0.005988023952095856,
+      "TN": 498,
+      "TP": 92,
+      "accuracy": 0.944,
+      "precision": 0.968421052631579,
+      "recall": 0.7419354838709677,
+      "specificity": 0.9940119760479041,
+      "threshold": 0.78
+    },
+    {
+      "F1": 0.8348623853211009,
+      "FN": 33,
+      "FNR": 0.2661290322580645,
+      "FP": 3,
+      "FPR": 0.005988023952095856,
+      "TN": 498,
+      "TP": 91,
+      "accuracy": 0.9424,
+      "precision": 0.9680851063829787,
+      "recall": 0.7338709677419355,
+      "specificity": 0.9940119760479041,
+      "threshold": 0.79
+    },
+    {
+      "F1": 0.8240740740740741,
+      "FN": 35,
+      "FNR": 0.282258064516129,
+      "FP": 3,
+      "FPR": 0.005988023952095856,
+      "TN": 498,
+      "TP": 89,
+      "accuracy": 0.9392,
+      "precision": 0.967391304347826,
+      "recall": 0.717741935483871,
+      "specificity": 0.9940119760479041,
+      "threshold": 0.8
+    },
+    {
+      "F1": 0.8130841121495326,
+      "FN": 37,
+      "FNR": 0.2983870967741935,
+      "FP": 3,
+      "FPR": 0.005988023952095856,
+      "TN": 498,
+      "TP": 87,
+      "accuracy": 0.936,
+      "precision": 0.9666666666666667,
+      "recall": 0.7016129032258065,
+      "specificity": 0.9940119760479041,
+      "threshold": 0.81
+    },
+    {
+      "F1": 0.8018867924528302,
+      "FN": 39,
+      "FNR": 0.3145161290322581,
+      "FP": 3,
+      "FPR": 0.005988023952095856,
+      "TN": 498,
+      "TP": 85,
+      "accuracy": 0.9328,
+      "precision": 0.9659090909090909,
+      "recall": 0.6854838709677419,
+      "specificity": 0.9940119760479041,
+      "threshold": 0.8200000000000001
+    },
+    {
+      "F1": 0.8,
+      "FN": 40,
+      "FNR": 0.32258064516129037,
+      "FP": 2,
+      "FPR": 0.003992015968063867,
+      "TN": 499,
+      "TP": 84,
+      "accuracy": 0.9328,
+      "precision": 0.9767441860465116,
+      "recall": 0.6774193548387096,
+      "specificity": 0.9960079840319361,
+      "threshold": 0.8300000000000001
+    },
+    {
+      "F1": 0.7884615384615384,
+      "FN": 42,
+      "FNR": 0.33870967741935487,
+      "FP": 2,
+      "FPR": 0.003992015968063867,
+      "TN": 499,
+      "TP": 82,
+      "accuracy": 0.9296,
+      "precision": 0.9761904761904762,
+      "recall": 0.6612903225806451,
+      "specificity": 0.9960079840319361,
+      "threshold": 0.8400000000000001
+    },
+    {
+      "F1": 0.7647058823529411,
+      "FN": 46,
+      "FNR": 0.3709677419354839,
+      "FP": 2,
+      "FPR": 0.003992015968063867,
+      "TN": 499,
+      "TP": 78,
+      "accuracy": 0.9232,
+      "precision": 0.975,
+      "recall": 0.6290322580645161,
+      "specificity": 0.9960079840319361,
+      "threshold": 0.85
+    },
+    {
+      "F1": 0.7562189054726367,
+      "FN": 48,
+      "FNR": 0.3870967741935484,
+      "FP": 1,
+      "FPR": 0.001996007984031989,
+      "TN": 500,
+      "TP": 76,
+      "accuracy": 0.9216,
+      "precision": 0.987012987012987,
+      "recall": 0.6129032258064516,
+      "specificity": 0.998003992015968,
+      "threshold": 0.86
+    },
+    {
+      "F1": 0.7562189054726367,
+      "FN": 48,
+      "FNR": 0.3870967741935484,
+      "FP": 1,
+      "FPR": 0.001996007984031989,
+      "TN": 500,
+      "TP": 76,
+      "accuracy": 0.9216,
+      "precision": 0.987012987012987,
+      "recall": 0.6129032258064516,
+      "specificity": 0.998003992015968,
+      "threshold": 0.87
+    },
+    {
+      "F1": 0.7437185929648241,
+      "FN": 50,
+      "FNR": 0.4032258064516129,
+      "FP": 1,
+      "FPR": 0.001996007984031989,
+      "TN": 500,
+      "TP": 74,
+      "accuracy": 0.9184,
+      "precision": 0.9866666666666667,
+      "recall": 0.5967741935483871,
+      "specificity": 0.998003992015968,
+      "threshold": 0.88
+    },
+    {
+      "F1": 0.7046632124352332,
+      "FN": 56,
+      "FNR": 0.4516129032258065,
+      "FP": 1,
+      "FPR": 0.001996007984031989,
+      "TN": 500,
+      "TP": 68,
+      "accuracy": 0.9088,
+      "precision": 0.9855072463768116,
+      "recall": 0.5483870967741935,
+      "specificity": 0.998003992015968,
+      "threshold": 0.89
+    },
+    {
+      "F1": 0.7015706806282722,
+      "FN": 57,
+      "FNR": 0.45967741935483875,
+      "FP": 0,
+      "FPR": 0.0,
+      "TN": 501,
+      "TP": 67,
+      "accuracy": 0.9088,
+      "precision": 1.0,
+      "recall": 0.5403225806451613,
+      "specificity": 1.0,
+      "threshold": 0.9
+    },
+    {
+      "F1": 0.6947368421052631,
+      "FN": 58,
+      "FNR": 0.467741935483871,
+      "FP": 0,
+      "FPR": 0.0,
+      "TN": 501,
+      "TP": 66,
+      "accuracy": 0.9072,
+      "precision": 1.0,
+      "recall": 0.532258064516129,
+      "specificity": 1.0,
+      "threshold": 0.91
+    },
+    {
+      "F1": 0.6666666666666666,
+      "FN": 62,
+      "FNR": 0.5,
+      "FP": 0,
+      "FPR": 0.0,
+      "TN": 501,
+      "TP": 62,
+      "accuracy": 0.9008,
+      "precision": 1.0,
+      "recall": 0.5,
+      "specificity": 1.0,
+      "threshold": 0.92
+    },
+    {
+      "F1": 0.6298342541436464,
+      "FN": 67,
+      "FNR": 0.5403225806451613,
+      "FP": 0,
+      "FPR": 0.0,
+      "TN": 501,
+      "TP": 57,
+      "accuracy": 0.8928,
+      "precision": 1.0,
+      "recall": 0.4596774193548387,
+      "specificity": 1.0,
+      "threshold": 0.93
+    },
+    {
+      "F1": 0.6222222222222222,
+      "FN": 68,
+      "FNR": 0.5483870967741935,
+      "FP": 0,
+      "FPR": 0.0,
+      "TN": 501,
+      "TP": 56,
+      "accuracy": 0.8912,
+      "precision": 1.0,
+      "recall": 0.45161290322580644,
+      "specificity": 1.0,
+      "threshold": 0.9400000000000001
+    },
+    {
+      "F1": 0.6067415730337078,
+      "FN": 70,
+      "FNR": 0.564516129032258,
+      "FP": 0,
+      "FPR": 0.0,
+      "TN": 501,
+      "TP": 54,
+      "accuracy": 0.888,
+      "precision": 1.0,
+      "recall": 0.43548387096774194,
+      "specificity": 1.0,
+      "threshold": 0.9500000000000001
+    },
+    {
+      "F1": 0.5828571428571429,
+      "FN": 73,
+      "FNR": 0.5887096774193548,
+      "FP": 0,
+      "FPR": 0.0,
+      "TN": 501,
+      "TP": 51,
+      "accuracy": 0.8832,
+      "precision": 1.0,
+      "recall": 0.4112903225806452,
+      "specificity": 1.0,
+      "threshold": 0.9600000000000001
+    },
+    {
+      "F1": 0.5149700598802396,
+      "FN": 81,
+      "FNR": 0.6532258064516129,
+      "FP": 0,
+      "FPR": 0.0,
+      "TN": 501,
+      "TP": 43,
+      "accuracy": 0.8704,
+      "precision": 1.0,
+      "recall": 0.3467741935483871,
+      "specificity": 1.0,
+      "threshold": 0.97
+    },
+    {
+      "F1": 0.41025641025641024,
+      "FN": 92,
+      "FNR": 0.7419354838709677,
+      "FP": 0,
+      "FPR": 0.0,
+      "TN": 501,
+      "TP": 32,
+      "accuracy": 0.8528,
+      "precision": 1.0,
+      "recall": 0.25806451612903225,
+      "specificity": 1.0,
+      "threshold": 0.98
+    },
+    {
+      "F1": 0.3355704697986577,
+      "FN": 99,
+      "FNR": 0.7983870967741935,
+      "FP": 0,
+      "FPR": 0.0,
+      "TN": 501,
+      "TP": 25,
+      "accuracy": 0.8416,
+      "precision": 1.0,
+      "recall": 0.20161290322580644,
+      "specificity": 1.0,
+      "threshold": 0.99
+    }
+  ],
+  "validation_metrics": {
+    "F1": 0.8652482269503546,
+    "FN": 2,
+    "FNR": 0.016129032258064502,
+    "FP": 36,
+    "FPR": 0.07185628742514971,
+    "TN": 465,
+    "TP": 122,
+    "accuracy": 0.9392,
+    "category_f1_scopes": {
+      "merged": {
+        "all_labelled_incl_legitimate": {
+          "legitimate": 501,
+          "macro_f1": 0.7934454881758973,
+          "malicious": 124,
+          "per_class": {
+            "credential_theft": {
+              "f1": 0.7272727272727272,
+              "precision": 0.8,
+              "recall": 0.6666666666666666,
+              "support": 6
+            },
+            "delivery_scam": {
+              "f1": 0.7272727272727272,
+              "precision": 0.6666666666666666,
+              "recall": 0.8,
+              "support": 10
+            },
+            "digital_arrest": {
+              "f1": 0.9333333333333333,
+              "precision": 0.875,
+              "recall": 1.0,
+              "support": 7
+            },
+            "fake_job": {
+              "f1": 0.9473684210526316,
+              "precision": 0.9,
+              "recall": 1.0,
+              "support": 9
+            },
+            "impersonation": {
+              "f1": 0.6,
+              "precision": 0.6,
+              "recall": 0.6,
+              "support": 10
+            },
+            "investment_scam": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 6
+            },
+            "legitimate": {
+              "f1": 0.9607438016528926,
+              "precision": 0.9957173447537473,
+              "recall": 0.9281437125748503,
+              "support": 501
+            },
+            "other_fraud": {
+              "f1": 0.6557377049180327,
+              "precision": 0.6060606060606061,
+              "recall": 0.7142857142857143,
+              "support": 28
+            },
+            "payment_fraud": {
+              "f1": 0.6956521739130435,
+              "precision": 0.6153846153846154,
+              "recall": 0.8,
+              "support": 10
+            },
+            "phishing": {
+              "f1": 0.7272727272727274,
+              "precision": 0.6153846153846154,
+              "recall": 0.8888888888888888,
+              "support": 9
+            },
+            "prize_lottery_scam": {
+              "f1": 0.7532467532467533,
+              "precision": 0.6041666666666666,
+              "recall": 1.0,
+              "support": 29
+            }
+          },
+          "support": 625,
+          "weighted_f1": 0.9179767124059446
+        },
+        "fraud_only": {
+          "legitimate": 0,
+          "macro_f1": 0.8605346700083543,
+          "malicious": 124,
+          "per_class": {
+            "credential_theft": {
+              "f1": 0.8,
+              "precision": 1.0,
+              "recall": 0.6666666666666666,
+              "support": 6
+            },
+            "delivery_scam": {
+              "f1": 0.888888888888889,
+              "precision": 1.0,
+              "recall": 0.8,
+              "support": 10
+            },
+            "digital_arrest": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 7
+            },
+            "fake_job": {
+              "f1": 0.9473684210526316,
+              "precision": 0.9,
+              "recall": 1.0,
+              "support": 9
+            },
+            "impersonation": {
+              "f1": 0.6666666666666665,
+              "precision": 0.75,
+              "recall": 0.6,
+              "support": 10
+            },
+            "investment_scam": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 6
+            },
+            "other_fraud": {
+              "f1": 0.7777777777777779,
+              "precision": 0.8076923076923077,
+              "recall": 0.75,
+              "support": 28
+            },
+            "payment_fraud": {
+              "f1": 0.761904761904762,
+              "precision": 0.7272727272727273,
+              "recall": 0.8,
+              "support": 10
+            },
+            "phishing": {
+              "f1": 0.8421052631578948,
+              "precision": 0.8,
+              "recall": 0.8888888888888888,
+              "support": 9
+            },
+            "prize_lottery_scam": {
+              "f1": 0.9206349206349206,
+              "precision": 0.8529411764705882,
+              "recall": 1.0,
+              "support": 29
+            }
+          },
+          "support": 124,
+          "weighted_f1": 0.8512585226507129
+        }
+      },
+      "unmerged": {
+        "all_labelled_incl_legitimate": {
+          "legitimate": 501,
+          "macro_f1": 0.7934454881758973,
+          "malicious": 124,
+          "per_class": {
+            "credential_theft": {
+              "f1": 0.7272727272727272,
+              "precision": 0.8,
+              "recall": 0.6666666666666666,
+              "support": 6
+            },
+            "delivery_scam": {
+              "f1": 0.7272727272727272,
+              "precision": 0.6666666666666666,
+              "recall": 0.8,
+              "support": 10
+            },
+            "digital_arrest": {
+              "f1": 0.9333333333333333,
+              "precision": 0.875,
+              "recall": 1.0,
+              "support": 7
+            },
+            "fake_job": {
+              "f1": 0.9473684210526316,
+              "precision": 0.9,
+              "recall": 1.0,
+              "support": 9
+            },
+            "impersonation": {
+              "f1": 0.6,
+              "precision": 0.6,
+              "recall": 0.6,
+              "support": 10
+            },
+            "investment_scam": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 6
+            },
+            "legitimate": {
+              "f1": 0.9607438016528926,
+              "precision": 0.9957173447537473,
+              "recall": 0.9281437125748503,
+              "support": 501
+            },
+            "other_fraud": {
+              "f1": 0.6557377049180327,
+              "precision": 0.6060606060606061,
+              "recall": 0.7142857142857143,
+              "support": 28
+            },
+            "payment_fraud": {
+              "f1": 0.6956521739130435,
+              "precision": 0.6153846153846154,
+              "recall": 0.8,
+              "support": 10
+            },
+            "phishing": {
+              "f1": 0.7272727272727274,
+              "precision": 0.6153846153846154,
+              "recall": 0.8888888888888888,
+              "support": 9
+            },
+            "prize_lottery_scam": {
+              "f1": 0.7532467532467533,
+              "precision": 0.6041666666666666,
+              "recall": 1.0,
+              "support": 29
+            }
+          },
+          "support": 625,
+          "weighted_f1": 0.9179767124059446
+        },
+        "fraud_only": {
+          "legitimate": 0,
+          "macro_f1": 0.8605346700083543,
+          "malicious": 124,
+          "per_class": {
+            "credential_theft": {
+              "f1": 0.8,
+              "precision": 1.0,
+              "recall": 0.6666666666666666,
+              "support": 6
+            },
+            "delivery_scam": {
+              "f1": 0.888888888888889,
+              "precision": 1.0,
+              "recall": 0.8,
+              "support": 10
+            },
+            "digital_arrest": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 7
+            },
+            "fake_job": {
+              "f1": 0.9473684210526316,
+              "precision": 0.9,
+              "recall": 1.0,
+              "support": 9
+            },
+            "impersonation": {
+              "f1": 0.6666666666666665,
+              "precision": 0.75,
+              "recall": 0.6,
+              "support": 10
+            },
+            "investment_scam": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 6
+            },
+            "other_fraud": {
+              "f1": 0.7777777777777779,
+              "precision": 0.8076923076923077,
+              "recall": 0.75,
+              "support": 28
+            },
+            "payment_fraud": {
+              "f1": 0.761904761904762,
+              "precision": 0.7272727272727273,
+              "recall": 0.8,
+              "support": 10
+            },
+            "phishing": {
+              "f1": 0.8421052631578948,
+              "precision": 0.8,
+              "recall": 0.8888888888888888,
+              "support": 9
+            },
+            "prize_lottery_scam": {
+              "f1": 0.9206349206349206,
+              "precision": 0.8529411764705882,
+              "recall": 1.0,
+              "support": 29
+            }
+          },
+          "support": 124,
+          "weighted_f1": 0.8512585226507129
+        }
+      }
+    },
+    "category_macro_f1": 0.8605346700083543,
+    "category_weighted_f1": 0.8512585226507129,
+    "precision": 0.7721518987341772,
+    "recall": 0.9838709677419355,
+    "specificity": 0.9281437125748503,
+    "threshold": 0.16
+  }
+}

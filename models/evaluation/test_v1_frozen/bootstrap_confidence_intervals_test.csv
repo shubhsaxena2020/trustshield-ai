@@ -1,0 +1,13 @@
+system,metric,threshold,point_estimate,bootstrap_mean,ci_lower,ci_upper,confidence_level,resamples,seed,bootstrap_scheme,n_rows,n_groups
+rules,recall,25.0,0.057239057239,0.057151606106,0.031029168635,0.088569085691,0.95,2000,42,duplicate_group cluster bootstrap; sample 497 groups with replacement and include all rows in each sampled group,625,497
+rules,specificity,25.0,0.97256097561,0.972804025837,0.942758798173,0.994475138122,0.95,2000,42,duplicate_group cluster bootstrap; sample 497 groups with replacement and include all rows in each sampled group,625,497
+rules,precision,25.0,0.653846153846,0.667344408658,0.423076923077,0.923076923077,0.95,2000,42,duplicate_group cluster bootstrap; sample 497 groups with replacement and include all rows in each sampled group,625,497
+rules,F1,25.0,0.105263157895,0.104821164781,0.058247729408,0.158847156143,0.95,2000,42,duplicate_group cluster bootstrap; sample 497 groups with replacement and include all rows in each sampled group,625,497
+ml,recall,0.12,0.93265993266,0.933106795961,0.902279518013,0.960526315789,0.95,2000,42,duplicate_group cluster bootstrap; sample 497 groups with replacement and include all rows in each sampled group,625,497
+ml,specificity,0.12,0.746951219512,0.74515911823,0.688471827171,0.795600839853,0.95,2000,42,duplicate_group cluster bootstrap; sample 497 groups with replacement and include all rows in each sampled group,625,497
+ml,precision,0.12,0.769444444444,0.769637356493,0.719344853961,0.813958054304,0.95,2000,42,duplicate_group cluster bootstrap; sample 497 groups with replacement and include all rows in each sampled group,625,497
+ml,F1,0.12,0.843226788432,0.843300140474,0.808438543255,0.87370201532,0.95,2000,42,duplicate_group cluster bootstrap; sample 497 groups with replacement and include all rows in each sampled group,625,497
+combined,recall,25.0,0.262626262626,0.262077228052,0.200703626521,0.325885751257,0.95,2000,42,duplicate_group cluster bootstrap; sample 497 groups with replacement and include all rows in each sampled group,625,497
+combined,specificity,25.0,0.969512195122,0.969193071862,0.938650306748,0.993865030675,0.95,2000,42,duplicate_group cluster bootstrap; sample 497 groups with replacement and include all rows in each sampled group,625,497
+combined,precision,25.0,0.886363636364,0.885743085568,0.777777777778,0.97619047619,0.95,2000,42,duplicate_group cluster bootstrap; sample 497 groups with replacement and include all rows in each sampled group,625,497
+combined,F1,25.0,0.405194805195,0.403460654055,0.324464491087,0.48,0.95,2000,42,duplicate_group cluster bootstrap; sample 497 groups with replacement and include all rows in each sampled group,625,497

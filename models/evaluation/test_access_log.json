@@ -1,0 +1,8 @@
+[
+  {
+    "command_line": "scripts/evaluate_model.py --split test --systems rules,ml,combined --dataset-dir datasets/processed/trustshield-text-v1 --model-name trustshield_text_v1 --confirm-final-test",
+    "dataset_manifest_sha256": "4e5556fd63cb29e932fd6e241d8d1e98eda1bf1abb46ffba55b437a40b967485",
+    "model_artifact_sha256": "4daac40049baa3622d4b7acbad309ef001456d04f029e361dcd67be186e130ea",
+    "timestamp": "2026-09-23T20:23:22.146832+00:00"
+  }
+]

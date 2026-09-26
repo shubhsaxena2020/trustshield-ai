@@ -1,0 +1,124 @@
+{
+  "review_basis": "Primary causes are descriptive human inferences from the saved clean-text messages and recorded labels; they are not new ground-truth annotations. Counts in each table are mutually exclusive primary-cause counts.",
+  "reviewed_sets": {
+    "ml_false_positives": 83,
+    "ml_false_negatives": 20,
+    "rules_false_positives": 9,
+    "combined_false_negative_sample": 40,
+    "combined_false_negative_sample_seed": 42,
+    "unique_review_rows": 150
+  },
+  "false_positive_causes": [
+    {
+      "cause": "security-warning language",
+      "count": 26,
+      "slice_counts": {"holdout": 26, "public": 0, "synthetic_other": 0},
+      "examples": ["holdout-codex-v1-035d786a", "holdout-codex-v1-4833371f", "holdout-codex-v1-b81c2b28"]
+    },
+    {
+      "cause": "banking vocabulary",
+      "count": 16,
+      "slice_counts": {"holdout": 15, "public": 0, "synthetic_other": 1},
+      "examples": ["agy-gen-legit-v1-d74eaaea", "holdout-codex-v1-6f01526c", "holdout-codex-v1-f7eaa2f2"]
+    },
+    {
+      "cause": "urgent legitimate notification",
+      "count": 17,
+      "slice_counts": {"holdout": 16, "public": 1, "synthetic_other": 0},
+      "examples": ["holdout-codex-v1-2da9b3d1", "holdout-codex-v1-31ea062a", "holdout-codex-v1-b27d08db"]
+    },
+    {
+      "cause": "payment terminology",
+      "count": 20,
+      "slice_counts": {"holdout": 14, "public": 6, "synthetic_other": 0},
+      "examples": ["holdout-codex-v1-02f076a2", "holdout-codex-v1-1c0498e2", "ucisms-031bf24a"]
+    },
+    {
+      "cause": "short or context-free text",
+      "count": 4,
+      "slice_counts": {"holdout": 1, "public": 3, "synthetic_other": 0},
+      "examples": ["holdout-codex-v1-008914ae", "indiaspam-035e199d", "indiaspam-d4e39247"]
+    },
+    {
+      "cause": "other",
+      "count": 0,
+      "slice_counts": {"holdout": 0, "public": 0, "synthetic_other": 0},
+      "examples": []
+    }
+  ],
+  "false_negative_causes": [
+    {
+      "cause": "unusual wording",
+      "count": 3,
+      "slice_counts": {"holdout": 3, "public": 0},
+      "examples": ["holdout-codex-v1-20349da7", "holdout-codex-v1-590b3439", "holdout-codex-v1-f72cf0da"]
+    },
+    {
+      "cause": "insufficient context",
+      "count": 2,
+      "slice_counts": {"holdout": 2, "public": 0},
+      "examples": ["holdout-codex-v1-97120f5a", "holdout-codex-v1-a29dfb23"]
+    },
+    {
+      "cause": "obfuscation",
+      "count": 2,
+      "slice_counts": {"holdout": 0, "public": 2},
+      "examples": ["ucisms-5cc6b284", "ucisms-cbb24ad5"]
+    },
+    {
+      "cause": "new scam pattern",
+      "count": 8,
+      "slice_counts": {"holdout": 8, "public": 0},
+      "examples": ["holdout-codex-v1-1b7d1301", "holdout-codex-v1-8fbf4f82", "holdout-codex-v1-cf6b4495"]
+    },
+    {
+      "cause": "OCR corruption",
+      "count": 0,
+      "slice_counts": {"holdout": 0, "public": 0},
+      "examples": [],
+      "note": "n/a for this clean-text review"
+    },
+    {
+      "cause": "classifier weakness",
+      "count": 4,
+      "slice_counts": {"holdout": 4, "public": 0},
+      "examples": ["holdout-codex-v1-1d249e4f", "holdout-codex-v1-794935a5", "holdout-codex-v1-d803f236"]
+    },
+    {
+      "cause": "rule gap",
+      "count": 1,
+      "slice_counts": {"holdout": 1, "public": 0},
+      "examples": ["holdout-codex-v1-2d21d6d2"]
+    }
+  ],
+  "observed_fn_facts": {
+    "ml_false_positives_holdout": 72,
+    "ml_false_positives_public": 10,
+    "ml_false_positives_synthetic_other": 1,
+    "ml_false_negatives_with_rule_score_below_25": 19,
+    "ml_false_negatives_with_rule_score_at_least_25": 1,
+    "ml_false_negatives_holdout": 18,
+    "ml_false_negatives_public": 2,
+    "all_reviewed_text_was_clean_text": true
+  },
+  "rules_false_positive_summary": {
+    "count": 9,
+    "slice_counts": {"holdout": 0, "public": 9, "synthetic_other": 0},
+    "observed_pattern": "All nine were Indian telecom or retail promotions whose wording matched rule evidence such as cashback, free subscriptions, recharge, or an offer link.",
+    "examples": ["indiaspam-02adb758", "indiaspam-3877bbdb", "indiaspam-86e6cece"]
+  },
+  "combined_fn_sample_summary": {
+    "sample_size": 40,
+    "holdout": 30,
+    "public": 10,
+    "ml_probability_at_least_012": 38,
+    "ml_probability_below_012": 2,
+    "observed_pattern": "Thirty-eight of the forty sampled combined false negatives had ML probability at least 0.12 but remained below combined risk score 25; this is an observed fusion outcome, not a retuning recommendation.",
+    "examples": ["holdout-codex-v1-0399ffb8", "holdout-codex-v1-06e03034", "ucisms-384544ad"]
+  },
+  "future_work": [
+    "Expand hard-negative coverage beyond the current synthetic controls and public promotions.",
+    "Evaluate fusion calibration and uncertainty on a new, independently collected corpus.",
+    "Add real screenshot data and OCR-specific error labels before making screenshot claims."
+  ]
+}
