@@ -28,7 +28,7 @@ RULES = {
 SKIP_SUFFIXES = {".png", ".jpg", ".jpeg", ".webp", ".joblib", ".pkl", ".svg", ".lock", ".ico", ".woff", ".woff2"}
 SKIP_FILES = {"package-lock.json", "requirements-lock.txt", "requirements-api.lock.txt"}
 # Fixtures that intentionally contain fake credentials to exercise the redaction/analysis code.
-ALLOW_PATH_PARTS = ("tests/fixtures", "datasets/", "demo/fixtures", "benchmarks/", "tests/unit/test_secret_scan_and_fetch.py")
+ALLOW_PATH_PARTS = ("tests/fixtures", "datasets/", "demo/fixtures", "benchmarks/", "tests/unit/test_secret_scan_and_fetch.py", "tests/unit/test_fetch_authenticated.py")
 
 
 def tracked_files() -> list[Path]:
