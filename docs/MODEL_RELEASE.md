@@ -5,23 +5,30 @@ and verified byte-for-byte against `models/release/v3_release_manifest.json` (`m
 
 ## Publishing (once per promoted model)
 
-1. Compute and confirm the hash: `python scripts/build_release_manifest.py` records it; the value must equal
+1. Confirm the hash recorded by `python scripts/build_release_manifest.py` equals
    `d69aadbb758d186c8b33946895b456588cf8f5ce5eca504647d9e7a009c1189a` for the promoted v3.
-2. Attach `models/trained/trustshield_text_v3.joblib` (and the v1 rollback for CI) to a GitHub Release of the repository as
-   release assets. Note the asset URLs; store them as GitHub repository **variables** `MODEL_V3_URL` / `MODEL_V1_URL`
-   (URLs are not secrets; integrity comes from the hash, not from the URL).
+2. Create a **private** GitHub Release (tag `model-v3`) on the repository and attach `trustshield_text_v3.joblib`,
+   `trustshield_text_v1.joblib` (rollback) and `SHA256SUMS`. Release assets of a private repository are private.
 
-## Consuming
+## Authenticated retrieval (server-side, narrowly scoped)
 
-| where | how |
+| where | credential | how |
+|---|---|---|
+| GitHub Actions | the job's built-in `GITHUB_TOKEN` (`contents: read`) | `scripts/fetch_model_artifact.py --github-release owner/repo@model-v3` |
+| Render Docker build | a **fine-grained personal access token**, single repository, permission *Contents: Read-only*, expiry <= 90 days, stored as a Render environment variable / secret `MODEL_FETCH_TOKEN` | `docker/api.Dockerfile` reads it as a BuildKit **secret** (`RUN --mount=type=secret,id=MODEL_FETCH_TOKEN`), never as `ARG`/`ENV`, so it cannot appear in image layers, `docker history` or build logs; `MODEL_RELEASE=owner/repo@model-v3` is a plain (non-secret) build argument |
+| local build | `docker build --secret id=MODEL_FETCH_TOKEN,env=MODEL_FETCH_TOKEN --build-arg MODEL_RELEASE=owner/repo@model-v3 ...` | same script |
+
+The fetcher sends the token only to `api.github.com`; the asset endpoint answers with a redirect to a pre-signed storage URL and the
+`Authorization` header is dropped on that cross-host redirect (tested). The token is read from a file/env, never placed on a command
+line, never printed (errors show only an HTTP status), and never written to disk. The token is not `NEXT_PUBLIC_*`, is not used by the
+running API (the image already contains the verified artifact) and is never returned by any endpoint. Rotate it by replacing the Render
+secret; revoke it in GitHub if exposed.
+
+| step | check |
 |---|---|
-| Docker build | `docker build -f docker/api.Dockerfile --build-arg MODEL_ARTIFACT_URL=<https asset URL> .` or place the file in `release-artifacts/` (git-ignored). The build **fails** if the SHA-256 differs. |
-| CI | `scripts/fetch_model_artifact.py --url $MODEL_V3_URL` before tests, preflight and the container job. |
-| Render | the image already contains the verified artifact; nothing is downloaded at runtime. |
-| API startup (staging/production) | re-verifies hash, load, identity, threshold 0.16 and sklearn; aborts on any mismatch. |
-
-`scripts/fetch_model_artifact.py` accepts HTTPS only, refuses non-HTTPS redirects, caps size, writes atomically, and installs
-nothing when the hash differs.
+| fetch | HTTPS only, size-capped, atomic write |
+| install | SHA-256 must equal the release manifest, otherwise nothing is installed and the build fails |
+| API startup (staging/production) | re-verifies hash, load, identity, threshold 0.16 and sklearn; aborts on any mismatch |
 
 ## Recovery only
 

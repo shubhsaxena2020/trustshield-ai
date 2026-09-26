@@ -2,7 +2,7 @@
 # Build from the repository root:
 #   docker build -f docker/api.Dockerfile -t trustshield-api .
 # The promoted model artifact is never trained here. Supply it either as release-artifacts/trustshield_text_v3.joblib in the
-# build context or with --build-arg MODEL_ARTIFACT_URL=<https release asset>; the build FAILS unless its SHA-256 matches
+# build context or from a private GitHub Release (--build-arg MODEL_RELEASE + BuildKit secret); the build FAILS unless its SHA-256 matches
 # models/release/v3_release_manifest.json.
 FROM python:3.13-slim-bookworm@sha256:2325bb286ec344af3e5898cc224b5844e2707ac6e26b1632516fd3edc84a5e26
 
@@ -30,8 +30,12 @@ COPY models/release/v3_release_manifest.json ./models/release/v3_release_manifes
 COPY scripts/fetch_model_artifact.py ./scripts/fetch_model_artifact.py
 COPY release-artifacts ./release-artifacts
 
-ARG MODEL_ARTIFACT_URL=""
-RUN python scripts/fetch_model_artifact.py --from-dir release-artifacts ${MODEL_ARTIFACT_URL:+--url "$MODEL_ARTIFACT_URL"} \
+# MODEL_RELEASE=OWNER/REPO@TAG names a PRIVATE GitHub Release (not secret). The read-only token is a BuildKit secret
+# (id MODEL_FETCH_TOKEN, mounted at /run/secrets, never an ARG/ENV, so it cannot appear in image layers, `docker history` or logs):
+#   docker build --secret id=MODEL_FETCH_TOKEN,env=MODEL_FETCH_TOKEN --build-arg MODEL_RELEASE=owner/repo@model-v3 -f docker/api.Dockerfile .
+ARG MODEL_RELEASE=""
+RUN --mount=type=secret,id=MODEL_FETCH_TOKEN \
+    python scripts/fetch_model_artifact.py --from-dir release-artifacts ${MODEL_RELEASE:+--github-release "$MODEL_RELEASE" --token-file /run/secrets/MODEL_FETCH_TOKEN} \
  && rm -rf release-artifacts scripts \
  && mkdir -p /tmp/trustshield && chown -R trustshield:trustshield /tmp/trustshield
 
