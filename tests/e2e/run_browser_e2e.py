@@ -58,7 +58,7 @@ def main() -> int:
         with sync_playwright() as pw:
             browser = pw.chromium.launch()
             page = browser.new_page(viewport={"width": 1100, "height": 900})
-            page.goto("http://localhost:3000/")
+            page.goto("http://localhost:3000/analyzer")
             body = lambda: page.inner_text("body")  # noqa: E731
 
             page.fill("#input", "URGENT: your SBI account is blocked. Share the OTP now and verify KYC at http://sbi-kyc-update.xyz/login")
@@ -130,7 +130,7 @@ def degraded() -> int:
         with sync_playwright() as pw:
             browser = pw.chromium.launch()
             page = browser.new_page(viewport={"width": 1100, "height": 900})
-            page.goto("http://localhost:3000/")
+            page.goto("http://localhost:3000/analyzer")
             page.wait_for_selector("[data-testid=ml-unavailable-banner]", timeout=15000)
             check("degraded: banner visible on the text tab", page.locator("[data-testid=ml-unavailable-banner]").is_visible())
             page.click("role=tab[name=/qr/i]")

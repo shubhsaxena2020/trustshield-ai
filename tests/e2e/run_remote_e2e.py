@@ -44,7 +44,7 @@ def main() -> int:
         requests: list[str] = []
         page.on("console", lambda m: console_errors.append(m.text) if m.type == "error" else None)
         page.on("request", lambda r: requests.append(r.url))
-        page.goto(args.web, wait_until="networkidle", timeout=args.timeout)
+        page.goto(args.web.rstrip("/") + "/analyzer", wait_until="networkidle", timeout=args.timeout)  # the tabbed analyzer moved from / to /analyzer
         body = lambda: page.inner_text("body")  # noqa: E731
         check("site opens over HTTPS", (args.local_rehearsal or args.web.startswith("https://")) and "TrustShield" in body())
         check("prototype footer shown", "Research / Tech Expo Prototype" in body())
