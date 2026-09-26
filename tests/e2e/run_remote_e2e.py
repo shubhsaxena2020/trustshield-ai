@@ -99,7 +99,9 @@ def main() -> int:
         api_origin = (args.api or args.web).rstrip("/")
         check("browser called the production API directly", any(u.startswith(api_origin + "/api/v1/analyze/") for u in requests))
         check("no localhost requests in production", args.local_rehearsal or not any("localhost" in u or "127.0.0.1" in u for u in requests))
-        check("no CORS/console errors", not any("CORS" in e or "blocked" in e.lower() for e in console_errors), "; ".join(console_errors)[:300])
+        # The Vercel preview toolbar (vercel.live) is injected only into Preview deployments and is intentionally blocked by our CSP.
+        app_errors = [e for e in console_errors if "vercel.live" not in e]
+        check("no CORS/console errors", not any("CORS" in e or "blocked" in e.lower() for e in app_errors), "; ".join(app_errors)[:300])
         browser.close()
     bad.unlink(missing_ok=True)  # released only after the browser closes (Windows keeps the upload handle open)
     failed = [name for name, ok in results if not ok]

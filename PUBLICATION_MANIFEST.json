@@ -491,7 +491,7 @@
     "services/worker/sandbox_worker.py": "f11012f42c9b5cee405eb5f1e7384564826da151d03404648b539008878e3b5c",
     "tests/conftest.py": "2d329f5ca4f73eb098dcad156568c5b0c33518a6efd08b7cc3580464966b81ce",
     "tests/e2e/run_browser_e2e.py": "6e9fc748b257cae4a6595069de82430ff6f68366260a13275abcb780cd72abbc",
-    "tests/e2e/run_remote_e2e.py": "fb5235939eb8020a9f1b81a03415ee0573670d638610cd1d503300b8a0150d2a",
+    "tests/e2e/run_remote_e2e.py": "a606f5edeaa9747e4ff9805bbb3b77a80fc6cfed3c24503bd036cedc78b50004",
     "tests/fixtures/make_toy_dataset.py": "0ff71e556ff93085599e09a7b6d4e738d9cb91b6071ced4152bfd57916774d48",
     "tests/fixtures/sandbox_site/__init__.py": "b492dc8a9e7c4027f9adfb1a19728dea3640ab9c8fb3eaad546aed646f689a2f",
     "tests/fixtures/sandbox_site/site.py": "5449f383fdca5ce6b26b91937c3f9c8465c973d429d0ddfbed787c9e83902d16",
