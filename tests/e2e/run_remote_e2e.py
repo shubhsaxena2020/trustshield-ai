@@ -8,6 +8,7 @@ localhost calls, and safe failure for a malformed upload. Uses only the syntheti
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 from pathlib import Path
 
@@ -27,14 +28,18 @@ def check(name: str, ok: bool, detail: str = "") -> None:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--web", required=True)
-    parser.add_argument("--api", required=True)
+    parser.add_argument("--api", default="")
+    parser.add_argument("--bypass-token", default=os.environ.get("VERCEL_AUTOMATION_BYPASS_SECRET", ""), help="Vercel Deployment Protection bypass secret")
+    parser.add_argument("--same-origin", action="store_true", help="the API is served from the same origin under /api (Vercel Services)")
     parser.add_argument("--timeout", type=int, default=90000)
     parser.add_argument("--local-rehearsal", action="store_true", help="rehearse against http://localhost servers (skips the HTTPS and no-localhost checks)")
     args = parser.parse_args()
     SHOTS.mkdir(parents=True, exist_ok=True)
     with sync_playwright() as pw:
         browser = pw.chromium.launch()
-        page = browser.new_page(viewport={"width": 1100, "height": 900})
+        context = browser.new_context(viewport={"width": 1100, "height": 900}, extra_http_headers=(
+            {"x-vercel-protection-bypass": args.bypass_token, "x-vercel-set-bypass-cookie": "true"} if args.bypass_token else {}))
+        page = context.new_page()
         console_errors: list[str] = []
         requests: list[str] = []
         page.on("console", lambda m: console_errors.append(m.text) if m.type == "error" else None)
@@ -91,7 +96,7 @@ def main() -> int:
         check("malformed upload shows a safe error (no traceback)", "Traceback" not in body())
 
         page.wait_for_timeout(500)
-        api_origin = args.api.rstrip("/")
+        api_origin = (args.api or args.web).rstrip("/")
         check("browser called the production API directly", any(u.startswith(api_origin + "/api/v1/analyze/") for u in requests))
         check("no localhost requests in production", args.local_rehearsal or not any("localhost" in u or "127.0.0.1" in u for u in requests))
         check("no CORS/console errors", not any("CORS" in e or "blocked" in e.lower() for e in console_errors), "; ".join(console_errors)[:300])

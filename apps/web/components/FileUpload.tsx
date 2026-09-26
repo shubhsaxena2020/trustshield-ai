@@ -12,7 +12,7 @@ interface FileUploadProps {
   disabled?: boolean;
 }
 
-const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
+const MAX_FILE_SIZE_BYTES = 4 * 1024 * 1024; // 4 MB: the hosting platform rejects request bodies above 4.5 MB
 const ACCEPTED_TYPES = ["image/png", "image/jpeg", "image/webp"];
 const ACCEPTED_EXTENSIONS = [".png", ".jpg", ".jpeg", ".webp"];
 
@@ -65,7 +65,7 @@ export function FileUpload({
 
     if (selectedFile.size > MAX_FILE_SIZE_BYTES) {
       const sizeMb = (selectedFile.size / (1024 * 1024)).toFixed(1);
-      onError(`File exceeds the 5 MB limit (${sizeMb} MB). Please choose a smaller image.`);
+      onError(`File exceeds the 4 MB limit (${sizeMb} MB). Please choose a smaller image.`);
       if (inputRef.current) inputRef.current.value = "";
       return;
     }
@@ -133,7 +133,7 @@ export function FileUpload({
           {label}
         </label>
         <span className="text-xs text-slate-500 dark:text-slate-400">
-          PNG, JPEG, WebP (max 5 MB)
+          PNG, JPEG, WebP (max 4 MB)
         </span>
       </div>
 

@@ -211,7 +211,6 @@ def test_readiness_fails_when_ml_is_unavailable(monkeypatch):
 
 
 @pytest.mark.parametrize("overrides,fragment", [
-    ({"cors_origins": ()}, "CORS_ALLOWED_ORIGINS"),
     ({"cors_origins": ("*",)}, "wildcards"),
     ({"cors_origins": ("http://app.example",)}, "https"),
     ({"cors_origins": ("https://localhost",)}, "localhost"),
@@ -236,7 +235,7 @@ def test_dangerous_environment_flags_block_production(monkeypatch, name, value, 
 
 
 def test_production_app_refuses_to_start_on_bad_config():
-    app = api.create_app(_settings(cors_origins=()))
+    app = api.create_app(_settings(cors_origins=("*",)))
     with pytest.raises(RuntimeError, match="startup checks failed"):
         with TestClient(app):
             pass
@@ -260,3 +259,27 @@ def test_model_absent_or_tampered_is_a_loud_failure(tmp_path):
     problems = model_problems(tmp_path)
     assert any("differs from the promoted release" in p for p in problems)
     assert any("failed to load" in p for p in problems)
+
+
+def test_same_origin_deployment_needs_no_cors_origins_and_allows_none():
+    assert _settings(cors_origins=()).problems() == []
+    client = _client(cors_origins=())
+    response = client.get("/api/v1/healthz", headers={"Origin": "https://anything.example"})
+    assert response.status_code == 200 and "access-control-allow-origin" not in response.headers
+
+
+def test_probe_paths_exist_under_api_prefix():
+    client = _client(cors_origins=())
+    assert client.get("/api/v1/healthz").json() == {"status": "alive"}
+    assert client.get("/api/v1/readyz").json()["ready"] is True
+
+
+def test_rollback_to_v1_needs_explicit_confirmation_and_is_verified_against_the_manifest(monkeypatch):
+    monkeypatch.setenv("TRUSTSHIELD_ML_MODEL", "trustshield_text_v1")
+    assert any("TRUSTSHIELD_ROLLBACK_CONFIRM" in p for p in _settings().problems())
+    monkeypatch.setenv("TRUSTSHIELD_ROLLBACK_CONFIRM", "v1")
+    assert _settings().problems() == []
+    problems = model_problems()
+    if any("MISSING" in p for p in problems):
+        pytest.skip("model artifact not present in this checkout")
+    assert problems == []

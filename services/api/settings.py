@@ -85,8 +85,7 @@ class Settings:
         if self.env not in ENVIRONMENTS:
             found.append(f"TRUSTSHIELD_ENV must be one of {', '.join(ENVIRONMENTS)} (got {self.env!r})")
         if self.strict:
-            if not self.cors_origins:
-                found.append("CORS_ALLOWED_ORIGINS must list the deployed frontend origin(s)")
+            # An empty list is valid and safest: same-origin deployments (Vercel Services: frontend and API share one origin) need no CORS.
             for origin in self.cors_origins:
                 parts = urlsplit(origin)
                 if origin == "*" or "*" in origin:
@@ -105,8 +104,10 @@ class Settings:
                 found.append("TRUSTSHIELD_SANDBOX_ALLOW_EXTERNAL must be false")
             if os.getenv("ENABLE_EXTERNAL_REPUTATION", "false").strip().lower() in TRUTHY:
                 found.append("ENABLE_EXTERNAL_REPUTATION is not implemented and must be false")
-            if os.getenv("TRUSTSHIELD_ML_MODEL", "").strip() not in {"", "trustshield_text_v3"}:
-                found.append("TRUSTSHIELD_ML_MODEL must be unset or trustshield_text_v3")
+            override = os.getenv("TRUSTSHIELD_ML_MODEL", "").strip()
+            rollback_ok = override == "trustshield_text_v1" and os.getenv("TRUSTSHIELD_ROLLBACK_CONFIRM", "") == "v1"
+            if override not in {"", "trustshield_text_v3"} and not rollback_ok:
+                found.append("TRUSTSHIELD_ML_MODEL must be unset or trustshield_text_v3 (rollback to v1 additionally needs TRUSTSHIELD_ROLLBACK_CONFIRM=v1)")
             if self.store_policy != "sandbox_only":
                 found.append("TRUSTSHIELD_RESULT_STORE must be sandbox_only (retain minimal user content)")
         return found

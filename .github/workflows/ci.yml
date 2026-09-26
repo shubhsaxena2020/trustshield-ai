@@ -91,6 +91,12 @@ jobs:
         run: |
           python scripts/fetch_model_artifact.py --github-release "$MODEL_RELEASE" --dest release-artifacts
           docker build -f docker/api.Dockerfile -t trustshield-api:ci .
+      - name: Build the Vercel bundle and its API image (Dockerfile.vercel must build and verify both artifacts)
+        run: |
+          python scripts/fetch_model_artifact.py --github-release "$MODEL_RELEASE" --dest artifacts
+          python scripts/fetch_model_artifact.py --model trustshield_text_v1 --github-release "$MODEL_RELEASE" --dest artifacts
+          python scripts/build_vercel_bundle.py --out vercel-bundle --artifacts artifacts
+          docker build -f vercel-bundle/api/Dockerfile.vercel -t trustshield-vercel-api:ci vercel-bundle/api
       - name: Run the container with production hardening and smoke-test it
         run: |
           docker run -d --name api -p 8000:8000 --memory 2g --cpus 1 --read-only --tmpfs /tmp:rw,size=128m \

@@ -137,9 +137,11 @@ def check_production(remote_url: str | None) -> None:
         ("DEBUG", os.getenv("DEBUG", "").lower() in TRUTHY)) if bad]
     check("no development configuration enabled", "PASS" if not dev_flags else "FAIL", ", ".join(dev_flags))
     public = os.getenv("PUBLIC_API_URL", "")
-    check("PUBLIC_API_URL is https", "PASS" if public.startswith("https://") else "FAIL", public or "unset")
+    check("PUBLIC_API_URL is https (or unset for a same-origin deployment)", "PASS" if not public or public.startswith("https://") else "FAIL", public or "unset (same-origin)")
     frontend_api = os.getenv("NEXT_PUBLIC_API_URL", "")
-    check("frontend API URL matches PUBLIC_API_URL", "PASS" if frontend_api and frontend_api.rstrip("/") == public.rstrip("/") else "FAIL", frontend_api or "unset")
+    same_origin = not frontend_api  # unset = relative /api URLs (Vercel Services: frontend and API share one origin)
+    check("frontend API URL is same-origin or matches PUBLIC_API_URL",
+          "PASS" if same_origin or frontend_api.rstrip("/") == public.rstrip("/") else "FAIL", frontend_api or "unset (same-origin /api)")
     db = os.getenv("DATABASE_URL", "").strip()
     check("database", "PASS" if not db else "WARN",
           "stateless deployment: no database used" if not db else "DATABASE_URL is set but Milestone A does not use a database")

@@ -185,7 +185,7 @@ access log.
 
 ## Deployment (Milestone A: public MVP)
 
-Frontend on Vercel, API in a Docker container on Render, stateless, sandbox disabled. See `docs/DEPLOYMENT_ARCHITECTURE.md`
+One Vercel project (Vercel Services): Next.js at `/`, the FastAPI container at `/api/*`, same origin, stateless, sandbox disabled: `docs/VERCEL_DEPLOYMENT.md`. See also `docs/DEPLOYMENT_ARCHITECTURE.md`
 (measured sizing, configuration, hardening), `docs/MODEL_RELEASE.md` (trusted model artifact), `.env.example`, `docker/api.Dockerfile`,
 `docker-compose.yml` (local production-like run), `.github/workflows/ci.yml` (deployment gate), `scripts/smoke_remote.py` and
 `tests/e2e/run_remote_e2e.py` (verify a deployed API/site), and `python scripts/preflight.py --profile production`.

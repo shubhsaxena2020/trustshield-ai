@@ -5,7 +5,8 @@ import { AnalysisResult } from "@/components/types";
 import { FileUpload } from "@/components/FileUpload";
 import { ResultDashboard } from "@/components/ResultDashboard";
 
-// Production builds must be given NEXT_PUBLIC_API_URL (the HTTPS API origin); the localhost fallback exists for development only.
+// Production is same-origin (Vercel Services routes /api/* to the backend): NEXT_PUBLIC_API_URL is unset and requests use relative
+// URLs. Set it only to point at a separate API origin. The localhost fallback exists for development only.
 const API =
   process.env.NEXT_PUBLIC_API_URL ??
   (process.env.NODE_ENV === "production" ? "" : "http://localhost:8000");
@@ -35,7 +36,6 @@ export default function Home() {
   // Check backend health for optional OCR and ML module status notice
   useEffect(() => {
     let isMounted = true;
-    if (!API) return () => {};
     fetch(`${API}/api/v1/health`)
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
@@ -161,7 +161,7 @@ export default function Home() {
         </p>
       </header>
 
-      {(!API || apiReachable === false) && (
+      {apiReachable === false && (
         <p
           role="alert"
           data-testid="api-unreachable-banner"

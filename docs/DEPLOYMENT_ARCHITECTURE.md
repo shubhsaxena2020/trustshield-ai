@@ -1,5 +1,9 @@
 # Deployment architecture (Milestone A: public MVP)
 
+> **Superseded topology (2026-09-27): the deployment is one Vercel project with Vercel Services; see `docs/VERCEL_DEPLOYMENT.md`.**
+> Render was cancelled and never created. The measured sizing, configuration and hardening below still apply unchanged to the
+> FastAPI container, which now runs as the `/api/*` service on Vercel (1 vCPU / 2 GB on Hobby).
+
 Decisions fixed by the project lead: **Vercel** (Next.js frontend), **Render Docker Web Service** (FastAPI API, target `1 CPU / 2 GB`),
 provider-generated HTTPS domains, **stateless** single API instance, no PostgreSQL, trusted-release-artifact model delivery,
 `ENABLE_WEB_SANDBOX=false`. Budget target <= $30/month; no paid infrastructure is added without a report.
