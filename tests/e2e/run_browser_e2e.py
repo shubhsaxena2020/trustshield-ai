@@ -114,5 +114,44 @@ def main() -> int:
     return 1 if failed else 0
 
 
+def degraded() -> int:
+    """Second scenario: v3 artifact unavailable. The UI must say so on every tab and still analyse with rules."""
+    env = {**os.environ, "TRUSTSHIELD_ML_MODEL": "model-that-does-not-exist"}
+    env.pop("ENABLE_WEB_SANDBOX", None)
+    api = subprocess.Popen([PY, "-m", "uvicorn", "services.api.main:app", "--port", "8000"], cwd=ROOT, env=env)
+    npx = "npx.cmd" if os.name == "nt" else "npx"
+    web = subprocess.Popen([npx, "next", "start", "-p", "3000"], cwd=ROOT / "apps" / "web", env=env)
+    try:
+        wait("http://localhost:8000/api/v1/health")
+        wait("http://localhost:3000/")
+        health = json.load(urllib.request.urlopen("http://localhost:8000/api/v1/health"))
+        check("degraded: health reports ML unavailable", health["modules"]["ml"]["available"] is False)
+        with sync_playwright() as pw:
+            browser = pw.chromium.launch()
+            page = browser.new_page(viewport={"width": 1100, "height": 900})
+            page.goto("http://localhost:3000/")
+            page.wait_for_selector("[data-testid=ml-unavailable-banner]", timeout=15000)
+            check("degraded: banner visible on the text tab", page.locator("[data-testid=ml-unavailable-banner]").is_visible())
+            page.click("role=tab[name=/qr/i]")
+            check("degraded: banner still visible on another tab", page.locator("[data-testid=ml-unavailable-banner]").is_visible())
+            page.click("role=tab[name=/text|message/i]")
+            page.fill("#input", "URGENT: your SBI account is blocked. Share the OTP now and verify KYC at http://sbi-kyc-update.xyz/login")
+            page.click("button[type=submit]")
+            page.wait_for_selector("text=/rule|evidence/i", timeout=30000)
+            check("degraded: rules-only analysis still produces evidence", "evidence" in page.inner_text("body").lower())
+            page.screenshot(path=str(SHOTS / "degraded_ml_unavailable.png"), full_page=True)
+            browser.close()
+    finally:
+        for pid in (api.pid, web.pid):
+            subprocess.run(["taskkill", "/PID", str(pid), "/T", "/F"] if os.name == "nt" else ["kill", str(pid)], capture_output=True)
+    failed = [name for name, ok, _ in results if not ok]
+    return 1 if failed else 0
+
+
 if __name__ == "__main__":
-    raise SystemExit(main())
+    code = main()
+    if "--degraded" in sys.argv:
+        time.sleep(2)
+        code = degraded() or code
+        print(f"{len(results) - len([r for r in results if not r[1]])}/{len(results)} passed (incl. degraded)")
+    raise SystemExit(code)

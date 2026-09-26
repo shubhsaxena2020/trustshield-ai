@@ -53,15 +53,22 @@ class ValidatingEgressProxy:
 
     def _authorized(self, header: bytes) -> bool:
         expected = base64.b64encode(f"{self.username}:{self.password}".encode())
+        found = None
         for line in header.split(b"\r\n")[1:]:
+            if line[:1] in (b" ", b"\t"):
+                return False  # obs-fold / leading whitespace is never accepted (credential-smuggling vector)
             name, _, value = line.partition(b":")
-            if name.strip().lower() == b"proxy-authorization":
-                scheme, _, credential = value.strip().partition(b" ")
-                return scheme.lower() == b"basic" and hmac.compare_digest(credential.strip(), expected)
-        return False
+            if name.lower() == b"proxy-authorization":
+                if found is not None:
+                    return False  # duplicate credential headers
+                found = value
+        if found is None:
+            return False
+        scheme, _, credential = found.strip().partition(b" ")
+        return scheme.lower() == b"basic" and hmac.compare_digest(credential.strip(), expected)
 
     async def start(self) -> tuple[str, int]:
-        self.server = await asyncio.start_server(self._handle, "127.0.0.1", 0)
+        self.server = await asyncio.start_server(self._handle, "127.0.0.1", 0, limit=_HEADER_LIMIT)
         host, port = self.server.sockets[0].getsockname()[:2]
         return host, port
 
@@ -101,7 +108,7 @@ class ValidatingEgressProxy:
                 await writer.drain()
             except (OSError, ConnectionError):
                 pass
-        except (asyncio.IncompleteReadError, asyncio.TimeoutError, OSError, ValueError, UnsafeURL, ProxyRejected):
+        except (asyncio.IncompleteReadError, asyncio.LimitOverrunError, asyncio.TimeoutError, OSError, ValueError, UnsafeURL, ProxyRejected):
             try:
                 writer.write(b"HTTP/1.1 403 Forbidden\r\nContent-Length: 0\r\nConnection: close\r\n\r\n")
                 await writer.drain()
@@ -110,9 +117,15 @@ class ValidatingEgressProxy:
         finally:
             if upstream is not None:
                 upstream[1].close()
-                await upstream[1].wait_closed()
+                try:
+                    await upstream[1].wait_closed()
+                except (OSError, ConnectionError):
+                    pass
             writer.close()
-            await writer.wait_closed()
+            try:
+                await writer.wait_closed()
+            except (OSError, ConnectionError):
+                pass
 
     async def _open_pinned(self, target: ValidatedTarget) -> tuple[asyncio.StreamReader, asyncio.StreamWriter]:
         # The resolver has already returned every validated address. Connect
@@ -145,7 +158,7 @@ class ValidatingEgressProxy:
         for line in lines[1:]:
             if not line:
                 continue
-            name = line.split(b":", 1)[0].lower()
+            name = line.split(b":", 1)[0].strip().lower()
             if name.startswith(b"proxy-"):
                 continue
             if name == b"host":

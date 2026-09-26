@@ -50,6 +50,7 @@ class Telemetry:
     load_timeout: bool = False
     tls_error: bool = False
     post_attempts: int = 0
+    navigations: int = 0
     total_bytes: int = 0
 
     def as_dict(self) -> dict[str, Any]:
@@ -68,7 +69,7 @@ class Telemetry:
             "screenshot_jpeg_b64": self.screenshot_jpeg_b64,
             "page_blocks_automation": self.page_blocks_automation,
             "load_timeout": self.load_timeout, "tls_error": self.tls_error,
-            "post_attempts": self.post_attempts, "total_bytes": self.total_bytes,
+            "post_attempts": self.post_attempts, "navigations": self.navigations, "total_bytes": self.total_bytes,
         }
         return clean(data, 20_000)
 

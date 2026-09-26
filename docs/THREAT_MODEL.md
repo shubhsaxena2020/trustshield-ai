@@ -87,3 +87,24 @@ Known limitations:
 - `ENABLE_WEB_SANDBOX` and `TRUSTSHIELD_SANDBOX_ALLOW_EXTERNAL` default to off; live external browsing has not been exercised. The browser E2E confirms the UI opt-in is refused safely with external browsing off.
 - Job dispatch is one thread per accepted job; there is no persistent queue.
 - **Gate:** external live browsing (`TRUSTSHIELD_SANDBOX_ALLOW_EXTERNAL`) stays disabled until the sandbox and UI changes receive a fresh adversarial review; this is independent of the ML model promotion.
+
+## Phase 5 security gate: second adversarial review (2026-09-26)
+
+An independent review (Codex; the Antigravity attempt was blocked by a provider content filter and produced nothing) attacked the
+proxy authentication, Job Object containment, redirects, downloads, concurrency and UI opt-in against HEAD `d239ca3`. All eight
+verified findings were fixed with regression tests (mutation-checked):
+
+| # | severity | finding | fix |
+|---|---|---|---|
+| 1 | high | proxy credential forwarded upstream when sent obs-folded (leading whitespace) | obs-fold and duplicate credential headers are refused (407); `Proxy-*` headers stripped after whitespace normalisation |
+| 2 | high | Job Object assigned after process start (child escape window, 1/10 runs) | worker launched `CREATE_SUSPENDED`, contained, then resumed; failure to contain kills the worker and fails closed |
+| 3 | medium | JS/meta navigation chains bypassed the redirect limit (200 requests) | every main-frame navigation request counts; cap = `max_redirects + 1`, reason `navigation_limit` |
+| 4 | medium | GET form auto-submit reached the target | in-page submit/`requestSubmit` blocked in every frame; POST remains blocked at the network layer |
+| 5 | medium | API admission did not enforce the port allow-list | same 80/443 rule at admission (422) |
+| 6 | medium | unbounded accepted jobs/threads | at most 8 accepted-but-unfinished jobs, then HTTP 429; slot released when the job ends |
+| 7 | low/med | oversized headers / disconnects raised unhandled exceptions | explicit stream limit, `LimitOverrunError` handled, cleanup errors suppressed |
+| 8 | low | design doc named a nonexistent env var and a container/queue architecture | `WEB_SANDBOX_DESIGN.md` carries an authoritative implementation note (`ENABLE_WEB_SANDBOX`, subprocess + Job Object) |
+
+Residual limitations after the fixes: GET navigations to validated public hosts are inherently possible (loading a page is a GET);
+form-submit blocking is in-page best effort layered over the network-level POST block; no container/VM isolation; no non-Windows
+containment beyond the wall-clock kill; live external browsing has still never been exercised and stays disabled.

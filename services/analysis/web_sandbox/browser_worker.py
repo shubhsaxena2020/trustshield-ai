@@ -28,6 +28,21 @@ def _resolver_from_map(mapping: dict[str, list[str]] | None):
     return resolve
 
 
+# Runs in every frame before page scripts: no popups, and forms are never submitted (POST is also blocked at the
+# network layer; this closes GET auto-submit, which the network layer cannot tell apart from a link click).
+NO_SUBMIT_SCRIPT = """
+(() => {
+  window.open = function () { return null; };
+  const block = (event) => { try { event.preventDefault(); event.stopImmediatePropagation(); } catch (e) {} };
+  document.addEventListener('submit', block, true);
+  const refuse = function () { block(new Event('submit')); };
+  try {
+    Object.defineProperty(HTMLFormElement.prototype, 'submit', { value: refuse, writable: false, configurable: false });
+    Object.defineProperty(HTMLFormElement.prototype, 'requestSubmit', { value: refuse, writable: false, configurable: false });
+  } catch (e) {}
+})();
+"""
+
 async def run_browser(job: dict) -> dict:
     try:
         from playwright.async_api import TimeoutError as PlaywrightTimeoutError, async_playwright
@@ -89,6 +104,12 @@ async def run_browser(job: dict) -> dict:
                 if request.url.startswith("data:"):
                     await block_and_record(route, "inline_scheme_policy")
                     return
+                if request.is_navigation_request() and request.frame == page.main_frame:
+                    # Counts server redirects AND JS/meta navigations, so script chains cannot dodge the limit.
+                    telemetry.navigations += 1
+                    if telemetry.navigations > policy.max_redirects + 1:
+                        await block_and_record(route, "navigation_limit")
+                        return
                 if len(telemetry.redirects) > policy.max_redirects:
                     await block_and_record(route, "redirect_limit")
                     return
@@ -173,7 +194,7 @@ async def run_browser(job: dict) -> dict:
 
             pending_downloads: list[asyncio.Task] = []
             page.on("download", lambda dl: pending_downloads.append(asyncio.ensure_future(on_download(dl))))
-            await page.add_init_script("window.open = function(){ return null; };")
+            await page.add_init_script(NO_SUBMIT_SCRIPT)
             try:
                 await page.goto(target.url, wait_until="domcontentloaded", timeout=policy.navigation_timeout_ms)
             except PlaywrightTimeoutError:

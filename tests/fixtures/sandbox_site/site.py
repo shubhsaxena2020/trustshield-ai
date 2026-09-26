@@ -5,6 +5,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 
 POSTS: list[tuple[str, bytes]] = []
+GETS: list[str] = []
 
 
 class SandboxSiteHandler(BaseHTTPRequestHandler):
@@ -30,6 +31,7 @@ class SandboxSiteHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         path = self.path.split("?", 1)[0]
+        GETS.append(self.path)
         if path == "/benign":
             return self._send("<title>Welcome</title><p>Hello from a controlled page.</p>")
         if path == "/bank-login":
@@ -49,6 +51,12 @@ class SandboxSiteHandler(BaseHTTPRequestHandler):
         if path == "/private-redirect":
             target = getattr(self.server, "private_target", "http://127.0.0.1/")
             self.send_response(302); self.send_header("Location", target); self.end_headers(); return
+        if path.startswith("/js-chain/"):
+            hop = int(path.rsplit("/", 1)[1])
+            return self._send(f"<script>location.href='/js-chain/{hop + 1}'</script><p>hop {hop}</p>")
+        if path == "/get-form-submit":
+            return self._send("<form id='f' method='get' action='/record'><input name='q' value='secret'></form>"
+                              "<script>document.getElementById('f').submit()</script><p>auto get form</p>")
         if path == "/loop":
             self.send_response(302); self.send_header("Location", "/loop"); self.end_headers(); return
         if path == "/download":

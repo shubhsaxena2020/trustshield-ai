@@ -91,7 +91,10 @@ def test_api_client_starts_scrubbed_worker_with_parent_timeout(monkeypatch):
 
     monkeypatch.setenv("OPENAI_API_KEY", "must-not-cross-boundary")
     monkeypatch.setenv("TRUSTSHIELD_SECRET", "must-not-cross-boundary")
-    monkeypatch.setattr("subprocess.Popen", fake_popen)
+    from services.analysis.web_sandbox import client as client_module
+    from services.analysis.web_sandbox.jobobject import Containment
+    monkeypatch.setattr(client_module, "start_contained",
+                        lambda command, **kwargs: (fake_popen(command, **kwargs), Containment(True, "fake")))
     result = SandboxClient(SandboxPolicy(total_timeout_s=3))._run_process("https://example.com/", None, None, True)
     assert result["status"] == "completed"
     assert "services.worker.sandbox_worker" in seen["command"]

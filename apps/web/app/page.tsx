@@ -150,6 +150,17 @@ export default function Home() {
         </p>
       </header>
 
+      {mlHealthy === false && (
+        <p
+          role="status"
+          data-testid="ml-unavailable-banner"
+          className="mb-4 rounded-md border border-amber-600 bg-amber-50 p-3 text-sm font-medium text-amber-900 dark:border-amber-400 dark:bg-amber-950 dark:text-amber-200"
+        >
+          Notice: ML analysis is unavailable on this server; results use rule-based analysis only and
+          are less complete.
+        </p>
+      )}
+
       <section
         aria-labelledby="analyze-h"
         className="rounded-lg border border-slate-300 p-4 dark:border-slate-700"
@@ -196,11 +207,6 @@ export default function Home() {
                 className="w-full rounded-md border border-slate-300 bg-transparent p-3 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-500"
                 placeholder="e.g. Your bank KYC expires today. Verify immediately at ..."
               />
-              {mlHealthy === false && (
-                <p className="mt-2 text-xs text-amber-800 dark:text-amber-300">
-                  Notice: ML analysis is unavailable; rule-based analysis still works.
-                </p>
-              )}
             </div>
           )}
 

@@ -18,7 +18,9 @@ from services.analysis.pipeline import analyze_image, analyze_qr, analyze_text, 
 from services.analysis import pipeline as analysis_pipeline
 from services.analysis.web_sandbox.client import run_sandbox
 from services.analysis.url_analysis.ssrf import UnsafeURL, validate_public_url
-from services.analysis.web_sandbox.policy import feature_enabled
+from urllib.parse import urlsplit
+
+from services.analysis.web_sandbox.policy import SandboxPolicy, feature_enabled
 
 app = FastAPI(title="TrustShield AI", version="0.1.0")
 app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:3000"], allow_methods=["GET", "POST"], allow_headers=["*"])
@@ -28,6 +30,8 @@ _STORE: "OrderedDict[str, AnalysisResult]" = OrderedDict()
 _STORE_MAX = 200
 _SANDBOX_BUCKETS: dict[str, tuple[float, float]] = {}
 _SANDBOX_RATE = 5.0
+_SANDBOX_MAX_PENDING = 8  # accepted-but-unfinished jobs; bounds threads and queued subprocesses
+_SANDBOX_PENDING = threading.BoundedSemaphore(_SANDBOX_MAX_PENDING)
 _SANDBOX_WINDOW = 60.0
 
 
@@ -102,10 +106,13 @@ async def _finish_sandbox_job(analysis_id: str, url: str) -> None:
 
 
 def _start_sandbox_job(analysis_id: str, url: str) -> None:
-    threading.Thread(
-        target=lambda: asyncio.run(_finish_sandbox_job(analysis_id, url)),
-        name="trustshield-sandbox-job", daemon=True,
-    ).start()
+    def run() -> None:
+        try:
+            asyncio.run(_finish_sandbox_job(analysis_id, url))
+        finally:
+            _SANDBOX_PENDING.release()
+
+    threading.Thread(target=run, name="trustshield-sandbox-job", daemon=True).start()
 
 
 @app.post("/api/v1/analyze/url", response_model=AnalysisResult)
@@ -125,18 +132,27 @@ async def analyze_url_endpoint(body: UrlIn, request: Request, response: Response
         return _remember(static.model_copy(update={"modules": modules}))
     try:
         validate_public_url(body.url)
-    except UnsafeURL as exc:
+        port = urlsplit(body.url).port
+    except (UnsafeURL, ValueError) as exc:
         raise HTTPException(422, f"URL not eligible for sandbox: {exc}")
+    if port is not None and port not in SandboxPolicy.from_env().allowed_ports:
+        raise HTTPException(422, f"URL not eligible for sandbox: port {port} is not allowed")
     client_key = request.client.host if request.client else "unknown"
     if not _sandbox_rate_allowed(client_key):
         raise HTTPException(429, "sandbox rate limit exceeded; try again later")
+    if not _SANDBOX_PENDING.acquire(blocking=False):
+        raise HTTPException(429, "sandbox is busy; try again later")
     modules = dict(static.modules)
     modules["web_sandbox"] = ModuleResult(status="sandboxing", detail="Sandbox worker is running")
     limitations = [item for item in static.limitations if "not inspected in an isolated browser" not in item]
     limitations.append("The isolated browser inspection is still in progress.")
     in_progress = static.model_copy(update={"status": "sandboxing", "modules": modules, "limitations": limitations})
     _remember(in_progress)
-    _start_sandbox_job(in_progress.analysis_id, body.url)
+    try:
+        _start_sandbox_job(in_progress.analysis_id, body.url)
+    except Exception:
+        _SANDBOX_PENDING.release()
+        raise
     response.status_code = 202
     return in_progress
 

@@ -75,3 +75,45 @@ def contain(process) -> Containment:
         return Containment(True, f"kill-on-close, {MEMORY_LIMIT_BYTES >> 20} MiB, {ACTIVE_PROCESS_LIMIT} processes", int(job))
     except Exception as exc:  # containment is best-effort and reported, never silent
         return Containment(False, f"job object error: {type(exc).__name__}")
+
+
+class ContainmentError(RuntimeError):
+    """Raised when a worker cannot be placed in its Job Object; the worker is never left running."""
+
+
+def _resume(process) -> None:
+    import ctypes
+    from ctypes import wintypes
+
+    ntdll = ctypes.windll.ntdll
+    ntdll.NtResumeProcess.argtypes = [wintypes.HANDLE]
+    status = ntdll.NtResumeProcess(wintypes.HANDLE(int(process._handle)))
+    if status != 0:
+        raise ContainmentError(f"NtResumeProcess failed (0x{status & 0xFFFFFFFF:08x})")
+
+
+def start_contained(command, **popen_kwargs):
+    """Start `command` suspended, put it in a Job Object, then resume: no window in which it can escape.
+
+    On Windows a failure to contain kills the process and raises ContainmentError (fail closed).
+    Elsewhere the process starts normally and containment reports applied=False.
+    """
+    import subprocess
+
+    if sys.platform != "win32":
+        return subprocess.Popen(command, **popen_kwargs), Containment(False, "job objects are Windows-only")
+    flags = popen_kwargs.pop("creationflags", 0) | 0x00000004  # CREATE_SUSPENDED
+    process = subprocess.Popen(command, creationflags=flags, **popen_kwargs)
+    containment = contain(process)
+    if not containment.applied:
+        process.kill()
+        process.wait()
+        raise ContainmentError(containment.detail)
+    try:
+        _resume(process)
+    except Exception:
+        containment.close()
+        process.kill()
+        process.wait()
+        raise
+    return process, containment

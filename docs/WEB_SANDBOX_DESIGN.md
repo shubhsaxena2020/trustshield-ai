@@ -6,6 +6,15 @@
 > **Team Level:** BCA / Undergraduate Senior Project (Implementation Target: 1–2 Weeks)  
 > **Compliance:** Aligns with `docs/ARCHITECTURE.md`, `docs/THREAT_MODEL.md`, `services/analysis/url_analysis/ssrf.py`, `services/analysis/pipeline.py`, and `services/analysis/fusion/result.py`.
 
+> **IMPLEMENTATION NOTE (authoritative where it differs from the design below).** The MVP implements: flags
+> `ENABLE_WEB_SANDBOX` (default false) and `TRUSTSHIELD_SANDBOX_ALLOW_EXTERNAL` (default false); knobs `TRUSTSHIELD_SANDBOX_*`;
+> a worker **subprocess** (not a container) started suspended inside a Windows **Job Object** (kill-on-close, memory and process caps,
+> fail closed); a per-job authenticated validating egress proxy; API admission checks (SSRF pre-flight, port allow-list, per-client rate
+> limit, at most 8 accepted-but-unfinished jobs, then HTTP 429); JS/meta navigations counted against the redirect limit; in-page form
+> submission blocked (POST is also blocked at the network layer). Not implemented: Docker/microVM isolation, a persistent `asyncio.Queue`
+> job queue, and separate `config.py`/`queue.py` modules. See `docs/THREAT_MODEL.md` for limitations.
+
+
 ---
 
 ## 1. Executive Summary, Goals & Non-Goals
@@ -79,7 +88,7 @@ To maintain security, legal safety, and ethical boundaries:
 |  | - Request schema validation (url <= 2048 chars)       |  |   |
 |  | - Static URL Analyzer (services/.../static.py)        |  |   |
 |  | - Pre-flight SSRF Guard (services/.../ssrf.py)        |  |   |
-|  | - Feature Flag Check (TRUSTSHIELD_WEB_SANDBOX)        |  |   |
+|  | - Feature Flag Check (ENABLE_WEB_SANDBOX)        |  |   |
 |  +---------------------------+---------------------------+  |   |
 |                              | Enqueue Validated Job        |   |
 |                              v                              |   |
@@ -579,9 +588,9 @@ Returns the current state:
 ### 7.3 Feature Flag & Graceful Fallback
 Managed via environment variable:
 ```bash
-TRUSTSHIELD_WEB_SANDBOX=on   # Options: on | off (default: off)
+ENABLE_WEB_SANDBOX=true   # implemented flag: true | false (default: false)
 ```
-- If `TRUSTSHIELD_WEB_SANDBOX=off` or Playwright/Chromium dependencies are missing:
+- If `ENABLE_WEB_SANDBOX` is false or Playwright/Chromium dependencies are missing:
   - The endpoint completes **static analysis only**.
   - `modules.web_sandbox` is set to `status="not_run"` or `status="unavailable"`.
   - Appends `LIMIT_SANDBOX` to `limitations`.

@@ -11,7 +11,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-from .jobobject import Containment, contain
+from .jobobject import Containment, ContainmentError, start_contained
 from .policy import SandboxPolicy
 from .policy import external_allowed
 from .telemetry import bounded_telemetry, clean_text
@@ -63,12 +63,11 @@ class SandboxClient:
         process = None
         containment = Containment(False, "not started")
         try:
-            process = subprocess.Popen(
+            process, containment = start_contained(
                 [sys.executable, "-m", "services.worker.sandbox_worker"],
                 cwd=str(root), env=env, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE, text=True,
             )
-            containment = contain(process)
             stdout, stderr = process.communicate(json.dumps(payload), timeout=self.policy.total_timeout_s)
             lines = [line for line in stdout.splitlines() if line.strip()]
             data = json.loads(lines[-1]) if lines else {"status": "failed", "detail": "worker returned no JSON"}
@@ -81,6 +80,8 @@ class SandboxClient:
                 process.kill()
                 process.communicate()
             return {"status": "timeout", "detail": "sandbox wall-clock limit exceeded"}
+        except ContainmentError as exc:
+            return {"status": "failed", "detail": "sandbox containment unavailable: " + clean_text(exc, 300)}
         except (OSError, json.JSONDecodeError) as exc:
             return {"status": "failed", "detail": clean_text(exc, 500)}
         finally:
