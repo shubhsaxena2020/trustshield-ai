@@ -45,8 +45,11 @@ class SandboxClient:
             "PATH": os.environ.get("PATH", ""),
             "PYTHONPATH": os.environ.get("PYTHONPATH", str(root)),
             "TEMP": str(temp_root), "TMP": str(temp_root),
-            "PLAYWRIGHT_BROWSERS_PATH": str(root / ".playwright-browsers"),
         }
+        local_browsers = root / ".playwright-browsers"
+        browsers = os.environ.get("PLAYWRIGHT_BROWSERS_PATH") or (str(local_browsers) if local_browsers.is_dir() else "")
+        if browsers:
+            env["PLAYWRIGHT_BROWSERS_PATH"] = browsers
         for key in ("SystemRoot", "WINDIR"):
             if os.environ.get(key):
                 env[key] = os.environ[key]

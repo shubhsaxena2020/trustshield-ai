@@ -89,6 +89,7 @@ def test_api_client_starts_scrubbed_worker_with_parent_timeout(monkeypatch):
         seen["command"] = command; seen["env"] = kwargs["env"]
         return FakeProcess()
 
+    monkeypatch.setenv("PLAYWRIGHT_BROWSERS_PATH", "/opt/browsers")
     monkeypatch.setenv("OPENAI_API_KEY", "must-not-cross-boundary")
     monkeypatch.setenv("TRUSTSHIELD_SECRET", "must-not-cross-boundary")
     from services.analysis.web_sandbox import client as client_module
@@ -100,7 +101,7 @@ def test_api_client_starts_scrubbed_worker_with_parent_timeout(monkeypatch):
     assert "services.worker.sandbox_worker" in seen["command"]
     assert seen["timeout"] == 3
     assert "OPENAI_API_KEY" not in seen["env"] and "TRUSTSHIELD_SECRET" not in seen["env"]
-    assert "PLAYWRIGHT_BROWSERS_PATH" in seen["env"]
+    assert seen["env"]["PLAYWRIGHT_BROWSERS_PATH"] == "/opt/browsers"
 
 
 def test_downloads_are_quarantined_hashed_and_deleted(monkeypatch):

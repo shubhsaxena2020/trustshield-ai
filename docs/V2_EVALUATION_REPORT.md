@@ -99,36 +99,35 @@ official script agree.
 ## Manual error analysis (descriptive only; no tuning)
 
 **v3 real false negatives (30, all fraud missed).** Most are short bank-style
-security notices with the link redacted to `<URL>` and a soft call to action
-("New device registered... visit", "login attempt from an unrecognised device",
-"New payee request... If this was NOT you", "Zelle payment attempt?",
-"Santander one-time passcode... if NOT you"). Six of these were caught by v1 at
+security notices with the link redacted to a placeholder and a soft call to
+action (new-device or new-payee alerts, unrecognised-login warnings, card-activity
+confirmations, one-time-passcode notices). Six of these were caught by v1 at
 exactly score 25 (ML p 0.12-0.24) and v3 scores them near 0 (p 0.00-0.07):
 v3's extra legitimate bank-alert training data taught it that this genre is
 benign, which trades recall on real alert-style smishing for fewer synthetic
-bank-alert false positives. The rest are generic (fake job "Get Paid", drug
-sales, "Done, click on the link and get your money", COVID pass, toll/bill
-scams) that neither model scores. The dataset's `<URL>`/`<NAMED_ENTITY>`
-redaction removes lexical URL evidence the deterministic rules rely on.
+bank-alert false positives. The rest are generic (fake-job offers, illicit
+product sales, "click for money" lures, health-pass phishing, toll/bill scams)
+that neither model scores. The dataset's placeholder redaction removes lexical
+URL evidence the deterministic rules rely on.
 
-**v3 real-legitimate false positives (44 of 112, all Mendeley).** Short
-transactional or account messages in BDT/bKash/Payoneer style: balances,
-transfers, refunds, salary credited, "please confirm receipt", bill reminders,
-OTP notices, subscription/renewal notices. They share vocabulary (payment,
-confirm, account, OTP, KYC) with fraud training data; many sit at score 25-35
-just over the caution line. This is a domain shift (Bengali-English financial
-SMS) neither model was trained on, and it is not a v3-specific failure.
+**v3 real-legitimate false positives (44 of 112, all one source).** Short
+transactional or account messages in a South-Asian mobile-money style:
+balances, transfers, refunds, salary credited, "please confirm receipt", bill
+reminders, OTP notices, subscription/renewal notices. They share vocabulary
+(payment, confirm, account, OTP, KYC) with fraud training data; many sit at
+score 25-35 just over the caution line. This is a domain shift (Bengali-English
+financial SMS) neither model was trained on, and it is not a v3-specific failure.
 
-**v1 right, v3 wrong (32).** 5 Mendeley legitimate messages (order ready,
-Rocket receipt, school fees, support message, software update) that v3 pushes
-just over 25 (p 0.16-0.27 vs v1 <= 0.11), and 6 real fraud alert-style
+**v1 right, v3 wrong (32).** 5 legitimate messages of that source (order ready,
+mobile-wallet receipt, school fees, support message, software update) that v3
+pushes just over 25 (p 0.16-0.27 vs v1 <= 0.11), and 6 real fraud alert-style
 messages described above; the rest are synthetic.
 
-**v3 right, v1 wrong (57).** Mostly Mendeley legitimate transactional messages
-v1 flagged (refund processed, delivery scheduled, invoice payment, appointment
-confirmed) that v3 clears, plus a few real fraud rows v3 catches (Walmart
-survey credit, LinKt toll reminder, EE bill update, "Account hacked! Open the
-app now", "Update your account details to avoid suspension").
+**v3 right, v1 wrong (57).** Mostly legitimate transactional messages of that
+source that v1 flagged (refund processed, delivery scheduled, invoice payment,
+appointment confirmed) and v3 clears, plus a few real fraud rows v3 catches
+(store-credit survey lure, toll reminder, telecom bill update, account-hacked
+and account-suspension warnings).
 
 **Reading.** Errors are genre-driven: v3 moves the boundary for two
 overlapping genres in opposite directions - transactional-payment SMS (fewer

@@ -32,8 +32,12 @@ ALLOW_PATH_PARTS = ("tests/fixtures", "datasets/", "demo/fixtures", "benchmarks/
 
 
 def tracked_files() -> list[Path]:
-    out = subprocess.check_output(["git", "ls-files"], cwd=ROOT, text=True)
-    return [ROOT / line for line in out.splitlines() if line.strip()]
+    try:
+        out = subprocess.check_output(["git", "ls-files"], cwd=ROOT, text=True, stderr=subprocess.DEVNULL)
+        return [ROOT / line for line in out.splitlines() if line.strip()]
+    except (subprocess.CalledProcessError, FileNotFoundError):  # e.g. the published tree before `git init`
+        return [p for p in ROOT.rglob("*") if p.is_file() and ".git" not in p.parts and "node_modules" not in p.parts
+                and ".venv" not in p.parts and ".next" not in p.parts]
 
 
 def scan(paths: list[Path]) -> list[tuple[str, int, str]]:

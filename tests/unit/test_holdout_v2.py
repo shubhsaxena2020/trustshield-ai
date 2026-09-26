@@ -11,6 +11,11 @@ import pytest
 from scripts.prepare_holdout_v2 import PREVIOUS_HOLDOUT_SHA256, audit_quality_check, prepare_holdout_v2
 
 
+needs_raw_holdout = pytest.mark.skipif(
+    not (Path(__file__).resolve().parents[2] / "datasets" / "raw" / "holdout_v2").exists(),
+    reason="raw v2 holdout sources are not part of the published tree")
+
+
 def _row(text: str, *, row_id: str, source: str = "toy-synthetic", binary: str = "legitimate", category: str = "legitimate") -> dict:
     synthetic = source == "toy-synthetic"
     return {
@@ -66,6 +71,7 @@ def test_genuine_toy_audit_passes_quality_checks() -> None:
     assert summary["max_sentence_reuse"] == 1
 
 
+@needs_raw_holdout
 def test_blind_audit_filters_disagreement_and_exclude_and_uses_audit_category(tmp_path: Path):
     v1 = tmp_path / "v1"
     _write_v1(v1)
@@ -99,6 +105,7 @@ def test_blind_audit_filters_disagreement_and_exclude_and_uses_audit_category(tm
     assert manifest["excluded_audit_verdict"]["corrupted"] == ["real-exclude"]
 
 
+@needs_raw_holdout
 def test_within_holdout_exact_then_normalized_dedupe_records_ids(tmp_path: Path):
     v1 = tmp_path / "v1"
     _write_v1(v1)
@@ -132,6 +139,7 @@ def test_builder_refuses_failing_active_audit(tmp_path: Path):
         prepare_holdout_v2([candidate_path], v1, out)
 
 
+@needs_raw_holdout
 def test_manifest_has_new_supersession_chain_and_rejected_audit_hashes(tmp_path: Path):
     v1 = tmp_path / "v1"
     _write_v1(v1)
@@ -155,6 +163,7 @@ def test_manifest_has_new_supersession_chain_and_rejected_audit_hashes(tmp_path:
     assert entry["sha256"] == hashlib.sha256(rejected.read_bytes()).hexdigest()
 
 
+@needs_raw_holdout
 def test_holdout_manifest_contains_audit_hashes_and_quality_summary(tmp_path: Path):
     v1 = tmp_path / "v1"
     _write_v1(v1)

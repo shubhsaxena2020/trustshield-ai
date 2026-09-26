@@ -30,6 +30,8 @@ def test_original_v1_test_artifacts_and_provenance_are_frozen() -> None:
     if not MODEL_PATH.exists():
         pytest.skip("v1 model artifact is absent; skipping frozen-artifact check on a fresh clone")
 
+    if not (DATASET_DIR / "test.jsonl").exists() or not ORIGINAL_TEST_DIR.exists():
+        pytest.skip("v1 test split / evaluation record is not part of the published tree")
     manifest = load_manifest()
     files = manifest["files"]
     expected_originals = (
