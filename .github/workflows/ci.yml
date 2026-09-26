@@ -46,7 +46,7 @@ jobs:
           NEXT_PUBLIC_API_URL: https://trustshield-api.example.com
           TRUSTSHIELD_RESULT_STORE: sandbox_only
           TESSERACT_CMD: /usr/bin/tesseract
-        run: python scripts/preflight.py --profile production --ports
+        run: python scripts/preflight.py --profile production --skip-frontend --ports
 
   frontend:
     runs-on: ubuntu-24.04

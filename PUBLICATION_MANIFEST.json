@@ -2,7 +2,7 @@
   "files": {
     ".dockerignore": "20f93ec717f4cbc9db199522407c9fc6f14e25b47b9c7b86eaa97551419bf5bf",
     ".env.example": "25b9e45d082dfa3f8fee451e5eebbb7800c10c2e09829f3132f68d1bcafd4f2e",
-    ".github/workflows/ci.yml": "0b05fb71783da76d107061e3f664febddc99e083535eb75159197477200446a3",
+    ".github/workflows/ci.yml": "86f6497000d37c1aaf1cc2d383128722c0001af07e5b6b69a1e6dfbe34209963",
     ".gitignore": "3767eb66c5a3baeca446aec1a010a86095da5484ca026bd8446dcf1fc97f45ac",
     "README.md": "ffcbc0602e3fac138c7ba9f466f13f315b7b354a1d613b513a4d38bb871e8162",
     "apps/web/.gitignore": "207e265ff4901f9ad9f96d8ce08530e04f9fc600815472a66d0a446096d654cd",
@@ -421,7 +421,7 @@
     "scripts/make_ocr_corpus.py": "fc5557f969d2fdc4c96a0c381525faf395a86e3c2a87ea1e3b99084afb5303e0",
     "scripts/measure_footprint.py": "1f46ee6ec6aa9434dc84f746e0a8605a775b090462cae499bec1d766c2a6bbac",
     "scripts/ocr_benchmark.py": "cbfb36dcf24b7c7059f4f3d44907daf4221e81975dfd582c34b9a8b8e99ac811",
-    "scripts/preflight.py": "26fb9246381592791958e6d405476765f85078aa5680023aa81bea15c2a58e7a",
+    "scripts/preflight.py": "e9415facf0ba32da83cb330c5ae94e89a2dceb2cbe58aea087c69435cbf0ccf9",
     "scripts/prepare_dataset.py": "aa71415010dcbf936312d8ed2eb0c8c715959d0830a997899b4660a79c53b82c",
     "scripts/prepare_dataset_v3.py": "d4dbc74fab354a5d71ab35b7b04c6750ff19ed89776a386d483b7726ece42a0c",
     "scripts/prepare_hardening_candidates.py": "bb8ba7229d1fe24147637e8b9248db447e725b3c950aa6dbd7ebf89aab6b086c",
