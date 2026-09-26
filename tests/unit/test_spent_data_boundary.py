@@ -19,6 +19,7 @@ NEVER_READS_CONTENT = {
     "_v2_spent_guard.py": "the guard itself",
     "fusion_oof_predictions.py": "refuses sealed paths",
     "build_public_tree.py": "publication policy: names excluded paths, reads only CSV headers",
+    "sync_public_repo.py": "mirrors the already-filtered publication tree",
 }
 
 
