@@ -5,6 +5,7 @@ import asyncio
 import json
 import logging
 import math
+import os
 import sys
 import threading
 import time
@@ -316,6 +317,14 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         return JSONResponse(status_code=422, content={"detail": details})
 
     app.include_router(router)
+    if os.getenv("TRUSTSHIELD_DEBUG_PROXY", "").strip() == "1":
+        # Temporary observation window only (scripts/observe_proxy_chain.py): reveals the peer address and forwarding headers.
+        @app.get("/debug/proxy", include_in_schema=False)
+        def debug_proxy(request: Request):
+            return {"peer": request.client.host if request.client else None,
+                    "x_forwarded_for": request.headers.get("x-forwarded-for", ""),
+                    "x_forwarded_proto": request.headers.get("x-forwarded-proto", "")}
+
     app.add_middleware(BodyLimitMiddleware, max_bytes=settings.max_body_bytes)
     app.add_middleware(ObservabilityMiddleware, settings=settings)
     app.add_middleware(CORSMiddleware, allow_origins=list(settings.cors_origins), allow_methods=["GET", "POST", "OPTIONS"],
