@@ -35,6 +35,7 @@ from services.chat.contract import ChatAnalysis, to_contract
 from services.chat.explain import Reply, followup_intent, get_provider
 from services.chat.orchestrator import analyze_turn
 from services.chat.router import MAX_MESSAGE_CHARS, route
+from services.chat.signing import sign, verify
 
 from .security import BodyLimitMiddleware, ObservabilityMiddleware, RateLimiter, ResultStore, client_key, event_log
 from .settings import Settings
@@ -286,6 +287,7 @@ class Turn(BaseModel):
 class ChatIn(BaseModel):
     message: str = Field(default="", max_length=MAX_MESSAGE_CHARS)
     context: ChatAnalysis | None = None  # the previous analysis, sent back by the browser (the server stores no conversation)
+    context_signature: str = Field(default="", max_length=128)
     history: list[Turn] = Field(default_factory=list, max_length=6)
 
 
@@ -301,24 +303,26 @@ class ChatOut(BaseModel):
     route: dict
     reply: ReplyOut
     analysis: ChatAnalysis | None = None
-    legacy_result: AnalysisResult | None = None
+    context_signature: str | None = None
 
 
 def _reply_out(reply: Reply) -> ReplyOut:
     return ReplyOut(text=reply.text, cited_evidence=reply.cited_evidence[:10], provider=reply.provider, grounded=reply.grounded)
 
 
-async def _chat_turn(request: Request, response: Response, message: str, context: ChatAnalysis | None, history: list[Turn],
+async def _chat_turn(request: Request, response: Response, message: str, context: ChatAnalysis | None, signature: str, history: list[Turn],
                      image: tuple[bytes, str | None, str | None] | None) -> ChatOut:
     if sum(len(t.text) for t in history) > 12_000:
         raise HTTPException(422, "conversation context is too large; start a new chat")
+    if context is not None and not verify(context, signature):
+        context = None  # unsigned or altered context is never trusted
     plan = route(message, image is not None, context is not None, followup_intent)
     provider = get_provider()
     if plan.kind == "empty":
         raise HTTPException(422, "Send a message, link, screenshot or QR code to analyse.")
     if plan.kind == "followup":
         assert context is not None and plan.intent is not None
-        return ChatOut(kind="followup", route=plan.public(), reply=_reply_out(provider.reply_for_followup(plan.intent, message, context)))
+        return ChatOut(kind="followup", route=plan.public(), reply=_reply_out(await run_in_threadpool(provider.reply_for_followup, plan.intent, message, context)))
     try:
         if image is not None:
             result, types = await run_heavy(request, analyze_turn, message, image, plan)
@@ -330,25 +334,26 @@ async def _chat_turn(request: Request, response: Response, message: str, context
         raise HTTPException(422, str(exc))
     _publish(request, response, result)
     analysis = to_contract(result, types, plan.urls)
-    return ChatOut(kind="analysis", route=plan.public(), reply=_reply_out(provider.reply_for_analysis(analysis)),
-                   analysis=analysis, legacy_result=result)
+    return ChatOut(kind="analysis", route=plan.public(), reply=_reply_out(await run_in_threadpool(provider.reply_for_analysis, analysis)),
+                   analysis=analysis, context_signature=sign(analysis))
 
 
 @router.post("/api/v1/chat", response_model=ChatOut, dependencies=[Depends(limit_light)])
 async def chat_endpoint(body: ChatIn, request: Request, response: Response):
-    return await _chat_turn(request, response, body.message, body.context, body.history, None)
+    return await _chat_turn(request, response, body.message, body.context, body.context_signature, body.history, None)
 
 
 @router.post("/api/v1/chat/upload", response_model=ChatOut, dependencies=[Depends(limit_heavy)])
 async def chat_upload_endpoint(request: Request, response: Response, file: UploadFile = File(...),
-                               message: str = Form(default="", max_length=MAX_MESSAGE_CHARS), context: str = Form(default="")):
+                               message: str = Form(default="", max_length=MAX_MESSAGE_CHARS), context: str = Form(default="", max_length=60_000),
+                               context_signature: str = Form(default="", max_length=128)):
     try:
         parsed = ChatAnalysis.model_validate_json(context) if context.strip() else None
     except ValueError:
         raise HTTPException(422, "invalid conversation context")
     try:
         data = await file.read(max_upload_size() + 1)
-        return await _chat_turn(request, response, message, parsed, [], (data, file.content_type, file.filename))
+        return await _chat_turn(request, response, message, parsed, context_signature, [], (data, file.content_type, file.filename))
     finally:
         await file.close()
 

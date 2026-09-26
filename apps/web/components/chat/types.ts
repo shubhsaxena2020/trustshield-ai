@@ -54,10 +54,11 @@ export interface ChatResponse {
   route: { kind: string; reason: string; urls: string[]; intent: string | null; has_attachment: boolean; modules: string[] };
   reply: ChatReply;
   analysis: ChatAnalysis | null;
+  context_signature: string | null;
 }
 
 export type Message =
   | { id: string; role: "user"; text: string; fileName?: string; previewUrl?: string }
-  | { id: string; role: "assistant"; kind: "analysis"; reply: ChatReply; analysis: ChatAnalysis; route: ChatResponse["route"] }
+  | { id: string; role: "assistant"; kind: "analysis"; reply: ChatReply; analysis: ChatAnalysis; signature: string; route: ChatResponse["route"] }
   | { id: string; role: "assistant"; kind: "followup"; reply: ChatReply }
   | { id: string; role: "assistant"; kind: "error"; text: string; retry?: () => void };

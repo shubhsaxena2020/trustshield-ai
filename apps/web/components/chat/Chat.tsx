@@ -54,10 +54,10 @@ export function Chat() {
     endRef.current?.scrollIntoView?.({ behavior: "smooth", block: "end" });
   }, [messages, busy]);
 
-  const lastAnalysis: ChatAnalysis | null = (() => {
+  const lastAnalysis: { analysis: ChatAnalysis; signature: string } | null = (() => {
     for (let i = messages.length - 1; i >= 0; i--) {
       const m = messages[i];
-      if (m.role === "assistant" && m.kind === "analysis") return m.analysis;
+      if (m.role === "assistant" && m.kind === "analysis") return { analysis: m.analysis, signature: m.signature };
     }
     return null;
   })();
@@ -78,9 +78,10 @@ export function Chat() {
       if (prev) URL.revokeObjectURL(prev.url);
       return null;
     });
+    requestAnimationFrame(() => inputRef.current?.focus()); // keep keyboard focus in the composer
   }
 
-  async function send(text: string, attachment: File | null, context: ChatAnalysis | null) {
+  async function send(text: string, attachment: File | null, context: { analysis: ChatAnalysis; signature: string } | null) {
     setBusy(true);
     setNotice("");
     const controller = new AbortController();
@@ -91,13 +92,16 @@ export function Chat() {
         const form = new FormData();
         form.append("file", attachment);
         form.append("message", text);
-        if (context) form.append("context", JSON.stringify(context));
+        if (context) {
+          form.append("context", JSON.stringify(context.analysis));
+          form.append("context_signature", context.signature);
+        }
         res = await fetch(`${API}/api/v1/chat/upload`, { method: "POST", body: form, signal: controller.signal });
       } else {
         res = await fetch(`${API}/api/v1/chat`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: text, context }),
+          body: JSON.stringify({ message: text, context: context?.analysis ?? null, context_signature: context?.signature ?? "" }),
           signal: controller.signal,
         });
       }
@@ -110,15 +114,19 @@ export function Chat() {
       setMessages((prev) => [
         ...prev,
         data.kind === "analysis" && data.analysis
-          ? { id: uid(), role: "assistant", kind: "analysis", reply: data.reply, analysis: data.analysis, route: data.route }
+          ? { id: uid(), role: "assistant", kind: "analysis", reply: data.reply, analysis: data.analysis, signature: data.context_signature ?? "", route: data.route }
           : { id: uid(), role: "assistant", kind: "followup", reply: data.reply },
       ]);
     } catch (err) {
       if (controller.signal.aborted) {
-        setMessages((prev) => [...prev, { id: uid(), role: "assistant", kind: "error", text: "Analysis cancelled." }]);
+        setMessages((prev) => [...prev, { id: uid(), role: "assistant", kind: "followup", reply: { text: "Analysis cancelled.", cited_evidence: [], provider: "none", grounded: true } }]);
       } else {
         const msg = err instanceof Error && err.message ? err.message : "Could not reach the analysis service.";
-        setMessages((prev) => [...prev, { id: uid(), role: "assistant", kind: "error", text: msg, retry: () => void send(text, attachment, context) }]);
+        const errorId = uid();
+        setMessages((prev) => [...prev, { id: errorId, role: "assistant", kind: "error", text: msg, retry: () => {
+          setMessages((curr) => curr.filter((m) => m.id !== errorId));
+          void send(text, attachment, context);
+        } }]);
       }
     } finally {
       abortRef.current = null;
@@ -171,7 +179,7 @@ export function Chat() {
         </div>
         <nav className="flex items-center gap-3 text-sm">
           <a href="/analyzer" className="font-medium text-teal-800 underline dark:text-teal-300">Advanced analyzer</a>
-          <button type="button" onClick={newChat} className="rounded-md border border-slate-300 px-3 py-1.5 font-medium hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-600 dark:border-slate-600 dark:hover:bg-slate-800">
+          <button type="button" onClick={newChat} className="min-h-11 rounded-md border border-slate-300 px-3 py-2 font-medium hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-600 dark:border-slate-600 dark:hover:bg-slate-800">
             New chat
           </button>
         </nav>
@@ -188,7 +196,10 @@ export function Chat() {
         </p>
       )}
 
-      <main className="flex-1 pb-4" aria-live="polite">
+      <main className="flex-1 pb-4">
+        <div aria-live="polite" aria-atomic="true" className="sr-only">
+          {busy ? "Analysing." : messages.length > 0 && messages[messages.length - 1].role === "assistant" ? "New response received." : ""}
+        </div>
         {empty && (
           <section className="py-8">
             <h2 className="text-2xl font-semibold">Is something asking you to click, pay or share?</h2>
@@ -227,7 +238,7 @@ export function Chat() {
                 <div role="alert" className="rounded-xl border border-red-600 bg-red-50 px-4 py-3 text-sm text-red-900 dark:bg-red-950 dark:text-red-100">
                   <p>{m.text}</p>
                   {m.retry && (
-                    <button type="button" onClick={m.retry} disabled={busy} className="mt-2 rounded-md border border-red-700 px-3 py-1 font-medium hover:bg-red-100 disabled:opacity-50 dark:hover:bg-red-900">
+                    <button type="button" onClick={m.retry} disabled={busy} className="mt-2 min-h-11 rounded-md border border-red-700 px-4 py-2 font-medium hover:bg-red-100 disabled:opacity-50 dark:hover:bg-red-900">
                       Retry
                     </button>
                   )}
@@ -238,7 +249,7 @@ export function Chat() {
                     <p className="whitespace-pre-wrap break-words">{m.reply.text}</p>
                     <div className="mt-2 flex items-center gap-3 text-xs text-slate-600 dark:text-slate-400">
                       <span>{m.reply.grounded ? "Grounded in the analysis evidence" : "Not grounded"}</span>
-                      <button type="button" onClick={() => void navigator.clipboard?.writeText(m.reply.text)} className="font-medium underline focus:outline-none focus:ring-2 focus:ring-teal-600">
+                      <button type="button" onClick={() => void navigator.clipboard?.writeText(m.reply.text)} className="min-h-11 px-2 font-medium underline focus:outline-none focus:ring-2 focus:ring-teal-600">
                         Copy
                       </button>
                     </div>
@@ -266,7 +277,7 @@ export function Chat() {
             {/* eslint-disable-next-line @next/next/no-img-element -- blob: preview */}
             <img src={attached.url} alt="Attachment preview" className="h-14 w-14 rounded object-cover" />
             <span className="min-w-0 flex-1 truncate text-sm">{attached.file.name}</span>
-            <button type="button" onClick={removeAttachment} aria-label="Remove attachment" className="rounded-md px-2 py-1 text-sm font-medium underline focus:outline-none focus:ring-2 focus:ring-teal-600">
+            <button type="button" onClick={removeAttachment} aria-label="Remove attachment" className="min-h-11 rounded-md px-3 py-2 text-sm font-medium underline focus:outline-none focus:ring-2 focus:ring-teal-600">
               Remove
             </button>
           </div>
@@ -279,7 +290,7 @@ export function Chat() {
           className="flex items-end gap-2 rounded-2xl border border-slate-400 bg-white p-2 focus-within:ring-2 focus-within:ring-teal-600 dark:border-slate-600 dark:bg-slate-900"
         >
           <input ref={fileRef} type="file" accept={ALLOWED.join(",")} className="sr-only" aria-label="Attach an image" tabIndex={-1} onChange={(e) => { accept(e.target.files?.[0]); e.target.value = ""; }} />
-          <button type="button" onClick={() => fileRef.current?.click()} aria-label="Attach a screenshot or QR code" className="h-10 w-10 shrink-0 rounded-full border border-slate-400 text-xl font-medium hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-600 dark:hover:bg-slate-800">
+          <button type="button" onClick={() => fileRef.current?.click()} aria-label="Attach a screenshot or QR code" className="h-11 w-11 shrink-0 rounded-full border border-slate-400 text-xl font-medium hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-600 dark:hover:bg-slate-800">
             +
           </button>
           <textarea
@@ -304,7 +315,7 @@ export function Chat() {
             placeholder={lastAnalysis ? "Ask a follow-up, or paste something new…" : "Paste a message or link, or attach a screenshot…"}
             className="max-h-40 min-h-10 flex-1 resize-none bg-transparent px-2 py-2 text-base outline-none"
           />
-          <button type="submit" disabled={busy || (!draft.trim() && !attached)} className="h-10 shrink-0 rounded-full bg-teal-700 px-4 text-sm font-semibold text-white hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-teal-600 focus:ring-offset-2 disabled:opacity-50">
+          <button type="submit" disabled={busy || (!draft.trim() && !attached)} className="h-11 shrink-0 rounded-full bg-teal-700 px-4 text-sm font-semibold text-white hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-teal-600 focus:ring-offset-2 disabled:opacity-50">
             Send
           </button>
         </form>

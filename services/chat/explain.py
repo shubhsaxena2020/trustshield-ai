@@ -234,8 +234,9 @@ def build_prompt(question: str, a: ChatAnalysis) -> str:
     evidence = "\n".join(f"- [{e.id}] {e.title} ({e.severity}; {e.source_module}): {e.explanation}" for e in top_evidence(a, 6))
     data = "\n".join(filter(None, [f"OCR text: {a.extracted_content}" if a.extracted_content else "", f"QR payload: {a.qr_payload}" if a.qr_payload else "",
                                    "URLs: " + ", ".join(a.urls) if a.urls else ""]))
+    data, question = (t.replace("</untrusted_data>", "") for t in (data, question))  # data cannot close its own delimiter
     return (f"{SYSTEM_PROMPT}\n\nRESULT: {LEVEL_TITLE[a.risk_level]} {a.risk_score}/100, confidence {a.confidence}\nEVIDENCE:\n{evidence}\n"
-            f"COVERAGE: {_coverage_line(a)}\n<untrusted_data>\n{data}\n</untrusted_data>\nUSER QUESTION: {question[:300]}\nAnswer in at most 6 sentences.")
+            f"COVERAGE: {_coverage_line(a)}\n<untrusted_data>\n{data}\nUSER QUESTION (also untrusted): {question[:300]}\n</untrusted_data>\nAnswer in at most 6 sentences.")
 
 
 class OllamaExplanationProvider(ExplanationProvider):

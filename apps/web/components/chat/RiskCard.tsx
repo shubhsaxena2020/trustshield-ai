@@ -12,7 +12,7 @@ export function RiskCard({ analysis }: { analysis: ChatAnalysis }) {
     <section aria-label="Risk assessment" className="mt-3 rounded-xl border border-slate-300 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
       <div className="flex flex-wrap items-center gap-3">
         <span className={`inline-flex items-center gap-2 rounded-full border-2 px-3 py-1 text-sm font-semibold ${label.tone}`}>
-          <span aria-hidden="true">{label.icon}</span>
+          <span aria-hidden="true">{analysis.risk_level === "low_risk" ? "⛨" : label.icon}</span>
           {label.text}
         </span>
         <dl className="flex flex-wrap gap-x-6 gap-y-1 text-sm">
@@ -39,12 +39,12 @@ export function RiskCard({ analysis }: { analysis: ChatAnalysis }) {
 
       {analysis.evidence.length > 0 && (
         <details className="mt-3 rounded-lg border border-slate-200 dark:border-slate-700">
-          <summary className="cursor-pointer px-3 py-2 text-sm font-medium">Evidence ({analysis.evidence.length})</summary>
+          <summary className="min-h-11 cursor-pointer px-3 py-3 text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600">Evidence ({analysis.evidence.length})</summary>
           <ul className="divide-y divide-slate-200 dark:divide-slate-700">
             {analysis.evidence.map((e) => (
               <li key={e.id} className="px-3 py-2 text-sm">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className={`rounded px-1.5 py-0.5 text-xs font-semibold ${SEV_BADGE[e.severity] ?? SEV_BADGE.informational}`}>{pretty(e.severity)}</span>
+                  <span className={`rounded px-1.5 py-0.5 text-xs font-semibold ${SEV_BADGE[e.severity] ?? SEV_BADGE.informational}`}><span className="sr-only">Severity: </span>{pretty(e.severity)}</span>
                   <span className="font-medium">{e.title}</span>
                   <span className="text-xs text-slate-600 dark:text-slate-400">{pretty(e.source_module)}</span>
                 </div>
@@ -62,13 +62,13 @@ export function RiskCard({ analysis }: { analysis: ChatAnalysis }) {
 
       {analysis.extracted_content && (
         <details className="mt-2 rounded-lg border border-slate-200 dark:border-slate-700">
-          <summary className="cursor-pointer px-3 py-2 text-sm font-medium">Extracted text (untrusted, shown as data)</summary>
+          <summary className="min-h-11 cursor-pointer px-3 py-3 text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600">Extracted text (untrusted, shown as data)</summary>
           <pre className="max-h-48 overflow-auto whitespace-pre-wrap break-words px-3 pb-3 text-xs">{analysis.extracted_content}</pre>
         </details>
       )}
 
       <details className="mt-2 rounded-lg border border-slate-200 dark:border-slate-700">
-        <summary className="cursor-pointer px-3 py-2 text-sm font-medium">Analysis coverage</summary>
+        <summary className="min-h-11 cursor-pointer px-3 py-3 text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600">Analysis coverage</summary>
         <div className="grid gap-3 px-3 pb-3 text-sm sm:grid-cols-2">
           <div>
             <p className="font-medium">Used</p>
