@@ -172,10 +172,11 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--ports", type=int, nargs="*", default=[8000, 3000])
+    parser.add_argument("--skip-frontend", action="store_true", help="API-only host (Render image / backend CI job): no Node or web build checks")
     parser.add_argument("--profile", choices=("development", "production"), default="development")
     parser.add_argument("--remote", help="also verify a deployed API base URL (one GET to /api/v1/health)")
     args = parser.parse_args(argv)
-    steps = [check_model, check_ocr, check_api, check_frontend, check_sandbox]
+    steps = [check_model, check_ocr, check_api, check_sandbox] if args.skip_frontend else [check_model, check_ocr, check_api, check_frontend, check_sandbox]
     if args.profile == "production":
         def check_production_step() -> None:
             check_production(args.remote)
