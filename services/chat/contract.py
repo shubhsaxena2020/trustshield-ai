@@ -7,9 +7,9 @@ from __future__ import annotations
 
 import re
 from datetime import datetime
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, StringConstraints, field_validator
 
 from services.analysis.fusion.result import AnalysisResult, RiskLabel
 
@@ -36,6 +36,16 @@ _CTRL = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
 
 def clean(value: Any, limit: int = 300) -> str:
     return _CTRL.sub("", str(value or ""))[:limit]
+
+
+class _ItemFactory:
+    """Item[n]: a string bounded to n characters, so client-supplied list entries cannot be arbitrarily large."""
+
+    def __class_getitem__(cls, n: int):
+        return Annotated[str, StringConstraints(max_length=n)]
+
+
+Item = _ItemFactory
 
 
 class ContractEvidence(BaseModel):
@@ -66,22 +76,22 @@ class ChatAnalysis(BaseModel):
     contract_version: str = CONTRACT_VERSION
     analysis_id: str = Field(max_length=64)
     timestamp: datetime
-    input_types: list[str] = Field(max_length=6)
+    input_types: list[Item[40]] = Field(max_length=6)
     risk_score: int = Field(ge=0, le=100)
     risk_level: RiskLabel
     confidence: Literal["high", "medium", "low"]
     primary_category: str = Field(max_length=80, default="")
-    modules_used: list[str] = Field(default_factory=list, max_length=12)
+    modules_used: list[Item[60]] = Field(default_factory=list, max_length=12)
     evidence: list[ContractEvidence] = Field(default_factory=list, max_length=MAX_EVIDENCE)
     extracted_content: str | None = Field(default=None, max_length=MAX_TEXT)  # OCR text: untrusted DATA
-    urls: list[str] = Field(default_factory=list, max_length=10)
+    urls: list[Item[500]] = Field(default_factory=list, max_length=10)
     qr_payload: str | None = Field(default=None, max_length=1000)
     qr_payload_type: str | None = Field(default=None, max_length=20)
-    warnings: list[str] = Field(default_factory=list, max_length=12)
-    uncertainty: list[str] = Field(default_factory=list, max_length=12)
-    safe_actions: list[str] = Field(default_factory=list, max_length=8)
+    warnings: list[Item[400]] = Field(default_factory=list, max_length=12)
+    uncertainty: list[Item[400]] = Field(default_factory=list, max_length=12)
+    safe_actions: list[Item[400]] = Field(default_factory=list, max_length=8)
     capabilities: list[Capability] = Field(default_factory=list, max_length=12)
-    ocr_confidence: float | None = None
+    ocr_confidence: float | None = Field(default=None, ge=0, le=100)
 
     @property
     def capabilities_used(self) -> list[str]:

@@ -168,3 +168,11 @@ def test_external_provider_refused_without_opt_in():
 
 def test_disabled_provider_reports_disabled():
     assert run_providers([DisabledProvider()], "http://a.example", PrivacyMode.LOCAL_ONLY, False)[0].status == "disabled"
+
+
+def test_forged_oversize_context_is_rejected():
+    a = chat(PHISH).json()["analysis"]
+    for field in ("warnings", "uncertainty", "safe_actions", "urls"):
+        bad = {**a, field: ["x" * 5000]}
+        assert chat("Why is this suspicious?", context=bad).status_code == 422, field
+    assert chat("hi", context={**a, "risk_level": "definitely_safe"}).status_code == 422
