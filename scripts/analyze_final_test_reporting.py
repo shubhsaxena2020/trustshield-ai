@@ -248,7 +248,11 @@ def build_review_rows(rows: list[dict], sample_seed: int = SEED) -> list[dict]:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--project-root", type=Path, default=Path(__file__).resolve().parents[1])
-    args = parser.parse_args()
+    import sys as _sys
+    from pathlib import Path as _Path
+    _sys.path.insert(0, str(_Path(__file__).resolve().parents[1]))
+    from scripts._v2_spent_guard import require_archival_override
+    args = parser.parse_args(require_archival_override(None))
     root = args.project_root.resolve()
     test_dir = root / "models" / "evaluation" / "test"
     dataset_dir = root / "datasets" / "processed" / "trustshield-text-v1"

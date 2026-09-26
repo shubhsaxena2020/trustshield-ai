@@ -116,6 +116,47 @@ def check_sandbox() -> None:
         check("sandbox Chromium", "PASS" if browsers.is_dir() and any(browsers.glob("chromium*")) else "FAIL", str(browsers))
 
 
+def check_production(remote_url: str | None) -> None:
+    """Deployment profile: the same identity/limits/config checks the API enforces at startup, plus deployment-only ones."""
+    from services.api.settings import Settings
+    from services.api.startup import environment_problems, model_problems
+
+    settings = Settings.from_env()
+    check("TRUSTSHIELD_ENV is staging or production", "PASS" if settings.strict else "FAIL", f"TRUSTSHIELD_ENV={settings.env}")
+    problems = environment_problems(settings)
+    check("API environment (CORS, ML, sandbox, OCR, fusion, tmp)", "PASS" if not problems else "FAIL", "; ".join(problems))
+    model = model_problems()
+    check("v3 identity: artifact present, hash, load, sklearn, threshold 0.16", "PASS" if not model else "FAIL", "; ".join(model))
+    dev_flags = [name for name, bad in (
+        ("TRUSTSHIELD_ENV=test", os.getenv("TRUSTSHIELD_ENV", "").lower() == "test"),
+        ("TRUSTSHIELD_OCR_PROVIDER=mock", os.getenv("TRUSTSHIELD_OCR_PROVIDER", "").lower() == "mock"),
+        ("ENABLE_WEB_SANDBOX", os.getenv("ENABLE_WEB_SANDBOX", "false").lower() in TRUTHY),
+        ("localhost in PUBLIC_API_URL", "localhost" in os.getenv("PUBLIC_API_URL", "")),
+        ("localhost in NEXT_PUBLIC_API_URL", "localhost" in os.getenv("NEXT_PUBLIC_API_URL", "")),
+        ("DEBUG", os.getenv("DEBUG", "").lower() in TRUTHY)) if bad]
+    check("no development configuration enabled", "PASS" if not dev_flags else "FAIL", ", ".join(dev_flags))
+    public = os.getenv("PUBLIC_API_URL", "")
+    check("PUBLIC_API_URL is https", "PASS" if public.startswith("https://") else "FAIL", public or "unset")
+    frontend_api = os.getenv("NEXT_PUBLIC_API_URL", "")
+    check("frontend API URL matches PUBLIC_API_URL", "PASS" if frontend_api and frontend_api.rstrip("/") == public.rstrip("/") else "FAIL", frontend_api or "unset")
+    db = os.getenv("DATABASE_URL", "").strip()
+    check("database", "PASS" if not db else "WARN",
+          "stateless deployment: no database used" if not db else "DATABASE_URL is set but Milestone A does not use a database")
+    for rel in ("services", "models/release", "models/metadata"):
+        check(f"required directory {rel}", "PASS" if (ROOT / rel).is_dir() else "FAIL")
+    if remote_url:
+        import urllib.request
+
+        try:
+            with urllib.request.urlopen(remote_url.rstrip("/") + "/api/v1/health", timeout=10) as response:
+                health = json.loads(response.read())
+            ml = health["modules"]["ml"]
+            ok = ml.get("available") and ml.get("model_name") == EXPECTED_MODEL and health["modules"].get("web_sandbox") is False
+            check("remote API health (v3 loaded, sandbox off)", "PASS" if ok else "FAIL", f"{remote_url}: {ml.get('model_name')} available={ml.get('available')}")
+        except Exception as exc:
+            check("remote API health", "FAIL", type(exc).__name__)
+
+
 def check_ports(ports: list[int]) -> None:
     for port in ports:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as probe:
@@ -131,8 +172,15 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--ports", type=int, nargs="*", default=[8000, 3000])
+    parser.add_argument("--profile", choices=("development", "production"), default="development")
+    parser.add_argument("--remote", help="also verify a deployed API base URL (one GET to /api/v1/health)")
     args = parser.parse_args(argv)
-    for step in (check_model, check_ocr, check_api, check_frontend, check_sandbox):
+    steps = [check_model, check_ocr, check_api, check_frontend, check_sandbox]
+    if args.profile == "production":
+        def check_production_step() -> None:
+            check_production(args.remote)
+        steps.append(check_production_step)
+    for step in steps:
         try:
             step()
         except Exception as exc:  # a crashing check is a failed check, never a silent pass

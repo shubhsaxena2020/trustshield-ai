@@ -1,0 +1,14 @@
+# Runtime dependencies of the API image (top-level, exact versions taken from the verified release environment).
+# The fully-resolved, hash-free lock for Linux is requirements-api.lock.txt (regenerate: see docs/DEPLOYMENT_ARCHITECTURE.md).
+fastapi==0.141.1
+uvicorn==0.53.0
+pydantic==2.13.5
+python-multipart==0.0.32
+tldextract==5.3.2
+opencv-python-headless==5.0.0.93
+pillow==12.3.0
+pytesseract==0.3.13
+numpy==2.5.3
+scipy==1.18.1
+scikit-learn==1.9.1
+joblib==1.6.0

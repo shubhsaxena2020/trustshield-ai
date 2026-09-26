@@ -17,3 +17,10 @@ graphify-out/
 .playwright-browsers/
 .DS_Store
 tests/e2e/screenshots/
+
+# release artifacts are supplied at image-build time (see docs/MODEL_RELEASE.md); never commit them
+release-artifacts/*
+!release-artifacts/.gitkeep
+.env
+.env.*
+!.env.example

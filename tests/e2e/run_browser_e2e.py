@@ -1,6 +1,7 @@
 """Browser end-to-end run: real Next.js UI -> real FastAPI -> real pipeline.
 
 Not collected by pytest (no test_ prefix). Run:  python tests/e2e/run_browser_e2e.py
+Requires a production build made with NEXT_PUBLIC_API_URL=http://localhost:8000 (production builds have no localhost fallback).
 Starts its own API (8000) and web (3000, production build) servers and stops
 them by PID. Sandbox runs with ENABLE_WEB_SANDBOX=true but external browsing
 OFF, so it must refuse the public URL safely.

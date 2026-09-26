@@ -5,7 +5,10 @@ import { AnalysisResult } from "@/components/types";
 import { FileUpload } from "@/components/FileUpload";
 import { ResultDashboard } from "@/components/ResultDashboard";
 
-const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+// Production builds must be given NEXT_PUBLIC_API_URL (the HTTPS API origin); the localhost fallback exists for development only.
+const API =
+  process.env.NEXT_PUBLIC_API_URL ??
+  (process.env.NODE_ENV === "production" ? "" : "http://localhost:8000");
 
 type TabMode = "text" | "url" | "image" | "qr";
 
@@ -26,15 +29,18 @@ export default function Home() {
   const [ocrHealthy, setOcrHealthy] = useState<boolean | null>(null);
   const [mlHealthy, setMlHealthy] = useState<boolean | null>(null);
   const [sandboxAvailable, setSandboxAvailable] = useState(false);
+  const [apiReachable, setApiReachable] = useState<boolean | null>(null);
   const [useSandbox, setUseSandbox] = useState(false);
 
   // Check backend health for optional OCR and ML module status notice
   useEffect(() => {
     let isMounted = true;
+    if (!API) return () => {};
     fetch(`${API}/api/v1/health`)
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (!isMounted) return;
+        setApiReachable(data !== null);
         const ocr = data?.modules?.ocr;
         if (typeof ocr === "boolean") setOcrHealthy(ocr);
         else if (ocr && typeof ocr.available === "boolean") setOcrHealthy(ocr.available);
@@ -46,7 +52,7 @@ export default function Home() {
         else if (ml && typeof ml.available === "boolean") setMlHealthy(ml.available);
       })
       .catch(() => {
-        // Fail gracefully if health check fails or is unreachable
+        if (isMounted) setApiReachable(false);
       });
 
     return () => {
@@ -128,7 +134,12 @@ export default function Home() {
         setResult(data);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not reach the analysis service.");
+      const network = err instanceof TypeError; // fetch rejects with TypeError when the API cannot be reached
+      setError(
+        network || !(err instanceof Error)
+          ? "Could not reach the analysis service. Check your connection and try again."
+          : err.message,
+      );
     } finally {
       setBusy(false);
     }
@@ -149,6 +160,16 @@ export default function Home() {
           lists the evidence behind it.
         </p>
       </header>
+
+      {(!API || apiReachable === false) && (
+        <p
+          role="alert"
+          data-testid="api-unreachable-banner"
+          className="mb-4 rounded-md border border-red-600 bg-red-50 p-3 text-sm font-medium text-red-900 dark:border-red-400 dark:bg-red-950 dark:text-red-200"
+        >
+          The analysis service is not reachable right now. Please try again in a minute; nothing you typed has been sent.
+        </p>
+      )}
 
       {mlHealthy === false && (
         <p
@@ -295,6 +316,14 @@ export default function Home() {
       </section>
 
       {result && <ResultDashboard result={result} />}
+
+      <footer className="mt-10 border-t border-slate-300 pt-4 text-xs text-slate-600 dark:border-slate-700 dark:text-slate-400">
+        <p className="font-medium">TrustShield AI · Research / Tech Expo Prototype</p>
+        <p className="mt-1">
+          Results are risk evidence with stated uncertainty, not a guarantee of safety. Do not share real OTPs, passwords or
+          card details. Analyses are short-lived and not kept after a restart.
+        </p>
+      </footer>
     </main>
   );
 }

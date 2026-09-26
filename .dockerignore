@@ -1,0 +1,21 @@
+# Keep the build context tiny and free of data, secrets, and spent holdouts.
+.git
+.github
+.venv
+**/__pycache__
+**/*.pyc
+.playwright-browsers
+apps
+benchmarks
+datasets
+docs
+demo
+tests
+models/trained
+models/evaluation
+.env
+.env.*
+!.env.example
+*.md
+!requirements*.txt
+!release-artifacts/.gitkeep

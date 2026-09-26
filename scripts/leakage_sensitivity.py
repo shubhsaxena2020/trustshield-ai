@@ -246,7 +246,11 @@ def run(project_root: str | Path | None = None) -> dict:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--project-root", type=Path, default=Path(__file__).resolve().parents[1])
-    args = parser.parse_args()
+    import sys as _sys
+    from pathlib import Path as _Path
+    _sys.path.insert(0, str(_Path(__file__).resolve().parents[1]))
+    from scripts._v2_spent_guard import require_archival_override
+    args = parser.parse_args(require_archival_override(None))
     print(json.dumps(run(args.project_root), indent=2, sort_keys=True))
 
 

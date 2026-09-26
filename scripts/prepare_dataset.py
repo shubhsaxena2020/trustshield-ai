@@ -436,7 +436,11 @@ def main() -> None:
                         help="Uniformly subsample this non-fraud category before dedup/grouping; seed is 42 and all fraud rows are kept.")
     parser.add_argument("--near-dup-threshold", type=float, default=NEAR_DUPLICATE_THRESHOLD)
     parser.add_argument("--template-signature", choices=("legacy", "strict"), default="legacy")
-    args = parser.parse_args()
+    import sys as _sys
+    from pathlib import Path as _Path
+    _sys.path.insert(0, str(_Path(__file__).resolve().parents[1]))
+    from scripts._v2_spent_guard import require_archival_override
+    args = parser.parse_args(require_archival_override(None))
     print(json.dumps(prepare_dataset(args.input_dir, args.output_dir, args.extra, args.cap, args.near_dup_threshold, args.template_signature), indent=2))
 
 

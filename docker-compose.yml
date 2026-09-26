@@ -1,0 +1,21 @@
+# Local production-like run of the API container (Milestone A). The sandbox worker is intentionally absent.
+#   cp release-artifacts/... (see docs/MODEL_RELEASE.md) ; docker compose build ; docker compose up
+services:
+  api:
+    build:
+      context: .
+      dockerfile: docker/api.Dockerfile
+    image: trustshield-api:local
+    ports: ["8000:8000"]
+    environment:
+      TRUSTSHIELD_ENV: production
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-https://trustshield-local.example}
+      ENABLE_WEB_SANDBOX: "false"
+    read_only: true
+    tmpfs: ["/tmp:rw,size=128m"]
+    cap_drop: ["ALL"]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 2g
+    cpus: 1
+    pids_limit: 200
+    restart: unless-stopped

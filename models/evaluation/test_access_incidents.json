@@ -1,0 +1,11 @@
+[
+  {
+    "timestamp": "2026-09-26T10:17:29.916781+00:00",
+    "what": "scripts/evaluate_model.py --split test --confirm-final-test ran by accident during a guard smoke test (an earlier guard-installation command aborted, the follow-up loop ran the then-unguarded scripts)",
+    "spent_data_touched": "v1 test split (same v1 model, same dataset manifest hash as the original single evaluation)",
+    "also_ran_unguarded": ["scripts/prepare_dataset_v3.py (read v2 holdout TEXT only via the remove-only similarity filter; wrote no holdout data; regenerated v3 files were discarded)", "scripts/prepare_dataset.py x2 (killed by PID; v1 dataset files unchanged per git)"],
+    "handling": "outputs were restored from the committed blobs (models/evaluation/test/*, v3 dataset files) and never inspected or used; the appended entry was removed from test_access_log.json and recorded here instead so the historical log keeps its single original entry; v2 holdout_access_log.json was never written",
+    "decisions_influenced": "none",
+    "prevention": "all scripts that can read or rewrite spent data now refuse without --archival-override-v2-spent; tests/unit/test_spent_data_boundary.py enforces it statically"
+  }
+]

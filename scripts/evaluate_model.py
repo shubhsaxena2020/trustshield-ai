@@ -214,7 +214,14 @@ def main() -> None:
     parser.add_argument("--eval-dir", type=Path, help="evaluation output directory; default preserves v1 behavior")
     parser.add_argument("--out-dir", type=Path, help="alias for --eval-dir")
     parser.add_argument("--confirm-final-test", action="store_true")
-    args = parser.parse_args()
+    import sys as _sys
+    from pathlib import Path as _Path
+    _sys.path.insert(0, str(_Path(__file__).resolve().parents[1]))
+    from scripts._v2_spent_guard import require_archival_override
+    argv = _sys.argv[1:]
+    if "--split=test" in argv or any(a == "--split" and i + 1 < len(argv) and argv[i + 1] == "test" for i, a in enumerate(argv)):
+        argv = require_archival_override(argv)  # the v1 test split is spent
+    args = parser.parse_args(argv)
     if args.eval_dir is not None and args.out_dir is not None and args.eval_dir.resolve() != args.out_dir.resolve():
         parser.error("--eval-dir and --out-dir must refer to the same directory when both are supplied")
     report = evaluate(args.split, [value for value in args.systems.split(",") if value], args.dataset_dir,
