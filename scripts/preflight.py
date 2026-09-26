@@ -133,6 +133,7 @@ def check_production(remote_url: str | None) -> None:
         ("ENABLE_WEB_SANDBOX", os.getenv("ENABLE_WEB_SANDBOX", "false").lower() in TRUTHY),
         ("localhost in PUBLIC_API_URL", "localhost" in os.getenv("PUBLIC_API_URL", "")),
         ("localhost in NEXT_PUBLIC_API_URL", "localhost" in os.getenv("NEXT_PUBLIC_API_URL", "")),
+        ("TRUSTSHIELD_DEBUG_PROXY", os.getenv("TRUSTSHIELD_DEBUG_PROXY", "") == "1"),
         ("DEBUG", os.getenv("DEBUG", "").lower() in TRUTHY)) if bad]
     check("no development configuration enabled", "PASS" if not dev_flags else "FAIL", ", ".join(dev_flags))
     public = os.getenv("PUBLIC_API_URL", "")
