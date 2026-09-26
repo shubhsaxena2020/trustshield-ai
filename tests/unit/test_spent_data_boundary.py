@@ -18,6 +18,7 @@ NEVER_READS_CONTENT = {
     "preflight.py": "docstring: never opens the v2 holdout",
     "_v2_spent_guard.py": "the guard itself",
     "fusion_oof_predictions.py": "refuses sealed paths",
+    "build_public_tree.py": "publication policy: names excluded paths, reads only CSV headers",
 }
 
 
