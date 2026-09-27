@@ -238,9 +238,22 @@ _REQUESTS_SECRET = re.compile(
 _NEGATED_REQUEST = re.compile(r"\b(never|don'?t|do not|avoid|refuse to|won'?t)\b\W*(\w+\W+){0,4}$", re.I)
 
 
+def _claims_unsupported_certainty(text: str) -> bool:
+    # found by the Gemini-migration conversation benchmark: "I cannot guarantee it's completely safe" and "I'm not
+    # able to say it's definitely safe" both correctly REFUSE to claim certainty, but the certainty regexes below had
+    # no negation check at all (unlike every other check in this function), so a refusal was misclassified as the
+    # exact violation it was refusing to commit. Same negation-cue/clause-boundary logic already used for every other
+    # check here now applies to this one too.
+    for cert_re in (_CLAIMS_VERIFIED, _CLAIMS_UNSUPPORTED_CERTAINTY):
+        m = cert_re.search(text)
+        if m and not _is_negated(text, m.start(), m.end()):
+            return True
+    return False
+
+
 def chat_grounding_violations(text: str) -> list[str]:
     found = []
-    if _CLAIMS_VERIFIED.search(text) or _CLAIMS_UNSUPPORTED_CERTAINTY.search(text):
+    if _claims_unsupported_certainty(text):
         found.append("claims certainty or verification")
     m_cap = _CLAIMS_CAPABILITY_NOT_USED.search(text)
     if m_cap and not _is_negated(text, m_cap.start(), m_cap.end()):
@@ -341,7 +354,7 @@ def grounding_violations(text: str, a: ChatAnalysis) -> list[str]:
     """Checks a generated reply against the analysis; returns the violated rules (empty = acceptable)."""
     found = []
     caps = {c.name: c.used for c in a.capabilities}
-    if _CLAIMS_VERIFIED.search(text) or _CLAIMS_UNSUPPORTED_CERTAINTY.search(text):
+    if _claims_unsupported_certainty(text):
         found.append("claims certainty or verification")
     m_opened = _CLAIMS_OPENED.search(text)
     if m_opened and not caps.get("web_sandbox") and not _is_negated(text, m_opened.start(), m_opened.end()):

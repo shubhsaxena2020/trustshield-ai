@@ -178,6 +178,27 @@ def test_chat_grounding_violations_helper():
     assert not chat_grounding_violations("Phishing impersonates a trusted sender to steal credentials.")
 
 
+# ---- found by the Gemini-migration conversation benchmark: a REFUSAL to claim certainty was misclassified as the
+# exact violation it refused to commit, because _CLAIMS_VERIFIED/_CLAIMS_UNSUPPORTED_CERTAINTY had no negation check
+# at all -- unlike every other check in the same function. Real Sonnet/Gemini responses hit this in practice. --------------
+
+@pytest.mark.parametrize("refusal", [
+    "I cannot guarantee that anything is completely safe, as no system is perfect.",
+    "I'm not able to tell you that anything is \"definitely safe\" -- that kind of absolute guarantee isn't something "
+    "I can honestly provide.",
+    "As TrustShield AI, I cannot guarantee that anything is 100% safe.",
+])
+def test_certainty_refusals_are_not_misclassified_as_certainty_claims(refusal):
+    assert not chat_grounding_violations(refusal)
+    from services.chat.explain import _claims_unsupported_certainty
+    assert not _claims_unsupported_certainty(refusal)
+
+
+def test_actual_certainty_claims_still_caught_after_the_negation_fix():
+    assert chat_grounding_violations("This is definitely safe, you can trust it completely.")
+    assert chat_grounding_violations("It is 100% safe.")
+
+
 # ---- self-discovered grounding-check bypasses, fixed before independent review -------------------------------------------
 
 @pytest.mark.parametrize("bypass", [
