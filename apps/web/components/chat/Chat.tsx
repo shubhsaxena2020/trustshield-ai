@@ -12,10 +12,10 @@ const ALLOWED = ["image/png", "image/jpeg", "image/webp"];
 
 // Starters only fill the composer; the user decides whether to send.
 const STARTERS = [
-  "Check a suspicious message: URGENT: your bank account is suspended. Verify now at http://secure-bank-login.example-verify.top/login",
-  "Explain UPI fraud",
-  "How does TrustShield work?",
-  "Upload a screenshot or QR code with the + button and ask what it is.",
+  "I got this text: 'URGENT: your bank account is suspended. Verify now at secure-bank-login.top' — is it real?",
+  "How does UPI payment-request fraud work?",
+  "Someone called claiming to be customs and wants money to release a parcel — is that normal?",
+  "How can I tell if a payment QR code is legitimate before scanning it?",
 ];
 
 const uid = () => Math.random().toString(36).slice(2);
@@ -25,6 +25,7 @@ export function Chat() {
   const [draft, setDraft] = useState("");
   const [attached, setAttached] = useState<{ file: File; url: string } | null>(null);
   const [busy, setBusy] = useState(false);
+  const [busyLabel, setBusyLabel] = useState("TrustShield is thinking\u2026");
   const [notice, setNotice] = useState("");
   const [dragging, setDragging] = useState(false);
   const [apiUp, setApiUp] = useState<boolean | null>(null);
@@ -81,8 +82,9 @@ export function Chat() {
     requestAnimationFrame(() => inputRef.current?.focus()); // keep keyboard focus in the composer
   }
 
-  async function send(text: string, attachment: File | null, context: { analysis: ChatAnalysis; signature: string } | null) {
+  async function send(text: string, attachment: File | null, context: { analysis: ChatAnalysis; signature: string } | null, history: { role: "user" | "assistant"; text: string }[]) {
     setBusy(true);
+    setBusyLabel(attachment ? "Analyzing the attachment\u2026" : "TrustShield is thinking\u2026");
     setNotice("");
     const controller = new AbortController();
     abortRef.current = controller;
@@ -96,12 +98,13 @@ export function Chat() {
           form.append("context", JSON.stringify(context.analysis));
           form.append("context_signature", context.signature);
         }
+        form.append("history", JSON.stringify(history));
         res = await fetch(`${API}/api/v1/chat/upload`, { method: "POST", body: form, signal: controller.signal });
       } else {
         res = await fetch(`${API}/api/v1/chat`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: text, context: context?.analysis ?? null, context_signature: context?.signature ?? "" }),
+          body: JSON.stringify({ message: text, context: context?.analysis ?? null, context_signature: context?.signature ?? "", history }),
           signal: controller.signal,
         });
       }
@@ -125,7 +128,7 @@ export function Chat() {
         const errorId = uid();
         setMessages((prev) => [...prev, { id: errorId, role: "assistant", kind: "error", text: msg, retry: () => {
           setMessages((curr) => curr.filter((m) => m.id !== errorId));
-          void send(text, attachment, context);
+          void send(text, attachment, context, history);
         } }]);
       }
     } finally {
@@ -137,11 +140,18 @@ export function Chat() {
   function submit() {
     const text = draft.trim();
     if (busy || (!text && !attached)) return;
+    // Bounded, client-carried recent history so a remote/Ollama provider (if ever enabled) has short-term conversational
+    // context; the server stores none of this. Capped at 6 turns / 2000 chars each, matching the backend's own bound.
+    type HistoryTurn = { role: "user" | "assistant"; text: string };
+    const history: HistoryTurn[] = messages
+      .flatMap((m): HistoryTurn[] => (m.role === "user" ? [{ role: "user", text: m.text }] : m.kind === "error" ? [] : [{ role: "assistant", text: m.reply.text }]))
+      .slice(-6)
+      .map((h) => ({ role: h.role, text: h.text.slice(0, 2000) }));
     setMessages((prev) => [...prev, { id: uid(), role: "user", text, fileName: attached?.file.name, previewUrl: attached?.url }]);
     const attachment = attached?.file ?? null;
     setDraft("");
     setAttached(null); // the URL stays alive: the sent message still shows the thumbnail
-    void send(text, attachment, lastAnalysis);
+    void send(text, attachment, lastAnalysis, history);
   }
 
   function newChat() {
@@ -202,10 +212,10 @@ export function Chat() {
         </div>
         {empty && (
           <section className="py-8">
-            <h2 className="text-2xl font-semibold">Is something asking you to click, pay or share?</h2>
+            <h2 className="text-2xl font-semibold">Ask me anything about scams, or check something suspicious.</h2>
             <p className="mt-2 max-w-xl text-slate-700 dark:text-slate-300">
-              Paste a message or link, or attach a screenshot or QR code. TrustShield shows the evidence behind every result. It
-              never opens the link and never says something is guaranteed safe.
+              I can explain how phishing, UPI fraud or KYC scams work, or check a message, link, screenshot or QR code for you.
+              Every result comes with the evidence behind it, and I never say something is guaranteed safe.
             </p>
             <div className="mt-5 grid gap-2 sm:grid-cols-2">
               {STARTERS.map((s) => (
@@ -245,10 +255,10 @@ export function Chat() {
                 </div>
               ) : (
                 <div className="max-w-full">
-                  <div className="rounded-2xl rounded-bl-sm border border-slate-300 bg-slate-50 px-4 py-3 text-sm dark:border-slate-700 dark:bg-slate-900">
+                  <div className="max-w-[85%] rounded-2xl rounded-bl-sm border border-slate-300 bg-slate-50 px-4 py-3 text-sm dark:border-slate-700 dark:bg-slate-900">
                     <p className="whitespace-pre-wrap break-words">{m.reply.text}</p>
                     <div className="mt-2 flex items-center gap-3 text-xs text-slate-600 dark:text-slate-400">
-                      <span>{m.reply.grounded ? "Grounded in the analysis evidence" : "Not grounded"}</span>
+                      {m.kind === "analysis" && <span>{m.reply.grounded ? "Grounded in the analysis evidence" : "Not grounded"}</span>}
                       <button type="button" onClick={() => void navigator.clipboard?.writeText(m.reply.text)} className="min-h-11 px-2 font-medium underline focus:outline-none focus:ring-2 focus:ring-teal-600">
                         Copy
                       </button>
@@ -261,7 +271,7 @@ export function Chat() {
           ))}
           {busy && (
             <li role="status" className="text-sm text-slate-600 dark:text-slate-400">
-              Analysing…{" "}
+              {busyLabel}{" "}
               <button type="button" onClick={() => abortRef.current?.abort()} className="font-medium underline">Cancel</button>
             </li>
           )}
@@ -312,7 +322,7 @@ export function Chat() {
             }}
             rows={2}
             aria-label="Message"
-            placeholder={lastAnalysis ? "Ask a follow-up, or paste something new…" : "Paste a message or link, or attach a screenshot…"}
+            placeholder={lastAnalysis ? "Ask a follow-up, or paste something new to check…" : "Ask a cybersecurity question, or paste something to check…"}
             className="max-h-40 min-h-10 flex-1 resize-none bg-transparent px-2 py-2 text-base outline-none"
           />
           <button type="submit" disabled={busy || (!draft.trim() && !attached)} className="h-11 shrink-0 rounded-full bg-teal-700 px-4 text-sm font-semibold text-white hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-teal-600 focus:ring-offset-2 disabled:opacity-50">

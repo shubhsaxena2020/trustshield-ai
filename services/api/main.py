@@ -371,14 +371,18 @@ async def chat_endpoint(body: ChatIn, request: Request, response: Response):
 @router.post("/api/v1/chat/upload", response_model=ChatOut, dependencies=[Depends(limit_heavy)])
 async def chat_upload_endpoint(request: Request, response: Response, file: UploadFile = File(...),
                                message: str = Form(default="", max_length=MAX_MESSAGE_CHARS), context: str = Form(default="", max_length=60_000),
-                               context_signature: str = Form(default="", max_length=128)):
+                               context_signature: str = Form(default="", max_length=128), history: str = Form(default="[]", max_length=16_000)):
     try:
         parsed = ChatAnalysis.model_validate_json(context) if context.strip() else None
     except ValueError:
         raise HTTPException(422, "invalid conversation context")
     try:
+        turns = [Turn.model_validate(t) for t in json.loads(history)] if history.strip() else []
+    except (ValueError, TypeError):
+        raise HTTPException(422, "invalid conversation history")
+    try:
         data = await file.read(max_upload_size() + 1)
-        return await _chat_turn(request, response, message, parsed, context_signature, [], (data, file.content_type, file.filename))
+        return await _chat_turn(request, response, message, parsed, context_signature, turns, (data, file.content_type, file.filename))
     finally:
         await file.close()
 
