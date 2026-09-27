@@ -1518,5 +1518,2195 @@
   "e15a39e13f1a7913d00c64f9": {
     "status": "invented_facts",
     "latency_ms": 5485
+  },
+  "3452da877b876e432012620f": {
+    "status": "ok",
+    "latency_ms": 2729,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.85
+  },
+  "015e490837a25bc8438cedb3": {
+    "status": "ok",
+    "latency_ms": 5039,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.85
+  },
+  "eac23ecb1a6ee6b3f119ee98": {
+    "status": "ok",
+    "latency_ms": 3222,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "b7572a7cefd488af91b55f3f": {
+    "status": "ok",
+    "latency_ms": 2769,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.98
+  },
+  "b97d69d551b48b583eedf484": {
+    "status": "ok",
+    "latency_ms": 3955,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.95
+  },
+  "2fdf00243ccae43769c7afe2": {
+    "status": "transport_error",
+    "latency_ms": 2732
+  },
+  "edd4335dd946eff364920a49": {
+    "status": "transport_error",
+    "latency_ms": 2050
+  },
+  "fbb1e26c1b14890078ab4b9d": {
+    "status": "transport_error",
+    "latency_ms": 2048
+  },
+  "0c99f205debd39870298aacb": {
+    "status": "transport_error",
+    "latency_ms": 2041
+  },
+  "70d629d83e46aa018b60cb6c": {
+    "status": "transport_error",
+    "latency_ms": 2043
+  },
+  "b4940e2bbb6c1f1066e57cec": {
+    "status": "transport_error",
+    "latency_ms": 2035
+  },
+  "77d4ae77444920be63b089eb": {
+    "status": "transport_error",
+    "latency_ms": 2029
+  },
+  "a81a80cca746467cb8e5a7b0": {
+    "status": "transport_error",
+    "latency_ms": 2026
+  },
+  "7b987462fce05429d4a139bf": {
+    "status": "transport_error",
+    "latency_ms": 2035
+  },
+  "4533eb1903331378b0b07248": {
+    "status": "transport_error",
+    "latency_ms": 2048
+  },
+  "63bda18e2a215433eeea0a0b": {
+    "status": "transport_error",
+    "latency_ms": 2032
+  },
+  "980d5a112b8c696ff27bfbfe": {
+    "status": "transport_error",
+    "latency_ms": 2049
+  },
+  "a526a643546efae1b363ca22": {
+    "status": "transport_error",
+    "latency_ms": 2045
+  },
+  "a4c2b9a529f85e9e09c6304f": {
+    "status": "transport_error",
+    "latency_ms": 2039
+  },
+  "7428611858857ab0e8df665f": {
+    "status": "transport_error",
+    "latency_ms": 2022
+  },
+  "78dd46e3150f13488c9beb30": {
+    "status": "transport_error",
+    "latency_ms": 2028
+  },
+  "8560dbe3d4fea02a1ba75aea": {
+    "status": "transport_error",
+    "latency_ms": 2043
+  },
+  "15ab8116f5144d53ab84560d": {
+    "status": "transport_error",
+    "latency_ms": 2048
+  },
+  "afaf452152ca0b7b75a07009": {
+    "status": "transport_error",
+    "latency_ms": 2016
+  },
+  "3454d7703798316f8ce2fc27": {
+    "status": "transport_error",
+    "latency_ms": 2033
+  },
+  "8d61aaa6be786c0d43b6449f": {
+    "status": "transport_error",
+    "latency_ms": 2035
+  },
+  "3189a8b4397e53ff891cea3b": {
+    "status": "transport_error",
+    "latency_ms": 2045
+  },
+  "b4d349f09b2787109afa08eb": {
+    "status": "transport_error",
+    "latency_ms": 2030
+  },
+  "07aa60cf38c26fc6f3a19b6d": {
+    "status": "transport_error",
+    "latency_ms": 2038
+  },
+  "8bd41a3820601ab97ef073c2": {
+    "status": "transport_error",
+    "latency_ms": 2041
+  },
+  "506bfa684c209fed766c965c": {
+    "status": "transport_error",
+    "latency_ms": 22067
+  },
+  "0c48aa8e104311bd4adfc9af": {
+    "status": "ok",
+    "latency_ms": 1759,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "6779aff6f5077c6f52261c24": {
+    "status": "ok",
+    "latency_ms": 1751,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "809b104e2805d5020b0ca564": {
+    "status": "ok",
+    "latency_ms": 3678,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.45
+  },
+  "e8c66134a97d594f352b1cad": {
+    "status": "ok",
+    "latency_ms": 2883,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.85
+  },
+  "8e6ac71be0aa537f41bb263a": {
+    "status": "ok",
+    "latency_ms": 2397,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.85
+  },
+  "df5a14d9ff3822bfde914bb6": {
+    "status": "ok",
+    "latency_ms": 1846,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.1
+  },
+  "4d8292efad9b02acbe8993e2": {
+    "status": "ok",
+    "latency_ms": 2767,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "64ad52323a2a761cd5ef0d77": {
+    "status": "ok",
+    "latency_ms": 1871,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "d32eb5f3abd69e389ebf4d09": {
+    "status": "ok",
+    "latency_ms": 3487,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.85
+  },
+  "1f810735c8fe5647fc74807f": {
+    "status": "invented_facts",
+    "latency_ms": 2301
+  },
+  "0732ff8b87a7eb168db86e53": {
+    "status": "ok",
+    "latency_ms": 2114,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.2
+  },
+  "2db3606c7f636d9162bd9f0f": {
+    "status": "ok",
+    "latency_ms": 2958,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "fd6d0e9370d08c29fe0715bb": {
+    "status": "ok",
+    "latency_ms": 2762,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "ef4676d741592094564b6070": {
+    "status": "invented_facts",
+    "latency_ms": 3475
+  },
+  "943f5458690c86e7bc91c451": {
+    "status": "ok",
+    "latency_ms": 3245,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.85
+  },
+  "9505a29d52cf756a7a0b3158": {
+    "status": "ok",
+    "latency_ms": 3125,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.75
+  },
+  "29f0c4b3bf25bce1f6361ed0": {
+    "status": "ok",
+    "latency_ms": 2946,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.85
+  },
+  "f3160d61feae48b6a4c13864": {
+    "status": "ok",
+    "latency_ms": 1701,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.85
+  },
+  "060cf74a1b12017ae97c2c45": {
+    "status": "ok",
+    "latency_ms": 2250,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.98
+  },
+  "fafcbc960c536439c249c241": {
+    "status": "ok",
+    "latency_ms": 1492,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "72ebeb3217d6d43745149828": {
+    "status": "ok",
+    "latency_ms": 1752,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "80c39dde8246d775ae2dcf0d": {
+    "status": "ok",
+    "latency_ms": 2299,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.95
+  },
+  "04bb2e255b6e409088ca1676": {
+    "status": "ok",
+    "latency_ms": 2512,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.65
+  },
+  "07a87b516bea22264de7b785": {
+    "status": "ok",
+    "latency_ms": 1875,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.95
+  },
+  "a95c11a5cd0ac1420f064b26": {
+    "status": "ok",
+    "latency_ms": 1982,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "2fc8b61661576bed7127f5b8": {
+    "status": "ok",
+    "latency_ms": 1989,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.85
+  },
+  "d9f0efca609a96ea7acd907b": {
+    "status": "ok",
+    "latency_ms": 1588,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "b671eb67d9d3608c4facb246": {
+    "status": "ok",
+    "latency_ms": 1801,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "f61f3f72f90d02509889d252": {
+    "status": "ok",
+    "latency_ms": 1849,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "f6bd979c6fed50a6d7a7a9e0": {
+    "status": "ok",
+    "latency_ms": 1650,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "41b9ebfdb2c901a481620e38": {
+    "status": "ok",
+    "latency_ms": 1704,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "43b3e10f3e2c97c13c8bd86f": {
+    "status": "ok",
+    "latency_ms": 2799,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.75
+  },
+  "c8407e7eebf0c2d95b691812": {
+    "status": "ok",
+    "latency_ms": 1872,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "089143fae8396a4b0a513f36": {
+    "status": "ok",
+    "latency_ms": 2063,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.85
+  },
+  "75870369550379a1d77c6c33": {
+    "status": "ok",
+    "latency_ms": 7664,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.85
+  },
+  "f94ad3b471483630ac32825f": {
+    "status": "ok",
+    "latency_ms": 1565,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "1849c4fe0486ce4cfda285b8": {
+    "status": "ok",
+    "latency_ms": 1691,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "fad6ade77378a869f327171c": {
+    "status": "ok",
+    "latency_ms": 1634,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "2cda09e8921c55fc1b2ac7f3": {
+    "status": "ok",
+    "latency_ms": 2007,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.85
+  },
+  "382ff8e581089a20274a05bd": {
+    "status": "ok",
+    "latency_ms": 1611,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.1
+  },
+  "cc6a377116d16c4a661a2026": {
+    "status": "ok",
+    "latency_ms": 1899,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.85
+  },
+  "972d553dd9af2a33de18a27b": {
+    "status": "ok",
+    "latency_ms": 1418,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "73929d5948b471dae85c433f": {
+    "status": "invented_facts",
+    "latency_ms": 2120
+  },
+  "05b99562328d3b256e4627c7": {
+    "status": "ok",
+    "latency_ms": 2614,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.95
+  },
+  "7c063976abc0418277062fe0": {
+    "status": "ok",
+    "latency_ms": 1796,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "986b6f522e328a311b9acaa7": {
+    "status": "ok",
+    "latency_ms": 2134,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.82
+  },
+  "8882a7246aecab1d8b89247c": {
+    "status": "ok",
+    "latency_ms": 1884,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "997da3b8e07d915c2f73e27e": {
+    "status": "ok",
+    "latency_ms": 2152,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.6
+  },
+  "eccbbccf6d98865a3b20a207": {
+    "status": "ok",
+    "latency_ms": 1524,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "198b4a57f00de85e07d6b679": {
+    "status": "ok",
+    "latency_ms": 2321,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.75
+  },
+  "3d2acb6dceca4ea6edb43572": {
+    "status": "ok",
+    "latency_ms": 1699,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "ad5938e39657e7b66e14b3d3": {
+    "status": "ok",
+    "latency_ms": 1972,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.85
+  },
+  "ce5d8d4e84afc28a2d5cd294": {
+    "status": "ok",
+    "latency_ms": 1515,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "0de6ee0e197f07934fa47c51": {
+    "status": "ok",
+    "latency_ms": 1583,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "fe9049ea7d588b1106d34653": {
+    "status": "ok",
+    "latency_ms": 2214,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.98
+  },
+  "56d2ce3c6cf20168671ff20f": {
+    "status": "ok",
+    "latency_ms": 1589,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "866c0374fd21f1eb54433c0a": {
+    "status": "ok",
+    "latency_ms": 2066,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.95
+  },
+  "016d06460533957c26d6230d": {
+    "status": "ok",
+    "latency_ms": 2328,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.88
+  },
+  "b69d1eb2a7a44cb64fb1573c": {
+    "status": "ok",
+    "latency_ms": 2057,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.85
+  },
+  "e4c8436338a7741cbfe8ce2d": {
+    "status": "ok",
+    "latency_ms": 1999,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.85
+  },
+  "e1b1ec9cd88494bed67158f5": {
+    "status": "ok",
+    "latency_ms": 1837,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "d928887610e4f70487658798": {
+    "status": "ok",
+    "latency_ms": 1889,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.8
+  },
+  "6e6f3e87eca6fecde07d72a6": {
+    "status": "ok",
+    "latency_ms": 1506,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "03fe6521c5620ceb9764dbeb": {
+    "status": "ok",
+    "latency_ms": 2492,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.95
+  },
+  "8a2f0d93ab1c9c4ad2a11bac": {
+    "status": "invented_facts",
+    "latency_ms": 2320
+  },
+  "0df9b374de8f3363ab24f505": {
+    "status": "ok",
+    "latency_ms": 1594,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "d98eeb14d71f46cd5985f35f": {
+    "status": "ok",
+    "latency_ms": 1898,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "788910cf526819d81920ff6f": {
+    "status": "ok",
+    "latency_ms": 2894,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.92
+  },
+  "ca3ccddf1cd9fdf1e89371bc": {
+    "status": "ok",
+    "latency_ms": 2515,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.85
+  },
+  "49753baa9fe88fa2b6daed5c": {
+    "status": "ok",
+    "latency_ms": 3033,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.85
+  },
+  "4ab8ddeddbe0c9c534275198": {
+    "status": "ok",
+    "latency_ms": 2491,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.8
+  },
+  "b8b79cea6c7155d9fed73372": {
+    "status": "invented_facts",
+    "latency_ms": 2021
+  },
+  "cdae0a9cb54dbfa56487dad5": {
+    "status": "ok",
+    "latency_ms": 2225,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.92
+  },
+  "1af3affbb04df201e0208e17": {
+    "status": "ok",
+    "latency_ms": 2583,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.9
+  },
+  "0e6cda16a6b257929e194b4d": {
+    "status": "ok",
+    "latency_ms": 2397,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.65
+  },
+  "99455ba391f2e7ae7b470d2c": {
+    "status": "ok",
+    "latency_ms": 2251,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.75
+  },
+  "b4b97dad04e5313785506643": {
+    "status": "ok",
+    "latency_ms": 1482,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.2
+  },
+  "745c39720df1b5a7ffbc5eb1": {
+    "status": "invented_facts",
+    "latency_ms": 2572
+  },
+  "e923971f67282e9a98812b6d": {
+    "status": "ok",
+    "latency_ms": 1333,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "bbfd242c55c20107ab592f86": {
+    "status": "ok",
+    "latency_ms": 2035,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.85
+  },
+  "2881f3ecab3bc32d294ac648": {
+    "status": "ok",
+    "latency_ms": 1448,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "3b3b80b8db3b5a2abcfc09e1": {
+    "status": "ok",
+    "latency_ms": 2136,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.85
+  },
+  "bcac90ea8c5ee38cac6ef746": {
+    "status": "ok",
+    "latency_ms": 1601,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "f934dae7eee518bf20ecdbd3": {
+    "status": "ok",
+    "latency_ms": 1513,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.1
+  },
+  "a9c0dbc9ea5af9f436af5584": {
+    "status": "ok",
+    "latency_ms": 1876,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "b4b2abef39d96a1937397bc1": {
+    "status": "ok",
+    "latency_ms": 2064,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.85
+  },
+  "b33572aba5c26d5eed20a7b1": {
+    "status": "ok",
+    "latency_ms": 1691,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.85
+  },
+  "ba2890498361abd4a5b75e0d": {
+    "status": "ok",
+    "latency_ms": 2050,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.9
+  },
+  "089e9a4fa2c0f8f2a8cf25a2": {
+    "status": "invented_facts",
+    "latency_ms": 2193
+  },
+  "e472cb60b0468eb79524b9cf": {
+    "status": "ok",
+    "latency_ms": 2206,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.95
+  },
+  "2a6cd3aa6515cd3f847bf19f": {
+    "status": "ok",
+    "latency_ms": 1664,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.85
+  },
+  "47ffc741526e2693d70c5e60": {
+    "status": "ok",
+    "latency_ms": 2203,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.92
+  },
+  "310d18e4834a2f87e4d807fa": {
+    "status": "ok",
+    "latency_ms": 1569,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "f7e0700c4d525232e0398ebb": {
+    "status": "ok",
+    "latency_ms": 1774,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "10494ec132e08b5c3f41acad": {
+    "status": "ok",
+    "latency_ms": 1863,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "6d0544dad3ac5281eb32aec2": {
+    "status": "invented_facts",
+    "latency_ms": 2717
+  },
+  "9a499d6ed7480a731c8be3f3": {
+    "status": "ok",
+    "latency_ms": 1593,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "50f67d9c2fdc485c529031d3": {
+    "status": "ok",
+    "latency_ms": 1408,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "40cb0086dc6c76b9d80965d0": {
+    "status": "ok",
+    "latency_ms": 1977,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.85
+  },
+  "e756a0b004e64c5da50a747f": {
+    "status": "ok",
+    "latency_ms": 2204,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.65
+  },
+  "fac7a15c56af716ee131d5a2": {
+    "status": "ok",
+    "latency_ms": 2123,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.85
+  },
+  "6dcc931bc6c1aa5b6505dd86": {
+    "status": "ok",
+    "latency_ms": 1593,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.85
+  },
+  "d24e17879fc7ef0e8850ea16": {
+    "status": "ok",
+    "latency_ms": 1502,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "9a077e4bfeec54a32a902566": {
+    "status": "ok",
+    "latency_ms": 1710,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.85
+  },
+  "42486b32b80b7bd56eb951f3": {
+    "status": "ok",
+    "latency_ms": 1495,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "586578388f8f8400cfebacfd": {
+    "status": "ok",
+    "latency_ms": 1596,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "8998fbfa85fed6a52eb2f3ae": {
+    "status": "ok",
+    "latency_ms": 1976,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.85
+  },
+  "f4da1a2e16190740fe826423": {
+    "status": "ok",
+    "latency_ms": 1801,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "3470b39068b6cfa17268edf5": {
+    "status": "ok",
+    "latency_ms": 1900,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.85
+  },
+  "a706ae2724e71b0a896db3c7": {
+    "status": "ok",
+    "latency_ms": 2198,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.85
+  },
+  "bb83549fb0a26ce55e440dd5": {
+    "status": "invented_facts",
+    "latency_ms": 2096
+  },
+  "1547e079e8235da24e0705cf": {
+    "status": "ok",
+    "latency_ms": 1682,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.85
+  },
+  "e014e685695c87933c365f84": {
+    "status": "ok",
+    "latency_ms": 2527,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.92
+  },
+  "48386262cb9dea20bfc06930": {
+    "status": "ok",
+    "latency_ms": 1567,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "86019980a753c164452895be": {
+    "status": "ok",
+    "latency_ms": 2228,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.85
+  },
+  "8e0ce8fd5676b98a77dad7ea": {
+    "status": "ok",
+    "latency_ms": 1918,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.95
+  },
+  "b6eda103b82df2299e5f2832": {
+    "status": "invented_facts",
+    "latency_ms": 1703
+  },
+  "e9dadc4281ef0112cd97a532": {
+    "status": "ok",
+    "latency_ms": 1766,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "bf2a7edac725df67ff711a61": {
+    "status": "invented_facts",
+    "latency_ms": 1977
+  },
+  "649bccd83e67c8462595e21a": {
+    "status": "ok",
+    "latency_ms": 2233,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.65
+  },
+  "90c2c7056e054d6b1eff6b32": {
+    "status": "invented_facts",
+    "latency_ms": 1821
+  },
+  "62b506f712f63d1453334d58": {
+    "status": "invented_facts",
+    "latency_ms": 1876
+  },
+  "3e6fd2acc91c83d5585067a6": {
+    "status": "ok",
+    "latency_ms": 2622,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.85
+  },
+  "40836d24abb62fcabc2e6478": {
+    "status": "ok",
+    "latency_ms": 1332,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "80e25365015d7a2614fb0ac7": {
+    "status": "ok",
+    "latency_ms": 1706,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "2767baea449c958719b8822d": {
+    "status": "ok",
+    "latency_ms": 1704,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.92
+  },
+  "3e4cd7cd794e1963a2ab632f": {
+    "status": "ok",
+    "latency_ms": 2502,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.75
+  },
+  "b1530f467afabcc23d659767": {
+    "status": "ok",
+    "latency_ms": 1777,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.4
+  },
+  "5fbd25dc46b29e1d6252533e": {
+    "status": "ok",
+    "latency_ms": 1622,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "d9da7bf0e6fb0fda51e0766b": {
+    "status": "ok",
+    "latency_ms": 1716,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "bf905c0ea2b3797d3593bc4d": {
+    "status": "ok",
+    "latency_ms": 1808,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "55478d3e3698cf3668c608e5": {
+    "status": "ok",
+    "latency_ms": 2240,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.4
+  },
+  "a606234230500ec44ad9fc7c": {
+    "status": "ok",
+    "latency_ms": 2434,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.92
+  },
+  "7e6803c99f1d0a1bbaeb04b1": {
+    "status": "ok",
+    "latency_ms": 1594,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "8ac9e75ba61809088633ca85": {
+    "status": "ok",
+    "latency_ms": 1897,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.85
+  },
+  "02c7cd8acb99f65fea72b80c": {
+    "status": "ok",
+    "latency_ms": 6363,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.95
+  },
+  "cee1b11d5acf1557da7abdaa": {
+    "status": "ok",
+    "latency_ms": 2511,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.6
+  },
+  "6d21d02ec0f1741fc5cc97f4": {
+    "status": "ok",
+    "latency_ms": 1975,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.85
+  },
+  "bf9155ce31115888a69c05c4": {
+    "status": "invented_facts",
+    "latency_ms": 2071
+  },
+  "cc7bafe1621efbc35eed0ddb": {
+    "status": "ok",
+    "latency_ms": 1880,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "cbe4a39061f1d6e49e427d89": {
+    "status": "ok",
+    "latency_ms": 2232,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.85
+  },
+  "2b0895acb8f1f036a64cdaa9": {
+    "status": "invented_facts",
+    "latency_ms": 1893
+  },
+  "4c93cce423f8e08263c25eed": {
+    "status": "ok",
+    "latency_ms": 2344,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.95
+  },
+  "fad1b0473d73b861613a6060": {
+    "status": "ok",
+    "latency_ms": 1604,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.85
+  },
+  "5f15ba076a11c3c2ff6eab3b": {
+    "status": "ok",
+    "latency_ms": 1982,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.85
+  },
+  "18f6eaccb7ca4c0ae13be9dc": {
+    "status": "ok",
+    "latency_ms": 1716,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "9922c2686cc1eb3460b4163b": {
+    "status": "ok",
+    "latency_ms": 1867,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.95
+  },
+  "6014c5e56893899eebe62df3": {
+    "status": "invented_facts",
+    "latency_ms": 2236
+  },
+  "7ec21da736d4bb063bcfbd1c": {
+    "status": "ok",
+    "latency_ms": 1923,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.85
+  },
+  "d5827a51dbb5ef30f416efbb": {
+    "status": "ok",
+    "latency_ms": 1777,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "67959751ab903f40e8b21ecb": {
+    "status": "ok",
+    "latency_ms": 1706,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "ffe18a7a7de31e6d5344ed79": {
+    "status": "ok",
+    "latency_ms": 2053,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.85
+  },
+  "7347fc21e5ecae1fe1cd3391": {
+    "status": "ok",
+    "latency_ms": 2430,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.92
+  },
+  "ae89cce397397c01ba1537c4": {
+    "status": "ok",
+    "latency_ms": 1875,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.9
+  },
+  "cafd7f442c6425581b5b93de": {
+    "status": "ok",
+    "latency_ms": 2077,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.85
+  },
+  "917377ba63cb618e3042d064": {
+    "status": "ok",
+    "latency_ms": 1768,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.65
+  },
+  "b4d908342c016f785876a3e1": {
+    "status": "ok",
+    "latency_ms": 2061,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.85
+  },
+  "b4e066af729add8ae8439673": {
+    "status": "ok",
+    "latency_ms": 1560,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "0190bc892a4104f190b1044c": {
+    "status": "ok",
+    "latency_ms": 1599,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "00d3e95224768c313011451b": {
+    "status": "ok",
+    "latency_ms": 1679,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "3eaa2f915ca4c2278835bea4": {
+    "status": "ok",
+    "latency_ms": 1347,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "76e501a37c3811bb58cbbc3a": {
+    "status": "ok",
+    "latency_ms": 2497,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.95
+  },
+  "a79de3b0090e8c751b55c430": {
+    "status": "ok",
+    "latency_ms": 2282,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.65
+  },
+  "1ac8226dbcf1f38711b3010f": {
+    "status": "ok",
+    "latency_ms": 1648,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "ad5b856eacbe67eadfb376bb": {
+    "status": "ok",
+    "latency_ms": 13998,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.85
+  },
+  "3fdfd91909bf1785eef46d11": {
+    "status": "ok",
+    "latency_ms": 12938,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.7
+  },
+  "ae95530230fba5996bbf3ae9": {
+    "status": "ok",
+    "latency_ms": 8468,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "5747d50c72c038b4eec98f0b": {
+    "status": "ok",
+    "latency_ms": 8063,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "e874143a3df60222e37cacef": {
+    "status": "ok",
+    "latency_ms": 15768,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.95
+  },
+  "0708ad58ed8f4625af54b007": {
+    "status": "ok",
+    "latency_ms": 14852,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.85
+  },
+  "782734c141d000fd4a9dd633": {
+    "status": "ok",
+    "latency_ms": 8146,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "4e179bbb683dde4006b33aea": {
+    "status": "ok",
+    "latency_ms": 10499,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.2
+  },
+  "c81a6cf2ad4258ffb30bbbbb": {
+    "status": "ok",
+    "latency_ms": 12984,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.85
+  },
+  "bfaabb9b0e7f2d28ef758708": {
+    "status": "ok",
+    "latency_ms": 6849,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "52de8c8985271f8e9bfd5e0d": {
+    "status": "invented_facts",
+    "latency_ms": 12251
+  },
+  "182c8acb5d267d9a4d18e355": {
+    "status": "invalid_schema",
+    "latency_ms": 18069
+  },
+  "b7bf8a8731a071b665d4596b": {
+    "status": "invented_facts",
+    "latency_ms": 14541
+  },
+  "93870f9320a2e6f6a95f28dd": {
+    "status": "ok",
+    "latency_ms": 11924,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.95
+  },
+  "beb69a209098eab6051c8d9d": {
+    "status": "ok",
+    "latency_ms": 8824,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "a0b49f2fd12b4e4e365d2617": {
+    "status": "ok",
+    "latency_ms": 8910,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.1
+  },
+  "bc372b5f7263f3226a8e6723": {
+    "status": "ok",
+    "latency_ms": 9111,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "42f839abfa88542173e8bbab": {
+    "status": "ok",
+    "latency_ms": 8962,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "48faac7302145e44247397e2": {
+    "status": "ok",
+    "latency_ms": 9004,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "2abe7233a75ca44960dadde9": {
+    "status": "ok",
+    "latency_ms": 13981,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.95
+  },
+  "f773520208c7666170fcc79d": {
+    "status": "ok",
+    "latency_ms": 13571,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.6
+  },
+  "9e70d655b7183756ff73eb90": {
+    "status": "ok",
+    "latency_ms": 9231,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "ff6937d0043528d0b83a48e1": {
+    "status": "ok",
+    "latency_ms": 6746,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "1b4aa2b3fe27c43933c926d7": {
+    "status": "ok",
+    "latency_ms": 12993,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.95
+  },
+  "b442bacd4d62eb4ec71a4474": {
+    "status": "invented_facts",
+    "latency_ms": 13446
+  },
+  "2fe11fb63881321cd9aec2c5": {
+    "status": "ok",
+    "latency_ms": 8201,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "c51b88a96655df2202a6531e": {
+    "status": "ok",
+    "latency_ms": 12988,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.95
+  },
+  "5d29135ae2a503a015a2229d": {
+    "status": "ok",
+    "latency_ms": 11502,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.95
+  },
+  "859f48e7315911f432a1498b": {
+    "status": "ok",
+    "latency_ms": 9052,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "85cf199786c04c9961e45927": {
+    "status": "ok",
+    "latency_ms": 12352,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.8
+  },
+  "aa1b49a67c5c6a81f920bea9": {
+    "status": "invented_facts",
+    "latency_ms": 11947
+  },
+  "8702e5b85435c91a6a7d8587": {
+    "status": "ok",
+    "latency_ms": 7633,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "4830cc22e592ee08bdc78de9": {
+    "status": "ok",
+    "latency_ms": 8305,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "a8257b82a353a3583dcc91e5": {
+    "status": "ok",
+    "latency_ms": 15784,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.65
+  },
+  "5e5ff632262621cedde76fc7": {
+    "status": "ok",
+    "latency_ms": 10280,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.8
+  },
+  "42520946b458cd5c7b0184d0": {
+    "status": "ok",
+    "latency_ms": 10937,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.85
+  },
+  "9e46314320a26e8100e324f0": {
+    "status": "ok",
+    "latency_ms": 8174,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.9
+  },
+  "5b277bd2d7ac1758e909d39c": {
+    "status": "ok",
+    "latency_ms": 9178,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "be0b3ba7996b8b252db797e6": {
+    "status": "ok",
+    "latency_ms": 9855,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "34d0412ad4f7ad269a7435cb": {
+    "status": "ok",
+    "latency_ms": 15333,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.7
+  },
+  "678f09f3d8dd768717fead72": {
+    "status": "invented_facts",
+    "latency_ms": 14859
+  },
+  "7d5f9feb800554fde8526301": {
+    "status": "ok",
+    "latency_ms": 11529,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.3
+  },
+  "9de7fbe2506fa62182aa5f6d": {
+    "status": "ok",
+    "latency_ms": 10405,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "8c004f6a2ef15f4e94716c0f": {
+    "status": "ok",
+    "latency_ms": 8370,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "919cca51b41c7b33d5c99979": {
+    "status": "invented_facts",
+    "latency_ms": 15075
+  },
+  "e09b4e4c6dedc355adde7382": {
+    "status": "ok",
+    "latency_ms": 13343,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "fe7c14a4da866a20977df822": {
+    "status": "ok",
+    "latency_ms": 12791,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.85
+  },
+  "65a1868fbeeec93b2222dbb7": {
+    "status": "ok",
+    "latency_ms": 12071,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.8
+  },
+  "7e7e5e8abc0fde23c34a0c4d": {
+    "status": "ok",
+    "latency_ms": 12247,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.9
+  },
+  "a946b11d0b64f0e223fa28c0": {
+    "status": "ok",
+    "latency_ms": 15332,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.98
+  },
+  "0525c455804c62ba0a739500": {
+    "status": "ok",
+    "latency_ms": 8393,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "bd669e52f3f0431792b38b65": {
+    "status": "ok",
+    "latency_ms": 8816,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "765abd836fbbfa0296118d3e": {
+    "status": "ok",
+    "latency_ms": 13891,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.95
+  },
+  "d96ee7a07fee13a5de4ada60": {
+    "status": "ok",
+    "latency_ms": 12447,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.6
+  },
+  "aa8a2dff1982f40e508e2597": {
+    "status": "ok",
+    "latency_ms": 14655,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.95
+  },
+  "8a6afadb790420e4803242fc": {
+    "status": "ok",
+    "latency_ms": 7543,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "95c5d362265816816b05dc6b": {
+    "status": "ok",
+    "latency_ms": 9586,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "af68485fdc56437f6310f412": {
+    "status": "ok",
+    "latency_ms": 9199,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "325f3fa1cdc8021ca083e5c5": {
+    "status": "ok",
+    "latency_ms": 11304,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "f516584c608102e313dea9da": {
+    "status": "ok",
+    "latency_ms": 8237,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "3507389593a434c97bde82f6": {
+    "status": "ok",
+    "latency_ms": 8014,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "cfe54eb1f4b2f8550420e075": {
+    "status": "ok",
+    "latency_ms": 9464,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "936136dec299b4a09c6e4717": {
+    "status": "ok",
+    "latency_ms": 13548,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.7
+  },
+  "629268d32c7d4319dba94367": {
+    "status": "ok",
+    "latency_ms": 8199,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "6a201ec3be1759ddfb169ea0": {
+    "status": "ok",
+    "latency_ms": 11537,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.85
+  },
+  "c8b54b65aa132076d1ca6170": {
+    "status": "ok",
+    "latency_ms": 13143,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.85
+  },
+  "07a9af5c525a63021f52a8b2": {
+    "status": "ok",
+    "latency_ms": 8239,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "681fc04609a38c4d235d6bca": {
+    "status": "ok",
+    "latency_ms": 8136,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "2040d439c6e733328f5c9357": {
+    "status": "ok",
+    "latency_ms": 8846,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "75b3a81762a15e6245ed0bef": {
+    "status": "ok",
+    "latency_ms": 11771,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.6
+  },
+  "6519b755f5e100e86b1f9e0c": {
+    "status": "ok",
+    "latency_ms": 8213,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.9
+  },
+  "bc5933c6a34dd24748f5c114": {
+    "status": "ok",
+    "latency_ms": 10019,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "5bcbdbc313992653fa01fd6f": {
+    "status": "ok",
+    "latency_ms": 9648,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.8
+  },
+  "bc91ee3587dbe9f464a96cb9": {
+    "status": "invented_facts",
+    "latency_ms": 11976
+  },
+  "5660ff59b80b9f8a052d4234": {
+    "status": "ok",
+    "latency_ms": 10942,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.95
+  },
+  "85e56cb48c922e0657b71930": {
+    "status": "ok",
+    "latency_ms": 8377,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "fe7fb1e27480a693afe92670": {
+    "status": "ok",
+    "latency_ms": 12994,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.8
+  },
+  "ca2c608c52612e1a47522271": {
+    "status": "ok",
+    "latency_ms": 14183,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.8
+  },
+  "3480137b04ac853a2d0bfd87": {
+    "status": "ok",
+    "latency_ms": 15274,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.85
+  },
+  "d8be7af7f653491678dfcfa6": {
+    "status": "ok",
+    "latency_ms": 7930,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "84b48b3269215422a911bf6e": {
+    "status": "ok",
+    "latency_ms": 14259,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.85
+  },
+  "10066581b30c951567fbc665": {
+    "status": "ok",
+    "latency_ms": 10616,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "0c5c4ce849356c906dbdd3af": {
+    "status": "ok",
+    "latency_ms": 10690,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.8
+  },
+  "290a5b98a5e083fcd79ff70f": {
+    "status": "ok",
+    "latency_ms": 9477,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "75c6b337248bee31cfc395cb": {
+    "status": "ok",
+    "latency_ms": 8439,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "ebe317d0d656e07554cc32ac": {
+    "status": "ok",
+    "latency_ms": 13115,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.95
+  },
+  "b563d468fdecdfb7882e0870": {
+    "status": "ok",
+    "latency_ms": 11541,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.3
+  },
+  "a776d7f58d96e870582db578": {
+    "status": "ok",
+    "latency_ms": 13364,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.95
+  },
+  "edab8f363ec8d4c6e056ac66": {
+    "status": "ok",
+    "latency_ms": 12547,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.85
+  },
+  "794c42b418f7c8a07d5fce2b": {
+    "status": "ok",
+    "latency_ms": 12982,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.9
+  },
+  "4e87f67e2d440a2cc2d94cb6": {
+    "status": "ok",
+    "latency_ms": 11448,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.5
+  },
+  "0a82c0498e9c8d73f8a861c3": {
+    "status": "ok",
+    "latency_ms": 8332,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "5656632b8ff9bf3eeba20daa": {
+    "status": "ok",
+    "latency_ms": 10911,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.3
+  },
+  "c2659dc84b86e3bb1103efe8": {
+    "status": "ok",
+    "latency_ms": 8665,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "060a2cbced6ed420ebac3b34": {
+    "status": "ok",
+    "latency_ms": 12573,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.9
+  },
+  "1987207bef93e0401f5ce9f2": {
+    "status": "invented_facts",
+    "latency_ms": 12058
+  },
+  "e22863bc9ce34178cc8f5d8c": {
+    "status": "ok",
+    "latency_ms": 8026,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "b682c521bd1daa3ff870a390": {
+    "status": "ok",
+    "latency_ms": 7557,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "1cf6ee9a3f609329d102e0ad": {
+    "status": "ok",
+    "latency_ms": 12115,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.9
+  },
+  "fbed24710b165de6debdd283": {
+    "status": "invented_facts",
+    "latency_ms": 13076
+  },
+  "20593317bfeaae90b726ff1e": {
+    "status": "ok",
+    "latency_ms": 12810,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.85
+  },
+  "14fa8ff43754a8dc06392a9e": {
+    "status": "invented_facts",
+    "latency_ms": 11934
+  },
+  "4ceacf697c9b04ff97704d45": {
+    "status": "invented_facts",
+    "latency_ms": 10723
+  },
+  "c16811192fb9769a916ad633": {
+    "status": "ok",
+    "latency_ms": 12053,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.95
+  },
+  "35be97289c4e0843eaa95109": {
+    "status": "invented_facts",
+    "latency_ms": 11210
+  },
+  "0fc08b23c2cadc14b123aee3": {
+    "status": "ok",
+    "latency_ms": 11464,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.7
+  },
+  "f1f8e586dad12c9e9f4c1395": {
+    "status": "ok",
+    "latency_ms": 12098,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.6
+  },
+  "fe06b447356982956a6af78b": {
+    "status": "ok",
+    "latency_ms": 9870,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.3
+  },
+  "1c9c5451b7b56017d08deaec": {
+    "status": "invented_facts",
+    "latency_ms": 12553
+  },
+  "e4d4b8dc410d08144c52714a": {
+    "status": "ok",
+    "latency_ms": 7980,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "fe41d826703ef796eca49ae0": {
+    "status": "ok",
+    "latency_ms": 14547,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.85
+  },
+  "bd53612b4ca2798a2c86fef3": {
+    "status": "ok",
+    "latency_ms": 7575,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "bc50122f7f5f6a6dbf58b363": {
+    "status": "ok",
+    "latency_ms": 9190,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.4
+  },
+  "8582482cfd5a76c47163b858": {
+    "status": "ok",
+    "latency_ms": 6680,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "2f46f0febb4f8707a9ba75b6": {
+    "status": "ok",
+    "latency_ms": 9401,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.0
+  },
+  "bed26035e22624876e126bcc": {
+    "status": "ok",
+    "latency_ms": 8171,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "069e04e3e6e1c66e327ff765": {
+    "status": "ok",
+    "latency_ms": 12675,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.6
+  },
+  "c588dc940b119d09bbadc52f": {
+    "status": "ok",
+    "latency_ms": 9000,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "d67fafb7c8706c521f172751": {
+    "status": "ok",
+    "latency_ms": 11181,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.85
+  },
+  "5c0cbbe7a6b0ba4a2b433244": {
+    "status": "ok",
+    "latency_ms": 11496,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.85
+  },
+  "850c6acceb20d889b7d97c81": {
+    "status": "ok",
+    "latency_ms": 14152,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.95
+  },
+  "45c8c2baad606acb2feca222": {
+    "status": "invented_facts",
+    "latency_ms": 13258
+  },
+  "ecf914cd7ec11442747c11e2": {
+    "status": "ok",
+    "latency_ms": 14899,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.95
+  },
+  "a0a1278a24639349b93a6980": {
+    "status": "ok",
+    "latency_ms": 18824,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.8
+  },
+  "446c94f038f3c416e601c17f": {
+    "status": "ok",
+    "latency_ms": 7782,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.99
+  },
+  "b496e63bfbe0922dc76d9427": {
+    "status": "ok",
+    "latency_ms": 10067,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "61f6d3b2799bf6ef633f90ab": {
+    "status": "invented_facts",
+    "latency_ms": 15011
+  },
+  "d257c5fc5faf551ff4b01753": {
+    "status": "ok",
+    "latency_ms": 8201,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 1.0
+  },
+  "e8277bdcef5817d33f2a4f43": {
+    "status": "ok",
+    "latency_ms": 7739,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "4805015cd3d47c32af5d3d5f": {
+    "status": "ok",
+    "latency_ms": 12288,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.7
+  },
+  "0ede09cf2e943fa16cd9a610": {
+    "status": "ok",
+    "latency_ms": 13541,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.7
+  },
+  "840f455bfd8e2ee412e70427": {
+    "status": "ok",
+    "latency_ms": 11997,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.9
+  },
+  "9a07db66a511a9d66b238735": {
+    "status": "ok",
+    "latency_ms": 10208,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "4eb09a49defe018c138ab520": {
+    "status": "ok",
+    "latency_ms": 10443,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "6547411bb20460d5ac9bf082": {
+    "status": "ok",
+    "latency_ms": 12104,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.85
+  },
+  "7af4d2abb3c9c99d9a4dfabe": {
+    "status": "ok",
+    "latency_ms": 9398,
+    "assessment": "uncertain",
+    "semantic_confidence": 1.0
+  },
+  "6a86e92860aa07ed5300676d": {
+    "status": "ok",
+    "latency_ms": 12889,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "bbbec5ee77532a882f912bba": {
+    "status": "ok",
+    "latency_ms": 9952,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "879acc839bae5f992cfbb6c9": {
+    "status": "ok",
+    "latency_ms": 13915,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.4
+  },
+  "8608d2bc3879f22ad5c79cb8": {
+    "status": "ok",
+    "latency_ms": 10708,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.8
+  },
+  "23257b0019132617cc25b76b": {
+    "status": "ok",
+    "latency_ms": 13201,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.7
+  },
+  "52c870990869bfe3b427e93c": {
+    "status": "invented_facts",
+    "latency_ms": 14131
+  },
+  "26ad5e3c0e363f250558c48a": {
+    "status": "ok",
+    "latency_ms": 9085,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "8e2650755a70cdf48fc7b8a4": {
+    "status": "invented_facts",
+    "latency_ms": 13565
+  },
+  "a02018f8534372c3c3f50863": {
+    "status": "ok",
+    "latency_ms": 8371,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "43a0deb388d7664fced6922e": {
+    "status": "invented_facts",
+    "latency_ms": 14924
+  },
+  "178396800f9cb7cc8fd47676": {
+    "status": "ok",
+    "latency_ms": 13932,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.95
+  },
+  "bd640873d168aed8e0f1e84b": {
+    "status": "invented_facts",
+    "latency_ms": 11676
+  },
+  "2f911b9a261a369dbb046c83": {
+    "status": "ok",
+    "latency_ms": 9505,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "7970bbc1a355af1ef3d85839": {
+    "status": "invented_facts",
+    "latency_ms": 13909
+  },
+  "89cb7160e3410dc899999217": {
+    "status": "ok",
+    "latency_ms": 11021,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.7
+  },
+  "72e7c1d71626aba4a389222d": {
+    "status": "invented_facts",
+    "latency_ms": 12092
+  },
+  "2b8a2194b1ea61b26db56622": {
+    "status": "invented_facts",
+    "latency_ms": 15322
+  },
+  "b0a7a8fb6f3e1cbb40d4ec17": {
+    "status": "ok",
+    "latency_ms": 11033,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "5e239c8dea21f0177343693c": {
+    "status": "ok",
+    "latency_ms": 10775,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "74bba5921dd1cf6002f175de": {
+    "status": "ok",
+    "latency_ms": 9195,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "e72ef270036d023f15875d2b": {
+    "status": "invented_facts",
+    "latency_ms": 12953
+  },
+  "1cc76d82870c09d678f649a3": {
+    "status": "ok",
+    "latency_ms": 17833,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.6
+  },
+  "99933781b10f4b823771e806": {
+    "status": "ok",
+    "latency_ms": 13201,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.6
+  },
+  "2ac1533bdfba319808edfe02": {
+    "status": "ok",
+    "latency_ms": 8319,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "f7f06a5aac2c80b5112b53e6": {
+    "status": "ok",
+    "latency_ms": 12082,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "fd5549e2ae4be72fd6ca7a3e": {
+    "status": "ok",
+    "latency_ms": 9399,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 1.0
+  },
+  "b743007c16b26c302f0d953b": {
+    "status": "ok",
+    "latency_ms": 13691,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.7
+  },
+  "a7b86fa185ee57c871af7603": {
+    "status": "invented_facts",
+    "latency_ms": 12848
+  },
+  "d9550f2ef255a097a1c53b3c": {
+    "status": "ok",
+    "latency_ms": 9893,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "4c2cdc292b7e7f748b25378e": {
+    "status": "ok",
+    "latency_ms": 11269,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "850779aeafcf3cc7fa910db3": {
+    "status": "ok",
+    "latency_ms": 14039,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.95
+  },
+  "693c8d861aa22f8f7f995630": {
+    "status": "ok",
+    "latency_ms": 14362,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.8
+  },
+  "18f69e68ff8868e2f8d37a15": {
+    "status": "ok",
+    "latency_ms": 13252,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.8
+  },
+  "fa7e5410c2d9036c79fa52e8": {
+    "status": "invented_facts",
+    "latency_ms": 11452
+  },
+  "5c178f764cd89df7d7de8e32": {
+    "status": "ok",
+    "latency_ms": 9345,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "2a64ac60b4d2859683fd0198": {
+    "status": "ok",
+    "latency_ms": 11760,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "71cb72b24fed01cc183377f2": {
+    "status": "invented_facts",
+    "latency_ms": 12764
+  },
+  "1f27dff282850f29e59cfc55": {
+    "status": "ok",
+    "latency_ms": 11695,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.95
+  },
+  "ccc91021eb9bc60462be3d8b": {
+    "status": "ok",
+    "latency_ms": 10830,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.8
+  },
+  "a6fc9d40cdb6d773687fc2e0": {
+    "status": "invented_facts",
+    "latency_ms": 9007
+  },
+  "41d70709addc41cdf09f7342": {
+    "status": "ok",
+    "latency_ms": 6855,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "077ca1de21f2c2e7847f89e8": {
+    "status": "invented_facts",
+    "latency_ms": 13725
+  },
+  "16451eb0ddf4db334bd19224": {
+    "status": "invented_facts",
+    "latency_ms": 16820
+  },
+  "d96f2c9962109ec3d56ac891": {
+    "status": "ok",
+    "latency_ms": 10494,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.8
+  },
+  "6ab806434c3b7283569e9596": {
+    "status": "ok",
+    "latency_ms": 8617,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "1f0d7d6beec6fa87fc8d0378": {
+    "status": "ok",
+    "latency_ms": 10005,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "8f352938de74dcaf07079e92": {
+    "status": "ok",
+    "latency_ms": 10641,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "c41e6f41107da8f22edaff66": {
+    "status": "ok",
+    "latency_ms": 13467,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.95
+  },
+  "32c582dc29b0b904a7e48468": {
+    "status": "ok",
+    "latency_ms": 11271,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.9
+  },
+  "7558630a00f3b3eb868353e6": {
+    "status": "ok",
+    "latency_ms": 10221,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.8
+  },
+  "654d12959f43d44ab8b9d2e7": {
+    "status": "ok",
+    "latency_ms": 10664,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.85
+  },
+  "6d92811b11e812a7eb86ef60": {
+    "status": "invented_facts",
+    "latency_ms": 10252
+  },
+  "3072e09f294f7d6e2f651579": {
+    "status": "ok",
+    "latency_ms": 8022,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "c8a74b00e705451497fa7049": {
+    "status": "ok",
+    "latency_ms": 8834,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "8c1962e84002e7846b388ac8": {
+    "status": "ok",
+    "latency_ms": 12725,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.99
+  },
+  "060a95eef4cf4abfa2153e2a": {
+    "status": "ok",
+    "latency_ms": 9807,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "439b7515c8291b6dabc3e590": {
+    "status": "transport_error",
+    "latency_ms": 20037
+  },
+  "7a89462d1ccaf6b219f32ae2": {
+    "status": "ok",
+    "latency_ms": 11375,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.7
+  },
+  "4248db8746440b5501217d08": {
+    "status": "invented_facts",
+    "latency_ms": 11042
   }
 }
