@@ -21,3 +21,11 @@ Not applied (judgement, low value tonight): drag-flicker refinement, textarea-on
 
 ## Verification after the fixes
 Backend 436 tests green; chat E2E 25/25; old analyzer E2E 8/8; typecheck/lint/build clean.
+
+## Post-release hardening item (deferred at the production gate)
+
+**Context-key version field.** `services/chat/signing.py` signs with a single active key (`TRUSTSHIELD_CONTEXT_SECRET`, falling back to a random
+per-process key). There is no key-id embedded in the signature, so rotating the secret invalidates every context in flight at once (safe —
+callers fall back to a fresh analysis — but not graceful) and there is no way to accept both an old and new key during a rotation window.
+Deferred rather than added right before promotion, to avoid changing the signature format on the same day it first ships. First follow-up:
+add a short `kid` prefix to the signed payload and accept the current key plus one previous key during rotation.

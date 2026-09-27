@@ -136,6 +136,9 @@ def check_production(remote_url: str | None) -> None:
         ("TRUSTSHIELD_DEBUG_PROXY", os.getenv("TRUSTSHIELD_DEBUG_PROXY", "") == "1"),
         ("DEBUG", os.getenv("DEBUG", "").lower() in TRUTHY)) if bad]
     check("no development configuration enabled", "PASS" if not dev_flags else "FAIL", ", ".join(dev_flags))
+    explanation_provider = os.getenv("TRUSTSHIELD_EXPLANATION_PROVIDER", "deterministic").strip().lower()
+    check("explanation provider is deterministic in production", "PASS" if explanation_provider in ("", "deterministic") else "FAIL",
+          f"TRUSTSHIELD_EXPLANATION_PROVIDER={explanation_provider} (runtime already ignores this in production, but it must not be set)")
     public = os.getenv("PUBLIC_API_URL", "")
     check("PUBLIC_API_URL is https (or unset for a same-origin deployment)", "PASS" if not public or public.startswith("https://") else "FAIL", public or "unset (same-origin)")
     frontend_api = os.getenv("NEXT_PUBLIC_API_URL", "")
