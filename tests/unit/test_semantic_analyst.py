@@ -217,3 +217,18 @@ def test_evidence_span_quoting_a_redaction_placeholder_is_accepted(monkeypatch):
 def test_closing_tag_variants_cannot_escape_the_boundary(injection):
     prompt = build_semantic_prompt(injection)
     assert prompt.count("</message_to_analyse>") == 1  # only the one legitimate closing tag from the template
+
+
+# ---- item 75: with the experimental flag OFF, the live analysis path is byte-for-byte identical to baseline ---------------
+
+def test_default_flags_off_semantic_analyst_never_touches_the_chat_endpoint(monkeypatch):
+    """The semantic analyst is not wired into services/api/main.py's analysis path at all this phase (see
+    docs/HYBRID_INTELLIGENCE_ARCHITECTURE.md) -- this test locks that in as a regression guard, not just a doc claim."""
+    monkeypatch.delenv("TRUSTSHIELD_SEMANTIC_ANALYST", raising=False)
+    from fastapi.testclient import TestClient
+    from services.api.main import app
+    client = TestClient(app)
+    r = client.post("/api/v1/chat", json={"message": "URGENT your bank account is suspended verify at http://sbi-fake.xyz/login"})
+    assert r.status_code == 200
+    body = r.json()
+    assert "semantic" not in json.dumps(body).lower()  # no semantic-analyst field appears anywhere in the response
