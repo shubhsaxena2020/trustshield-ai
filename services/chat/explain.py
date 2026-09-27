@@ -216,18 +216,29 @@ _OFF_TOPIC_REPLY = ("My focus is cybersecurity, scams and fraud — I can't help
 
 # General-chat grounding: even outside an analysis, a reply must never claim a capability TrustShield doesn't have, promise
 # certainty, or request the kind of secret TrustShield itself warns users never to share.
-_CLAIMS_CAPABILITY_NOT_USED = re.compile(r"\b(i|we|trustshield) (checked|consulted|looked up)\b.*\b(reputation|virustotal|blacklist)\b|"
-                                         r"\b(i|we|trustshield) (opened|visited|browsed)\b.*\b(website|site|page|url)\b", re.I)
-_REQUESTS_SECRET = re.compile(r"\b(please |can you )?(send|share|enter|provide|tell me) your (password|otp|cvv|pin|card number)\b", re.I)
+_CLAIMS_CAPABILITY_NOT_USED = re.compile(
+    r"\b(i|we|trustshield)\b.{0,25}\b(ran|performed|did|conducted|checked|consulted|looked up|have access to)\b.{0,20}\b(a )?(live )?(reputation|threat feeds?|virustotal|blacklist|threat intel\w*|databases?|scan)\b|"
+    r"\b(i|we|trustshield)\b.{0,25}\b(opened|visited|browsed( to)?|went to|looked at|inspected|examined|reviewed)\b.{0,20}\b(website|site|page|url|domain|link|destination)\b|"
+    r"\b(website|site|page|link|url|domain|destination)\b.{0,20}\b(was|were|has been|have been)\b.{0,15}\b(opened|loaded|visited|browsed|inspected)\b|"
+    r"\b(reputation|virustotal|threat.?intel\w*|blacklist\w*)\b.{0,20}\b(reported|shows?|found|confirms?|says?|returned|clean|flagged)\b|"
+    r"\bbased on\b.{0,25}\b(threat feeds?|reputation data|databases?|threat intel\w*)\b", re.I)
+_CLAIMS_UNSUPPORTED_CERTAINTY = re.compile(
+    r"\b(completely|totally|entirely|absolutely|definitely|100%) (safe|fine|legitimate|genuine|clean)\b|"
+    r"\bno (need|reason) to worry\b|\bnothing to worry about\b|\byou can trust (it|this)( completely)?\b", re.I)
+_REQUESTS_SECRET = re.compile(
+    r"\b(please |can you )?(send|share|enter|provide|tell me|give me|what('s| is) your)\b.{0,20}\b"
+    r"(password|otp|one[- ]?time (password|code)|cvv|card verification (number|code)|pin( number)?|card number|security code)\b", re.I)
+_NEGATED_REQUEST = re.compile(r"\b(never|don'?t|do not|avoid|refuse to|won'?t)\b\W*(\w+\W+){0,4}$", re.I)
 
 
 def chat_grounding_violations(text: str) -> list[str]:
     found = []
-    if _CLAIMS_VERIFIED.search(text):
+    if _CLAIMS_VERIFIED.search(text) or _CLAIMS_UNSUPPORTED_CERTAINTY.search(text):
         found.append("claims certainty or verification")
     if _CLAIMS_CAPABILITY_NOT_USED.search(text):
         found.append("claims an unavailable capability was used")
-    if _REQUESTS_SECRET.search(text):
+    match = _REQUESTS_SECRET.search(text)
+    if match and not _NEGATED_REQUEST.search(text[:match.start()]):
         found.append("asks the user for a secret")
     return found
 
@@ -280,25 +291,47 @@ class DeterministicExplanationProvider(ExplanationProvider):
 
 
 _CLAIMS_VERIFIED = re.compile(r"\b(verified|confirmed safe|is safe|100% safe|definitely (fraud|safe|genuine|legitimate)|guaranteed)\b", re.I)
-_CLAIMS_OPENED = re.compile(r"\b(i|we|trustshield) (opened|visited|browsed|inspected|loaded) (the )?(website|site|page|link|url)\b", re.I)
-_CLAIMS_REPUTATION = re.compile(r"\b(reputation|threat.?intel\w*|blacklist\w*) (check|lookup|database|list|service)\b.*\b(shows?|found|confirms?|says?|returned|clean|flagged)\b", re.I)
+# Active OR passive voice, and a wider verb list (independent review FIND-002: "ran a scan", "was loaded in a browser").
+_CLAIMS_OPENED = re.compile(
+    r"\b(i|we|trustshield)\b.{0,15}\b(opened|visited|browsed( to)?|inspected|loaded|went to|looked at|examined|reviewed|ran a (live )?scan (of|on))\b.{0,15}\b(website|site|page|link|url|domain|destination)\b|"
+    r"\b(website|site|page|link|url|domain|destination)\b.{0,20}\b(was|were|has been|have been)\b.{0,15}\b(opened|loaded|visited|browsed|inspected)\b", re.I)
+_CLAIMS_REPUTATION = re.compile(
+    r"\b(i|we|trustshield)\b.{0,15}\b(ran|performed|did|conducted|checked|consulted|looked up)\b.{0,20}\b(a )?(live )?(reputation|threat feeds?|virustotal|blacklist|threat intel\w*|databases?|scan)\b|"
+    r"\b(reputation|threat.?intel\w*|blacklist\w*|threat feeds?|databases?|virustotal)\b.{0,20}\b(check|lookup|database|list|service|shows?|found|confirms?|says?|returned|reported|clean|flagged)\b|"
+    r"\bbased on\b.{0,25}\b(threat feeds?|reputation data|databases?|threat intel\w*)\b", re.I)
 
 
 def grounding_violations(text: str, a: ChatAnalysis) -> list[str]:
     """Checks a generated reply against the analysis; returns the violated rules (empty = acceptable)."""
     found = []
     caps = {c.name: c.used for c in a.capabilities}
-    if _CLAIMS_VERIFIED.search(text):
+    if _CLAIMS_VERIFIED.search(text) or _CLAIMS_UNSUPPORTED_CERTAINTY.search(text):
         found.append("claims certainty or verification")
     if _CLAIMS_OPENED.search(text) and not caps.get("web_sandbox"):
         found.append("claims the webpage was opened")
     if _CLAIMS_REPUTATION.search(text) and not caps.get("reputation"):
         found.append("claims a reputation result")
+    # Any OTHER level's title, spoken as a label ("Risk level: high", "the high-risk category", "High risk —"), not just
+    # immediately before a dash (independent review FIND-002: bare "Risk level: high." was not caught before).
+    _LEVEL_SHORT = {"low_risk": "low", "high_risk": "high", "caution": "caution", "suspicious": "suspicious",
+                    "unable_to_verify": "unable to verify"}
     for level, title in LEVEL_TITLE.items():
-        if level != a.risk_level and re.search(rf"\b{re.escape(title)}\b\s*[—:-]", text, re.I):
+        if level == a.risk_level:
+            continue
+        short = _LEVEL_SHORT[level]
+        if (re.search(rf"\brisk level\b\W{{0,3}}{short}\b", text, re.I) or re.search(rf"\b{short}[ -]?risk\b", text, re.I) or
+            re.search(rf"\b{re.escape(title)}\b\s*[—:-]", text, re.I)):
             found.append(f"states a different risk level ({title})")
     for m in re.finditer(r"\b(\d{1,3})\s*/\s*100\b", text):
         if int(m.group(1)) != a.risk_score:
+            found.append("states a different risk score")
+    # Spelled-out score claims ("the score is zero out of one hundred", "42 out of 100").
+    _WORD_NUM = {"zero": 0, "one": 1, "ten": 10, "twenty": 20, "thirty": 30, "forty": 40, "fifty": 50, "sixty": 60,
+                "seventy": 70, "eighty": 80, "ninety": 90, "hundred": 100}
+    for m in re.finditer(r"\b(\d{1,3}|zero|one|ten|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety)\b\s+out of\s+(?:one hundred|100)\b", text, re.I):
+        raw = m.group(1).lower()
+        value = int(raw) if raw.isdigit() else _WORD_NUM.get(raw)
+        if value is not None and value != a.risk_score:
             found.append("states a different risk score")
     return found
 

@@ -35,10 +35,9 @@ phase's tests uses a fake transport, not a live model.
    than erroring.
 
 ## No credentials exist to reuse
-This session checked for any TrustShield-authorized LLM credential in the environment: none exists. (A `GROQ_API_KEY` /
-`OPENAI_API_KEY` pair was found, but it is scoped to an unrelated tool — `~/.config/watch/.env`, used for a video-transcription
-skill — and reusing another tool's credential for a different product without the user's explicit authorization would be a
-scope violation, so it was not used.)
+This session checked for any TrustShield-authorized LLM credential in the environment: none exists. A credential pair scoped
+to an unrelated local tool was found; reusing another tool's credential for a different product without the user's explicit
+authorization would be a scope violation, so it was not used and its location is intentionally not recorded here.
 
 ## Provider comparison (for the user's decision — nothing below is activated)
 | Provider | Quality | Latency | Free tier | Cost (rough) | OpenAI-compatible | India availability | Notes |

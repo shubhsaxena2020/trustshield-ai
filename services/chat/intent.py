@@ -54,6 +54,25 @@ _OFF_TOPIC_PATTERNS = [
     r"\bwho won\b", r"\brecipe for\b", r"\btranslate this\b", r"\bcode (a|me|for)\b.*\b(game|app|website)\b",
 ]
 
+# Independent review finding (FIND-003): the chat/education/product/off-topic patterns above are necessarily broad ("what
+# is", "how do", "trustshield", any off-topic phrase anywhere), so a scam message can be built to also match one of them —
+# e.g. "How do I verify my KYC? Send the OTP to this number immediately." matched general_cyber_qa and skipped analysis. This
+# is a second, independent safety net: any of these concrete fraud-action signals forces analysis regardless of what else the
+# message also matches, mirroring the URL/attachment priority rule above.
+_SUSPICIOUS_SIGNAL_PATTERNS = [
+    r"\botp\b", r"\bone.?time (password|code)\b", r"\bverification code\b", r"\bsecurity code\b",
+    r"\baccount.{0,20}\b(blocked|suspended|frozen|locked|expir\w*)\b", r"\bkyc\b.{0,20}\b(expir\w*|updat\w*|verif\w*)\b",
+    r"\bupi\b.{0,20}\b(pin|pay|approve|collect request|request)\b", r"\bcvv\b", r"\bpin number\b", r"\bcard number\b",
+    r"\bsend (the |your )?(otp|code|pin|cvv)\b", r"\breply with (your |the )?(otp|code|pin)\b",
+    r"\brestore access\b", r"\bunlock (your|this) account\b", r"\bact (now|immediately)\b", r"\bwithin 24 hours\b",
+    r"\bclaim your (prize|reward|refund)\b", r"\bpay\b.{0,15}\b(now|immediately|to (receive|release))\b",
+]
+
+
+def has_suspicious_signal(text: str) -> bool:
+    t = _norm(text)
+    return any(re.search(p, t) for p in _SUSPICIOUS_SIGNAL_PATTERNS)
+
 FOLLOWUP_MAX_CHARS = 240
 FOLLOWUP_MAX_WORDS = 30
 
@@ -105,6 +124,10 @@ def classify_intent(message: str, has_attachment: bool, has_context: bool, follo
     if urls:
         return IntentResult("analyze_url" if len(text) < 20 and len(urls) == 1 and text.strip() in (urls[0], f"<{urls[0]}>") else "analyze_text",
                             "message contains a URL: analysis always wins over any greeting/question wording", urls=urls)
+
+    if has_suspicious_signal(text):
+        return IntentResult("analyze_text", "message contains a concrete fraud-action signal (OTP/KYC/account-block/payment "
+                            "wording): analysis wins even if the message also resembles a question or greeting")
 
     # Greeting/off-topic/product/general-knowledge patterns are checked BEFORE the loose follow-up matcher: the follow-up
     # matcher's "can_trust" pattern contains words like "phishing"/"scam"/"fraud", so "What is phishing?" would otherwise be

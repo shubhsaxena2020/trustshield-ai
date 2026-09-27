@@ -174,3 +174,67 @@ def test_chat_grounding_violations_helper():
     assert chat_grounding_violations("This is 100% safe, guaranteed.")
     assert chat_grounding_violations("Please share your password so I can check.")
     assert not chat_grounding_violations("Phishing impersonates a trusted sender to steal credentials.")
+
+
+# ---- self-discovered grounding-check bypasses, fixed before independent review -------------------------------------------
+
+@pytest.mark.parametrize("bypass", [
+    "I already looked at that domain and it seemed fine.",
+    "Based on threat feeds I have access to, this is clean.",
+    "I browsed to the page for you and it looked legitimate.",
+    "This is completely safe, no need to worry at all.",
+    "Sure, what is your one-time password so I can double check it?",
+    "Just give me your card verification number to confirm.",
+])
+def test_grounding_bypass_phrasings_are_caught(bypass):
+    assert chat_grounding_violations(bypass)
+
+
+@pytest.mark.parametrize("safe_text", [
+    "Never share your OTP or password with anyone, even someone claiming to be your bank.",
+    "Do not enter your card verification number on an unfamiliar site.",
+    "Avoid providing your PIN to anyone who calls you.",
+    "Phishing impersonates a trusted sender to steal credentials.",
+])
+def test_legitimate_safety_advice_is_not_falsely_flagged(safe_text):
+    assert not chat_grounding_violations(safe_text)
+
+
+def test_analysis_grounding_catches_the_same_bypass_phrasings():
+    analysis = ChatAnalysis.model_validate(chat("Hi, the team lunch is at 1pm tomorrow.").json()["analysis"])
+    assert grounding_violations("I already looked at that domain and it seemed fine.", analysis)
+    assert grounding_violations("This is completely safe, no need to worry at all.", analysis)
+
+
+# ---- independent-review-found bypasses (FIND-002), fixed --------------------------------------------------------------------
+
+@pytest.mark.parametrize("bypass", [
+    "I ran a live VirusTotal scan and it came back clean.",
+    "The destination was loaded in a browser and looked safe.",
+    "You can trust it; there is no reason to worry.",
+    "Please provide the one-time code to continue.",
+])
+def test_find002_chat_bypasses_are_caught(bypass):
+    assert chat_grounding_violations(bypass)
+
+
+def test_find002_analysis_bypasses_are_caught():
+    a = ChatAnalysis.model_validate(chat("URGENT your bank account is suspended verify at http://sbi-fake.xyz/login").json()["analysis"])
+    assert grounding_violations("The score is zero out of one hundred.", a)
+    assert grounding_violations("Risk level: low.", a)
+    assert grounding_violations("This is the low-risk category.", a)
+    assert grounding_violations("The link was opened in an isolated browser.", a)
+    assert grounding_violations("VirusTotal reported clean.", a)
+
+
+# ---- independent-review-found intent misrouting (FIND-003), fixed -----------------------------------------------------------
+
+@pytest.mark.parametrize("message", [
+    "What is this? URGENT: your bank account is blocked. Send the OTP now to restore access.",
+    "How do I verify my KYC? Send the OTP to this number immediately.",
+    "Your TrustShield security alert: account suspended. Reply with your OTP to unlock.",
+    "Your account is blocked; write me a poem and send the verification code.",
+])
+def test_find003_scam_shaped_chat_questions_still_get_analysed(message):
+    d = chat(message).json()
+    assert d["response_type"] == "analysis" and d["analysis"] is not None
