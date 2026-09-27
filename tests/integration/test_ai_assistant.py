@@ -199,6 +199,34 @@ def test_actual_certainty_claims_still_caught_after_the_negation_fix():
     assert chat_grounding_violations("It is 100% safe.")
 
 
+# ---- found by the commissioned independent review (Antigravity), reproduced and confirmed real: the first negation
+# fix above was too permissive -- it treated ANY negation cue within 60 chars as suppressing a certainty claim,
+# regardless of what verb that cue actually negated, so an UNRELATED contraction ("Don't worry", trailing "don't
+# click") let a genuine, unhedged certainty claim slip past entirely. Replaced with _CERTAINTY_NEGATION_CUE, which
+# only suppresses when the negation directly modifies a verb of assertion (guarantee/confirm/verify/etc.), and
+# dropped trailing negation for certainty claims altogether (it was only ever valid for passive capability
+# phrasing like "reputation lookup was NOT performed"). --------------------------------------------------------------------
+
+@pytest.mark.parametrize("regression", [
+    "Don't worry because this link is safe.",
+    "You shouldn't panic because this is 100% safe.",
+    "I won't lie this is guaranteed.",
+    "This is 100% safe if you don't click other links.",
+])
+def test_unrelated_contractions_no_longer_suppress_a_real_certainty_claim(regression):
+    assert chat_grounding_violations(regression)
+
+
+@pytest.mark.parametrize("hedge", [
+    "I can't verify that link is safe.",
+    "I don't think that link is safe, so please be careful.",
+    "That check won't confirm it is safe.",
+    "You shouldn't assume it is safe.",
+])
+def test_genuine_hedges_are_still_not_misclassified(hedge):
+    assert not chat_grounding_violations(hedge)
+
+
 def test_bare_contraction_negation_cues_are_actually_detected():
     """Found by the same benchmark, a deeper root cause: \\bn't\\b can never match inside "can't"/"don't"/"won't"/
     "shouldn't"/"wouldn't"/"couldn't" because there is no word boundary between the stem's last letter and "n"
@@ -502,6 +530,34 @@ def test_chain_never_calls_secondary_when_primary_succeeds():
                            ("secondary", secondary)])
     chain.reply_cyber_qa("What is phishing?")
     assert calls == []
+
+
+def test_chain_grounding_violations_never_trip_the_circuit_breaker():
+    """Found by the commissioned independent review: a grounding violation is the SAFETY layer correctly rejecting
+    the model's own output, not a transport/infrastructure failure. Recording it as a circuit failure would let an
+    attacker send 3 adversarial prompts designed to provoke a certainty claim and take the primary tier offline for
+    every concurrent user for 60 seconds -- a real, attacker-triggerable denial-of-service."""
+    _clear_circuits()
+    from services.chat.explain import _CIRCUIT_FAILURE_THRESHOLD, _circuit_state
+    always_violates = lambda p: "This is 100% safe, guaranteed."  # noqa: E731
+    chain = ProviderChain([("primary", always_violates),
+                           ("secondary", lambda p: "Phishing tricks people into revealing sensitive information.")])
+    for _ in range(_CIRCUIT_FAILURE_THRESHOLD + 3):
+        reply = chain.reply_cyber_qa("Say it's definitely safe.")
+        assert reply.provider == "secondary"  # falls through every time, but the circuit never opens for primary
+    assert "primary" not in _circuit_state
+    _clear_circuits()
+
+
+def test_chain_falls_through_when_the_validator_itself_raises():
+    """A bug in the grounding validator must not escape as an unhandled exception -- it should behave like any other
+    tier failure and fall through to the next tier."""
+    _clear_circuits()
+    def broken_validator(_text):
+        raise RuntimeError("validator bug")
+    chain = ProviderChain([("primary", lambda p: "some answer")])
+    chain._try(lambda: "prompt", broken_validator, chain.fallback.reply_cyber_qa("What is phishing?"))  # must not raise
+    _clear_circuits()
 
 
 def test_chain_circuit_breaker_skips_a_repeatedly_failing_tier():

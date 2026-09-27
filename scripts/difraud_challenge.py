@@ -139,10 +139,12 @@ def main() -> int:
             # model failure -- treating it as a permanent "transport_error" data point would falsely make a FAST model
             # look unreliable purely because it outran this script's own request rate. Retry with backoff instead of
             # recording it; never cache a budget-exceeded result as if it were the model's real answer.
+            budget_exhausted = False
             for attempt in range(6):
                 t0 = time.perf_counter()
                 result = analyze_semantics(r["text"])
                 if result.status == "transport_error" and result.raw_error == "RemoteProviderBudgetExceeded":
+                    budget_exhausted = attempt == 5
                     time.sleep(4)
                     continue
                 break
@@ -150,8 +152,15 @@ def main() -> int:
             if result.assessment:
                 sem["assessment"] = result.assessment.assessment
                 sem["semantic_confidence"] = result.assessment.semantic_confidence
-            cache[key] = sem
-            save_cache(cache)
+            if budget_exhausted:
+                # found by independent review: writing this to the cache would permanently poison that row -- a
+                # future run reads `if key in cache: sem = cache[key]` and would reuse a stale rate-limit rejection
+                # forever, never giving the model another real chance. Record it for THIS run's honest reporting
+                # (still counted as a negative prediction, same as any other status), but never persist it.
+                print(f"  WARNING: budget exhausted for one message after 6 retries; not cached, will retry next run")
+            else:
+                cache[key] = sem
+                save_cache(cache)
         if "latency_ms" in sem:
             latencies_ms.append(sem["latency_ms"])
         v3_pred = clf.predict(r["text"])

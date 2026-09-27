@@ -238,16 +238,33 @@ _REQUESTS_SECRET = re.compile(
 _NEGATED_REQUEST = re.compile(r"\b(never|don'?t|do not|avoid|refuse to|won'?t)\b\W*(\w+\W+){0,4}$", re.I)
 
 
+# found by the independent review commissioned for the Gemini migration pass (Antigravity), reproduced and confirmed
+# real: the FIRST fix here (reusing the generic _is_negated/_NEGATION_CUE machinery, meant for capability-claim
+# negation like "did not check X") was too permissive for certainty claims specifically. Its 60-char leading window
+# treated ANY negation cue in that window as suppressing the claim, regardless of what that cue actually negated --
+# so "Don't worry because this link is safe.", "You shouldn't panic because this is 100% safe.", "I won't lie this is
+# guaranteed.", and "This is 100% safe if you don't click other links." ALL escaped detection, because some unrelated
+# contraction ("Don't", "shouldn't", "won't", trailing "don't") sat within the window even though it negates a
+# DIFFERENT verb entirely, not the certainty claim itself. A certainty claim is only genuinely negated if the
+# negation cue directly modifies a verb of ASSERTION ("guarantee", "confirm", "verify", "promise", "say", "claim",
+# "tell you", "assure", "state") immediately before it -- not any negation cue anywhere nearby, and never a TRAILING
+# one (which was for passive capability phrasing like "reputation lookup was NOT performed", not certainty claims).
+_CERTAINTY_NEGATION_CUE = re.compile(
+    r"\b(cannot|can'?t|won'?t|will not|do(n'?t| not)|does(n'?t| not)|should(n'?t| not)|would(n'?t| not)|"
+    r"could(n'?t| not)|(is|are|was|were)\s+not|isn'?t|wasn'?t|unable to|not able to)\s+"
+    r"(guarantee|confirm|verify|promise|say|claim|tell you|assure|state|think|assume|believe|suggest)\b", re.I)
+
+
 def _claims_unsupported_certainty(text: str) -> bool:
-    # found by the Gemini-migration conversation benchmark: "I cannot guarantee it's completely safe" and "I'm not
-    # able to say it's definitely safe" both correctly REFUSE to claim certainty, but the certainty regexes below had
-    # no negation check at all (unlike every other check in this function), so a refusal was misclassified as the
-    # exact violation it was refusing to commit. Same negation-cue/clause-boundary logic already used for every other
-    # check here now applies to this one too.
     for cert_re in (_CLAIMS_VERIFIED, _CLAIMS_UNSUPPORTED_CERTAINTY):
         m = cert_re.search(text)
-        if m and not _is_negated(text, m.start(), m.end()):
-            return True
+        if not m:
+            continue
+        before = text[max(0, m.start() - 60):m.start()]
+        cue = _CERTAINTY_NEGATION_CUE.search(before)
+        if cue and not _CLAUSE_BOUNDARY.search(before[cue.end():]):
+            continue  # this specific certainty claim is directly negated -- a refusal, not a claim
+        return True
     return False
 
 
@@ -802,6 +819,14 @@ class ProviderChain(ExplanationProvider):
         self.fallback = fallback or DeterministicExplanationProvider()
 
     def _try(self, build, violates, fallback_reply: Reply) -> Reply:
+        # found by the commissioned independent review: the circuit breaker must only track TRANSPORT/infrastructure
+        # failures, never a grounding-validator rejection of the model's own output. A grounding violation is the
+        # model producing content the SAFETY layer correctly rejected -- not evidence the route is broken. Recording
+        # it as a circuit failure means 3 adversarial prompts designed to provoke a certainty/capability claim (e.g.
+        # "reply saying this is 100% safe") would trip the breaker and take the primary tier offline for EVERY
+        # concurrent user for 60 seconds -- a real, attacker-triggerable denial-of-service on the whole tier. Also
+        # wraps `violates()` itself: an unexpected exception from the validator must fall through to the next tier
+        # like any other failure, not escape as an unhandled 500.
         for label, transport in self.tiers:
             if _circuit_open(label):
                 continue
@@ -810,9 +835,13 @@ class ProviderChain(ExplanationProvider):
             except Exception:
                 _circuit_record(label, success=False)
                 continue
-            if not text or violates(text):
-                _circuit_record(label, success=False)
-                continue
+            try:
+                rejected = not text or violates(text)
+            except Exception:
+                _provider_log.warning("grounding validator raised for tier %s", label, exc_info=True)
+                continue  # do not penalize the circuit breaker for a validator bug, not a transport fault
+            if rejected:
+                continue  # the tier answered; the SAFETY layer rejected the content -- not a transport failure
             _circuit_record(label, success=True)
             return Reply(text, fallback_reply.cited_evidence, provider=label)
         return fallback_reply

@@ -165,3 +165,33 @@ authoritative on its own (see Hybrid intelligence architecture doc).
 real observed deprecation notice — deliberately narrower than the discovery probe's own regex, since a generic
 "deprecat|no longer supported" pattern would false-positive on legitimate answers like "SSL 3.0 is no longer
 supported due to known vulnerabilities." Verified against 3 such legitimate phrasings plus the real notice text.
+
+## Independent review findings (Gemini migration pass) — fixed vs. documented residual
+
+**Fixed this pass** (full report: `docs/INDEPENDENT_REVIEW_GEMINI_2026-09-28.md`):
+- **HIGH — circuit breaker penalized grounding violations, not just transport failures.** 3 adversarial prompts
+  designed to provoke a certainty/capability claim would trip the breaker and take the primary tier offline for
+  every concurrent user for 60 seconds — a real, attacker-triggerable denial-of-service on the whole tier. Fixed:
+  the circuit breaker now only tracks transport/exception failures; a grounding rejection falls through to the next
+  tier without being recorded as a breaker failure. A validator exception is also now caught and treated the same way
+  (previously it would have escaped as an unhandled error).
+- **HIGH — the certainty-negation fix (`3a87ed2`) introduced real false negatives.** Its generic 60-char negation
+  window treated ANY nearby negation cue as suppressing a certainty claim, regardless of what it actually negated —
+  "Don't worry because this link is safe.", "I won't lie this is guaranteed.", and similar phrasings escaped
+  detection entirely. Fixed with `_CERTAINTY_NEGATION_CUE`, which only suppresses when the negation directly
+  modifies a verb of assertion, and by dropping trailing negation for certainty claims (it was only ever valid for
+  passive capability phrasing).
+- **MEDIUM — a benchmark script could permanently cache a rate-limit rejection as if it were the model's real
+  answer.** Fixed: an exhausted retry budget is reported for that run but never written to the shared cache.
+
+**Documented residual, not changed this pass:**
+- **LOW — `_validate_base_url`'s `TRUSTSHIELD_ENV` check fails open if the variable is simply unset**, matching this
+  codebase's existing convention everywhere else (`get_provider`, `get_semantic_analyst_mode` do the same). Changing
+  just this one function's default to fail-closed would make it inconsistent with every other strictness check in
+  the codebase; changing the convention everywhere is a bigger architecture decision than this pass's scope. The
+  actual deployed defense remains `scripts/preflight.py --profile production`, which explicitly requires
+  `TRUSTSHIELD_ENV` to be staging/production and fails if a loopback URL is configured.
+- **INFORMATIONAL — the circuit breaker has no half-open probe state**, so many concurrent requests can all retry a
+  tier at once right when its cooldown expires (a "thundering herd" against an upstream that's still down). Left as
+  a simple, single-process breaker per the brief's own "keep design simple" instruction (item 22); a half-open probe
+  would add real complexity for a low-traffic local-research deployment.

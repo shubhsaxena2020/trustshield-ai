@@ -13,7 +13,21 @@ challenge already ran under the identical protocol and rows this pass would reus
 quota for no new information, per the project's own quota-discipline convention).
 
 ## Fixed configuration (identical to the Sonnet run, `docs/LLM_SEMANTIC_BENCHMARK_PROTOCOL.md`'s Protocol v2 addendum)
-- Prompt version `semantic-v1`, schema `SemanticAssessment`, temperature 0.1, `max_tokens=900`.
+- Prompt version `semantic-v1`, schema `SemanticAssessment`, temperature 0.1, `max_tokens=900` **as originally
+  written — see the addendum below, which supersedes this value before any Gemini benchmark result was read.**
+
+## Protocol amendment (found via a raw probe, before any 200-message Gemini result was read)
+**Flagged by independent review**: this amendment was made in the same commit that discovered the problem
+(`ec07326`), but the protocol document itself was not updated at the time — a real documentation gap, now closed.
+A raw API probe showed Gemini 3 models spend ~850 hidden "reasoning" tokens per call
+(`completion_tokens_details.reasoning_tokens`) against the SAME `max_tokens` budget as the visible JSON response.
+900 tokens left as few as 30-50 tokens for the actual output, truncating 61-81% of calls
+(`finish_reason="max_tokens"`, confirmed directly). `SEMANTIC_MAX_TOKENS` was raised to **2400** BEFORE the
+200-message Gemini semantic benchmark was run with the corrected value — the earlier, badly-truncated 0%-recall
+result was discarded and never used as a reported number; only the corrected run's numbers are reported in
+`docs/GEMINI_SEMANTIC_BENCHMARK_RESULTS.md`. Sonnet's own result is unaffected and was not re-run: it was already
+complete well under 900 tokens, so a higher ceiling cannot change its behavior (a monotonic argument, not an
+assumption).
 - System-role separation (the independent-review fix): `SYSTEM_PROMPT` sent as an actual system-role message, not
   folded into user content — this now applies identically for any model via `services/chat/explain._remote_transport`.
 - Decision rule: `assessment=="fraud_like" AND semantic_confidence>=0.6`.

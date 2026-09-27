@@ -33,6 +33,17 @@ coherent refusal. This reproduced differently across runs (temperature 0.1, not 
 a reliable 4% failure rate — it's one observed instance of occasionally degenerate output on this specific adversarial
 prompt, worth noting as a real (if small) reliability concern for this model, not something to explain away.
 
+## Methodology limitation flagged by independent review: validator tuned on the same set it was scored against
+The two grounding-validator fixes above were found and fixed using failures observed on this exact 25-prompt set,
+across the same three runs whose final ("clean") numbers are reported as the benchmark result. This is validator
+tuning against its own test set, not evaluation on a held-out set — a real methodology limitation, not hidden here.
+It does not invalidate the fixes themselves (both are traceable, real bugs with root causes independent of this
+specific benchmark, and a third, more severe regression in the SAME code was later found and fixed by a completely
+separate independent review pass — see the note in `docs/LLM_SECURITY_POLICY.md`), but the reported 0.00%
+grounding-violation rate for `ag/gemini-3-flash` and `ag/claude-sonnet-4-6` should be read as "no violations on the
+specific prompts used to also debug the validator," not as a generalization claim about grounding-violation rate on
+novel prompts. A proper held-out evaluation set was not built this pass — flagged as a real gap, not attempted.
+
 ## Applying the pre-registered decision rule
 Relative to Sonnet: both Gemini candidates match success rate (1.00) and provider-notice rate (0.00). `ag/gemini-3-flash`
 matches Sonnet's grounding-violation rate exactly (0.00 in the clean run) with comparable latency.
