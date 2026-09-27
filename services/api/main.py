@@ -33,6 +33,7 @@ from services.analysis.web_sandbox.policy import SandboxPolicy, feature_enabled
 
 from services.chat.contract import ChatAnalysis, to_contract
 from services.chat.explain import Reply, followup_intent, get_provider
+from services.chat.intent import classify_intent
 from services.chat.orchestrator import analyze_turn
 from services.chat.router import MAX_MESSAGE_CHARS, route
 from services.chat.signing import sign, verify
@@ -298,9 +299,14 @@ class ReplyOut(BaseModel):
     grounded: bool = True
 
 
+ResponseType = Literal["chat", "analysis", "follow_up", "education", "product_info"]
+
+
 class ChatOut(BaseModel):
-    kind: Literal["analysis", "followup"]
-    route: dict
+    kind: Literal["analysis", "followup", "chat"]  # kept for compatibility; response_type is the richer field
+    response_type: ResponseType
+    intent: dict
+    route: dict = Field(default_factory=dict)
     reply: ReplyOut
     analysis: ChatAnalysis | None = None
     context_signature: str | None = None
@@ -310,19 +316,37 @@ def _reply_out(reply: Reply) -> ReplyOut:
     return ReplyOut(text=reply.text, cited_evidence=reply.cited_evidence[:10], provider=reply.provider, grounded=reply.grounded)
 
 
+# Intents handled without ever touching the analysis pipeline: this is the fix for the "yo" -> "Low Risk 0/100" bug. Analysis
+# always wins when there is a URL, an attachment, or unmatched content (see services/chat/intent.py's priority order).
+_CHAT_ONLY_REPLY = {
+    "greeting": ("chat", "reply_greeting"), "off_topic": ("chat", "reply_off_topic"),
+    "general_cyber_qa": ("education", "reply_cyber_qa"), "product_qa": ("product_info", "reply_product_qa"),
+}
+
+
 async def _chat_turn(request: Request, response: Response, message: str, context: ChatAnalysis | None, signature: str, history: list[Turn],
                      image: tuple[bytes, str | None, str | None] | None) -> ChatOut:
     if sum(len(t.text) for t in history) > 12_000:
         raise HTTPException(422, "conversation context is too large; start a new chat")
     if context is not None and not verify(context, signature):
         context = None  # unsigned or altered context is never trusted
-    plan = route(message, image is not None, context is not None, followup_intent)
     provider = get_provider()
-    if plan.kind == "empty":
+    intent_result = classify_intent(message, image is not None, context is not None, followup_intent)
+    if intent_result.intent == "empty":
         raise HTTPException(422, "Send a message, link, screenshot or QR code to analyse.")
-    if plan.kind == "followup":
-        assert context is not None and plan.intent is not None
-        return ChatOut(kind="followup", route=plan.public(), reply=_reply_out(await run_in_threadpool(provider.reply_for_followup, plan.intent, message, context)))
+
+    if intent_result.intent in _CHAT_ONLY_REPLY:
+        response_type, method_name = _CHAT_ONLY_REPLY[intent_result.intent]
+        reply = await run_in_threadpool(getattr(provider, method_name), message)
+        return ChatOut(kind="chat", response_type=response_type, intent=intent_result.public(), reply=_reply_out(reply))
+
+    if intent_result.intent == "follow_up_analysis":
+        assert context is not None and intent_result.followup_intent is not None
+        reply = await run_in_threadpool(provider.reply_for_followup, intent_result.followup_intent, message, context)
+        return ChatOut(kind="followup", response_type="follow_up", intent=intent_result.public(), reply=_reply_out(reply))
+
+    plan = route(message, image is not None, False, followup_intent)  # follow-up already ruled out above; this call only
+    # selects which pipeline modules to run (url/text/image) for a message intent classification has already decided to analyse
     try:
         if image is not None:
             result, types = await run_heavy(request, analyze_turn, message, image, plan)
@@ -334,8 +358,9 @@ async def _chat_turn(request: Request, response: Response, message: str, context
         raise HTTPException(422, str(exc))
     _publish(request, response, result)
     analysis = to_contract(result, types, plan.urls)
-    return ChatOut(kind="analysis", route=plan.public(), reply=_reply_out(await run_in_threadpool(provider.reply_for_analysis, analysis)),
-                   analysis=analysis, context_signature=sign(analysis))
+    reply = await run_in_threadpool(provider.reply_for_analysis, analysis)
+    return ChatOut(kind="analysis", response_type="analysis", intent=intent_result.public(), route=plan.public(),
+                   reply=_reply_out(reply), analysis=analysis, context_signature=sign(analysis))
 
 
 @router.post("/api/v1/chat", response_model=ChatOut, dependencies=[Depends(limit_light)])
