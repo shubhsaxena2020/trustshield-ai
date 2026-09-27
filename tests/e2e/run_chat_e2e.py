@@ -89,6 +89,27 @@ def run(page: Page, timeout: int) -> None:
     page.click("button:has-text('New chat')")
     check("new chat clears the timeline", page.locator("main ol > li").count() == 0)
 
+    # --- human-likeness matrix: the core bug this phase fixes ("yo" -> "Low Risk 0/100") -----------------------------------
+    ask(page, "yo", timeout)
+    yo_reply = last_reply(page)
+    check("greeting gets a natural reply, not a score", "0/100" not in yo_reply and "Risk score" not in yo_reply and "TrustShield AI" in yo_reply)
+    page.click("button:has-text('New chat')")
+
+    ask(page, "What is phishing?", timeout)
+    phishing_reply = last_reply(page)
+    check("general cybersecurity question gets an educational answer, no risk card", "Risk score" not in phishing_reply and "impersonates" in phishing_reply.lower())
+    page.click("button:has-text('New chat')")
+
+    ask(page, "What can you do?", timeout)
+    product_reply = last_reply(page)
+    check("product question gets a product answer, no risk card", "Risk score" not in product_reply)
+    page.click("button:has-text('New chat')")
+
+    ask(page, "Hey bro your SBI account is blocked click http://sbi-kyc-update.xyz/login", timeout)
+    check("greeting language does not suppress a real scam analysis", "Risk score" in last_reply(page))
+    page.screenshot(path=str(SHOTS / "chat_greeting_vs_scam.png"), full_page=True)
+    page.click("button:has-text('New chat')")
+
     ask(page, "Hi, the team lunch is at 1pm tomorrow. See you there!", timeout)
     check("benign text: not flagged high risk", "High Risk" not in last_reply(page))
 

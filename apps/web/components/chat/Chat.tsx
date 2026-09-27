@@ -12,9 +12,9 @@ const ALLOWED = ["image/png", "image/jpeg", "image/webp"];
 
 // Starters only fill the composer; the user decides whether to send.
 const STARTERS = [
-  "URGENT: your bank account is suspended. Verify now at http://secure-bank-login.example-verify.top/login or lose access.",
-  "Is this link safe? https://paypa1-secure.example.com/verify",
-  "I received a delivery SMS asking me to pay ₹25 for redelivery. Should I trust it?",
+  "Check a suspicious message: URGENT: your bank account is suspended. Verify now at http://secure-bank-login.example-verify.top/login",
+  "Explain UPI fraud",
+  "How does TrustShield work?",
   "Upload a screenshot or QR code with the + button and ask what it is.",
 ];
 
@@ -114,12 +114,12 @@ export function Chat() {
       setMessages((prev) => [
         ...prev,
         data.kind === "analysis" && data.analysis
-          ? { id: uid(), role: "assistant", kind: "analysis", reply: data.reply, analysis: data.analysis, signature: data.context_signature ?? "", route: data.route }
-          : { id: uid(), role: "assistant", kind: "followup", reply: data.reply },
+          ? { id: uid(), role: "assistant", kind: "analysis", responseType: data.response_type, reply: data.reply, analysis: data.analysis, signature: data.context_signature ?? "", route: data.route }
+          : { id: uid(), role: "assistant", kind: "followup", responseType: data.response_type, reply: data.reply },
       ]);
     } catch (err) {
       if (controller.signal.aborted) {
-        setMessages((prev) => [...prev, { id: uid(), role: "assistant", kind: "followup", reply: { text: "Analysis cancelled.", cited_evidence: [], provider: "none", grounded: true } }]);
+        setMessages((prev) => [...prev, { id: uid(), role: "assistant", kind: "followup", responseType: "chat", reply: { text: "Analysis cancelled.", cited_evidence: [], provider: "none", grounded: true } }]);
       } else {
         const msg = err instanceof Error && err.message ? err.message : "Could not reach the analysis service.";
         const errorId = uid();

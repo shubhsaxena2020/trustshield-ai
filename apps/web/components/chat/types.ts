@@ -49,8 +49,12 @@ export interface ChatReply {
   grounded: boolean;
 }
 
+export type ResponseType = "chat" | "analysis" | "follow_up" | "education" | "product_info";
+
 export interface ChatResponse {
-  kind: "analysis" | "followup";
+  kind: "analysis" | "followup" | "chat";
+  response_type: ResponseType;
+  intent: { intent: string; reason: string; urls: string[]; followup_intent: string | null };
   route: { kind: string; reason: string; urls: string[]; intent: string | null; has_attachment: boolean; modules: string[] };
   reply: ChatReply;
   analysis: ChatAnalysis | null;
@@ -59,6 +63,6 @@ export interface ChatResponse {
 
 export type Message =
   | { id: string; role: "user"; text: string; fileName?: string; previewUrl?: string }
-  | { id: string; role: "assistant"; kind: "analysis"; reply: ChatReply; analysis: ChatAnalysis; signature: string; route: ChatResponse["route"] }
-  | { id: string; role: "assistant"; kind: "followup"; reply: ChatReply }
+  | { id: string; role: "assistant"; kind: "analysis"; responseType: ResponseType; reply: ChatReply; analysis: ChatAnalysis; signature: string; route: ChatResponse["route"] }
+  | { id: string; role: "assistant"; kind: "followup"; responseType: ResponseType; reply: ChatReply }
   | { id: string; role: "assistant"; kind: "error"; text: string; retry?: () => void };
