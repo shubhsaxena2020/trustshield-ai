@@ -1,0 +1,64 @@
+{
+  "n_rows": 7560,
+  "majority_class_baseline_accuracy": 0.7229,
+  "results": [
+    {
+      "feature": "raw_word",
+      "n_test": 1890,
+      "accuracy": 0.9021,
+      "classes": [
+        "india_spam_sms",
+        "ucI_sms_spam"
+      ],
+      "confusion_matrix": [
+        [
+          343,
+          181
+        ],
+        [
+          4,
+          1362
+        ]
+      ]
+    },
+    {
+      "feature": "normalized_word",
+      "n_test": 1890,
+      "accuracy": 0.9021,
+      "classes": [
+        "india_spam_sms",
+        "ucI_sms_spam"
+      ],
+      "confusion_matrix": [
+        [
+          343,
+          181
+        ],
+        [
+          4,
+          1362
+        ]
+      ]
+    },
+    {
+      "feature": "char",
+      "n_test": 1890,
+      "accuracy": 0.9228,
+      "classes": [
+        "india_spam_sms",
+        "ucI_sms_spam"
+      ],
+      "confusion_matrix": [
+        [
+          391,
+          133
+        ],
+        [
+          13,
+          1353
+        ]
+      ]
+    }
+  ],
+  "note": "source-name accuracy, NOT fraud accuracy -- high accuracy here means the corpora are stylistically distinguishable, which is exactly the kind of dataset artifact a fraud classifier could exploit instead of learning transferable semantics (see the LOSO findings on the v4-source-robustness branch)"
+}
