@@ -22,3 +22,11 @@ absence of every dataset/source identifier string, and the function signature is
 hashed together with the model ID and prompt version — never raw message text, never the API key — and only the
 already-validated structured result (status, assessment, confidence, signal types). Changing the model, prompt version,
 or redaction logic changes the cache key, so a stale result is never silently reused across a prompt change.
+
+## Update (Gemini migration pass): identical boundary, per model
+This entire boundary applies unchanged when the semantic analyst runs against a Gemini model instead of Sonnet — the
+model is just a string passed to the same, already-hardened `_remote_transport`/`_model_bound_transport`. No
+model-specific code path exists that could bypass redaction, the cache-key scoping, or the system-role separation
+(`docs/AI_PROVIDER_CHAIN.md`). One operational finding this pass, not a privacy issue but adjacent: Gemini 3 models
+consume real, billable "reasoning" tokens per call that never appear in the visible response — see
+`docs/GEMINI_SEMANTIC_BENCHMARK_PROTOCOL.md`'s amendment.
