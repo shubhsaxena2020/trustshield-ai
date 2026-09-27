@@ -139,6 +139,11 @@ def check_production(remote_url: str | None) -> None:
     explanation_provider = os.getenv("TRUSTSHIELD_EXPLANATION_PROVIDER", "deterministic").strip().lower()
     check("explanation provider is deterministic in production", "PASS" if explanation_provider in ("", "deterministic") else "FAIL",
           f"TRUSTSHIELD_EXPLANATION_PROVIDER={explanation_provider} (runtime already ignores this in production, but it must not be set)")
+    ai_base_url = os.getenv("TRUSTSHIELD_AI_BASE_URL", "")
+    localhost_ai_url = any(h in ai_base_url for h in ("localhost", "127.0.0.1", "0.0.0.0"))
+    check("TRUSTSHIELD_AI_BASE_URL is not localhost in production", "PASS" if not localhost_ai_url else "FAIL",
+          f"TRUSTSHIELD_AI_BASE_URL={ai_base_url} -- a localhost LLM router (e.g. 9Router) only reaches the developer's own "
+          "machine and cannot serve deployed traffic; see docs/PROVIDER_CONFIGURATION.md" if localhost_ai_url else "")
     public = os.getenv("PUBLIC_API_URL", "")
     check("PUBLIC_API_URL is https (or unset for a same-origin deployment)", "PASS" if not public or public.startswith("https://") else "FAIL", public or "unset (same-origin)")
     frontend_api = os.getenv("NEXT_PUBLIC_API_URL", "")

@@ -1,7 +1,19 @@
 # TrustShield conversational AI architecture
 
-**Status: CURRENT** (deterministic router + deterministic provider, tested and deployed to Preview only).
-**OPTIONAL, not active anywhere:** the Ollama and remote-LLM providers exist in code but nothing in this deployment enables them.
+**Status: CURRENT.** A real generative LLM has been successfully integrated and verified locally (branch
+`feature/trustshield-9router-llm`, via a local OpenAI-compatible router, "9Router", proxying an Antigravity-backed model).
+**It is active only in local development, never in any deployed Preview or production.** No Vercel deployment uses it — see
+"Cloud/public deployment status" below for exactly why.
+
+## Two kinds of AI, plus a rule-based engine
+1. **Real security ML — `trustshield_text_v3`.** A trained classical classifier (word+char TF-IDF, calibrated). Decides
+   fraud probability. Untouched by this or any prior conversational phase.
+2. **Deterministic security engine.** Rules, OCR, QR decoding, static URL structure analysis, evidence generation, risk
+   fusion. Also untouched.
+3. **Real generative LLM (optional, local-only today).** A 9Router-routed model (`ag/claude-sonnet-4-6`, selected after a
+   controlled benchmark — see `PROVIDER_CONFIGURATION.md`). Explains and converses; never decides the verdict.
+4. **Deterministic conversational fallback.** Templates over structured fields; always available, used whenever the LLM is
+   unavailable, invalid, or its output fails grounding validation.
 
 ## The principle
 ```
@@ -39,8 +51,17 @@ one the pipeline already produced.
 - **`RemoteLLMProvider`** (optional, OpenAI-compatible; eligible in production but only when an operator has explicitly set
   `TRUSTSHIELD_AI_BASE_URL` and `TRUSTSHIELD_AI_API_KEY` — see `PROVIDER_CONFIGURATION.md`): same fallback behaviour.
 
-**No provider is active in the current Preview.** No credentials exist in this environment for any remote LLM authorized for
-TrustShield's use; `get_provider()` returns `DeterministicExplanationProvider` everywhere until an operator configures one.
+**No provider is active in any deployed Preview.** Locally, with `TRUSTSHIELD_AI_PROVIDER=remote` pointed at the developer's
+own 9Router instance, `get_provider()` returns a working `RemoteLLMProvider` and genuinely calls a real model — confirmed via
+`response_provider` metadata on real requests, not inferred from output style. See `docs/9ROUTER_LLM_RC_REVIEW.md` for the
+verification record and example (sanitized) exchanges.
+
+## Cloud/public deployment status
+**Blocked, deliberately.** The local 9Router instance is a personal, machine-bound tool (its local config directory contains
+a `machine-id` file and IDE-session-scoped auth material) that proxies the operator's own Antigravity/IDE subscription — not
+a general-purpose, multi-tenant API entitlement. Per the standing rule against using a subscription-backed route to serve
+arbitrary public traffic, no Vercel Preview or production deployment uses this provider, and none will until the user
+separately confirms a cloud-reachable, appropriately-licensed endpoint exists and is authorized for that use.
 
 ## Response types
 `response_type`: `chat` (greeting/off-topic), `education` (general cybersecurity Q&A), `product_info` (questions about

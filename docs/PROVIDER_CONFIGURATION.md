@@ -1,8 +1,31 @@
 # AI provider configuration
 
-**Current state: no provider is configured. `TRUSTSHIELD_AI_PROVIDER` is unset everywhere, including the Preview deployed
-for this phase. Every reply comes from the deterministic provider — a real, working, always-correct-and-grounded fallback,
-not a placeholder, but not a large language model.**
+**Current state: a real LLM is integrated and verified working, but only in local development.** `TRUSTSHIELD_AI_PROVIDER`
+is unset in every deployed environment (Preview and production); every deployed reply still comes from the deterministic
+provider. Locally, `TRUSTSHIELD_AI_PROVIDER=remote` against a self-hosted OpenAI-compatible router ("9Router") genuinely
+calls a real model — see the local setup below and `docs/9ROUTER_LLM_RC_REVIEW.md` for the verification record.
+
+## Local setup: 9Router (verified working)
+```
+TRUSTSHIELD_AI_PROVIDER=remote
+TRUSTSHIELD_AI_BASE_URL=http://127.0.0.1:20128/v1
+TRUSTSHIELD_AI_MODEL=ag/claude-sonnet-4-6
+TRUSTSHIELD_AI_API_KEY=<the operator's own 9Router key, backend-environment only>
+```
+**Model selection.** `/v1/models` on the running router listed 22 models across several backends (`ds/*` DeepSeek, `ag/*`
+Antigravity-routed, `gc/*` direct Gemini). Three chat-capable candidates were benchmarked on the 7 required test prompts:
+- **`ag/claude-sonnet-4-6` — selected.** Strong instruction-following, explicitly identified and refused a prompt-injection
+  attempt in its own words, correctly disclaimed missing capabilities, natural prose. Latency ~2-6s.
+- `ag/gemini-3-flash-agent` — **disqualified**: silently returned a deprecation notice ("Gemini 3.5 Flash is no longer
+  available...") as ordinary chat content instead of erroring, for every prompt tested.
+- `ag/gemini-pro-agent` — usable, reasonable quality, but less explicit about refusing the injection attempt in the same
+  test; kept as a documented fallback candidate, not selected.
+
+**Critical, non-obvious requirement found only by testing against the real router: `stream: false` must be sent explicitly
+in the request body.** Without it, 9Router returns a Server-Sent-Events stream regardless of the request, which is not
+valid JSON — every remote call silently failed until this was found and fixed (`services/chat/explain.py`).
+
+## Environment variables
 
 ## Environment variables
 | Variable | Purpose | Required for |
@@ -48,4 +71,13 @@ authorization would be a scope violation, so it was not used and its location is
 | Local Ollama | Depends on model | Depends on hardware | free | free | Yes (local server) | N/A | Development only; production must not depend on a developer's machine |
 
 **Recommendation: OpenAI as primary, Groq as a fast/cheap fallback for retry-on-timeout.** Neither is enabled. Enabling
-either needs the user's explicit go-ahead per the stop condition above.
+either needs the user's explicit go-ahead per the stop condition above. The local 9Router setup above is a third,
+already-working option for local development, but is not eligible for a public deployment — see the next section.
+
+## Why 9Router cannot serve a public Preview or production
+The local router's own config directory (`%APPDATA%\9router\`) contains a `machine-id` file and IDE-session-bound auth
+material, and it proxies the operator's personal Antigravity/IDE subscription rather than a general-purpose API entitlement
+purchased for application traffic. Per the standing rule against using a subscription-backed route for arbitrary public
+users, this was not deployed to any Preview and will not be without the user separately confirming a cloud-reachable,
+appropriately-licensed endpoint. `scripts/preflight.py --profile production` now fails outright if
+`TRUSTSHIELD_AI_BASE_URL` ever points at `localhost`/`127.0.0.1`/`0.0.0.0`, so this cannot happen by accident either.

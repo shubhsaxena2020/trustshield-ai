@@ -39,3 +39,26 @@ A model-generated response is validated by regex pattern-matching, not a structu
 verification. A sufficiently novel phrasing of a forbidden claim could theoretically slip past the regex checks — this is a
 known limitation of both the pre-rotation deterministic explanation layer and this phase's chat/education extension, and is
 flagged for the independent security review commissioned for this phase.
+
+## Privacy: what leaves TrustShield when a real LLM is active
+
+**Update (9Router integration phase):** a real remote LLM is now verified working (local development only; see
+`docs/PROVIDER_CONFIGURATION.md`). This section states precisely what that means for privacy, because "TrustShield calls
+`localhost`" is not the same claim as "processing stays local" — a local router can still proxy a remote model.
+
+**When the deterministic provider answers (every deployed environment today): nothing leaves TrustShield.**
+
+**When a remote/Ollama provider is active (local development only today):**
+- **General cybersecurity question:** the user's question text is sent, run through `redact_secrets()` first (best-effort
+  masking of OTP/CVV/password/card-number/long-token-shaped patterns — not a claim of perfect PII detection).
+- **Product question:** the question plus TrustShield's own fixed product metadata (name, capabilities, sealed metrics) —
+  no user analysis content.
+- **Analysis explanation/follow-up:** the structured evidence (titles, severities, source modules), the risk result, the
+  capability-coverage list, and the user's follow-up question — all redacted the same way. OCR text and QR payloads, if
+  present in the evidence, are sent as structured evidence data, not as a raw image or raw unredacted transcript.
+- Never sent: the `TRUSTSHIELD_AI_API_KEY` value itself (it is a request header, never a payload field); the v3 model
+  artifact or its internals; any other user's conversation (the server keeps none).
+
+If a remote provider is ever enabled for a deployed environment, this same content leaves TrustShield's process boundary
+and is processed by whatever upstream model the configured router/provider uses — this is external processing, full stop,
+regardless of whether the configured URL happens to be a `localhost` address on the machine running TrustShield.
