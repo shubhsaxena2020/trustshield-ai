@@ -76,6 +76,15 @@ def has_suspicious_signal(text: str) -> bool:
 FOLLOWUP_MAX_CHARS = 240
 FOLLOWUP_MAX_WORDS = 30
 
+# Found via a live-LLM test (item 59 of the 9Router integration brief): "Explain that in very simple words." matched the
+# generic `^explain\b` cyber-education ancher above and lost its analysis context, so the assistant re-explained phishing
+# in general instead of simplifying the CURRENT result. A message that reformulates/simplifies something already in
+# context ("that"/"it"/"this") must be routed as a follow-up before the generic education patterns get a chance to match.
+_CONTEXTUAL_REPHRASE_PATTERN = re.compile(
+    r"\b(explain|simplify|rephrase|reformulate|shorten|summarize|say|make)\b.{0,20}\b(that|it|this)\b|"
+    r"\b(in simple(r)? (words|terms)|more simply|differently|shorter|to a (non.?technical|beginner)|"
+    r"(three|3|top)\b.{0,30}\b(reasons?|points?)|why does (that|it|this) matter)\b", re.I)
+
 
 def _norm(text: str) -> str:
     return re.sub(r"\s+", " ", text.strip().lower())
@@ -128,6 +137,16 @@ def classify_intent(message: str, has_attachment: bool, has_context: bool, follo
     if has_suspicious_signal(text):
         return IntentResult("analyze_text", "message contains a concrete fraud-action signal (OTP/KYC/account-block/payment "
                             "wording): analysis wins even if the message also resembles a question or greeting")
+
+    # A contextual rephrase/simplify request ("explain that simply", "shorter", "to a beginner") wins over the generic
+    # education patterns below when an analysis is in context — see _CONTEXTUAL_REPHRASE_PATTERN's comment for the bug this
+    # fixes. Without has_context this pattern is harmless: "explain differently" with nothing to explain falls through to
+    # the ordinary analyze_text default a few lines down.
+    if has_context and len(text) <= FOLLOWUP_MAX_CHARS and _CONTEXTUAL_REPHRASE_PATTERN.search(text):
+        intent = followup_intent_fn(text)
+        if intent:
+            return IntentResult("follow_up_analysis", f"contextual rephrase/simplify request matching follow-up intent '{intent}'",
+                                followup_intent=intent)
 
     # Greeting/off-topic/product/general-knowledge patterns are checked BEFORE the loose follow-up matcher: the follow-up
     # matcher's "can_trust" pattern contains words like "phishing"/"scam"/"fraud", so "What is phishing?" would otherwise be
