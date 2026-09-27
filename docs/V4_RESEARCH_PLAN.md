@@ -47,3 +47,14 @@ strong, direct evidence that the corpora are highly distinguishable by style alo
 contributing cause of, the LOSO recall collapse already documented on `feature/trustshield-v4-source-robustness`. Any
 future v4 work should treat "more rows from these two sources" with the same skepticism that branch's findings already
 established.
+
+### Expanded to three sources (branch `feature/trustshield-final-expo-rc`)
+Adding the 1,679 genuinely non-overlapping DIFrauD SMS rows (MIT license, University of Houston; see
+`datasets/raw/difraud_sms/SOURCE.md`) as a third source label, the same experiment's accuracy **drops to 74.6–79.6%**
+(macro-F1 0.62–0.70) against a lower 59.2% three-way majority baseline — still comfortably above baseline, still real
+evidence of dataset-style artifacts, but noticeably less separable than the two-source result. Read together, both
+numbers matter: the two-source figure shows near-total style separability between exactly those two corpora; the
+three-source figure shows that separability is not absolute once a third, differently-collected corpus is added — some
+of what looked like "source fingerprint" in the two-source case may be pairwise idiosyncrasy between those specific two
+corpora rather than a universal property of "any SMS corpus vs. any other." Neither number should be read alone as "the"
+source-predictability finding for this project.

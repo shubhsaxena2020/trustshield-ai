@@ -1,64 +1,171 @@
 {
-  "n_rows": 7560,
-  "majority_class_baseline_accuracy": 0.7229,
-  "results": [
-    {
-      "feature": "raw_word",
-      "n_test": 1890,
-      "accuracy": 0.9021,
-      "classes": [
-        "india_spam_sms",
-        "ucI_sms_spam"
-      ],
-      "confusion_matrix": [
-        [
-          343,
-          181
-        ],
-        [
-          4,
-          1362
-        ]
-      ]
+  "note": "source-name accuracy, NOT fraud accuracy -- high accuracy here means the corpora are stylistically distinguishable, which is exactly the kind of dataset artifact a fraud classifier could exploit instead of learning transferable semantics (see the LOSO findings on the v4-source-robustness branch)",
+  "two_source": {
+    "n_rows": 7560,
+    "n_sources": 2,
+    "class_counts": {
+      "india_spam_sms": 2095,
+      "ucI_sms_spam": 5465
     },
-    {
-      "feature": "normalized_word",
-      "n_test": 1890,
-      "accuracy": 0.9021,
-      "classes": [
-        "india_spam_sms",
-        "ucI_sms_spam"
-      ],
-      "confusion_matrix": [
-        [
-          343,
-          181
+    "majority_class_baseline_accuracy": 0.7229,
+    "results": [
+      {
+        "feature": "raw_word",
+        "n_test": 1890,
+        "accuracy": 0.9021,
+        "macro_f1": 0.862,
+        "classes": [
+          "india_spam_sms",
+          "ucI_sms_spam"
         ],
-        [
-          4,
-          1362
+        "confusion_matrix": [
+          [
+            343,
+            181
+          ],
+          [
+            4,
+            1362
+          ]
         ]
-      ]
+      },
+      {
+        "feature": "normalized_word",
+        "n_test": 1890,
+        "accuracy": 0.9021,
+        "macro_f1": 0.862,
+        "classes": [
+          "india_spam_sms",
+          "ucI_sms_spam"
+        ],
+        "confusion_matrix": [
+          [
+            343,
+            181
+          ],
+          [
+            4,
+            1362
+          ]
+        ]
+      },
+      {
+        "feature": "char",
+        "n_test": 1890,
+        "accuracy": 0.9228,
+        "macro_f1": 0.8957,
+        "classes": [
+          "india_spam_sms",
+          "ucI_sms_spam"
+        ],
+        "confusion_matrix": [
+          [
+            391,
+            133
+          ],
+          [
+            13,
+            1353
+          ]
+        ]
+      }
+    ]
+  },
+  "three_source_with_difraud": {
+    "n_rows": 9239,
+    "n_sources": 3,
+    "class_counts": {
+      "difraud_sms": 1679,
+      "india_spam_sms": 2095,
+      "ucI_sms_spam": 5465
     },
-    {
-      "feature": "char",
-      "n_test": 1890,
-      "accuracy": 0.9228,
-      "classes": [
-        "india_spam_sms",
-        "ucI_sms_spam"
-      ],
-      "confusion_matrix": [
-        [
-          391,
-          133
+    "majority_class_baseline_accuracy": 0.5915,
+    "results": [
+      {
+        "feature": "raw_word",
+        "n_test": 2310,
+        "accuracy": 0.7459,
+        "macro_f1": 0.6204,
+        "classes": [
+          "difraud_sms",
+          "india_spam_sms",
+          "ucI_sms_spam"
         ],
-        [
-          13,
-          1353
+        "confusion_matrix": [
+          [
+            61,
+            7,
+            352
+          ],
+          [
+            0,
+            379,
+            145
+          ],
+          [
+            76,
+            7,
+            1283
+          ]
         ]
-      ]
-    }
-  ],
-  "note": "source-name accuracy, NOT fraud accuracy -- high accuracy here means the corpora are stylistically distinguishable, which is exactly the kind of dataset artifact a fraud classifier could exploit instead of learning transferable semantics (see the LOSO findings on the v4-source-robustness branch)"
+      },
+      {
+        "feature": "normalized_word",
+        "n_test": 2310,
+        "accuracy": 0.7442,
+        "macro_f1": 0.6207,
+        "classes": [
+          "difraud_sms",
+          "india_spam_sms",
+          "ucI_sms_spam"
+        ],
+        "confusion_matrix": [
+          [
+            64,
+            8,
+            348
+          ],
+          [
+            0,
+            376,
+            148
+          ],
+          [
+            78,
+            9,
+            1279
+          ]
+        ]
+      },
+      {
+        "feature": "char",
+        "n_test": 2310,
+        "accuracy": 0.7961,
+        "macro_f1": 0.6994,
+        "classes": [
+          "difraud_sms",
+          "india_spam_sms",
+          "ucI_sms_spam"
+        ],
+        "confusion_matrix": [
+          [
+            107,
+            12,
+            301
+          ],
+          [
+            0,
+            427,
+            97
+          ],
+          [
+            50,
+            11,
+            1305
+          ]
+        ]
+      }
+    ]
+  },
+  "three_source_note": "null if datasets/raw/difraud_sms/all.jsonl was not present when this ran (gitignored, regenerated via scripts/fetch_difraud_sms.py) -- otherwise adds the 1,679 genuinely non-overlapping DIFrauD rows as a third, independent source label"
 }
