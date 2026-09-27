@@ -1,5 +1,30 @@
 # Hybrid v4 candidate selection policy (pre-registered; no candidate selected this pass)
 
+## Fusion entry gate (pre-registered BEFORE the Stage-2 DIFrauD challenge result is read, FINAL OVERNIGHT MASTER
+## COMPLETION PASS, item 29 of that brief)
+
+Hybrid fusion (a meta-classifier or weighted combination of v3 + rules + semantic-analyst features) is built and
+enabled behind `TRUSTSHIELD_FUSION_EXPERIMENT=hybrid_v4` **only if all six of the following hold** on the Stage-2
+DIFrauD source-held-out challenge (`docs/LLM_SEMANTIC_BENCHMARK_PROTOCOL.md`'s Protocol v2 addendum,
+`artifacts/difraud_challenge/results.json`):
+
+1. Semantic-analyst schema-valid rate >= 98% on the challenge (i.e. `status in {"invalid_schema"}` rate < 2%; a
+   deliberate `invented_facts` rejection is NOT counted against this rate -- it is the validator working correctly,
+   not a schema failure).
+2. Repeatability agreement >= 95% on a repeatability set of representative messages (fixed temperature).
+3. The semantic analyst demonstrates meaningful complementary detection value over v3 on the challenge -- judged by
+   confidence intervals, absolute recall/specificity differences, and error overlap, not a single decimal metric.
+4. No catastrophic specificity collapse (specificity does not fall below v3's own challenge specificity by more than a
+   few points on the same sample).
+5. The semantic analyst's errors are not simply a subset of v3's errors (i.e. it catches at least some fraud v3 misses,
+   or vice versa in a way fusion could exploit) -- "complementary errors," not "duplicate errors."
+6. The analyst remains safely bounded (all six independent-review findings from `docs/INDEPENDENT_REVIEW_CODEX_2026-09-28.md`
+   fixed and regression-tested -- true as of this pass).
+
+**This gate is fixed now, before the challenge result exists. It will not be loosened after seeing the number.** If the
+challenge result fails any of 1-5, no fusion is built this pass regardless of how promising any single metric looks --
+see `docs/V4_RESEARCH_PLAN.md`'s own warning about not reading development numbers as promotion evidence.
+
 **Status: no hybrid candidate exists yet. This document defines the criteria a future candidate would need to meet —
 written now, before any full-scale benchmark, so criteria are not adjusted after seeing results.**
 
