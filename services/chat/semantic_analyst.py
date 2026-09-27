@@ -136,11 +136,20 @@ SYSTEM_PROMPT = (
 )
 
 
+_CLOSING_TAG_ESCAPE = re.compile(r"<\s*/\s*message_to_analyse\s*>", re.I)  # catches spacing/case variants of the real one
+
+
 def build_semantic_prompt(message: str) -> str:
     """The message text is the ONLY content sent -- no dataset label, no source name, no filename, no row identifier
     (item 52/53/54 of the hybrid-intelligence brief). redact_secrets() runs first so a real OTP/password/card number in
-    the analysed text does not reach the provider, while the analyst still learns THAT one was present."""
-    safe = redact_secrets(message)[:2000]
+    the analysed text does not reach the provider, while the analyst still learns THAT one was present.
+
+    Self-caught before independent review (mirroring services/chat/explain.py's build_prompt, which already had this):
+    the message could contain its own literal "</message_to_analyse>" and close the boundary early. Stripped explicitly
+    here rather than relying on redact_secrets() -- which happened to coincidentally mangle "message_to_analyse" via its
+    long-token pattern in early manual testing, an accident that must not be mistaken for an intentional defense.
+    """
+    safe = _CLOSING_TAG_ESCAPE.sub("", redact_secrets(message))[:2000]
     return f"{SYSTEM_PROMPT}\n\n<message_to_analyse>\n{safe}\n</message_to_analyse>\nRespond with ONLY the JSON object."
 
 
