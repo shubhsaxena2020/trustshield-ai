@@ -330,5 +330,91 @@
       "urgency_without_keywords",
       "authority_impersonation"
     ]
+  },
+  "ca53587e0e76c4a32168df82": {
+    "status": "ok",
+    "latency_ms": 5701,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.75,
+    "signal_types": [
+      "suspicious_call_to_action"
+    ]
+  },
+  "cf27643b25a2644adb6dda6c": {
+    "status": "invented_facts",
+    "latency_ms": 8614
+  },
+  "ecd4207156776ade03c56800": {
+    "status": "ok",
+    "latency_ms": 5386,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.3,
+    "signal_types": [
+      "executive_impersonation"
+    ]
+  },
+  "9e040b524e1857e1befce6cf": {
+    "status": "ok",
+    "latency_ms": 5539,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.6,
+    "signal_types": [
+      "implausible_claims"
+    ]
+  },
+  "e44767d728ed5e34e6a2069c": {
+    "status": "ok",
+    "latency_ms": 8713,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.55,
+    "signal_types": [
+      "urgency_without_keywords",
+      "implausible_claims",
+      "suspicious_call_to_action"
+    ]
+  },
+  "be49207f79e99b95de8c4a56": {
+    "status": "ok",
+    "latency_ms": 3276,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95,
+    "signal_types": []
+  },
+  "53398be14d71a81ab0656b73": {
+    "status": "ok",
+    "latency_ms": 3495,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.85,
+    "signal_types": []
+  },
+  "d8a24101f542e3b2f42ce66c": {
+    "status": "ok",
+    "latency_ms": 5179,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.3,
+    "signal_types": [
+      "emotional_manipulation"
+    ]
+  },
+  "ed7380e169c485e7c091f67b": {
+    "status": "ok",
+    "latency_ms": 4655,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.3,
+    "signal_types": [
+      "suspicious_call_to_action"
+    ]
+  },
+  "12e5fa8e9cbee47779b8aaea": {
+    "status": "ok",
+    "latency_ms": 10168,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.6,
+    "signal_types": [
+      "suspicious_call_to_action",
+      "implausible_claims",
+      "urgency_without_keywords",
+      "fake_investment_opportunity"
+    ]
   }
 }

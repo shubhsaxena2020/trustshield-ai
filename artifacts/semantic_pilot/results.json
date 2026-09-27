@@ -128,11 +128,11 @@
     "n_neg": 10,
     "tp": 0,
     "fn": 0,
-    "tn": 9,
-    "fp": 1,
+    "tn": 10,
+    "fp": 0,
     "recall": null,
-    "specificity": 0.9,
-    "precision": 0.0,
+    "specificity": 1.0,
+    "precision": null,
     "f1": null,
     "reportable": false
   }

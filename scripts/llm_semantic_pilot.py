@@ -155,7 +155,11 @@ def main() -> int:
         repeatability.append({"text_preview": r["text"][:60], "runs": runs, "assessment_agreement": len(assessments) == 1})
 
     # source-held-out: rows from the specified held-out source, capped
-    held_out_rows = [r for r in dev if r.get("source_name") == args.held_out_source][:args.held_out_n]
+    # A random seeded sample, not "the first N rows in file order" -- file order in these corpora is not guaranteed
+    # arbitrary (e.g. legitimate/fraud rows can be grouped by upstream collection batch), so taking a prefix risks a
+    # biased, unintentionally stratified slice rather than a representative one.
+    held_out_pool = [r for r in dev if r.get("source_name") == args.held_out_source]
+    held_out_rows = random.Random(SEED).sample(held_out_pool, min(args.held_out_n, len(held_out_pool)))
     held_out_results = []
     for r in held_out_rows:
         sem = run_semantic(r["text"], model, cache)
