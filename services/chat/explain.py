@@ -85,19 +85,30 @@ def _bullets(items: list[ContractEvidence]) -> str:
     return "\n".join(f"• {e.title.rstrip('.')} ({e.severity})" for e in items)
 
 
+_OPENERS = {"low_risk": "This looks okay.", "caution": "This is worth a second look.", "suspicious": "This looks suspicious.",
+           "high_risk": "This looks highly suspicious.", "unable_to_verify": "I couldn't reliably assess this."}
+
+
+def _evidence_phrase(items: list[ContractEvidence]) -> str:
+    titles = [e.title.rstrip(".").lower() for e in items[:3]]
+    if len(titles) == 1:
+        return titles[0]
+    return ", ".join(titles[:-1]) + " and " + titles[-1]
+
+
 def initial_reply(a: ChatAnalysis) -> Reply:
+    """A natural-language lead paragraph, not a report: technical detail (module names, exact scores, full evidence list,
+    capability coverage) lives in the structured card the frontend renders alongside this text, not in the sentence itself."""
     top = top_evidence(a)
-    lines = [f"{LEVEL_TITLE[a.risk_level]} — {a.risk_score}/100 (confidence: {a.confidence}).", LEVEL_SENTENCE[a.risk_level]]
-    if top and a.risk_level != "unable_to_verify":
-        lines += ["Strongest evidence:", _bullets(top)]
-    if a.qr_payload:
-        lines.append(f"The QR code contained a {a.qr_payload_type or 'text'} payload (shown as data in the evidence view).")
-    if a.risk_level == "unable_to_verify" or a.uncertainty:
-        lines.append("What TrustShield could not verify: " + " ".join(a.uncertainty[:3]) if a.uncertainty else "Some checks did not run.")
-    if a.safe_actions:
-        lines.append("Recommended: " + a.safe_actions[0])
-    lines.append(_coverage_line(a))
-    return Reply("\n".join(lines), _cite(top))
+    opener = _OPENERS[a.risk_level]
+    if a.risk_level == "unable_to_verify":
+        detail = "There wasn't enough to check reliably here — " + (a.uncertainty[0] if a.uncertainty else "some checks did not run") + "."
+    elif top:
+        detail = f"The combination of {_evidence_phrase(top)} is " + ("consistent with fraud." if a.risk_level in ("suspicious", "high_risk") else "worth noting, though nothing stands out strongly.")
+    else:
+        detail = LEVEL_SENTENCE[a.risk_level]
+    action = (" " + a.safe_actions[0]) if a.safe_actions and a.risk_level != "low_risk" else ""
+    return Reply(f"{opener} {detail}{action}", _cite(top))
 
 
 def answer_followup(intent: str, a: ChatAnalysis) -> Reply:
