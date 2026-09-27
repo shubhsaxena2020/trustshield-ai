@@ -22,6 +22,7 @@ ALLOWED = {"india_spam_sms.jsonl", "ucI_sms_spam.jsonl"}  # non-spent, licensed,
 CACHE_PATH = ROOT / "artifacts" / "semantic_pilot" / "cache.json"
 POSITIVE = "malicious_or_fraudulent"
 SEED = 20260927
+MIN_COUNT_FOR_RATE = 20  # matches docs/LLM_SEMANTIC_BENCHMARK_PROTOCOL.md's registered reportability threshold
 
 
 def load(name: str) -> list[dict]:
@@ -107,7 +108,8 @@ def metrics(rows: list[dict], pred_key: str, true_key: str = "true") -> dict:
     prec = round(tp / prec_n, 4) if prec_n else None
     f1 = round(2 * prec * rec / (prec + rec), 4) if prec and rec else None
     return {"n": len(rows), "n_pos": n_pos, "n_neg": n_neg, "tp": tp, "fn": fn, "tn": tn, "fp": fp,
-           "recall": rec, "specificity": spec, "precision": prec, "f1": f1, "reportable": n_pos >= 15 and n_neg >= 15}
+           "recall": rec, "specificity": spec, "precision": prec, "f1": f1,
+           "reportable": n_pos >= MIN_COUNT_FOR_RATE and n_neg >= MIN_COUNT_FOR_RATE}
 
 
 def main() -> int:
@@ -121,14 +123,28 @@ def main() -> int:
     args = ap.parse_args()
 
     import os
+    from services.chat.semantic_analyst import DEFAULT_MODEL
     if os.getenv("TRUSTSHIELD_SEMANTIC_ANALYST") != "remote":
         raise SystemExit("set TRUSTSHIELD_SEMANTIC_ANALYST=remote (and _AI_BASE_URL/_API_KEY/_MODEL) before running this")
-    model = os.getenv("TRUSTSHIELD_AI_MODEL", "unknown")
+    # must match the live path's own default (services.chat.semantic_analyst.DEFAULT_MODEL) -- found by independent
+    # review: a mismatched "unknown" fallback here vs. the analyst's real default meant a cache entry recorded without
+    # TRUSTSHIELD_AI_MODEL set could be silently reused after the code's actual default model changed.
+    model = os.getenv("TRUSTSHIELD_AI_MODEL", DEFAULT_MODEL)
     cache = load_cache()
 
     dev = load_dev()
-    pilot = stratified_sample(dev, args.n_per_class, prefer_sources=("india_spam_sms",))
-    print(f"pilot size: {len(pilot)} (target {args.n_per_class}/class)")
+    # Reserve the held-out slice BEFORE drawing the pilot sample and exclude it from the pilot pool entirely -- found
+    # by independent review: the previous version sampled the pilot from both sources (india_spam_sms preferred) and
+    # then drew "held-out" rows from the same india_spam_sms pool, so the held-out slice was not actually unseen
+    # relative to the pilot (exact or near-duplicate messages could appear in both, including via the shared cache).
+    held_out_pool_all = [r for r in dev if r.get("source_name") == args.held_out_source]
+    held_out_rows = random.Random(SEED).sample(held_out_pool_all, min(args.held_out_n, len(held_out_pool_all)))
+    held_out_ids = {r.get("id") or r["text"] for r in held_out_rows}
+    dev_minus_held_out = [r for r in dev if (r.get("id") or r["text"]) not in held_out_ids]
+
+    pilot = stratified_sample(dev_minus_held_out, args.n_per_class, prefer_sources=("india_spam_sms",))
+    print(f"pilot size: {len(pilot)} (target {args.n_per_class}/class); held-out source reserved first: "
+         f"{len(held_out_rows)} rows from {args.held_out_source!r} excluded from the pilot pool")
 
     pilot_rows = []
     for i, r in enumerate(pilot):
@@ -154,12 +170,7 @@ def main() -> int:
         assessments = {x["assessment"] for x in runs}
         repeatability.append({"text_preview": r["text"][:60], "runs": runs, "assessment_agreement": len(assessments) == 1})
 
-    # source-held-out: rows from the specified held-out source, capped
-    # A random seeded sample, not "the first N rows in file order" -- file order in these corpora is not guaranteed
-    # arbitrary (e.g. legitimate/fraud rows can be grouped by upstream collection batch), so taking a prefix risks a
-    # biased, unintentionally stratified slice rather than a representative one.
-    held_out_pool = [r for r in dev if r.get("source_name") == args.held_out_source]
-    held_out_rows = random.Random(SEED).sample(held_out_pool, min(args.held_out_n, len(held_out_pool)))
+    # held_out_rows was already drawn above, BEFORE the pilot pool was built, and excluded from it entirely.
     held_out_results = []
     for r in held_out_rows:
         sem = run_semantic(r["text"], model, cache)
