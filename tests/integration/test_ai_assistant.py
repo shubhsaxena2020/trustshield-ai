@@ -380,6 +380,28 @@ def test_find002_base_url_ssrf_validation(url, should_pass):
             _validate_base_url(url)
 
 
+# ---- Gemini-migration baseline audit: found the runtime SSRF check had no TRUSTSHIELD_ENV awareness at all, unlike
+# the semantic analyst's stricter posture; the only defense against a loopback URL in production was the separate,
+# deploy-time-only scripts/preflight.py check, not the runtime code path itself. ------------------------------------------
+
+@pytest.mark.parametrize("env", ["staging", "production"])
+def test_loopback_base_url_refused_at_runtime_in_staging_and_production(monkeypatch, env):
+    from services.chat.explain import _validate_base_url
+    monkeypatch.setenv("TRUSTSHIELD_ENV", env)
+    with pytest.raises(ValueError):
+        _validate_base_url("http://127.0.0.1:20128/v1")
+    with pytest.raises(ValueError):
+        _validate_base_url("http://localhost:20128/v1")
+
+
+def test_loopback_base_url_still_allowed_in_development(monkeypatch):
+    from services.chat.explain import _validate_base_url
+    monkeypatch.setenv("TRUSTSHIELD_ENV", "development")
+    _validate_base_url("http://127.0.0.1:20128/v1")  # must not raise
+    monkeypatch.delenv("TRUSTSHIELD_ENV", raising=False)
+    _validate_base_url("http://127.0.0.1:20128/v1")  # default (unset) is also non-strict
+
+
 def test_find003_delimiter_variants_are_stripped_before_a_fake_close_can_appear():
     from services.chat.explain import build_prompt, _DELIMITER_ESCAPE
     a = ChatAnalysis.model_validate(chat("URGENT your bank account is suspended verify at http://sbi-fake.xyz/login").json()["analysis"])

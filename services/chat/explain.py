@@ -560,6 +560,17 @@ def _validate_base_url(base_url: str) -> None:
         raise ValueError(f"TRUSTSHIELD_AI_BASE_URL must be http(s), got scheme {parsed.scheme!r}")
     host = (parsed.hostname or "").lower()
     if host in _LOOPBACK_HOSTS:
+        # Gemini-migration baseline audit: this function previously had no TRUSTSHIELD_ENV check at all, so a
+        # production deployment accidentally configured with a loopback TRUSTSHIELD_AI_BASE_URL would be accepted at
+        # the runtime-code level -- the only defense was scripts/preflight.py's separate, deploy-time-only check.
+        # The Semantic Security Analyst already refuses outright in staging/production regardless of its own flag
+        # (get_semantic_analyst_mode); this brings the conversational provider's runtime code to the same posture as
+        # defense-in-depth, without removing the (still useful) deploy-time preflight check.
+        strict = os.getenv("TRUSTSHIELD_ENV", "development").strip().lower() in {"staging", "production"}
+        if strict:
+            raise ValueError(f"TRUSTSHIELD_AI_BASE_URL may not be a loopback address ({host!r}) when TRUSTSHIELD_ENV "
+                             "is staging/production -- a localhost LLM router only reaches the developer's own "
+                             "machine and cannot serve deployed traffic")
         return  # the documented, legitimate local-development case (9Router and similar local routers)
     if parsed.scheme == "http":
         raise ValueError(f"TRUSTSHIELD_AI_BASE_URL uses http for a non-loopback host ({host!r}); only https is allowed "
