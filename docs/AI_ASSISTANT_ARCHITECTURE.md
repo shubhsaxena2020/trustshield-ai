@@ -50,6 +50,11 @@ one the pipeline already produced.
   text untouched.
 - **`RemoteLLMProvider`** (optional, OpenAI-compatible; eligible in production but only when an operator has explicitly set
   `TRUSTSHIELD_AI_BASE_URL` and `TRUSTSHIELD_AI_API_KEY` — see `PROVIDER_CONFIGURATION.md`): same fallback behaviour.
+- **`ProviderChain`** (Gemini migration pass, optional, built only when `TRUSTSHIELD_AI_PRIMARY_MODEL` is also set):
+  PRIMARY → SECONDARY → deterministic, each remote tier tried lazily with a per-tier circuit breaker. See
+  `docs/AI_PROVIDER_CHAIN.md`. `ag/gemini-3-flash` passed a pre-registered benchmark against the `ag/claude-sonnet-4-6`
+  incumbent (`docs/GEMINI_CONVERSATION_BENCHMARK_RESULTS.md`) and is the recommended PRIMARY for this configuration,
+  local research only — same production-eligibility rule as `RemoteLLMProvider` below.
 
 **No provider is active in any deployed Preview.** Locally, with `TRUSTSHIELD_AI_PROVIDER=remote` pointed at the developer's
 own 9Router instance, `get_provider()` returns a working `RemoteLLMProvider` and genuinely calls a real model — confirmed via
