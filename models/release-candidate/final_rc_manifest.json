@@ -1,0 +1,40 @@
+{
+  "name": "trustshield-final-expo-rc-2026-09-28",
+  "note": "Reproducibility manifest for the FINAL OVERNIGHT MASTER COMPLETION PASS. This is a research/documentation checkpoint, NOT a production release manifest -- production remains on the existing trustshield_text_v3 promotion (see models/release/v3_release_manifest.json). No hybrid candidate is frozen; see docs/HYBRID_V4_SELECTION_POLICY.md's gate decision.",
+  "branch": "feature/trustshield-final-expo-rc",
+  "commit_at_manifest_write_time": "8b66271",
+  "production_v3_identity": {
+    "artifact": "models/trained/trustshield_text_v3.joblib",
+    "threshold": 0.16,
+    "sealed_holdout_metrics": {"recall": 0.821, "specificity": 0.783, "precision": 0.821, "f1": 0.821}
+  },
+  "llm_configuration": {
+    "model_id": "ag/claude-sonnet-4-6",
+    "route": "local 9Router (http://127.0.0.1:20128/v1), never public",
+    "conversational_prompt_version": "see services/chat/explain.py",
+    "semantic_analyst_prompt_version": "semantic-v1"
+  },
+  "hybrid_intelligence_status": {
+    "semantic_analyst": "implemented, independently reviewed, disabled by default, local research only",
+    "fusion": "NOT built -- pre-registered entry gate evaluated against the 200-message DIFrauD challenge and NOT met",
+    "candidate_frozen": null,
+    "final_holdout_status": "NOT EVALUATED"
+  },
+  "test_counts": {"passed": 624, "skipped": 7},
+  "frozen_sha256": {
+    "models/trained/trustshield_text_v3.joblib": "d69aadbb758d186c8b33946895b456588cf8f5ce5eca504647d9e7a009c1189a",
+    "models/metadata/trustshield_text_v3.json": "59158261cf12e4def294e17c51f7a816f9e57e264aea20db9322fc4bb1e64dcb",
+    "services/chat/semantic_analyst.py": "791f8616c704e9cf7e7d784834e6050d154606044fd287c90ac21d78d7333510",
+    "services/chat/explain.py": "c0bbd84e506b1e3d68ccc22ac7f8c3d65813bbcf16c8cf05f3d9cb99e3d666ad",
+    "scripts/llm_semantic_pilot.py": "dad04649404730e26508b194ce0c90ba76aee8784befc83494686e2fe1a910c2",
+    "scripts/difraud_challenge.py": "078afc3e39dadcca7c1a472eb6f5b7bcb5af395b6318cc4f45483effa496dfb3",
+    "scripts/source_predictability.py": "abc1b72f0dc4949cab7cdf77eab0a6e495d48517252f3f29afa90b5f7e88e341",
+    "artifacts/difraud_challenge/results.json": "f424b5bc6d0a59142db52cad9e578d776d6c9b819d780abba131098c730ec744",
+    "artifacts/difraud_challenge/error_overlap.json": "29aff76317c629e7482869f27da96e8fa120f01f311345a8a46c5ce60aca11ca",
+    "artifacts/source_predictability/results.json": "11863f116eb1ea8362dbcf328467da5ffe55f849c917c8e4d5fed9a7be412a28",
+    "docs/HYBRID_V4_SELECTION_POLICY.md": "85ef9cccab57db70703a8e1584469b8456ac2a9cb6fd28336af347a3865e62c5",
+    "docs/LLM_SEMANTIC_BENCHMARK_PROTOCOL.md": "961b008b1edf1f079e678fa05f806a2e8fe8cfbfb4f0207a665c59fa0daaf2b1",
+    "docs/INDEPENDENT_REVIEW_CODEX_2026-09-28.md": "72a3a91024160c4bb3a65c9b8cfbcb2e120df6563b931d962892749ad1908896"
+  },
+  "no_secrets_recorded": true
+}
