@@ -199,6 +199,24 @@ def test_actual_certainty_claims_still_caught_after_the_negation_fix():
     assert chat_grounding_violations("It is 100% safe.")
 
 
+def test_bare_contraction_negation_cues_are_actually_detected():
+    """Found by the same benchmark, a deeper root cause: \\bn't\\b can never match inside "can't"/"don't"/"won't"/
+    "shouldn't"/"wouldn't"/"couldn't" because there is no word boundary between the stem's last letter and "n"
+    (contiguous word characters) -- only the explicitly-spelled-out isn't/wasn't/didn't ever worked. A real Sonnet
+    response ("...so I can't verify whether that specific link is safe or malicious...") hit exactly this gap."""
+    real_response = ("Great question, and I want to be upfront: I'm not able to browse URLs or check reputation "
+                     "services, so I can't verify whether that specific link is safe or malicious. That said, the "
+                     "message you've shared has some characteristics worth examining.")
+    assert not chat_grounding_violations(real_response)
+    for cue, text in [
+        ("can't", "I can't verify that link is safe."),
+        ("don't", "I don't think that link is safe, so please be careful."),
+        ("won't", "That check won't confirm it is safe."),
+        ("shouldn't", "You shouldn't assume it is safe."),
+    ]:
+        assert not chat_grounding_violations(text), f"false positive for {cue!r}: {text!r}"
+
+
 # ---- self-discovered grounding-check bypasses, fixed before independent review -------------------------------------------
 
 @pytest.mark.parametrize("bypass", [

@@ -329,7 +329,12 @@ _CLAIMS_REPUTATION = re.compile(
 # "I have not checked the message, but I opened the website for you." has "not" ~30 characters before "opened", and the
 # old window let that hide a real claim. The window is now narrower (25 chars) AND requires the negation to be in the SAME
 # clause: no sentence/clause boundary (. , ; ! ? or "but") between the negation cue and the match.
-_NEGATION_CUE = re.compile(r"\b(no|not|never|n't|didn'?t|did not|wasn'?t|was not|isn'?t|is not|cannot|without|disabled)\b", re.I)
+# found by the Gemini-migration conversation benchmark: a real Sonnet response used "can't" as its negation cue, which
+# this regex never caught -- "n't" was wrapped in the SAME leading \b as the rest of the group, but a word boundary
+# never exists between "a" and "n" in "can't" (contiguous word characters), so \bn't could never actually match any
+# contraction not separately spelled out (didn't/wasn't/isn't already work because their own stems start a word).
+# Moving n't\b outside the leading-\b group fixes can't/don't/won't/shouldn't/wouldn't/couldn't and everything else.
+_NEGATION_CUE = re.compile(r"\b(no|not|never|didn'?t|did not|wasn'?t|was not|isn'?t|is not|cannot|without|disabled)\b|n't\b", re.I)
 _CLAUSE_BOUNDARY = re.compile(r"[.,;!?]|\bbut\b|\band\b", re.I)
 
 
