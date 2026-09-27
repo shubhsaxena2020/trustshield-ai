@@ -160,8 +160,8 @@ authoritative on its own (see Hybrid intelligence architecture doc).
 | A later chain tier's request confused with an earlier tier's model/credentials | Each tier's transport is a closure bound to one specific model string; `_remote_transport`'s `model=` override never falls back to a different tier's value |
 | Certainty-refusal ("I cannot guarantee X is safe") misclassified as a certainty violation, silently discarding a good, safe response | Found via 3-model comparative benchmarking; fixed in `_claims_unsupported_certainty`/`_NEGATION_CUE` with regression tests using the exact real responses that exposed it |
 
-**Known gap, not fixed this pass:** the runtime conversational path does not itself have the model-deprecation-notice
-regex guard the functional probe uses — a provider that started returning deprecation text mid-deployment (rather than
-at initial probe time) would currently only be caught by `chat_grounding_violations`/`grounding_violations` if the
-notice text happens to also trip a certainty/capability check, which is not guaranteed. Documented as a residual risk
-for a future pass, not silently left unmentioned.
+**Update: this gap was found and closed within this same pass, not deferred.** `_remote_call_once` now raises
+`ProviderNoticeDetected` (never retried, same treatment as a 4xx) when a response matches the exact structure of a
+real observed deprecation notice — deliberately narrower than the discovery probe's own regex, since a generic
+"deprecat|no longer supported" pattern would false-positive on legitimate answers like "SSL 3.0 is no longer
+supported due to known vulnerabilities." Verified against 3 such legitimate phrasings plus the real notice text.
