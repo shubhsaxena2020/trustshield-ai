@@ -1,0 +1,139 @@
+{
+  "protocol": "docs/LLM_SEMANTIC_BENCHMARK_PROTOCOL.md",
+  "model": "ag/claude-sonnet-4-6",
+  "pilot_size": 24,
+  "v3_pilot": {
+    "n": 24,
+    "n_pos": 12,
+    "n_neg": 12,
+    "tp": 12,
+    "fn": 0,
+    "tn": 12,
+    "fp": 0,
+    "recall": 1.0,
+    "specificity": 1.0,
+    "precision": 1.0,
+    "f1": 1.0,
+    "reportable": false
+  },
+  "semantic_pilot": {
+    "n": 24,
+    "n_pos": 12,
+    "n_neg": 12,
+    "tp": 11,
+    "fn": 1,
+    "tn": 11,
+    "fp": 1,
+    "recall": 0.9167,
+    "specificity": 0.9167,
+    "precision": 0.9167,
+    "f1": 0.9167,
+    "reportable": false
+  },
+  "semantic_status_distribution": {
+    "ok": 23,
+    "invented_facts": 1
+  },
+  "repeatability": [
+    {
+      "text_preview": "ONLY for U! Double DATA+ZEE5. Recharge with 299, get 1yr ZEE",
+      "runs": [
+        {
+          "status": "ok",
+          "assessment": "uncertain",
+          "confidence": 0.6
+        },
+        {
+          "status": "ok",
+          "assessment": "uncertain",
+          "confidence": 0.6
+        },
+        {
+          "status": "ok",
+          "assessment": "uncertain",
+          "confidence": 0.6
+        }
+      ],
+      "assessment_agreement": true
+    },
+    {
+      "text_preview": "Hi 901969xxxx, Rs.56,6OO/- Bonus is credited t0 your wallet ",
+      "runs": [
+        {
+          "status": "ok",
+          "assessment": "fraud_like",
+          "confidence": 0.92
+        },
+        {
+          "status": "ok",
+          "assessment": "fraud_like",
+          "confidence": 0.92
+        },
+        {
+          "status": "ok",
+          "assessment": "fraud_like",
+          "confidence": 0.92
+        }
+      ],
+      "assessment_agreement": true
+    },
+    {
+      "text_preview": "Is such that",
+      "runs": [
+        {
+          "status": "ok",
+          "assessment": "uncertain",
+          "confidence": 0.1
+        },
+        {
+          "status": "ok",
+          "assessment": "uncertain",
+          "confidence": 0.1
+        },
+        {
+          "status": "ok",
+          "assessment": "uncertain",
+          "confidence": 0.1
+        }
+      ],
+      "assessment_agreement": true
+    },
+    {
+      "text_preview": "Congrats User, Rs.15OOO Bonus is Credited to your wallet No ",
+      "runs": [
+        {
+          "status": "ok",
+          "assessment": "fraud_like",
+          "confidence": 0.87
+        },
+        {
+          "status": "ok",
+          "assessment": "fraud_like",
+          "confidence": 0.87
+        },
+        {
+          "status": "ok",
+          "assessment": "fraud_like",
+          "confidence": 0.87
+        }
+      ],
+      "assessment_agreement": true
+    }
+  ],
+  "held_out_source": "india_spam_sms",
+  "held_out_n": 10,
+  "held_out_semantic": {
+    "n": 10,
+    "n_pos": 0,
+    "n_neg": 10,
+    "tp": 0,
+    "fn": 0,
+    "tn": 9,
+    "fp": 1,
+    "recall": null,
+    "specificity": 0.9,
+    "precision": 0.0,
+    "f1": null,
+    "reportable": false
+  }
+}

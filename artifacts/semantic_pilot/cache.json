@@ -1,0 +1,334 @@
+{
+  "73cda215ef2b6efbb250a931": {
+    "status": "ok",
+    "latency_ms": 10686,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.6,
+    "signal_types": [
+      "suspicious_call_to_action",
+      "urgency_without_keywords",
+      "implausible_claims",
+      "credential_harvesting_intent"
+    ]
+  },
+  "a6d17f826ff5022d6fac1676": {
+    "status": "ok",
+    "latency_ms": 10260,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.92,
+    "signal_types": [
+      "fake_refund",
+      "suspicious_call_to_action",
+      "credential_harvesting_intent",
+      "urgency_without_keywords"
+    ]
+  },
+  "6e4289e095f6f14ea598e10c": {
+    "status": "ok",
+    "latency_ms": 3867,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.1,
+    "signal_types": []
+  },
+  "0eda4802e8e443d73cfdbfe8": {
+    "status": "ok",
+    "latency_ms": 12236,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.87,
+    "signal_types": [
+      "fake_refund",
+      "suspicious_call_to_action",
+      "implausible_claims",
+      "credential_harvesting_intent"
+    ]
+  },
+  "d840c9779bcec64ddce8970e": {
+    "status": "ok",
+    "latency_ms": 8875,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.55,
+    "signal_types": [
+      "fake_investment_opportunity",
+      "suspicious_call_to_action",
+      "emotional_manipulation"
+    ]
+  },
+  "6b47a258295466442b408e3e": {
+    "status": "ok",
+    "latency_ms": 5883,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.3,
+    "signal_types": [
+      "fake_investment_opportunity"
+    ]
+  },
+  "355c36a50c41dc1256de6cbe": {
+    "status": "ok",
+    "latency_ms": 9908,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.55,
+    "signal_types": [
+      "suspicious_call_to_action",
+      "implausible_claims",
+      "credential_harvesting_intent",
+      "authority_impersonation"
+    ]
+  },
+  "07236cc36f0639d83cc8f398": {
+    "status": "ok",
+    "latency_ms": 4092,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.85,
+    "signal_types": []
+  },
+  "19652f93ac95521cece9daef": {
+    "status": "ok",
+    "latency_ms": 8972,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.72,
+    "signal_types": [
+      "fake_investment_opportunity",
+      "urgency_without_keywords",
+      "emotional_manipulation",
+      "implausible_claims"
+    ]
+  },
+  "031616b41b9a2c0e53850443": {
+    "status": "ok",
+    "latency_ms": 9903,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.88,
+    "signal_types": [
+      "fake_job",
+      "suspicious_call_to_action",
+      "implausible_claims",
+      "fake_investment_opportunity"
+    ]
+  },
+  "c3895b20d6789e754b3b5cf5": {
+    "status": "ok",
+    "latency_ms": 10048,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.92,
+    "signal_types": [
+      "fake_refund",
+      "suspicious_call_to_action",
+      "urgency_without_keywords",
+      "implausible_claims"
+    ]
+  },
+  "0cf0d680d6e39819d2aeef61": {
+    "status": "ok",
+    "latency_ms": 9608,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.88,
+    "signal_types": [
+      "fake_job",
+      "suspicious_call_to_action",
+      "implausible_claims",
+      "urgency_without_keywords"
+    ]
+  },
+  "301ac75771eed404e1ad390d": {
+    "status": "ok",
+    "latency_ms": 9975,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.92,
+    "signal_types": [
+      "fake_job",
+      "urgency_without_keywords",
+      "suspicious_call_to_action",
+      "implausible_claims"
+    ]
+  },
+  "16c01ab7faf6bc01de4a4d08": {
+    "status": "ok",
+    "latency_ms": 6713,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.1,
+    "signal_types": []
+  },
+  "f0503f42e71a4b3d93cc6087": {
+    "status": "ok",
+    "latency_ms": 3592,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.1,
+    "signal_types": []
+  },
+  "c184d5593e1365e68ec8a1eb": {
+    "status": "ok",
+    "latency_ms": 10368,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.92,
+    "signal_types": [
+      "fake_refund",
+      "suspicious_call_to_action",
+      "urgency_without_keywords",
+      "credential_harvesting_intent"
+    ]
+  },
+  "00041d5957f6fc02d4866bf7": {
+    "status": "invented_facts",
+    "latency_ms": 8969
+  },
+  "c978167eb5b734a2294f03b0": {
+    "status": "ok",
+    "latency_ms": 5465,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.4,
+    "signal_types": [
+      "fake_investment_opportunity"
+    ]
+  },
+  "b7e61fd9865661bf90df1ab6": {
+    "status": "ok",
+    "latency_ms": 8532,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.82,
+    "signal_types": [
+      "implausible_claims",
+      "suspicious_call_to_action",
+      "authority_impersonation",
+      "urgency_without_keywords"
+    ]
+  },
+  "bd8a10a7592a110289ca4e4f": {
+    "status": "ok",
+    "latency_ms": 8971,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.82,
+    "signal_types": [
+      "suspicious_call_to_action",
+      "credential_harvesting_intent",
+      "urgency_without_keywords",
+      "authority_impersonation"
+    ]
+  },
+  "8e717ea3b4d23d7d97916069": {
+    "status": "ok",
+    "latency_ms": 8361,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.85,
+    "signal_types": [
+      "fake_job",
+      "suspicious_call_to_action",
+      "implausible_claims",
+      "emotional_manipulation"
+    ]
+  },
+  "d02f09c0edf1d44adf61260d": {
+    "status": "ok",
+    "latency_ms": 9446,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.92,
+    "signal_types": [
+      "fake_refund",
+      "suspicious_call_to_action",
+      "credential_harvesting_intent",
+      "urgency_without_keywords"
+    ]
+  },
+  "e346adb86889754e3263b155": {
+    "status": "ok",
+    "latency_ms": 5581,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.3,
+    "signal_types": [
+      "urgency_without_keywords"
+    ]
+  },
+  "d7c842af2c8e50d3e2944f43": {
+    "status": "ok",
+    "latency_ms": 2991,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.1,
+    "signal_types": []
+  },
+  "b7126df371545f87e4a75caa": {
+    "status": "invented_facts",
+    "latency_ms": 9093
+  },
+  "47fd0f47c5a1d9d7b4a7e81a": {
+    "status": "ok",
+    "latency_ms": 9097,
+    "assessment": "fraud_like",
+    "semantic_confidence": 0.72,
+    "signal_types": [
+      "suspicious_call_to_action",
+      "authority_impersonation",
+      "credential_harvesting_intent",
+      "urgency_without_keywords"
+    ]
+  },
+  "ce554b99bf8c825e38713f86": {
+    "status": "invented_facts",
+    "latency_ms": 7912
+  },
+  "4d0d781f7aa5d11cbc09b772": {
+    "status": "ok",
+    "latency_ms": 4501,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.15,
+    "signal_types": [
+      "emotional_manipulation"
+    ]
+  },
+  "2260f49b1ca820769b364931": {
+    "status": "ok",
+    "latency_ms": 5534,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.55,
+    "signal_types": [
+      "suspicious_call_to_action"
+    ]
+  },
+  "a0a2fddd0ea460ab5fe736b7": {
+    "status": "ok",
+    "latency_ms": 6246,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.1,
+    "signal_types": [
+      "urgency_without_keywords"
+    ]
+  },
+  "51e35d95a54622fec1019fe9": {
+    "status": "ok",
+    "latency_ms": 2963,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.7,
+    "signal_types": []
+  },
+  "bcf7025001de8b3b089096a4": {
+    "status": "ok",
+    "latency_ms": 9215,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.6,
+    "signal_types": [
+      "suspicious_call_to_action",
+      "implausible_claims",
+      "fake_support",
+      "credential_harvesting_intent"
+    ]
+  },
+  "e488837b09f1582bd75d2740": {
+    "status": "ok",
+    "latency_ms": 6794,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.55,
+    "signal_types": [
+      "suspicious_call_to_action",
+      "authority_impersonation"
+    ]
+  },
+  "9e276c9679fa36becfc80466": {
+    "status": "ok",
+    "latency_ms": 8770,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.55,
+    "signal_types": [
+      "suspicious_call_to_action",
+      "urgency_without_keywords",
+      "authority_impersonation"
+    ]
+  }
+}
