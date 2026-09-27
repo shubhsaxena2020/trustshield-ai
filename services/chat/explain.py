@@ -630,7 +630,8 @@ def _remote_call_once(base_url: str, api_key: str, model: str, prompt: str, max_
         return _scrub_provider_output(payload["choices"][0]["message"]["content"], api_key)
 
 
-def _remote_transport(prompt: str, max_tokens: int = _REMOTE_MAX_TOKENS, system_prompt: str | None = None) -> str:
+def _remote_transport(prompt: str, max_tokens: int = _REMOTE_MAX_TOKENS, system_prompt: str | None = None,
+                      model: str | None = None) -> str:
     """OpenAI-compatible chat-completions call. Only reachable when TRUSTSHIELD_AI_BASE_URL and TRUSTSHIELD_AI_API_KEY are
     both explicitly configured; see docs/PROVIDER_CONFIGURATION.md. The key is read from the environment only and is never
     included in any response, log line, or the frontend bundle -- on error, only the exception TYPE is logged, never its
@@ -638,10 +639,14 @@ def _remote_transport(prompt: str, max_tokens: int = _REMOTE_MAX_TOKENS, system_
 
     Bounded retry: one retry for a transient 5xx only; no retry for 4xx (auth/rate-limit/bad-request errors will not
     succeed on retry and would only waste quota and double the user's wait).
+
+    `model` overrides TRUSTSHIELD_AI_MODEL for this call only -- lets ProviderChain address several models (e.g. a
+    Gemini primary and a Sonnet secondary) through the SAME base_url/api_key without duplicating any transport,
+    retry, budget, or SSRF-validation logic per tier.
     """
     base_url = os.environ["TRUSTSHIELD_AI_BASE_URL"].rstrip("/")
     api_key = os.environ["TRUSTSHIELD_AI_API_KEY"]
-    model = os.getenv("TRUSTSHIELD_AI_MODEL", "gpt-4o-mini")
+    model = model or os.getenv("TRUSTSHIELD_AI_MODEL", "gpt-4o-mini")
     _validate_base_url(base_url)  # raises ValueError, caught by the caller like any other transport failure -> fallback
     _acquire_remote_budget()  # raises RemoteProviderBudgetExceeded if the per-minute cap is hit -> fallback
     t0 = time.perf_counter()
@@ -716,11 +721,129 @@ class RemoteLLMProvider(ExplanationProvider):
         return self._generate_chat("off_topic", message, self.fallback.reply_off_topic(message))
 
 
+# ---- ProviderChain (Gemini migration): PRIMARY -> SECONDARY -> ... -> deterministic, added only after the primary
+# candidate actually passed docs/GEMINI_CONVERSATION_BENCHMARK_RESULTS.md's pre-registered selection criteria. -------------
+
+_CIRCUIT_FAILURE_THRESHOLD = 3
+_CIRCUIT_COOLDOWN_SECONDS = 60
+_circuit_state: dict[str, tuple[int, float]] = {}
+_CIRCUIT_LOCK = threading.Lock()
+
+
+def _circuit_open(label: str) -> bool:
+    """Simple, in-process, per-tier circuit breaker (item 22 of the Gemini migration brief): after
+    _CIRCUIT_FAILURE_THRESHOLD consecutive failures for one tier, skip it for _CIRCUIT_COOLDOWN_SECONDS rather than
+    keep hammering a broken route on every single request. Per-process state only -- restarting the process, or
+    running multiple worker processes, resets it independently; documented as a known limitation, not hidden."""
+    with _CIRCUIT_LOCK:
+        state = _circuit_state.get(label)
+        if not state:
+            return False
+        failures, opened_at = state
+        if failures < _CIRCUIT_FAILURE_THRESHOLD:
+            return False
+        if time.monotonic() - opened_at > _CIRCUIT_COOLDOWN_SECONDS:
+            del _circuit_state[label]
+            return False
+        return True
+
+
+def _circuit_record(label: str, success: bool) -> None:
+    with _CIRCUIT_LOCK:
+        if success:
+            _circuit_state.pop(label, None)
+        else:
+            failures, _ = _circuit_state.get(label, (0, 0.0))
+            _circuit_state[label] = (failures + 1, time.monotonic())
+
+
+class ProviderChain(ExplanationProvider):
+    """PRIMARY -> SECONDARY -> ... -> deterministic tertiary. Each remote tier is tried LAZILY: the next tier is only
+    invoked if the current one actually fails (exception, empty response, or a grounding violation) -- this is why
+    ProviderChain does not simply nest RemoteLLMProvider instances inside one another. RemoteLLMProvider always
+    eagerly computes ITS OWN hardcoded deterministic fallback and returns that on any failure, which would never give
+    a later remote tier (e.g. Sonnet as SECONDARY) a chance to answer -- ProviderChain owns the fallback decision
+    itself instead, generalizing RemoteLLMProvider's single-hop try/validate/fallback pattern to N hops.
+
+    Security results are never touched here -- this class, like RemoteLLMProvider, only ever produces conversational
+    explanation text; the authoritative analysis result is computed upstream and passed in unchanged (item 55).
+    """
+    name = "chain"
+
+    def __init__(self, tiers: list[tuple[str, Transport]], fallback: ExplanationProvider | None = None):
+        if not tiers:
+            raise ValueError("ProviderChain requires at least one remote tier")
+        self.tiers = tiers
+        self.fallback = fallback or DeterministicExplanationProvider()
+
+    def _try(self, build, violates, fallback_reply: Reply) -> Reply:
+        for label, transport in self.tiers:
+            if _circuit_open(label):
+                continue
+            try:
+                text = transport(build()).strip()
+            except Exception:
+                _circuit_record(label, success=False)
+                continue
+            if not text or violates(text):
+                _circuit_record(label, success=False)
+                continue
+            _circuit_record(label, success=True)
+            return Reply(text, fallback_reply.cited_evidence, provider=label)
+        return fallback_reply
+
+    def reply_for_analysis(self, analysis: ChatAnalysis) -> Reply:
+        return self.fallback.reply_for_analysis(analysis)
+
+    def reply_for_followup(self, intent: str, question: str, analysis: ChatAnalysis) -> Reply:
+        fallback_reply = self.fallback.reply_for_followup(intent, question, analysis)
+        return self._try(lambda: build_prompt(question, analysis), lambda t: grounding_violations(t, analysis),
+                         fallback_reply)
+
+    def reply_greeting(self, message: str) -> Reply:
+        fallback_reply = self.fallback.reply_greeting(message)
+        return self._try(lambda: build_chat_prompt("greeting", message), chat_grounding_violations, fallback_reply)
+
+    def reply_cyber_qa(self, question: str) -> Reply:
+        fallback_reply = self.fallback.reply_cyber_qa(question)
+        return self._try(lambda: build_chat_prompt("cyber_qa", question), chat_grounding_violations, fallback_reply)
+
+    def reply_product_qa(self, question: str) -> Reply:
+        fallback_reply = self.fallback.reply_product_qa(question)
+        return self._try(lambda: build_chat_prompt("product_qa", question), chat_grounding_violations, fallback_reply)
+
+    def reply_off_topic(self, message: str) -> Reply:
+        fallback_reply = self.fallback.reply_off_topic(message)
+        return self._try(lambda: build_chat_prompt("off_topic", message), chat_grounding_violations, fallback_reply)
+
+
+def _model_bound_transport(model: str) -> Transport:
+    """A Transport closed over a specific model, reusing _remote_transport's existing budget/concurrency/retry/
+    SSRF-validated logic unchanged -- no per-tier duplication of any of that (item 23)."""
+    def transport(prompt: str, max_tokens: int = _REMOTE_MAX_TOKENS, system_prompt: str | None = None) -> str:
+        return _remote_transport(prompt, max_tokens=max_tokens, system_prompt=system_prompt, model=model)
+    return transport
+
+
 def get_provider() -> ExplanationProvider:
     """TRUSTSHIELD_AI_PROVIDER selects the provider ('remote' | 'ollama' | 'deterministic', default 'deterministic'). Falls
-    back to the legacy TRUSTSHIELD_EXPLANATION_PROVIDER name for compatibility with existing deployments/config."""
+    back to the legacy TRUSTSHIELD_EXPLANATION_PROVIDER name for compatibility with existing deployments/config.
+
+    When TRUSTSHIELD_AI_PRIMARY_MODEL is also set (alongside the existing remote config), 'remote' builds a
+    ProviderChain instead of a single RemoteLLMProvider: PRIMARY (TRUSTSHIELD_AI_PRIMARY_MODEL) -> SECONDARY
+    (TRUSTSHIELD_AI_SECONDARY_MODEL, if also set) -> deterministic. Both tiers share the same
+    TRUSTSHIELD_AI_BASE_URL/_API_KEY -- no duplicated credentials (item 23). Omitting TRUSTSHIELD_AI_PRIMARY_MODEL
+    preserves the exact pre-existing single-provider behavior (TRUSTSHIELD_AI_MODEL, one RemoteLLMProvider) --
+    nothing changes for a deployment that hasn't opted into the chain."""
     name = os.getenv("TRUSTSHIELD_AI_PROVIDER", os.getenv("TRUSTSHIELD_EXPLANATION_PROVIDER", "deterministic")).strip().lower()
     strict = os.getenv("TRUSTSHIELD_ENV", "development").strip().lower() in {"staging", "production"}
+    primary_model = os.getenv("TRUSTSHIELD_AI_PRIMARY_MODEL", "").strip()
+    if name == "remote" and os.getenv("TRUSTSHIELD_AI_BASE_URL") and os.getenv("TRUSTSHIELD_AI_API_KEY") and primary_model:
+        tiers = [("primary", _model_bound_transport(primary_model))]
+        secondary_model = os.getenv("TRUSTSHIELD_AI_SECONDARY_MODEL", "").strip()
+        if secondary_model:
+            tiers.append(("secondary", _model_bound_transport(secondary_model)))
+        return ProviderChain(tiers)
     if name == "remote" and os.getenv("TRUSTSHIELD_AI_BASE_URL") and os.getenv("TRUSTSHIELD_AI_API_KEY"):
         return RemoteLLMProvider()  # allowed in strict/production: it requires an operator-configured, explicit key
     if name == "ollama" and not strict:

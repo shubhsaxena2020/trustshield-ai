@@ -26,7 +26,14 @@ from pydantic import BaseModel, Field, ValidationError, field_validator
 _log = logging.getLogger("trustshield.semantic_analyst")
 
 PROMPT_VERSION = "semantic-v1"
-SEMANTIC_MAX_TOKENS = 900  # a structured multi-signal JSON object needs more room than a short conversational reply
+# Found running the Gemini-migration semantic benchmark: Gemini 3 models (via this 9Router route) spend roughly
+# 850 hidden "reasoning" tokens per call BEFORE producing any visible output, and completion_tokens_details.
+# reasoning_tokens counts against the SAME max_tokens budget as the visible response. 900 (tuned against Sonnet,
+# which doesn't exhibit this behavior) left as few as 30-50 tokens for the actual JSON, truncating it on 61-81% of
+# calls (confirmed via a raw finish_reason="max_tokens" probe). 2400 gives Gemini's ~850-token reasoning overhead
+# plus a comfortable output budget, and cannot regress Sonnet (which was already complete well under 900 -- a
+# higher ceiling can only prevent truncation, never newly cause it, for a model that wasn't hitting the old one).
+SEMANTIC_MAX_TOKENS = 2400
 DEFAULT_MODEL = "gpt-4o-mini"  # single source of truth -- scripts/llm_semantic_pilot.py's cache key must use the same
                               # default the live path uses, or a cache entry keyed on a stale/mismatched default model
                               # string could be silently reused after the code's real default model changes.
