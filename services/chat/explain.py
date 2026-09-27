@@ -585,12 +585,12 @@ def _scrub_provider_output(text: str, api_key: str) -> str:
     return text.replace(api_key, "[REDACTED]") if api_key and api_key in text else text
 
 
-def _remote_call_once(base_url: str, api_key: str, model: str, prompt: str) -> str:
+def _remote_call_once(base_url: str, api_key: str, model: str, prompt: str, max_tokens: int = _REMOTE_MAX_TOKENS) -> str:
     # stream MUST be explicit: some OpenAI-compatible routers (observed with the local 9Router setup this was built and
     # tested against) return an SSE stream by default even without "stream": true in the request, which is not valid JSON
     # and would otherwise silently fail every single call.
     body = json.dumps({"model": model, "messages": [{"role": "user", "content": prompt}], "temperature": 0.1,
-                       "max_tokens": _REMOTE_MAX_TOKENS, "stream": False}).encode()
+                       "max_tokens": max_tokens, "stream": False}).encode()
     request = urllib.request.Request(f"{base_url}/chat/completions", data=body,
                                      headers={"Content-Type": "application/json", "Authorization": f"Bearer {api_key}"})
     with urllib.request.urlopen(request, timeout=_REMOTE_TIMEOUT_SECONDS) as response:  # noqa: S310 (validated by _validate_base_url)
@@ -598,7 +598,7 @@ def _remote_call_once(base_url: str, api_key: str, model: str, prompt: str) -> s
         return _scrub_provider_output(payload["choices"][0]["message"]["content"], api_key)
 
 
-def _remote_transport(prompt: str) -> str:
+def _remote_transport(prompt: str, max_tokens: int = _REMOTE_MAX_TOKENS) -> str:
     """OpenAI-compatible chat-completions call. Only reachable when TRUSTSHIELD_AI_BASE_URL and TRUSTSHIELD_AI_API_KEY are
     both explicitly configured; see docs/PROVIDER_CONFIGURATION.md. The key is read from the environment only and is never
     included in any response, log line, or the frontend bundle -- on error, only the exception TYPE is logged, never its
@@ -620,7 +620,7 @@ def _remote_transport(prompt: str) -> str:
     try:
         for attempts in (1, 2):  # noqa: B007 (used after the loop for logging)
             try:
-                text = _remote_call_once(base_url, api_key, model, prompt)
+                text = _remote_call_once(base_url, api_key, model, prompt, max_tokens)
                 _provider_log.info("provider=remote model=%s status=success latency_ms=%d attempts=%d",
                                    model, round((time.perf_counter() - t0) * 1000), attempts)
                 return text

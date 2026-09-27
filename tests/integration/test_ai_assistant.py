@@ -299,7 +299,7 @@ def test_remote_provider_bounded_retry_no_retry_on_4xx(monkeypatch):
     monkeypatch.setenv("TRUSTSHIELD_AI_API_KEY", "NOT-A-REAL-KEY-FIXTURE-VALUE")
     calls = []
 
-    def fake_call(base_url, api_key, model, prompt):
+    def fake_call(base_url, api_key, model, prompt, max_tokens=300):
         calls.append(1)
         import urllib.error
         raise urllib.error.HTTPError(base_url, 401, "unauthorized", None, None)
