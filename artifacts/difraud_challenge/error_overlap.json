@@ -1,0 +1,12 @@
+{
+  "n": 200,
+  "model": "ag/claude-sonnet-4-6",
+  "v3_false_negatives": 20,
+  "semantic_false_negatives": 55,
+  "v3_false_positives": 3,
+  "semantic_false_positives": 0,
+  "semantic_catches_fraud_v3_missed": 4,
+  "v3_catches_fraud_semantic_missed": 39,
+  "both_miss_same_fraud": 16,
+  "note": "A small complementary catch exists (semantic flags some fraud v3 misses), but v3 catches far more of what the semantic analyst misses -- on this genuinely held-out source, v3 alone materially outperforms the semantic analyst alone; the complementary signal is real but too small to justify fusion on this evidence (see docs/HYBRID_V4_SELECTION_POLICY.md's gate decision)."
+}

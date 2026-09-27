@@ -1,0 +1,66 @@
+{
+  "protocol": "docs/LLM_SEMANTIC_BENCHMARK_PROTOCOL.md#protocol-v2-addendum",
+  "model": "ag/claude-sonnet-4-6",
+  "source": "difraud_sms_non_overlapping",
+  "source_available_fraud": 762,
+  "source_available_legit": 917,
+  "challenge_size": 200,
+  "v3": {
+    "n": 200,
+    "n_pos": 100,
+    "n_neg": 100,
+    "tp": 80,
+    "fn": 20,
+    "tn": 97,
+    "fp": 3,
+    "recall": 0.8,
+    "recall_wilson_95": [
+      0.7112,
+      0.8666
+    ],
+    "specificity": 0.97,
+    "specificity_wilson_95": [
+      0.9155,
+      0.9897
+    ],
+    "challenge_sample_precision": 0.9639,
+    "challenge_sample_precision_note": "computed on a 50/50 stratified sample -- NOT real-world PPV",
+    "f1": 0.8743,
+    "balanced_accuracy": 0.885,
+    "reportable": true
+  },
+  "semantic_analyst": {
+    "n": 200,
+    "n_pos": 100,
+    "n_neg": 100,
+    "tp": 45,
+    "fn": 55,
+    "tn": 100,
+    "fp": 0,
+    "recall": 0.45,
+    "recall_wilson_95": [
+      0.3561,
+      0.5476
+    ],
+    "specificity": 1.0,
+    "specificity_wilson_95": [
+      0.963,
+      1.0
+    ],
+    "challenge_sample_precision": 1.0,
+    "challenge_sample_precision_note": "computed on a 50/50 stratified sample -- NOT real-world PPV",
+    "f1": 0.6207,
+    "balanced_accuracy": 0.725,
+    "reportable": true
+  },
+  "semantic_status_distribution": {
+    "invented_facts": 33,
+    "invalid_schema": 1,
+    "ok": 166
+  },
+  "semantic_latency_ms": {
+    "median": 5935.5,
+    "p90": 9281.3,
+    "n_live_calls_this_run": 200
+  }
+}
