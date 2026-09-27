@@ -57,3 +57,22 @@ def test_empty_message():
 def test_ambiguous_short_benign_text_defaults_to_analysis_not_chat():
     # deliberately ambiguous: not a greeting phrase, not a question pattern -> safe default is still analysis
     assert go("see you tomorrow at the office") == "analyze_text"
+
+
+# ---- self-discovered bug (found via live 9Router testing): "Explain that simply" was hijacked by the generic
+# education `^explain\b` pattern and lost its analysis context -----------------------------------------------------------
+
+@pytest.mark.parametrize("message", [
+    "Explain that in very simple words.",
+    "Explain it to someone who isn't technical.",
+    "Can you make that shorter?",
+    "Give me the three most important reasons.",
+    "Why does that matter?",
+])
+def test_contextual_rephrase_requests_stay_a_followup(message):
+    assert go(message, has_context=True) == "follow_up_analysis"
+
+
+def test_contextual_rephrase_pattern_does_not_hijack_plain_education_questions():
+    assert go("Explain how UPI fraud works", has_context=True) == "general_cyber_qa"
+    assert go("What is phishing?", has_context=True) == "general_cyber_qa"

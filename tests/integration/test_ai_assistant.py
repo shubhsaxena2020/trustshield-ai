@@ -1,5 +1,7 @@
 """Conversational AI assistant: greeting/education/product Q&A, hallucination and prompt-injection regression suites,
 provider fallback, and end-to-end response_type routing. Extends tests/integration/test_chat_api.py."""
+import json
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -238,3 +240,80 @@ def test_find002_analysis_bypasses_are_caught():
 def test_find003_scam_shaped_chat_questions_still_get_analysed(message):
     d = chat(message).json()
     assert d["response_type"] == "analysis" and d["analysis"] is not None
+
+
+# ---- self-discovered bug: honest negated capability disclaimers were wrongly flagged as violations (found via live 9Router test) ---
+
+def test_honest_negated_capability_disclaimer_is_not_a_violation():
+    a = ChatAnalysis.model_validate(chat("URGENT your bank account is suspended verify at http://sbi-fake.xyz/login").json()["analysis"])
+    assert not grounding_violations("No live webpage inspection or external reputation lookup was performed, so the full picture is not confirmed.", a)
+    assert not grounding_violations("I did not open the website, and no reputation check was run.", a)
+    assert grounding_violations("I opened the website and reputation lookup confirmed it is clean.", a)
+
+
+def test_chat_honest_negated_capability_disclaimer_is_not_a_violation():
+    assert not chat_grounding_violations("I have not checked reputation or opened any website.")
+    assert chat_grounding_violations("I checked reputation databases and they are clean.")
+
+
+# ---- 9Router remote provider: secret handling and payload minimization ----------------------------------------------------
+
+def test_remote_provider_never_returns_the_api_key(monkeypatch):
+    monkeypatch.setenv("TRUSTSHIELD_AI_BASE_URL", "http://127.0.0.1:20128/v1")
+    monkeypatch.setenv("TRUSTSHIELD_AI_API_KEY", "NOT-A-REAL-KEY-FIXTURE-VALUE")
+    monkeypatch.setenv("TRUSTSHIELD_AI_PROVIDER", "remote")
+    d = chat("yo").json()
+    body = json.dumps(d)
+    assert "NOT-A-REAL-KEY-FIXTURE-VALUE" not in body
+    assert "Authorization" not in body and "authorization" not in body.lower().replace("author", "")
+
+
+def test_remote_transport_sends_stream_false_explicitly():
+    """9Router (and likely other OpenAI-compatible routers) returns an SSE stream by default without this -- confirmed
+    against the real local 9Router setup this was built and tested against."""
+    from services.chat.explain import _remote_call_once
+    import inspect
+    body = inspect.getsource(_remote_call_once)
+    assert '"stream": False' in body
+
+
+def test_redact_secrets_masks_otp_cvv_password_and_long_tokens():
+    from services.chat.explain import redact_secrets
+    assert "123456" not in redact_secrets("My OTP is 123456, please help")
+    assert "445" not in redact_secrets("the CVV is 445 on my card")
+    assert "hunter2" not in redact_secrets("password: hunter2")
+    assert "4111111111111111" not in redact_secrets("card number 4111111111111111 was charged")
+    fake_token = "eyJhbGciOiJIUzI1NiJ9" + "abcdefghijklmnop"  # split so this fixture itself doesn't look like a real credential
+    assert fake_token not in redact_secrets("token=" + fake_token)
+
+
+def test_redact_secrets_does_not_mangle_ordinary_text():
+    from services.chat.explain import redact_secrets
+    text = "Your delivery will arrive tomorrow at 3pm, thanks for your order."
+    assert redact_secrets(text) == text
+
+
+def test_remote_provider_bounded_retry_no_retry_on_4xx(monkeypatch):
+    """No retry on a 401/403/429 -- retrying an auth or rate-limit error wastes quota and cannot succeed."""
+    monkeypatch.setenv("TRUSTSHIELD_AI_BASE_URL", "http://127.0.0.1:20128/v1")
+    monkeypatch.setenv("TRUSTSHIELD_AI_API_KEY", "NOT-A-REAL-KEY-FIXTURE-VALUE")
+    calls = []
+
+    def fake_call(base_url, api_key, model, prompt):
+        calls.append(1)
+        import urllib.error
+        raise urllib.error.HTTPError(base_url, 401, "unauthorized", None, None)
+
+    import services.chat.explain as explain_module
+    from services.chat.explain import _remote_transport
+    orig = explain_module._remote_call_once
+    explain_module._remote_call_once = fake_call
+    try:
+        try:
+            with pytest.raises(Exception):
+                _remote_transport("x")
+        finally:
+            pass
+    finally:
+        explain_module._remote_call_once = orig
+    assert len(calls) == 1  # exactly one attempt, no retry on a 4xx
