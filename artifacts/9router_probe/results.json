@@ -1,0 +1,382 @@
+[
+  {
+    "model": "ds/deepseek-v4-pro",
+    "verdict": "CHAT_CAPABLE",
+    "all_calls_ok": true,
+    "provider_notice_detected": false,
+    "route_ok_response_preview": "ROUTE_OK",
+    "cyber_qa_response_preview": "Phishing is a type of cyberattack in which attackers impersonate trusted entities to trick victims into revealing sensitive information, such as passw",
+    "strict_json_valid": true,
+    "strict_json_response_preview": "{\"ok\": true}",
+    "latencies_ms": {
+      "route_ok": 1306,
+      "cyber_qa": 1802,
+      "strict_json": 1291
+    },
+    "errors": {}
+  },
+  {
+    "model": "ds/deepseek-v4-pro-max",
+    "verdict": "CHAT_CAPABLE",
+    "all_calls_ok": true,
+    "provider_notice_detected": false,
+    "route_ok_response_preview": "ROUTE_OK",
+    "cyber_qa_response_preview": "Phishing is a type of cyberattack in which attackers impersonate trusted entities to trick victims into revealing sensitive information, such as passw",
+    "strict_json_valid": true,
+    "strict_json_response_preview": "{\"ok\": true}",
+    "latencies_ms": {
+      "route_ok": 1257,
+      "cyber_qa": 2408,
+      "strict_json": 1207
+    },
+    "errors": {}
+  },
+  {
+    "model": "ds/deepseek-v4-pro-none",
+    "verdict": "CHAT_CAPABLE",
+    "all_calls_ok": true,
+    "provider_notice_detected": false,
+    "route_ok_response_preview": "ROUTE_OK",
+    "cyber_qa_response_preview": "Phishing is a cyberattack in which attackers impersonate trusted entities through emails, messages, or websites to trick individuals into revealing se",
+    "strict_json_valid": true,
+    "strict_json_response_preview": "{\"ok\": true}",
+    "latencies_ms": {
+      "route_ok": 1183,
+      "cyber_qa": 2118,
+      "strict_json": 1514
+    },
+    "errors": {}
+  },
+  {
+    "model": "ds/deepseek-v4-flash",
+    "verdict": "CHAT_CAPABLE",
+    "all_calls_ok": true,
+    "provider_notice_detected": false,
+    "route_ok_response_preview": "ROUTE_OK",
+    "cyber_qa_response_preview": "Phishing is a cyberattack in which criminals impersonate a trusted entity to trick people into revealing sensitive information such as passwords or cr",
+    "strict_json_valid": true,
+    "strict_json_response_preview": "{\"ok\": true}",
+    "latencies_ms": {
+      "route_ok": 1019,
+      "cyber_qa": 773,
+      "strict_json": 774
+    },
+    "errors": {}
+  },
+  {
+    "model": "ds/deepseek-chat",
+    "verdict": "CHAT_CAPABLE",
+    "all_calls_ok": true,
+    "provider_notice_detected": false,
+    "route_ok_response_preview": "ROUTE_OK",
+    "cyber_qa_response_preview": "Phishing is a cyberattack that uses fraudulent emails, messages, or websites to trick people into revealing sensitive information like passwords or cr",
+    "strict_json_valid": true,
+    "strict_json_response_preview": "{\"ok\": true}",
+    "latencies_ms": {
+      "route_ok": 485,
+      "cyber_qa": 632,
+      "strict_json": 828
+    },
+    "errors": {}
+  },
+  {
+    "model": "ds/deepseek-reasoner",
+    "verdict": "CHAT_CAPABLE",
+    "all_calls_ok": true,
+    "provider_notice_detected": false,
+    "route_ok_response_preview": "ROUTE_OK",
+    "cyber_qa_response_preview": "Phishing is a fraudulent attempt, often via email or fake websites, to trick people into revealing sensitive information such as passwords, credit car",
+    "strict_json_valid": true,
+    "strict_json_response_preview": "{\"ok\": true}",
+    "latencies_ms": {
+      "route_ok": 1175,
+      "cyber_qa": 1144,
+      "strict_json": 542
+    },
+    "errors": {}
+  },
+  {
+    "model": "ag/gemini-3-flash-agent",
+    "verdict": "REJECTED",
+    "all_calls_ok": true,
+    "provider_notice_detected": true,
+    "route_ok_response_preview": "Gemini 3.5 Flash is no longer available. Please switch to Gemini 3.7 Flash in th",
+    "cyber_qa_response_preview": "Gemini 3.5 Flash is no longer available. Please switch to Gemini 3.7 Flash in the latest version of Antigravity.",
+    "strict_json_valid": false,
+    "strict_json_response_preview": "Gemini 3.5 Flash is no longer available. Please switch to Gemini 3.7 Flash in the latest version of Antigravity.",
+    "latencies_ms": {
+      "route_ok": 1138,
+      "cyber_qa": 1025,
+      "strict_json": 1026
+    },
+    "errors": {}
+  },
+  {
+    "model": "ag/gemini-3.5-flash-low",
+    "verdict": "REJECTED",
+    "all_calls_ok": true,
+    "provider_notice_detected": true,
+    "route_ok_response_preview": "Gemini 3.5 Flash is no longer available. Please switch to Gemini 3.7 Flash in th",
+    "cyber_qa_response_preview": "Gemini 3.5 Flash is no longer available. Please switch to Gemini 3.7 Flash in the latest version of Antigravity.",
+    "strict_json_valid": false,
+    "strict_json_response_preview": "Gemini 3.5 Flash is no longer available. Please switch to Gemini 3.7 Flash in the latest version of Antigravity.",
+    "latencies_ms": {
+      "route_ok": 1024,
+      "cyber_qa": 1024,
+      "strict_json": 987
+    },
+    "errors": {}
+  },
+  {
+    "model": "ag/gemini-3.5-flash-extra-low",
+    "verdict": "REJECTED",
+    "all_calls_ok": true,
+    "provider_notice_detected": true,
+    "route_ok_response_preview": "Gemini 3.5 Flash is no longer available. Please switch to Gemini 3.7 Flash in th",
+    "cyber_qa_response_preview": "Gemini 3.5 Flash is no longer available. Please switch to Gemini 3.7 Flash in the latest version of Antigravity.",
+    "strict_json_valid": false,
+    "strict_json_response_preview": "Gemini 3.5 Flash is no longer available. Please switch to Gemini 3.7 Flash in the latest version of Antigravity.",
+    "latencies_ms": {
+      "route_ok": 1005,
+      "cyber_qa": 1080,
+      "strict_json": 1024
+    },
+    "errors": {}
+  },
+  {
+    "model": "ag/gemini-pro-agent",
+    "verdict": "CHAT_CAPABLE",
+    "all_calls_ok": true,
+    "provider_notice_detected": false,
+    "route_ok_response_preview": "ROUTE_OK",
+    "cyber_qa_response_preview": "Phishing is a type",
+    "strict_json_valid": false,
+    "strict_json_response_preview": "{\"ok\":",
+    "latencies_ms": {
+      "route_ok": 5119,
+      "cyber_qa": 4507,
+      "strict_json": 4559
+    },
+    "errors": {}
+  },
+  {
+    "model": "ag/gemini-3.1-pro-low",
+    "verdict": "CHAT_CAPABLE",
+    "all_calls_ok": true,
+    "provider_notice_detected": false,
+    "route_ok_response_preview": "ROUTE_OK",
+    "cyber_qa_response_preview": "Phishing is a cyber",
+    "strict_json_valid": true,
+    "strict_json_response_preview": "{\"ok\": true}",
+    "latencies_ms": {
+      "route_ok": 5101,
+      "cyber_qa": 4879,
+      "strict_json": 4505
+    },
+    "errors": {}
+  },
+  {
+    "model": "ag/claude-sonnet-4-6",
+    "verdict": "CHAT_CAPABLE",
+    "all_calls_ok": true,
+    "provider_notice_detected": false,
+    "route_ok_response_preview": "ROUTE_OK",
+    "cyber_qa_response_preview": "Phishing is a cyberattack where malicious actors deceive individuals into revealing sensitive information (such as passwords or credit card numbers) b",
+    "strict_json_valid": true,
+    "strict_json_response_preview": "{\"ok\": true}",
+    "latencies_ms": {
+      "route_ok": 2527,
+      "cyber_qa": 2596,
+      "strict_json": 3681
+    },
+    "errors": {}
+  },
+  {
+    "model": "ag/claude-opus-4-6-thinking",
+    "verdict": "CHAT_CAPABLE",
+    "all_calls_ok": true,
+    "provider_notice_detected": false,
+    "route_ok_response_preview": "ROUTE_OK",
+    "cyber_qa_response_preview": "Phishing is a type of social engineering cyberattack where an attacker impersonates a trusted entity\u2014typically via email, text message, or a fake webs",
+    "strict_json_valid": true,
+    "strict_json_response_preview": "{\"ok\": true}",
+    "latencies_ms": {
+      "route_ok": 1518,
+      "cyber_qa": 3052,
+      "strict_json": 2100
+    },
+    "errors": {}
+  },
+  {
+    "model": "ag/gpt-oss-120b-medium",
+    "verdict": "CHAT_CAPABLE",
+    "all_calls_ok": true,
+    "provider_notice_detected": false,
+    "route_ok_response_preview": "ROUTE_OK",
+    "cyber_qa_response_preview": "Phishing is a fraudulent technique where attackers impersonate trustworthy entities\u2014typically via email, messages, or websites\u2014to trick individuals in",
+    "strict_json_valid": true,
+    "strict_json_response_preview": "{\"ok\": true}",
+    "latencies_ms": {
+      "route_ok": 2752,
+      "cyber_qa": 1436,
+      "strict_json": 1609
+    },
+    "errors": {}
+  },
+  {
+    "model": "ag/gemini-3-flash",
+    "verdict": "CHAT_CAPABLE",
+    "all_calls_ok": true,
+    "provider_notice_detected": false,
+    "route_ok_response_preview": "ROUTE_OK",
+    "cyber_qa_response_preview": "Phishing is a cyber attack where fraudulent",
+    "strict_json_valid": true,
+    "strict_json_response_preview": "{\"ok\": true}",
+    "latencies_ms": {
+      "route_ok": 1290,
+      "cyber_qa": 3497,
+      "strict_json": 1426
+    },
+    "errors": {}
+  },
+  {
+    "model": "gc/gemini-3.1-pro-preview",
+    "verdict": "REJECTED",
+    "all_calls_ok": false,
+    "provider_notice_detected": false,
+    "route_ok_response_preview": "",
+    "cyber_qa_response_preview": "",
+    "strict_json_valid": false,
+    "strict_json_response_preview": "",
+    "latencies_ms": {
+      "route_ok": 2322,
+      "cyber_qa": 14,
+      "strict_json": 39
+    },
+    "errors": {
+      "route_ok": "HTTPError:403",
+      "cyber_qa": "HTTPError:403",
+      "strict_json": "HTTPError:403"
+    }
+  },
+  {
+    "model": "gc/gemini-3-pro-preview",
+    "verdict": "REJECTED",
+    "all_calls_ok": false,
+    "provider_notice_detected": false,
+    "route_ok_response_preview": "",
+    "cyber_qa_response_preview": "",
+    "strict_json_valid": false,
+    "strict_json_response_preview": "",
+    "latencies_ms": {
+      "route_ok": 2107,
+      "cyber_qa": 27,
+      "strict_json": 8
+    },
+    "errors": {
+      "route_ok": "HTTPError:403",
+      "cyber_qa": "HTTPError:403",
+      "strict_json": "HTTPError:403"
+    }
+  },
+  {
+    "model": "gc/gemini-3-flash-preview",
+    "verdict": "REJECTED",
+    "all_calls_ok": false,
+    "provider_notice_detected": false,
+    "route_ok_response_preview": "",
+    "cyber_qa_response_preview": "",
+    "strict_json_valid": false,
+    "strict_json_response_preview": "",
+    "latencies_ms": {
+      "route_ok": 2026,
+      "cyber_qa": 33,
+      "strict_json": 31
+    },
+    "errors": {
+      "route_ok": "HTTPError:403",
+      "cyber_qa": "HTTPError:403",
+      "strict_json": "HTTPError:403"
+    }
+  },
+  {
+    "model": "gc/gemini-3.1-flash-lite-preview",
+    "verdict": "REJECTED",
+    "all_calls_ok": false,
+    "provider_notice_detected": false,
+    "route_ok_response_preview": "",
+    "cyber_qa_response_preview": "",
+    "strict_json_valid": false,
+    "strict_json_response_preview": "",
+    "latencies_ms": {
+      "route_ok": 2105,
+      "cyber_qa": 38,
+      "strict_json": 11
+    },
+    "errors": {
+      "route_ok": "HTTPError:403",
+      "cyber_qa": "HTTPError:403",
+      "strict_json": "HTTPError:403"
+    }
+  },
+  {
+    "model": "gc/gemini-2.5-pro",
+    "verdict": "REJECTED",
+    "all_calls_ok": false,
+    "provider_notice_detected": false,
+    "route_ok_response_preview": "",
+    "cyber_qa_response_preview": "",
+    "strict_json_valid": false,
+    "strict_json_response_preview": "",
+    "latencies_ms": {
+      "route_ok": 1800,
+      "cyber_qa": 12,
+      "strict_json": 7
+    },
+    "errors": {
+      "route_ok": "HTTPError:403",
+      "cyber_qa": "HTTPError:403",
+      "strict_json": "HTTPError:403"
+    }
+  },
+  {
+    "model": "gc/gemini-2.5-flash",
+    "verdict": "REJECTED",
+    "all_calls_ok": false,
+    "provider_notice_detected": false,
+    "route_ok_response_preview": "",
+    "cyber_qa_response_preview": "",
+    "strict_json_valid": false,
+    "strict_json_response_preview": "",
+    "latencies_ms": {
+      "route_ok": 2146,
+      "cyber_qa": 5,
+      "strict_json": 36
+    },
+    "errors": {
+      "route_ok": "HTTPError:403",
+      "cyber_qa": "HTTPError:403",
+      "strict_json": "HTTPError:403"
+    }
+  },
+  {
+    "model": "gc/gemini-2.5-flash-lite",
+    "verdict": "REJECTED",
+    "all_calls_ok": false,
+    "provider_notice_detected": false,
+    "route_ok_response_preview": "",
+    "cyber_qa_response_preview": "",
+    "strict_json_valid": false,
+    "strict_json_response_preview": "",
+    "latencies_ms": {
+      "route_ok": 1784,
+      "cyber_qa": 12,
+      "strict_json": 13
+    },
+    "errors": {
+      "route_ok": "HTTPError:403",
+      "cyber_qa": "HTTPError:403",
+      "strict_json": "HTTPError:403"
+    }
+  }
+]
