@@ -7,8 +7,8 @@ from fastapi.testclient import TestClient
 
 from services.api.main import app
 from services.chat.contract import ChatAnalysis
-from services.chat.explain import (DeterministicExplanationProvider, OllamaExplanationProvider, RemoteLLMProvider,
-                                   chat_grounding_violations, get_provider, grounding_violations)
+from services.chat.explain import (DeterministicExplanationProvider, OllamaExplanationProvider, ProviderChain,
+                                   RemoteLLMProvider, chat_grounding_violations, get_provider, grounding_violations)
 
 client = TestClient(app)
 PHISH = "URGENT: your bank account is suspended. Verify now at http://secure-bank-login.example-verify.top/login or lose access."
@@ -444,3 +444,120 @@ def test_find008_remote_call_budget_is_enforced():
     with pytest.raises(RemoteProviderBudgetExceeded):
         _acquire_remote_budget()
     _REMOTE_CALL_TIMES.clear()
+
+
+# ---- ProviderChain: PRIMARY -> SECONDARY -> deterministic, built for the Gemini migration --------------------------------
+
+def _clear_circuits():
+    from services.chat.explain import _circuit_state
+    _circuit_state.clear()
+
+
+def test_chain_uses_primary_when_it_succeeds():
+    _clear_circuits()
+    chain = ProviderChain([("primary", lambda p: "Phishing tricks people into revealing sensitive information."),
+                           ("secondary", lambda p: "should never be reached")])
+    reply = chain.reply_cyber_qa("What is phishing?")
+    assert reply.provider == "primary"
+
+
+def test_chain_falls_through_to_secondary_when_primary_raises():
+    _clear_circuits()
+    def primary(_):
+        raise ConnectionError("primary down")
+    chain = ProviderChain([("primary", primary),
+                           ("secondary", lambda p: "Phishing tricks people into revealing sensitive information.")])
+    reply = chain.reply_cyber_qa("What is phishing?")
+    assert reply.provider == "secondary"
+
+
+def test_chain_falls_through_to_secondary_when_primary_violates_grounding():
+    _clear_circuits()
+    chain = ProviderChain([("primary", lambda p: "This is 100% safe, guaranteed."),  # a grounding violation
+                           ("secondary", lambda p: "Phishing tricks people into revealing sensitive information.")])
+    reply = chain.reply_cyber_qa("What is phishing?")
+    assert reply.provider == "secondary"
+
+
+def test_chain_falls_through_to_deterministic_when_every_remote_tier_fails():
+    _clear_circuits()
+    def always_fails(_):
+        raise ConnectionError("down")
+    chain = ProviderChain([("primary", always_fails), ("secondary", always_fails)])
+    reply = chain.reply_cyber_qa("What is phishing?")
+    assert reply.provider == "deterministic"
+    assert reply.text  # the deterministic tier always has something to say
+
+
+def test_chain_never_calls_secondary_when_primary_succeeds():
+    """Lazy evaluation: secondary must not be invoked at all if primary already answered -- this is the whole reason
+    ProviderChain doesn't just nest RemoteLLMProvider instances (which would eagerly compute a fallback every time)."""
+    _clear_circuits()
+    calls = []
+
+    def secondary(_):
+        calls.append(1)
+        return "Phishing tricks people into revealing sensitive information."
+    chain = ProviderChain([("primary", lambda p: "Phishing tricks people into revealing sensitive information."),
+                           ("secondary", secondary)])
+    chain.reply_cyber_qa("What is phishing?")
+    assert calls == []
+
+
+def test_chain_circuit_breaker_skips_a_repeatedly_failing_tier():
+    _clear_circuits()
+    from services.chat.explain import _CIRCUIT_FAILURE_THRESHOLD
+    primary_calls = []
+
+    def primary(_):
+        primary_calls.append(1)
+        raise ConnectionError("down")
+    chain = ProviderChain([("primary", primary),
+                           ("secondary", lambda p: "Phishing tricks people into revealing sensitive information.")])
+    for _ in range(_CIRCUIT_FAILURE_THRESHOLD + 2):
+        chain.reply_cyber_qa("What is phishing?")
+    # after the threshold, primary should stop being called at all (circuit open) -- fewer calls than iterations
+    assert len(primary_calls) == _CIRCUIT_FAILURE_THRESHOLD
+    _clear_circuits()
+
+
+def test_chain_circuit_recovers_after_a_success():
+    _clear_circuits()
+    from services.chat.explain import _circuit_record
+    _circuit_record("primary", success=False)
+    _circuit_record("primary", success=False)
+    _circuit_record("primary", success=False)  # now at threshold, circuit "open" once cooldown checked
+    chain = ProviderChain([("primary", lambda p: "Phishing tricks people into revealing sensitive information.")])
+    # a fresh success elsewhere resets the counter for that label -- verify the bookkeeping function itself
+    _circuit_record("primary", success=True)
+    from services.chat.explain import _circuit_state
+    assert "primary" not in _circuit_state
+    _clear_circuits()
+
+
+def test_chain_reply_for_analysis_delegates_to_fallback_only():
+    """reply_for_analysis is never an LLM call at all (see RemoteLLMProvider's identical behavior) -- the analysis
+    result itself is never touched by any provider tier (item 55)."""
+    _clear_circuits()
+    chain = ProviderChain([("primary", lambda p: "should never be called")])
+    a = ChatAnalysis.model_validate(chat(PHISH).json()["analysis"])
+    reply = chain.reply_for_analysis(a)
+    assert reply.provider == "deterministic"
+
+
+def test_chain_requires_at_least_one_tier():
+    with pytest.raises(ValueError):
+        ProviderChain([])
+
+
+def test_get_provider_builds_a_chain_only_when_primary_model_is_configured(monkeypatch):
+    monkeypatch.setenv("TRUSTSHIELD_AI_PROVIDER", "remote")
+    monkeypatch.setenv("TRUSTSHIELD_AI_BASE_URL", "http://127.0.0.1:20128/v1")
+    monkeypatch.setenv("TRUSTSHIELD_AI_API_KEY", "test-key")
+    monkeypatch.delenv("TRUSTSHIELD_AI_PRIMARY_MODEL", raising=False)
+    assert isinstance(get_provider(), RemoteLLMProvider)  # unchanged pre-existing behavior when unset
+    monkeypatch.setenv("TRUSTSHIELD_AI_PRIMARY_MODEL", "ag/gemini-3-flash")
+    assert isinstance(get_provider(), ProviderChain)
+    monkeypatch.setenv("TRUSTSHIELD_AI_SECONDARY_MODEL", "ag/claude-sonnet-4-6")
+    chain = get_provider()
+    assert isinstance(chain, ProviderChain) and len(chain.tiers) == 2
