@@ -122,3 +122,14 @@ containment beyond the wall-clock kill; live external browsing has still never b
 | Hostile browsing from the API | Unchanged: sandbox disabled; the chat path performs no network fetch of user URLs |
 
 Residual: rate limiting is per instance, not global; the client-held context can be edited by the client (it only affects that client's own follow-up answers).
+
+## Conversational AI assistant (branch `feature/trustshield-ai-assistant`)
+
+| Threat | Control |
+|--------|---------|
+| Intent misrouting suppresses a real analysis | Deterministic priority rule: a URL or attachment always forces analysis regardless of greeting/question wording (`docs/INTENT_ROUTING.md`); tested against adversarial greeting-shaped scam text |
+| Chat/education/product replies hallucinate a capability, certainty, or request a secret | `chat_grounding_violations` checked on every non-deterministic reply; any violation falls back to the deterministic answer |
+| A future remote LLM provider is enabled without cost/turn limits | `docs/AI_FAILURE_MODES.md` flags this as required before any remote provider goes live; none is active today |
+| Off-topic requests are used to pivot the assistant into general-purpose use | `off_topic` intent declines and redirects to the product's cybersecurity scope |
+
+Residual: output validation is regex-based, not a structured-output schema (flagged for the independent review of this phase).

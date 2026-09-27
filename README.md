@@ -190,3 +190,10 @@ One Vercel project (Vercel Services): Next.js at `/`, the FastAPI container at `
 `docker-compose.yml` (local production-like run), `.github/workflows/ci.yml` (deployment gate), `scripts/smoke_remote.py` and
 `tests/e2e/run_remote_e2e.py` (verify a deployed API/site), and `python scripts/preflight.py --profile production`.
 Spent-data rules: `docs/SPENT_DATA_POLICY.md`.
+
+## Conversational AI assistant (branch `feature/trustshield-ai-assistant`)
+`/` is a chat-style assistant with a deterministic intent router (greeting/education/product-question/analysis/follow-up —
+`docs/INTENT_ROUTING.md`) and a provider abstraction (`docs/AI_ASSISTANT_ARCHITECTURE.md`) that is deterministic-only in
+every deployment today; optional local Ollama and remote-LLM providers exist in code but are not enabled
+(`docs/PROVIDER_CONFIGURATION.md`). Security/output-validation policy: `docs/LLM_SECURITY_POLICY.md`. `/analyzer` keeps the
+original tabbed tool.

@@ -107,3 +107,9 @@ The conversational assistant lives on branch `feature/trustshield-conversational
 Vercel **Preview** using the same bundle/`vercel.json`; production keeps serving the four-tab app until a final report is approved. No
 new environment variables are required (`TRUSTSHIELD_EXPLANATION_PROVIDER` is ignored in production). Same limits as before: Hobby, 2 GiB / 1 vCPU,
 ~4 MiB uploads, sandbox disabled, stateless, per-instance rate limits. Promotion: `vercel promote <preview>` (rebuilds) after approval.
+
+## Conversational AI assistant build (branch `feature/trustshield-ai-assistant`, Preview only)
+
+Same deployment shape as the conversational build above; no new infrastructure. `TRUSTSHIELD_AI_PROVIDER` is unset on this
+Preview, so every reply is the deterministic provider — no LLM credential exists or is used. See
+`docs/PROVIDER_CONFIGURATION.md` for exactly what enabling a remote provider would require (a paid API key; not done).
