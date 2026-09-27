@@ -62,3 +62,19 @@ flagged for the independent security review commissioned for this phase.
 If a remote provider is ever enabled for a deployed environment, this same content leaves TrustShield's process boundary
 and is processed by whatever upstream model the configured router/provider uses — this is external processing, full stop,
 regardless of whether the configured URL happens to be a `localhost` address on the machine running TrustShield.
+
+## Update (Gemini migration pass): two real validator false positives found and fixed
+The certainty-claim check (`_CLAIMS_VERIFIED`/`_CLAIMS_UNSUPPORTED_CERTAINTY`) had no negation check at all, and the
+shared negation-cue regex (`_NEGATION_CUE`) could never match `n't` glued to a contraction stem (`can't`, `don't`,
+`won't`, `shouldn't`, `wouldn't`, `couldn't` — only explicitly spelled-out `isn't`/`wasn't`/`didn't` worked). Both were
+found because three different real models (Sonnet, two Gemini candidates) were compared on identical prompts, which
+made the pattern of misclassified refusals impossible to miss. Both fixed with regression tests using the exact real
+model responses that exposed them (`tests/integration/test_ai_assistant.py`). This directly answers the "what is NOT
+yet built" caveat above about novel phrasings — these were false positives (over-rejection of good responses), not
+under-rejection, but the same regex-fragility concern applies in both directions.
+
+## Update: ProviderChain does not change any of the above
+`services/chat/explain.ProviderChain` (see `docs/AI_PROVIDER_CHAIN.md`) adds PRIMARY → SECONDARY → deterministic
+routing, but every tier is validated by the exact same `grounding_violations`/`chat_grounding_violations` functions
+described above — a model switching from Gemini to Sonnet to deterministic mid-chain does not relax, bypass, or
+duplicate any check.
