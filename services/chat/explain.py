@@ -614,6 +614,28 @@ def _scrub_provider_output(text: str, api_key: str) -> str:
     return text.replace(api_key, "[REDACTED]") if api_key and api_key in text else text
 
 
+class ProviderNoticeDetected(RuntimeError):
+    """The response text IS the model's route, not an answer -- e.g. 9Router relaying a Google-side model-deprecation
+    notice as ordinary chat content instead of an HTTP error (confirmed real behavior this pass:
+    docs/9ROUTER_MODEL_INVENTORY.md -- 3 model routes did exactly this). Raised, not returned, so this never reaches
+    the user as though it were a genuine reply, and (being a plain Exception, not an HTTPError) is never retried --
+    retrying would just get the identical notice again."""
+
+
+# found by scripts/probe_9router_models.py's functional probe (Gemini migration pass): a route can be "chat-capable"
+# at the HTTP layer while every response is a provider/deprecation notice, not a model answer. This is the same
+# pattern check, now applied to the LIVE conversational transport, not only the one-off discovery probe.
+#
+# Deliberately NARROWER than the discovery probe's version: a generic "deprecat|no longer supported" would false-
+# positive on legitimate cybersecurity content (e.g. "SSL 3.0 is no longer supported due to known vulnerabilities" is
+# a perfectly good answer to a real security question). This instead matches the SPECIFIC structure of the actual
+# observed notice ("Gemini 3.5 Flash is no longer available. Please switch to Gemini 3.7 Flash...") -- a model/route
+# being unavailable, paired with a redirect instruction -- not any mention of something being outdated in general.
+_PROVIDER_NOTICE_RE = re.compile(
+    r"is no longer available\.?\s*please switch|this model (has been|is) deprecat|"
+    r"\bmodel (is|has been) (deprecated|retired)\b|\broute (has been )?retired\b", re.I)
+
+
 def _remote_call_once(base_url: str, api_key: str, model: str, prompt: str, max_tokens: int = _REMOTE_MAX_TOKENS,
                       system_prompt: str | None = None) -> str:
     # stream MUST be explicit: some OpenAI-compatible routers (observed with the local 9Router setup this was built and
@@ -627,7 +649,10 @@ def _remote_call_once(base_url: str, api_key: str, model: str, prompt: str, max_
                                      headers={"Content-Type": "application/json", "Authorization": f"Bearer {api_key}"})
     with urllib.request.urlopen(request, timeout=_REMOTE_TIMEOUT_SECONDS) as response:  # noqa: S310 (validated by _validate_base_url)
         payload = json.loads(response.read())
-        return _scrub_provider_output(payload["choices"][0]["message"]["content"], api_key)
+        text = _scrub_provider_output(payload["choices"][0]["message"]["content"], api_key)
+    if _PROVIDER_NOTICE_RE.search(text):
+        raise ProviderNoticeDetected(f"model={model!r} route returned a provider/deprecation notice, not an answer")
+    return text
 
 
 def _remote_transport(prompt: str, max_tokens: int = _REMOTE_MAX_TOKENS, system_prompt: str | None = None,

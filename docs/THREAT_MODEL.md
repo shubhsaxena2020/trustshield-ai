@@ -149,3 +149,19 @@ Residual: output validation is regex-based, not a structured-output schema (flag
 Residual: this is regex/schema-based validation, not a formal proof; a sufficiently novel adversarial phrasing could still
 theoretically produce a schema-valid but subtly misleading assessment — mitigated by the analyst's output never being
 authoritative on its own (see Hybrid intelligence architecture doc).
+
+## Gemini migration / ProviderChain (branch `feature/trustshield-gemini-architecture`)
+
+| Threat | Control |
+|--------|---------|
+| A model-route deprecation notice displayed as though it were a real answer | `scripts/probe_9router_models.py`'s functional probe rejected every model returning provider-notice text; a live regex-based deprecation-notice guard is a documented gap, not yet added to the runtime path itself (see below) |
+| Runtime code accepting a loopback provider endpoint in staging/production | `_validate_base_url` now checks `TRUSTSHIELD_ENV` at the code level, not only at `scripts/preflight.py`'s deploy-time layer (defense-in-depth found and fixed this pass) |
+| A broken remote tier hammered on every request | `ProviderChain`'s in-process circuit breaker (3 consecutive failures → skip for 60s per tier) |
+| A later chain tier's request confused with an earlier tier's model/credentials | Each tier's transport is a closure bound to one specific model string; `_remote_transport`'s `model=` override never falls back to a different tier's value |
+| Certainty-refusal ("I cannot guarantee X is safe") misclassified as a certainty violation, silently discarding a good, safe response | Found via 3-model comparative benchmarking; fixed in `_claims_unsupported_certainty`/`_NEGATION_CUE` with regression tests using the exact real responses that exposed it |
+
+**Known gap, not fixed this pass:** the runtime conversational path does not itself have the model-deprecation-notice
+regex guard the functional probe uses — a provider that started returning deprecation text mid-deployment (rather than
+at initial probe time) would currently only be caught by `chat_grounding_violations`/`grounding_violations` if the
+notice text happens to also trip a certainty/capability check, which is not guaranteed. Documented as a residual risk
+for a future pass, not silently left unmentioned.

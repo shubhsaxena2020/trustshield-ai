@@ -550,6 +550,44 @@ def test_chain_requires_at_least_one_tier():
         ProviderChain([])
 
 
+# ---- provider-notice detection: a route can be "chat-capable" at the HTTP layer while every answer is a deprecation
+# notice, not a real reply (docs/9ROUTER_MODEL_INVENTORY.md -- confirmed real behavior for 3 model routes). ----------------
+
+def test_provider_notice_is_detected_and_raised_not_returned():
+    from services.chat.explain import ProviderNoticeDetected, _remote_call_once
+    import services.chat.explain as explain_module
+
+    class _FakeResponse:
+        def __init__(self, body):
+            self._body = body
+        def read(self):
+            return self._body
+        def __enter__(self):
+            return self
+        def __exit__(self, *a):
+            return False
+
+    notice = json.dumps({"choices": [{"message": {"content":
+        "Gemini 3.5 Flash is no longer available. Please switch to Gemini 3.7 Flash in the model picker."}}]}).encode()
+    orig_urlopen = explain_module.urllib.request.urlopen
+    explain_module.urllib.request.urlopen = lambda *a, **kw: _FakeResponse(notice)
+    try:
+        with pytest.raises(ProviderNoticeDetected):
+            _remote_call_once("http://127.0.0.1:20128/v1", "test-key", "ag/gemini-3-flash-agent", "hi")
+    finally:
+        explain_module.urllib.request.urlopen = orig_urlopen
+
+
+@pytest.mark.parametrize("legitimate_answer", [
+    "SSL 3.0 is no longer supported by modern browsers due to known vulnerabilities like POODLE.",
+    "TLS 1.0 and 1.1 are no longer considered secure; most services now require TLS 1.2 or higher.",
+    "Older SMS-based OTP methods are being deprecated by some banks in favor of app-based authenticators.",
+])
+def test_provider_notice_regex_does_not_false_positive_on_legitimate_security_content(legitimate_answer):
+    from services.chat.explain import _PROVIDER_NOTICE_RE
+    assert not _PROVIDER_NOTICE_RE.search(legitimate_answer)
+
+
 def test_get_provider_builds_a_chain_only_when_primary_model_is_configured(monkeypatch):
     monkeypatch.setenv("TRUSTSHIELD_AI_PROVIDER", "remote")
     monkeypatch.setenv("TRUSTSHIELD_AI_BASE_URL", "http://127.0.0.1:20128/v1")
