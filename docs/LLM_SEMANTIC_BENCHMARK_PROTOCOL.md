@@ -38,3 +38,47 @@ already-fixed prompt on a source's held-out rows and reporting the result honest
 A small stratified pilot runs first. If the pilot shows the semantic analyst adds no distinguishable signal, or an
 unacceptable invalid-output rate, the full-scale benchmark is not run and that finding is reported as-is — this protocol
 does not promise a large benchmark will happen regardless of pilot results.
+
+## Protocol v2 addendum — DIFrauD source-held-out challenge (FINAL OVERNIGHT MASTER COMPLETION PASS)
+
+Written and committed BEFORE reading `artifacts/difraud_challenge/results.json`. This section amends, and does not
+silently rewrite, the v1 protocol above — the pilot's 24-message result (Section I of `docs/HYBRID_V4_RC_REVIEW.md`)
+stands as originally recorded.
+
+### Why DIFrauD, and why it counts as genuinely source-held-out here
+`redasers/difraud`'s SMS subset (MIT license, University of Houston; provenance in `datasets/raw/difraud_sms/SOURCE.md`)
+merges the UCI SMS Spam Collection (already in `ucI_sms_spam.jsonl`) with a second, previously-unused academic corpus
+("SMS Phishing Dataset for Machine Learning and Pattern Recognition"). Filtering out every row whose normalized text
+already appears in `india_spam_sms.jsonl` or `ucI_sms_spam.jsonl` leaves **1,679 rows (762 fraud / 917 legitimate) that
+are genuinely new text v3 has never seen in any split** — this is the source-held-out property that matters, independent
+of DIFrauD's own internal train/test naming. DIFrauD is nonetheless a **development/generalization benchmark, not a new
+final sealed holdout** — it has already informed this pass's architecture discussion by being read at all, per the
+brief's own item 37 framing ("once a challenge source informs architecture decisions, it is development evidence").
+
+### Sample construction
+Stratified, seeded (`SEED=20260927`, same seed as the v1 pilot for consistency): up to 100 fraud + 100 legitimate rows,
+drawn only from the 1,679 non-overlapping DIFrauD rows. Exact counts actually available: 762 fraud / 917 legitimate —
+both comfortably above the 100-per-class target, so no relaxation to "all available fraud rows" was needed.
+
+### What this sample can and cannot say
+The 100/100 split is artificial (DIFrauD's natural fraud prevalence in this subset is roughly 45%, not 50%, but the
+stratified draw is intentionally balanced for measurement power). Recall and specificity are directly meaningful from
+this sample. **Precision computed on this stratified sample is reported explicitly as "challenge-sample precision" and
+is NOT the same as real-world positive predictive value** — it reflects a 50/50 prior, not this source's actual
+prevalence. No real-world-prevalence-adjusted PPV is computed in this pass because no reliable population-level
+prevalence estimate exists for this specific non-overlapping DIFrauD subset (extrapolating from the aggregate DIFrauD
+paper's stated prevalence would itself be an assumption this protocol declines to silently make).
+
+### Systems compared, same 200 messages
+v3 (existing production classifier, unmodified) and the Semantic Security Analyst (`semantic-v1` prompt, decision rule
+unchanged from Section 3 above). No deterministic-rules-alone or rules-fusion path is benchmarked here — no rules-fusion
+harness exists on this branch outside the existing `services/analysis/pipeline.py`, wiring it in for a one-off benchmark
+was judged out of scope for this pass, and this is documented as a gap rather than skipped silently.
+
+### Reportability
+Wilson 95% confidence intervals are reported alongside every rate. 100+ positive and 100+ negative examples clears the
+brief's "strong preference: 100+" bar for a source-generalization claim — the first result in this project to do so.
+
+### Latency
+Reported separately from accuracy metrics, median and p90 (n permitting), for the semantic-analyst calls only (v3
+inference is local and sub-millisecond; a shared latency table would be misleading).
