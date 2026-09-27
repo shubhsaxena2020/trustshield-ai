@@ -1518,5 +1518,325 @@
   "e15a39e13f1a7913d00c64f9": {
     "status": "invented_facts",
     "latency_ms": 5485
+  },
+  "3452da877b876e432012620f": {
+    "status": "invalid_schema",
+    "latency_ms": 2168
+  },
+  "015e490837a25bc8438cedb3": {
+    "status": "invalid_schema",
+    "latency_ms": 2277
+  },
+  "eac23ecb1a6ee6b3f119ee98": {
+    "status": "ok",
+    "latency_ms": 1780,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "b7572a7cefd488af91b55f3f": {
+    "status": "ok",
+    "latency_ms": 2030,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "b97d69d551b48b583eedf484": {
+    "status": "invalid_schema",
+    "latency_ms": 2735
+  },
+  "2fdf00243ccae43769c7afe2": {
+    "status": "invalid_schema",
+    "latency_ms": 2197
+  },
+  "edd4335dd946eff364920a49": {
+    "status": "ok",
+    "latency_ms": 1867,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "fbb1e26c1b14890078ab4b9d": {
+    "status": "ok",
+    "latency_ms": 1778,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "0c99f205debd39870298aacb": {
+    "status": "invalid_schema",
+    "latency_ms": 2498
+  },
+  "70d629d83e46aa018b60cb6c": {
+    "status": "ok",
+    "latency_ms": 1936,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "b4940e2bbb6c1f1066e57cec": {
+    "status": "invalid_schema",
+    "latency_ms": 3587
+  },
+  "77d4ae77444920be63b089eb": {
+    "status": "invalid_schema",
+    "latency_ms": 1850
+  },
+  "a81a80cca746467cb8e5a7b0": {
+    "status": "invalid_schema",
+    "latency_ms": 2325
+  },
+  "7b987462fce05429d4a139bf": {
+    "status": "invalid_schema",
+    "latency_ms": 2244
+  },
+  "4533eb1903331378b0b07248": {
+    "status": "ok",
+    "latency_ms": 1715,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "63bda18e2a215433eeea0a0b": {
+    "status": "ok",
+    "latency_ms": 1942,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.1
+  },
+  "980d5a112b8c696ff27bfbfe": {
+    "status": "ok",
+    "latency_ms": 2029,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "a526a643546efae1b363ca22": {
+    "status": "ok",
+    "latency_ms": 1761,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "a4c2b9a529f85e9e09c6304f": {
+    "status": "ok",
+    "latency_ms": 1688,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "7428611858857ab0e8df665f": {
+    "status": "invalid_schema",
+    "latency_ms": 3585
+  },
+  "ad5b856eacbe67eadfb376bb": {
+    "status": "invalid_schema",
+    "latency_ms": 8690
+  },
+  "3fdfd91909bf1785eef46d11": {
+    "status": "invalid_schema",
+    "latency_ms": 9136
+  },
+  "ae95530230fba5996bbf3ae9": {
+    "status": "ok",
+    "latency_ms": 7424,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "5747d50c72c038b4eec98f0b": {
+    "status": "invalid_schema",
+    "latency_ms": 8171
+  },
+  "e874143a3df60222e37cacef": {
+    "status": "invalid_schema",
+    "latency_ms": 8354
+  },
+  "0708ad58ed8f4625af54b007": {
+    "status": "invalid_schema",
+    "latency_ms": 8190
+  },
+  "782734c141d000fd4a9dd633": {
+    "status": "ok",
+    "latency_ms": 7793,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "4e179bbb683dde4006b33aea": {
+    "status": "ok",
+    "latency_ms": 7821,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "c81a6cf2ad4258ffb30bbbbb": {
+    "status": "invalid_schema",
+    "latency_ms": 7825
+  },
+  "bfaabb9b0e7f2d28ef758708": {
+    "status": "invalid_schema",
+    "latency_ms": 7744
+  },
+  "52de8c8985271f8e9bfd5e0d": {
+    "status": "invalid_schema",
+    "latency_ms": 7549
+  },
+  "182c8acb5d267d9a4d18e355": {
+    "status": "invalid_schema",
+    "latency_ms": 7626
+  },
+  "b7bf8a8731a071b665d4596b": {
+    "status": "invalid_schema",
+    "latency_ms": 8436
+  },
+  "93870f9320a2e6f6a95f28dd": {
+    "status": "invalid_schema",
+    "latency_ms": 8063
+  },
+  "beb69a209098eab6051c8d9d": {
+    "status": "invalid_schema",
+    "latency_ms": 8054
+  },
+  "a0b49f2fd12b4e4e365d2617": {
+    "status": "ok",
+    "latency_ms": 7715,
+    "assessment": "uncertain",
+    "semantic_confidence": 0.1
+  },
+  "bc372b5f7263f3226a8e6723": {
+    "status": "invalid_schema",
+    "latency_ms": 8426
+  },
+  "42f839abfa88542173e8bbab": {
+    "status": "ok",
+    "latency_ms": 7826,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "48faac7302145e44247397e2": {
+    "status": "invalid_schema",
+    "latency_ms": 8436
+  },
+  "2abe7233a75ca44960dadde9": {
+    "status": "invalid_schema",
+    "latency_ms": 9073
+  },
+  "f773520208c7666170fcc79d": {
+    "status": "invalid_schema",
+    "latency_ms": 8528
+  },
+  "9e70d655b7183756ff73eb90": {
+    "status": "invalid_schema",
+    "latency_ms": 8617
+  },
+  "ff6937d0043528d0b83a48e1": {
+    "status": "ok",
+    "latency_ms": 8920,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "1b4aa2b3fe27c43933c926d7": {
+    "status": "invalid_schema",
+    "latency_ms": 7933
+  },
+  "b442bacd4d62eb4ec71a4474": {
+    "status": "invalid_schema",
+    "latency_ms": 7459
+  },
+  "2fe11fb63881321cd9aec2c5": {
+    "status": "ok",
+    "latency_ms": 7792,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "c51b88a96655df2202a6531e": {
+    "status": "invalid_schema",
+    "latency_ms": 8266
+  },
+  "5d29135ae2a503a015a2229d": {
+    "status": "invalid_schema",
+    "latency_ms": 7550
+  },
+  "859f48e7315911f432a1498b": {
+    "status": "invalid_schema",
+    "latency_ms": 7695
+  },
+  "85cf199786c04c9961e45927": {
+    "status": "invalid_schema",
+    "latency_ms": 8363
+  },
+  "aa1b49a67c5c6a81f920bea9": {
+    "status": "invalid_schema",
+    "latency_ms": 8204
+  },
+  "8702e5b85435c91a6a7d8587": {
+    "status": "ok",
+    "latency_ms": 7433,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "4830cc22e592ee08bdc78de9": {
+    "status": "invalid_schema",
+    "latency_ms": 8561
+  },
+  "a8257b82a353a3583dcc91e5": {
+    "status": "invalid_schema",
+    "latency_ms": 9147
+  },
+  "5e5ff632262621cedde76fc7": {
+    "status": "invalid_schema",
+    "latency_ms": 8342
+  },
+  "42520946b458cd5c7b0184d0": {
+    "status": "invalid_schema",
+    "latency_ms": 9436
+  },
+  "9e46314320a26e8100e324f0": {
+    "status": "invalid_schema",
+    "latency_ms": 9343
+  },
+  "5b277bd2d7ac1758e909d39c": {
+    "status": "ok",
+    "latency_ms": 7782,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.9
+  },
+  "be0b3ba7996b8b252db797e6": {
+    "status": "invalid_schema",
+    "latency_ms": 9075
+  },
+  "34d0412ad4f7ad269a7435cb": {
+    "status": "invalid_schema",
+    "latency_ms": 8872
+  },
+  "678f09f3d8dd768717fead72": {
+    "status": "invalid_schema",
+    "latency_ms": 8539
+  },
+  "7d5f9feb800554fde8526301": {
+    "status": "invalid_schema",
+    "latency_ms": 8979
+  },
+  "9de7fbe2506fa62182aa5f6d": {
+    "status": "invalid_schema",
+    "latency_ms": 8954
+  },
+  "8c004f6a2ef15f4e94716c0f": {
+    "status": "ok",
+    "latency_ms": 7809,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "919cca51b41c7b33d5c99979": {
+    "status": "invalid_schema",
+    "latency_ms": 8345
+  },
+  "e09b4e4c6dedc355adde7382": {
+    "status": "invalid_schema",
+    "latency_ms": 8778
+  },
+  "78dd46e3150f13488c9beb30": {
+    "status": "invalid_schema",
+    "latency_ms": 2924
+  },
+  "8560dbe3d4fea02a1ba75aea": {
+    "status": "ok",
+    "latency_ms": 1959,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
+  },
+  "15ab8116f5144d53ab84560d": {
+    "status": "ok",
+    "latency_ms": 2569,
+    "assessment": "legitimate_like",
+    "semantic_confidence": 0.95
   }
 }

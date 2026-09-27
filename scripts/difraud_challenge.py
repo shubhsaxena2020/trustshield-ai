@@ -134,8 +134,18 @@ def main() -> int:
         if key in cache:
             sem = cache[key]
         else:
-            t0 = time.perf_counter()
-            result = analyze_semantics(r["text"])
+            # found running this against a fast model (ag/gemini-3-flash): a client-side rate-budget rejection
+            # (RemoteProviderBudgetExceeded, the existing 20-calls/min cap) is a self-imposed throttle, not a real
+            # model failure -- treating it as a permanent "transport_error" data point would falsely make a FAST model
+            # look unreliable purely because it outran this script's own request rate. Retry with backoff instead of
+            # recording it; never cache a budget-exceeded result as if it were the model's real answer.
+            for attempt in range(6):
+                t0 = time.perf_counter()
+                result = analyze_semantics(r["text"])
+                if result.status == "transport_error" and result.raw_error == "RemoteProviderBudgetExceeded":
+                    time.sleep(4)
+                    continue
+                break
             sem = {"status": result.status, "latency_ms": round((time.perf_counter() - t0) * 1000)}
             if result.assessment:
                 sem["assessment"] = result.assessment.assessment
