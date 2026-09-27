@@ -39,3 +39,11 @@ the new sealed holdout in `V4_EVALUATION_PROTOCOL.md`.
 ## Next
 Collect new rights-cleared real-world sources, mine hard negatives, install torch to run D/E, freeze one candidate, then evaluate once on
 a freshly sealed holdout.
+
+## Source-predictability finding (branch `feature/trustshield-hybrid-intelligence-v4`)
+A classifier trained to predict SOURCE (india_spam_sms vs ucI_sms_spam), not fraud, reached 90-92% accuracy against a
+72% majority-class baseline (`scripts/source_predictability.py`, `artifacts/source_predictability/results.json`). This is
+strong, direct evidence that the corpora are highly distinguishable by style alone — consistent with, and a likely
+contributing cause of, the LOSO recall collapse already documented on `feature/trustshield-v4-source-robustness`. Any
+future v4 work should treat "more rows from these two sources" with the same skepticism that branch's findings already
+established.

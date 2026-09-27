@@ -36,3 +36,11 @@ No cloud dependency is required for core analysis — v3, OCR, QR and static URL
   point of TrustShield is that the verdict comes from an evidence-fused pipeline, and the LLM only explains it.
 - **What happens if the AI explanation service is unavailable?** The deterministic provider — not a placeholder, a fully
   grounded fallback — answers instead; the security analysis itself is unaffected either way.
+
+## Hybrid intelligence (experimental, local research only — not part of the live demo path)
+A structured "semantic security analyst" role was added and validated against the real local model: it produces bounded,
+schema-checked social-engineering signals (impersonation, urgency, secrecy, unusual payment method) as provisional
+evidence, never a verdict. A small 24-message pilot found it correctly flagged 11/12 fraud and 11/12 legitimate examples,
+with perfect repeatability on a 4-example check — genuinely encouraging, but far too small a sample to claim anything
+beyond "worth a larger, funded follow-up." See `docs/HYBRID_V4_SELECTION_POLICY.md` for exactly what a real answer would
+require. It is not enabled in the demo build.

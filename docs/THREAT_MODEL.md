@@ -133,3 +133,19 @@ Residual: rate limiting is per instance, not global; the client-held context can
 | Off-topic requests are used to pivot the assistant into general-purpose use | `off_topic` intent declines and redirects to the product's cybersecurity scope |
 
 Residual: output validation is regex-based, not a structured-output schema (flagged for the independent review of this phase).
+
+## Hybrid intelligence / semantic analyst (branch `feature/trustshield-hybrid-intelligence-v4`, local research only)
+
+| Threat | Control |
+|--------|---------|
+| Semantic analyst output treated as authoritative | Schema has no score/verdict field; disabled by default; not wired into the live analysis pipeline this pass |
+| Invented network-derived facts (domain age, reputation, live browsing) | `validate_no_invented_facts` rejects the whole assessment, not just the offending field |
+| Fabricated evidence quotes | `evidence_spans_exist_in` checked against the redacted text the model actually saw; a non-existent quote discards the assessment |
+| Prompt injection via analysed content | Content lives inside a delimited `<message_to_analyse>` block after the system instructions; tested with the brief's exact injection strings |
+| Label/source/dataset leakage into the prompt | `build_semantic_prompt(message: str)` — the signature itself is the guardrail; explicit leakage tests for every known source/dataset identifier string |
+| Research cache holding raw secrets | Cache key and value are built from `redact_secrets()` output only, never raw text or the API key |
+| Provider/SSRF/key-leak surface | Reuses the already-hardened `_remote_transport` (SSRF validation, key scrubbing, call budget) rather than a separate transport |
+
+Residual: this is regex/schema-based validation, not a formal proof; a sufficiently novel adversarial phrasing could still
+theoretically produce a schema-valid but subtly misleading assessment — mitigated by the analyst's output never being
+authoritative on its own (see Hybrid intelligence architecture doc).

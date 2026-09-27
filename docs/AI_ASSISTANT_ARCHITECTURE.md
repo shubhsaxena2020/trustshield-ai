@@ -73,3 +73,8 @@ Streaming responses (deferred — see `AI_FAILURE_MODES.md`'s note; non-streamin
 security result is locked before any explanation is generated). A true ambiguous-intent LLM fallback (every case in the
 current test matrix resolves deterministically). Multi-turn conversation summarization beyond the existing bounded
 client-carried context.
+
+## Semantic security analyst (branch `feature/trustshield-hybrid-intelligence-v4`, experimental, local only)
+A separate, structured LLM role distinct from the conversational provider above — see `docs/HYBRID_INTELLIGENCE_ARCHITECTURE.md`
+and `docs/LLM_SEMANTIC_ANALYST.md`. It produces validated provisional evidence (impersonation/social-engineering signals),
+never prose, never a final score, and is not wired into any live analysis path this pass.
