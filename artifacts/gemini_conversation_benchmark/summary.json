@@ -2,31 +2,31 @@
   "ag/claude-sonnet-4-6": {
     "n": 25,
     "success_rate": 1.0,
-    "grounding_violation_rate": 0.04,
+    "grounding_violation_rate": 0.0,
     "provider_notice_rate": 0.0,
     "empty_response_rate": 0.0,
     "error_rate": 0.0,
-    "median_latency_ms": 3750,
-    "p90_latency_ms": 4721
+    "median_latency_ms": 3908,
+    "p90_latency_ms": 5048
   },
   "ag/gemini-3-flash": {
-    "n": 25,
-    "success_rate": 1.0,
-    "grounding_violation_rate": 0.04,
-    "provider_notice_rate": 0.0,
-    "empty_response_rate": 0.0,
-    "error_rate": 0.0,
-    "median_latency_ms": 4158,
-    "p90_latency_ms": 5559
-  },
-  "ag/gemini-3.1-pro-low": {
     "n": 25,
     "success_rate": 1.0,
     "grounding_violation_rate": 0.0,
     "provider_notice_rate": 0.0,
     "empty_response_rate": 0.0,
     "error_rate": 0.0,
-    "median_latency_ms": 3934,
-    "p90_latency_ms": 4599
+    "median_latency_ms": 3976,
+    "p90_latency_ms": 5313
+  },
+  "ag/gemini-3.1-pro-low": {
+    "n": 25,
+    "success_rate": 1.0,
+    "grounding_violation_rate": 0.04,
+    "provider_notice_rate": 0.0,
+    "empty_response_rate": 0.0,
+    "error_rate": 0.0,
+    "median_latency_ms": 4033,
+    "p90_latency_ms": 4430
   }
 }
