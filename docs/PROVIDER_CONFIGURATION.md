@@ -39,6 +39,34 @@ valid JSON — every remote call silently failed until this was found and fixed 
 `TRUSTSHIELD_EXPLANATION_PROVIDER` (the name used before this phase) is still read as a fallback for `TRUSTSHIELD_AI_PROVIDER`
 if the newer name is unset, so nothing already deployed breaks.
 
+## Provider chain (Gemini migration pass): PRIMARY -> SECONDARY -> deterministic
+An optional multi-tier chain, built by `get_provider()` only when `TRUSTSHIELD_AI_PRIMARY_MODEL` is set:
+
+| Variable | Purpose |
+|---|---|
+| `TRUSTSHIELD_AI_PRIMARY_MODEL` | model ID for the primary conversational tier (e.g. `ag/gemini-3-flash`) |
+| `TRUSTSHIELD_AI_SECONDARY_MODEL` | optional model ID for the secondary tier (e.g. `ag/claude-sonnet-4-6`) |
+
+Both tiers share the same `TRUSTSHIELD_AI_BASE_URL`/`TRUSTSHIELD_AI_API_KEY` — no duplicated credentials. Each tier is
+tried lazily (the secondary tier is never called if the primary already answered); on any failure — exception, empty
+response, or a grounding-validator rejection — the chain falls through to the next tier, and ultimately to the
+deterministic provider, which always succeeds. A simple in-process circuit breaker skips a tier after 3 consecutive
+failures for 60 seconds, so a broken route isn't hammered on every request. **Omitting `TRUSTSHIELD_AI_PRIMARY_MODEL`
+preserves the exact single-provider `RemoteLLMProvider` behavior this project already had** — this is additive, not a
+breaking change to any existing deployment.
+
+Per `docs/GEMINI_CONVERSATION_BENCHMARK_RESULTS.md`, `ag/gemini-3-flash` passed the pre-registered selection criteria
+as a PRIMARY candidate; the recommended local-research configuration is:
+```
+TRUSTSHIELD_AI_PROVIDER=remote
+TRUSTSHIELD_AI_BASE_URL=http://127.0.0.1:20128/v1
+TRUSTSHIELD_AI_PRIMARY_MODEL=ag/gemini-3-flash
+TRUSTSHIELD_AI_SECONDARY_MODEL=ag/claude-sonnet-4-6
+TRUSTSHIELD_AI_API_KEY=<the operator's own 9Router key, backend environment only>
+```
+This is not deployed anywhere — see "Why 9Router cannot serve a public Preview or production" below, unchanged by
+this pass.
+
 ## Enabling local Ollama (development only)
 1. Install and run Ollama normally; pull a model (e.g. `ollama pull llama3.2`).
 2. Set `TRUSTSHIELD_AI_PROVIDER=ollama` (and `TRUSTSHIELD_AI_MODEL` if not `llama3.2`).
