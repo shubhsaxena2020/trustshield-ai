@@ -14,8 +14,8 @@ POSITIVE = "malicious_or_fraudulent"
 
 def main() -> int:
     sys.path.insert(0, str(ROOT))
-    from scripts.difraud_challenge import load_non_overlapping_difraud, stratified_sample
-    from scripts.llm_semantic_pilot import cache_key, load_cache
+    from archive.research.difraud_challenge import load_non_overlapping_difraud, stratified_sample
+    from archive.research.llm_semantic_pilot import cache_key, load_cache
     from services.analysis.ml.classifier import TextClassifier
     from services.chat.semantic_analyst import PROMPT_VERSION
 

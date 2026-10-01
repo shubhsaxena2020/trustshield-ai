@@ -111,7 +111,7 @@ def main() -> int:
         raise SystemExit("set TRUSTSHIELD_SEMANTIC_ANALYST=remote (and _AI_BASE_URL/_API_KEY/_MODEL) before running this")
 
     sys.path.insert(0, str(ROOT))
-    from scripts.llm_semantic_pilot import cache_key, load_cache, save_cache  # reuse the existing, already-safe cache
+    from archive.research.llm_semantic_pilot import cache_key, load_cache, save_cache  # reuse the existing, already-safe cache
     from services.analysis.ml.classifier import TextClassifier
     from services.chat.semantic_analyst import DEFAULT_MODEL, PROMPT_VERSION, analyze_semantics
 
