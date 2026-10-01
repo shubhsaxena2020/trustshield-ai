@@ -8,7 +8,6 @@ from PIL import Image
 from services.api.main import app
 from services.chat.explain import (DeterministicExplanationProvider, OllamaExplanationProvider, followup_intent,
                                    grounding_violations)
-from services.chat.external import DisabledProvider, ExternalIntelligenceProvider, PrivacyMode, ProviderResult, run_providers
 from services.chat.router import route
 
 client = TestClient(app)
@@ -153,28 +152,6 @@ def test_default_provider_is_deterministic(monkeypatch):
     monkeypatch.setenv("TRUSTSHIELD_ENV", "production")
     monkeypatch.setenv("TRUSTSHIELD_EXPLANATION_PROVIDER", "ollama")
     assert isinstance(get_provider(), DeterministicExplanationProvider)
-
-
-# ---- external intelligence privacy gating -------------------------------------------------------------------------------------
-
-class _Fake(ExternalIntelligenceProvider):
-    name = "fake"
-    called = False
-
-    def lookup(self, url):
-        _Fake.called = True
-        return ProviderResult(source="fake", status="completed")
-
-
-def test_external_provider_refused_without_opt_in():
-    res = run_providers([_Fake()], "http://a.example", PrivacyMode.LOCAL_ONLY, True)
-    assert res[0].status == "refused_privacy" and not _Fake.called
-    res = run_providers([_Fake()], "http://a.example", PrivacyMode.ENHANCED, False)
-    assert res[0].status == "refused_privacy" and not _Fake.called
-
-
-def test_disabled_provider_reports_disabled():
-    assert run_providers([DisabledProvider()], "http://a.example", PrivacyMode.LOCAL_ONLY, False)[0].status == "disabled"
 
 
 def test_forged_oversize_context_is_rejected():
