@@ -49,7 +49,7 @@ def top_evidence(analysis: ChatAnalysis, n: int = 4) -> list[ContractEvidence]:
 
 def _coverage_line(a: ChatAnalysis) -> str:
     used = ", ".join(c.description for c in a.capabilities if c.used) or "none"
-    missing = "; ".join(f"{c.description}" for c in a.capabilities if not c.used and c.name in {"reputation", "web_sandbox"})
+    missing = "; ".join(f"{c.description}" for c in a.capabilities if not c.used and c.name == "reputation")
     return f"Checked: {used}. Not checked: {missing}." if missing else f"Checked: {used}."
 
 
@@ -162,9 +162,6 @@ def answer_followup(intent: str, a: ChatAnalysis) -> Reply:
         return Reply(f"Risk ({LEVEL_TITLE[a.risk_level]}, {a.risk_score}/100) measures how strong the fraud indicators are. Confidence ({a.confidence}) measures how reliable that assessment is given what could be checked. "
                      "They can differ: a message can look clearly risky while confidence stays limited because live page inspection and reputation checks were not available.")
     if intent == "opened_website":
-        sandbox = used.get("web_sandbox")
-        if sandbox is not None and sandbox.used:
-            return Reply("The destination page was inspected in an isolated browser for this analysis; see the evidence for what was observed.")
         return Reply("No. TrustShield did not open the destination webpage in this analysis. The result is based on the message content, the link's structure, the text model and deterministic rules. " + ALWAYS_UNAVAILABLE_TEXT)
     if intent == "reputation_checked":
         rep = used.get("reputation")
@@ -379,7 +376,7 @@ def grounding_violations(text: str, a: ChatAnalysis) -> list[str]:
     if _claims_unsupported_certainty(text):
         found.append("claims certainty or verification")
     m_opened = _CLAIMS_OPENED.search(text)
-    if m_opened and not caps.get("web_sandbox") and not _is_negated(text, m_opened.start(), m_opened.end()):
+    if m_opened and not _is_negated(text, m_opened.start(), m_opened.end()):
         found.append("claims the webpage was opened")
     m_rep = _CLAIMS_REPUTATION.search(text)
     if m_rep and not caps.get("reputation") and not _is_negated(text, m_rep.start(), m_rep.end()):
@@ -559,7 +556,12 @@ class OllamaExplanationProvider(ExplanationProvider):
 
 
 _provider_log = logging.getLogger("trustshield.ai_provider")
-_REMOTE_TIMEOUT_SECONDS = 20
+# Found during the final architecture review: ProviderChain's primary and secondary tiers both resolve to the
+# SAME local 9Router endpoint by default. At the old 20s timeout, a dead/stalled 9Router meant two full 20s
+# waits back to back (40s) before the deterministic fallback finally answered -- long enough to lose a live
+# demo audience. 8s comfortably covers the observed median latencies for the shortlisted conversational models
+# (ag/gemini-3-flash ~2-4s, ag/claude-sonnet-4-6 ~4-6s) while bounding the worst case at 16s instead of 40s.
+_REMOTE_TIMEOUT_SECONDS = 8
 _REMOTE_MAX_TOKENS = 300
 
 # FIND-002 (independent review): TRUSTSHIELD_AI_BASE_URL is operator-set config, not user input, but validate it anyway --

@@ -103,19 +103,6 @@ def check_api() -> None:
     check("fusion strategy", "PASS" if fusion == "ml_aware_weighted" else "WARN", f"TRUSTSHIELD_FUSION={fusion}")
 
 
-def check_sandbox() -> None:
-    external = os.getenv("TRUSTSHIELD_SANDBOX_ALLOW_EXTERNAL", "false").strip().lower() in TRUTHY
-    check("sandbox external browsing DISABLED", "FAIL" if external else "PASS",
-          "TRUSTSHIELD_SANDBOX_ALLOW_EXTERNAL is enabled: refuse to demo" if external else "external browsing off")
-    test_mode = os.getenv("TRUSTSHIELD_ENV", "").strip().lower() == "test"
-    check("test-mode loopback allowance off", "FAIL" if test_mode else "PASS", "TRUSTSHIELD_ENV=test" if test_mode else "TRUSTSHIELD_ENV is not test")
-    enabled = os.getenv("ENABLE_WEB_SANDBOX", "false").strip().lower() in TRUTHY
-    check("sandbox feature flag", "PASS" if not enabled else "WARN", "ENABLE_WEB_SANDBOX enabled (opt-in checkbox visible; external browsing still off)" if enabled else "ENABLE_WEB_SANDBOX off (recommended for the demo)")
-    if enabled:
-        browsers = Path(os.getenv("PLAYWRIGHT_BROWSERS_PATH", ROOT / ".playwright-browsers"))
-        check("sandbox Chromium", "PASS" if browsers.is_dir() and any(browsers.glob("chromium*")) else "FAIL", str(browsers))
-
-
 def check_production(remote_url: str | None) -> None:
     """Deployment profile: the same identity/limits/config checks the API enforces at startup, plus deployment-only ones."""
     from services.api.settings import Settings
@@ -124,13 +111,12 @@ def check_production(remote_url: str | None) -> None:
     settings = Settings.from_env()
     check("TRUSTSHIELD_ENV is staging or production", "PASS" if settings.strict else "FAIL", f"TRUSTSHIELD_ENV={settings.env}")
     problems = environment_problems(settings)
-    check("API environment (CORS, ML, sandbox, OCR, fusion, tmp)", "PASS" if not problems else "FAIL", "; ".join(problems))
+    check("API environment (CORS, ML, OCR, fusion, tmp)", "PASS" if not problems else "FAIL", "; ".join(problems))
     model = model_problems()
     check("v3 identity: artifact present, hash, load, sklearn, threshold 0.16", "PASS" if not model else "FAIL", "; ".join(model))
     dev_flags = [name for name, bad in (
         ("TRUSTSHIELD_ENV=test", os.getenv("TRUSTSHIELD_ENV", "").lower() == "test"),
         ("TRUSTSHIELD_OCR_PROVIDER=mock", os.getenv("TRUSTSHIELD_OCR_PROVIDER", "").lower() == "mock"),
-        ("ENABLE_WEB_SANDBOX", os.getenv("ENABLE_WEB_SANDBOX", "false").lower() in TRUTHY),
         ("localhost in PUBLIC_API_URL", "localhost" in os.getenv("PUBLIC_API_URL", "")),
         ("localhost in NEXT_PUBLIC_API_URL", "localhost" in os.getenv("NEXT_PUBLIC_API_URL", "")),
         ("TRUSTSHIELD_DEBUG_PROXY", os.getenv("TRUSTSHIELD_DEBUG_PROXY", "") == "1"),
@@ -162,8 +148,8 @@ def check_production(remote_url: str | None) -> None:
             with urllib.request.urlopen(remote_url.rstrip("/") + "/api/v1/health", timeout=10) as response:
                 health = json.loads(response.read())
             ml = health["modules"]["ml"]
-            ok = ml.get("available") and ml.get("model_name") == EXPECTED_MODEL and health["modules"].get("web_sandbox") is False
-            check("remote API health (v3 loaded, sandbox off)", "PASS" if ok else "FAIL", f"{remote_url}: {ml.get('model_name')} available={ml.get('available')}")
+            ok = ml.get("available") and ml.get("model_name") == EXPECTED_MODEL
+            check("remote API health (v3 loaded)", "PASS" if ok else "FAIL", f"{remote_url}: {ml.get('model_name')} available={ml.get('available')}")
         except Exception as exc:
             check("remote API health", "FAIL", type(exc).__name__)
 
@@ -187,7 +173,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--profile", choices=("development", "production"), default="development")
     parser.add_argument("--remote", help="also verify a deployed API base URL (one GET to /api/v1/health)")
     args = parser.parse_args(argv)
-    steps = [check_model, check_ocr, check_api, check_sandbox] if args.skip_frontend else [check_model, check_ocr, check_api, check_frontend, check_sandbox]
+    steps = [check_model, check_ocr, check_api] if args.skip_frontend else [check_model, check_ocr, check_api, check_frontend]
     if args.profile == "production":
         def check_production_step() -> None:
             check_production(args.remote)

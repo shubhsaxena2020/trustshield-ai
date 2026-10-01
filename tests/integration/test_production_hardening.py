@@ -222,8 +222,6 @@ def test_bad_production_settings_are_reported(overrides, fragment):
 
 
 @pytest.mark.parametrize("name,value,fragment", [
-    ("ENABLE_WEB_SANDBOX", "true", "ENABLE_WEB_SANDBOX"),
-    ("TRUSTSHIELD_SANDBOX_ALLOW_EXTERNAL", "true", "ALLOW_EXTERNAL"),
     ("TRUSTSHIELD_ML", "off", "TRUSTSHIELD_ML=off"),
     ("TRUSTSHIELD_ML_MODEL", "trustshield_text_v1", "TRUSTSHIELD_ML_MODEL"),
     ("TRUSTSHIELD_OCR_PROVIDER", "mock", "mock"),

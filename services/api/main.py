@@ -7,10 +7,7 @@ import logging
 import math
 import os
 import sys
-import threading
-import time
 from contextlib import asynccontextmanager
-from urllib.parse import urlsplit
 
 from typing import Literal
 
@@ -26,10 +23,7 @@ from services.analysis.extractors.image_validation import ImageRejected, max_upl
 from services.analysis.extractors.ocr import get_ocr_provider
 from services.analysis.fusion.result import SCHEMA_VERSION, AnalysisResult, ModuleResult
 from services.analysis.normalization.text import InvalidInput
-from services.analysis.pipeline import analyze_image, analyze_qr, analyze_text, analyze_url, merge_sandbox_result
-from services.analysis.url_analysis.ssrf import UnsafeURL, validate_public_url
-from services.analysis.web_sandbox.client import run_sandbox
-from services.analysis.web_sandbox.policy import SandboxPolicy, feature_enabled
+from services.analysis.pipeline import analyze_image, analyze_qr, analyze_text, analyze_url
 
 from services.chat.contract import ChatAnalysis, to_contract
 from services.chat.explain import Reply, followup_intent, get_provider
@@ -42,12 +36,6 @@ from .security import BodyLimitMiddleware, ObservabilityMiddleware, RateLimiter,
 from .settings import Settings
 from .startup import startup_problems
 
-_SANDBOX_BUCKETS: dict[str, tuple[float, float]] = {}
-_SANDBOX_RATE = 5.0
-_SANDBOX_MAX_PENDING = 8  # accepted-but-unfinished jobs; bounds threads and queued subprocesses
-_SANDBOX_PENDING = threading.BoundedSemaphore(_SANDBOX_MAX_PENDING)
-_SANDBOX_WINDOW = 60.0
-
 router = APIRouter()
 
 
@@ -57,7 +45,6 @@ class TextIn(BaseModel):
 
 class UrlIn(BaseModel):
     url: str = Field(max_length=2048)
-    sandbox: bool = False
 
 
 # ---- per-request helpers -------------------------------------------------------------------------------------------
@@ -131,7 +118,7 @@ def health():
         "text": True, "url_static": True,
         "ml": ml,
         "ocr": {"available": ocr.is_available(), "provider": ocr.name},
-        "qr": True, "web_sandbox": feature_enabled(),
+        "qr": True,
     }}
 
 
@@ -165,83 +152,9 @@ def analyze_text_endpoint(body: TextIn, request: Request, response: Response):
         raise HTTPException(422, str(e))
 
 
-def _sandbox_rate_allowed(key: str) -> bool:
-    now = time.monotonic()
-    if len(_SANDBOX_BUCKETS) > 5000:
-        for stale in [k for k, (t, _) in _SANDBOX_BUCKETS.items() if now - t > _SANDBOX_WINDOW]:
-            del _SANDBOX_BUCKETS[stale]
-    started, tokens = _SANDBOX_BUCKETS.get(key, (now, _SANDBOX_RATE))
-    elapsed = max(0.0, now - started)
-    tokens = min(_SANDBOX_RATE, tokens + elapsed * (_SANDBOX_RATE / _SANDBOX_WINDOW))
-    if tokens < 1.0:
-        _SANDBOX_BUCKETS[key] = (now, tokens)
-        return False
-    _SANDBOX_BUCKETS[key] = (now, tokens - 1.0)
-    return True
-
-
-async def _finish_sandbox_job(analysis_id: str, url: str, store: ResultStore) -> None:
-    try:
-        outcome = await run_sandbox(url)
-        current = store.get(analysis_id)
-        if current is not None:
-            store.put(merge_sandbox_result(current, outcome), retain=True)
-    except Exception as exc:  # background failures become structured module failures
-        event_log.warning(json.dumps({"event": "sandbox_failure", "analysis_id": analysis_id, "error_type": type(exc).__name__}))
-        current = store.get(analysis_id)
-        if current is not None:
-            store.put(merge_sandbox_result(current, {"status": "failed", "detail": "sandbox worker failed"}), retain=True)
-
-
-def _start_sandbox_job(analysis_id: str, url: str, store: ResultStore) -> None:
-    def run() -> None:
-        try:
-            asyncio.run(_finish_sandbox_job(analysis_id, url, store))
-        finally:
-            _SANDBOX_PENDING.release()
-
-    threading.Thread(target=run, name="trustshield-sandbox-job", daemon=True).start()
-
-
 @router.post("/api/v1/analyze/url", response_model=AnalysisResult, dependencies=[Depends(limit_light)])
-async def analyze_url_endpoint(body: UrlIn, request: Request, response: Response):
-    store = _state(request).store
-    static = analyze_url(body.url)
-    if not body.sandbox:
-        return _publish(request, response, static)
-    if not feature_enabled():
-        modules = dict(static.modules)
-        modules["web_sandbox"] = ModuleResult(status="unavailable", detail="Disabled by ENABLE_WEB_SANDBOX=false")
-        return _publish(request, response, static.model_copy(update={"modules": modules}))
-    if (static.modules.get("url_static", ModuleResult(status="failed")).status != "completed" or
-            static.modules.get("url_static").detail):
-        modules = dict(static.modules)
-        modules["web_sandbox"] = ModuleResult(status="unavailable", detail="URL is malformed or unsupported")
-        return _publish(request, response, static.model_copy(update={"modules": modules}))
-    try:
-        validate_public_url(body.url)
-        port = urlsplit(body.url).port
-    except (UnsafeURL, ValueError) as exc:
-        raise HTTPException(422, f"URL not eligible for sandbox: {exc}")
-    if port is not None and port not in SandboxPolicy.from_env().allowed_ports:
-        raise HTTPException(422, f"URL not eligible for sandbox: port {port} is not allowed")
-    if not _sandbox_rate_allowed(_client(request)):
-        raise HTTPException(429, "sandbox rate limit exceeded; try again later")
-    if not _SANDBOX_PENDING.acquire(blocking=False):
-        raise HTTPException(429, "sandbox is busy; try again later")
-    modules = dict(static.modules)
-    modules["web_sandbox"] = ModuleResult(status="sandboxing", detail="Sandbox worker is running")
-    limitations = [item for item in static.limitations if "not inspected in an isolated browser" not in item]
-    limitations.append("The isolated browser inspection is still in progress.")
-    in_progress = static.model_copy(update={"status": "sandboxing", "modules": modules, "limitations": limitations})
-    _publish(request, response, in_progress, retain=True)
-    try:
-        _start_sandbox_job(in_progress.analysis_id, body.url, store)
-    except Exception:
-        _SANDBOX_PENDING.release()
-        raise
-    response.status_code = 202
-    return in_progress
+def analyze_url_endpoint(body: UrlIn, request: Request, response: Response):
+    return _publish(request, response, analyze_url(body.url))
 
 
 def _image_error(exc: ImageRejected) -> HTTPException:

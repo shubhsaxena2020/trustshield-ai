@@ -14,7 +14,7 @@ GOOD = {
 @pytest.fixture(autouse=True)
 def _env(monkeypatch):
     preflight.results.clear()
-    for name in ("TRUSTSHIELD_ML", "TRUSTSHIELD_ML_MODEL", "TRUSTSHIELD_SANDBOX_ALLOW_EXTERNAL", "ENABLE_WEB_SANDBOX", "DATABASE_URL",
+    for name in ("TRUSTSHIELD_ML", "TRUSTSHIELD_ML_MODEL", "DATABASE_URL",
                  "DEBUG", "TRUSTSHIELD_OCR_PROVIDER", "TRUSTSHIELD_FUSION"):
         monkeypatch.delenv(name, raising=False)
     for name, value in GOOD.items():
@@ -35,7 +35,7 @@ def test_valid_production_configuration_passes_deployment_checks():
     preflight.check_production(None)
     failed = _failures()
     # Tesseract is installed on the dev machine via TESSERACT_CMD; only that environment-specific check may differ.
-    assert failed <= {"API environment (CORS, ML, sandbox, OCR, fusion, tmp)"}, failed
+    assert failed <= {"API environment (CORS, ML, OCR, fusion, tmp)"}, failed
     assert _status("PUBLIC_API_URL is https (or unset for a same-origin deployment)") == "PASS" and _status("frontend API URL is same-origin or matches PUBLIC_API_URL") == "PASS"
     assert _status("no development configuration enabled") == "PASS" and _status("database") == "PASS"
 
@@ -44,10 +44,9 @@ def test_valid_production_configuration_passes_deployment_checks():
     ("PUBLIC_API_URL", "http://api.example.com", "PUBLIC_API_URL is https (or unset for a same-origin deployment)"),
     ("NEXT_PUBLIC_API_URL", "https://other.example.com", "frontend API URL is same-origin or matches PUBLIC_API_URL"),
     ("TRUSTSHIELD_ENV", "development", "TRUSTSHIELD_ENV is staging or production"),
-    ("ENABLE_WEB_SANDBOX", "true", "no development configuration enabled"),
     ("TRUSTSHIELD_OCR_PROVIDER", "mock", "no development configuration enabled"),
-    ("CORS_ALLOWED_ORIGINS", "*", "API environment (CORS, ML, sandbox, OCR, fusion, tmp)"),
-    ("TRUSTSHIELD_ML_MODEL", "trustshield_text_v1", "API environment (CORS, ML, sandbox, OCR, fusion, tmp)"),
+    ("CORS_ALLOWED_ORIGINS", "*", "API environment (CORS, ML, OCR, fusion, tmp)"),
+    ("TRUSTSHIELD_ML_MODEL", "trustshield_text_v1", "API environment (CORS, ML, OCR, fusion, tmp)"),
 ])
 def test_each_deployment_mistake_is_a_failure(monkeypatch, name, value, check):
     monkeypatch.setenv(name, value)

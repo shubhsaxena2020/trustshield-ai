@@ -8,7 +8,7 @@ from scripts import preflight
 @pytest.fixture(autouse=True)
 def _reset(monkeypatch):
     preflight.results.clear()
-    for name in ("TRUSTSHIELD_ML", "TRUSTSHIELD_ML_MODEL", "TRUSTSHIELD_SANDBOX_ALLOW_EXTERNAL", "TRUSTSHIELD_ENV", "ENABLE_WEB_SANDBOX"):
+    for name in ("TRUSTSHIELD_ML", "TRUSTSHIELD_ML_MODEL", "TRUSTSHIELD_ENV"):
         monkeypatch.delenv(name, raising=False)
     yield
     preflight.results.clear()
@@ -46,23 +46,6 @@ def test_model_override_to_v1_warns(monkeypatch):
     assert _status("model override") == "WARN"
 
 
-@pytest.mark.parametrize("env,name", [
-    ({"TRUSTSHIELD_SANDBOX_ALLOW_EXTERNAL": "true"}, "sandbox external browsing DISABLED"),
-    ({"TRUSTSHIELD_ENV": "test"}, "test-mode loopback allowance off"),
-])
-def test_unsafe_sandbox_settings_fail(monkeypatch, env, name):
-    for key, value in env.items():
-        monkeypatch.setenv(key, value)
-    preflight.check_sandbox()
-    assert _status(name) == "FAIL"
-
-
-def test_safe_sandbox_defaults_pass():
-    preflight.check_sandbox()
-    assert _status("sandbox external browsing DISABLED") == "PASS"
-    assert _status("sandbox feature flag") == "PASS"
-
-
 def test_busy_port_fails():
     with socket.socket() as holder:
         holder.bind(("127.0.0.1", 0))
@@ -77,5 +60,4 @@ def test_crashing_check_is_reported_as_failure(monkeypatch):
     monkeypatch.setattr(preflight, "check_model", lambda: None)
     monkeypatch.setattr(preflight, "check_api", lambda: None)
     monkeypatch.setattr(preflight, "check_frontend", lambda: None)
-    monkeypatch.setattr(preflight, "check_sandbox", lambda: None)
     assert preflight.main(["--ports"]) == 1

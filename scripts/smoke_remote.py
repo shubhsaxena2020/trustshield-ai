@@ -3,7 +3,7 @@
     python scripts/smoke_remote.py --base https://api.example.com --origin https://frontend.example.app
 
 Uses only the public HTTP surface and the synthetic demo fixtures. Exits non-zero if any check fails. It sends a small, bounded
-number of requests (well under the rate limits) and never enables or exercises the sandbox.
+number of requests (well under the rate limits).
 """
 from __future__ import annotations
 
@@ -55,7 +55,6 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--base", required=True)
     parser.add_argument("--origin", default="")
-    parser.add_argument("--expect-sandbox", default="false")
     parser.add_argument("--bypass-token", default=os.environ.get("VERCEL_AUTOMATION_BYPASS_SECRET", ""), help="Vercel Deployment Protection bypass secret for Preview URLs")
     parser.add_argument("--skip-limits", action="store_true", help="skip the oversize/rate-limit probes")
     args = parser.parse_args()
@@ -70,7 +69,6 @@ def main() -> int:
     check("health reachable", status == 200, str(status))
     check("ML is trustshield_text_v3 and available", modules.get("ml", {}).get("model_name") == "trustshield_text_v3" and modules.get("ml", {}).get("available") is True)
     check("Tesseract OCR available", modules.get("ocr", {}).get("available") is True and modules["ocr"].get("provider") == "tesseract")
-    check("web sandbox disabled", modules.get("web_sandbox") is False)
     status, _, body = call(base, "/api/v1/readyz")
     check("readyz ready", status == 200 and js(body).get("ready") is True)
     status, headers, _ = call(base, "/api/v1/health")
@@ -94,7 +92,6 @@ def main() -> int:
     check("static URL analysis returns evidence", status == 200 and len(r.get("evidence", [])) > 0)
     status, _, r = analyze("url", "/api/v1/analyze/url", body={"url": "http://0x7f000001/login"}, headers={"Content-Type": "application/json"})
     check("numeric-IP URL flagged", status == 200 and any(e["category"] == "ip_address_host" for e in r.get("evidence", [])), f"{status}")
-    check("URL analysis did not start a sandbox", r.get("modules", {}).get("web_sandbox", {}).get("status") in {"not_run", "unavailable"})
 
     body, hdr = multipart("file", "kyc_screenshot.png", (FIX / "kyc_screenshot.png").read_bytes())
     status, _, r = analyze("image", "/api/v1/analyze/image", raw=body, headers=hdr)

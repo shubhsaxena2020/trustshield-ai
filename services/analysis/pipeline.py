@@ -29,7 +29,6 @@ from services.analysis.ml.evidence import ml_evidence, ml_module_result
 
 LIMIT_ML = "Machine-learning classification was not available for this analysis."
 LIMIT_REP = "No threat-intelligence reputation information is available; this is not the same as the link being known-clean."
-LIMIT_SANDBOX = "The destination page was not inspected in an isolated browser, so its actual content and behaviour are unknown."
 LIMIT_SHORT_CONTEXT = "Limited context: the text is very short, so confidence is reduced."
 
 
@@ -121,7 +120,7 @@ def analyze_text(raw: str, input_type: str = "text", extra_modules: dict[str, Mo
                                          metadata={"claimed": claims, "registered_domain": r.facts["registered_domain"]}))
         modules["url_static"] = ModuleResult(status="completed", data={"domains": analyzed})
         modules["reputation"] = ModuleResult(status="unavailable", detail="No reputation provider configured")
-        limitations += [LIMIT_REP, LIMIT_SANDBOX]
+        limitations += [LIMIT_REP]
     return _finish(input_type, evidence, modules, limitations, module_quality=quality,
                    input_token_count=token_count)
 
@@ -132,8 +131,7 @@ def analyze_url(raw: str, input_type: str = "url", extra_modules: dict[str, Modu
     r = analyze_url_static(raw)
     if not r.valid:
         modules = {"url_static": ModuleResult(status="completed" if r.evidence else "failed", data=r.facts,
-                                               detail="URL is malformed or uses an unsupported scheme"),
-                   "web_sandbox": ModuleResult(status="not_run", detail="Isolated browser inspection not enabled")}
+                                               detail="URL is malformed or uses an unsupported scheme")}
         modules.update(extra_modules or {})
         return _finish(input_type, r.evidence, modules,
                        ["The URL could not be parsed or uses an unsupported scheme."] + list(extra_limitations or []),
@@ -141,39 +139,9 @@ def analyze_url(raw: str, input_type: str = "url", extra_modules: dict[str, Modu
     modules = {
         "url_static": ModuleResult(status="completed", data=r.facts),
         "reputation": ModuleResult(status="unavailable", detail="No reputation provider configured"),
-        "web_sandbox": ModuleResult(status="not_run", detail="Isolated browser inspection not enabled"),
     }
     modules.update(extra_modules or {})
-    return _finish(input_type, r.evidence, modules, [LIMIT_REP, LIMIT_SANDBOX] + list(extra_limitations or []), module_quality=module_quality)
-
-
-def merge_sandbox_result(result: AnalysisResult, outcome: dict) -> AnalysisResult:
-    """Fuse worker telemetry into the already-computed static URL result."""
-    from services.analysis.web_sandbox.evidence import telemetry_to_evidence
-
-    modules = dict(result.modules)
-    status = str(outcome.get("status", "failed"))
-    if status == "completed":
-        telemetry = outcome.get("telemetry") or {}
-        modules["web_sandbox"] = ModuleResult(status="completed", detail="Isolated browser observation completed", data=telemetry)
-        extra = telemetry_to_evidence(telemetry, initial_url=telemetry.get("initial_url"))
-        limitations = [item for item in result.limitations if item != LIMIT_SANDBOX]
-    elif status == "timeout":
-        modules["web_sandbox"] = ModuleResult(status="timeout", detail="Sandbox wall-clock limit exceeded")
-        extra = []
-        limitations = [item for item in result.limitations if item != LIMIT_SANDBOX] + ["The isolated browser inspection timed out; risk confidence was reduced."]
-    elif status == "unavailable":
-        modules["web_sandbox"] = ModuleResult(status="unavailable", detail=str(outcome.get("detail", "Sandbox unavailable")))
-        extra = []
-        limitations = [item for item in result.limitations if item != LIMIT_SANDBOX] + ["The isolated browser was unavailable; page behavior was not inspected."]
-    else:
-        modules["web_sandbox"] = ModuleResult(status="failed", detail=str(outcome.get("detail", "Sandbox worker failed")))
-        extra = []
-        limitations = [item for item in result.limitations if item != LIMIT_SANDBOX] + ["The isolated browser inspection failed; page behavior was not inspected."]
-    limitations = [item for item in limitations if "inspection is still in progress" not in item]
-    merged = _finish(result.input_type, list(result.evidence) + extra, modules, limitations, input_ok=True)
-    # Job polling keys remain stable while fusion is recomputed.
-    return merged.model_copy(update={"analysis_id": result.analysis_id, "created_at": result.created_at})
+    return _finish(input_type, r.evidence, modules, [LIMIT_REP] + list(extra_limitations or []), module_quality=module_quality)
 
 
 def _ocr_module(result: OCRResult, image) -> ModuleResult:

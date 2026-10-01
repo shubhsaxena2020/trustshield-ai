@@ -98,10 +98,6 @@ class Settings:
                 found.append("TRUSTSHIELD_ML=off is not allowed in staging/production")
             if os.getenv("TRUSTSHIELD_OCR_PROVIDER", "tesseract").strip().lower() == "mock":
                 found.append("the mock OCR provider is demo/test only and not allowed in staging/production")
-            if os.getenv("ENABLE_WEB_SANDBOX", "false").strip().lower() in TRUTHY:
-                found.append("ENABLE_WEB_SANDBOX must be false for this deployment")
-            if os.getenv("TRUSTSHIELD_SANDBOX_ALLOW_EXTERNAL", "false").strip().lower() in TRUTHY:
-                found.append("TRUSTSHIELD_SANDBOX_ALLOW_EXTERNAL must be false")
             if os.getenv("ENABLE_EXTERNAL_REPUTATION", "false").strip().lower() in TRUTHY:
                 found.append("ENABLE_EXTERNAL_REPUTATION is not implemented and must be false")
             override = os.getenv("TRUSTSHIELD_ML_MODEL", "").strip()

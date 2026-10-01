@@ -67,7 +67,7 @@ def test_text_analysis_contract():
     assert a["risk_level"] and 0 <= a["risk_score"] <= 100 and a["confidence"] in ("high", "medium", "low")
     assert a["evidence"] and all(e["id"] and e["explanation"] for e in a["evidence"])
     names = {c["name"]: c["used"] for c in a["capabilities"]}
-    assert names["reputation"] is False and names["web_sandbox"] is False
+    assert names["reputation"] is False
     assert not any(b in d["reply"]["text"] for b in BANNED)
 
 

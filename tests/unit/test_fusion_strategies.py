@@ -82,7 +82,7 @@ def test_drivers_are_rendered_in_explanation():
 
 
 def test_confidence_remains_capped():
-    modules = {name: "completed" for name in ("text_rules", "ml", "url_static", "reputation", "web_sandbox", "ocr", "qr")}
+    modules = {name: "completed" for name in ("text_rules", "ml", "url_static", "reputation", "ocr", "qr")}
     result = ml_aware_weighted([], modules)
     assert result.confidence == CONFIDENCE_CAP == "medium"
 

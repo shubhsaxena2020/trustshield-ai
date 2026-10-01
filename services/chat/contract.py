@@ -25,11 +25,9 @@ CAPABILITIES: dict[str, str] = {
     "ocr": "screenshot text extraction (OCR)",
     "qr": "QR code decoding",
     "reputation": "external reputation / threat-intelligence lookup",
-    "web_sandbox": "live inspection of the destination webpage",
 }
 ALWAYS_UNAVAILABLE = {
     "reputation": "No reputation provider is configured; a link that is not flagged is not the same as a link known to be safe.",
-    "web_sandbox": "Live webpage inspection is disabled in this deployment, so the destination was not opened.",
 }
 _CTRL = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
 

@@ -202,7 +202,6 @@ def test_qr_url_uses_static_analysis_without_fetching(monkeypatch):
     assert result.input_type == "qr"
     assert result.modules["qr"].data["payload_type"] == "url"
     assert {"domain_mismatch", "executable_download", "unusual_port"} <= categories(result)
-    assert result.modules["web_sandbox"].status == "not_run"
 
     analyze_qr(qr_bytes("https://example.com/safe"), "image/png", "qr.png")
     analyze_qr(qr_bytes("upi://pay?pa=merchant@upi&pn=Store&am=100&tn=Dinner"), "image/png", "qr.png")

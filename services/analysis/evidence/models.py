@@ -19,7 +19,7 @@ class Severity(str, Enum):
 
 class Evidence(BaseModel):
     id: str = Field(default_factory=lambda: uuid.uuid4().hex[:12])
-    source: str  # e.g. text_rules, url_static, ml, web_sandbox
+    source: str  # e.g. text_rules, url_static, ml
     category: str  # e.g. urgency, domain_mismatch, credential_request
     severity: Severity
     confidence: float = Field(ge=0.0, le=1.0)

@@ -108,7 +108,7 @@ def test_missing_model_degrades_to_unavailable_without_raising(monkeypatch, tmp_
 
 
 def test_confidence_cap_is_single_documented_medium_cap(monkeypatch):
-    modules = {name: "completed" for name in ("text_rules", "ml", "url_static", "reputation", "web_sandbox", "ocr", "qr")}
+    modules = {name: "completed" for name in ("text_rules", "ml", "url_static", "reputation", "ocr", "qr")}
     assert CONFIDENCE_CAP == "medium"
     assert fusion_engine.assess_confidence(modules) == "medium"
     monkeypatch.setattr(fusion_engine, "CONFIDENCE_CAP", "high")

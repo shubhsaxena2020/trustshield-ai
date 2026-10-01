@@ -155,7 +155,6 @@ def test_bad_schemes():
 
 def test_url_endpoint_result_shape():
     r = analyze_url("https://example.com")
-    assert r.modules["web_sandbox"].status == "not_run"
     assert r.risk.label in {"low_risk", "unable_to_verify"}
     assert any("not the same as" in l for l in r.limitations)
 
