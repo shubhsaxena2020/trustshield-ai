@@ -31,6 +31,14 @@ const nextConfig: NextConfig = {
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },
+  // Opt-in, same-process proxy for running frontend + backend on one machine behind a single public entry point (e.g. the
+  // local expo setup: Cloudflare Tunnel exposes only this Next.js server; it forwards /api/* server-side to the FastAPI
+  // backend on loopback, so the backend's own port is never reachable from outside). No effect unless API_PROXY_TARGET is
+  // set; the existing split-origin deployment (NEXT_PUBLIC_API_URL, direct browser-to-API CORS) is unchanged by default.
+  async rewrites() {
+    const target = process.env.API_PROXY_TARGET;
+    return target ? [{ source: "/api/:path*", destination: `${target}/api/:path*` }] : [];
+  },
 };
 
 export default nextConfig;
