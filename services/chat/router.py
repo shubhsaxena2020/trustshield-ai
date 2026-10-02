@@ -18,11 +18,10 @@ from dataclasses import dataclass, field
 from typing import Literal
 
 from services.analysis.normalization.text import extract_urls
+from services.chat.intent import FOLLOWUP_MAX_CHARS, FOLLOWUP_MAX_WORDS
 
 Kind = Literal["followup", "url", "text", "image", "empty"]
 MAX_MESSAGE_CHARS = 5000
-FOLLOWUP_MAX_CHARS = 240
-FOLLOWUP_MAX_WORDS = 30
 
 _BARE_URL = re.compile(r"^[\s<\"'(\[]*((?:https?://|www\.)\S+|[a-z0-9-]+(?:\.[a-z0-9-]+)+(?:/\S*)?)[\s>\"')\].,;!?]*$", re.I)
 
