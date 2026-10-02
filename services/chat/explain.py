@@ -808,8 +808,7 @@ def _model_bound_transport(model: str) -> Transport:
 
 
 def get_provider() -> ExplanationProvider:
-    """TRUSTSHIELD_AI_PROVIDER selects the provider ('remote' | 'ollama' | 'deterministic', default 'deterministic'). Falls
-    back to the legacy TRUSTSHIELD_EXPLANATION_PROVIDER name for compatibility with existing deployments/config.
+    """TRUSTSHIELD_AI_PROVIDER selects the provider ('remote' | 'ollama' | 'deterministic', default 'deterministic').
 
     When TRUSTSHIELD_AI_PRIMARY_MODEL is also set (alongside the existing remote config), 'remote' builds a
     ProviderChain instead of a single RemoteLLMProvider: PRIMARY (TRUSTSHIELD_AI_PRIMARY_MODEL) -> SECONDARY
@@ -817,7 +816,7 @@ def get_provider() -> ExplanationProvider:
     TRUSTSHIELD_AI_BASE_URL/_API_KEY -- no duplicated credentials (item 23). Omitting TRUSTSHIELD_AI_PRIMARY_MODEL
     preserves the exact pre-existing single-provider behavior (TRUSTSHIELD_AI_MODEL, one RemoteLLMProvider) --
     nothing changes for a deployment that hasn't opted into the chain."""
-    name = os.getenv("TRUSTSHIELD_AI_PROVIDER", os.getenv("TRUSTSHIELD_EXPLANATION_PROVIDER", "deterministic")).strip().lower()
+    name = os.getenv("TRUSTSHIELD_AI_PROVIDER", "deterministic").strip().lower()
     strict = os.getenv("TRUSTSHIELD_ENV", "development").strip().lower() in {"staging", "production"}
     primary_model = os.getenv("TRUSTSHIELD_AI_PRIMARY_MODEL", "").strip()
     if name == "remote" and os.getenv("TRUSTSHIELD_AI_BASE_URL") and os.getenv("TRUSTSHIELD_AI_API_KEY") and primary_model:

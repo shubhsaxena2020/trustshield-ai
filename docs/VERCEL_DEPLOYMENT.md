@@ -105,7 +105,7 @@ disabled and external browsing is not enabled.
 
 The conversational assistant lives on branch `feature/trustshield-conversational-next` and is **not promoted**. It is deployed, if at all, as a
 Vercel **Preview** using the same bundle/`vercel.json`; production keeps serving the four-tab app until a final report is approved. No
-new environment variables are required (`TRUSTSHIELD_EXPLANATION_PROVIDER` is ignored in production). Same limits as before: Hobby, 2 GiB / 1 vCPU,
+new environment variables are required (`TRUSTSHIELD_AI_PROVIDER` is ignored in production). Same limits as before: Hobby, 2 GiB / 1 vCPU,
 ~4 MiB uploads, sandbox disabled, stateless, per-instance rate limits. Promotion: `vercel promote <preview>` (rebuilds) after approval.
 
 ## Conversational AI assistant build (branch `feature/trustshield-ai-assistant`, Preview only)

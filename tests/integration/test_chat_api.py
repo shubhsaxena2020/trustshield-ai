@@ -150,7 +150,7 @@ def test_ollama_provider_transport_error_falls_back():
 def test_default_provider_is_deterministic(monkeypatch):
     from services.chat.explain import get_provider
     monkeypatch.setenv("TRUSTSHIELD_ENV", "production")
-    monkeypatch.setenv("TRUSTSHIELD_EXPLANATION_PROVIDER", "ollama")
+    monkeypatch.setenv("TRUSTSHIELD_AI_PROVIDER", "ollama")
     assert isinstance(get_provider(), DeterministicExplanationProvider)
 
 

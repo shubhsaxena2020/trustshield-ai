@@ -12,7 +12,7 @@ The verdict comes from rules + ML + URL/QR/OCR evidence + fusion. An explanation
   intents (why suspicious, evidence, URL flagged, sender, what to do, open link?, QR content, OCR text, confidence, confidence vs risk,
   did you open the site?, reputation checked?, definitely fraud?, can it be trusted?) are answered only from fields. When a capability
   is unavailable the answer says so.
-- **Ollama (optional)**: enabled only when `TRUSTSHIELD_EXPLANATION_PROVIDER=ollama` **and** the environment is not staging/production;
+- **Ollama (optional)**: enabled only when `TRUSTSHIELD_AI_PROVIDER=ollama` **and** the environment is not staging/production;
   loopback URLs only; the prompt is system rules + result + evidence + coverage, with all user/OCR/QR text inside an `<untrusted_data>`
   block. Output is checked by `grounding_violations` (certainty claims, "opened the page" when the sandbox was unused, reputation claims
   when unused, a different risk level or score). Any violation, error or timeout falls back to the deterministic reply. Tests use a

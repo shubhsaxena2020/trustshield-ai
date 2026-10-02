@@ -36,9 +36,6 @@ valid JSON — every remote call silently failed until this was found and fixed 
 | `TRUSTSHIELD_AI_BASE_URL` | OpenAI-compatible base URL (e.g. `https://api.openai.com/v1`) | `remote` only |
 | `TRUSTSHIELD_OLLAMA_URL` | local Ollama URL, loopback only (default `http://127.0.0.1:11434`) | `ollama` (dev only) |
 
-`TRUSTSHIELD_EXPLANATION_PROVIDER` (the name used before this phase) is still read as a fallback for `TRUSTSHIELD_AI_PROVIDER`
-if the newer name is unset, so nothing already deployed breaks.
-
 ## Provider chain (Gemini migration pass): PRIMARY -> SECONDARY -> deterministic
 An optional multi-tier chain, built by `get_provider()` only when `TRUSTSHIELD_AI_PRIMARY_MODEL` is set:
 
