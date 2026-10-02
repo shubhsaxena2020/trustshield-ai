@@ -10,6 +10,7 @@ from typing import Any
 
 from services.analysis.evidence.models import Evidence, Severity
 from services.analysis.fusion.config import RISK_BANDS
+from services.analysis.fusion.engine import CATEGORY_PRIORITY, ML_CATEGORY_MAP
 
 STRATEGY_VERSION = "phase4-1"
 MODERATE_ML_CUT = 0.12
@@ -43,30 +44,6 @@ EVIDENCE_STRENGTH_CLASSES = {
     }),
 }
 
-_CATEGORY_PRIORITY = [
-    ("digital_arrest", "digital_arrest"),
-    ("credential_pressure", "credential_phishing"),
-    ("credential_request", "credential_theft"),
-    ("domain_mismatch", "phishing"),
-    ("lookalike_domain", "phishing"),
-    ("homograph_domain", "phishing"),
-    ("job_fee_scam", "fake_job"),
-    ("fake_job", "fake_job"),
-    ("investment_pressure", "investment_fraud"),
-    ("investment_scam", "investment_fraud"),
-    ("payment_request", "payment_fraud"),
-    ("delivery_scam", "delivery_scam"),
-    ("lottery_prize", "prize_scam"),
-    ("account_threat", "account_threat_phishing"),
-    ("impersonation_authority", "impersonation"),
-    ("executable_download", "malware_delivery"),
-]
-_ML_CATEGORY_MAP = {
-    "phishing": "phishing", "credential_theft": "credential_theft", "payment_fraud": "payment_fraud",
-    "fake_job": "fake_job", "investment_scam": "investment_fraud", "impersonation": "impersonation",
-    "digital_arrest": "digital_arrest", "delivery_scam": "delivery_scam",
-    "prize_lottery_scam": "prize_scam", "other_fraud": "other_fraud",
-}
 
 
 @dataclass
@@ -119,14 +96,14 @@ def _classes(evidence: list[Evidence], strong_ml_cut: float) -> dict[str, list[E
 def _classification(evidence: list[Evidence]) -> tuple[str, list[str]]:
     cats = {item.category for item in evidence if item.severity != Severity.informational}
     matched: list[str] = []
-    for category, name in _CATEGORY_PRIORITY:
+    for category, name in CATEGORY_PRIORITY:
         if category in cats and name not in matched:
             matched.append(name)
     if matched:
         return matched[0], matched[1:]
     for item in evidence:
         if item.source == "ml_classifier" and item.severity != Severity.informational:
-            category = _ML_CATEGORY_MAP.get(str(item.metadata.get("category", "")))
+            category = ML_CATEGORY_MAP.get(str(item.metadata.get("category", "")))
             if category:
                 return category, []
     return "none_detected", []
