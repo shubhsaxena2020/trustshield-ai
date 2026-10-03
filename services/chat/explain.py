@@ -6,6 +6,7 @@ ever quoted as labelled DATA and never interpreted as an instruction.
 """
 from __future__ import annotations
 
+import hashlib
 import ipaddress
 import json
 import logging
@@ -23,6 +24,14 @@ from services.chat.contract import ChatAnalysis, ContractEvidence
 from services.chat.cyber_knowledge import match as match_cyber_topic
 from services.chat.product_metadata import PRODUCT_METADATA
 
+
+def _variant_index(key: str, count: int, salt: str = "") -> int:
+    if count <= 1:
+        return 0
+    raw = f"{salt}:{key or ''}".encode("utf-8")
+    return int(hashlib.sha256(raw).hexdigest(), 16) % count
+
+
 LEVEL_TITLE = {"low_risk": "Low risk", "caution": "Caution", "suspicious": "Suspicious", "high_risk": "High risk", "unable_to_verify": "Unable to verify"}
 LEVEL_SENTENCE = {
     "low_risk": "TrustShield found no significant suspicious indicators in what it could check.",
@@ -30,6 +39,38 @@ LEVEL_SENTENCE = {
     "suspicious": "Several suspicious indicators were found.",
     "high_risk": "Strong fraud indicators were found.",
     "unable_to_verify": "The available evidence was not enough to assess this reliably.",
+}
+_LEVEL_SENTENCE_VARIANTS: dict[str, tuple[str, ...]] = {
+    "low_risk": (
+        "TrustShield found no significant suspicious indicators in what it could check.",
+        "No notable suspicious signals were identified in the available checks.",
+        "The checks TrustShield could perform did not reveal material suspicious signals.",
+        "TrustShield did not find significant fraud indicators across the completed checks.",
+    ),
+    "caution": (
+        "Some indicators need independent verification before you act.",
+        "A few indicators need independent verification before you act.",
+        "Independent verification is recommended before acting on this.",
+        "You should seek independent verification before proceeding.",
+    ),
+    "suspicious": (
+        "Several suspicious indicators were found.",
+        "Multiple suspicious indicators were detected.",
+        "TrustShield identified several suspicious indicators.",
+        "A number of warning signals were flagged during the check.",
+    ),
+    "high_risk": (
+        "Strong fraud indicators were found.",
+        "TrustShield detected strong indicators of fraud.",
+        "Clear indicators commonly associated with fraud were found.",
+        "Significant fraud indicators were identified in this analysis.",
+    ),
+    "unable_to_verify": (
+        "The available evidence was not enough to assess this reliably.",
+        "There was insufficient evidence to make a dependable assessment.",
+        "Not enough evidence was available to reliably evaluate this.",
+        "The evidence available was insufficient for a reliable evaluation.",
+    ),
 }
 SEVERITY_ORDER = {"critical": 5, "high": 4, "medium": 3, "low": 2, "informational": 1}
 
@@ -94,6 +135,38 @@ def _bullets(items: list[ContractEvidence]) -> str:
 
 _OPENERS = {"low_risk": "This looks okay.", "caution": "This is worth a second look.", "suspicious": "This looks suspicious.",
            "high_risk": "This looks highly suspicious.", "unable_to_verify": "I couldn't reliably assess this."}
+_OPENER_VARIANTS: dict[str, tuple[str, ...]] = {
+    "low_risk": (
+        "This looks okay.",
+        "This appears okay.",
+        "Nothing alarming stands out here.",
+        "This looks acceptable based on what could be checked.",
+    ),
+    "caution": (
+        "This is worth a second look.",
+        "A cautious approach is advised here.",
+        "This warrants a careful second look.",
+        "Exercise caution with this.",
+    ),
+    "suspicious": (
+        "This looks suspicious.",
+        "There are suspicious aspects to this.",
+        "This looks questionable.",
+        "Several warning signs stand out here.",
+    ),
+    "high_risk": (
+        "This looks highly suspicious.",
+        "This appears strongly suspicious.",
+        "There are severe warning signs here.",
+        "This message looks dangerous.",
+    ),
+    "unable_to_verify": (
+        "I couldn't reliably assess this.",
+        "This could not be evaluated reliably.",
+        "I wasn't able to assess this with confidence.",
+        "Reliable assessment wasn't possible here.",
+    ),
+}
 
 
 def _evidence_phrase(items: list[ContractEvidence]) -> str:
@@ -107,13 +180,36 @@ def initial_reply(a: ChatAnalysis) -> Reply:
     """A natural-language lead paragraph, not a report: technical detail (module names, exact scores, full evidence list,
     capability coverage) lives in the structured card the frontend renders alongside this text, not in the sentence itself."""
     top = top_evidence(a)
-    opener = _OPENERS[a.risk_level]
+    idx = _variant_index(a.analysis_id, 4, salt="initial_reply")
+    opener = _OPENER_VARIANTS.get(a.risk_level, _OPENER_VARIANTS["unable_to_verify"])[idx]
     if a.risk_level == "unable_to_verify":
-        detail = "There wasn't enough to check reliably here — " + (a.uncertainty[0] if a.uncertainty else "some checks did not run") + "."
+        reason = a.uncertainty[0] if a.uncertainty else "some checks did not run"
+        detail_variants = (
+            f"There wasn't enough to check reliably here — {reason}.",
+            f"What was provided didn't offer enough material to check reliably — {reason}.",
+            f"The available evidence was insufficient for a dependable evaluation — {reason}.",
+            f"TrustShield did not have enough data to check reliably — {reason}.",
+        )
+        detail = detail_variants[idx]
     elif top:
-        detail = f"The combination of {_evidence_phrase(top)} is " + ("consistent with fraud." if a.risk_level in ("suspicious", "high_risk") else "worth noting, though nothing stands out strongly.")
+        phrase = _evidence_phrase(top)
+        if a.risk_level in ("suspicious", "high_risk"):
+            detail_variants = (
+                f"The combination of {phrase} is consistent with fraud.",
+                f"Signals including {phrase} together align with common fraud patterns.",
+                f"Seeing {phrase} combined is consistent with fraud.",
+                f"The presence of {phrase} matches patterns commonly seen in fraud.",
+            )
+        else:
+            detail_variants = (
+                f"The combination of {phrase} is worth noting, though nothing stands out strongly.",
+                f"Signals like {phrase} are worth keeping in mind, though nothing stands out as severe.",
+                f"While nothing stands out strongly, {phrase} is worth taking note of.",
+                f"The presence of {phrase} is notable, even though overall indicators remain mild.",
+            )
+        detail = detail_variants[idx]
     else:
-        detail = LEVEL_SENTENCE[a.risk_level]
+        detail = _LEVEL_SENTENCE_VARIANTS.get(a.risk_level, _LEVEL_SENTENCE_VARIANTS["unable_to_verify"])[idx]
     action = (" " + a.safe_actions[0]) if a.safe_actions and a.risk_level != "low_risk" else ""
     return Reply(f"{opener} {detail}{action}", _cite(top))
 
@@ -121,60 +217,200 @@ def initial_reply(a: ChatAnalysis) -> Reply:
 def answer_followup(intent: str, a: ChatAnalysis) -> Reply:
     top = top_evidence(a, 5)
     used = {c.name: c for c in a.capabilities}
+    idx = _variant_index(a.analysis_id, 4, salt=f"followup:{intent}")
     if intent in {"why_suspicious", "evidence"}:
         if not top:
-            return Reply(f"TrustShield did not record any material suspicious evidence. The result is {LEVEL_TITLE[a.risk_level]} ({a.risk_score}/100). {_coverage_line(a)}")
+            variants = (
+                f"TrustShield did not record any material suspicious evidence. The result is {LEVEL_TITLE[a.risk_level]} ({a.risk_score}/100). {_coverage_line(a)}",
+                f"No material suspicious evidence was recorded in this analysis. The result stands at {LEVEL_TITLE[a.risk_level]} ({a.risk_score}/100). {_coverage_line(a)}",
+                f"The analysis logged no significant suspicious evidence. Overall result: {LEVEL_TITLE[a.risk_level]} ({a.risk_score}/100). {_coverage_line(a)}",
+                f"TrustShield found no material suspicious evidence to record. The result is {LEVEL_TITLE[a.risk_level]} ({a.risk_score}/100). {_coverage_line(a)}",
+            )
+            return Reply(variants[idx])
         details = "\n".join(f"• {e.title.rstrip('.')} — {e.explanation.rstrip('.')}. (source: {e.source_module}, severity: {e.severity})" for e in top)
-        return Reply(f"The result is {LEVEL_TITLE[a.risk_level]} ({a.risk_score}/100) because of this evidence:\n{details}", _cite(top))
+        variants = (
+            f"The result is {LEVEL_TITLE[a.risk_level]} ({a.risk_score}/100) because of this evidence:\n{details}",
+            f"TrustShield reached {LEVEL_TITLE[a.risk_level]} ({a.risk_score}/100) based on this evidence:\n{details}",
+            f"This rating of {LEVEL_TITLE[a.risk_level]} ({a.risk_score}/100) was driven by the following evidence:\n{details}",
+            f"Here is the supporting evidence behind the {LEVEL_TITLE[a.risk_level]} ({a.risk_score}/100) evaluation:\n{details}",
+        )
+        return Reply(variants[idx], _cite(top))
     if intent == "url_flag":
         url_ev = [e for e in a.evidence if e.source_module in {"url_static", "brand_check", "qr_payload"} and e.severity != "informational"]
         if not url_ev:
-            return Reply("TrustShield did not record any link-related warning in this analysis." + (" No link was found." if not a.urls else ""))
-        return Reply("Link-related findings:\n" + "\n".join(f"• {e.title.rstrip('.')} — {e.explanation.rstrip('.')}" for e in url_ev[:5]) +
-                     "\nThese come from the link's structure only; the page itself was not opened.", _cite(url_ev[:5]))
+            no_link = " No link was found." if not a.urls else ""
+            variants = (
+                f"TrustShield did not record any link-related warning in this analysis.{no_link}",
+                f"No link-related warnings were recorded during this analysis.{no_link}",
+                f"There were no link-specific warnings flagged in what was checked.{no_link}",
+                f"TrustShield identified no warnings associated with links here.{no_link}",
+            )
+            return Reply(variants[idx])
+        details = "\n".join(f"• {e.title.rstrip('.')} — {e.explanation.rstrip('.')}" for e in url_ev[:5])
+        variants = (
+            f"Link-related findings:\n{details}\nThese come from the link's structure only; the page itself was not opened.",
+            f"Here are the findings regarding the link:\n{details}\nThese indicators are based on URL structure alone; the webpage was not opened.",
+            f"Link analysis identified the following points:\n{details}\nThese reflect the address structure only; TrustShield did not open the destination page.",
+            f"The following findings relate to the link:\n{details}\nThese stem purely from link syntax; the page itself was not opened.",
+        )
+        return Reply(variants[idx], _cite(url_ev[:5]))
     if intent == "sender_name":
         mismatch = [e for e in a.evidence if e.category in {"domain_mismatch", "lookalike_domain"}]
-        base = "A sender name or a claimed brand does not authenticate a message: it is trivial to write any name."
+        base_variants = (
+            "A sender name or a claimed brand does not authenticate a message: it is trivial to write any name.",
+            "Display names and claimed brands do not authenticate a message: any name can easily be typed.",
+            "A claimed brand or sender name is not proof of identity: anyone can write any sender name.",
+            "You cannot rely on a claimed sender name for authentication: sender labels are trivial to fake.",
+        )
+        base = base_variants[idx]
         if mismatch:
-            return Reply(base + " The stronger concern here: " + "; ".join(e.title.rstrip('.') for e in mismatch[:2]) + ".", _cite(mismatch[:2]))
-        return Reply(base + " TrustShield did not find a link/brand mismatch in this analysis, which does not prove the sender is genuine; contact the organisation through its official app or website.")
+            concerns = "; ".join(e.title.rstrip('.') for e in mismatch[:2])
+            lead_variants = (
+                f"{base} The stronger concern here: {concerns}.",
+                f"{base} More concerning in this case: {concerns}.",
+                f"{base} The primary concern identified: {concerns}.",
+                f"{base} Of greater concern here: {concerns}.",
+            )
+            return Reply(lead_variants[idx], _cite(mismatch[:2]))
+        no_mismatch_variants = (
+            f"{base} TrustShield did not find a link/brand mismatch in this analysis, which does not prove the sender is genuine; contact the organisation through its official app or website.",
+            f"{base} No domain or brand mismatch was flagged here, but that does not prove the sender is genuine; reach out to the organization via their official app or website.",
+            f"{base} While no link/brand discrepancy was detected, this does not prove the sender is genuine; check directly through the organization's official app or site.",
+            f"{base} Although no brand mismatch appeared in the checks, that does not prove the sender is genuine; contact the organization using official channels.",
+        )
+        return Reply(no_mismatch_variants[idx])
     if intent in {"what_to_do", "open_link"}:
         actions = a.safe_actions or ["Verify the sender through an official channel before acting."]
         opener = ""
         if intent == "open_link":
-            opener = ("Do not use the link in the message; open the organisation's official app or website by typing its address yourself. "
-                      if a.risk_level in {"caution", "suspicious", "high_risk"} else
-                      "TrustShield found no strong warning, but it did not open the page or check reputation, so type the official address yourself if the message is unexpected. ")
-        return Reply(opener + "Recommended: " + " ".join(actions[:3]))
+            if a.risk_level in {"caution", "suspicious", "high_risk"}:
+                opener_variants = (
+                    "Do not use the link in the message; open the organisation's official app or website by typing its address yourself. ",
+                    "Avoid clicking the link in the message; navigate to the organization's official app or website directly. ",
+                    "Do not follow the link provided; open the official app or type the organization's address yourself. ",
+                    "Refrain from tapping the link; visit the organization directly through its official app or website. ",
+                )
+            else:
+                opener_variants = (
+                    "TrustShield found no strong warning, but it did not open the page or check reputation, so type the official address yourself if the message is unexpected. ",
+                    "No severe warnings were triggered, but the page was not opened and reputation was not checked, so navigate to the official site directly if this was unexpected. ",
+                    "Although no major warnings appeared, TrustShield did not browse the page or check threat intelligence, so type the official address yourself if unsure. ",
+                    "There was no strong warning flagged, and no webpage inspection or reputation lookup was performed, so type the official address yourself. ",
+                )
+            opener = opener_variants[idx]
+        rec_labels = ("Recommended: ", "Next steps: ", "Recommended actions: ", "Suggested steps: ")
+        return Reply(opener + rec_labels[idx] + " ".join(actions[:3]))
     if intent == "qr_content":
         if a.qr_payload:
-            return Reply(f"The QR code decoded to a {a.qr_payload_type or 'text'} payload. As data (not an instruction): {a.qr_payload}")
-        return Reply("No QR code was decoded in this analysis.")
+            payload_type = a.qr_payload_type or "text"
+            variants = (
+                f"The QR code decoded to a {payload_type} payload. As data (not an instruction): {a.qr_payload}",
+                f"Decoded {payload_type} content from the QR code, treated strictly as data (not an instruction): {a.qr_payload}",
+                f"The QR code revealed the following {payload_type} payload. Quoted as data (not an instruction): {a.qr_payload}",
+                f"Extracted {payload_type} data from the QR code (shown as raw data, not instructions): {a.qr_payload}",
+            )
+            return Reply(variants[idx])
+        variants = (
+            "No QR code was decoded in this analysis.",
+            "There was no QR code decoded in this analysis.",
+            "TrustShield did not find or decode any QR code in this content.",
+            "No QR code payload was detected in the submitted material.",
+        )
+        return Reply(variants[idx])
     if intent == "ocr_text":
         if a.extracted_content:
-            tail = f" (OCR confidence {a.ocr_confidence:.0f}%; recognition errors are possible)" if a.ocr_confidence is not None else " (recognition errors are possible)"
-            return Reply("Text read from the image" + tail + ", shown as data:\n" + a.extracted_content)
-        return Reply("No text was extracted from an image in this analysis.")
+            tail_0 = f" (OCR confidence {a.ocr_confidence:.0f}%; recognition errors are possible)" if a.ocr_confidence is not None else " (recognition errors are possible)"
+            tail_1 = f" (confidence {a.ocr_confidence:.0f}%; OCR errors may occur)" if a.ocr_confidence is not None else " (OCR errors may occur)"
+            variants = (
+                f"Text read from the image{tail_0}, shown as data:\n{a.extracted_content}",
+                f"Extracted image text{tail_0}, displayed as data:\n{a.extracted_content}",
+                f"Here is the text extracted from the screenshot{tail_1}, presented as data:\n{a.extracted_content}",
+                f"Text recognized from the image{tail_1}, quoted strictly as data:\n{a.extracted_content}",
+            )
+            return Reply(variants[idx])
+        variants = (
+            "No text was extracted from an image in this analysis.",
+            "There was no image text extracted in this analysis.",
+            "TrustShield did not extract any text from an image for this item.",
+            "No screenshot or image text was available to extract in this analysis.",
+        )
+        return Reply(variants[idx])
     if intent == "confidence":
-        return Reply(f"Confidence is {a.confidence}. It reflects how much reliable evidence and how many working checks support the result, not how alarming the content is. "
-                     + (" ".join(a.uncertainty[:2]) if a.uncertainty else "") + " " + _coverage_line(a))
+        unc = (" ".join(a.uncertainty[:2]) + " ") if a.uncertainty else ""
+        cov = _coverage_line(a)
+        variants = (
+            f"Confidence is {a.confidence}. It reflects how much reliable evidence and how many working checks support the result, not how alarming the content is. {unc}{cov}".strip(),
+            f"The confidence rating is {a.confidence}. This indicates the depth of verifiable evidence and active checks behind the result, rather than threat severity. {unc}{cov}".strip(),
+            f"TrustShield assesses confidence as {a.confidence}. This measures how complete and dependable the available signals are, not the danger level. {unc}{cov}".strip(),
+            f"Confidence for this result is {a.confidence}. It signifies how thoroughly the content could be checked with working tools, not how suspicious it looks. {unc}{cov}".strip(),
+        )
+        return Reply(variants[idx])
     if intent == "confidence_vs_risk":
-        return Reply(f"Risk ({LEVEL_TITLE[a.risk_level]}, {a.risk_score}/100) measures how strong the fraud indicators are. Confidence ({a.confidence}) measures how reliable that assessment is given what could be checked. "
-                     "They can differ: a message can look clearly risky while confidence stays limited because live page inspection and reputation checks were not available.")
+        variants = (
+            f"Risk ({LEVEL_TITLE[a.risk_level]}, {a.risk_score}/100) measures how strong the fraud indicators are. Confidence ({a.confidence}) measures how reliable that assessment is given what could be checked. "
+            "They can differ: a message can look clearly risky while confidence stays limited because live page inspection and reputation checks were not available.",
+            f"Risk ({LEVEL_TITLE[a.risk_level]}, {a.risk_score}/100) evaluates how suspicious the signals are, whereas confidence ({a.confidence}) reflects the completeness of the data checked. "
+            "They often diverge: strong warning signs can be present even when confidence is restrained because webpage browsing and threat intel were not used.",
+            f"While risk ({LEVEL_TITLE[a.risk_level]}, {a.risk_score}/100) gauges the presence of scam indicators, confidence ({a.confidence}) tracks how solidly the analysis is backed by working checks. "
+            "A score can reflect serious risk while confidence remains limited because live inspection was not performed.",
+            f"The risk score ({LEVEL_TITLE[a.risk_level]}, {a.risk_score}/100) reflects the severity of detected indicators, while confidence ({a.confidence}) captures how thoroughly evidence could be gathered. "
+            "A message may show clear risk even if confidence is bounded due to unavailable reputation lookups and live browsing.",
+        )
+        return Reply(variants[idx])
     if intent == "opened_website":
-        return Reply("No. TrustShield did not open the destination webpage in this analysis. The result is based on the message content, the link's structure, the text model and deterministic rules. " + ALWAYS_UNAVAILABLE_TEXT)
+        variants = (
+            f"No. TrustShield did not open the destination webpage in this analysis. The result is based on the message content, the link's structure, the text model and deterministic rules. {ALWAYS_UNAVAILABLE_TEXT}",
+            f"No. The destination website was not opened during this evaluation. TrustShield relied solely on message text, link structure, model signals, and deterministic rules. {ALWAYS_UNAVAILABLE_TEXT}",
+            f"No, TrustShield did not visit or load the destination page. Findings are derived strictly from message content, URL syntax, and heuristic rules. {ALWAYS_UNAVAILABLE_TEXT}",
+            f"No. At no point was the webpage opened or inspected live. The analysis depends on text patterns, URL structural cues, and security rules. {ALWAYS_UNAVAILABLE_TEXT}",
+        )
+        return Reply(variants[idx])
     if intent == "reputation_checked":
         rep = used.get("reputation")
         if rep is not None and rep.used:
-            return Reply("An external reputation lookup was used; see the evidence for its result.")
-        return Reply("No reputation or threat-intelligence lookup was performed. A link that is not flagged is not the same as a link known to be safe.")
+            variants = (
+                "An external reputation lookup was used; see the evidence for its result.",
+                "An external reputation check was performed; refer to the evidence list for details.",
+                "A reputation and threat-intelligence check was consulted; see the recorded evidence for findings.",
+                "External reputation lookup was active for this check; its findings appear in the evidence section.",
+            )
+            return Reply(variants[idx])
+        variants = (
+            "No reputation or threat-intelligence lookup was performed. A link that is not flagged is not the same as a link known to be safe.",
+            "No external reputation or threat-feed check was run. An unflagged link is not proven safe.",
+            "No reputation database was consulted during this check. An unflagged link is not proven to be safe.",
+            "No threat-intelligence lookup was performed for this analysis. The absence of a flag does not mean a link is proven safe.",
+        )
+        return Reply(variants[idx])
     if intent == "definitely_fraud":
-        return Reply(f"TrustShield does not claim certainty. Its assessment is {LEVEL_TITLE[a.risk_level]} ({a.risk_score}/100, confidence {a.confidence}) based on the evidence it could check; it cannot prove a message is genuine or fraudulent. "
-                     "Verify through an official channel before acting.", _cite(top[:3]))
+        variants = (
+            f"TrustShield does not claim certainty. Its assessment is {LEVEL_TITLE[a.risk_level]} ({a.risk_score}/100, confidence {a.confidence}) based on the evidence it could check; it cannot prove a message is genuine or fraudulent. "
+            "Verify through an official channel before acting.",
+            f"TrustShield does not provide absolute certainty. The assessment stands at {LEVEL_TITLE[a.risk_level]} ({a.risk_score}/100, confidence {a.confidence}) based on available evidence; automated tools cannot definitively prove legitimacy or fraud. "
+            "Please verify independently before taking action.",
+            f"Certainty is not claimed by TrustShield. Based on evaluated signals, the rating is {LEVEL_TITLE[a.risk_level]} ({a.risk_score}/100, confidence {a.confidence}); no automated scan can conclusively prove a message is genuine or fake. "
+            "Confirm via official channels first.",
+            f"TrustShield avoids absolute claims. This evaluation indicates {LEVEL_TITLE[a.risk_level]} ({a.risk_score}/100, confidence {a.confidence}) using checked evidence, but cannot conclusively determine truth or fraud. "
+            "Always verify through an official contact method.",
+        )
+        return Reply(variants[idx], _cite(top[:3]))
     if intent == "can_trust":
-        return Reply(f"TrustShield's assessment is {LEVEL_TITLE[a.risk_level]} ({a.risk_score}/100, confidence {a.confidence}). " + LEVEL_SENTENCE[a.risk_level] +
-                     " It cannot guarantee safety; " + (a.safe_actions[0] if a.safe_actions else "verify through an official channel."), _cite(top[:3]))
-    return Reply("I can explain the evidence, the link findings, what to do next, my confidence, and what TrustShield did or did not check for this analysis.")
+        lvl_sent = _LEVEL_SENTENCE_VARIANTS.get(a.risk_level, _LEVEL_SENTENCE_VARIANTS["unable_to_verify"])[idx]
+        action_text = a.safe_actions[0] if a.safe_actions else "verify through an official channel."
+        variants = (
+            f"TrustShield's assessment is {LEVEL_TITLE[a.risk_level]} ({a.risk_score}/100, confidence {a.confidence}). {lvl_sent} It cannot guarantee safety; {action_text}",
+            f"The current assessment is {LEVEL_TITLE[a.risk_level]} ({a.risk_score}/100, confidence {a.confidence}). {lvl_sent} Safety cannot be promised unconditionally; {action_text}",
+            f"TrustShield rates this as {LEVEL_TITLE[a.risk_level]} ({a.risk_score}/100, confidence {a.confidence}). {lvl_sent} No automated tool can promise safety; {action_text}",
+            f"This analysis concluded with {LEVEL_TITLE[a.risk_level]} ({a.risk_score}/100, confidence {a.confidence}). {lvl_sent} Absolute safety cannot be assured; {action_text}",
+        )
+        return Reply(variants[idx], _cite(top[:3]))
+    variants = (
+        "I can explain the evidence, the link findings, what to do next, my confidence, and what TrustShield did or did not check for this analysis.",
+        "I can walk you through the evidence, link details, suggested next steps, confidence score, and coverage limits for this analysis.",
+        "Feel free to ask about the recorded evidence, URL findings, recommended actions, confidence level, or what checks were run.",
+        "I'm here to clarify the evidence signals, link evaluation, recommended steps, confidence metrics, and what was or was not checked.",
+    )
+    return Reply(variants[idx])
 
 
 ALWAYS_UNAVAILABLE_TEXT = "Live webpage inspection is disabled in this deployment."

@@ -21,6 +21,16 @@ BRANDS: dict[str, tuple[str, set[str]]] = {
     "indiapost": ("India Post", {"indiapost.gov.in"}),
     "uidai": ("UIDAI / Aadhaar", {"uidai.gov.in"}),
     "incometax": ("Income Tax Department", {"incometax.gov.in", "incometaxindia.gov.in"}),
+    "paypal": ("PayPal", {"paypal.com", "paypal.me"}),
+    "apple": ("Apple", {"apple.com", "icloud.com", "appleid.apple.com"}),
+    "dhl": ("DHL", {"dhl.com", "dhl.co.in"}),
+    "fedex": ("FedEx", {"fedex.com"}),
+    "chase": ("Chase", {"chase.com"}),
+    "wellsfargo": ("Wells Fargo", {"wellsfargo.com"}),
+    "coinbase": ("Coinbase", {"coinbase.com"}),
+    "binance": ("Binance", {"binance.com"}),
+    "linkedin": ("LinkedIn", {"linkedin.com"}),
+    "spotify": ("Spotify", {"spotify.com"}),
 }
 
 # Phrases in free text that claim a brand (regex on lowercased text).

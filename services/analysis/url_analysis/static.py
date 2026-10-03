@@ -163,10 +163,12 @@ def analyze_url_static(url: str) -> UrlStaticResult:
             flagged = True
             break
     if not flagged:
+        label_tokens = {p for p in re.split(r"[-.]", reg_label) if p}
         for key, (name, officials) in BRANDS.items():
             for off in officials:
                 ol = off.split(".")[0]
-                if len(ol) >= 5 and reg_label != ol and registered not in officials and _levenshtein(reg_label, ol) <= 2 and abs(len(reg_label) - len(ol)) <= 2:
+                near_token = any(len(p) >= 5 and p != ol and _levenshtein(p, ol) <= 1 for p in label_tokens)
+                if len(ol) >= 5 and registered not in officials and (near_token or (reg_label != ol and _levenshtein(reg_label, ol) <= 2 and abs(len(reg_label) - len(ol)) <= 2)):
                     ev.append(_ev("lookalike_domain", Severity.high, 0.85, f"Domain closely resembles {name}'s domain",
                                   f"'{registered}' differs from '{off}' by a few characters (typosquatting).", brand=name, official=off, registered_domain=registered))
                     flagged = True
