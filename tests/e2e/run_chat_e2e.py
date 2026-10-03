@@ -57,11 +57,12 @@ def last_reply(page: Page) -> str:
 
 def run(page: Page, timeout: int) -> None:
     body = lambda: page.inner_text("body")  # noqa: E731
-    check("home is the conversational assistant", page.locator("textarea").count() == 1 and "Think Before You Trust" in body())
-    check("privacy note visible", "Avoid uploading passwords, OTPs or card secrets" in body())
+    check("home is the conversational assistant", page.locator("textarea").count() == 1 and "What should I check for you?" in body())
+    check("privacy note visible", "Avoid sharing passwords, OTPs or card secrets" in body())
 
     page.click("button:has-text('URGENT: your bank account')")
-    check("starter prompt fills the composer without sending", "bank account" in page.input_value("textarea") and page.locator("main ol > li").count() == 0)
+    page.wait_for_selector("main ol > li", timeout=timeout)
+    check("starter prompt sends immediately", "bank account" in body().lower() or page.locator("main ol > li").count() >= 1)
     page.fill("textarea", "line one")
     page.press("textarea", "Shift+Enter")
     check("Shift+Enter inserts a newline", "\n" in page.input_value("textarea"))

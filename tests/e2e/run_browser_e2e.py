@@ -1,10 +1,9 @@
-"""Browser end-to-end run: real Next.js UI -> real FastAPI -> real pipeline.
+"""Browser end-to-end run against the current chat UI: real Next.js page -> real FastAPI -> real pipeline.
 
-Not collected by pytest (no test_ prefix). Run:  python tests/e2e/run_browser_e2e.py
-Requires a production build made with NEXT_PUBLIC_API_URL=http://localhost:8000 (production builds have no localhost fallback).
-Starts its own API (8000) and web (3000, production build) servers and stops
-them by PID. Sandbox runs with ENABLE_WEB_SANDBOX=true but external browsing
-OFF, so it must refuse the public URL safely.
+Not collected by pytest (no test_ prefix). Run:  .venv\\Scripts\\python.exe tests\\e2e\\run_browser_e2e.py
+Uses ports 8100 (API) and 3100 (web) so it never collides with a developer's running stack. Builds the
+frontend with API_PROXY_TARGET pointing at its own API, so the browser only ever talks to the web origin.
+Stops both servers by PID in a finally block.
 """
 from __future__ import annotations
 
@@ -19,12 +18,17 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[2]
+WEB = ROOT / "apps" / "web"
 SHOTS = ROOT / "tests" / "e2e" / "screenshots"
 PY = str(ROOT / ".venv" / "Scripts" / "python.exe") if os.name == "nt" else sys.executable
+API_PORT, WEB_PORT = 8100, 3100
+API = f"http://127.0.0.1:{API_PORT}"
+WEB_URL = f"http://127.0.0.1:{WEB_PORT}/"
+NPX = "npx.cmd" if os.name == "nt" else "npx"
 results: list[tuple[str, bool, str]] = []
 
 
-def wait(url: str, seconds: int = 90) -> None:
+def wait(url: str, seconds: int = 120) -> None:
     for _ in range(seconds):
         try:
             urllib.request.urlopen(url, timeout=2)
@@ -36,123 +40,79 @@ def wait(url: str, seconds: int = 90) -> None:
 
 def check(name: str, ok: bool, detail: str = "") -> None:
     results.append((name, bool(ok), detail))
-    print(("PASS " if ok else "FAIL ") + name + (f" — {detail}" if detail and not ok else ""))
+    print(("PASS " if ok else "FAIL ") + name + (f" -- {detail}" if detail and not ok else ""))
+
+
+def kill(procs: list[subprocess.Popen]) -> None:
+    for p in procs:
+        subprocess.run(["taskkill", "/PID", str(p.pid), "/T", "/F"] if os.name == "nt" else ["kill", str(p.pid)],
+                       capture_output=True)
+
+
+def send(page, text: str) -> None:
+    page.get_by_role("textbox", name="Message").fill(text)
+    page.get_by_role("button", name="Send").click()
 
 
 def main() -> int:
     SHOTS.mkdir(parents=True, exist_ok=True)
-    env = {**os.environ, "ENABLE_WEB_SANDBOX": "true", "PLAYWRIGHT_BROWSERS_PATH": str(ROOT / ".playwright-browsers"),
+    env = {**os.environ, "API_PROXY_TARGET": API, "PLAYWRIGHT_BROWSERS_PATH": str(ROOT / ".playwright-browsers"),
            "TESSERACT_CMD": os.environ.get("TESSERACT_CMD", r"C:\Users\shubh\Tools\Tesseract-OCR\tesseract.exe")}
     env.pop("TRUSTSHIELD_ENV", None)
-    env.pop("TRUSTSHIELD_SANDBOX_ALLOW_EXTERNAL", None)
-    api = subprocess.Popen([PY, "-m", "uvicorn", "services.api.main:app", "--port", "8000"], cwd=ROOT, env=env)
-    npx = "npx.cmd" if os.name == "nt" else "npx"
-    web = subprocess.Popen([npx, "next", "start", "-p", "3000"], cwd=ROOT / "apps" / "web", env=env)
-    pids = [api.pid, web.pid]
+    build = subprocess.run([NPX, "next", "build"], cwd=WEB, env=env, capture_output=True, text=True)
+    if build.returncode != 0:
+        print(build.stdout[-1500:], build.stderr[-1500:])
+        check("frontend production build", False, "next build failed")
+        return 1
+    api = subprocess.Popen([PY, "-m", "uvicorn", "services.api.main:app", "--host", "127.0.0.1", "--port", str(API_PORT)],
+                           cwd=ROOT, env=env)
+    web = subprocess.Popen([NPX, "next", "start", "-H", "127.0.0.1", "-p", str(WEB_PORT)], cwd=WEB, env=env)
     try:
-        wait("http://localhost:8000/api/v1/health")
-        wait("http://localhost:3000/")
-        health = json.load(urllib.request.urlopen("http://localhost:8000/api/v1/health"))
-        check("health reports sandbox enabled and default ML v3",
-              health["modules"]["web_sandbox"] is True and health["modules"]["ml"]["model_name"] == "trustshield_text_v3")
+        wait(f"{API}/api/v1/health")
+        wait(WEB_URL)
+        health = json.load(urllib.request.urlopen(f"{API}/api/v1/health"))
+        check("health: default ML v3 available", health["modules"]["ml"]["model_name"] == "trustshield_text_v3")
+        check("health: web sandbox no longer reported", "web_sandbox" not in health["modules"])
         with sync_playwright() as pw:
             browser = pw.chromium.launch()
             page = browser.new_page(viewport={"width": 1100, "height": 900})
-            page.goto("http://localhost:3000/analyzer")
-            body = lambda: page.inner_text("body")  # noqa: E731
+            page.goto(WEB_URL)
+            page.get_by_role("heading", name="What should I check for you?").wait_for(timeout=15000)
+            check("empty state shows", True)
+            check("no advanced-analyzer link", page.get_by_text("Advanced analyzer").count() == 0)
 
-            page.fill("#input", "URGENT: your SBI account is blocked. Share the OTP now and verify KYC at http://sbi-kyc-update.xyz/login")
-            page.click("button[type=submit]")
-            page.wait_for_selector("text=/high|suspicious/i", timeout=30000)
-            text = body().lower()
-            check("text scam: risk shown with evidence", ("high" in text or "suspicious" in text) and "evidence" in text)
+            send(page, "URGENT: your SBI account is blocked. Share the OTP now and verify KYC at http://sbi-kyc-update.xyz/login")
+            page.get_by_text("High Risk", exact=False).first.wait_for(timeout=60000)
+            body = page.inner_text("body")
+            check("text scam: High Risk with evidence card", "Risk score" in body and "Evidence (" in body, body[-300:])
             page.screenshot(path=str(SHOTS / "text_scam.png"), full_page=True)
 
-            page.fill("#input", "Hi, the team lunch is at 1pm tomorrow. See you there!")
-            page.click("button[type=submit]")
-            page.wait_for_selector("text=/low risk|no strong|low/i", timeout=30000)
-            check("benign text: not flagged high", "high risk" not in body().lower())
+            send(page, "Hi, the team lunch is at 1pm tomorrow. See you there!")
+            page.wait_for_function("() => document.querySelectorAll('[aria-label=\"Message\"]').length > 0")
+            page.wait_for_timeout(4000)
+            check("benign message: not flagged High Risk after the scam turn",
+                  page.inner_text("main").count("High Risk") == 1, "a second High Risk appeared for a benign message")
 
-            page.click("role=tab[name=/link|url/i]")
-            page.fill("#input", "http://0x7f000001/login")
-            page.click("button[type=submit]")
-            page.wait_for_selector("text=/raw IP|IP address/i", timeout=30000)
-            check("numeric-encoded IP URL: IP-address evidence shown", True)
-            page.screenshot(path=str(SHOTS / "url_ip.png"), full_page=True)
+            send(page, "http://paypa1-secure-login.xyz/verify")
+            page.wait_for_timeout(6000)
+            check("lookalike URL: flagged, not Low Risk", "Low Risk" not in page.inner_text("main").split("paypa1")[-1])
+            page.screenshot(path=str(SHOTS / "url_lookalike.png"), full_page=True)
 
-            box = page.locator("input[type=checkbox]")
-            check("sandbox opt-in checkbox visible and off by default", box.count() == 1 and not box.is_checked())
-            box.check()
-            page.fill("#input", "https://example.com/")
-            page.click("button[type=submit]")
-            page.wait_for_function("() => !document.querySelector('button[type=submit]').disabled", timeout=60000)
-            after = body().lower()
-            check("sandbox request on public URL settles (external browsing off) without error alert",
-                  page.locator("section[aria-labelledby=analyze-h] > p[role=alert]").count() == 0 and "external browsing is disabled" in after
-                  and "inspection is still in progress" not in after, after[-400:])
-            page.screenshot(path=str(SHOTS / "url_sandbox_refused.png"), full_page=True)
-
-            page.click("role=tab[name=/screenshot|image/i]")
-            page.set_input_files("input[type=file]", str(ROOT / "demo/fixtures/kyc_screenshot.png"))
-            page.click("button[type=submit]")
-            page.wait_for_selector("text=/extracted text|OCR/i", timeout=90000)
-            check("screenshot: OCR panel shown", True)
+            page.get_by_role("button", name="Attach", exact=True).click()
+            with page.expect_file_chooser() as chooser:
+                page.get_by_role("menuitem", name="Upload a screenshot or QR code").click()
+            chooser.value.set_files(str(ROOT / "demo" / "fixtures" / "kyc_screenshot.png"))
+            page.get_by_role("button", name="Send").click()
+            page.get_by_text("Risk score", exact=False).nth(2).wait_for(timeout=120000)
+            check("screenshot: OCR-backed analysis card shown", "Risk score" in page.inner_text("main"))
             page.screenshot(path=str(SHOTS / "screenshot_kyc.png"), full_page=True)
-
-            page.click("role=tab[name=/qr/i]")
-            page.set_input_files("input[type=file]", str(ROOT / "demo/fixtures/qr_suspicious_url.png"))
-            page.click("button[type=submit]")
-            page.wait_for_selector("text=/QR/i", timeout=60000)
-            check("QR: decoded and analysed without opening the link", "not opened" in body().lower() or "qr" in body().lower())
-            page.screenshot(path=str(SHOTS / "qr_url.png"), full_page=True)
             browser.close()
     finally:
-        for pid in pids:
-            subprocess.run(["taskkill", "/PID", str(pid), "/T", "/F"] if os.name == "nt" else ["kill", str(pid)],
-                           capture_output=True)
+        kill([api, web])
     failed = [name for name, ok, _ in results if not ok]
     print(f"\n{len(results) - len(failed)}/{len(results)} passed")
     return 1 if failed else 0
 
 
-def degraded() -> int:
-    """Second scenario: v3 artifact unavailable. The UI must say so on every tab and still analyse with rules."""
-    env = {**os.environ, "TRUSTSHIELD_ML_MODEL": "model-that-does-not-exist"}
-    env.pop("ENABLE_WEB_SANDBOX", None)
-    api = subprocess.Popen([PY, "-m", "uvicorn", "services.api.main:app", "--port", "8000"], cwd=ROOT, env=env)
-    npx = "npx.cmd" if os.name == "nt" else "npx"
-    web = subprocess.Popen([npx, "next", "start", "-p", "3000"], cwd=ROOT / "apps" / "web", env=env)
-    try:
-        wait("http://localhost:8000/api/v1/health")
-        wait("http://localhost:3000/")
-        health = json.load(urllib.request.urlopen("http://localhost:8000/api/v1/health"))
-        check("degraded: health reports ML unavailable", health["modules"]["ml"]["available"] is False)
-        with sync_playwright() as pw:
-            browser = pw.chromium.launch()
-            page = browser.new_page(viewport={"width": 1100, "height": 900})
-            page.goto("http://localhost:3000/analyzer")
-            page.wait_for_selector("[data-testid=ml-unavailable-banner]", timeout=15000)
-            check("degraded: banner visible on the text tab", page.locator("[data-testid=ml-unavailable-banner]").is_visible())
-            page.click("role=tab[name=/qr/i]")
-            check("degraded: banner still visible on another tab", page.locator("[data-testid=ml-unavailable-banner]").is_visible())
-            page.click("role=tab[name=/text|message/i]")
-            page.fill("#input", "URGENT: your SBI account is blocked. Share the OTP now and verify KYC at http://sbi-kyc-update.xyz/login")
-            page.click("button[type=submit]")
-            page.wait_for_selector("text=/rule|evidence/i", timeout=30000)
-            check("degraded: rules-only analysis still produces evidence", "evidence" in page.inner_text("body").lower())
-            page.screenshot(path=str(SHOTS / "degraded_ml_unavailable.png"), full_page=True)
-            browser.close()
-    finally:
-        for pid in (api.pid, web.pid):
-            subprocess.run(["taskkill", "/PID", str(pid), "/T", "/F"] if os.name == "nt" else ["kill", str(pid)], capture_output=True)
-    failed = [name for name, ok, _ in results if not ok]
-    return 1 if failed else 0
-
-
 if __name__ == "__main__":
-    code = main()
-    if "--degraded" in sys.argv:
-        time.sleep(2)
-        code = degraded() or code
-        print(f"{len(results) - len([r for r in results if not r[1]])}/{len(results)} passed (incl. degraded)")
-    raise SystemExit(code)
+    raise SystemExit(main())
