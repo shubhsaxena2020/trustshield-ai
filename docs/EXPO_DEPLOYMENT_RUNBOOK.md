@@ -42,7 +42,9 @@ on the existing split-origin Vercel/Render deployment unless that variable is se
    ```powershell
    winget install --id Cloudflare.cloudflared
    ```
-   Verify: `cloudflared --version`.
+   Verify: `"C:\Program Files (x86)\cloudflared\cloudflared.exe" --version`. The installer does not add it to PATH in
+   existing shells, so every command below uses this full path. Replace `cloudflared` with it, or add that folder to PATH
+   and open a new terminal.
 
 2. **Backend `.env`** (project root) — copy `.env.example` and set at least:
    ```
@@ -102,7 +104,7 @@ rebuild with it set and restart.
 
 **4. Open the public tunnel to the frontend only:**
 ```bash
-cloudflared tunnel --url http://localhost:3000
+"C:\Program Files (x86)\cloudflared\cloudflared.exe" tunnel --url http://localhost:3000
 ```
 `cloudflared` prints a random `https://<something>.trycloudflare.com` URL — that is what goes on the QR code for
 judges. This is a free "quick tunnel": no account, no DNS setup, good for a single event. It changes every time you

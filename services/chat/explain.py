@@ -752,7 +752,7 @@ def _ollama_transport(prompt: str) -> str:
     body = json.dumps({"model": os.getenv("TRUSTSHIELD_OLLAMA_MODEL", "llama3.2"), "prompt": prompt, "stream": False,
                        "options": {"temperature": 0.1, "num_predict": 300}}).encode()
     request = urllib.request.Request(url + "/api/generate", data=body, headers={"Content-Type": "application/json"})
-    with urllib.request.urlopen(request, timeout=30) as response:  # noqa: S310 (loopback only, enforced above)
+    with urllib.request.urlopen(request, timeout=30) as response:  # noqa: S310 # nosec B310 (scheme pinned to loopback http by the regex above)
         return json.loads(response.read()).get("response", "")
 
 
@@ -957,7 +957,7 @@ def _remote_call_once(base_url: str, api_key: str, model: str, prompt: str, max_
                        "max_tokens": max_tokens, "stream": False}).encode()
     request = urllib.request.Request(f"{base_url}/chat/completions", data=body,
                                      headers={"Content-Type": "application/json", "Authorization": f"Bearer {api_key}"})
-    with urllib.request.urlopen(request, timeout=_REMOTE_TIMEOUT_SECONDS) as response:  # noqa: S310 (validated by _validate_base_url)
+    with urllib.request.urlopen(request, timeout=_REMOTE_TIMEOUT_SECONDS) as response:  # noqa: S310 # nosec B310 (scheme validated by _validate_base_url)
         payload = json.loads(response.read())
         text = _scrub_provider_output(payload["choices"][0]["message"]["content"], api_key)
     if _PROVIDER_NOTICE_RE.search(text):
