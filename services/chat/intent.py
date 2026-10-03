@@ -62,7 +62,7 @@ _OFF_TOPIC_PATTERNS = [
 _SUSPICIOUS_SIGNAL_PATTERNS = [
     r"\botp\b", r"\bone.?time (password|code)\b", r"\bverification code\b", r"\bsecurity code\b",
     r"\baccount.{0,20}\b(blocked|suspended|frozen|locked|expir\w*)\b", r"\bkyc\b.{0,20}\b(expir\w*|updat\w*|verif\w*)\b",
-    r"\bupi\b.{0,20}\b(pin|pay|approve|collect request|request)\b", r"\bcvv\b", r"\bpin number\b", r"\bcard number\b",
+    r"\bupi\b.{0,20}\b(pin|approve|collect request)\b", r"\bcvv\b", r"\bpin number\b", r"\bcard number\b",
     r"\bsend (the |your )?(otp|code|pin|cvv)\b", r"\breply with (your |the )?(otp|code|pin)\b",
     r"\brestore access\b", r"\bunlock (your|this) account\b", r"\bact (now|immediately)\b", r"\bwithin 24 hours\b",
     r"\bclaim your (prize|reward|refund)\b", r"\bpay\b.{0,15}\b(now|immediately|to (receive|release))\b",
