@@ -120,26 +120,6 @@ The v2 holdout scripts are historical and refuse to run (`v2 is spent`).
 .venv\Scripts\python -m pytest -q
 ```
 
-### Optional isolated web sandbox
-
-Install Playwright in the project virtual environment and keep Chromium under
-the repository (never system-wide):
-
-```powershell
-.venv\Scripts\pip install -r requirements-sandbox.txt
-$env:PLAYWRIGHT_BROWSERS_PATH = (Join-Path (Get-Location) '.playwright-browsers')
-.venv\Scripts\python -m playwright install chromium
-```
-
-The sandbox is opt-in per request (`{"sandbox": true}`), disabled by default,
-and external browsing is blocked by default. Use `ENABLE_WEB_SANDBOX=true` to
-enable the path; only explicitly approved deployments should also set
-`TRUSTSHIELD_SANDBOX_ALLOW_EXTERNAL=true`. Run the sandbox tests with
-`$env:TESSERACT_CMD='C:\\Users\\shubh\\Tools\\Tesseract-OCR\\tesseract.exe'; .venv\\Scripts\\python -m pytest -q tests/security tests/integration`.
-This Windows MVP is not a malware-grade sandbox: it has no Docker/microVM,
-reputation, detonation, or persistent screenshot storage policy, and browser
-zero-day risk remains.
-
 ## Run the API
 
 ```powershell
