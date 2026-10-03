@@ -381,6 +381,9 @@ def grounding_violations(text: str, a: ChatAnalysis) -> list[str]:
     m_rep = _CLAIMS_REPUTATION.search(text)
     if m_rep and not caps.get("reputation") and not _is_negated(text, m_rep.start(), m_rep.end()):
         found.append("claims a reputation result")
+    match = _REQUESTS_SECRET.search(text)
+    if match and not _NEGATED_REQUEST.search(text[:match.start()]):
+        found.append("asks the user for a secret")
     # Any OTHER level's title, spoken as a label ("Risk level: high", "the high-risk category", "High risk —"), not just
     # immediately before a dash (independent review FIND-002: bare "Risk level: high." was not caught before).
     _LEVEL_SHORT = {"low_risk": "low", "high_risk": "high", "caution": "caution", "suspicious": "suspicious",
@@ -647,7 +650,6 @@ def _remote_transport(prompt: str, max_tokens: int = _REMOTE_MAX_TOKENS, system_
     api_key = os.environ["TRUSTSHIELD_AI_API_KEY"]
     model = model or os.getenv("TRUSTSHIELD_AI_MODEL", "gpt-4o-mini")
     _validate_base_url(base_url)  # raises ValueError, caught by the caller like any other transport failure -> fallback
-    _acquire_remote_budget()  # raises RemoteProviderBudgetExceeded if the per-minute cap is hit -> fallback
     t0 = time.perf_counter()
     attempts = 0
     last_error: Exception | None = None
@@ -656,6 +658,7 @@ def _remote_transport(prompt: str, max_tokens: int = _REMOTE_MAX_TOKENS, system_
     try:
         for attempts in (1, 2):  # noqa: B007 (used after the loop for logging)
             try:
+                _acquire_remote_budget()  # every HTTP request counts, including the 5xx retry
                 text = _remote_call_once(base_url, api_key, model, prompt, max_tokens, system_prompt)
                 _provider_log.info("provider=remote model=%s status=success latency_ms=%d attempts=%d",
                                    model, round((time.perf_counter() - t0) * 1000), attempts)
@@ -743,6 +746,8 @@ class ProviderChain(ExplanationProvider):
                 continue
             try:
                 text = transport(build()).strip()
+            except RemoteProviderBudgetExceeded:
+                continue  # a local cost cap, not a route fault: must not open the breaker
             except Exception:
                 _circuit_record(label, success=False)
                 continue

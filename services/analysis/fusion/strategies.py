@@ -125,6 +125,12 @@ def _confidence(module_status: dict[str, str], evidence: list[Evidence], input_o
     deterministic_positive = any(item.source != "ml_classifier" and item.severity != Severity.informational for item in evidence)
     if module_status.get("ml") == "completed" and ml_positive != deterministic_positive:
         base = {"high": "medium", "medium": "low", "low": "low"}[base]
+    elif module_status.get("ml") == "completed" and ml_positive and deterministic_positive:
+        ranks = list(Severity)
+        ml_top = max(ranks.index(i.severity) for i in evidence if i.source == "ml_classifier" and i.severity != Severity.informational)
+        det_top = max(ranks.index(i.severity) for i in evidence if i.source != "ml_classifier" and i.severity != Severity.informational)
+        if abs(ml_top - det_top) >= 2:
+            base = {"high": "medium", "medium": "low", "low": "low"}[base]
     return base
 
 
