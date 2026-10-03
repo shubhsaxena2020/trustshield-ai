@@ -170,7 +170,7 @@ _OPENER_VARIANTS: dict[str, tuple[str, ...]] = {
 
 
 def _evidence_phrase(items: list[ContractEvidence]) -> str:
-    titles = [e.title.rstrip(".").lower() for e in items[:3]]
+    titles = [(t[:1].lower() + t[1:]) for t in (e.title.rstrip(".") for e in items[:3])]
     if len(titles) == 1:
         return titles[0]
     return ", ".join(titles[:-1]) + " and " + titles[-1]
