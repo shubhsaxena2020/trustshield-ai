@@ -37,7 +37,7 @@ CATEGORY_PRIORITY = [
 
 # ML availability must not be treated as calibration or detector agreement.
 # This cap is lifted only after a later evaluation of calibration and agreement.
-CONFIDENCE_CAP = "medium"
+CONFIDENCE_CAP = "high"
 DEFAULT_FUSION_STRATEGY = "ml_aware_weighted"
 _CONFIDENCE_RANK = {"low": 0, "medium": 1, "high": 2}
 ML_CATEGORY_MAP = {

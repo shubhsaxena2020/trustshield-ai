@@ -121,8 +121,6 @@ def _confidence(module_status: dict[str, str], evidence: list[Evidence], input_o
         quality_avg = sum(max(0.0, min(1.0, value)) for value in quality.values()) / len(quality)
         coverage *= 0.5 + 0.5 * quality_avg
     base = "high" if coverage >= 0.85 else "medium" if coverage >= 0.55 else "low"
-    if base == "high":
-        base = "medium"  # preserve the documented cap for new strategies too
     ml_positive = any(item.source == "ml_classifier" and item.severity != Severity.informational for item in evidence)
     deterministic_positive = any(item.source != "ml_classifier" and item.severity != Severity.informational for item in evidence)
     if module_status.get("ml") == "completed" and ml_positive != deterministic_positive:

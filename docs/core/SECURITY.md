@@ -40,10 +40,10 @@ relay's port, even for convenience.
 
 **Rate limits are per process.** Multiple workers or instances each keep their own counters.
 
-**The remote-call budget is a cost control.** It is 20 calls per minute per process. Raising it changes the cost exposure
-and should be a deliberate decision.
+**The remote-call budget is a cost control.** It is 100 calls per minute per process (raised from 20 on 2026-10-03 by owner decision). It bounds
+cost exposure on a paid endpoint.
 
-**Fusion confidence is capped.** This is a calibration safeguard, not a security control; see DETECTION.md.
+**Fusion confidence can now report `high`** without a v3 calibration study; see DETECTION.md.
 
 ## Data handling
 

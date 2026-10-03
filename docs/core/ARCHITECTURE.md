@@ -44,10 +44,10 @@ input (text | URL | image | QR)
   (the sandboxed browser) was removed; see DECISIONS.md.
 - **Stateless by default.** Results are held in a bounded in-memory store with a TTL. Uploaded images are processed in
   memory and not stored.
-- **Honest confidence.** Confidence reflects coverage and agreement, and is intentionally capped; see DETECTION.md.
+- **Honest confidence.** Confidence reflects coverage and agreement, and can report `high` when coverage and agreement support it; see DETECTION.md.
 - **Fail visibly.** A missing model or OCR binary fails startup in staging and production instead of degrading silently.
 
 ## Known gaps
 
-- Fusion confidence is capped at `medium` by a hardcoded clamp that is not yet lifted. See DETECTION.md and DECISIONS.md.
+- Fusion confidence was lifted to allow `high` on 2026-10-03 by owner decision, without a calibration study on the shipped v3 model. See DETECTION.md and DECISIONS.md.
 - Rate limits are in memory and per process.

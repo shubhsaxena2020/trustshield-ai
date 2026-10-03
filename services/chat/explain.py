@@ -565,7 +565,7 @@ def _is_private_ip(host: str) -> bool:
 # existing chat rate limits, so a client that stays within those limits still cannot run up unbounded provider cost.
 _REMOTE_CONCURRENCY = threading.Semaphore(3)
 _REMOTE_CALL_TIMES: list[float] = []
-_REMOTE_CALLS_PER_MINUTE = 20
+_REMOTE_CALLS_PER_MINUTE = 100
 _REMOTE_CALL_LOCK = threading.Lock()
 
 

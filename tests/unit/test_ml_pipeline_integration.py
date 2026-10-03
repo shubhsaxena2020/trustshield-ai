@@ -107,12 +107,12 @@ def test_missing_model_degrades_to_unavailable_without_raising(monkeypatch, tmp_
     assert result.modules["ml"].detail
 
 
-def test_confidence_cap_is_single_documented_medium_cap(monkeypatch):
+def test_confidence_cap_is_single_documented_high_cap(monkeypatch):
     modules = {name: "completed" for name in ("text_rules", "ml", "url_static", "reputation", "ocr", "qr")}
-    assert CONFIDENCE_CAP == "medium"
-    assert fusion_engine.assess_confidence(modules) == "medium"
-    monkeypatch.setattr(fusion_engine, "CONFIDENCE_CAP", "high")
+    assert CONFIDENCE_CAP == "high"
     assert fusion_engine.assess_confidence(modules) == "high"
+    monkeypatch.setattr(fusion_engine, "CONFIDENCE_CAP", "medium")
+    assert fusion_engine.assess_confidence(modules) == "medium"
 
 
 def test_health_reports_ml_shape():

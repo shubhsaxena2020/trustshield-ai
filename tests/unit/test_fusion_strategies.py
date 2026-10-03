@@ -25,7 +25,7 @@ def test_strong_ml_alone_is_at_least_suspicious_and_disagreement_lowers_confiden
     result = strength_gated([ev("ml_malicious_content", Severity.high, 0.95, "ml_classifier")], statuses())
     assert result.label in {"suspicious", "high_risk"}
     assert result.score >= 50
-    assert result.confidence == "low"
+    assert result.confidence == "medium"  # full coverage starts at high; disagreement steps it down one level
 
 
 def test_moderate_ml_alone_is_at_least_caution():
@@ -72,7 +72,7 @@ def test_completed_ml_disagreement_lowers_confidence():
     result = ml_aware_weighted([ev("ml_malicious_content", Severity.medium, 0.4, "ml_classifier")], statuses())
     assert result.data["agreement"] == "ml_only"
     assert result.data["disagreement"] is True
-    assert result.confidence == "low"
+    assert result.confidence == "medium"  # full coverage starts at high; disagreement steps it down one level
 
 
 def test_drivers_are_rendered_in_explanation():
@@ -81,10 +81,10 @@ def test_drivers_are_rendered_in_explanation():
     assert "moderate_ml" in explanation
 
 
-def test_confidence_remains_capped():
+def test_full_coverage_and_agreement_can_report_high():
     modules = {name: "completed" for name in ("text_rules", "ml", "url_static", "reputation", "ocr", "qr")}
     result = ml_aware_weighted([], modules)
-    assert result.confidence == CONFIDENCE_CAP == "medium"
+    assert result.confidence == CONFIDENCE_CAP == "high"
 
 
 def test_strong_ml_and_strong_deterministic_evidence_are_high_risk():
@@ -102,7 +102,7 @@ def test_rules_strong_with_ml_negative_keeps_risk_and_reduces_confidence():
     positive = strength_gated(evidence + [ev("ml_malicious_content", Severity.medium, 0.4, "ml_classifier")], statuses())
     assert negative.score >= 50
     assert negative.label in {"suspicious", "high_risk"}
-    assert negative.confidence == "low"
+    assert negative.confidence == "medium"  # full coverage starts at high; disagreement steps it down one level
     assert positive.score >= negative.score
 
 

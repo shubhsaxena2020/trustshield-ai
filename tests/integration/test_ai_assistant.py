@@ -467,7 +467,7 @@ def test_find005_negation_must_be_in_the_same_clause():
 def test_find008_remote_call_budget_is_enforced():
     from services.chat.explain import _acquire_remote_budget, _REMOTE_CALL_TIMES, RemoteProviderBudgetExceeded
     _REMOTE_CALL_TIMES.clear()
-    for _ in range(20):
+    for _ in range(100):
         _acquire_remote_budget()
     with pytest.raises(RemoteProviderBudgetExceeded):
         _acquire_remote_budget()

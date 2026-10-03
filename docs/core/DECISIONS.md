@@ -74,14 +74,14 @@ through the existing relay).
 
 ---
 
-### D-005: Keep the per-minute remote-call budget at 20 (open)
+### D-005: Raise the per-minute remote-call budget to 100 (2026-10-03)
 
-**Decided (for now).** The budget stays at 20 calls per minute per process.
+**Decided.** The budget is 100 calls per minute per process, by owner decision.
 
 **Why.** It bounds cost exposure on a remote provider. Raising it for a live demo is a cost decision the owner must make.
 
-**Open.** Before a live multi-person demo, decide whether 20 per minute is enough. The change itself is a one-line edit
-in `services/chat/explain.py`, but it was deliberately not made without that decision.
+**Consequence.** Cost exposure at the limit is up to five times higher. Re-check the budget if the endpoint is billed
+per call.
 
 ---
 

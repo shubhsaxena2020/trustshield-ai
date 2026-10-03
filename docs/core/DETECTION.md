@@ -33,10 +33,12 @@ Confidence answers "how reliable is this assessment", not "how alarming is the c
 - module quality (for example OCR quality on a screenshot)
 - agreement between ML and rules (`agree`, `ml_only`, `rules_only`, `both_negative`)
 
-**Known issue, not yet fixed.** Confidence is clamped to `medium` by a hardcoded constant (`CONFIDENCE_CAP` in
-`engine.py`) and a second hardcoded clamp in `strategies.py`. The result is that a fully covered, fully agreeing scan
-still reports `medium`. The clamp was introduced deliberately as a safety measure until calibration was evaluated; the
-calibration evaluation has not been run since. Lifting it requires a decision; see DECISIONS.md.
+**Cap lifted (2026-10-03).** `CONFIDENCE_CAP` in `engine.py` is now `high`, and the duplicate hardcoded clamp in
+`strategies.py` was removed. A fully covered scan with ML and rules agreeing can report `high`. A disagreement between
+ML and rules steps the level down one level, so that case reports `medium`.
+
+**Open.** No calibration study has been run on the shipped v3 model. The only validation predictions on disk were
+produced by v1, so they cannot support this change. See DECISIONS.md, D-004.
 
 ## Thresholds and tuning
 

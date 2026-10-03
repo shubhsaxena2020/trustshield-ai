@@ -27,8 +27,7 @@ external components and are reported, not hidden.
   guard. `test_spent_data_boundary.py` checks this statically.
 - **Runtime boundary.** Services and frontend code never reference spent data paths (`test_runtime_and_frontend_never_reference_spent_data`).
 - **Deployment profile.** Staging and production configuration rules are tested against the real settings code.
-- **Confidence cap.** A test asserts the current `medium` cap. It will fail when the cap is intentionally lifted; that is
-  the point, so the change is deliberate.
+- **Confidence cap.** Tests assert the current `high` cap and the `medium` step-down on ML/rules disagreement.
 
 ## Before shipping a change
 
