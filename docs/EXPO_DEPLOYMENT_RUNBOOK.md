@@ -69,7 +69,12 @@ on the existing split-origin Vercel/Render deployment unless that variable is se
 
 Run these in order, each in its own terminal, from the project root unless noted.
 
-**1. Start 9Router** the way you normally do (its own app/service). Confirm it's listening on loopback:
+**1. Start 9Router bound to loopback only.** 9Router defaults to `0.0.0.0`, which exposes it to the local network. Always
+pass `--host 127.0.0.1`:
+```bash
+node "C:\Users\shubh\.npm-global\node_modules\9router\cli.js" --host 127.0.0.1
+```
+Confirm it's listening on loopback only (`127.0.0.1:20128`, never `0.0.0.0`):
 ```bash
 curl http://127.0.0.1:20128/v1/models
 ```
