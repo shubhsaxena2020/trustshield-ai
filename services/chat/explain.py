@@ -417,42 +417,139 @@ ALWAYS_UNAVAILABLE_TEXT = "Live webpage inspection is disabled in this deploymen
 
 
 # ---- general chat / cybersecurity education / product Q&A (deterministic; no analysis in play) ---------------------------
-_GREETING_REPLY = ("Hey! I'm TrustShield AI. Send me a suspicious message, screenshot, QR code or link and I'll investigate "
-                   "it — or ask me a cybersecurity question, like how phishing or UPI fraud works.")
+_GREETING_VARIANTS: tuple[str, ...] = (
+    "Hey! I'm TrustShield AI. Send me a suspicious message, screenshot, QR code or link and I'll investigate "
+    "it — or ask me a cybersecurity question, like how phishing or UPI fraud works.",
+    "Hello! I'm TrustShield AI, your cybersecurity assistant. Share a suspicious link, message, screenshot, or QR code "
+    "for analysis, or ask any digital safety question, such as spotting scams or UPI fraud.",
+    "Hi there! I'm TrustShield AI. You can send me any suspicious text, URL, screenshot, or QR code to investigate, "
+    "or ask about cybersecurity topics like phishing techniques and payment security.",
+    "Welcome! I'm TrustShield AI. Paste a message, link, QR code, or screenshot to check for scams, "
+    "or ask me any security question about phishing, smishing, or online fraud.",
+)
+_GREETING_REPLY = _GREETING_VARIANTS[0]
 
-_PRODUCT_ANSWERS: list[tuple[re.Pattern, str]] = [
-    (re.compile(r"\baccurate|accuracy\b", re.I), lambda m: (
+
+def greeting_reply(message: str) -> Reply:
+    idx = _variant_index(message.strip().lower(), len(_GREETING_VARIANTS), salt="greeting")
+    return Reply(_GREETING_VARIANTS[idx])
+
+
+_PRODUCT_GUARANTEE_VARIANTS: tuple[str, ...] = (
+    "TrustShield does not provide absolute guarantees; it reports risk evidence and uncertainty to help you evaluate messages.",
+    "No absolute certainty is provided by TrustShield; our role is reporting risk indicators and uncertainty for your review.",
+    "TrustShield avoids absolute claims; we provide risk assessments based on verifiable indicators rather than guarantees.",
+    "We cannot promise absolute certainty; TrustShield provides evidence-based risk assessments with clear uncertainty bounds.",
+)
+
+_PRODUCT_ANSWERS: list[tuple[re.Pattern, Callable[[dict, int], str]]] = [
+    (re.compile(r"\baccurate|accuracy\b", re.I), lambda m, idx=0: (
         f"On a one-time sealed test, {m['current_production_model']} scored recall {m['sealed_holdout_metrics']['recall']}, "
         f"specificity {m['sealed_holdout_metrics']['specificity']}, precision {m['sealed_holdout_metrics']['precision']}, "
-        f"F1 {m['sealed_holdout_metrics']['f1']}. {m['sealed_holdout_metrics']['note']}")),
-    (re.compile(r"\bchatgpt\b", re.I), lambda m: "No — TrustShield is a purpose-built cybersecurity assistant, not ChatGPT. " + m["not_a_general_assistant"]),
-    (re.compile(r"\bmodel\b.*\buse\b|\bwhat model\b", re.I), lambda m: f"The active fraud-detection model is {m['current_production_model']}."),
-    (re.compile(r"\bstore|save|keep\b.*\bmy\b|\bhistory\b", re.I), lambda m: m["privacy"]),
-    (re.compile(r"\bbrowse\b|\bvisit\b|\bopen\b.*\bwebsite", re.I), lambda m: ("No — " + m["capabilities_not_used"][1] + " is not used; " + m["capabilities_used"][2] + " is.")),
-    (re.compile(r"\bguarantee\b|\bdefinitely (safe|fraud)\b", re.I), lambda m: m["guarantees"]),
-    (re.compile(r"\b(made|built|created)\b.*\byou\b", re.I), lambda m: f"{m['name']} was built by team {m['team']}."),
+        f"F1 {m['sealed_holdout_metrics']['f1']}. {m['sealed_holdout_metrics']['note']}",
+        f"According to a one-time sealed evaluation, {m['current_production_model']} achieved recall of {m['sealed_holdout_metrics']['recall']}, "
+        f"specificity of {m['sealed_holdout_metrics']['specificity']}, precision of {m['sealed_holdout_metrics']['precision']}, "
+        f"and F1 score of {m['sealed_holdout_metrics']['f1']}. {m['sealed_holdout_metrics']['note']}",
+        f"In sealed holdout testing, {m['current_production_model']} measured recall {m['sealed_holdout_metrics']['recall']}, "
+        f"specificity {m['sealed_holdout_metrics']['specificity']}, precision {m['sealed_holdout_metrics']['precision']}, "
+        f"and F1 {m['sealed_holdout_metrics']['f1']}. {m['sealed_holdout_metrics']['note']}",
+        f"Sealed test results for {m['current_production_model']} recorded {m['sealed_holdout_metrics']['recall']} recall, "
+        f"{m['sealed_holdout_metrics']['specificity']} specificity, {m['sealed_holdout_metrics']['precision']} precision, "
+        f"and {m['sealed_holdout_metrics']['f1']} F1. {m['sealed_holdout_metrics']['note']}",
+    )[idx % 4]),
+    (re.compile(r"\bchatgpt\b", re.I), lambda m, idx=0: (
+        f"No — TrustShield is a purpose-built cybersecurity assistant, not ChatGPT. {m['not_a_general_assistant']}",
+        f"No, I am TrustShield AI, a dedicated security tool rather than ChatGPT. {m['not_a_general_assistant']}",
+        f"No — I'm TrustShield AI, designed specifically for scam and fraud analysis, not a general assistant like ChatGPT. {m['not_a_general_assistant']}",
+        f"No, TrustShield is a specialized cybersecurity and fraud assistant, distinct from ChatGPT. {m['not_a_general_assistant']}",
+    )[idx % 4]),
+    (re.compile(r"\bmodel\b.*\buse\b|\bwhat model\b", re.I), lambda m, idx=0: (
+        f"The active fraud-detection model is {m['current_production_model']}.",
+        f"TrustShield is currently running {m['current_production_model']} for fraud detection.",
+        f"Our active text classification model is {m['current_production_model']}.",
+        f"Fraud detection is powered by the active model {m['current_production_model']}.",
+    )[idx % 4]),
+    (re.compile(r"\bstore|save|keep\b.*\bmy\b|\bhistory\b", re.I), lambda m, idx=0: (
+        m["privacy"],
+        f"Privacy by design: {m['privacy']}",
+        f"TrustShield is strictly stateless: {m['privacy']}",
+        f"Regarding data storage: {m['privacy']}",
+    )[idx % 4]),
+    (re.compile(r"\bbrowse\b|\bvisit\b|\bopen\b.*\bwebsite", re.I), lambda m, idx=0: (
+        f"No — {m['capabilities_not_used'][1]} is not used; {m['capabilities_used'][2]} is.",
+        f"No, TrustShield does not browse links. Specifically, {m['capabilities_not_used'][1]} is not used, while {m['capabilities_used'][2]} is.",
+        f"No — we do not visit destination pages. Instead of live browsing, {m['capabilities_used'][2]} is utilized.",
+        f"No, live page browsing is disabled. {m['capabilities_used'][2]} is used instead of {m['capabilities_not_used'][1]}.",
+    )[idx % 4]),
+    (re.compile(r"\bguarantee\b|\bdefinitely (safe|fraud)\b", re.I), lambda m, idx=0: _PRODUCT_GUARANTEE_VARIANTS[idx % 4]),
+    (re.compile(r"\b(made|built|created)\b.*\byou\b", re.I), lambda m, idx=0: (
+        f"{m['name']} was built by team {m['team']}.",
+        f"{m['name']} was created by team {m['team']}.",
+        f"Team {m['team']} developed {m['name']}.",
+        f"{m['name']} was engineered by team {m['team']}.",
+    )[idx % 4]),
 ]
 
 
 def product_qa_reply(question: str) -> Reply:
+    idx = _variant_index(question.strip().lower(), 4, salt="product_qa")
     for pattern, build in _PRODUCT_ANSWERS:
         if pattern.search(question):
-            return Reply(build(PRODUCT_METADATA))
+            return Reply(build(PRODUCT_METADATA, idx))
     m = PRODUCT_METADATA
-    return Reply(f"I'm {m['name']} — {m['purpose']} Right now I use: {', '.join(m['capabilities_used'][:3])}. "
-                 f"I don't use: {' or '.join(m['capabilities_not_used'])}.")
+    fallback_variants = (
+        f"I'm {m['name']} — {m['purpose']} Right now I use: {', '.join(m['capabilities_used'][:3])}. "
+        f"I don't use: {' or '.join(m['capabilities_not_used'])}.",
+        f"I am {m['name']}. {m['purpose']} Currently active checks include: {', '.join(m['capabilities_used'][:3])}. "
+        f"Capabilities not used: {' or '.join(m['capabilities_not_used'])}.",
+        f"This is {m['name']} — {m['purpose']} Working capabilities: {', '.join(m['capabilities_used'][:3])}. "
+        f"Not enabled: {' or '.join(m['capabilities_not_used'])}.",
+        f"TrustShield AI here: {m['purpose']} Active features: {', '.join(m['capabilities_used'][:3])}. "
+        f"Not currently used: {' or '.join(m['capabilities_not_used'])}.",
+    )
+    return Reply(fallback_variants[idx])
 
 
 def cyber_qa_reply(question: str) -> Reply:
     answer = match_cyber_topic(question)
+    idx = _variant_index(question.strip().lower(), 4, salt="cyber_qa")
     if answer:
-        return Reply(answer)
-    return Reply("I can explain things like phishing, smishing, vishing, digital arrest scams, SIM swapping, QR/UPI fraud, "
-                 "sender-ID spoofing, or what to do if you clicked a suspicious link — what would you like to know?")
+        topic_variants = (
+            answer,
+            f"Here is an overview: {answer}",
+            f"To explain: {answer}",
+            f"Here is how that works: {answer}",
+        )
+        return Reply(topic_variants[idx])
+    fallback_variants = (
+        "I can explain things like phishing, smishing, vishing, digital arrest scams, SIM swapping, QR/UPI fraud, "
+        "sender-ID spoofing, or what to do if you clicked a suspicious link — what would you like to know?",
+        "I can help explain phishing, smishing, vishing, digital arrest scams, SIM swapping, QR/UPI fraud, "
+        "sender-ID spoofing, or next steps after clicking a suspicious link. What would you like to explore?",
+        "Ask me about topics like phishing, smishing, vishing, digital arrest scams, SIM swapping, QR or UPI scams, "
+        "sender-ID spoofing, or recovering from a suspicious link — what can I clarify?",
+        "I cover cybersecurity topics including phishing, smishing, vishing, digital arrest scams, SIM swapping, "
+        "QR and UPI fraud, sender spoofing, and handling suspicious links. What would you like to discuss?",
+    )
+    return Reply(fallback_variants[idx])
 
 
-_OFF_TOPIC_REPLY = ("My focus is cybersecurity, scams and fraud — I can't help with that, but ask me about phishing, "
-                    "suspicious messages, links, screenshots or QR codes and I can dig in.")
+_OFF_TOPIC_VARIANTS: tuple[str, ...] = (
+    "My focus is cybersecurity, scams and fraud — I can't help with that, but ask me about phishing, "
+    "suspicious messages, links, screenshots or QR codes and I can dig in.",
+    "I specialize in cybersecurity, scams, and digital safety. I'm unable to assist with unrelated topics, "
+    "but feel free to ask about suspicious messages, URLs, QR codes, or fraud tactics.",
+    "That falls outside my scope. My purpose is detecting fraud and answering cybersecurity questions — "
+    "send me a suspicious link, message, screenshot, or ask how common scams work.",
+    "I'm dedicated to cybersecurity and scam prevention, so I can't help with other subjects. "
+    "If you have a suspicious message, link, QR code, or security query, I'd be glad to look into it.",
+)
+_OFF_TOPIC_REPLY = _OFF_TOPIC_VARIANTS[0]
+
+
+def off_topic_reply(message: str) -> Reply:
+    idx = _variant_index(message.strip().lower(), len(_OFF_TOPIC_VARIANTS), salt="off_topic")
+    return Reply(_OFF_TOPIC_VARIANTS[idx])
 
 # General-chat grounding: even outside an analysis, a reply must never claim a capability TrustShield doesn't have, promise
 # certainty, or request the kind of secret TrustShield itself warns users never to share.
@@ -549,7 +646,7 @@ class DeterministicExplanationProvider(ExplanationProvider):
         return answer_followup(intent, analysis)
 
     def reply_greeting(self, message: str) -> Reply:
-        return Reply(_GREETING_REPLY)
+        return greeting_reply(message)
 
     def reply_cyber_qa(self, question: str) -> Reply:
         return cyber_qa_reply(question)
@@ -558,7 +655,7 @@ class DeterministicExplanationProvider(ExplanationProvider):
         return product_qa_reply(question)
 
     def reply_off_topic(self, message: str) -> Reply:
-        return Reply(_OFF_TOPIC_REPLY)
+        return off_topic_reply(message)
 
 
 _CLAIMS_VERIFIED = re.compile(r"\b(verified|confirmed safe|is safe|100% safe|definitely (fraud|safe|genuine|legitimate)|guaranteed)\b", re.I)
@@ -738,8 +835,8 @@ def build_chat_prompt(kind: str, question: str) -> str:
     """kind is 'greeting' | 'cyber_qa' | 'product_qa' | 'off_topic'. The deterministic answer is always included as the
     grounding floor; an LLM is asked to rephrase/elaborate on it, not to answer independently."""
     m = PRODUCT_METADATA
-    floor = {"greeting": _GREETING_REPLY, "cyber_qa": cyber_qa_reply(question).text,
-            "product_qa": product_qa_reply(question).text, "off_topic": _OFF_TOPIC_REPLY}[kind]
+    floor = {"greeting": greeting_reply(question).text, "cyber_qa": cyber_qa_reply(question).text,
+            "product_qa": product_qa_reply(question).text, "off_topic": off_topic_reply(question).text}[kind]
     policy = ("You are TrustShield AI, a cybersecurity assistant. Stay within cybersecurity, scams, fraud, digital safety and "
              "your own product. Never claim to have browsed a website or checked a reputation/threat-intelligence service. "
              "Never claim certainty ('100% safe', 'guaranteed'). Never ask the user for a password, OTP, CVV or PIN. The "
