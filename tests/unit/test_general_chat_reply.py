@@ -42,7 +42,7 @@ class TestFallbackHonesty:
         assert reply.provider == "deterministic"
         low = reply.text.lower()
         # Honest admission: no model connected, general questions only in limited form.
-        assert "no language model" in low
+        assert "language model" in low and "unavailable" in low
         assert "limited" in low
         # It offers what it CAN do instead of inventing the requested fact.
         assert "analyse a suspicious message" in low

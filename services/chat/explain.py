@@ -583,19 +583,19 @@ def _format_history(turns: list[tuple[str, str]]) -> str:
 
 
 _CHAT_FALLBACK_VARIANTS: tuple[str, ...] = (
-    "Right now I can only answer general questions in a limited form: no language model is connected in this deployment, "
+    "Right now I can only answer general questions in a limited form: my language model isn't available at the moment, "
     "so I can't reason through open questions or look facts up, and I won't guess at an answer. What I can do: analyse a "
     "suspicious message, link, screenshot or QR code for fraud indicators, and explain cybersecurity topics such as "
     "phishing, smishing, UPI/QR fraud and digital arrest scams. Send me one of those and I'll help.",
-    "I'm honest about my limits: with no language model connected here I can only help with general questions in a limited "
+    "I'm honest about my limits: with my language model unavailable right now I can only help with general questions in a limited "
     "form, and I'd rather say that than invent something. I can analyse a suspicious message, link, screenshot or QR code, "
     "or explain cybersecurity topics like phishing, smishing, UPI fraud and digital arrest scams — send one of those and "
     "I'll take a look.",
-    "That falls outside what I can answer here: this deployment has no language model connected, so general questions get "
+    "That falls outside what I can answer right now: my language model is unavailable at the moment, so general questions get "
     "only a limited answer from me and I never make facts up. What I can do is analyse a suspicious message, link, "
     "screenshot or QR code, and explain cybersecurity topics such as phishing, smishing, QR/UPI fraud and digital arrest "
     "scams. I'm happy to help with any of those.",
-    "I can't answer general questions like that in full — no language model is connected to this deployment, so my "
+    "I can't answer general questions like that in full — my language model is unavailable at the moment, so my "
     "answers there are limited and I won't make something up. I can analyse a suspicious message, link, screenshot or QR "
     "code for fraud indicators, or explain cybersecurity topics: phishing, smishing, UPI/QR fraud, digital arrest scams. "
     "Send one of those and I'll dig in.",
@@ -670,8 +670,15 @@ def _claims_unsupported_certainty(text: str) -> bool:
     return False
 
 
+# A model must not invent who built or runs the product. The only builder facts are in product_metadata, which the deterministic
+# product answer quotes directly; any other "built by"/"created by" claim in a model reply is rejected.
+_CLAIMS_CREATOR = re.compile(r"\b(built|created|developed|made|designed|owned|run) by\b", re.I)
+
+
 def chat_grounding_violations(text: str) -> list[str]:
     found = []
+    if _CLAIMS_CREATOR.search(text) and PRODUCT_METADATA.get("team", "") not in text:
+        found.append("claims a builder or owner not in the product facts")
     if _claims_unsupported_certainty(text):
         found.append("claims certainty or verification")
     m_cap = _CLAIMS_CAPABILITY_NOT_USED.search(text)
@@ -696,16 +703,16 @@ class ExplanationProvider(ABC):
     def reply_for_followup(self, intent: str, question: str, analysis: ChatAnalysis) -> Reply: ...
 
     @abstractmethod
-    def reply_greeting(self, message: str) -> Reply: ...
+    def reply_greeting(self, message: str, history: list | None = None) -> Reply: ...
 
     @abstractmethod
-    def reply_cyber_qa(self, question: str) -> Reply: ...
+    def reply_cyber_qa(self, question: str, history: list | None = None) -> Reply: ...
 
     @abstractmethod
-    def reply_product_qa(self, question: str) -> Reply: ...
+    def reply_product_qa(self, question: str, history: list | None = None) -> Reply: ...
 
     @abstractmethod
-    def reply_off_topic(self, message: str) -> Reply: ...
+    def reply_off_topic(self, message: str, history: list | None = None) -> Reply: ...
 
     @abstractmethod
     def reply_chat(self, message: str, history: list | None = None) -> Reply:
@@ -722,16 +729,16 @@ class DeterministicExplanationProvider(ExplanationProvider):
     def reply_for_followup(self, intent: str, question: str, analysis: ChatAnalysis) -> Reply:
         return answer_followup(intent, analysis)
 
-    def reply_greeting(self, message: str) -> Reply:
+    def reply_greeting(self, message: str, history: list | None = None) -> Reply:
         return greeting_reply(message)
 
-    def reply_cyber_qa(self, question: str) -> Reply:
+    def reply_cyber_qa(self, question: str, history: list | None = None) -> Reply:
         return cyber_qa_reply(question)
 
-    def reply_product_qa(self, question: str) -> Reply:
+    def reply_product_qa(self, question: str, history: list | None = None) -> Reply:
         return product_qa_reply(question)
 
-    def reply_off_topic(self, message: str) -> Reply:
+    def reply_off_topic(self, message: str, history: list | None = None) -> Reply:
         return off_topic_reply(message)
 
     def reply_chat(self, message: str, history: list | None = None) -> Reply:
@@ -971,10 +978,11 @@ _provider_log = logging.getLogger("trustshield.ai_provider")
 # Found during the final architecture review: ProviderChain's primary and secondary tiers both resolve to the
 # SAME local 9Router endpoint by default. At the old 20s timeout, a dead/stalled 9Router meant two full 20s
 # waits back to back (40s) before the deterministic fallback finally answered -- long enough to lose a live
-# demo audience. 8s comfortably covers the observed median latencies for the shortlisted conversational models
-# (ag/gemini-3-flash ~2-4s, ag/claude-sonnet-4-6 ~4-6s) while bounding the worst case at 16s instead of 40s.
-_REMOTE_TIMEOUT_SECONDS = 8
-_REMOTE_MAX_TOKENS = 300
+# demo audience. Live measurements on the friend's DeepSeek endpoint (2026-10-04) showed 4-14 s per answer, so the
+# 8 s limit fell back to templates on real questions. 25 s covers that range; the worst case is still bounded.
+_REMOTE_TIMEOUT_SECONDS = 25
+# 600 tokens: 300 cut ChatGPT-style answers off mid-sentence.
+_REMOTE_MAX_TOKENS = 600
 
 # FIND-002 (independent review): TRUSTSHIELD_AI_BASE_URL is operator-set config, not user input, but validate it anyway --
 # a misconfigured or attacker-influenced value must not turn this into an SSRF proxy that also forwards the bearer key.
@@ -1224,21 +1232,21 @@ class ProviderChain(ExplanationProvider):
         return self._try(lambda: build_prompt(question, analysis), lambda t: grounding_violations(t, analysis),
                          fallback_reply)
 
-    def reply_greeting(self, message: str) -> Reply:
+    def reply_greeting(self, message: str, history: list | None = None) -> Reply:
         fallback_reply = self.fallback.reply_greeting(message)
-        return self._try(lambda: build_chat_prompt("greeting", message), chat_grounding_violations, fallback_reply)
+        return self._try(lambda: build_chat_prompt("greeting", message, history), chat_grounding_violations, fallback_reply)
 
-    def reply_cyber_qa(self, question: str) -> Reply:
+    def reply_cyber_qa(self, question: str, history: list | None = None) -> Reply:
         fallback_reply = self.fallback.reply_cyber_qa(question)
-        return self._try(lambda: build_chat_prompt("cyber_qa", question), chat_grounding_violations, fallback_reply)
+        return self._try(lambda: build_chat_prompt("cyber_qa", question, history), chat_grounding_violations, fallback_reply)
 
-    def reply_product_qa(self, question: str) -> Reply:
+    def reply_product_qa(self, question: str, history: list | None = None) -> Reply:
         fallback_reply = self.fallback.reply_product_qa(question)
-        return self._try(lambda: build_chat_prompt("product_qa", question), chat_grounding_violations, fallback_reply)
+        return self._try(lambda: build_chat_prompt("product_qa", question, history), chat_grounding_violations, fallback_reply)
 
-    def reply_off_topic(self, message: str) -> Reply:
+    def reply_off_topic(self, message: str, history: list | None = None) -> Reply:
         fallback_reply = self.fallback.reply_off_topic(message)
-        return self._try(lambda: build_chat_prompt("off_topic", message), chat_grounding_violations, fallback_reply)
+        return self._try(lambda: build_chat_prompt("off_topic", message, history), chat_grounding_violations, fallback_reply)
 
     def reply_chat(self, message: str, history: list | None = None) -> Reply:
         """A general question with an LLM tier configured: the 'chat' prompt kind lets the model answer from its own

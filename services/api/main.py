@@ -252,12 +252,9 @@ async def _chat_turn(request: Request, response: Response, message: str, context
     if intent_result.intent in _CHAT_ONLY_REPLY:
         response_type, method_name = _CHAT_ONLY_REPLY[intent_result.intent]
         method = getattr(provider, method_name)
-        # reply_chat is the only chat-only handler with a history-aware signature (agent2's provider contract)
-        if intent_result.intent == "general_chat":
-            trimmed = [{"role": t.role, "text": t.text[:1500]} for t in history[-6:]]
-            reply = await run_in_threadpool(method, message, trimmed)
-        else:
-            reply = await run_in_threadpool(method, message)
+        # Every chat-only handler takes the recent turns, so follow-ups and general questions see the conversation.
+        trimmed = [{"role": t.role, "text": t.text[:1500]} for t in history[-6:]]
+        reply = await run_in_threadpool(method, message, trimmed)
         return ChatOut(kind="chat", response_type=response_type, intent=intent_result.public(), reply=_reply_out(reply))
 
     if intent_result.intent == "follow_up_analysis":

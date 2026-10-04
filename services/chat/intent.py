@@ -36,6 +36,8 @@ _ASSISTANT_PATTERNS = [
     r"^(who|what) (are|r) (you|u)\b", r"\btell me (more )?about (yourself|you)\b", r"\bintroduce yourself\b",
     r"^(how are|how r) (you|u)\b", r"\bare you (a bot|a robot|real|human)\b", r"\bwhat('s| is) your (name|purpose|job)\b",
     r"^(hi|hey|hello|yo)[ ,!]+(who|what) (are|r) (you|u)\b",
+    r"\b(use|talk to|chat with|ask|help) (you|trustshield)\b", r"\bhow (do|can|should|to) (i |we )?(use|talk to) (you|trustshield)\b",
+    r"\bwho (made|built|created|owns|runs) (you|trustshield)\b", r"\b(your|trustshield'?s) (name|creator|purpose|job|features)\b",
 ]
 
 _GREETINGS = {"yo", "hi", "hey", "hello", "sup", "howdy", "yo!", "hi!", "hey!", "hello!",
