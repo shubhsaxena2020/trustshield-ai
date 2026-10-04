@@ -651,7 +651,8 @@ _NEGATED_REQUEST = re.compile(r"\b(never|don'?t|do not|avoid|refuse to|won'?t)\b
 _CERTAINTY_NEGATION_CUE = re.compile(
     r"\b(cannot|can'?t|won'?t|will not|do(n'?t| not)|does(n'?t| not)|should(n'?t| not)|would(n'?t| not)|"
     r"could(n'?t| not)|(is|are|was|were)\s+not|isn'?t|wasn'?t|unable to|not able to|never)\s+"
-    r"(guarantee|confirm|verify|promise|say|claim|tell you|assure|state|think|assume|believe|suggest|prove|establish|show)\b", re.I)
+    r"(guarantees?|confirms?|verifies|verify|promises?|says?|claims?|tells? you|assures?|states?|stated|think|assume|believe|suggests?|"
+    r"proves?|establish|shows?|describes?|calls?|labels?|rates?|certif(y|ies))\b", re.I)
 
 
 def _claims_unsupported_certainty(text: str) -> bool:
