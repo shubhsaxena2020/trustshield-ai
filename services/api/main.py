@@ -6,6 +6,7 @@ import json
 import logging
 import math
 import os
+import re
 import sys
 from contextlib import asynccontextmanager
 
@@ -14,6 +15,7 @@ from typing import Literal
 from fastapi import APIRouter, Depends, FastAPI, File, Form, HTTPException, Request, Response, UploadFile
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from starlette.concurrency import run_in_threadpool
@@ -27,7 +29,9 @@ from services.analysis.pipeline import analyze_image, analyze_qr, analyze_text, 
 
 from services.chat.contract import ChatAnalysis, to_contract
 from services.chat import agent
-from services.chat.explain import Reply, followup_intent, get_provider
+from services.chat.explain import DeterministicExplanationProvider, Reply, followup_intent, get_provider
+
+_log = logging.getLogger("trustshield.api")
 from services.chat.intent import classify_intent
 from services.chat.orchestrator import analyze_turn
 from services.chat.router import MAX_MESSAGE_CHARS, route
@@ -268,6 +272,136 @@ async def _agent_chat(request: Request, response: Response, message: str, histor
     response_type = _CHAT_ONLY_REPLY[intent_result.intent][0]
     return ChatOut(kind="chat", response_type=response_type, intent=intent_result.public(),
                    reply=ReplyOut(text=agent_reply.text, provider="nilabh", grounded=True))
+
+
+def _sse(event: dict) -> str:
+    return "data: " + json.dumps(event, default=str) + "\n\n"
+
+
+def _text_events(text: str):
+    """Deterministic text is sent as word-sized tokens so the client paints it the same way as a streamed model answer."""
+    for piece in re.findall(r"\S+\s*|\s+", text):
+        yield _sse({"type": "token", "text": piece})
+
+
+def _deterministic_chat_text(provider, intent: str, message: str, recent: list[dict]) -> str:
+    # Always the template answer here: the chained provider would call the model again, with the older prompt.
+    method_name = _CHAT_ONLY_REPLY[intent][1]
+    return getattr(DeterministicExplanationProvider(), method_name)(message, recent).text
+
+
+def _stream_chat_events(message: str, history: list[Turn], context: ChatAnalysis | None, signature: str):
+    try:
+        if sum(len(t.text) for t in history) > 12_000:
+            yield _sse({"type": "error", "detail": "conversation context is too large; start a new chat"})
+            return
+        if context is not None and not verify(context, signature):
+            context = None
+        provider = get_provider()
+        recent = [{"role": t.role, "text": t.text[:1500]} for t in history[-8:]]
+        intent_result = classify_intent(message, False, context is not None, followup_intent)
+        if intent_result.intent == "empty":
+            yield _sse({"type": "error", "detail": "Send a message, link, screenshot or QR code to analyse."})
+            return
+        meta = intent_result.public()
+
+        if intent_result.intent in _CHAT_ONLY_REPLY and agent.configured():
+            yield _sse({"type": "meta", "kind": "chat", "response_type": _CHAT_ONLY_REPLY[intent_result.intent][0], "intent": meta})
+            captured: dict = {}
+
+            def scan(text: str) -> str:
+                plan = route(text, False, False, followup_intent)
+                try:
+                    result, types = analyze_turn(text, None, plan)
+                except (InvalidInput, ImageRejected) as exc:
+                    return json.dumps({"error": str(exc)[:200]})
+                analysis = to_contract(result, types, plan.urls)
+                captured.update(result=result, plan=plan, analysis=analysis)
+                return json.dumps(analysis.model_dump(mode="json"), default=str)[:6000]
+
+            final_text = ""
+            try:
+                for kind, payload in agent.stream_turn(message, recent, scan):
+                    if kind == "token":
+                        yield _sse({"type": "token", "text": payload})
+                    elif kind == "reset":
+                        yield _sse({"type": "reset"})
+                    elif kind == "scanned" and captured.get("analysis") is not None:
+                        a = captured["analysis"]
+                        yield _sse({"type": "analysis", "analysis": a.model_dump(mode="json"), "signature": sign(a),
+                                    "route": captured["plan"].public(), "response_type": "analysis"})
+                    elif kind == "final":
+                        final_text = payload
+            except Exception:  # network or model failure: the deterministic answer below replaces whatever was shown
+                final_text = ""
+            analysis = captured.get("analysis")
+            if not (final_text and agent.reply_is_acceptable(final_text, analysis.risk_score if analysis is not None else None)):
+                if analysis is not None:
+                    fallback = DeterministicExplanationProvider().reply_for_analysis(analysis).text
+                else:
+                    fallback = _deterministic_chat_text(provider, intent_result.intent, message, recent)
+                yield _sse({"type": "replace", "text": fallback})
+            yield _sse({"type": "done"})
+            return
+
+        if intent_result.intent in _CHAT_ONLY_REPLY:
+            yield _sse({"type": "meta", "kind": "chat", "response_type": _CHAT_ONLY_REPLY[intent_result.intent][0], "intent": meta})
+            yield from _text_events(_deterministic_chat_text(provider, intent_result.intent, message, recent))
+            yield _sse({"type": "done"})
+            return
+
+        if intent_result.intent == "follow_up_analysis":
+            assert context is not None and intent_result.followup_intent is not None
+            yield _sse({"type": "meta", "kind": "followup", "response_type": "follow_up", "intent": meta})
+            text = provider.reply_for_followup(intent_result.followup_intent, message, context).text
+            yield from _text_events(text)
+            yield _sse({"type": "done"})
+            return
+
+        # Analysis: the scanner runs first (fast), the card is sent at once, then the explanation streams in.
+        yield _sse({"type": "meta", "kind": "analysis", "response_type": "analysis", "intent": meta})
+        plan = route(message, False, False, followup_intent)
+        result, types = analyze_turn(message, None, plan)
+        analysis = to_contract(result, types, plan.urls)
+        if agent.configured() and intent_result.intent == "analyze_text":
+            corrected = agent.correct_spelling(message)
+            if corrected:
+                plan2 = route(corrected, False, False, followup_intent)
+                try:
+                    result2, types2 = analyze_turn(corrected, None, plan2)
+                    analysis2 = to_contract(result2, types2, plan2.urls)
+                    if analysis2.risk_score > analysis.risk_score:
+                        result, plan, analysis = result2, plan2, analysis2
+                except (InvalidInput, ImageRejected):
+                    pass
+        yield _sse({"type": "analysis", "analysis": analysis.model_dump(mode="json"), "signature": sign(analysis),
+                    "route": plan.public(), "response_type": "analysis"})
+        if agent.configured() and message.strip() and analysis.risk_level != "unable_to_verify":
+            final_text = ""
+            try:
+                for kind, payload in agent.stream_explain(message, analysis.model_dump_json()):
+                    if kind == "token":
+                        yield _sse({"type": "token", "text": payload})
+                    elif kind == "final":
+                        final_text = payload
+            except Exception:
+                final_text = ""
+            if not (final_text and agent.reply_is_acceptable(final_text, analysis.risk_score, explanation=True)):
+                yield _sse({"type": "replace", "text": DeterministicExplanationProvider().reply_for_analysis(analysis).text})
+        else:
+            yield from _text_events(DeterministicExplanationProvider().reply_for_analysis(analysis).text)
+        yield _sse({"type": "done"})
+    except (InvalidInput, ImageRejected) as exc:
+        yield _sse({"type": "error", "detail": str(exc)[:300]})
+    except Exception:
+        _log.exception("chat stream failed")
+        yield _sse({"type": "error", "detail": "Something went wrong. Please try again."})
+
+
+@router.post("/api/v1/chat/stream", dependencies=[Depends(limit_light)])
+async def chat_stream_endpoint(body: ChatIn):
+    return StreamingResponse(_stream_chat_events(body.message, body.history, body.context, body.context_signature),
+                             media_type="text/event-stream", headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 
 
 async def _chat_turn(request: Request, response: Response, message: str, context: ChatAnalysis | None, signature: str, history: list[Turn],

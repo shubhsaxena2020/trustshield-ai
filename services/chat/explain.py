@@ -650,7 +650,7 @@ _NEGATED_REQUEST = re.compile(r"\b(never|don'?t|do not|avoid|refuse to|won'?t)\b
 # one (which was for passive capability phrasing like "reputation lookup was NOT performed", not certainty claims).
 _CERTAINTY_NEGATION_CUE = re.compile(
     r"\b(cannot|can'?t|won'?t|will not|do(n'?t| not)|does(n'?t| not)|should(n'?t| not)|would(n'?t| not)|"
-    r"could(n'?t| not)|(is|are|was|were)\s+not|isn'?t|wasn'?t|unable to|not able to)\s+"
+    r"could(n'?t| not)|(is|are|was|were)\s+not|isn'?t|wasn'?t|unable to|not able to|never)\s+"
     r"(guarantee|confirm|verify|promise|say|claim|tell you|assure|state|think|assume|believe|suggest|prove|establish|show)\b", re.I)
 
 
@@ -665,6 +665,9 @@ def _claims_unsupported_certainty(text: str) -> bool:
             continue  # this specific certainty claim is directly negated -- a refusal, not a claim
         # "This sender is not verified", "Safety is not guaranteed": a negation directly before the claim word
         if re.search(r"\b(not|no|never|isn'?t|aren'?t|cannot|can'?t)\b\W*(\w+\W+){0,2}$", before, re.I):
+            continue
+        # Advice, not a claim: "the link should be verified", "check it to be verified through the official app"
+        if re.search(r"\b(be|been|get|got|to be|should|must|needs?|verify|check)\b\W*(\w+\W+){0,2}$", before, re.I):
             continue
         return True
     return False

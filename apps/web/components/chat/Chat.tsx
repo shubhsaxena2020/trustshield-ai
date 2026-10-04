@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { RiskCard } from "./RiskCard";
-import type { ChatAnalysis, ChatResponse, Message } from "./types";
+import type { ChatAnalysis, ChatResponse, Message, ResponseType } from "./types";
 
 // Production is same-origin (Vercel Services routes /api/* to the backend); see the deployment runbook.
 const API = process.env.NEXT_PUBLIC_API_URL ?? (process.env.NODE_ENV === "production" ? "" : "http://localhost:8000");
@@ -24,6 +24,35 @@ const uid = () => Math.random().toString(36).slice(2);
 
 function newConversation(): Conversation {
   return { id: uid(), title: "New chat", messages: [] };
+}
+
+// Chats are saved in this browser (localStorage), so they survive a page refresh. Uploaded image previews are not saved (a
+// blob URL cannot be restored), and failed-request messages are dropped. Cross-device history needs sign-in, which is not set up.
+const STORE_KEY = "trustshield.chats.v1";
+
+function loadChats(): Conversation[] | null {
+  try {
+    const raw = window.localStorage.getItem(STORE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Conversation[];
+    return Array.isArray(parsed) && parsed.length > 0 ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveChats(chats: Conversation[]) {
+  try {
+    const clean = chats.slice(0, 50).map((c) => ({
+      ...c,
+      messages: c.messages
+        .filter((m) => m.role === "user" || m.kind !== "error")
+        .map((m) => (m.role === "user" ? { id: m.id, role: m.role, text: m.text, fileName: m.fileName } : m)),
+    }));
+    window.localStorage.setItem(STORE_KEY, JSON.stringify(clean));
+  } catch {
+    // storage full or blocked: the chat still works in memory
+  }
 }
 
 // Minimal typing for the Web Speech API, which is not in the default DOM lib.
@@ -95,6 +124,20 @@ export function Chat() {
 
   useEffect(() => () => recogRef.current?.stop(), []);
 
+  // Restore the saved chats after mount (server render has no localStorage), then keep them saved on every change.
+  const hydrated = useRef(false);
+  useEffect(() => {
+    const stored = loadChats();
+    if (stored) {
+      setChats(stored);
+      setActiveId(stored[0].id);
+    }
+    hydrated.current = true;
+  }, []);
+  useEffect(() => {
+    if (hydrated.current) saveChats(chats);
+  }, [chats]);
+
   const lastAnalysis: { analysis: ChatAnalysis; signature: string } | null = (() => {
     for (let i = messages.length - 1; i >= 0; i--) {
       const m = messages[i];
@@ -154,12 +197,123 @@ export function Chat() {
     inputRef.current?.focus();
   }
 
+  // Streams a text reply as it is written. Text arrives as server events; it is shown at a steady pace (no waiting for the
+  // whole answer), and the server's final check can replace it before the message is marked done.
+  async function streamChat(text: string, context: { analysis: ChatAnalysis; signature: string } | null, history: HistoryTurn[], convId: string, controller: AbortController) {
+    const msgId = uid();
+    const patch = (fn: (m: Message) => Message) =>
+      setChats((prev) => prev.map((c) => (c.id === convId ? { ...c, messages: c.messages.map((m) => (m.id === msgId ? fn(m) : m)) } : c)));
+    const setText = (t: string) => patch((m) => (m.role === "assistant" && m.kind !== "error" ? { ...m, reply: { ...m.reply, text: t } } : m));
+    setChats((prev) => prev.map((c) => (c.id === convId ? { ...c, messages: [...c.messages, { id: msgId, role: "assistant", kind: "followup", responseType: "chat", reply: { text: "", cited_evidence: [], provider: "", grounded: true } }] } : c)));
+
+    let full = "";
+    let shown = 0;
+    let timer: number | null = null;
+    const tick = () => {
+      timer = null;
+      if (shown >= full.length) return;
+      const step = Math.max(1, Math.ceil((full.length - shown) / 10));
+      shown = Math.min(full.length, shown + step);
+      setText(full.slice(0, shown));
+      timer = window.setTimeout(tick, 16);
+    };
+    const kick = () => {
+      if (timer === null) timer = window.setTimeout(tick, 16);
+    };
+    const flush = () => {
+      if (timer !== null) clearTimeout(timer);
+      timer = null;
+      shown = full.length;
+      setText(full);
+    };
+
+    try {
+      const res = await fetch(`${API}/api/v1/chat/stream`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text, context: context?.analysis ?? null, context_signature: context?.signature ?? "", history }),
+        signal: controller.signal,
+      });
+      if (!res.ok || !res.body) {
+        const detail = await res.json().then((d) => (typeof d.detail === "string" ? d.detail : "")).catch(() => "");
+        throw new Error(detail || `The request failed (${res.status}).`);
+      }
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let finished = false;
+      while (!finished) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        let end = buffer.indexOf("\n\n");
+        while (end >= 0) {
+          const block = buffer.slice(0, end);
+          buffer = buffer.slice(end + 2);
+          end = buffer.indexOf("\n\n");
+          const line = block.split("\n").find((l) => l.startsWith("data: "));
+          if (!line) continue;
+          const ev = JSON.parse(line.slice(6)) as {
+            type: string; text?: string; detail?: string; response_type?: ResponseType;
+            analysis?: ChatAnalysis; signature?: string; route?: ChatResponse["route"];
+          };
+          if (ev.type === "meta" && ev.response_type) {
+            const rt = ev.response_type;
+            patch((m) => (m.role === "assistant" && m.kind !== "error" ? { ...m, responseType: rt } : m));
+          } else if (ev.type === "token") {
+            full += ev.text ?? "";
+            kick();
+          } else if (ev.type === "reset") {
+            full = "";
+            flush();
+          } else if (ev.type === "analysis" && ev.analysis) {
+            const analysis = ev.analysis;
+            const signature = ev.signature ?? "";
+            const route = ev.route as ChatResponse["route"];
+            patch((m) =>
+              m.role === "assistant" && m.kind !== "error"
+                ? { id: m.id, role: "assistant", kind: "analysis", responseType: "analysis", reply: m.reply, analysis, signature, route }
+                : m,
+            );
+          } else if (ev.type === "replace") {
+            full = ev.text ?? "";
+            flush();
+          } else if (ev.type === "error") {
+            throw new Error(ev.detail || "Something went wrong.");
+          } else if (ev.type === "done") {
+            finished = true;
+          }
+        }
+      }
+      flush();
+    } catch (err) {
+      if (timer !== null) clearTimeout(timer);
+      timer = null;
+      if (controller.signal.aborted) {
+        if (!full) setText("Stopped.");
+        else flush();
+      } else {
+        const msg = err instanceof Error && err.message ? err.message : "Could not reach the analysis service.";
+        patch(() => ({ id: msgId, role: "assistant", kind: "error", text: msg }));
+      }
+    }
+  }
+
   async function send(text: string, attachment: File | null, context: { analysis: ChatAnalysis; signature: string } | null, history: HistoryTurn[], convId: string) {
     setBusy(true);
     setBusyLabel(attachment ? "Checking the attachment…" : "Thinking…");
     setNotice("");
     const controller = new AbortController();
     abortRef.current = controller;
+    if (!attachment) {
+      try {
+        await streamChat(text, context, history, convId, controller);
+      } finally {
+        abortRef.current = null;
+        setBusy(false);
+      }
+      return;
+    }
     const append = (m: Message) => setChats((prev) => prev.map((c) => (c.id === convId ? { ...c, messages: [...c.messages, m] } : c)));
     try {
       let res: Response;
@@ -294,7 +448,7 @@ export function Chat() {
             ))}
           </ul>
         </nav>
-        <p className="px-2 pt-3 text-xs text-zinc-500">Chats are kept only in this browser tab and are cleared on reload.</p>
+        <p className="px-2 pt-3 text-xs text-zinc-500">Chats are saved in this browser, so they stay after a refresh.</p>
       </aside>
       {sidebarOpen && <button type="button" aria-label="Close chats" onClick={() => setSidebarOpen(false)} className="fixed inset-0 z-20 bg-black/50 md:hidden" />}
 
