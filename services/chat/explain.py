@@ -679,6 +679,9 @@ def _claims_unsupported_certainty(text: str) -> bool:
 _CLAIMS_CREATOR = re.compile(r"\b(built|created|developed|made|designed|owned|run) by\b", re.I)
 
 
+_DESCRIBES_SCAM = re.compile(r"\b(into|about|against|scammers?|fraudsters?|attackers?|phishers?|tricks?|impersonat\w*)\b\W*(\w+\W+){0,4}$", re.I)
+
+
 def chat_grounding_violations(text: str) -> list[str]:
     found = []
     if _CLAIMS_CREATOR.search(text) and PRODUCT_METADATA.get("team", "") not in text:
@@ -689,7 +692,8 @@ def chat_grounding_violations(text: str) -> list[str]:
     if m_cap and not _is_negated(text, m_cap.start(), m_cap.end()):
         found.append("claims an unavailable capability was used")
     match = _REQUESTS_SECRET.search(text)
-    if match and not _NEGATED_REQUEST.search(text[:match.start()]):
+    # A description of a scam ("trick you into sharing passwords", "scammers ask for an OTP") is not a request to the user.
+    if match and not _NEGATED_REQUEST.search(text[:match.start()]) and not _DESCRIBES_SCAM.search(text[max(0, match.start() - 40):match.start()]):
         found.append("asks the user for a secret")
     return found
 
@@ -808,7 +812,8 @@ def grounding_violations(text: str, a: ChatAnalysis) -> list[str]:
     if m_rep and not caps.get("reputation") and not _is_negated(text, m_rep.start(), m_rep.end()):
         found.append("claims a reputation result")
     match = _REQUESTS_SECRET.search(text)
-    if match and not _NEGATED_REQUEST.search(text[:match.start()]):
+    # A description of a scam ("trick you into sharing passwords", "scammers ask for an OTP") is not a request to the user.
+    if match and not _NEGATED_REQUEST.search(text[:match.start()]) and not _DESCRIBES_SCAM.search(text[max(0, match.start() - 40):match.start()]):
         found.append("asks the user for a secret")
     # Any OTHER level's title, spoken as a label ("Risk level: high", "the high-risk category", "High risk —"), not just
     # immediately before a dash (independent review FIND-002: bare "Risk level: high." was not caught before).
