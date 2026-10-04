@@ -338,6 +338,10 @@ def _stream_chat_events(message: str, history: list[Turn], context: ChatAnalysis
             if not (final_text and agent.reply_is_acceptable(final_text, analysis.risk_score if analysis is not None else None)):
                 if analysis is not None:
                     fallback = DeterministicExplanationProvider().reply_for_analysis(analysis).text
+                elif final_text:
+                    # The model answered, but a check rejected that answer: a neutral scope reply, not an "unavailable" notice.
+                    fallback = ("I focus on scams, cybersecurity and checking suspicious content, so I can't help with that one. "
+                                "Paste a message, link or QR content you'd like checked, or ask a cybersecurity question.")
                 else:
                     fallback = _deterministic_chat_text(provider, intent_result.intent, message, recent)
                 yield _sse({"type": "replace", "text": fallback})
