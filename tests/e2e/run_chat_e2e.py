@@ -63,6 +63,8 @@ def run(page: Page, timeout: int) -> None:
 
     page.click("button:has-text('URGENT: your bank account')")
     page.wait_for_selector("main ol > li", timeout=timeout)
+    # Replies stream in now; the composer is disabled while one is busy, so wait for the starter reply to finish.
+    page.wait_for_function("() => !document.querySelector('main li[role=status]')", timeout=timeout)
     check("starter prompt sends immediately", "bank account" in body().lower() or page.locator("main ol > li").count() >= 1)
     page.fill("textarea", "line one")
     page.press("textarea", "Shift+Enter")
