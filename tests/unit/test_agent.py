@@ -38,7 +38,7 @@ def test_model_calls_scanner_and_explains_result(monkeypatch):
     replies = [_msg("", _call("URGENT your SBI account is blocked, share OTP")) | {"_key": FAKE_KEY},
                _msg("This is high risk: it asks for an OTP.") | {"_key": FAKE_KEY}]
     monkeypatch.setattr(agent, "_post", lambda messages, tools: replies.pop(0))
-    out = agent.run("is this safe? URGENT your SBI account is blocked", [], scan=lambda t: calls.append(t) or '{"risk_score": 85}')
+    out = agent.run("is this safe? URGENT your SBI account is blocked, share OTP", [], scan=lambda t: calls.append(t) or '{"risk_score": 85}')
     assert calls == ["URGENT your SBI account is blocked, share OTP"]
     assert out.used_scanner is True and "high risk" in out.text
 

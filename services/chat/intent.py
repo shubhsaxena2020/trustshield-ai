@@ -264,4 +264,15 @@ def classify_intent(message: str, has_attachment: bool, has_context: bool, follo
         return IntentResult("general_chat", "general question/request to the assistant with no URL, attachment, "
                             "fraud-action signal or personal-data request")
 
+    # A question or a request with no link, attachment, or scam wording is conversation, not content to scan.
+    # (Anything with a link, a fraud signal, or a payment/credential object was already routed to analysis above.)
+    refers_to_unseen = re.search(r"\b(this|these|those|message|link|sms|text|email|screenshot|qr|attachment|above|below)\b",
+                                 text, re.I)
+    if (not has_action_or_object_risk(text) and not refers_to_unseen
+            and (text.rstrip().endswith("?") or _TASK_VERB_EARLY.search(" ".join(text.split()[:6])))):
+        return IntentResult("general_chat", "a question or request with no content to check")
     return IntentResult("analyze_text", "no chat/education/product pattern matched: analysed as content (safe default)")
+
+
+_TASK_VERB_EARLY = re.compile(r"\b(write|generate|create|make|build|code|program|explain|tell|give|help|show|list|translate|"
+                              r"summari[sz]e|ignore|act|pretend|forget|describe|draft|compose|solve|you are)\b", re.I)
