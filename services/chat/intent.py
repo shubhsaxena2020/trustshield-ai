@@ -289,3 +289,23 @@ _TASK_VERB_EARLY = re.compile(r"\b(write|writ|generate|genrate|create|creat|make
 # ("code" is deliberately not here: "QR code" would otherwise look like a coding request. "write ... code" still matches "write".)
 
 
+def is_question_or_task(text: str) -> bool:
+    """True when the text reads as a question or a request (not a pasted message). Used to confirm a model's 'chat' verdict."""
+    stripped = text.strip()
+    if not stripped:
+        return False
+    return bool(stripped.endswith("?") or _QUESTION_START.search(stripped)
+                or _TASK_VERB_EARLY.search(" ".join(stripped.split()[:6]))
+                or re.search(r"\b(batao|bataiye|batayein|samjhao|samjhaiye|likho|likhiye)\b", stripped, re.I))
+
+
+def has_transaction_signal(text: str) -> bool:
+    """A payment, transfer or money amount, or a reference to content the assistant has not seen (this message, this link, this QR code).
+    The model may not move such a message to chat."""
+    t = _norm(text)
+    if re.search(r"\b(pay|paid|payment|deposit|transfer|send|sent|fee|refund|claim|release|unlock|collect|receive)\b", t):
+        return True
+    if re.search(r"(rs\.?|rupees?|inr|usd|$|u{20b9})\s*\d|\d[\d,]*\s*(rs|rupees?|inr|usd)\b", t):
+        return True
+    return bool(re.search(r"\b(this|these|that|message|link|qr|screenshot|sms|email)\b", t))
+

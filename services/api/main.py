@@ -1,4 +1,4 @@
-"""TrustShield AI API. Run: uvicorn services.api.main:app  (configuration comes from the environment; see .env.example)"""
+﻿"""TrustShield AI API. Run: uvicorn services.api.main:app  (configuration comes from the environment; see .env.example)"""
 from __future__ import annotations
 
 import asyncio
@@ -243,6 +243,20 @@ _CHAT_ONLY_REPLY = {
 }
 
 
+
+def _refine_with_model(intent_result, message: str, has_image: bool):
+    """Model decides only the uncertain cases: plain text with soft risk words and no strong scam signal. Strong signals,
+    links and attachments keep the rule decision. The model may move a question or task to chat, never a pasted message."""
+    from services.chat.intent import has_suspicious_signal, has_transaction_signal, is_question_or_task
+    if (intent_result.intent != "analyze_text" or has_image or intent_result.urls or has_suspicious_signal(message)
+            or not agent.configured() or not is_question_or_task(message) or has_transaction_signal(message)):
+        return intent_result
+    verdict = agent.route_text(message)
+    if verdict == "chat":
+        from services.chat.intent import IntentResult
+        return IntentResult("general_chat", "model routing: a question or task, not content to check")
+    return intent_result
+
 async def _agent_chat(request: Request, response: Response, message: str, history: list[Turn], intent_result) -> ChatOut | None:
     """Model-led chat turn. Returns None when the model is unavailable or a reply fails a check."""
     captured: dict = {}
@@ -299,7 +313,7 @@ def _stream_chat_events(message: str, history: list[Turn], context: ChatAnalysis
             context = None
         provider = get_provider()
         recent = [{"role": t.role, "text": t.text[:1500]} for t in history[-8:]]
-        intent_result = classify_intent(message, False, context is not None, followup_intent)
+        intent_result = _refine_with_model(classify_intent(message, False, context is not None, followup_intent), message, False)
         if intent_result.intent == "empty":
             yield _sse({"type": "error", "detail": "Send a message, link, screenshot or QR code to analyse."})
             return
@@ -415,7 +429,7 @@ async def _chat_turn(request: Request, response: Response, message: str, context
     if context is not None and not verify(context, signature):
         context = None  # unsigned or altered context is never trusted
     provider = get_provider()
-    intent_result = classify_intent(message, image is not None, context is not None, followup_intent)
+    intent_result = await run_in_threadpool(_refine_with_model, classify_intent(message, image is not None, context is not None, followup_intent), message, image is not None)
     if intent_result.intent == "empty":
         raise HTTPException(422, "Send a message, link, screenshot or QR code to analyse.")
 
@@ -575,3 +589,6 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
 
 app = create_app()
+
+
+

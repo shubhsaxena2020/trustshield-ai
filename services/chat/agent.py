@@ -126,12 +126,12 @@ def _looks_like_task(text: str) -> bool:
 _HAS_LINK_OR_NUMBER = re.compile(r"https?://|www\.|\.\w{2,}/|\d{3,}")
 
 
-def _post(messages: list[dict], tools: list[dict] | None) -> dict:
+def _post(messages: list[dict], tools: list[dict] | None, max_tokens: int | None = None) -> dict:
     base_url = os.environ["NILABH_LLM_BASE_URL"].rstrip("/")
     api_key = os.environ["NILABH_LLM_API_KEY"]
     _validate_base_url(base_url)
     body: dict = {"model": os.environ["NILABH_LLM_MODEL"], "messages": messages, "stream": False,
-                  "max_tokens": _REMOTE_MAX_TOKENS, "temperature": 0.3}
+                  "max_tokens": max_tokens or _REMOTE_MAX_TOKENS, "temperature": 0.3}
     if tools:
         body["tools"] = tools
     request = urllib.request.Request(f"{base_url}/chat/completions", data=json.dumps(body).encode(),
@@ -182,7 +182,7 @@ def run(message: str, history: list[dict], scan: Callable[[str], str]) -> AgentR
 def _single_turn(system: str, user: str, max_tokens: int = 1200) -> str | None:
     """One model call without tools. Returns the text, or None if the model is unavailable."""
     try:
-        msg = _post([{"role": "system", "content": system}, {"role": "user", "content": user}], None)
+        msg = _post([{"role": "system", "content": system}, {"role": "user", "content": user}], None, max_tokens)
         key = msg.pop("_key")
         text = _scrub_provider_output((msg.get("content") or "").strip(), key)
         return text or None
@@ -328,3 +328,30 @@ def reply_is_acceptable(text: str, risk_score: int | None, explanation: bool = F
             if int(found) != risk_score:
                 return False
     return True
+
+
+ROUTE_SYSTEM = (
+    "You route a message for TrustShield, a scam checker. Answer with exactly one word.\n"
+    "CHECK = the user is sending content that may be a scam to be checked: a message, call script, offer, link, payment or "
+    "credential request, or a screenshot's text that they want assessed.\n"
+    "CHAT = the user is asking a question about scams, security or anything else, or giving a task, and is NOT sending content "
+    "to check.\n"
+    "Examples: 'How do password managers store passwords?' -> CHAT. 'Is it true banks never ask for an OTP?' -> CHAT. "
+    "'Explain why scammers use urgency' -> CHAT. 'Your SBI account is blocked, share the OTP now' -> CHECK. "
+    "'Pay 500 rupees to release your parcel' -> CHECK. 'Write a poem about rain' -> CHAT."
+)
+
+
+def route_text(message: str) -> str | None:
+    """Model decision for an uncertain message: 'check', 'chat', or None (unclear or unavailable, so the rules decide)."""
+    if not message.strip() or len(message) > 2000:
+        return None
+    out = _single_turn(ROUTE_SYSTEM, message, max_tokens=400)
+    if not out:
+        return None
+    word = out.strip().split()[0].strip(".:,!").upper() if out.strip() else ""
+    if word == "CHAT":
+        return "chat"
+    if word == "CHECK":
+        return "check"
+    return None
