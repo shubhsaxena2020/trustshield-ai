@@ -26,6 +26,7 @@ from services.analysis.normalization.text import InvalidInput
 from services.analysis.pipeline import analyze_image, analyze_qr, analyze_text, analyze_url
 
 from services.chat.contract import ChatAnalysis, to_contract
+from services.chat import agent
 from services.chat.explain import Reply, followup_intent, get_provider
 from services.chat.intent import classify_intent
 from services.chat.orchestrator import analyze_turn
@@ -238,6 +239,37 @@ _CHAT_ONLY_REPLY = {
 }
 
 
+async def _agent_chat(request: Request, response: Response, message: str, history: list[Turn], intent_result) -> ChatOut | None:
+    """Model-led chat turn. Returns None when the model is unavailable or a reply fails a check."""
+    captured: dict = {}
+
+    def scan(text: str) -> str:
+        plan = route(text, False, False, followup_intent)
+        try:
+            result, types = analyze_turn(text, None, plan)
+        except (InvalidInput, ImageRejected) as exc:
+            return json.dumps({"error": str(exc)[:200]})
+        analysis = to_contract(result, types, plan.urls)
+        captured.update(result=result, plan=plan, analysis=analysis)
+        return json.dumps(analysis.model_dump(mode="json"), default=str)[:6000]
+
+    recent = [{"role": t.role, "text": t.text[:1500]} for t in history[-8:]]
+    agent_reply = await run_in_threadpool(agent.run, message, recent, scan)
+    if agent_reply is None:
+        return None
+    analysis = captured.get("analysis")
+    if not agent.reply_is_acceptable(agent_reply.text, analysis.risk_score if analysis is not None else None):
+        return None
+    if analysis is not None:
+        _publish(request, response, captured["result"])
+        return ChatOut(kind="analysis", response_type="analysis", intent=intent_result.public(), route=captured["plan"].public(),
+                       reply=ReplyOut(text=agent_reply.text, provider="nilabh", grounded=True), analysis=analysis,
+                       context_signature=sign(analysis))
+    response_type = _CHAT_ONLY_REPLY[intent_result.intent][0]
+    return ChatOut(kind="chat", response_type=response_type, intent=intent_result.public(),
+                   reply=ReplyOut(text=agent_reply.text, provider="nilabh", grounded=True))
+
+
 async def _chat_turn(request: Request, response: Response, message: str, context: ChatAnalysis | None, signature: str, history: list[Turn],
                      image: tuple[bytes, str | None, str | None] | None) -> ChatOut:
     if sum(len(t.text) for t in history) > 12_000:
@@ -248,6 +280,12 @@ async def _chat_turn(request: Request, response: Response, message: str, context
     intent_result = classify_intent(message, image is not None, context is not None, followup_intent)
     if intent_result.intent == "empty":
         raise HTTPException(422, "Send a message, link, screenshot or QR code to analyse.")
+
+    if intent_result.intent in _CHAT_ONLY_REPLY and agent.configured():
+        # The model is the chat assistant and may call the scanner. Any failed check falls through to the deterministic path.
+        outcome = await _agent_chat(request, response, message, history, intent_result)
+        if outcome is not None:
+            return outcome
 
     if intent_result.intent in _CHAT_ONLY_REPLY:
         response_type, method_name = _CHAT_ONLY_REPLY[intent_result.intent]
@@ -273,8 +311,27 @@ async def _chat_turn(request: Request, response: Response, message: str, context
         raise _image_error(exc)
     except InvalidInput as exc:
         raise HTTPException(422, str(exc))
-    _publish(request, response, result)
     analysis = to_contract(result, types, plan.urls)
+    if image is None and intent_result.intent == "analyze_text" and agent.configured():
+        # The model reads through spelling mistakes. The scanner checks the corrected text too; the higher risk wins.
+        corrected = await run_in_threadpool(agent.correct_spelling, message)
+        if corrected:
+            plan2 = route(corrected, False, False, followup_intent)
+            try:
+                result2, types2 = await run_in_threadpool(analyze_turn, corrected, None, plan2)
+            except (InvalidInput, ImageRejected):
+                result2 = None
+            if result2 is not None:
+                analysis2 = to_contract(result2, types2, plan2.urls)
+                if analysis2.risk_score > analysis.risk_score:
+                    result, plan, analysis = result2, plan2, analysis2
+    _publish(request, response, result)
+    if agent.configured() and message.strip() and analysis.risk_level != "unable_to_verify":
+        text = await run_in_threadpool(agent.explain, message, analysis.model_dump_json(), analysis.risk_score)
+        if text:
+            return ChatOut(kind="analysis", response_type="analysis", intent=intent_result.public(), route=plan.public(),
+                           reply=ReplyOut(text=text, provider="nilabh", grounded=True), analysis=analysis,
+                           context_signature=sign(analysis))
     reply = await run_in_threadpool(provider.reply_for_analysis, analysis)
     return ChatOut(kind="analysis", response_type="analysis", intent=intent_result.public(), route=plan.public(),
                    reply=_reply_out(reply), analysis=analysis, context_signature=sign(analysis))

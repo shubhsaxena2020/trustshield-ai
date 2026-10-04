@@ -464,12 +464,12 @@ def test_find005_negation_must_be_in_the_same_clause():
     assert grounding_violations("I have not checked the message, but I opened the website for you.", a)
 
 
-def test_find008_remote_call_budget_is_enforced():
-    from services.chat.explain import _acquire_remote_budget, _REMOTE_CALL_TIMES, RemoteProviderBudgetExceeded
+def test_find008_remote_call_budget_is_disabled_by_owner_decision():
+    # Owner decision (2026-10-04): no per-minute cap, so the demo is never blocked by a rate limit. Calls stay unlimited.
+    from services.chat.explain import _acquire_remote_budget, _REMOTE_CALL_TIMES, _REMOTE_CALLS_PER_MINUTE
     _REMOTE_CALL_TIMES.clear()
-    for _ in range(100):
-        _acquire_remote_budget()
-    with pytest.raises(RemoteProviderBudgetExceeded):
+    assert _REMOTE_CALLS_PER_MINUTE is None
+    for _ in range(150):
         _acquire_remote_budget()
     _REMOTE_CALL_TIMES.clear()
 

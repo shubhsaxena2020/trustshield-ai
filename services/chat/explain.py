@@ -458,10 +458,10 @@ _PRODUCT_ANSWERS: list[tuple[re.Pattern, Callable[[dict, int], str]]] = [
         f"and {m['sealed_holdout_metrics']['f1']} F1. {m['sealed_holdout_metrics']['note']}",
     )[idx % 4]),
     (re.compile(r"\bchatgpt\b", re.I), lambda m, idx=0: (
-        f"No — TrustShield is a purpose-built cybersecurity assistant, not ChatGPT. {m['not_a_general_assistant']}",
-        f"No, I am TrustShield AI, a dedicated security tool rather than ChatGPT. {m['not_a_general_assistant']}",
-        f"No — I'm TrustShield AI, designed specifically for scam and fraud analysis, not a general assistant like ChatGPT. {m['not_a_general_assistant']}",
-        f"No, TrustShield is a specialized cybersecurity and fraud assistant, distinct from ChatGPT. {m['not_a_general_assistant']}",
+        f"I'm a chat assistant built for scam and cybersecurity questions, and I can also answer general questions. {m['scope']}",
+        f"I'm TrustShield AI, a chat assistant that specialises in scams and fraud, and I can talk about other topics too. {m['scope']}",
+        f"Think of me as a ChatGPT-style assistant with a scam scanner built in: I chat, and I check suspicious content. {m['scope']}",
+        f"I'm TrustShield AI: a conversational assistant focused on digital safety, with a scam scanner I use when you share content. {m['scope']}",
     )[idx % 4]),
     (re.compile(r"\bmodel\b.*\buse\b|\bwhat model\b", re.I), lambda m, idx=0: (
         f"The active fraud-detection model is {m['current_production_model']}.",
@@ -979,10 +979,10 @@ _provider_log = logging.getLogger("trustshield.ai_provider")
 # SAME local 9Router endpoint by default. At the old 20s timeout, a dead/stalled 9Router meant two full 20s
 # waits back to back (40s) before the deterministic fallback finally answered -- long enough to lose a live
 # demo audience. Live measurements on the friend's DeepSeek endpoint (2026-10-04) showed 4-14 s per answer, so the
-# 8 s limit fell back to templates on real questions. 25 s covers that range; the worst case is still bounded.
-_REMOTE_TIMEOUT_SECONDS = 25
-# 600 tokens: 300 cut ChatGPT-style answers off mid-sentence.
-_REMOTE_MAX_TOKENS = 600
+# 8 s limit fell back to templates on real questions. No hard cap on answer length or wait time (owner decision): 120 s
+# covers slow model turns, and the answer limit is high enough that a full answer is never cut off mid-sentence.
+_REMOTE_TIMEOUT_SECONDS = 120
+_REMOTE_MAX_TOKENS = 4096
 
 # FIND-002 (independent review): TRUSTSHIELD_AI_BASE_URL is operator-set config, not user input, but validate it anyway --
 # a misconfigured or attacker-influenced value must not turn this into an SSRF proxy that also forwards the bearer key.
@@ -1028,9 +1028,10 @@ def _is_private_ip(host: str) -> bool:
 
 # FIND-008 (independent review): a per-process cap on concurrent and per-minute remote-provider calls, separate from the
 # existing chat rate limits, so a client that stays within those limits still cannot run up unbounded provider cost.
-_REMOTE_CONCURRENCY = threading.Semaphore(3)
+_REMOTE_CONCURRENCY = threading.Semaphore(16)
 _REMOTE_CALL_TIMES: list[float] = []
-_REMOTE_CALLS_PER_MINUTE = 100
+# No per-minute cap (owner decision, 2026-10-04: limits must not block the demo). Set an integer to re-enable one.
+_REMOTE_CALLS_PER_MINUTE: int | None = None
 _REMOTE_CALL_LOCK = threading.Lock()
 
 
@@ -1042,7 +1043,7 @@ def _acquire_remote_budget() -> None:
     with _REMOTE_CALL_LOCK:
         now = time.monotonic()
         _REMOTE_CALL_TIMES[:] = [t for t in _REMOTE_CALL_TIMES if now - t < 60]
-        if len(_REMOTE_CALL_TIMES) >= _REMOTE_CALLS_PER_MINUTE:
+        if _REMOTE_CALLS_PER_MINUTE is not None and len(_REMOTE_CALL_TIMES) >= _REMOTE_CALLS_PER_MINUTE:
             raise RemoteProviderBudgetExceeded(f"remote provider call budget ({_REMOTE_CALLS_PER_MINUTE}/min) exceeded")
         _REMOTE_CALL_TIMES.append(now)
 
