@@ -1,4 +1,4 @@
-"""Deterministic conversational intent classifier. No language model decides intent.
+﻿"""Deterministic conversational intent classifier. No language model decides intent.
 
 Fixes the core product bug this phase exists to fix: every message used to be treated as an analysis request, so "yo" scored
 "Low Risk — 0/100". This module decides FIRST whether a message is casual chat, a general or product question, or something
@@ -150,15 +150,21 @@ _REFERS_TO_UNSEEN_CONTENT = re.compile(
 # that names a payment/credential/urgency object, is content to analyse, never chat, education or product Q&A. Plain
 # education questions ("what is phishing?") contain none of these action or object words, so they still answer normally.
 _ACTION_OR_OBJECT_RISK = re.compile(
-    r"\b(pay|paid|payment|send|sent|share|sharing|transfer|approve|confirm|verify|click|enter|submit|provide|deposit|fee|fine|"
-    r"refund|reconnect|claim|release|unlock|download|install|reply|call (the|this) number)\b|"
-    r"\b(otp|mpin|pin|password|passcode|cvv|upi|netbanking|net banking|yono|gpay|phonepe|paytm|crypto\w*|bitcoin|kyc|blocked|"
+    # Payment and credential actions. Generic verbs (send, share, verify, click, enter, submit, provide, install, ...) are not
+    # listed alone: they are common in harmless text. Scam wording with them is caught by the suspicious-signal rule and the
+    # object words below.
+    r"\b(pay|paid|payment|transfer|approve|deposit|fee|refund|reconnect|claim|unlock|call (the|this) number)\b|"
+    r"\b(otp|mpin|pin|password|passcode|cvv|upi|netbanking|net banking|yono|gpay|phonepe|paytm|bitcoin|kyc|blocked|"
     r"suspended|arrest\w*|warrant|parcel|prize|lottery|urgent\w*|netbank\w*|collect request|user id|credentials?|"
-    r"bill|payable|rupees|dues?|tonight|courier|customs|clearance|duty|consignment|shipment|package|account|alert|"
-    r"detected|suspension|suspended|flagged|"
-    # job, loan, investment, utility and reward lures (independent review, round 3)
-    r"job|jobs|task|tasks|hiring|salary|income|commission|telegram|whatsapp|loan|pre-?approved|sanction\w*|trading|forex|"
-    r"returns|electricity|disconnect\w*|cutoff|cut off|reward|cashback|voucher|gift|lucky draw)\b")
+    r"payable|rupees|dues?|courier|customs|clearance|consignment|shipment|"
+    r"detected|suspension|flagged|"
+    # action verbs count only together with a money, account or identity object or urgency ("share a joke" stays clear)
+    r"\b(verify|verifying|share|sharing|send|sent|provide|submit|enter|confirm|click|update|download|install)\b.{0,25}"
+    r"\b(otp|pin|password|cvv|card|account|bank|details|upi|money|rupees|payment|kyc|identity|aadhaar|pan|now|immediately|urgently)\b|"    # crypto only as a payment/investment term ("cryptography" is not a risk word)
+    r"crypto(currency)? (withdraw\w*|invest\w*|trading|wallet|deposit\w*)|"
+    # job, loan, investment, utility and reward lures
+    r"job offer|work from home|daily task|hiring|salary|telegram|whatsapp (job|task)|loan|pre-?approved|sanction\w*|forex|"
+    r"electricity|disconnect\w*|cutoff|cut off|cashback|voucher|lucky draw)\b")
 # Narrow education exemption: a short definitional question ("what is a digital arrest scam?", "how does UPI fraud work?",
 # "how do I spot a fake SMS?") carries no personal pronoun, no digits, and no payment, release or sending action. Such a
 # question is education, not a message to check. Any question with an action verb is still analysed.
@@ -271,11 +277,15 @@ def classify_intent(message: str, has_attachment: bool, has_context: bool, follo
     task_like = bool(_TASK_VERB_EARLY.search(" ".join(text.split()[:6])))
     # "this" is ambiguous: "why is this suspicious?" needs the content (analyse), but "tell me more about this expo" is a request
     # about a topic (chat). A task verb therefore overrides the unseen-content wording.
-    if (not has_action_or_object_risk(text) and (task_like or (text.rstrip().endswith("?") and not refers_to_unseen))):
+    question_start = bool(_QUESTION_START.search(text.strip()))
+    if (not has_action_or_object_risk(text) and (task_like or ((text.rstrip().endswith("?") or question_start) and not refers_to_unseen))):
         return IntentResult("general_chat", "a question or request with no content to check")
     return IntentResult("analyze_text", "no chat/education/product pattern matched: analysed as content (safe default)")
 
 
-_TASK_VERB_EARLY = re.compile(r"\b(write|generate|create|make|build|program|explain|tell|give|help|show|list|translate|"
+_QUESTION_START = re.compile(r"^(what|why|how|who|when|where|which|is|are|can|do|does|did|will)\b", re.I)
+_TASK_VERB_EARLY = re.compile(r"\b(write|writ|generate|genrate|create|creat|make|mak|build|bulid|program|explain|expain|expln|tell|tel|give|giv|help|hlp|show|shw|list|translate|print|override|bataiye|batao|batayein|likho|likhiye|samjhao|samjhaiye|"
                               r"summari[sz]e|ignore|act|pretend|forget|describe|draft|compose|solve|you are)\b", re.I)
 # ("code" is deliberately not here: "QR code" would otherwise look like a coding request. "write ... code" still matches "write".)
+
+
