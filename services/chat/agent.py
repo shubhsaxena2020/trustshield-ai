@@ -191,6 +191,11 @@ def _single_turn(system: str, user: str, max_tokens: int = 1200) -> str | None:
         return None
 
 
+# A streamed reply that goes silent for this long is abandoned, so the user gets the deterministic answer in about half a minute
+# instead of waiting for the platform to cut the connection (observed 2026-10-04: model silences of 90+ s).
+_STREAM_SILENCE_SECONDS = 25
+
+
 def _stream_post(messages: list[dict], tools: list[dict] | None):
     """Yields the model's streamed delta objects (content and tool-call fragments) as they arrive."""
     base_url = os.environ["NILABH_LLM_BASE_URL"].rstrip("/")
@@ -202,7 +207,7 @@ def _stream_post(messages: list[dict], tools: list[dict] | None):
         body["tools"] = tools
     request = urllib.request.Request(f"{base_url}/chat/completions", data=json.dumps(body).encode(),
                                      headers={"Content-Type": "application/json", "Authorization": f"Bearer {api_key}"})
-    with urllib.request.urlopen(request, timeout=_REMOTE_TIMEOUT_SECONDS) as response:  # noqa: S310 # nosec B310 (scheme validated by _validate_base_url)
+    with urllib.request.urlopen(request, timeout=_STREAM_SILENCE_SECONDS) as response:  # noqa: S310 # nosec B310 (scheme validated by _validate_base_url)
         for raw in response:
             line = raw.decode("utf-8", "replace").strip()
             if not line.startswith("data:"):
