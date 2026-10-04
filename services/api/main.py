@@ -313,7 +313,7 @@ def _stream_chat_events(message: str, history: list[Turn], context: ChatAnalysis
             context = None
         provider = get_provider()
         recent = [{"role": t.role, "text": t.text[:1500]} for t in history[-8:]]
-        intent_result = _refine_with_model(classify_intent(message, False, context is not None, followup_intent), message, False)
+        intent_result = classify_intent(message, False, context is not None, followup_intent)
         if intent_result.intent == "empty":
             yield _sse({"type": "error", "detail": "Send a message, link, screenshot or QR code to analyse."})
             return
@@ -429,7 +429,7 @@ async def _chat_turn(request: Request, response: Response, message: str, context
     if context is not None and not verify(context, signature):
         context = None  # unsigned or altered context is never trusted
     provider = get_provider()
-    intent_result = await run_in_threadpool(_refine_with_model, classify_intent(message, image is not None, context is not None, followup_intent), message, image is not None)
+    intent_result = classify_intent(message, image is not None, context is not None, followup_intent)
     if intent_result.intent == "empty":
         raise HTTPException(422, "Send a message, link, screenshot or QR code to analyse.")
 

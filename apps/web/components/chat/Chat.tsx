@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { RiskCard } from "./RiskCard";
@@ -293,7 +293,9 @@ export function Chat() {
         if (!full) setText("Stopped.");
         else flush();
       } else {
-        const msg = err instanceof Error && err.message ? err.message : "Could not reach the analysis service.";
+        const raw = err instanceof Error ? err.message : "";
+        const dropped = !raw || /network|fetch|load failed|aborted|terminated|stream|body/i.test(raw);
+        const msg = dropped ? "The connection to TrustShield dropped. Please send your message again." : raw;
         patch(() => ({ id: msgId, role: "assistant", kind: "error", text: msg }));
       }
     }
@@ -350,7 +352,9 @@ export function Chat() {
       if (controller.signal.aborted) {
         append({ id: uid(), role: "assistant", kind: "followup", responseType: "chat", reply: { text: "Stopped.", cited_evidence: [], provider: "none", grounded: true } });
       } else {
-        const msg = err instanceof Error && err.message ? err.message : "Could not reach the analysis service.";
+        const raw = err instanceof Error ? err.message : "";
+        const dropped = !raw || /network|fetch|load failed|aborted|terminated|stream|body/i.test(raw);
+        const msg = dropped ? "The connection to TrustShield dropped. Please send your message again." : raw;
         const errorId = uid();
         append({
           id: errorId,
@@ -610,3 +614,5 @@ export function Chat() {
     </div>
   );
 }
+
+
