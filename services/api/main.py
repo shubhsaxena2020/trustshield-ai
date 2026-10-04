@@ -232,8 +232,9 @@ def _reply_out(reply: Reply) -> ReplyOut:
 # Intents handled without ever touching the analysis pipeline: this is the fix for the "yo" -> "Low Risk 0/100" bug. Analysis
 # always wins when there is a URL, an attachment, or unmatched content (see services/chat/intent.py's priority order).
 _CHAT_ONLY_REPLY = {
-    "greeting": ("chat", "reply_greeting"), "off_topic": ("chat", "reply_off_topic"),
+    "greeting": ("chat", "reply_greeting"), "assistant_qa": ("chat", "reply_greeting"), "off_topic": ("chat", "reply_off_topic"),
     "general_cyber_qa": ("education", "reply_cyber_qa"), "product_qa": ("product_info", "reply_product_qa"),
+    "general_chat": ("chat", "reply_chat"),
 }
 
 
@@ -250,7 +251,13 @@ async def _chat_turn(request: Request, response: Response, message: str, context
 
     if intent_result.intent in _CHAT_ONLY_REPLY:
         response_type, method_name = _CHAT_ONLY_REPLY[intent_result.intent]
-        reply = await run_in_threadpool(getattr(provider, method_name), message)
+        method = getattr(provider, method_name)
+        # reply_chat is the only chat-only handler with a history-aware signature (agent2's provider contract)
+        if intent_result.intent == "general_chat":
+            trimmed = [{"role": t.role, "text": t.text[:1500]} for t in history[-6:]]
+            reply = await run_in_threadpool(method, message, trimmed)
+        else:
+            reply = await run_in_threadpool(method, message)
         return ChatOut(kind="chat", response_type=response_type, intent=intent_result.public(), reply=_reply_out(reply))
 
     if intent_result.intent == "follow_up_analysis":

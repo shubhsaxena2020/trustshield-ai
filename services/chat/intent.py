@@ -13,7 +13,9 @@ still be analysed.
   5. A recognizable general cybersecurity question is GENERAL_CYBER_QA.
   6. A recognizable question about TrustShield itself is PRODUCT_QA.
   7. A message clearly off the product's cybersecurity scope (per docs/AI_ASSISTANT_ARCHITECTURE.md's domain-scope rule) is OFF_TOPIC.
-  8. Anything else — including short benign text and, deliberately, anything ambiguous — is ANALYZE_TEXT: the pipeline always
+  8. A question or request to the assistant on any other topic, with no URL, no attachment, no fraud-action signal and no
+     request for personal data ("your bank details…"), is GENERAL_CHAT — answered as chat, never scored as content.
+  9. Anything else — including short benign text and, deliberately, anything ambiguous — is ANALYZE_TEXT: the pipeline always
      produces an honest result (including "Low Risk" for genuinely benign text), so defaulting to analysis is the safe choice.
 Empty input is EMPTY.
 """
@@ -25,8 +27,16 @@ from typing import Literal
 
 from services.analysis.normalization.text import extract_urls
 
-Intent = Literal["greeting", "general_cyber_qa", "product_qa", "off_topic", "analyze_url", "analyze_text",
-                 "analyze_attachment", "follow_up_analysis", "empty"]
+Intent = Literal["greeting", "assistant_qa", "general_cyber_qa", "product_qa", "off_topic", "general_chat", "analyze_url",
+                 "analyze_text", "analyze_attachment", "follow_up_analysis", "empty"]
+
+# Questions addressed to the assistant itself ("who are you", "tell me more about yourself"). They are answered as chat, never
+# scored as content: before this rule they fell through to analyze_text and produced a Low Risk 0/100 card.
+_ASSISTANT_PATTERNS = [
+    r"^(who|what) (are|r) (you|u)\b", r"\btell me (more )?about (yourself|you)\b", r"\bintroduce yourself\b",
+    r"^(how are|how r) (you|u)\b", r"\bare you (a bot|a robot|real|human)\b", r"\bwhat('s| is) your (name|purpose|job)\b",
+    r"^(hi|hey|hello|yo)[ ,!]+(who|what) (are|r) (you|u)\b",
+]
 
 _GREETINGS = {"yo", "hi", "hey", "hello", "sup", "howdy", "yo!", "hi!", "hey!", "hello!",
               "good morning", "good afternoon", "good evening", "morning", "evening",
@@ -46,7 +56,9 @@ _CYBER_TERMS = [
     r"\bwhy do scammers\b", r"\bverify a bank\b", r"\bclicked a phishing\b", r"\breport fraud\b",
     r"\bdifference between phishing and spam\b", r"\bwhat is (a |an )?(scam|fraud|malware|ransomware|spyware)\b",
     r"\bkyc scam\b", r"\bcourier scam\b", r"\bjob scam\b", r"\bwhatsapp scam\b", r"\botp\b.*\b(scam|fraud|share)\b",
-    r"^what is\b", r"^what's\b", r"^how does\b", r"^how do\b", r"^explain\b", r"^tell me about\b",
+    # NOTE: the earlier generic openers (^what is, ^how do, ^explain, ^tell me about…) were removed when general_chat was
+    # introduced: a bare "how do" is not a cybersecurity question — "how do I make pasta?" must not be routed to
+    # general_cyber_qa. The topic-specific patterns above already cover every previously tested cyber question.
 ]
 
 _OFF_TOPIC_PATTERNS = [
@@ -110,6 +122,76 @@ def is_off_topic(text: str) -> bool:
     return any(re.search(p, t) for p in _OFF_TOPIC_PATTERNS)
 
 
+# general_chat: questions or requests addressed to the assistant on any topic (maths, cooking, writing,…) that carry no
+# URL, no attachment, no fraud-action signal and no request for personal data. Kept narrow so plain statements ("check
+# this") keep the safe analyze_text default. Questions are off-topic subject matter, but a question form alone is not
+# enough for general_cyber_qa, hence its own intent (checked after cyber/product so scope questions keep winning).
+_GENERAL_CHAT_QUESTION_STARTERS = re.compile(
+    r"^(what|whats|what's|who|whens|when is|when was|where|why|which|how|when;\s)*\b(what|who|when|where|why|which|how)\b")
+_GENERAL_CHAT_AUX_STARTER = re.compile(
+    r"^(is|are|can|could|do|does|did|will|would|should|shall)\b")
+# A request is only chat when the message itself opens with the request ("Write me a haiku"), never when a lure contains
+# "give me a ..." mid-message.
+_GENERAL_CHAT_REQUEST_VERBS = re.compile(
+    r"^(write|give me|give us|make me|make a|tell me|suggest|recommend|list|draft|create)\b.{0,20}\b(me|a|an|the|some|us)\b")
+_GENERAL_CHAT_PERSONAL_DATA = re.compile(
+    r"\b(your|my|mine)\b.{0,15}\b(bank|account|card|password|passcode|otp|upi|aadhaar|pan|cvv|pin|credentials|details?|information|bvn|ssn)\b")
+
+
+# A question that points at content the assistant has not seen ("is this legit?", "why is it suspicious?", "what does the
+# message say?") is not general chat: nothing is in view to answer from, so it keeps the analyse-by-default path.
+_REFERS_TO_UNSEEN_CONTENT = re.compile(
+    r"\b(this|that|these|those|it|the (message|link|sms|text|email|screenshot|attachment|url|qr|one|above|below|file))\b")
+
+
+# Safety gate (independent review, critical): a message that asks the reader to pay, send, share, approve, verify or click, or
+# that names a payment/credential/urgency object, is content to analyse, never chat, education or product Q&A. Plain
+# education questions ("what is phishing?") contain none of these action or object words, so they still answer normally.
+_ACTION_OR_OBJECT_RISK = re.compile(
+    r"\b(pay|paid|payment|send|sent|share|sharing|transfer|approve|confirm|verify|click|enter|submit|provide|deposit|fee|fine|"
+    r"refund|reconnect|claim|release|unlock|download|install|reply|call (the|this) number)\b|"
+    r"\b(otp|mpin|pin|password|passcode|cvv|upi|netbanking|net banking|yono|gpay|phonepe|paytm|crypto\w*|bitcoin|kyc|blocked|"
+    r"suspended|arrest\w*|warrant|parcel|prize|lottery|urgent\w*|netbank\w*|collect request|user id|credentials?|"
+    r"bill|payable|rupees|dues?|tonight|courier|customs|clearance|duty|consignment|shipment|package|account|alert|"
+    r"detected|suspension|suspended|flagged|"
+    # job, loan, investment, utility and reward lures (independent review, round 3)
+    r"job|jobs|task|tasks|hiring|salary|income|commission|telegram|whatsapp|loan|pre-?approved|sanction\w*|trading|forex|"
+    r"returns|electricity|disconnect\w*|cutoff|cut off|reward|cashback|voucher|gift|lucky draw)\b")
+# Narrow education exemption: a short definitional question ("what is a digital arrest scam?", "how does UPI fraud work?",
+# "how do I spot a fake SMS?") carries no personal pronoun, no digits, and no payment, release or sending action. Such a
+# question is education, not a message to check. Any question with an action verb is still analysed.
+_DEFINITIONAL_QUESTION = re.compile(
+    r"^(?!.*\b(my|your|you|me|we|us|our|this|that|it|these|those)\b)(?!.*\d)"
+    r"(what (is|are|s|'s) (a |an |the )?|what does [\w\s'-]{1,30} mean|how does |how do (one|people) |"
+    r"how do i (spot|identify|recognize|recognise|avoid|protect|verify|check|report) |explain |define )"
+    r"[\w\s'-]{1,60}\??$")
+_BLOCKING_ACTION = re.compile(
+    r"\b(pay|paid|payment|send|sent|share|sharing|transfer|approve|enter|submit|provide|deposit|fee|fine|refund|reconnect|"
+    r"claim|release|unlock|unblock|restore|retrieve|clear|collect|download|install|reply|click|confirm|update|"
+    r"call (the|this) number)\b")
+
+
+def is_definitional_question(text: str) -> bool:
+    t = _norm(text)
+    return bool(_DEFINITIONAL_QUESTION.search(t)) and not _BLOCKING_ACTION.search(t)
+
+
+def has_action_or_object_risk(text: str) -> bool:
+    return bool(_ACTION_OR_OBJECT_RISK.search(_norm(text)))
+
+
+def is_general_chat(text: str) -> bool:
+    t = _norm(text)
+    if _REFERS_TO_UNSEEN_CONTENT.search(t):
+        return False
+    if not t.endswith("?") and not _GENERAL_CHAT_REQUEST_VERBS.search(t):
+        return False
+    # the question-word/auxiliary form only counts when it starts the sentence
+    if t.endswith("?") and not (_GENERAL_CHAT_QUESTION_STARTERS.search(t) or _GENERAL_CHAT_AUX_STARTER.search(t)):
+        return False
+    return not _GENERAL_CHAT_PERSONAL_DATA.search(t)
+
+
 @dataclass
 class IntentResult:
     intent: Intent
@@ -155,6 +237,11 @@ def classify_intent(message: str, has_attachment: bool, has_context: bool, follo
     # through to the follow-up check.
     if is_greeting(text):
         return IntentResult("greeting", "matches a greeting/small-talk phrase with no other content")
+    if any(re.search(p, _norm(text)) for p in _ASSISTANT_PATTERNS):
+        return IntentResult("assistant_qa", "question addressed to the assistant itself: answered as chat, not scored as content")
+    if has_action_or_object_risk(text) and not is_definitional_question(text):
+        return IntentResult("analyze_text", "asks for a payment, credential or action, or names a payment/urgency object: "
+                            "analysed as content, never answered as chat or education")
     if is_off_topic(text):
         return IntentResult("off_topic", "matches an off-scope request pattern (outside cybersecurity/product scope)")
     if is_product_question(text):
@@ -167,5 +254,12 @@ def classify_intent(message: str, has_attachment: bool, has_context: bool, follo
         if intent:
             return IntentResult("follow_up_analysis", f"short question matching follow-up intent '{intent}' with analysis in context",
                                 followup_intent=intent)
+
+    # general_chat is checked after the follow-up matchers (an in-context short question about the CURRENT analysis must
+    # still win) and before the analyze_text default. It deliberately ignores has_context: "what's the capital of
+    # France?" is general knowledge even when an analysis happens to be in context.
+    if is_general_chat(text) and not has_suspicious_signal(text):
+        return IntentResult("general_chat", "general question/request to the assistant with no URL, attachment, "
+                            "fraud-action signal or personal-data request")
 
     return IntentResult("analyze_text", "no chat/education/product pattern matched: analysed as content (safe default)")

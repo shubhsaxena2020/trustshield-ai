@@ -10,7 +10,7 @@ import re
 
 TOPICS: dict[str, tuple[tuple[str, ...], str]] = {
     "phishing": (("phishing",),
-        "Phishing is a fraud message (email, text or chat) that impersonates a trusted sender to trick you into sharing "
+        "Phishing is a fraud message (email, text or chat) that impersonates a trusted sender to trick you into giving up "
         "credentials, OTPs or money, or into clicking a malicious link. Warning signs: urgency, a request for credentials "
         "or payment, and a link or sender that doesn't quite match the organization it claims to be."),
     "smishing": (("smishing",),

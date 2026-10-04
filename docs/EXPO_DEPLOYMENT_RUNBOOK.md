@@ -131,3 +131,30 @@ no background services were installed, so there's nothing to clean up afterward 
 | Chat replies are always the deterministic fallback, never a real LLM answer | 9Router isn't running, or the base URL/key/model is wrong | `curl http://127.0.0.1:20128/v1/models`; check `TRUSTSHIELD_AI_API_KEY` and model IDs against `docs/PROVIDER_CONFIGURATION.md` |
 | `EADDRINUSE` on port 3000 or 8000 | A previous run's process never exited | Find and stop it (`netstat -ano \| findstr :3000`, then `taskkill /PID <pid> /F`) before restarting |
 | Tunnel URL works on laptop's own network but not on phone data/other Wi-Fi | Testing against the wrong URL, or a firewall is blocking `cloudflared` itself | Re-confirm the exact URL `cloudflared` printed; `cloudflared` only needs outbound HTTPS, so this is rarely a firewall issue once it's running |
+
+## Part 2: provider, no tunnel, production rules (added 2026-10-04)
+
+**Expo flow without a tunnel.** The laptop serves the frontend and API on loopback, and the model is called from the laptop,
+so no public tunnel is needed for the chat to answer.
+
+1. Start 9Router on loopback: `node "C:\Users\shubh\.npm-global\node_modules\9router\cli.js" --host 127.0.0.1`.
+2. Start the API on loopback with `.env` loaded: `uvicorn services.api.main:app --host 127.0.0.1 --port 8000`.
+3. Build and start the frontend on loopback, with the proxy pointed at the API:
+   `API_PROXY_TARGET=http://127.0.0.1:8000 npx next build`, then `npx next start -H 127.0.0.1 -p 3000`.
+
+**Provider order.** `services/chat/explain.py::get_provider` builds a chain. The first tier is the dedicated endpoint when
+`NILABH_LLM_BASE_URL`, `NILABH_LLM_API_KEY` and `NILABH_LLM_MODEL` are set (model `deepseek-v4.1-flash`). Then the 9Router
+primary, if configured. Then the deterministic templates, which always answer. Every tier shares the same budget,
+circuit breaker and grounding checks.
+
+**Production rules.**
+- The friend's key and endpoint are never set as Vercel environment variables. Production therefore answers with the
+  deterministic templates. Those templates answer greetings, identity questions, cybersecurity questions and product
+  questions, and they still run the scam analysis on content.
+- The endpoint `pi.tailcb8887.ts.net` is a tailnet address and is not reachable from Vercel. Making it reachable from
+  production requires a decision to expose it publicly. That decision is not made.
+- Verdicts come only from the classifier (`trustshield_text_v3`). Model output is text only.
+
+**Preview verification.** Previews sit behind Vercel Authentication, so anonymous requests return 302 to login. The
+browser suite needs one of: an automation bypass secret supplied as `--bypass-token`, or Preview protection turned off by
+a project owner. Do not promote a Preview that has not passed the chat e2e.
