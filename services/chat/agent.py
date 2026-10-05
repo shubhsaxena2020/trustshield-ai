@@ -65,8 +65,12 @@ def system_prompt() -> str:
         f"WHAT YOU DO\n"
         f"- Chat naturally about yourself, cybersecurity, scams, and digital safety.\n"
         f"- Answer simple general questions briefly when they are harmless.\n"
-        f"- Check suspicious content with your scanner, but only when the user has actually pasted content to check: a message, "
-        f"a link, a phone number or a screenshot's text. Never scan a request, a question or a task.\n\n"
+        f"- Answer questions about scams, fraud, phishing and staying safe fully and helpfully, in plain language: how common scams "
+        f"work, the warning signs, and what to do. Never write a working scam message or script for someone to send.\n"
+        f"- Call the analyze_content tool when the user shares content to check: a pasted message, link, phone number, or "
+        f"screenshot text, including informal or misspelt ones. Do not call it for questions, requests, remarks about your earlier "
+        f"replies, or general chat. When a result comes back, explain it in plain words; never change its score or level, and "
+        f"never claim you scanned something you did not.\n\n"
         f"WHAT YOU DO NOT DO\n"
         f"- Do not write code, scripts, essays, homework, emails, poems or long creative work. Say briefly that you focus on "
         f"scams and cybersecurity, and offer a related help instead.\n"
@@ -224,18 +228,20 @@ def _stream_post(messages: list[dict], tools: list[dict] | None):
                 yield choices[0].get("delta") or {}
 
 
-def stream_turn(message: str, history: list[dict], scan: Callable[[str], str]):
+def stream_turn(message: str, history: list[dict], scan: Callable[[str], str] | None):
     """Streaming chat turn. Yields (kind, payload): ("token", text) as the model writes, ("reset", None) when a scanner call
     starts (earlier text is discarded), ("scanned", None) after the scanner ran, and ("final", full_text) at the end. Raises
-    on network failure, before any token is shown, so the caller can fall back."""
+    on network failure, before any token is shown, so the caller can fall back. With scan=None the model gets no scanner tool
+    at all: it answers the question directly."""
     messages: list[dict] = [{"role": "system", "content": system_prompt()}]
     for turn in history[-8:]:
         role = turn.get("role")
         if role in ("user", "assistant") and turn.get("text"):
             messages.append({"role": role, "content": str(turn["text"])[:_HISTORY_TURN_CHARS]})
     messages.append({"role": "user", "content": message})
-    for round_no in range(MAX_TOOL_ROUNDS + 1):
-        tools = [SCAN_TOOL] if round_no < MAX_TOOL_ROUNDS else None
+    tool_rounds = MAX_TOOL_ROUNDS if scan is not None else 0
+    for round_no in range(tool_rounds + 1):
+        tools = [SCAN_TOOL] if round_no < tool_rounds else None
         parts: list[str] = []
         tool_acc: dict[int, dict] = {}
         for delta in _stream_post(messages, tools):
@@ -266,7 +272,7 @@ def stream_turn(message: str, history: list[dict], scan: Callable[[str], str]):
             except json.JSONDecodeError:
                 args = {}
             content_to_scan = str(args.get("text", ""))[:5000]
-            if content_to_scan.strip() and is_content_to_check(message, content_to_scan):
+            if scan is not None and content_to_scan.strip() and is_content_to_check(message, content_to_scan):
                 summary = scan(content_to_scan)
                 scanned = True
             else:

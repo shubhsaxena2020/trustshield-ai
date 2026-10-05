@@ -670,6 +670,14 @@ def _claims_unsupported_certainty(text: str) -> bool:
         # Advice, not a claim: "the link should be verified", "check it to be verified through the official app"
         if re.search(r"\b(be|been|get|got|to be|should|must|needs?|verify|check)\b\W*(\w+\W+){0,2}$", before, re.I):
             continue
+        # A refusal that names the claim: "rather than claiming that content is definitely safe"
+        if re.search(r"\b(rather than|instead of|avoids?|without)\s+(claiming|saying|stating|guaranteeing|calling|promising|asserting)\b[^.;!?]{0,40}$",
+                     before, re.I):
+            continue
+        # A scam described by its promise: "fake offers promising guaranteed returns" is not TrustShield's own claim
+        if (re.search(r"\b(promis\w*|offer\w*|claim\w*|advertis\w*|pitch\w*|fake|scam\w*|lure\w*|bait\w*)\b[^.;!?]{0,30}$", before, re.I)
+                and not re.search(r"\b(we|i|trustshield)\b", before, re.I)):
+            continue
         return True
     return False
 

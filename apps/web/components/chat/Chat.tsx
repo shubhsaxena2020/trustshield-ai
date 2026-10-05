@@ -78,7 +78,8 @@ export function Chat() {
   const [activeId, setActiveId] = useState<string>(() => "");
   const [draft, setDraft] = useState("");
   const [attached, setAttached] = useState<{ file: File; url: string } | null>(null);
-  const [busy, setBusy] = useState(false);
+  // Conversations whose reply is still streaming. Each has its own controller, so switching chats never cancels a reply.
+  const [streaming, setStreaming] = useState<Set<string>>(() => new Set());
   const [busyLabel, setBusyLabel] = useState("Thinking…");
   const [notice, setNotice] = useState("");
   const [dragging, setDragging] = useState(false);
@@ -92,13 +93,14 @@ export function Chat() {
     () => getSpeechCtor() !== null,
     () => false,
   );
-  const abortRef = useRef<AbortController | null>(null);
+  const controllersRef = useRef(new Map<string, AbortController>());
   const endRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const recogRef = useRef<SpeechRecognitionLike | null>(null);
 
   const active = chats.find((c) => c.id === activeId) ?? chats[0];
+  const busy = streaming.has(active.id);
   const messages = active.messages;
 
 
@@ -302,17 +304,24 @@ export function Chat() {
   }
 
   async function send(text: string, attachment: File | null, context: { analysis: ChatAnalysis; signature: string } | null, history: HistoryTurn[], convId: string) {
-    setBusy(true);
     setBusyLabel(attachment ? "Checking the attachment…" : "Thinking…");
     setNotice("");
     const controller = new AbortController();
-    abortRef.current = controller;
+    controllersRef.current.set(convId, controller);
+    setStreaming((prev) => new Set(prev).add(convId));
+    const finish = () => {
+      controllersRef.current.delete(convId);
+      setStreaming((prev) => {
+        const next = new Set(prev);
+        next.delete(convId);
+        return next;
+      });
+    };
     if (!attachment) {
       try {
         await streamChat(text, context, history, convId, controller);
       } finally {
-        abortRef.current = null;
-        setBusy(false);
+        finish();
       }
       return;
     }
@@ -368,8 +377,7 @@ export function Chat() {
         });
       }
     } finally {
-      abortRef.current = null;
-      setBusy(false);
+      finish();
     }
   }
 
@@ -394,7 +402,6 @@ export function Chat() {
   }
 
   function newChat() {
-    abortRef.current?.abort();
     const c = newConversation();
     setChats((prev) => [c, ...prev]);
     setActiveId(c.id);
@@ -406,7 +413,6 @@ export function Chat() {
   }
 
   function switchTo(id: string) {
-    abortRef.current?.abort();
     setActiveId(id);
     setSidebarOpen(false);
   }
@@ -536,7 +542,7 @@ export function Chat() {
             {busy && (
               <li role="status" className="text-sm text-zinc-400">
                 {busyLabel}{" "}
-                <button type="button" onClick={() => abortRef.current?.abort()} className="font-medium underline">Stop</button>
+                <button type="button" onClick={() => controllersRef.current.get(active.id)?.abort()} className="font-medium underline">Stop</button>
               </li>
             )}
           </ol>

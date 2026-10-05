@@ -32,7 +32,8 @@ from services.chat import agent
 from services.chat.explain import DeterministicExplanationProvider, Reply, followup_intent, get_provider
 
 _log = logging.getLogger("trustshield.api")
-from services.chat.intent import classify_intent
+from services.analysis.normalization.text import extract_urls
+from services.chat.intent import classify_intent, has_action_or_object_risk, has_suspicious_signal, is_question_or_task
 from services.chat.orchestrator import analyze_turn
 from services.chat.router import MAX_MESSAGE_CHARS, route
 from services.chat.signing import sign, verify
@@ -298,10 +299,99 @@ def _text_events(text: str):
         yield _sse({"type": "token", "text": piece})
 
 
-def _deterministic_chat_text(provider, intent: str, message: str, recent: list[dict]) -> str:
-    # Always the template answer here: the chained provider would call the model again, with the older prompt.
-    method_name = _CHAT_ONLY_REPLY[intent][1]
-    return getattr(DeterministicExplanationProvider(), method_name)(message, recent).text
+_UNAVAILABLE_TEXT = ("The language model isn't responding right now, so I can't answer that yet. "
+                     "Please send your message again in a moment.")
+_REJECTED_TEXT = "I couldn't give a reliable answer to that one. Could you ask it another way?"
+
+
+_CONVERSATIONAL_REFERENCE = re.compile(
+    r"\b(this|that|it)\s+(is\s+|was\s+)?(a\s+|an\s+|about\s+|the\s+|related\s+|same\s+|another\s+)*"
+    r"(question|topic|thing|one|subject|answer|reply|point|query)\b", re.I)
+
+
+def _may_scan(message: str) -> bool:
+    """The scanner is for content the user shares: a link, a fraud or payment signal, or a passage of text. A question, a
+    request, or a remark about an earlier reply ("but this is a related question") is never scanned."""
+    if extract_urls(message):
+        return True
+    words = len(message.split())
+    if has_suspicious_signal(message) or has_action_or_object_risk(message):
+        return not is_question_or_task(message) or words >= 12
+    if is_question_or_task(message) or _CONVERSATIONAL_REFERENCE.search(message):
+        return False
+    return words >= 4
+
+
+def _make_scan(message: str, captured: dict):
+    """The tool the model can call. It refuses anything that is not content the user shared, and records the analysis."""
+    def scan(text: str) -> str:
+        if not _may_scan(message):
+            return json.dumps({"error": "the user asked a question or replied; answer it directly, do not scan"})
+        plan = route(text, False, False, followup_intent)
+        try:
+            result, types = analyze_turn(text, None, plan)
+        except (InvalidInput, ImageRejected) as exc:
+            return json.dumps({"error": str(exc)[:200]})
+        analysis = to_contract(result, types, plan.urls)
+        captured.update(result=result, plan=plan, analysis=analysis)
+        return json.dumps(analysis.model_dump(mode="json"), default=str)[:6000]
+    return scan
+
+
+def _analysis_event(captured: dict) -> str:
+    a = captured["analysis"]
+    return _sse({"type": "analysis", "analysis": a.model_dump(mode="json"), "signature": sign(a),
+                 "route": captured["plan"].public(), "response_type": "analysis"})
+
+
+def _model_events(message: str, recent: list[dict], captured: dict, scan):
+    """Every message goes to the model first. The model answers, and calls the scanner only when agent.stream_turn decides the
+    user shared content. A failure before any text is shown is retried once. If the model is still down, shared content is
+    still scanned directly, so a real scam is never left unchecked."""
+    if not agent.configured():
+        yield _sse({"type": "replace", "text": _UNAVAILABLE_TEXT})
+        return
+    final_text = ""
+    for attempt in range(2):
+        shown = False
+        final_text = ""
+        ok = False
+        try:
+            for kind, payload in agent.stream_turn(message, recent, scan):
+                if kind == "token":
+                    shown = True
+                    yield _sse({"type": "token", "text": payload})
+                elif kind == "reset":
+                    shown = False
+                    yield _sse({"type": "reset"})
+                elif kind == "scanned" and captured.get("analysis") is not None:
+                    yield _analysis_event(captured)
+                elif kind == "final":
+                    final_text = payload
+            ok = captured.get("analysis") is not None or agent.reply_is_acceptable(final_text, None, explanation=True)
+        except Exception:  # network, timeout or malformed response from the model
+            final_text = ""
+        if ok or captured.get("analysis") is not None:
+            break
+        # A reply that failed the check (or a failed connection) is retried once, with the earlier text cleared first.
+        if attempt == 0 and (shown or final_text):
+            yield _sse({"type": "reset"})
+    analysis = captured.get("analysis")
+    if analysis is not None:
+        if not (final_text and agent.reply_is_acceptable(final_text, analysis.risk_score, explanation=True)):
+            yield _sse({"type": "replace", "text": DeterministicExplanationProvider().reply_for_analysis(analysis).text})
+    elif final_text:
+        if not agent.reply_is_acceptable(final_text, None, explanation=True):
+            yield _sse({"type": "replace", "text": _REJECTED_TEXT})
+    elif _may_scan(message) and (has_suspicious_signal(message) or has_action_or_object_risk(message) or extract_urls(message)):
+        scan(message)  # the model is down: a message with scam signals is still analysed directly
+        if captured.get("analysis") is not None:
+            yield _analysis_event(captured)
+            yield _sse({"type": "replace", "text": DeterministicExplanationProvider().reply_for_analysis(captured["analysis"]).text})
+        else:
+            yield _sse({"type": "replace", "text": _UNAVAILABLE_TEXT})
+    else:
+        yield _sse({"type": "replace", "text": _UNAVAILABLE_TEXT})
 
 
 def _stream_chat_events(message: str, history: list[Turn], context: ChatAnalysis | None, signature: str):
@@ -319,95 +409,11 @@ def _stream_chat_events(message: str, history: list[Turn], context: ChatAnalysis
             return
         meta = intent_result.public()
 
-        if intent_result.intent in _CHAT_ONLY_REPLY and agent.configured():
-            yield _sse({"type": "meta", "kind": "chat", "response_type": _CHAT_ONLY_REPLY[intent_result.intent][0], "intent": meta})
-            captured: dict = {}
-
-            def scan(text: str) -> str:
-                plan = route(text, False, False, followup_intent)
-                try:
-                    result, types = analyze_turn(text, None, plan)
-                except (InvalidInput, ImageRejected) as exc:
-                    return json.dumps({"error": str(exc)[:200]})
-                analysis = to_contract(result, types, plan.urls)
-                captured.update(result=result, plan=plan, analysis=analysis)
-                return json.dumps(analysis.model_dump(mode="json"), default=str)[:6000]
-
-            final_text = ""
-            try:
-                for kind, payload in agent.stream_turn(message, recent, scan):
-                    if kind == "token":
-                        yield _sse({"type": "token", "text": payload})
-                    elif kind == "reset":
-                        yield _sse({"type": "reset"})
-                    elif kind == "scanned" and captured.get("analysis") is not None:
-                        a = captured["analysis"]
-                        yield _sse({"type": "analysis", "analysis": a.model_dump(mode="json"), "signature": sign(a),
-                                    "route": captured["plan"].public(), "response_type": "analysis"})
-                    elif kind == "final":
-                        final_text = payload
-            except Exception:  # network or model failure: the deterministic answer below replaces whatever was shown
-                final_text = ""
-            analysis = captured.get("analysis")
-            if not (final_text and agent.reply_is_acceptable(final_text, analysis.risk_score if analysis is not None else None)):
-                if analysis is not None:
-                    fallback = DeterministicExplanationProvider().reply_for_analysis(analysis).text
-                elif final_text:
-                    # The model answered, but a check rejected that answer: a neutral scope reply, not an "unavailable" notice.
-                    fallback = ("I focus on scams, cybersecurity and checking suspicious content, so I can't help with that one. "
-                                "Paste a message, link or QR content you'd like checked, or ask a cybersecurity question.")
-                else:
-                    fallback = _deterministic_chat_text(provider, intent_result.intent, message, recent)
-                yield _sse({"type": "replace", "text": fallback})
-            yield _sse({"type": "done"})
-            return
-
-        if intent_result.intent in _CHAT_ONLY_REPLY:
-            yield _sse({"type": "meta", "kind": "chat", "response_type": _CHAT_ONLY_REPLY[intent_result.intent][0], "intent": meta})
-            yield from _text_events(_deterministic_chat_text(provider, intent_result.intent, message, recent))
-            yield _sse({"type": "done"})
-            return
-
-        if intent_result.intent == "follow_up_analysis":
-            assert context is not None and intent_result.followup_intent is not None
-            yield _sse({"type": "meta", "kind": "followup", "response_type": "follow_up", "intent": meta})
-            text = provider.reply_for_followup(intent_result.followup_intent, message, context).text
-            yield from _text_events(text)
-            yield _sse({"type": "done"})
-            return
-
-        # Analysis: the scanner runs first (fast), the card is sent at once, then the explanation streams in.
-        yield _sse({"type": "meta", "kind": "analysis", "response_type": "analysis", "intent": meta})
-        plan = route(message, False, False, followup_intent)
-        result, types = analyze_turn(message, None, plan)
-        analysis = to_contract(result, types, plan.urls)
-        if agent.configured() and intent_result.intent == "analyze_text":
-            corrected = agent.correct_spelling(message)
-            if corrected:
-                plan2 = route(corrected, False, False, followup_intent)
-                try:
-                    result2, types2 = analyze_turn(corrected, None, plan2)
-                    analysis2 = to_contract(result2, types2, plan2.urls)
-                    if analysis2.risk_score > analysis.risk_score:
-                        result, plan, analysis = result2, plan2, analysis2
-                except (InvalidInput, ImageRejected):
-                    pass
-        yield _sse({"type": "analysis", "analysis": analysis.model_dump(mode="json"), "signature": sign(analysis),
-                    "route": plan.public(), "response_type": "analysis"})
-        if agent.configured() and message.strip() and analysis.risk_level != "unable_to_verify":
-            final_text = ""
-            try:
-                for kind, payload in agent.stream_explain(message, analysis.model_dump_json()):
-                    if kind == "token":
-                        yield _sse({"type": "token", "text": payload})
-                    elif kind == "final":
-                        final_text = payload
-            except Exception:
-                final_text = ""
-            if not (final_text and agent.reply_is_acceptable(final_text, analysis.risk_score, explanation=True)):
-                yield _sse({"type": "replace", "text": DeterministicExplanationProvider().reply_for_analysis(analysis).text})
-        else:
-            yield from _text_events(DeterministicExplanationProvider().reply_for_analysis(analysis).text)
+        # Every message goes to the model first; it decides whether to call the scanner (see _model_events and _may_scan).
+        response_type = _CHAT_ONLY_REPLY.get(intent_result.intent, ("chat", ""))[0]
+        yield _sse({"type": "meta", "kind": "chat", "response_type": response_type, "intent": meta})
+        captured: dict = {}
+        yield from _model_events(message, recent, captured, _make_scan(message, captured))
         yield _sse({"type": "done"})
     except (InvalidInput, ImageRejected) as exc:
         yield _sse({"type": "error", "detail": str(exc)[:300]})
