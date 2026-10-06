@@ -104,8 +104,9 @@ for i, line in enumerate(["A privacy-first analyser for scam messages, screensho
     q.text, q.font.size, q.font.color.rgb = line, Pt(20 if i == 0 else 15), WHITE if i == 0 else MUTED
 
 # 2 ── Problem
-s = base(2, "Use the NCRP/PIB figures carefully: complaints rose from about 2.63 lakh in 2021 to over 24 lakh in 2025, and about Rs 22,495 "
-            "crore was reported in 2025. Say the point clearly: the problem is not a lack of warnings, it is that people must spot the signs in seconds.")
+s = base(2, "Use the figures as reported, and name the source when asked. Reports of 2025 differ: one says over 24 lakh complaints and Rs 22,495 "
+            "crore; another cites I4C data of about 21.8 lakh complaints and Rs 19,813 crore. The 2021 figure is 2.63 lakh. Say the point clearly: "
+            "the problem is not a lack of warnings, it is that people must spot the signs in seconds.")
 title(s, "Scams are growing faster than awareness", "The problem")
 big_stat(s, 0.6, 2.2, "2.63 L", "financial cyber-fraud complaints in 2021")
 big_stat(s, 4.7, 2.2, "24 L+", "complaints in 2025 (government data, PIB/NCRP)", RED)

@@ -11,6 +11,13 @@ Read this before the screening (9–10 October 2026). Every number below is take
 - **Problem:** scams reach people through WhatsApp, SMS, email, screenshots, QR codes, shortened links, fake payment requests and impersonation. Most people cannot spot the signs in seconds.
 - **Why it matters (government data via PIB/NCRP, as recorded in `services/chat/product_metadata.py`):** financial cyber-fraud complaints rose from about 2.63 lakh (2021) to over 24 lakh (2025); about Rs 22,495 crore was reported in 2025.
 
+### Research checked on 2026-10-06 (sources)
+
+- **Scam figures conflict.** One report says over 24 lakh complaints and Rs 22,495 crore in 2025 ([Free Press Journal](https://www.freepressjournal.in/amp/mumbai/over-24-lakh-cyber-complaints-22495-crore-fraud-reported-in-2025)). Another search summary cites I4C data of 2,177,524 cheating complaints and about Rs 19,813 crore for 2025. We have not yet verified that figure against the I4C or PIB original, so do not quote it until we have. Quote the source you use, and say "reported" figures.
+- **Comparable tools.** A vendor comparison ([Straja.io](https://www.straja.io/blog/virustotal-vs-google-safe-browsing-vs-scamadviser-vs-scamy-io-which-tool-is-best-for-detecting-online-scams)) reports Google Safe Browsing caught about 3% of malicious sites with no false alarms, VirusTotal missed about 31%, and ScamAdviser caught about 78%. Treat these as one vendor's test. Other comparisons are listed in [Guard.io](https://guard.io/blog/best-website-safety-checker-tools) and [Malwarebytes](https://www.malwarebytes.com/solutions/best-scam-detection-tools).
+- **Our position:** the other tools check websites (reputation and blocklists). TrustShield checks the message the user actually received (text, screenshot, QR), explains the evidence, and never opens the link.
+- **Judge criteria:** we could not find PSIT's published criteria. A comparable university expo judges on innovation, professionalism and scientific insight ([Montana Tech TechXpo](https://m.mtech.edu/techxpo/docs/techxpo-guidelines-2026.pdf)). Ask the organisers for PSIT's rubric before the screening.
+
 ## 2. How it works
 
 1. **Input:** pasted text, a screenshot (PNG, JPEG or WebP), a pasted link, or a QR code.
