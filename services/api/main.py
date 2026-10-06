@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import time
 import logging
 import math
 import os
@@ -352,10 +353,12 @@ def _model_events(message: str, recent: list[dict], captured: dict, scan):
         yield _sse({"type": "replace", "text": _UNAVAILABLE_TEXT})
         return
     final_text = ""
-    for attempt in range(2):
+    for attempt in range(3):
         shown = False
         final_text = ""
         ok = False
+        if attempt:
+            time.sleep(1.5 * attempt)  # the model host sheds load with 503s; a short pause usually clears it
         try:
             for kind, payload in agent.stream_turn(message, recent, scan):
                 if kind == "token":
@@ -368,13 +371,14 @@ def _model_events(message: str, recent: list[dict], captured: dict, scan):
                     yield _analysis_event(captured)
                 elif kind == "final":
                     final_text = payload
-            ok = captured.get("analysis") is not None or agent.reply_is_acceptable(final_text, None, explanation=True)
+            # An empty reply (a failed call) is never accepted, so the loop retries it.
+            ok = captured.get("analysis") is not None or (bool(final_text) and agent.reply_is_acceptable(final_text, None, explanation=True))
         except Exception:  # network, timeout or malformed response from the model
             final_text = ""
         if ok or captured.get("analysis") is not None:
             break
         # A reply that failed the check (or a failed connection) is retried once, with the earlier text cleared first.
-        if attempt == 0 and (shown or final_text):
+        if attempt < 2 and (shown or final_text):
             yield _sse({"type": "reset"})
     analysis = captured.get("analysis")
     if analysis is not None:
