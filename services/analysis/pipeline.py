@@ -37,6 +37,21 @@ def _text_classifier() -> TextClassifier:
     return TextClassifier()
 
 
+def _is_official_url(url: str) -> bool:
+    """True when the link's registered domain is one of a known brand's official domains."""
+    from urllib.parse import urlparse
+
+    from services.analysis.url_analysis.brands import BRANDS
+    from services.analysis.url_analysis.static import _extract
+
+    host = (urlparse(url if "://" in url else f"https://{url}").hostname or "").lower()
+    if not host:
+        return False
+    ext = _extract(host)
+    registered = (getattr(ext, "top_domain_under_public_suffix", None) or ext.registered_domain or "").lower()
+    return any(registered in officials for _, officials in BRANDS.values())
+
+
 def _run_ml(text: str) -> tuple[ModuleResult, list[Evidence], bool]:
     if os.getenv("TRUSTSHIELD_ML", "on").strip().lower() == "off":
         return ModuleResult(status="not_run", detail="Disabled by TRUSTSHIELD_ML=off"), [], False
@@ -97,6 +112,10 @@ def analyze_text(raw: str, input_type: str = "text", extra_modules: dict[str, Mo
 
     urls = extract_urls(text)
     ml_module, ml_items, ml_completed = _run_ml(text)
+    # A message whose only links go to an official brand domain, with no rule firing, is not scored from the text classifier
+    # alone: "check my account at <official SBI link>" read as phishing before this guard (2026-10-06 test).
+    if urls and not evidence and all(_is_official_url(u) for u in urls):
+        ml_items = []
     evidence += ml_items
     modules["ml"] = ml_module
     limitations = ([] if ml_completed or ml_module.status == "not_run" else [LIMIT_ML]) + list(extra_limitations or [])
