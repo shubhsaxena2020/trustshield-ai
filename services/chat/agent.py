@@ -205,8 +205,9 @@ def _stream_post(messages: list[dict], tools: list[dict] | None):
     base_url = os.environ["NILABH_LLM_BASE_URL"].rstrip("/")
     api_key = os.environ["NILABH_LLM_API_KEY"]
     _validate_base_url(base_url)
+    # Reasoning is switched off for chat: it roughly halves the wait (measured 7.7 s vs 15.9 s) with the same answer length.
     body: dict = {"model": os.environ["NILABH_LLM_MODEL"], "messages": messages, "stream": True,
-                  "max_tokens": _REMOTE_MAX_TOKENS, "temperature": 0.3}
+                  "max_tokens": _REMOTE_MAX_TOKENS, "temperature": 0.3, "chat_template_kwargs": {"enable_thinking": False}}
     if tools:
         body["tools"] = tools
     request = urllib.request.Request(f"{base_url}/chat/completions", data=json.dumps(body).encode(),
