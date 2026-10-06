@@ -10,9 +10,10 @@ BRANDS: dict[str, tuple[str, set[str]]] = {
     # hdfc.bank.in and icici.bank.in (verified in a browser on 2026-10-06).
     "hdfc": ("HDFC Bank", {"hdfcbank.com", "hdfc.com", "hdfclife.com", "hdfcbank.net", "hdfc.bank.in"}),
     "icici": ("ICICI Bank", {"icicibank.com", "icicilombard.com", "iciciprulife.com", "icici.bank.in"}),
-    "axis": ("Axis Bank", {"axisbank.com"}),
-    "kotak": ("Kotak Mahindra Bank", {"kotak.com", "kotakbank.com"}),
-    "pnb": ("Punjab National Bank", {"pnbindia.in", "netpnb.com"}),
+    # axisbank.com, kotak.com and pnbindia.in redirect to axis.bank.in, kotak.bank.in and pnb.bank.in (browser-verified 2026-10-06).
+    "axis": ("Axis Bank", {"axisbank.com", "axis.bank.in"}),
+    "kotak": ("Kotak Mahindra Bank", {"kotak.com", "kotakbank.com", "kotak.bank.in"}),
+    "pnb": ("Punjab National Bank", {"pnbindia.in", "netpnb.com", "pnb.bank.in"}),
     "paytm": ("Paytm", {"paytm.com", "paytmbank.com"}),
     "phonepe": ("PhonePe", {"phonepe.com"}),
     "amazon": ("Amazon", {"amazon.in", "amazon.com", "amazonpay.in"}),
