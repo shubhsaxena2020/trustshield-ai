@@ -63,7 +63,16 @@ def risk_score(evidence: list[Evidence]) -> int:
     safe = 1.0
     for e in evidence:
         safe *= 1.0 - SEVERITY_WEIGHT[e.severity] * e.confidence
-    return round((1.0 - safe) * 100)
+    return _with_brand_floor(evidence, round((1.0 - safe) * 100))
+
+
+def _with_brand_floor(evidence: list[Evidence], score: int) -> int:
+    """A link that claims a known brand but is not its domain, together with a second URL risk (suspicious top-level domain,
+    credential path, no HTTPS, lookalike), is at least "suspicious". Without this floor a bare fake bank link scored 36 (caution)."""
+    categories = {e.category for e in evidence}
+    if "domain_mismatch" in categories and categories & {"suspicious_tld", "credential_path_terms", "no_https", "lookalike_domain"}:
+        return max(score, 60)
+    return score
 
 
 def label_for(score: int) -> str:
@@ -141,7 +150,9 @@ def fuse(evidence: list[Evidence], module_status: dict[str, str], input_ok: bool
         result = apply_strategy(strategy_name, evidence, module_status, input_ok, module_quality,
                                 severity_weight=SEVERITY_WEIGHT, input_token_count=input_token_count,
                                 **(strategy_params or {}))
-        return Fusion(result.score, result.label, result.confidence, result.primary, result.secondary, result.data)
+        score = _with_brand_floor(evidence, result.score)
+        label = result.label if score == result.score else label_for(score)
+        return Fusion(score, label, result.confidence, result.primary, result.secondary, result.data)
     score = risk_score(evidence)
     confidence = assess_confidence(module_status, input_ok, module_quality)
     label = label_for(score)
