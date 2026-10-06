@@ -1,0 +1,31 @@
+INFO:     Started server process [115916]
+INFO:     Waiting for application startup.
+▲ Next.js 16.3.6
+- Local:         http://127.0.0.1:3100
+- Network:       http://127.0.0.1:3100
+✓ Ready in 140ms
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8100 (Press CTRL+C to quit)
+✓ Running next.config.ts took 47ms
+INFO:     127.0.0.1:49678 - "GET /api/v1/health HTTP/1.1" 200 OK
+{"event": "request", "request_id": "140f38bb9238450c82faf7e1f5dad072", "method": "GET", "path": "/api/v1/health", "status": 200, "duration_ms": 72.5, "analysis_id": null}
+INFO:     127.0.0.1:49680 - "GET /api/v1/health HTTP/1.1" 200 OK
+{"event": "request", "request_id": "45c9bc06f0d44e7c84ba771c552c8a0d", "method": "GET", "path": "/api/v1/health", "status": 200, "duration_ms": 46.0, "analysis_id": null}
+INFO:     127.0.0.1:56894 - "GET /api/v1/health HTTP/1.1" 200 OK
+{"event": "request", "request_id": "2a1248718cf8450ca908c45487ee21c7", "method": "GET", "path": "/api/v1/health", "status": 200, "duration_ms": 39.5, "analysis_id": null}
+INFO:     127.0.0.1:56894 - "POST /api/v1/chat/stream HTTP/1.1" 200 OK
+{"event": "request", "request_id": "236da68a8e2d49d68e9c90f006d249fb", "method": "POST", "path": "/api/v1/chat/stream", "status": 200, "duration_ms": 57.2, "analysis_id": null}
+INFO:     127.0.0.1:56894 - "POST /api/v1/chat/stream HTTP/1.1" 200 OK
+{"event": "request", "request_id": "f001f6263a884bc884de15eaceee5154", "method": "POST", "path": "/api/v1/chat/stream", "status": 200, "duration_ms": 18.0, "analysis_id": null}
+INFO:     127.0.0.1:56894 - "POST /api/v1/chat/stream HTTP/1.1" 200 OK
+{"event": "request", "request_id": "ab028d5cd9fc48858df0aea7d7fbce50", "method": "POST", "path": "/api/v1/chat/stream", "status": 200, "duration_ms": 36.1, "analysis_id": null}
+PASS health: default ML v3 available
+PASS health: web sandbox no longer reported
+PASS empty state shows
+PASS no advanced-analyzer link
+PASS text scam: High Risk with evidence card
+PASS benign message: not flagged High Risk after the scam turn
+PASS lookalike URL: flagged, not Low Risk
+PASS screenshot: OCR-backed analysis card shown
+
+8/8 passed

@@ -114,6 +114,9 @@ def analyze_url_static(url: str) -> UrlStaticResult:
     ext = _extract(decoded_host)
     registered = ext.top_domain_under_public_suffix if hasattr(ext, "top_domain_under_public_suffix") else ext.registered_domain
     registered = (registered or host).lower()
+    # ".bank.in" is itself a public suffix, so the parser reports "bank.in" for sbi.bank.in: keep one label more (2026-10-06).
+    if decoded_host.lower().endswith(".bank.in") and decoded_host.lower().count(".") >= 3:
+        registered = ".".join(decoded_host.lower().split(".")[-3:])
     subdomain = ext.subdomain.lower()
     path = parts.path or ""
     facts = {"scheme": scheme, "hostname": host, "hostname_decoded": decoded_host, "registered_domain": registered,

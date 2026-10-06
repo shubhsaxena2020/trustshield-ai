@@ -1,0 +1,74 @@
+INFO:     Started server process [87796]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+▲ Next.js 16.3.6
+- Local:         http://localhost:3000
+- Network:       http://100.67.196.104:3000
+✓ Ready in 147ms
+✓ Running next.config.ts took 44ms
+INFO:     127.0.0.1:53566 - "GET /api/v1/health HTTP/1.1" 200 OK
+{"event": "request", "request_id": "e28a24f2fd824ebcb1902411c03a831a", "method": "GET", "path": "/api/v1/health", "status": 200, "duration_ms": 107.1, "analysis_id": null}
+INFO:     127.0.0.1:61252 - "GET /api/v1/health HTTP/1.1" 200 OK
+{"event": "request", "request_id": "5f412a40713d45a4bdde52cd086944a0", "method": "GET", "path": "/api/v1/health", "status": 200, "duration_ms": 56.8, "analysis_id": null}
+INFO:     127.0.0.1:61252 - "POST /api/v1/chat HTTP/1.1" 200 OK
+{"event": "request", "request_id": "da01ce3083594a8c90bdbb8f551696bc", "method": "POST", "path": "/api/v1/chat", "status": 200, "duration_ms": 123.8, "analysis_id": "6bd77384a1704e43810edf00377d7a5d"}
+INFO:     127.0.0.1:61252 - "POST /api/v1/chat HTTP/1.1" 200 OK
+{"event": "request", "request_id": "06f4d84b813b42fbb65843bad225fab7", "method": "POST", "path": "/api/v1/chat", "status": 200, "duration_ms": 28.2, "analysis_id": "e1fd993a13dd4e10a6968d3cfbe28a16"}
+INFO:     127.0.0.1:61252 - "POST /api/v1/chat HTTP/1.1" 200 OK
+{"event": "request", "request_id": "63a538cde5db4d7d9873b280f2e9df31", "method": "POST", "path": "/api/v1/chat", "status": 200, "duration_ms": 13.6, "analysis_id": null}
+INFO:     127.0.0.1:61252 - "POST /api/v1/chat HTTP/1.1" 200 OK
+{"event": "request", "request_id": "b120a62d2fb7455db54054e13da7f97d", "method": "POST", "path": "/api/v1/chat", "status": 200, "duration_ms": 3.9, "analysis_id": null}
+INFO:     127.0.0.1:61252 - "POST /api/v1/chat HTTP/1.1" 200 OK
+{"event": "request", "request_id": "66e049677b9a467bb0554e15c992621c", "method": "POST", "path": "/api/v1/chat", "status": 200, "duration_ms": 3.1, "analysis_id": null}
+INFO:     127.0.0.1:61252 - "POST /api/v1/chat HTTP/1.1" 200 OK
+{"event": "request", "request_id": "131c7ecaf9954f1ca95c88199be188e5", "method": "POST", "path": "/api/v1/chat", "status": 200, "duration_ms": 6.9, "analysis_id": null}
+INFO:     127.0.0.1:61252 - "POST /api/v1/chat HTTP/1.1" 200 OK
+{"event": "request", "request_id": "80f0cacaa4c14f1fba581158dc08f6c4", "method": "POST", "path": "/api/v1/chat", "status": 200, "duration_ms": 4.2, "analysis_id": null}
+INFO:     127.0.0.1:61252 - "POST /api/v1/chat HTTP/1.1" 200 OK
+{"event": "request", "request_id": "0cd8c6c1bda94f02b6cadc08f37a1135", "method": "POST", "path": "/api/v1/chat", "status": 200, "duration_ms": 4.1, "analysis_id": null}
+INFO:     127.0.0.1:61252 - "POST /api/v1/chat HTTP/1.1" 200 OK
+{"event": "request", "request_id": "3db04c05433a46adb6c5496a38dea2cd", "method": "POST", "path": "/api/v1/chat", "status": 200, "duration_ms": 40.0, "analysis_id": "9060f8c234d64c179e0a7b4afe84103f"}
+INFO:     127.0.0.1:61252 - "POST /api/v1/chat HTTP/1.1" 200 OK
+{"event": "request", "request_id": "16c20bb85aa04f8ab66cd1f0e47c3776", "method": "POST", "path": "/api/v1/chat", "status": 200, "duration_ms": 38.0, "analysis_id": "c40e5f8e149147ab85fbfbf70d61e371"}
+INFO:     127.0.0.1:61252 - "POST /api/v1/chat HTTP/1.1" 200 OK
+{"event": "request", "request_id": "885f69ac7b7849298f1e295944b00226", "method": "POST", "path": "/api/v1/chat", "status": 200, "duration_ms": 9.6, "analysis_id": "2f1ea2beb3244871a3abf6f2af179167"}
+INFO:     127.0.0.1:61252 - "POST /api/v1/chat/upload HTTP/1.1" 200 OK
+{"event": "request", "request_id": "d1c200b7c7d34f11b22bc1199343699b", "method": "POST", "path": "/api/v1/chat/upload", "status": 200, "duration_ms": 582.6, "analysis_id": "e13bbd15061f4d7990d644bf50d93f46"}
+INFO:     127.0.0.1:61252 - "POST /api/v1/chat/upload HTTP/1.1" 200 OK
+{"event": "request", "request_id": "3b2c01ef8c1d46d999d930fa00dac219", "method": "POST", "path": "/api/v1/chat/upload", "status": 200, "duration_ms": 1216.9, "analysis_id": "1dbb3a030d52479da9216678b1abe4af"}
+INFO:     127.0.0.1:61252 - "POST /api/v1/chat/upload HTTP/1.1" 200 OK
+{"event": "request", "request_id": "77a8c41dd3d4430d8852d0e58001216c", "method": "POST", "path": "/api/v1/chat/upload", "status": 200, "duration_ms": 559.1, "analysis_id": "37e14d3201a94af5a55802c2acc51a55"}
+INFO:     127.0.0.1:61252 - "POST /api/v1/chat HTTP/1.1" 200 OK
+{"event": "request", "request_id": "8d5ea3d1d5cf4d5ea9554e91d7ade86f", "method": "POST", "path": "/api/v1/chat", "status": 200, "duration_ms": 23.0, "analysis_id": "083dc6d556524485a3c0a632ed3bfd9f"}
+PASS home is the conversational assistant
+PASS privacy note visible
+PASS starter prompt sends immediately
+PASS Shift+Enter inserts a newline
+PASS scam text: risk card with score, confidence and evidence
+PASS scam text: flagged suspicious or high risk
+PASS never claims certainty
+PASS capability disclosure lists what was not used
+PASS follow-up answered from the analysis (no new risk card)
+PASS follow-up: states the page was not opened
+PASS follow-up: refuses certainty
+PASS new chat clears the timeline
+PASS greeting gets a natural reply, not a score
+PASS general cybersecurity question gets an educational answer, no risk card
+PASS product question gets a product answer, no risk card
+PASS greeting language does not suppress a real scam analysis
+PASS benign text: not flagged high risk
+PASS bare URL analysed with IP evidence
+PASS QR upload: payload shown as not opened
+PASS screenshot upload: OCR text extracted and analysed
+PASS blank image: Unable to Verify
+PASS clipboard image paste attaches a preview
+PASS attachment can be removed
+PASS oversize image rejected in the UI
+PASS mobile 390px: no horizontal scroll
+PASS 360px: no horizontal scroll
+PASS 430px: no horizontal scroll
+PASS 820px: no horizontal scroll
+PASS no console errors
+
+29/29 passed

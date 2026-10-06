@@ -1,0 +1,31 @@
+PASS home is the conversational assistant
+PASS privacy note visible
+PASS starter prompt sends immediately
+PASS Shift+Enter inserts a newline
+PASS scam text: risk card with score, confidence and evidence
+PASS scam text: flagged suspicious or high risk
+PASS never claims certainty
+PASS capability disclosure lists what was not used
+PASS follow-up answered from the analysis (no new risk card)
+PASS follow-up: states the page was not opened
+FAIL follow-up: refuses certainty
+PASS new chat clears the timeline
+PASS greeting gets a natural reply, not a score
+PASS general cybersecurity question gets an educational answer, no risk card
+PASS product question gets a product answer, no risk card
+PASS greeting language does not suppress a real scam analysis
+PASS benign text: not flagged high risk
+PASS bare URL analysed with IP evidence
+PASS QR upload: payload shown as not opened
+PASS screenshot upload: OCR text extracted and analysed
+PASS blank image: Unable to Verify
+PASS clipboard image paste attaches a preview
+PASS attachment can be removed
+PASS oversize image rejected in the UI
+PASS mobile 390px: no horizontal scroll
+PASS 360px: no horizontal scroll
+PASS 430px: no horizontal scroll
+PASS 820px: no horizontal scroll
+PASS no console errors
+
+28/29 passed

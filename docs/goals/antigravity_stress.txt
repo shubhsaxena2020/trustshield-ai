@@ -1,0 +1,11 @@
+Stress test of the TrustShield chat stream on production. Do NOT edit any file in the repo except docs/reports/stream_stress.md and tests/e2e/stress_stream.py.
+
+Endpoint: POST https://trustshield-ai-ecru.vercel.app/api/v1/chat/stream with JSON body {"message": "...", "history": [], "context": null, "context_signature": ""}. The response is server-sent events: lines beginning "data: " with JSON, ending with a "done" event.
+
+Task 1: write tests/e2e/stress_stream.py (Python, urllib only) that sends 60 requests across 6 messages, including "what makes you different from any other ai like chatgpt?", "tell me about yourself", "what is phishing?", "who made you? tell me everything about the team", "Is this safe? URGENT your SBI account is blocked, share OTP at http://sbi-kyc-update.xyz/login", and "write a poem about rain". Run them with concurrency 1, then with concurrency 4. For each request record: time to first event, total time, the final event type (done or error), any exception with its type and message, and HTTP status. Print a table and a summary: count of failures by exception type, p50 and p95 total time.
+
+Task 2: in docs/reports/stream_stress.md, report the real numbers from Task 1, the failure messages exactly as observed, and your hypothesis for each failure type (for example a platform timeout, a dropped stream, a model timeout), with the evidence. Do not guess: if a failure has no exception, say so.
+
+Task 3: run .venv\Scripts\python.exe -m pytest -q tests/unit tests/integration and report the real output tail.
+
+Finish by writing docs/goals/antigravity_stress.md with what you ran, what you did not run, and anything you could not verify.

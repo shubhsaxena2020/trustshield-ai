@@ -1,0 +1,81 @@
+INFO:     Started server process [82436]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     127.0.0.1:49691 - "GET /api/v1/health HTTP/1.1" 200 OK
+{"event": "request", "request_id": "e419b55f0c664855b57f22d68cea24bd", "method": "GET", "path": "/api/v1/health", "status": 200, "duration_ms": 116.7, "analysis_id": null}
+▲ Next.js 16.3.6
+- Local:         http://localhost:3000
+- Network:       http://100.67.196.104:3000
+✓ Ready in 250ms
+✓ Running next.config.ts took 184ms
+INFO:     127.0.0.1:51785 - "GET /api/v1/health HTTP/1.1" 200 OK
+{"event": "request", "request_id": "03d8582b51e44580bc287b812213a3c8", "method": "GET", "path": "/api/v1/health", "status": 200, "duration_ms": 38.8, "analysis_id": null}
+INFO:     127.0.0.1:51785 - "POST /api/v1/chat HTTP/1.1" 200 OK
+{"event": "request", "request_id": "541a49d1f4d44921a8f78a0a5fb37e54", "method": "POST", "path": "/api/v1/chat", "status": 200, "duration_ms": 17077.1, "analysis_id": "64d4a963557a43e9af0c239bec352232"}
+INFO:     127.0.0.1:51785 - "POST /api/v1/chat HTTP/1.1" 200 OK
+{"event": "request", "request_id": "4c33618dcb6b40be9dd17d3e94c2f39f", "method": "POST", "path": "/api/v1/chat", "status": 200, "duration_ms": 16109.8, "analysis_id": "aa4ac5e6bf9a47d79fb71359fcc99ed0"}
+INFO:     127.0.0.1:51785 - "POST /api/v1/chat HTTP/1.1" 200 OK
+{"event": "request", "request_id": "190d585066624bb3af19d3f7ab5907bf", "method": "POST", "path": "/api/v1/chat", "status": 200, "duration_ms": 8413.8, "analysis_id": null}
+INFO:     127.0.0.1:51785 - "POST /api/v1/chat HTTP/1.1" 200 OK
+{"event": "request", "request_id": "6c9e9385060f4bddb67cfe8335b389f3", "method": "POST", "path": "/api/v1/chat", "status": 200, "duration_ms": 7794.1, "analysis_id": null}
+INFO:     127.0.0.1:51785 - "POST /api/v1/chat HTTP/1.1" 200 OK
+{"event": "request", "request_id": "2d0bcfca1e76443fa33537c6083a1a7d", "method": "POST", "path": "/api/v1/chat", "status": 200, "duration_ms": 8860.3, "analysis_id": null}
+INFO:     127.0.0.1:51785 - "POST /api/v1/chat HTTP/1.1" 200 OK
+{"event": "request", "request_id": "65b442ab38804a7393eb17892f911423", "method": "POST", "path": "/api/v1/chat", "status": 200, "duration_ms": 12199.5, "analysis_id": null}
+INFO:     127.0.0.1:51785 - "POST /api/v1/chat HTTP/1.1" 200 OK
+{"event": "request", "request_id": "f1405f6406234b10a49e4080a3aa4927", "method": "POST", "path": "/api/v1/chat", "status": 200, "duration_ms": 16609.1, "analysis_id": null}
+INFO:     127.0.0.1:51785 - "POST /api/v1/chat HTTP/1.1" 200 OK
+{"event": "request", "request_id": "33928c20cb5546e99c18f0ece914b674", "method": "POST", "path": "/api/v1/chat", "status": 200, "duration_ms": 25677.6, "analysis_id": null}
+INFO:     127.0.0.1:51785 - "POST /api/v1/chat HTTP/1.1" 200 OK
+{"event": "request", "request_id": "f353d4ac62be418ba42704fa31c4908c", "method": "POST", "path": "/api/v1/chat", "status": 200, "duration_ms": 14420.7, "analysis_id": "918591b025464442a57cf08d164eb7b5"}
+INFO:     127.0.0.1:51785 - "POST /api/v1/chat HTTP/1.1" 200 OK
+{"event": "request", "request_id": "1e055f8701a540ee8f16003d87bcb149", "method": "POST", "path": "/api/v1/chat", "status": 200, "duration_ms": 16756.8, "analysis_id": "c64b19f43e184dc8a7ecb9b5a1b06039"}
+INFO:     127.0.0.1:51785 - "POST /api/v1/chat HTTP/1.1" 200 OK
+{"event": "request", "request_id": "8349d61d9c5243a59763f79c17cb7eae", "method": "POST", "path": "/api/v1/chat", "status": 200, "duration_ms": 15854.4, "analysis_id": "beafcc6195ca4245bbcd09ca1c274ab5"}
+INFO:     127.0.0.1:51785 - "POST /api/v1/chat/upload HTTP/1.1" 200 OK
+{"event": "request", "request_id": "cdaeff519d324386be26558f55c180e3", "method": "POST", "path": "/api/v1/chat/upload", "status": 200, "duration_ms": 9415.0, "analysis_id": "88a19691b4c04221a0c69561f8a9ebf6"}
+INFO:     127.0.0.1:51785 - "POST /api/v1/chat/upload HTTP/1.1" 200 OK
+{"event": "request", "request_id": "54c54ab7a8b5454a9a5b68743fa58176", "method": "POST", "path": "/api/v1/chat/upload", "status": 200, "duration_ms": 10127.4, "analysis_id": "f1ebb6467779457b91fb05ed943ce117"}
+Failed to proxy http://127.0.0.1:8000/api/v1/chat/upload Error: socket hang up
+    at ignore-listed frames {
+  code: 'ECONNRESET'
+}
+Error: socket hang up
+    at ignore-listed frames {
+  code: 'ECONNRESET'
+}
+{"event": "request", "request_id": "26b860bce9bf44f98c809da45461f2d0", "method": "POST", "path": "/api/v1/chat/upload", "status": 200, "duration_ms": 33485.9, "analysis_id": "9af5dc01566a4d0593060feea82d6abc"}
+INFO:     127.0.0.1:60492 - "POST /api/v1/chat HTTP/1.1" 200 OK
+{"event": "request", "request_id": "b5510cce2e1a4a09a2a720ca11220d78", "method": "POST", "path": "/api/v1/chat", "status": 200, "duration_ms": 13634.2, "analysis_id": "4ca45a921ae64a60b54993a6b907f079"}
+PASS home is the conversational assistant
+PASS privacy note visible
+PASS starter prompt sends immediately
+PASS Shift+Enter inserts a newline
+PASS scam text: risk card with score, confidence and evidence
+PASS scam text: flagged suspicious or high risk
+PASS never claims certainty
+PASS capability disclosure lists what was not used
+PASS follow-up answered from the analysis (no new risk card)
+PASS follow-up: states the page was not opened
+PASS follow-up: refuses certainty
+PASS new chat clears the timeline
+PASS greeting gets a natural reply, not a score
+PASS general cybersecurity question gets an educational answer, no risk card
+PASS product question gets a product answer, no risk card
+PASS greeting language does not suppress a real scam analysis
+PASS benign text: not flagged high risk
+PASS bare URL analysed with IP evidence
+PASS QR upload: payload shown as not opened
+PASS screenshot upload: OCR text extracted and analysed
+FAIL blank image: Unable to Verify
+PASS clipboard image paste attaches a preview
+PASS attachment can be removed
+PASS oversize image rejected in the UI
+PASS mobile 390px: no horizontal scroll
+PASS 360px: no horizontal scroll
+PASS 430px: no horizontal scroll
+PASS 820px: no horizontal scroll
+FAIL no console errors � Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+
+27/29 passed

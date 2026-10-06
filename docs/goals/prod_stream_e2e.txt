@@ -1,0 +1,46 @@
+PASS home is the conversational assistant
+PASS privacy note visible
+PASS starter prompt sends immediately
+PASS Shift+Enter inserts a newline
+Traceback (most recent call last):
+  File "C:\Users\shubh\trustshield-ai\tests\e2e\run_chat_e2e.py", line 198, in <module>
+    sys.exit(main())
+             ~~~~^^
+  File "C:\Users\shubh\trustshield-ai\tests\e2e\run_chat_e2e.py", line 186, in main
+    run(page, args.timeout)
+    ~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\shubh\trustshield-ai\tests\e2e\run_chat_e2e.py", line 72, in run
+    ask(page, SCAM, timeout)
+    ~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\shubh\trustshield-ai\tests\e2e\run_chat_e2e.py", line 51, in ask
+    page.wait_for_function(f"() => document.querySelectorAll('main ol > li').length >= {before + 2} && !document.querySelector('main li[role=status]')",
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                           timeout=timeout)
+                           ^^^^^^^^^^^^^^^^
+  File "C:\Users\shubh\trustshield-ai\.venv\Lib\site-packages\playwright\sync_api\_generated.py", line 12809, in wait_for_function
+    self._sync(
+    ~~~~~~~~~~^
+        self._impl_obj.wait_for_function(
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+        )
+        ^
+    )
+    ^
+  File "C:\Users\shubh\trustshield-ai\.venv\Lib\site-packages\playwright\_impl\_sync_base.py", line 115, in _sync
+    return task.result()
+           ~~~~~~~~~~~^^
+  File "C:\Users\shubh\trustshield-ai\.venv\Lib\site-packages\playwright\_impl\_page.py", line 1153, in wait_for_function
+    return await self._main_frame.wait_for_function(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\shubh\trustshield-ai\.venv\Lib\site-packages\playwright\_impl\_frame.py", line 941, in wait_for_function
+    await self._channel.send("waitForFunction", self._timeout, params)
+  File "C:\Users\shubh\trustshield-ai\.venv\Lib\site-packages\playwright\_impl\_connection.py", line 76, in send
+    return await self._connection.wrap_api_call(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\shubh\trustshield-ai\.venv\Lib\site-packages\playwright\_impl\_connection.py", line 632, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.TimeoutError: Page.wait_for_function: Timeout 90000ms exceeded.

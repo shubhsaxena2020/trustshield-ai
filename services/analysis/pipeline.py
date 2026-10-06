@@ -37,6 +37,13 @@ def _text_classifier() -> TextClassifier:
     return TextClassifier()
 
 
+_FRAUD_ACTION_CATEGORIES = {"account_threat", "payment_request", "lottery_prize", "delivery_scam", "fake_job", "investment_scam"}
+
+
+def _is_fraud_action(category: str) -> bool:
+    return category in _FRAUD_ACTION_CATEGORIES or any(word in category for word in ("sensitive", "credential", "secret", "otp"))
+
+
 def _is_official_url(url: str) -> bool:
     """True when the link's registered domain is one of a known brand's official domains."""
     from urllib.parse import urlparse
@@ -49,6 +56,8 @@ def _is_official_url(url: str) -> bool:
         return False
     ext = _extract(host)
     registered = (getattr(ext, "top_domain_under_public_suffix", None) or ext.registered_domain or "").lower()
+    if host.endswith(".bank.in") and host.count(".") >= 3:  # same rule as url_analysis/static.py
+        registered = ".".join(host.split(".")[-3:])
     return any(registered in officials for _, officials in BRANDS.values())
 
 
@@ -116,6 +125,13 @@ def analyze_text(raw: str, input_type: str = "text", extra_modules: dict[str, Mo
     # alone: "check my account at <official SBI link>" read as phishing before this guard (2026-10-06 test).
     if urls and not evidence and all(_is_official_url(u) for u in urls):
         ml_items = []
+    # Decision (2026-10-06, after official bank screenshots scored 25 and 64): a message with no link that names a real bank or
+    # agency, and in which no fraud action fired (a request for sensitive data, an account threat, a payment demand, a prize, job
+    # or investment lure), is not scored from the classifier or the authority cue. An official notice is not a scam by itself.
+    names_institution = any(e.category == "impersonation_authority" for e in evidence) or bool(claimed_brands(text))
+    if (not urls or all(_is_official_url(u) for u in urls)) and names_institution and not any(_is_fraud_action(e.category) for e in evidence):
+        ml_items = []
+        evidence = [e for e in evidence if e.category != "impersonation_authority"]
     evidence += ml_items
     modules["ml"] = ml_module
     limitations = ([] if ml_completed or ml_module.status == "not_run" else [LIMIT_ML]) + list(extra_limitations or [])

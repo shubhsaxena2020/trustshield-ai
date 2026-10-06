@@ -1,0 +1,31 @@
+Done. Everything verified against live execution; only my two owned files were touched (plus the required `docs/goals/agent3.md` report).
+
+## State of the goal
+
+**Implementation (already landed in the working tree, verified line-by-line):**
+- `services/api/main.py:237` — `_CHAT_ONLY_REPLY` has `"general_chat": ("chat", "reply_chat")`
+- `services/api/main.py:255-258` — for `general_chat` only, history is forwarded as `[{"role": t.role, "text": t.text[:1500]} for t in history[-6:]]` into `reply_chat(message, history)`; every other intent (greeting, assistant_qa, off_topic, cyber_qa, product_qa) still gets `(message)` only
+- `analyze_*` untouched — `git diff services/api/main.py` shows edits confined to `_CHAT_ONLY_REPLY` + the `_chat_turn` chat-only dispatch block, nothing in the analysis endpoints or pipeline
+
+**Real pytest output tail** (`.venv\Scripts\python.exe -m pytest -q tests/integration/test_general_chat_api.py`, this session):
+```
+....                                                                     [100%]
+============================== warnings summary ===============================
+.venv\Lib\site-packages\fastapi\testclient.py:1
+  C:\Users\shubh\trustshield-ai\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+4 passed, 1 warning in 2.27s
+```
+
+**Regression (analyze_* untouched):** `tests/integration/` minus the new file: **190 passed**. `tests/unit/`: **382 passed, 27 xfailed, 53 xpassed** — all 53 xpasses individually checked: they're every one an `awaiting general_chat intent` placeholder from `test_scam_question_corpus.py`, i.e. expectations set by another agent that already flip — no silent regressions in chat dispatch or analysis.
+
+## Cross-agent contract status (honest)
+
+- **agent2's `reply_chat(message, history)`** — exists on all provider classes in `services/chat/explain.py`; deterministic fallback honestly declines general questions without a model (doesn't invent "Paris"), expected behavior.
+- **agent1's `"general_chat"` classifier output — NOT yet landed.** Current `intent.py` classifies "what is the capital of France?" via `^what is\b` into `general_cyber_qa`. The tests handle this by pinning `classify_intent` to a stub returning `general_chat`, so the API's dispatch/history wiring is verified independently; once agent1's change lands, the stub can be dropped and the same tests hit the real classifier.
+
+## Report file
+
+`C:\Users\shubh\trustshield-ai\docs\goals\agent3.md` written — files changed, the exact pytest tail above, regression tails, the agent1 dependency note, and what's not done (no commit/push, no Vercel/.env/9Router changes, upload-endpoint history test not added).

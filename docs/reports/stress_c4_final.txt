@@ -1,0 +1,78 @@
+﻿
+>>> Starting stress run: 24 requests across 6 messages with CONCURRENCY = 4 ...
+[01/24 done] (Req #03) status=200 | TTFE=6.18s | Tot=13.06s | last=done
+[02/24 done] (Req #01) status=200 | TTFE=7.29s | Tot=14.10s | last=done
+[03/24 done] (Req #02) status=200 | TTFE=6.11s | Tot=15.84s | last=done
+[04/24 done] (Req #06) status=200 | TTFE=0.53s | Tot=4.47s | last=done
+[05/24 done] (Req #04) status=200 | TTFE=7.93s | Tot=20.81s | last=done
+[06/24 done] (Req #08) status=200 | TTFE=0.33s | Tot=4.71s | last=done
+[07/24 done] (Req #09) status=200 | TTFE=0.32s | Tot=5.33s | last=done
+[08/24 done] (Req #05) status=200 | TTFE=0.56s | Tot=15.68s | last=done
+[09/24 done] (Req #07) status=200 | TTFE=0.56s | Tot=14.72s | last=done
+[10/24 done] (Req #10) status=200 | TTFE=0.65s | Tot=8.41s | last=done
+[11/24 done] (Req #12) status=200 | TTFE=0.34s | Tot=5.23s | last=done
+[12/24 done] (Req #14) status=200 | TTFE=0.37s | Tot=5.10s | last=done
+[13/24 done] (Req #11) status=200 | TTFE=0.32s | Tot=16.70s | last=done
+[14/24 done] (Req #13) status=200 | TTFE=0.33s | Tot=12.37s | last=done
+[15/24 done] (Req #15) status=200 | TTFE=0.33s | Tot=9.24s | last=done
+[16/24 done] (Req #16) status=200 | TTFE=0.36s | Tot=9.42s | last=done
+[17/24 done] (Req #18) status=200 | TTFE=0.35s | Tot=3.91s | last=done
+[18/24 done] (Req #19) status=200 | TTFE=0.35s | Tot=6.57s | last=done
+[19/24 done] (Req #20) status=200 | TTFE=0.44s | Tot=4.03s | last=done
+[20/24 done] (Req #17) status=200 | TTFE=0.35s | Tot=15.46s | last=done
+[21/24 done] (Req #24) status=200 | TTFE=0.35s | Tot=5.57s | last=done
+[22/24 done] (Req #23) status=200 | TTFE=0.33s | Tot=13.91s | last=done
+[23/24 done] (Req #21) status=200 | TTFE=5.49s | Tot=18.19s | last=done
+[24/24 done] (Req #22) status=200 | TTFE=0.49s | Tot=16.20s | last=done
+
+Detailed Request Table:
+#    | Message (snippet)              | HTTP   | TTFE (s)   | Total (s)  | Final Evt  | Exception Type     | Exception Message                            
+-----+--------------------------------+--------+------------+------------+------------+--------------------+----------------------------------------------
+1    | what makes you different fr... | 200    | 7.286      | 14.105     | done       | None               | None                                         
+2    | tell me about yourself         | 200    | 6.107      | 15.840     | done       | None               | None                                         
+3    | what is phishing?              | 200    | 6.175      | 13.064     | done       | None               | None                                         
+4    | who made you? tell me every... | 200    | 7.928      | 20.814     | done       | None               | None                                         
+5    | Is this safe? URGENT your S... | 200    | 0.562      | 15.681     | done       | None               | None                                         
+6    | write a poem about rain        | 200    | 0.526      | 4.469      | done       | None               | None                                         
+7    | what makes you different fr... | 200    | 0.556      | 14.716     | done       | None               | None                                         
+8    | tell me about yourself         | 200    | 0.326      | 4.709      | done       | None               | None                                         
+9    | what is phishing?              | 200    | 0.319      | 5.331      | done       | None               | None                                         
+10   | who made you? tell me every... | 200    | 0.649      | 8.412      | done       | None               | None                                         
+11   | Is this safe? URGENT your S... | 200    | 0.316      | 16.700     | done       | None               | None                                         
+12   | write a poem about rain        | 200    | 0.340      | 5.233      | done       | None               | None                                         
+13   | what makes you different fr... | 200    | 0.329      | 12.369     | done       | None               | None                                         
+14   | tell me about yourself         | 200    | 0.372      | 5.103      | done       | None               | None                                         
+15   | what is phishing?              | 200    | 0.326      | 9.244      | done       | None               | None                                         
+16   | who made you? tell me every... | 200    | 0.363      | 9.424      | done       | None               | None                                         
+17   | Is this safe? URGENT your S... | 200    | 0.351      | 15.457     | done       | None               | None                                         
+18   | write a poem about rain        | 200    | 0.348      | 3.908      | done       | None               | None                                         
+19   | what makes you different fr... | 200    | 0.346      | 6.572      | done       | None               | None                                         
+20   | tell me about yourself         | 200    | 0.443      | 4.025      | done       | None               | None                                         
+21   | what is phishing?              | 200    | 5.493      | 18.187     | done       | None               | None                                         
+22   | who made you? tell me every... | 200    | 0.490      | 16.203     | done       | None               | None                                         
+23   | Is this safe? URGENT your S... | 200    | 0.329      | 13.909     | done       | None               | None                                         
+24   | write a poem about rain        | 200    | 0.349      | 5.574      | done       | None               | None                                         
+
+============================================================
+SUMMARY FOR CONCURRENCY 4
+============================================================
+Total Requests:       24
+Successful Requests:  24
+Failed Requests:      0
+
+Count of Failures by Exception Type:
+  None (0 failures)
+
+Timing Metrics (Total Time):
+  - Min Total Time:   3.908s
+  - Max Total Time:   20.814s
+  - p50 Total Time:   10.896s
+  - p95 Total Time:   17.964s
+
+Timing Metrics (TTFE - Time To First Event):
+  - Valid TTFE Count: 24/24
+  - p50 TTFE:         0.367s
+  - p95 TTFE:         7.119s
+============================================================
+
+Results saved to docs\reports\stress_c4_final.json

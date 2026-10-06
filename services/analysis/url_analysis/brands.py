@@ -6,8 +6,10 @@ BRANDS: dict[str, tuple[str, set[str]]] = {
     # SBI's own domains: sbi.co.in (corporate), onlinesbi.sbi and onlinesbi.com (internet banking), bank.sbi and sbi.bank.in
     # (current SBI domains per public reporting, 2025), sbicard.com, sbilife.co.in. Verify against sbi.co.in before a release.
     "sbi": ("State Bank of India", {"sbi.co.in", "onlinesbi.sbi", "onlinesbi.com", "bank.sbi", "sbi.bank.in", "sbicard.com", "sbilife.co.in"}),
-    "hdfc": ("HDFC Bank", {"hdfcbank.com", "hdfc.com", "hdfclife.com", "hdfcbank.net"}),
-    "icici": ("ICICI Bank", {"icicibank.com", "icicilombard.com", "iciciprulife.com"}),
+    # *.bank.in: Indian banks are moving to .bank.in under an RBI directive. hdfcbank.com and icicibank.com redirect to
+    # hdfc.bank.in and icici.bank.in (verified in a browser on 2026-10-06).
+    "hdfc": ("HDFC Bank", {"hdfcbank.com", "hdfc.com", "hdfclife.com", "hdfcbank.net", "hdfc.bank.in"}),
+    "icici": ("ICICI Bank", {"icicibank.com", "icicilombard.com", "iciciprulife.com", "icici.bank.in"}),
     "axis": ("Axis Bank", {"axisbank.com"}),
     "kotak": ("Kotak Mahindra Bank", {"kotak.com", "kotakbank.com"}),
     "pnb": ("Punjab National Bank", {"pnbindia.in", "netpnb.com"}),
