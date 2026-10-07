@@ -38,12 +38,19 @@ The language model (DeepSeek V4.1 Flash via the team's provider; NVIDIA Nemotron
 
 | Claim | Number | Source | How to say it |
 |---|---|---|---|
-| Automated tests | 713 passing | `pytest tests/unit tests/integration` (run 2026-10-06) | "713 automated tests pass" |
+| Automated tests | 728 passing | `pytest tests/unit tests/integration` (run 2026-10-07) | "728 automated tests pass" |
 | Routing audit | 180 messages; 96.1% correct; 0 of 79 scams missed; 7 false alarms | `docs/BASE_VERSION.md`, `docs/reports/routing_audit.md` | "The rules caught every scam in our audit set; some harmless questions were flagged." |
 | Stress test (chat stream) | 24 of 24 succeeded; first reply p50 0.37 s, p95 7.1 s | `docs/reports/stress_c4_final.json` | "All 24 test requests succeeded. Typical first reply under half a second." (Sample is small.) |
 | Sealed holdout (ML model) | recall 82.1%, specificity 78.3%, precision 82.1%, F1 82.1% | `services/chat/product_metadata.py`, `README.md` | Say the 90% target was NOT met. |
 
 **Do not claim:** 90% accuracy, "catches all scams in the world", "100% safe", or any live real-world accuracy. The sealed-holdout result is a one-time measurement.
+
+### Updates since the first version (2026-10-07)
+
+- **Official domains verified in a browser.** SBI, HDFC, ICICI, Axis, Kotak and PNB now redirect to `.bank.in` addresses (for example sbi.co.in → sbi.bank.in, hdfcbank.com → hdfc.bank.in). These are on the official list, so real links to those banks are not flagged.
+- **Official notices are no longer scored as scams.** A message with no link that names a bank, and asks for nothing, is not scored from the classifier. Real screenshots of official SBI, HDFC and ICICI pages now score 0.
+- **Look-alike links.** 14 of 20 test look-alikes are caught; all 20 official addresses are not flagged. Known misses are listed in `TEAM_NOTES_DEEP.md`, section 10.
+- **Shortened links** (bit.ly, tinyurl) now score at least caution, because they hide the destination.
 
 ## 5. Live demo script (about 3 minutes)
 

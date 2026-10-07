@@ -183,7 +183,7 @@ bullets(s, ["Ask 'what is phishing?'  →  a plain answer, no scanner.",
 s = base(10, "Testing evidence: 713 automated unit and integration tests pass. A routing audit of 180 messages gave 96.1% correct, with 0 of 79 "
              "scams missed and 7 false alarms. A 24-request stream stress test: all succeeded, median first response about 0.37 s, 95th percentile about 7.1 s.")
 title(s, "Tested, and measured", "Quality")
-big_stat(s, 0.6, 2.2, "713", "automated tests passing (unit + integration)")
+big_stat(s, 0.6, 2.2, "728", "automated tests passing (unit + integration)")
 big_stat(s, 4.7, 2.2, "0 / 79", "scam messages missed in the routing audit")
 big_stat(s, 8.8, 2.2, "24 / 24", "stress-test requests succeeded (p50 0.37 s first reply)", AMBER)
 bullets(s, ["Routing audit: 180 messages, 96.1% correct, 7 false alarms.", "Stress test p95 first reply: about 7.1 s."], top=5.0, size=18)

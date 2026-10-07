@@ -277,16 +277,22 @@ Rate limits apply per client (`limit_light`, `limit_heavy`). Production refuses 
 
 ## 10. Honest status: open issues (say these before a judge finds them)
 
-1. **Official notice in a screenshot can still score caution (25).** A real screenshot of the official SBI homepage was scored 25 by
-   the classifier alone. A narrow fix (drop classifier-only evidence when no rule fires) broke four existing tests that encode the
-   classifier's intended behaviour, so it was reverted. It needs a deliberate design decision.
+1. **Official notices (resolved 2026-10-07, with a narrow rule).** A text with no link that names a real bank or agency, and in which
+   no fraud action fired, is not scored from the classifier or the authority cue (`services/analysis/pipeline.py`). Real screenshots of the
+   official SBI, onlinesbi, HDFC and ICICI pages now score 0. A broader rule (drop all classifier-only evidence) broke four existing tests
+   that encode the classifier's intended behaviour, so we did not adopt it.
 2. **Bare lookalike link:** now scores at least 60 (suspicious), but a pure link with nothing else has little context, so confidence
    stays medium.
 3. **Classifier false positives** on ordinary official text. Measured FPR on validation: 7.2%.
 4. **Chat latency:** 6 to 34 seconds per reply in production, dominated by model queueing and 503 retries.
 5. **Model host availability:** the NVIDIA endpoint returns intermittent 503 "overloaded" errors.
 6. **Real browsing is not part of the product.** For testing only, we used Playwright to open official sites and take screenshots.
-7. **Second opinion on key dates:** the official SBI domain list was verified only through a public search. Confirm on sbi.co.in.
+7. **Official domains (verified 2026-10-07 in a browser):** sbi.co.in → sbi.bank.in, onlinesbi.sbi → onlinesbi.sbi.bank.in, hdfcbank.com →
+   hdfc.bank.in, icicibank.com → icici.bank.in, axisbank.com → axis.bank.in, kotak.com → kotak.bank.in, pnbindia.in → pnb.bank.in. Indian
+   banks are moving to `.bank.in` under an RBI directive. Other entries on the list (bank.sbi, onlinesbi.com) come from public reporting.
+8. **Look-alike misses (test set of 20, 2026-10-07):** `sbl.co.in` (one letter off `sbi.co.in`, too short to match) scores 0;
+   `irctc-refund.xyz` scores 3; `sbii.co.in` and a raw IP address with a login path score 50; `bit.ly` and `tinyurl` links score 34 (caution).
+   All 20 official test addresses are not flagged.
 8. **Keys:** the NVIDIA keys pasted during testing are not rotated (the team decided this; the key lives only on the laptop).
 
 ---
@@ -294,7 +300,7 @@ Rate limits apply per client (`limit_light`, `limit_heavy`). Production refuses 
 ## 11. Testing: what exists and how to run it
 
 - **Unit and integration:** `tests/unit`, `tests/integration`. Run: `.venv\Scripts\python.exe -m pytest -q tests/unit tests/integration`.
-  Result on 2026-10-06: **723 passed.**
+  Result on 2026-10-07: **728 passed.**
 - **Routing audit:** 180 messages (`tests/fixtures/routing_audit.jsonl`), report in `docs/reports/routing_audit.md`. Earlier result:
   96.1% correct, 0 of 79 scams missed, 7 false alarms.
 - **Stress test:** `tests/e2e/stress_stream.py`. Result: 24 of 24 succeeded, first-reply p50 0.37 s, p95 7.1 s (small sample).
