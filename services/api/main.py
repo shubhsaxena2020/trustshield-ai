@@ -345,6 +345,22 @@ def _analysis_event(captured: dict) -> str:
                  "route": captured["plan"].public(), "response_type": "analysis"})
 
 
+def _explain_analysis_events(message: str, analysis):
+    """The model explains a scanner result (it cannot change it). If the explanation fails a check, the template explanation is shown."""
+    final_text = ""
+    if agent.configured():
+        try:
+            for kind, payload in agent.stream_explain(message, analysis.model_dump_json()):
+                if kind == "token":
+                    yield _sse({"type": "token", "text": payload})
+                elif kind == "final":
+                    final_text = payload
+        except Exception:  # model unavailable: the template explanation below is used
+            final_text = ""
+    if not (final_text and agent.reply_is_acceptable(final_text, analysis.risk_score, explanation=True)):
+        yield _sse({"type": "replace", "text": DeterministicExplanationProvider().reply_for_analysis(analysis).text})
+
+
 def _model_events(message: str, recent: list[dict], captured: dict, scan):
     """Every message goes to the model first. The model answers, and calls the scanner only when agent.stream_turn decides the
     user shared content. A failure before any text is shown is retried once. If the model is still down, shared content is
@@ -417,7 +433,17 @@ def _stream_chat_events(message: str, history: list[Turn], context: ChatAnalysis
         response_type = _CHAT_ONLY_REPLY.get(intent_result.intent, ("chat", ""))[0]
         yield _sse({"type": "meta", "kind": "chat", "response_type": response_type, "intent": meta})
         captured: dict = {}
-        yield from _model_events(message, recent, captured, _make_scan(message, captured))
+        scan = _make_scan(message, captured)
+        # Content that carries a link or a scam signal is always scanned first (2026-10-07): the model must not be able to skip a link.
+        # The model then explains the result; the score is the scanner's.
+        if _may_scan(message) and (extract_urls(message) or has_suspicious_signal(message) or has_action_or_object_risk(message)):
+            scan(message)
+            if captured.get("analysis") is not None:
+                yield _analysis_event(captured)
+                yield from _explain_analysis_events(message, captured["analysis"])
+                yield _sse({"type": "done"})
+                return
+        yield from _model_events(message, recent, captured, scan)
         yield _sse({"type": "done"})
     except (InvalidInput, ImageRejected) as exc:
         yield _sse({"type": "error", "detail": str(exc)[:300]})
