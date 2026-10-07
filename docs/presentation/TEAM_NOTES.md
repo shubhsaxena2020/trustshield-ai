@@ -38,7 +38,7 @@ The language model (DeepSeek V4.1 Flash via the team's provider; NVIDIA Nemotron
 
 | Claim | Number | Source | How to say it |
 |---|---|---|---|
-| Automated tests | 728 passing | `pytest tests/unit tests/integration` (run 2026-10-07) | "728 automated tests pass" |
+| Automated tests | 765 passing, 7 skipped | `pytest tests` (run 2026-10-07) | "765 automated tests pass" |
 | Routing audit | 180 messages; 96.1% correct; 0 of 79 scams missed; 7 false alarms | `docs/BASE_VERSION.md`, `docs/reports/routing_audit.md` | "The rules caught every scam in our audit set; some harmless questions were flagged." |
 | Stress test (chat stream) | 24 of 24 succeeded; first reply p50 0.37 s, p95 7.1 s | `docs/reports/stress_c4_final.json` | "All 24 test requests succeeded. Typical first reply under half a second." (Sample is small.) |
 | Sealed holdout (ML model) | recall 82.1%, specificity 78.3%, precision 82.1%, F1 82.1% | `services/chat/product_metadata.py`, `README.md` | Say the 90% target was NOT met. |
@@ -51,6 +51,10 @@ The language model (DeepSeek V4.1 Flash via the team's provider; NVIDIA Nemotron
 - **Official notices are no longer scored as scams.** A message with no link that names a bank, and asks for nothing, is not scored from the classifier. Real screenshots of official SBI, HDFC and ICICI pages now score 0.
 - **Look-alike links.** 14 of 20 test look-alikes are caught; all 20 official addresses are not flagged. Known misses are listed in `TEAM_NOTES_DEEP.md`, section 10.
 - **Shortened links** (bit.ly, tinyurl) now score at least caution, because they hide the destination.
+- **Temporary tunnel links** (trycloudflare, ngrok, serveo and similar) are suspicious on their own, and high risk with a location or camera lure. A real link to the Hound test page scored 75 in text and in a screenshot.
+- **Google Safe Browsing domain check (live 2026-10-07 once deployed; see the verification note in section 9).** The scanner asks Google whether the registered domain is listed. Only the domain is sent. A listed domain is high risk.
+- **Public certificate history.** A domain whose first certificate is under 30 days old is flagged. An established institutional domain (.ac.in, .gov.in, .edu with at least a year of certificates) is low risk; psitche.ac.in, the college's official site, scores 15.
+- **Official college notice:** the psitche.ac.in portal no longer shows as a possible phish.
 
 ## 5. Live demo script (about 3 minutes)
 
@@ -85,7 +89,10 @@ A: Scam messages are still scanned directly, so a real scam is still checked. Th
 A: It works on pasted text, screenshots and QR codes together, explains the evidence, and keeps the analysis local where possible. It does not open links.
 
 **Q: What is not built yet?**
-A: Sign-in and cross-device history, Hindi OCR, reputation lookups, and a larger validation set. These are on the roadmap, not active.
+A: Sign-in and cross-device history, Hindi OCR, more reputation sources beyond Google Safe Browsing and certificate history, and a larger validation set. These are on the roadmap, not active.
+
+**Q: Do you check whether a site is dangerous?**
+A: For the domain only. We ask Google Safe Browsing whether the domain is listed, and we check the domain's public certificate history. We never send the message or the full link, and if a check cannot be made, the result says so.
 
 **Q: Is it on the internet, and who runs it?**
 A: A public demo, hosted on Vercel. The model is provided through the team's provider.

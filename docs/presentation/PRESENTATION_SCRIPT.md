@@ -40,6 +40,8 @@ suggestion: swap parts if a member is stronger at a section, but keep the total 
 > to block your account, a payment demand. We also check links, without opening them: is the domain really your bank's domain, or a
 > lookalike?
 >
+> We also ask Google Safe Browsing and a public certificate log about the domain only, never the message. Temporary tunnel links are flagged.
+>
 > Third, a trained machine-learning model gives a calibrated probability. All of these become evidence, and the evidence becomes one
 > score from zero to a hundred, with a label: low risk, caution, suspicious or high risk.
 
@@ -70,7 +72,7 @@ suggestion: swap parts if a member is stronger at a section, but keep the total 
 
 ## 6. Results and honest limits (4:00 – 4:35) · Vaishnavi Mishra
 
-> We tested the project end to end. Seven hundred and twenty-eight automated tests pass. On a set of 180 messages from our routing audit,
+> We tested the project end to end. Seven hundred and sixty-five automated tests pass. On a set of 180 messages from our routing audit,
 > we caught every scam message in the set. Our classifier, tested once on separate data, reached 82 percent recall and 78 percent
 > specificity.
 >
@@ -79,7 +81,7 @@ suggestion: swap parts if a member is stronger at a section, but keep the total 
 
 ## 7. Roadmap and closing (4:35 – 5:00) · Shubh Saxena
 
-> Next, we want to add sign-in and history across devices, Hindi support in the text reader, live reputation checks, and a bigger test
+> Next, we want to add sign-in and history across devices, Hindi support in the text reader, more reputation sources, and a bigger test
 > set with real screenshots.
 >
 > TrustShield does not promise that anything is safe. It shows you the evidence, so you can decide. Our tagline is: think before you
@@ -93,6 +95,7 @@ suggestion: swap parts if a member is stronger at a section, but keep the total 
 - **"Why not an LLM for the verdict?"** A language model's verdict changes from run to run. Ours is repeatable, and the model only explains it.
 - **"Do you store messages?"** No permanent history. Chats stay in the browser.
 - **"Do you open links?"** No. We read the address only, because opening a scam link is itself risky.
+- **"Do you check if a site is dangerous?"** Yes, for the domain only. Google Safe Browsing and the public certificate log are asked about the domain name. We do not send the message or the full link, and we say when a check could not be made.
 - **"What is the official-domain list?"** The real domains of each bank, verified by opening the bank sites. Indian banks are moving to .bank.in.
 - **"What if the AI model is down?"** The scanner still checks a message with scam signals. The chat says the assistant is unavailable.
 
@@ -102,5 +105,5 @@ suggestion: swap parts if a member is stronger at a section, but keep the total 
 - [ ] The whole script runs in under 5:00 with the demo.
 - [ ] The site loads on the presentation laptop, and the recording is ready as a backup.
 - [ ] Two screenshot files are saved on the laptop for the demo: the official SBI page (`sbi_official_home.png`) and the scam SMS (`sms_scam_screenshot.png`). Both were produced during testing; copy them from the team's scratch folder.
-- [ ] Each member knows the four numbers: 728 tests, 180 messages, 82% recall, 78% specificity.
+- [ ] Each member knows the four numbers: 765 tests, 180 messages, 82% recall, 78% specificity.
 - [ ] Ask the organisers for PSIT's judging rubric, if you have not received it yet.

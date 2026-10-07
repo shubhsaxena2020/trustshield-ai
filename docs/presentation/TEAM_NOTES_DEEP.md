@@ -200,6 +200,30 @@ File: `services/analysis/url_analysis/static.py`. Brand table: `services/analysi
 - **Lookalike** fires when a registered label is within edit distance 2 of an official label (typosquatting).
 - **Why the URL check never fetches the page:** privacy and safety. The product answers "is the link structured like a scam"
   and says clearly that it did not open the page (`capabilities_not_used` in the metadata).
+- **Tunnel addresses (added 2026-10-07):** `TUNNEL_HOSTS` in `static.py` lists temporary hosting services (trycloudflare.com,
+  ngrok.io, ngrok-free.app, serveo.net, localhost.run, loca.lt, lhr.life, pinggy.io and similar). A tunnel host emits
+  `disposable_tunnel_host` (high). The fusion floor (section 4.3) makes it at least 50, and at least 75 when a location or camera
+  lure is also present (`location_media_lure`, a text rule). Free-hosting subdomains (netlify.app, pages.dev, github.io and similar)
+  emit a low-severity `free_hosting_subdomain`, and become at least 50 with a lure. `vercel.app` is deliberately not listed.
+- **Shortened links** emit `url_shortener`, which the floor raises to at least 34 (caution).
+
+### 6.1 Online domain check (added 2026-10-07)
+
+Files: `services/analysis/reputation/cert_history.py` (certificate history, crt.sh) and `services/analysis/reputation/safe_browsing.py`
+(Google Safe Browsing Lookup API v4). `domain_evidence()` in `cert_history.py` runs both, and the pipeline calls it for each URL.
+
+- **What is sent:** only the registered domain. Safe Browsing gets `http://<domain>/`, crt.sh gets `%.<domain>`. The message, the full
+  link, the path and the page are never sent. The rule is written in each module's docstring.
+- **Safe Browsing:** a listed domain emits `safe_browsing_listed` (high, confidence 0.9). The fusion floor makes it at least 85.
+  The key is `GOOGLE_SAFE_BROWSING_KEY`, in `.env` locally and as an encrypted production variable in Vercel. Without a key the check
+  is skipped and nothing is claimed as checked. `TRUSTSHIELD_SAFE_BROWSING=off` disables it.
+- **Certificate history:** a domain whose first certificate is under 30 days old emits `domain_very_new` (medium). A domain under an
+  institutional suffix (.ac.in, .edu.in, .gov.in, .nic.in, .edu, .gov, .mil) with at least 365 days of certificates emits
+  `established_institution` (informational), which the fusion floor caps at 15 when there is no other medium or high risk evidence.
+  A domain with no certificates at all emits `no_certificate_history` (low).
+- **Failures are reported, never guessed.** If crt.sh or Safe Browsing cannot be reached (5-second timeout), the result's limitations
+  say so. Results are cached per process (`lru_cache`).
+- **Switch:** `TRUSTSHIELD_REPUTATION=off` disables the certificate check; tests run with both checks off and monkeypatch the lookups.
 
 ---
 
@@ -294,13 +318,19 @@ Rate limits apply per client (`limit_light`, `limit_heavy`). Production refuses 
    `irctc-refund.xyz` scores 3; `sbii.co.in` and a raw IP address with a login path score 50; `bit.ly` and `tinyurl` links score 34 (caution).
    All 20 official test addresses are not flagged.
 8. **Keys:** the NVIDIA keys pasted during testing are not rotated (the team decided this; the key lives only on the laptop).
+9. **Established-institution cap is broad.** Any .ac.in, .gov.in or .edu domain with a year of certificates is capped at 15 unless other medium
+   or high evidence fires. A phishing page hosted on a real institution's own domain would also be capped. Tunnel addresses are
+   excluded from the cap. We accept this trade-off for the expo and say so if asked.
+10. **Domain check limits.** Google Safe Browsing lists known bad domains; a new scam domain is not listed yet. Certificate history
+   does not prove a site is safe. Both checks use the domain only.
 
 ---
 
 ## 11. Testing: what exists and how to run it
 
 - **Unit and integration:** `tests/unit`, `tests/integration`. Run: `.venv\Scripts\python.exe -m pytest -q tests/unit tests/integration`.
-  Result on 2026-10-07: **728 passed.**
+  Result on 2026-10-07: **765 passed, 7 skipped** (`pytest tests`). Run with `TRUSTSHIELD_REPUTATION=off` and
+  `TRUSTSHIELD_SAFE_BROWSING=off` set by the fixtures, so no test calls crt.sh or Google.
 - **Routing audit:** 180 messages (`tests/fixtures/routing_audit.jsonl`), report in `docs/reports/routing_audit.md`. Earlier result:
   96.1% correct, 0 of 79 scams missed, 7 false alarms.
 - **Stress test:** `tests/e2e/stress_stream.py`. Result: 24 of 24 succeeded, first-reply p50 0.37 s, p95 7.1 s (small sample).
@@ -319,7 +349,12 @@ What is missing: a labelled set of real phishing screenshots and real links. Bui
 - `vercel deploy --prod` from the bundle folder, then the alias `trustshield-ai-ecru.vercel.app` moves to the new deployment.
 - Vercel's container registry (`vcr.vercel.com`) holds the `api` image. **Hobby plan limit: 50 images per repository**, so old
   images must be deleted periodically (we deleted 49 on 2026-10-06). Source: <https://vercel.com/docs/container-registry/limits-and-pricing>.
-- Model settings (`NILABH_LLM_*`) are set in the Vercel project as encrypted environment variables.
+- Model settings (`NILABH_LLM_*`) and `GOOGLE_SAFE_BROWSING_KEY` are set in the Vercel project as encrypted environment variables.
+- **Commit before you build (2026-10-07 incident).** The bundle script copies only git-tracked files (`git ls-files`). A new,
+  uncommitted `safe_browsing.py` was missing from the bundle, and the container crashed on import with a 500 on every request. The fix
+  is to commit first, then build, then deploy. Check that the new files show up in the bundle before deploying.
+- Build inputs: `--artifacts` must hold `trustshield_text_v3.joblib` and `trustshield_text_v1.joblib`. Both are in `release-artifacts/`
+  and `models/trained/`.
 
 ---
 

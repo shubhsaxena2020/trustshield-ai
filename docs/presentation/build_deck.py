@@ -135,7 +135,7 @@ s = base(5, "Walk through the six steps left to right. The key point for judges:
             "The machine-learning classifier adds a calibrated score, and the verdict comes only from the rules and classifier.")
 title(s, "How it works, step by step", "Pipeline")
 steps = ["Input\ntext · screenshot · link · QR", "Local extraction\nOCR (Tesseract) · QR decoder",
-         "Deterministic rules\nlinks · lookalike domains · urgency · OTP", "ML classifier\ntrustshield_text_v3 + confidence",
+         "Deterministic rules\nlinks · lookalikes · tunnels · OTP · domain check", "ML classifier\ntrustshield_text_v3 + confidence",
          "Risk verdict\nrules + classifier only", "Safe action\nverify · never share OTP · 1930 / NCRP"]
 for i, txt in enumerate(steps):
     x = 0.6 + (i % 3) * 4.1
@@ -157,7 +157,8 @@ s = base(7, "Privacy is a feature: text is extracted and QR codes are decoded on
 title(s, "Privacy first by design", "Privacy")
 bullets(s, ["Screenshots: text is read locally with Tesseract OCR.",
             "QR codes: the destination is decoded but never opened.",
-            "Links: analysed from their structure only; no request is made to the site.",
+            "Links: analysed from their structure only; the page is never requested.",
+            "Online domain check: only the registered domain (never the message or the full link) is sent to Google Safe Browsing and a public certificate log.",
             "No permanent history on our side; chats stay in your browser.",
             "Honest limit: message text is sent to the language-model host to produce the chat reply."], size=20)
 
@@ -166,7 +167,9 @@ s = base(8, "Explain the layers: deterministic rules catch known patterns (OTP a
             "classifier adds a calibrated confidence. The rules and classifier decide; the output is risk evidence, never a guarantee.")
 title(s, "What the scanner looks for", "Detection")
 card(s, 0.6, 2.3, 5.9, 3.9, "Deterministic rules",
-     "Link structure, lookalike and shortened domains, IP-address URLs, urgency, impersonation, payment and OTP requests.")
+     "Link structure, lookalike and shortened domains, temporary tunnel links (trycloudflare, ngrok), IP-address URLs, urgency, "
+     "impersonation, payment and OTP requests, and location or camera lures.")
+card(s, 0.6, 6.4, 5.9, 0.9, "Online domain check", "Google Safe Browsing listing and public certificate history, for the domain only.", TEAL)
 card(s, 6.8, 2.3, 5.9, 3.9, "Machine-learning classifier",
      "trustshield_text_v3, threshold 0.16, with a calibrated confidence score. Promoted after a one-time sealed-holdout test.", AMBER)
 
@@ -180,10 +183,10 @@ bullets(s, ["Ask 'what is phishing?'  →  a plain answer, no scanner.",
             "Ask 'what should I do if I already shared my OTP?'  →  clear safe steps and the 1930 helpline."], size=20)
 
 # 10 ── Testing
-s = base(10, "Testing evidence: 713 automated unit and integration tests pass. A routing audit of 180 messages gave 96.1% correct, with 0 of 79 "
+s = base(10, "Testing evidence: 765 automated unit and integration tests pass. A routing audit of 180 messages gave 96.1% correct, with 0 of 79 "
              "scams missed and 7 false alarms. A 24-request stream stress test: all succeeded, median first response about 0.37 s, 95th percentile about 7.1 s.")
 title(s, "Tested, and measured", "Quality")
-big_stat(s, 0.6, 2.2, "728", "automated tests passing (unit + integration)")
+big_stat(s, 0.6, 2.2, "765", "automated tests passing (unit + integration)")
 big_stat(s, 4.7, 2.2, "0 / 79", "scam messages missed in the routing audit")
 big_stat(s, 8.8, 2.2, "24 / 24", "stress-test requests succeeded (p50 0.37 s first reply)", AMBER)
 bullets(s, ["Routing audit: 180 messages, 96.1% correct, 7 false alarms.", "Stress test p95 first reply: about 7.1 s."], top=5.0, size=18)
@@ -203,7 +206,7 @@ s = base(12, "Safety of the assistant itself: it never says a message is 100% sa
              "and it checks its own replies against the scanner score. Mention that a grounding check sometimes replaces a bad reply with a neutral answer.")
 title(s, "Guardrails that protect users", "Safety")
 bullets(s, ["Never says 'guaranteed safe' or 'definitely fraud'.",
-            "Never claims to have opened a link or looked up a reputation service.",
+            "Never claims to have opened a link, and never invents a domain-check result: those come from the scanner.",
             "A reply that quotes a different score from the scanner is rejected.",
             "Never asks for a password, OTP, PIN or card number.",
             "Scope: answers scam and cybersecurity questions; declines creative or coding tasks."], size=20)
@@ -218,7 +221,7 @@ bullets(s, ["Questions were scanned as content → the model now answers first; 
             "Scam wording was sometimes refused as 'claims' → the grounding check now recognises refusals and scam descriptions."], size=19)
 
 # 14 ── Roadmap
-s = base(14, "Roadmap, in order of value: sign-in with history across devices, Hindi OCR, reputation checks, and a larger validation set with a fresh "
+s = base(14, "Roadmap, in order of value: sign-in with history across devices, Hindi OCR, more reputation sources, and a larger validation set with a fresh "
               "sealed holdout. Be clear that items marked planned are not active in the current build.")
 title(s, "Where we go next", "Roadmap")
 card(s, 0.6, 2.3, 3.9, 3.6, "Accounts", "Sign-in and history across devices (planned).")

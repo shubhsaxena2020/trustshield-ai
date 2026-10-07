@@ -17,7 +17,10 @@ result and answers questions about scams. The explanation can never change the s
 3. **Checking the words.** About a dozen rules look for scam language: urgency ("act now"), requests for OTP, PIN or card details,
    account threats ("your account will be blocked"), payment demands, prize and job lures, and claims to be a bank or an agency.
 4. **Checking the link.** The link is read as text only. We look at its domain: is it the official domain of the bank it mentions? Is
-   it a lookalike of an official domain? Does it use a suspicious ending, a login path, or a shortener? The link is never opened.
+   it a lookalike of an official domain? Does it use a suspicious ending, a login path, or a shortener? Is it a temporary tunnel
+   address? The link is never opened.
+4b. **The online domain check.** We ask two public sources about the registered domain only: Google Safe Browsing (is it listed as
+   dangerous?) and the public certificate log (how old is the domain's first certificate?). The message and the full link are never sent.
 5. **The model.** A trained text classifier gives a probability that the text is a scam. It is one signal among several.
 6. **The score.** The signals are combined into one score from 0 to 100, with a label: low risk, caution, suspicious, or high risk.
 7. **The explanation.** Each signal becomes a line in the result ("Asks for OTP", "Domain is not an official SBI domain"). The
@@ -45,11 +48,14 @@ message that names a bank and links to its real domain is not flagged. A message
   test on separate data gave 82% recall and 78% specificity, below our 90% goal.
 - A link with no other context can score too low (for example a 3-letter lookalike). We list these misses.
 - The assistant depends on a hosted language model, which is sometimes busy. When it is, the app says so; it does not invent an answer.
-- We do not check whether a website is live or known to be bad. That needs an external reputation service, which is future work.
+- The domain check uses Google Safe Browsing and the public certificate log. It is about the domain's reputation, not the page's content.
+  We do not open the page, so a clean domain does not prove the page is safe.
 
 ## 6. How to run it (for the technical team)
 
-- Tests: `.venv\Scripts\python.exe -m pytest -q tests/unit tests/integration` (728 pass).
+- Tests: `.venv\Scripts\python.exe -m pytest -q tests` (765 pass, 7 skipped; run 2026-10-07).
+- Domain check settings: `GOOGLE_SAFE_BROWSING_KEY` (set in `.env` locally and in Vercel), `TRUSTSHIELD_SAFE_BROWSING=off` and
+  `TRUSTSHIELD_REPUTATION=off` to switch the checks off (tests run with them off).
 - Local API: `uvicorn services.api.main:app --host 127.0.0.1 --port 8000`.
 - Web app: `cd apps/web && npm run dev`, then open http://localhost:3000.
 - Deep technical detail: `docs/presentation/TEAM_NOTES_DEEP.md`.
