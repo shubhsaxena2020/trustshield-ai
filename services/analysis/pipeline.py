@@ -24,6 +24,7 @@ from services.analysis.extractors.ocr import OCRResult, get_ocr_provider
 from services.analysis.extractors.qr import QRResult, OpenCVQRDecoder
 from services.analysis.url_analysis.brands import is_official
 from services.analysis.url_analysis.static import analyze_url_static
+from services.analysis.reputation.cert_history import domain_evidence
 from services.analysis.ml.classifier import TextClassifier
 from services.analysis.ml.evidence import ml_evidence, ml_module_result
 
@@ -148,6 +149,10 @@ def analyze_text(raw: str, input_type: str = "text", extra_modules: dict[str, Mo
             if not r.valid:
                 continue
             evidence += r.evidence
+            rep_evidence, rep_limit = domain_evidence(r.facts["registered_domain"])
+            evidence += rep_evidence
+            if rep_limit and rep_limit not in limitations:
+                limitations.append(rep_limit)
             analyzed.append(r.facts["registered_domain"])
             flagged = any(e.category in {"domain_mismatch", "lookalike_domain"} for e in r.evidence)
             if claims and not flagged and not any(is_official(c, r.facts["registered_domain"]) for c in claims):
@@ -174,12 +179,18 @@ def analyze_url(raw: str, input_type: str = "url", extra_modules: dict[str, Modu
         return _finish(input_type, r.evidence, modules,
                        ["The URL could not be parsed or uses an unsupported scheme."] + list(extra_limitations or []),
                        input_ok=bool(r.evidence), module_quality=module_quality)
+    rep_evidence, rep_limit = domain_evidence(r.facts["registered_domain"])
     modules = {
         "url_static": ModuleResult(status="completed", data=r.facts),
-        "reputation": ModuleResult(status="unavailable", detail="No reputation provider configured"),
+        "reputation": ModuleResult(status="completed" if rep_limit is None else "unavailable",
+                                   data={"certificate_check": "done" if rep_limit is None else "unavailable"},
+                                   detail="Public certificate history checked (crt.sh); the page itself was not opened."
+                                   if rep_limit is None else "Certificate history could not be checked."),
     }
     modules.update(extra_modules or {})
-    return _finish(input_type, r.evidence, modules, [LIMIT_REP] + list(extra_limitations or []), module_quality=module_quality)
+    # LIMIT_REP stays on every URL result: the certificate check is not threat-intelligence data, so "known-clean" is still unknown.
+    limits = [LIMIT_REP] + ([rep_limit] if rep_limit else []) + list(extra_limitations or [])
+    return _finish(input_type, list(r.evidence) + rep_evidence, modules, limits, module_quality=module_quality)
 
 
 def _ocr_module(result: OCRResult, image) -> ModuleResult:

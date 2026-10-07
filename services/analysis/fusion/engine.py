@@ -82,6 +82,13 @@ def _with_brand_floor(evidence: list[Evidence], score: int) -> int:
         credential_host = any(word in mismatch_hosts for word in ("login", "verify", "secure", "kyc", "netbank", "refund", "update"))
         if categories & {"suspicious_tld", "credential_path_terms", "no_https", "lookalike_domain"} or credential_host:
             return max(score, 60)
+    # Established institutional domain (certificates for a year or more, under .ac.in / .gov.in / .edu) with no medium or high risk
+    # evidence other than the classifier: low risk. Verified 2026-10-07 on psitche.ac.in (the college's official domain).
+    if "established_institution" in categories and "disposable_tunnel_host" not in categories and "domain_mismatch" not in categories:
+        other_risk = [e for e in evidence if e.category not in {"ml_phishing_pattern", "established_institution"}
+                      and e.severity in (Severity.medium, Severity.high)]
+        if not other_risk:
+            score = min(score, 15)
     return score
 
 
