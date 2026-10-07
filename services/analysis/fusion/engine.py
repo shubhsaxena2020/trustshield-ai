@@ -70,6 +70,8 @@ def _with_brand_floor(evidence: list[Evidence], score: int) -> int:
     """A link that claims a known brand but is not its domain, together with a second URL risk (suspicious top-level domain,
     credential path, no HTTPS, lookalike), is at least "suspicious". Without this floor a bare fake bank link scored 36 (caution)."""
     categories = {e.category for e in evidence}
+    if "safe_browsing_listed" in categories:
+        score = max(score, 85)  # Google Safe Browsing lists the domain: high risk on its own (2026-10-07)
     if "url_shortener" in categories:
         score = max(score, 34)  # a shortened link hides its destination: at least "caution" (2026-10-07)
     lure = "location_media_lure" in categories

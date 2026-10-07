@@ -16,6 +16,7 @@ import urllib.parse
 import urllib.request
 
 from services.analysis.evidence.models import Evidence, Severity
+from services.analysis.reputation import safe_browsing
 
 INSTITUTIONAL_SUFFIXES = (".ac.in", ".edu.in", ".gov.in", ".nic.in", ".edu", ".gov", ".mil")
 _TIMEOUT_SECONDS = 5
@@ -60,9 +61,23 @@ def is_institutional(domain: str) -> bool:
 
 
 def domain_evidence(domain: str) -> tuple[list[Evidence], str | None]:
-    """Evidence for one registered domain, plus a limitation text when the lookup could not be made."""
+    """Evidence for one registered domain, plus a limitation text when a lookup could not be made."""
     if not domain or not enabled():
         return [], None
+    evidence, limit = _certificate_evidence(domain)
+    listed = safe_browsing.listed_threats(domain)
+    if listed:
+        evidence.append(Evidence(source="reputation", category="safe_browsing_listed", severity=Severity.high, confidence=0.9,
+                                 title="Google Safe Browsing lists this domain",
+                                 description=f"Google Safe Browsing flags '{domain}' as {', '.join(t.lower().replace('_', ' ') for t in listed)}.",
+                                 metadata={"registered_domain": domain, "threat_types": list(listed)}))
+    elif listed is None and safe_browsing.enabled():
+        note = "The Google Safe Browsing check was unavailable, so the domain was not checked against its threat list."
+        limit = f"{limit} {note}" if limit else note
+    return evidence, limit
+
+
+def _certificate_evidence(domain: str) -> tuple[list[Evidence], str | None]:
     info = _crtsh(domain)
     if info is None:
         return [], "The online certificate check was unavailable, so the domain's history was not checked."

@@ -20,7 +20,25 @@ def _brand_new_record(domain, *args):
 @pytest.fixture(autouse=True)
 def _offline(monkeypatch):
     monkeypatch.setenv("TRUSTSHIELD_REPUTATION", "on")
+    monkeypatch.setenv("TRUSTSHIELD_SAFE_BROWSING", "off")
     cert_history._crtsh.cache_clear()
+
+
+def test_safe_browsing_listed_domain_is_high_risk(monkeypatch):
+    monkeypatch.setattr(cert_history, "_crtsh", _old_cert_record)
+    monkeypatch.setattr(cert_history.safe_browsing, "listed_threats", lambda domain: ("SOCIAL_ENGINEERING",))
+    result = analyze_url("https://secure-account-check.com/")
+    assert "safe_browsing_listed" in [e.category for e in result.evidence]
+    assert result.risk.score >= 85
+
+
+def test_safe_browsing_unavailable_is_reported_not_guessed(monkeypatch):
+    monkeypatch.setattr(cert_history, "_crtsh", _old_cert_record)
+    monkeypatch.setattr(cert_history.safe_browsing, "enabled", lambda: True)
+    monkeypatch.setattr(cert_history.safe_browsing, "listed_threats", lambda domain: None)
+    result = analyze_url("https://erp.psitche.ac.in/")
+    assert any("Safe Browsing check was unavailable" in lim for lim in result.limitations)
+    assert "safe_browsing_listed" not in [e.category for e in result.evidence]
 
 
 def test_established_institutional_domain_is_low_risk(monkeypatch):
