@@ -10,6 +10,12 @@ _NEGATION = re.compile(r"(do not|don't|dont|never|not to|beware|avoid|nobody wil
 _SENSITIVE = r"(?:otp|one[- ]time password|pin|cvv|password|passcode|card number|card details|net ?banking|login (?:id|details|credentials)|upi pin|aadhaar number)"
 
 RULES: dict[str, dict] = {
+    # Location or media capture lures: "track", "GPS", "see who opened", "allow camera". Scams use these with a link that asks the
+    # reader to open it (a tracking page captured GPS coordinates in a 2026-10-07 test). Alone it is weak; with a tunnel link it is decisive.
+    "location_media_lure": dict(
+        pattern=r"\b(gps|live location|share (?:your )?location|track (?:my|your|this|the) (?:location|phone|device|parcel)|tracking link|track (?:me|you|him|her)|location (?:access|tracking)|allow (?:the )?camera|camera access|see who (?:viewed|opened)|view (?:the )?(?:photo|video|document|file) (?:here|now)|verify (?:you are|you're) (?:human|real))\b",
+        severity=Severity.medium, confidence=0.6, title="Location or media capture lure",
+        desc="The message asks you to share a location, grant camera access, or open a page to track or view something."),
     "urgency": dict(
         pattern=r"\b(immediately|urgent(?:ly)?|right now|asap|within \d+ ?(?:hours?|hrs?|minutes?|mins?)|today only|expires? (?:today|soon|tonight)|final (?:warning|notice|reminder)|last chance|act now|verify now|limited time|before midnight)\b",
         severity=Severity.low, confidence=0.5, title="Urgency / time pressure",

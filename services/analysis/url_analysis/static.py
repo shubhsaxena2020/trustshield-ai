@@ -20,6 +20,12 @@ SHORTENERS = {
     "tiny.cc", "rebrand.ly", "bl.ink", "s.id", "v.gd", "t.ly", "lnkd.in", "wa.link", "shorturl.gg",
 }
 SUSPICIOUS_TLDS = {"xyz", "top", "click", "icu", "tk", "ml", "ga", "cf", "gq", "zip", "mov", "cyou", "buzz", "rest", "monster", "sbs", "cfd", "vip", "work", "support", "loan"}
+# Tunnel services that expose a machine on a public address (no account needed for some). Matched on the registered domain.
+TUNNEL_HOSTS = {"trycloudflare.com", "ngrok.io", "ngrok-free.app", "ngrok.app", "ngrok.dev", "serveo.net", "localhost.run",
+                "loca.lt", "lhr.life", "pinggy.io", "pinggy.link", "localto.net", "telebit.io", "bore.pub", "portmap.io"}
+# Free anonymous hosting. Weak signal only: many legitimate sites use these. Our own vercel.app is deliberately not listed.
+FREE_HOSTS = {"netlify.app", "pages.dev", "github.io", "glitch.me", "repl.co", "replit.dev", "herokuapp.com", "web.app",
+              "firebaseapp.com", "workers.dev", "duckdns.org", "000webhostapp.com", "wixsite.com", "weebly.com"}
 EXEC_EXT = {"exe", "apk", "msi", "bat", "cmd", "scr", "jar", "vbs", "ps1", "js", "dmg", "pkg", "com", "lnk", "iso"}
 ARCHIVE_EXT = {"zip", "rar", "7z", "gz", "tar"}
 CRED_TERMS = {"login", "signin", "verify", "verification", "account", "secure", "update", "kyc", "payment", "confirm", "banking", "password", "otp"}
@@ -181,6 +187,15 @@ def analyze_url_static(url: str) -> UrlStaticResult:
             if flagged:
                 break
 
+    # --- hosting signals (2026-10-07). Tunnels give a public address to any machine in seconds (Cofense, Securonix and Duo report
+    # TryCloudflare abused for credential theft and malware). Free anonymous hosts are weaker, because many real sites use them.
+    if any(registered == s or registered.endswith("." + s) for s in TUNNEL_HOSTS):
+        ev.append(_ev("disposable_tunnel_host", Severity.high, 0.8, "Link uses a temporary tunnel address",
+                      f"'{registered}' is a tunnel service that gives any computer a public web address in seconds. Attackers use these for fake login pages and tracking pages.",
+                      registered_domain=registered))
+    elif any(registered.endswith("." + s) for s in FREE_HOSTS):
+        ev.append(_ev("free_hosting_subdomain", Severity.low, 0.4, "Link is on a free anonymous hosting service",
+                      f"'{registered}' is on a free hosting service that anyone can use. Weak signal on its own.", registered_domain=registered))
     # --- structure signals
     if ext.suffix.split(".")[-1] in SUSPICIOUS_TLDS:
         ev.append(_ev("suspicious_tld", Severity.low, 0.5, f"Top-level domain '.{ext.suffix}' is frequently abused", "Weak signal on its own; many legitimate sites are unaffected.", tld=ext.suffix))

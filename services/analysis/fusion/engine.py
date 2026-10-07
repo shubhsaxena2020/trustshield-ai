@@ -72,6 +72,11 @@ def _with_brand_floor(evidence: list[Evidence], score: int) -> int:
     categories = {e.category for e in evidence}
     if "url_shortener" in categories:
         score = max(score, 34)  # a shortened link hides its destination: at least "caution" (2026-10-07)
+    lure = "location_media_lure" in categories
+    if "disposable_tunnel_host" in categories:
+        score = max(score, 75 if lure else 50)  # tunnel address: suspicious; with a location/camera lure: high risk (2026-10-07)
+    if "free_hosting_subdomain" in categories and lure:
+        score = max(score, 50)
     if "domain_mismatch" in categories:
         mismatch_hosts = " ".join(str(e.metadata.get("registered_domain", "")) for e in evidence if e.category == "domain_mismatch")
         credential_host = any(word in mismatch_hosts for word in ("login", "verify", "secure", "kyc", "netbank", "refund", "update"))
