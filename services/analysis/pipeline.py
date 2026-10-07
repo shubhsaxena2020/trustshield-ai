@@ -40,6 +40,9 @@ def _text_classifier() -> TextClassifier:
 _FRAUD_ACTION_CATEGORIES = {"account_threat", "payment_request", "lottery_prize", "delivery_scam", "fake_job", "investment_scam"}
 
 
+_CREDENTIAL_WORDS = ("login", "verify", "secure", "kyc", "netbank", "refund", "update")
+
+
 def _is_fraud_action(category: str) -> bool:
     return category in _FRAUD_ACTION_CATEGORIES or any(word in category for word in ("sensitive", "credential", "secret", "otp"))
 
@@ -56,7 +59,7 @@ def _is_official_url(url: str) -> bool:
         return False
     ext = _extract(host)
     registered = (getattr(ext, "top_domain_under_public_suffix", None) or ext.registered_domain or "").lower()
-    if host.endswith(".bank.in") and host.count(".") >= 3:  # same rule as url_analysis/static.py
+    if host.endswith(".bank.in") and host.count(".") >= 2:  # same rule as url_analysis/static.py
         registered = ".".join(host.split(".")[-3:])
     return any(registered in officials for _, officials in BRANDS.values())
 

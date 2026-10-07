@@ -115,7 +115,7 @@ def analyze_url_static(url: str) -> UrlStaticResult:
     registered = ext.top_domain_under_public_suffix if hasattr(ext, "top_domain_under_public_suffix") else ext.registered_domain
     registered = (registered or host).lower()
     # ".bank.in" is itself a public suffix, so the parser reports "bank.in" for sbi.bank.in: keep one label more (2026-10-06).
-    if decoded_host.lower().endswith(".bank.in") and decoded_host.lower().count(".") >= 3:
+    if decoded_host.lower().endswith(".bank.in") and decoded_host.lower().count(".") >= 2:
         registered = ".".join(decoded_host.lower().split(".")[-3:])
     subdomain = ext.subdomain.lower()
     path = parts.path or ""
@@ -159,7 +159,8 @@ def analyze_url_static(url: str) -> UrlStaticResult:
     for key, (name, officials) in BRANDS.items():
         if registered in officials:
             continue
-        official_labels = {d.split(".")[0] for d in officials}
+        # "bank" is generic (bank.sbi, sbi.bank.in): it must not make every .bank.in host look like SBI (2026-10-06).
+        official_labels = {d.split(".")[0] for d in officials} - {"bank"}
         if key in tokens or (tokens & official_labels):
             ev.append(_ev("domain_mismatch", Severity.high, 0.9, f"Domain references {name} but is not an official {name} domain",
                           f"The registered domain is '{registered}', which is not one of {name}'s known domains.", brand=name, registered_domain=registered))
@@ -171,7 +172,8 @@ def analyze_url_static(url: str) -> UrlStaticResult:
             for off in officials:
                 ol = off.split(".")[0]
                 near_token = any(len(p) >= 5 and p != ol and _levenshtein(p, ol) <= 1 for p in label_tokens)
-                if len(ol) >= 5 and registered not in officials and (near_token or (reg_label != ol and _levenshtein(reg_label, ol) <= 2 and abs(len(reg_label) - len(ol)) <= 2)):
+                short_brand = len(ol) >= 3 and len(reg_label) >= 4 and reg_label != ol and _levenshtein(reg_label, ol) <= 1  # "sbii" for "sbi" (2026-10-06)
+                if registered not in officials and ((len(ol) >= 5 and (near_token or (reg_label != ol and _levenshtein(reg_label, ol) <= 2 and abs(len(reg_label) - len(ol)) <= 2))) or short_brand):
                     ev.append(_ev("lookalike_domain", Severity.high, 0.85, f"Domain closely resembles {name}'s domain",
                                   f"'{registered}' differs from '{off}' by a few characters (typosquatting).", brand=name, official=off, registered_domain=registered))
                     flagged = True

@@ -70,8 +70,13 @@ def _with_brand_floor(evidence: list[Evidence], score: int) -> int:
     """A link that claims a known brand but is not its domain, together with a second URL risk (suspicious top-level domain,
     credential path, no HTTPS, lookalike), is at least "suspicious". Without this floor a bare fake bank link scored 36 (caution)."""
     categories = {e.category for e in evidence}
-    if "domain_mismatch" in categories and categories & {"suspicious_tld", "credential_path_terms", "no_https", "lookalike_domain"}:
-        return max(score, 60)
+    if "url_shortener" in categories:
+        score = max(score, 34)  # a shortened link hides its destination: at least "caution" (2026-10-07)
+    if "domain_mismatch" in categories:
+        mismatch_hosts = " ".join(str(e.metadata.get("registered_domain", "")) for e in evidence if e.category == "domain_mismatch")
+        credential_host = any(word in mismatch_hosts for word in ("login", "verify", "secure", "kyc", "netbank", "refund", "update"))
+        if categories & {"suspicious_tld", "credential_path_terms", "no_https", "lookalike_domain"} or credential_host:
+            return max(score, 60)
     return score
 
 
