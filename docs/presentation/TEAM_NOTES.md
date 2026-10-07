@@ -52,7 +52,8 @@ The language model (DeepSeek V4.1 Flash via the team's provider; NVIDIA Nemotron
 - **Look-alike links.** 14 of 20 test look-alikes are caught; all 20 official addresses are not flagged. Known misses are listed in `TEAM_NOTES_DEEP.md`, section 10.
 - **Shortened links** (bit.ly, tinyurl) now score at least caution, because they hide the destination.
 - **Temporary tunnel links** (trycloudflare, ngrok, serveo and similar) are suspicious on their own, and high risk with a location or camera lure. A real link to the Hound test page scored 75 in text and in a screenshot.
-- **Google Safe Browsing domain check (live 2026-10-07 once deployed; see the verification note in section 9).** The scanner asks Google whether the registered domain is listed. Only the domain is sent. A listed domain is high risk.
+- **Google Safe Browsing domain check (deployed 2026-10-07).** The scanner asks Google whether the registered domain is listed. Only the domain is sent. A listed domain is high risk. No live test domain was listed, so the listed path is covered by unit tests only.
+- **Verified on production, 2026-10-07:** the college link in a sentence scores 15; the bare college link scores 0; the tunnel link scores 75; the official SBI (onlinesbi.sbi) and HDFC links score 0.
 - **Public certificate history.** A domain whose first certificate is under 30 days old is flagged. An established institutional domain (.ac.in, .gov.in, .edu with at least a year of certificates) is low risk; psitche.ac.in, the college's official site, scores 15.
 - **Official college notice:** the psitche.ac.in portal no longer shows as a possible phish.
 
