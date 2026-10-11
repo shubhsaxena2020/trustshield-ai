@@ -26,7 +26,9 @@ export function NavBar() {
   return (
     <nav className="flex flex-wrap items-center justify-between gap-3 border-b px-6 py-3">
       <Link href="/" className="flex items-center gap-2 font-semibold">
-        <Image src="/logo.png" alt="TrustShield AI" width={140} height={24} priority />
+        {/* unoptimized: Next's /_next/image endpoint 404s on this split-service Vercel deployment
+            (web/api as separate services); the raw file serves fine, so skip the optimizer. */}
+        <Image src="/logo.png" alt="TrustShield AI" width={140} height={24} priority unoptimized />
       </Link>
       <div className="flex items-center gap-4 text-sm">
         <NavLink href="/analyzer">Analyzer</NavLink>
