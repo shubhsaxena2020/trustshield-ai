@@ -2,7 +2,29 @@
 
 What changed visually tonight, and why, for the team to speak to during the Round 2 presentation.
 
-## IMPLEMENTED
+## Superseded 2026-10-11 — ChatGPT-style redesign
+
+Everything below this notice describes the first redesign pass (shadcn/ui forms, a persistent
+`NavBar`, a standalone `/analyzer` page, a standalone `/history` page). That UI was replaced the
+same night with a 1:1 ChatGPT-style interface per the team's direction: white theme only, no
+separate analyzer/history pages, chat-style sidebar instead of a nav bar. Concretely:
+
+- `apps/web/app/analyzer/page.tsx`, `apps/web/app/history/page.tsx`, and
+  `apps/web/components/NavBar.tsx` were all deleted.
+- `apps/web/components/chat/Chat.tsx` (the pre-existing chat shell) is now the only page, reskinned
+  from forced-dark to a white ChatGPT-light-mode theme, with Log in/Sign up and the signed-in
+  user's email/Log out built directly into its own header and sidebar instead of a shared nav bar.
+- `/login` and `/signup` were rebuilt as minimal centered white pages matching ChatGPT's own
+  auth-page layout, with no shared header/nav wrapping them.
+- The product's real logo (`apps/web/public/logo-icon.png`, a square crop of the mark) replaced
+  the placeholder "TS" circle used below. The full wordmark lives at `apps/web/public/logo.png` but
+  is currently unused in the app itself.
+
+See `docs/AUTH_AND_HISTORY_ARCHITECTURE.md`'s "Frontend routes" section for the current routing
+picture. The backend auth/history code described below (shadcn `Card`/`Table` aside) is otherwise
+still accurate and untouched by this redesign.
+
+## IMPLEMENTED (original redesign pass, now superseded above)
 
 ### shadcn/ui adoption
 

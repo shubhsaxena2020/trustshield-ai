@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import Image from "next/image";
 import { authFetch } from "@/lib/authFetch";
+import { supabase } from "@/lib/supabaseClient";
+import { useSession } from "@/lib/useSession";
 import { RiskCard } from "./RiskCard";
 import type { ChatAnalysis, ChatResponse, Message, ResponseType } from "./types";
 
@@ -92,11 +95,7 @@ function getSpeechCtor(): (new () => SpeechRecognitionLike) | null {
 }
 
 function Logo({ className = "" }: { className?: string }) {
-  return (
-    <span aria-hidden="true" className={`flex shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-teal-400 to-emerald-600 font-bold text-zinc-950 ${className}`}>
-      TS
-    </span>
-  );
+  return <Image src="/logo-icon.png" alt="TrustShield AI" width={28} height={28} className={`shrink-0 object-contain ${className}`} unoptimized />;
 }
 
 function IconButton({ label, onClick, children, className = "" }: { label: string; onClick: () => void; children: ReactNode; className?: string }) {
@@ -106,7 +105,7 @@ function IconButton({ label, onClick, children, className = "" }: { label: strin
       onClick={onClick}
       aria-label={label}
       title={label}
-      className={`flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 hover:bg-zinc-700/60 hover:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-teal-500 ${className}`}
+      className={`flex h-8 w-8 items-center justify-center rounded-lg text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 focus:outline-none focus:ring-2 focus:ring-teal-500 ${className}`}
     >
       {children}
     </button>
@@ -114,6 +113,7 @@ function IconButton({ label, onClick, children, className = "" }: { label: strin
 }
 
 export function Chat() {
+  const { session, loading } = useSession();
   const [chats, setChats] = useState<Conversation[]>(() => [newConversation()]);
   const [activeId, setActiveId] = useState<string>(() => "");
   const [draft, setDraft] = useState("");
@@ -502,7 +502,7 @@ export function Chat() {
 
   return (
     <div
-      className="flex h-dvh w-full bg-zinc-950 text-[15px] text-zinc-100"
+      className="flex h-dvh w-full bg-white text-[15px] text-zinc-900"
       onDragOver={(e) => {
         e.preventDefault();
         setDragging(true);
@@ -517,7 +517,7 @@ export function Chat() {
       {/* Sidebar: desktop always visible, mobile as a drawer */}
       <aside
         aria-label="Chats"
-        className={`${sidebarOpen ? "fixed inset-y-0 left-0 z-30 w-72 shadow-2xl" : "hidden"} flex flex-col border-r border-zinc-800/80 bg-zinc-900 p-3 md:static md:flex md:w-64 md:shrink-0`}
+        className={`${sidebarOpen ? "fixed inset-y-0 left-0 z-30 w-72 shadow-2xl" : "hidden"} flex flex-col border-r border-zinc-200 bg-zinc-50 p-3 md:static md:flex md:w-64 md:shrink-0`}
       >
         <div className="flex items-center gap-2 px-2 pb-3 pt-1">
           <Logo className="h-7 w-7 text-xs" />
@@ -526,7 +526,7 @@ export function Chat() {
         <button
           type="button"
           onClick={newChat}
-          className="flex min-h-11 items-center gap-2 rounded-xl border border-zinc-700 px-3 py-2 text-left hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-teal-500"
+          className="flex min-h-11 items-center gap-2 rounded-xl border border-zinc-300 px-3 py-2 text-left hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-teal-500"
         >
           <span aria-hidden="true" className="text-lg leading-none">+</span> New chat
         </button>
@@ -537,7 +537,7 @@ export function Chat() {
               const isActive = c.id === active.id;
               const isRenaming = renaming?.id === c.id;
               return (
-                <li key={c.id} className={`group flex items-center gap-1 rounded-xl pr-1 ${isActive ? "bg-zinc-800" : "hover:bg-zinc-800/60"}`}>
+                <li key={c.id} className={`group flex items-center gap-1 rounded-xl pr-1 ${isActive ? "bg-zinc-200" : "hover:bg-zinc-100"}`}>
                   {isRenaming ? (
                     <input
                       autoFocus
@@ -549,7 +549,7 @@ export function Chat() {
                         if (e.key === "Enter") commitRename();
                         if (e.key === "Escape") setRenaming(null);
                       }}
-                      className="min-w-0 flex-1 rounded-lg bg-zinc-950 px-3 py-2 text-sm outline-none ring-2 ring-teal-500"
+                      className="min-w-0 flex-1 rounded-lg bg-white px-3 py-2 text-sm outline-none ring-2 ring-teal-500"
                     />
                   ) : (
                     <button
@@ -578,25 +578,37 @@ export function Chat() {
           </ul>
         </nav>
         <p className="px-2 pt-3 text-xs leading-5 text-zinc-500">Chats are saved in this browser, so they stay after a refresh.</p>
+        {session && (
+          <div className="mt-2 flex items-center justify-between gap-2 rounded-lg px-2 py-2 text-xs text-zinc-500">
+            <span className="min-w-0 truncate">{session.user.email}</span>
+            <button type="button" onClick={() => { void supabase?.auth.signOut(); }} className="shrink-0 hover:text-zinc-900">Log out</button>
+          </div>
+        )}
       </aside>
       {sidebarOpen && <button type="button" aria-label="Close chats" onClick={() => setSidebarOpen(false)} className="fixed inset-0 z-20 bg-black/60 md:hidden" />}
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex items-center gap-3 border-b border-zinc-800/60 px-4 py-3">
-          <button type="button" onClick={() => setSidebarOpen(true)} aria-label="Open chats" className="flex h-11 w-11 items-center justify-center rounded-xl hover:bg-zinc-800 md:hidden">
+        <header className="flex items-center gap-3 border-b border-zinc-200 px-4 py-3">
+          <button type="button" onClick={() => setSidebarOpen(true)} aria-label="Open chats" className="flex h-11 w-11 items-center justify-center rounded-xl hover:bg-zinc-100 md:hidden">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" /></svg>
           </button>
-          <h1 className="min-w-0 flex-1 truncate text-sm font-semibold text-zinc-200">{active.title}</h1>
+          <h1 className="min-w-0 flex-1 truncate text-sm font-semibold text-zinc-800">{active.title}</h1>
           <span className="hidden text-xs text-zinc-500 sm:block">Scam checker · evidence-first</span>
+          {!loading && !session && (
+            <nav aria-label="Account" className="flex shrink-0 gap-3 text-sm text-zinc-600">
+              <a href="/login" className="hover:text-zinc-900">Log in</a>
+              <a href="/signup" className="hover:text-zinc-900">Sign up</a>
+            </nav>
+          )}
         </header>
 
         {apiUp === false && (
-          <p role="alert" className="mx-4 mt-3 rounded-xl border border-red-700/60 bg-red-950/60 px-3 py-2 text-sm text-red-100">
+          <p role="alert" className="mx-4 mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
             The analysis service is unreachable right now. Please try again shortly.
           </p>
         )}
         {apiUp && mlUp === false && (
-          <p role="status" className="mx-4 mt-3 rounded-xl border border-amber-600/60 bg-amber-950/60 px-3 py-2 text-sm text-amber-100">
+          <p role="status" className="mx-4 mt-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
             The machine-learning module is unavailable, so results use rule-based checks only.
           </p>
         )}
@@ -610,7 +622,7 @@ export function Chat() {
             <section className="mx-auto flex max-w-2xl flex-col items-center py-16 text-center">
               <Logo className="mb-5 h-14 w-14 text-lg" />
               <h2 className="text-3xl font-semibold tracking-tight">What should I check for you?</h2>
-              <p className="mt-3 max-w-xl text-zinc-400">
+              <p className="mt-3 max-w-xl text-zinc-500">
                 Paste a message or a link, attach a screenshot or QR code, or ask how a scam works. I show the evidence behind every answer and never say something is guaranteed safe.
               </p>
               <div className="mt-8 grid w-full gap-2 sm:grid-cols-2">
@@ -619,7 +631,7 @@ export function Chat() {
                     key={s}
                     type="button"
                     onClick={() => submit(s)}
-                    className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-4 text-left text-sm leading-6 text-zinc-300 hover:border-zinc-600 hover:bg-zinc-800/70 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 text-left text-sm leading-6 text-zinc-800 hover:border-zinc-300 hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-teal-500"
                   >
                     {s}
                   </button>
@@ -634,7 +646,7 @@ export function Chat() {
                 {m.role === "user" ? (
                   <div className="group flex max-w-[85%] flex-col items-end gap-1">
                     {editing?.id === m.id ? (
-                      <div className="w-full min-w-[16rem] rounded-2xl bg-zinc-800 p-3">
+                      <div className="w-full min-w-[16rem] rounded-2xl bg-zinc-200 p-3">
                         <textarea
                           aria-label="Edit message"
                           autoFocus
@@ -651,12 +663,12 @@ export function Chat() {
                           className="w-full resize-none bg-transparent text-base outline-none"
                         />
                         <div className="mt-2 flex justify-end gap-2 text-sm">
-                          <button type="button" onClick={() => setEditing(null)} className="min-h-9 rounded-lg px-3 hover:bg-zinc-700">Cancel</button>
+                          <button type="button" onClick={() => setEditing(null)} className="min-h-9 rounded-lg px-3 hover:bg-zinc-100">Cancel</button>
                           <button type="button" onClick={() => saveEdit(index)} disabled={!editing.text.trim() || busy} className="min-h-9 rounded-lg bg-zinc-100 px-3 font-medium text-zinc-900 disabled:opacity-40">Save and resend</button>
                         </div>
                       </div>
                     ) : (
-                      <div className="rounded-3xl bg-zinc-800 px-4 py-2.5">
+                      <div className="rounded-3xl bg-zinc-200 px-4 py-2.5">
                         {/* eslint-disable-next-line @next/next/no-img-element -- blob: preview */}
                         {m.previewUrl && <img src={m.previewUrl} alt={m.fileName ?? "Attached image"} className="mb-2 max-h-56 rounded-xl" />}
                         {m.text && <p className="whitespace-pre-wrap break-words leading-7">{m.text}</p>}
@@ -665,12 +677,12 @@ export function Chat() {
                     {editing?.id !== m.id && (
                       <div className="flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100">
                         {m.text && (
-                          <button type="button" onClick={() => copyText(m.id, m.text)} className="min-h-8 rounded-lg px-2 text-xs text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100">
+                          <button type="button" onClick={() => copyText(m.id, m.text)} className="min-h-8 rounded-lg px-2 text-xs text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900">
                             {copied === m.id ? "Copied" : "Copy"}
                           </button>
                         )}
                         {m.text && !busy && (
-                          <button type="button" onClick={() => setEditing({ id: m.id, text: m.text })} className="min-h-8 rounded-lg px-2 text-xs text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100">
+                          <button type="button" onClick={() => setEditing({ id: m.id, text: m.text })} className="min-h-8 rounded-lg px-2 text-xs text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900">
                             Edit
                           </button>
                         )}
@@ -678,10 +690,10 @@ export function Chat() {
                     )}
                   </div>
                 ) : m.kind === "error" ? (
-                  <div role="alert" className="w-full rounded-2xl border border-red-800 bg-red-950/60 px-4 py-3 text-red-100">
+                  <div role="alert" className="w-full rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-red-800">
                     <p>{m.text}</p>
                     {m.retry && (
-                      <button type="button" onClick={m.retry} disabled={busy} className="mt-2 min-h-10 rounded-lg border border-red-600 px-4 py-2 font-medium hover:bg-red-900 disabled:opacity-50">
+                      <button type="button" onClick={m.retry} disabled={busy} className="mt-2 min-h-10 rounded-lg border border-red-200 px-4 py-2 font-medium hover:bg-red-100 disabled:opacity-50">
                         Retry
                       </button>
                     )}
@@ -690,16 +702,16 @@ export function Chat() {
                   <>
                     <Logo className="mt-0.5 h-7 w-7 text-[10px]" />
                     <div className="group min-w-0 flex-1">
-                      <p className="whitespace-pre-wrap break-words leading-7 text-zinc-100">{m.reply.text}</p>
+                      <p className="whitespace-pre-wrap break-words leading-7 text-zinc-900">{m.reply.text}</p>
                       <div className="mt-2 flex flex-wrap items-center gap-1 text-xs text-zinc-500">
                         {m.kind === "analysis" && <span className="mr-2">{m.reply.grounded ? "Based on the evidence" : "Not verified against the evidence"}</span>}
                         {m.reply.text && (
-                          <button type="button" onClick={() => copyText(m.id, m.reply.text)} className="min-h-8 rounded-lg px-2 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100">
+                          <button type="button" onClick={() => copyText(m.id, m.reply.text)} className="min-h-8 rounded-lg px-2 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900">
                             {copied === m.id ? "Copied" : "Copy"}
                           </button>
                         )}
                         {m.reply.text && canRegenerate(index) && (
-                          <button type="button" onClick={() => regenerate(index)} className="min-h-8 rounded-lg px-2 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100">
+                          <button type="button" onClick={() => regenerate(index)} className="min-h-8 rounded-lg px-2 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900">
                             Regenerate
                           </button>
                         )}
@@ -711,10 +723,10 @@ export function Chat() {
               </li>
             ))}
             {busy && (
-              <li role="status" className="flex items-center gap-3 text-sm text-zinc-400">
+              <li role="status" className="flex items-center gap-3 text-sm text-zinc-500">
                 <Logo className="h-7 w-7 text-[10px] animate-pulse" />
                 <span>{busyLabel}</span>
-                <button type="button" onClick={() => controllersRef.current.get(active.id)?.abort()} className="rounded-lg px-2 py-1 font-medium text-zinc-300 underline hover:bg-zinc-800">Stop</button>
+                <button type="button" onClick={() => controllersRef.current.get(active.id)?.abort()} className="rounded-lg px-2 py-1 font-medium text-zinc-800 underline hover:bg-zinc-100">Stop</button>
               </li>
             )}
           </ol>
@@ -723,9 +735,9 @@ export function Chat() {
 
         <div className="mx-auto w-full max-w-3xl px-4 pb-3 pt-2">
           {dragging && <p className="mb-2 rounded-2xl border-2 border-dashed border-teal-500 p-3 text-center text-sm">Drop an image to attach it</p>}
-          {notice && <p role="alert" className="mb-2 text-sm font-medium text-red-300">{notice}</p>}
+          {notice && <p role="alert" className="mb-2 text-sm font-medium text-red-600">{notice}</p>}
           {attached && (
-            <div className="mb-2 flex items-center gap-3 rounded-2xl bg-zinc-800 p-2">
+            <div className="mb-2 flex items-center gap-3 rounded-2xl bg-zinc-200 p-2">
               {/* eslint-disable-next-line @next/next/no-img-element -- blob: preview */}
               <img src={attached.url} alt="Attachment preview" className="h-14 w-14 rounded-xl object-cover" />
               <span className="min-w-0 flex-1 truncate text-sm">{attached.file.name}</span>
@@ -738,16 +750,16 @@ export function Chat() {
               e.preventDefault();
               submit();
             }}
-            className="relative flex items-end gap-2 rounded-3xl border border-zinc-800 bg-zinc-900 px-2 py-2 shadow-lg shadow-black/20 focus-within:border-zinc-600"
+            className="relative flex items-end gap-2 rounded-3xl border border-zinc-200 bg-zinc-50 px-2 py-2 shadow-lg shadow-black/20 focus-within:border-zinc-300"
           >
             <input ref={fileRef} type="file" accept={ALLOWED.join(",")} className="sr-only" aria-label="Attach an image" tabIndex={-1} onChange={(e) => { accept(e.target.files?.[0]); e.target.value = ""; setAttachOpen(false); }} />
             <div className="relative">
-              <button type="button" onClick={() => setAttachOpen((o) => !o)} aria-label="Attach" aria-expanded={attachOpen} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-2xl text-zinc-300 hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-teal-500">
+              <button type="button" onClick={() => setAttachOpen((o) => !o)} aria-label="Attach" aria-expanded={attachOpen} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-2xl text-zinc-800 hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-teal-500">
                 +
               </button>
               {attachOpen && (
-                <div role="menu" className="absolute bottom-14 left-0 z-10 w-60 rounded-2xl border border-zinc-700 bg-zinc-900 p-1 shadow-xl">
-                  <button type="button" role="menuitem" onClick={() => { setAttachOpen(false); fileRef.current?.click(); }} className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm hover:bg-zinc-800">
+                <div role="menu" className="absolute bottom-14 left-0 z-10 w-60 rounded-2xl border border-zinc-300 bg-white p-1 shadow-xl">
+                  <button type="button" role="menuitem" onClick={() => { setAttachOpen(false); fileRef.current?.click(); }} className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm hover:bg-zinc-100">
                     Upload a screenshot or QR code
                   </button>
                 </div>
@@ -773,10 +785,10 @@ export function Chat() {
               rows={1}
               aria-label="Message"
               placeholder={lastAnalysis ? "Ask a follow-up, or paste something new to check" : "Message TrustShield, or paste something to check"}
-              className="max-h-48 min-h-11 flex-1 resize-none bg-transparent px-2 py-2.5 text-base text-zinc-100 outline-none placeholder:text-zinc-500"
+              className="max-h-48 min-h-11 flex-1 resize-none bg-transparent px-2 py-2.5 text-base text-zinc-900 outline-none placeholder:text-zinc-500"
             />
             {speechSupported && (
-              <button type="button" onClick={toggleListening} aria-pressed={listening} aria-label={listening ? "Stop voice input" : "Speak your message"} className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-teal-500 ${listening ? "bg-red-700" : ""}`}>
+              <button type="button" onClick={toggleListening} aria-pressed={listening} aria-label={listening ? "Stop voice input" : "Speak your message"} className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-teal-500 ${listening ? "bg-red-100" : ""}`}>
                 {listening ? "■" : "🎙"}
               </button>
             )}

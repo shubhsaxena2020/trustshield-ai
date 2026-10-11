@@ -64,10 +64,16 @@ another user's history.
 
 ### Frontend routes
 
-- `/login`, `/signup` — Supabase email/password forms (shadcn/ui), redirect to `/analyzer` on
-  success.
-- `/history` — requires a session (redirects to `/login` if absent, including mid-session on
-  logout); lists the user's scans, "View" re-renders the full stored result through the existing
-  `ResultDashboard` component, per-row delete and "Clear all".
-- `NavBar` (in the root layout) shows Log in/Sign up when signed out, or the user's email + a
-  History link + Log out when signed in.
+Updated 2026-10-11 for the ChatGPT-style UI redesign (see `docs/UI_UX_REDESIGN_NOTES.md`). The
+backend auth/history layers above are unchanged by that redesign — only the frontend surface
+changed:
+
+- `/login`, `/signup` — Supabase email/password forms, redirect to `/` (the chat page) on success.
+  No standalone `NavBar` wraps them; each is its own full-bleed centered page.
+- `/` — the chat shell (`apps/web/components/chat/Chat.tsx`) is now the only page. There is no
+  dedicated `/history` page and no `NavBar` component (both removed). Signed-out users see
+  Log in/Sign up links in the chat header; signed-in users see their email and a Log out control
+  at the bottom of the sidebar. The `scan_history` read/write endpoints described above still
+  exist and still work, but nothing in the current UI calls `GET /api/v1/history` yet — the
+  sidebar's chat list is local-browser state, not account-linked history. Wiring the sidebar to
+  real per-account history is unimplemented, not removed.
