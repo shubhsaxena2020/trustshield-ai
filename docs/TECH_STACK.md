@@ -71,7 +71,7 @@ The API uses Python standard-library modules for HTTP calls (`urllib`), URL pars
 | matplotlib | not pinned in the checked-in full lock | Optional plotting imports in training/evaluation scripts; the package is named in `requirements.txt` but is absent from `requirements-lock.txt`. |
 | segno | 1.6.6 | Creates QR-code images in the demo-fixture generation script. |
 
-`requirements-dev.txt` includes `requirements.txt` plus Segno, Matplotlib, Hugging Face Datasets, and Hugging Face Hub. `requirements-lock.txt` resolves the installable development/training/test environment. The following additional resolved entries complete that lock; packages already listed in the API lock, ML table, or testing table retain those exact versions and purposes above.
+`requirements-dev.txt` includes `requirements.txt` plus Segno, Matplotlib, Hugging Face Datasets, and Hugging Face Hub. `requirements-lock.txt` resolves the installable development/training/test environment. The following additional resolved entries complete that lock; packages already listed in the API lock, ML table, or testing table retain those exact versions and purposes above, except for the `filelock` version difference called out below.
 
 | Additional locked package | Version | What it does in this project |
 |---|---:|---|
@@ -81,6 +81,7 @@ The API uses Python standard-library modules for HTTP calls (`urllib`), URL pars
 | attrs | 26.1.0 | Attribute/data-class support used by aiohttp and related dependencies. |
 | colorama | 0.4.6 | Enables colored terminal output for Python tooling on Windows. |
 | dill | 0.4.1 | Extends Python object serialization used by Hugging Face Datasets. |
+| filelock | 4.0.1 (dev lock; API lock is 4.0.3) | Provides file-lock support used by model/scientific Python dependencies; the two checked-in locks resolve different versions. |
 | frozenlist | 1.8.0 | Immutable list support used by aiohttp. |
 | fsspec | 2026.6.0 | Filesystem abstraction used to read local and remote datasets. |
 | greenlet | 3.5.6 | Coroutine/runtime support pulled in by the data tooling dependency graph. |
@@ -107,7 +108,7 @@ The full lock also contains the already-listed runtime packages plus `httpx` 0.2
 
 The default artifact is `trustshield_text_v3` (metadata `model_version` phase3-1), loaded by `services/analysis/ml/classifier.py`. Its metadata records a two-stage architecture, `linear_svc` family, combined word-and-character TF-IDF features, five-fold isotonic calibration (`sklearn-CalibratedClassifierCV-v1`), and a malicious-probability threshold of `0.16`. The artifact is version/hash checked and the runtime requires scikit-learn 1.9.1.
 
-The feature pipeline (`trustshield-text-features-v1`) combines lowercased word TF-IDF with word uni/bi-grams and character-within-word n-grams of sizes 2–5. Inference uses the calibrated multiclass model for legitimate-vs-fraud probability/category scores, with the separate category model available in the artifact path as implemented by the classifier. The model is an additional statistical signal: text rules and other evidence sources remain separate and feed the configured risk-fusion logic. OCR text and readable QR payload text can use the same text-analysis path; URL-only scans do not run this text classifier. Metadata and further training/evaluation rules are in `docs/ML_PIPELINE.md`.
+The feature pipeline (`trustshield-text-features-v1`) combines lowercased word TF-IDF with word uni/bi-grams and character-within-word n-grams of sizes 2–5. In the two-stage artifact, the calibrated binary LinearSVC estimates malicious probability; scores at or above 0.16 are eligible for the separate category classifier, which predicts a fraud category. The model is an additional statistical signal: text rules and other evidence sources remain separate and feed the configured risk-fusion logic. OCR text and readable QR payload text can use the same text-analysis path; URL-only scans do not run this text classifier. Metadata and further training/evaluation rules are in `docs/ML_PIPELINE.md`.
 
 ## OCR and QR decoding
 
