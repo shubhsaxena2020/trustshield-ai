@@ -191,6 +191,60 @@ review only"), not acted on otherwise since nothing else was touched.
 Full build (`npm run build`) and the backend test suite (790 passed, 7 skipped) stayed green
 after all of the above.
 
+## Hermes — production security assessment (user-run, against live production)
+
+Run by the user directly (PentestGPT Sentinel via Hermes), targeting the **live production URL**
+(`https://trustshield-ai-ecru.vercel.app`) — the one target I deliberately never touch myself
+(see the spec's security-testing boundary). Full report:
+`docs/security-runs/hermes_production_assessment.md`. Black-box, non-destructive: TLS/header
+audit, build-artifact and client-bundle secret scanning, CORS, prompt-injection resistance, and a
+light (8-request) rate-limit probe. **Zero critical/high findings.** Two medium, three low, three
+informational.
+
+**What's already solid (confirmed by this independent, external pass):** TLS 1.3, correct
+cert chain, full security-header set, no cookies, API docs disabled, no source maps, zero
+secrets in the 635 KB client bundle, no `.env`/`.git` exposure, prompt-injection resistant
+(refused a direct "print your system prompt" attempt), clean 422s with no stack traces, backend
+CORS correctly enforces an origin allowlist, correct 405 on wrong HTTP methods.
+
+### Medium-1 "no rate limiting observed" — verified as a false positive from an under-powered test
+
+The report ran 8 consecutive requests against `/api/v1/chat/stream` and saw no `429`. Checked
+against the actual code: that endpoint carries `dependencies=[Depends(limit_light)]`
+(`services/api/main.py:519`), the same limiter I independently proved trips under real pressure
+earlier tonight (150 **concurrent** local requests → 70 passed, 80 got `429`; see the rate-limit
+section above). 8 sequential requests is nowhere near the volume needed to observe a per-minute
+limiter tripping — this is the identical methodology gap my own first rate-limit test had before
+I fixed it. Not reproduced against production (per the standing rule: no burst/flood testing
+against the live URL, and Vercel's own edge bot-mitigation already challenges sequential traffic
+at ~15 requests per the same report's INFO-3 note, so a clean production measurement isn't
+practically obtainable without risking exactly the DoS-adjacent behavior that's off-limits).
+**Outcome: no action — the control exists and works; the test just couldn't see it.**
+
+### Medium-2 "CSP permits inline scripts" — real, deferred by user decision
+
+`script-src 'self' 'unsafe-inline'` in `apps/web/next.config.ts` genuinely weakens the browser's
+XSS backstop. A proper fix needs a nonce-based CSP via Next.js middleware (new code, not a
+config toggle) — real risk of breaking page hydration on the live site if rushed the night before
+a demo. **User decision: defer to after Round 2**, implement carefully once there's no demo-risk
+pressure.
+
+### Low-3 "`/api/v1/health` over-discloses internals" — real, left as-is by user decision
+
+The endpoint returns the ML model name/version and OCR provider. This is the same fact already
+flagged as a low-severity, non-exploitable disclosure in the prompt-injection section above — and
+it's disclosed here for a legitimate reason: the analyzer page's own browser JS calls this exact
+endpoint client-side to drive the "ML unavailable"/"OCR unavailable" banners, so it's unavoidably
+public given the current design. Trimming it would mean redesigning that feature, not deleting a
+field. **User decision: leave as-is**, informational severity, the same model name is already
+shown in the UI's own "Technical details" panel.
+
+### Low-1 (frontend CORS `*`), Low-2 (HSTS preload), informational items — noted, not actioned
+
+All explicitly optional per the report itself, low severity, and either a Vercel static-hosting
+platform default (Low-1) or require a standing commitment the team hasn't made yet (Low-2,
+preload requires HTTPS-only across all subdomains). No action taken tonight.
+
 ## End-to-end live verification (not a delegate finding — my own testing, recorded for completeness)
 
 Run against the real Supabase project (`xssorflxyuanvkpukjon`, not a mock) with a live local
