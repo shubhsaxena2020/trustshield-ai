@@ -62,10 +62,12 @@ create policy "owner can delete own history"
 - Backend: new `services/api/auth.py` exposes a FastAPI dependency `get_current_user`:
   - No `Authorization` header → returns `None` (anonymous). Analyze endpoints proceed exactly
     as today; no history write happens.
-  - Header present → the dependency calls Supabase Auth's `GET /auth/v1/user` with the token
-    (via `supabase-py`'s `auth.get_user(token)`) to resolve a user id. Invalid/expired tokens
-    raise 401 rather than silently falling back to anonymous, so a broken session is visible in
-    the UI instead of silently losing history.
+  - Header present → the dependency calls Supabase Auth's `GET /auth/v1/user` directly over
+    HTTPS (plain `urllib.request`, matching the existing pattern in
+    `services/analysis/reputation/safe_browsing.py` — no new SDK dependency, no lock-file
+    changes) to resolve a user id. Invalid/expired tokens raise 401 rather than silently
+    falling back to anonymous, so a broken session is visible in the UI instead of silently
+    losing history.
 - Backend never sees or stores a password. Backend holds exactly two new secrets:
   `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` (service-role, used only for the trusted
   server-side history write/read, never exposed to the frontend).
@@ -74,9 +76,10 @@ create policy "owner can delete own history"
 
 - `services/api/main.py`: each of the four `/api/v1/analyze/*` handlers gains an optional
   `user = Depends(get_current_user)`. After a successful analysis, if `user` is not `None`, the
-  result is written to `scan_history` via a new `services/history/store.py` (service-role
-  `supabase-py` client). Write failures are logged and swallowed — a history-write error must
-  never fail or degrade the analysis response itself.
+  result is written to `scan_history` via a new `services/history/store.py`, which calls
+  Supabase's PostgREST endpoint (`{SUPABASE_URL}/rest/v1/scan_history`) directly with the
+  service-role key — same `urllib.request` style, no SDK. Write failures are logged and
+  swallowed — a history-write error must never fail or degrade the analysis response itself.
 - New endpoints:
   - `GET /api/v1/history` — requires a valid user (401 if anonymous); returns that user's rows,
     newest first, paginated.
@@ -105,6 +108,19 @@ Clean security-SaaS aesthetic: light theme, generous whitespace, a single accent
 severity (reusing whatever color scale `ResultDashboard` already uses for score bands, so the
 new nav/history page doesn't introduce a second color language). No dark mode tonight — one
 polished theme beats two half-finished ones.
+
+A copy pass rides along with the reskin: coverage panel entries get one accurate status each
+(`not_configured` / `not_run` / `failed` / `no_match` / `threat_found` — whatever the module
+already reports internally, worded precisely instead of blurring "unavailable" and "not
+configured" into the same word), and anywhere the risk score sits next to a confidence label,
+the copy makes clear confidence describes the evidence/model, not certainty about the verdict.
+This is a wording and layout fix only — no change to how risk/confidence are computed.
+
+The history page's delete affordance includes a "clear all" action alongside the per-row
+delete, and the analyzer page gets one explicit line of copy: scans are only saved when you're
+logged in; anonymous scans are never stored. Both come from the same ChatGPT-sourced review
+that flagged the ambiguity (see note below) and are the only two items from it folded into this
+build.
 
 ### Testing plan
 
