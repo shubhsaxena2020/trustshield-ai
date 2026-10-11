@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { authFetch } from "@/lib/authFetch";
 import { RiskCard } from "./RiskCard";
 import type { ChatAnalysis, ChatResponse, Message, ResponseType } from "./types";
 
@@ -269,7 +270,7 @@ export function Chat() {
     };
 
     try {
-      const res = await fetch(`${API}/api/v1/chat/stream`, {
+      const res = await authFetch(`${API}/api/v1/chat/stream`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: text, context: context?.analysis ?? null, context_signature: context?.signature ?? "", history }),
@@ -374,7 +375,7 @@ export function Chat() {
         form.append("context_signature", context.signature);
       }
       form.append("history", JSON.stringify(history));
-      const res = await fetch(`${API}/api/v1/chat/upload`, { method: "POST", body: form, signal: controller.signal });
+      const res = await authFetch(`${API}/api/v1/chat/upload`, { method: "POST", body: form, signal: controller.signal });
       if (!res.ok) {
         const detail = await res.json().then((d) => (typeof d.detail === "string" ? d.detail : "")).catch(() => "");
         const busyMsg = res.status === 429 ? "Too many requests. Please wait a moment and try again." : res.status === 503 ? "The service is busy right now. Please try again shortly." : "";
