@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import logging
 import urllib.error
+import urllib.parse
 import urllib.request
 from typing import Any
 
@@ -59,19 +60,27 @@ def save(supabase_url: str, service_role_key: str, *, user_id: str, input_type: 
         _log.warning(json.dumps({"event": "history_write_failed", "error_type": type(exc).__name__}))
 
 
+def _eq(value: str) -> str:
+    """A PostgREST 'eq.<value>' filter value, URL-encoded so a crafted id (e.g. a path param an
+    attacker controls) can't inject extra '&'-separated filters into the query string. The
+    backend's own user_id is the real isolation boundary here, not RLS (this client uses the
+    service-role key, which bypasses RLS) -- see docs/SUPABASE_SETUP.md."""
+    return "eq." + urllib.parse.quote(value, safe="")
+
+
 def list_for_user(supabase_url: str, service_role_key: str, *, user_id: str, limit: int = 50) -> list[dict]:
-    params = f"?user_id=eq.{user_id}&order=created_at.desc&limit={limit}"
+    params = f"?user_id={_eq(user_id)}&order=created_at.desc&limit={int(limit)}"
     result = _request("GET", f"{supabase_url}/rest/v1/scan_history", service_role_key, params=params)
     return result if isinstance(result, list) else []
 
 
 def delete_for_user(supabase_url: str, service_role_key: str, *, user_id: str, row_id: str) -> bool:
     """Deletes only if row_id belongs to user_id (filtered in the query, not just by RLS)."""
-    params = f"?id=eq.{row_id}&user_id=eq.{user_id}"
+    params = f"?id={_eq(row_id)}&user_id={_eq(user_id)}"
     result = _request("DELETE", f"{supabase_url}/rest/v1/scan_history", service_role_key, params=params)
     return bool(result)
 
 
 def delete_all_for_user(supabase_url: str, service_role_key: str, *, user_id: str) -> None:
-    params = f"?user_id=eq.{user_id}"
+    params = f"?user_id={_eq(user_id)}"
     _request("DELETE", f"{supabase_url}/rest/v1/scan_history", service_role_key, params=params)

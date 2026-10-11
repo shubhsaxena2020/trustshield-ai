@@ -79,3 +79,33 @@ def test_delete_for_user_scopes_query_to_both_id_and_user(monkeypatch):
 def test_delete_for_user_returns_false_when_nothing_matched(monkeypatch):
     monkeypatch.setattr(store, "_request", lambda *a, **k: [])
     assert store.delete_for_user("https://x.supabase.co", "key", user_id="u1", row_id="missing") is False
+
+
+def test_delete_for_user_encodes_special_characters_in_row_id(monkeypatch):
+    """A crafted row_id (e.g. from an untrusted path param) must not be able to inject extra
+    PostgREST query filters via unescaped '&'/'='/'?' characters."""
+    captured = {}
+
+    def fake_request(method, url, key, **kwargs):
+        captured["params"] = kwargs.get("params")
+        return []
+
+    monkeypatch.setattr(store, "_request", fake_request)
+    store.delete_for_user("https://x.supabase.co", "key", user_id="u1",
+                           row_id="x&user_id=neq.u1&or=(id.eq.y)")
+    params = captured["params"]
+    query_params = params.lstrip("?").split("&")
+    assert query_params == ["id=eq.x%26user_id%3Dneq.u1%26or%3D%28id.eq.y%29", "user_id=eq.u1"]
+
+
+def test_list_for_user_encodes_special_characters_in_user_id(monkeypatch):
+    captured = {}
+
+    def fake_request(method, url, key, **kwargs):
+        captured["params"] = kwargs.get("params")
+        return []
+
+    monkeypatch.setattr(store, "_request", fake_request)
+    store.list_for_user("https://x.supabase.co", "key", user_id="u1&limit=99999")
+    assert captured["params"].count("user_id=eq.") == 1
+    assert "&limit=99999&" not in captured["params"]
