@@ -31,22 +31,32 @@ function newConversation(): Conversation {
   return { id: uid(), title: "New chat", messages: [] };
 }
 
-// Chats are saved in this browser (localStorage), so they survive a page refresh. Uploaded image previews are not saved (a
-// blob URL cannot be restored), and failed-request messages are dropped. Storage is scoped per signed-in identity (or "anon"
-// when signed out), so switching accounts on the same device switches history instead of sharing one bucket. Cross-device
-// sync (the same account seeing its chats on a different device) needs a backend store, which is not set up.
+// Signed-in chats are saved in this browser (localStorage) per account, so they survive a refresh but stay scoped to
+// whoever is signed in — like ChatGPT, signing out switches away from that history instead of merely hiding it.
+// Signed-out ("anon") chats are never written to storage at all: like ChatGPT's logged-out mode, they live only in
+// memory for the current page load and are gone on refresh or logout, so a shared device never shows one person's
+// anonymous scans to the next. Uploaded image previews are not saved (a blob URL cannot be restored), and
+// failed-request messages are dropped. Cross-device sync for a signed-in account needs a backend store, not set up.
 const LEGACY_STORE_KEY = "trustshield.chats.v1";
+const ANON_IDENTITY = "anon";
 const WELCOME_DISMISSED_KEY = "trustshield.welcome_dismissed.v1";
 const storeKeyFor = (identity: string) => `trustshield.chats.v1:${identity}`;
 
-function loadChats(identity: string): Conversation[] | null {
+// Anonymous chats from before this was identity-scoped (or from an earlier build that persisted them) must never
+// resurface: wipe every local chat key that isn't a specific signed-in account's.
+function purgeAnonStorage() {
   try {
-    let raw = window.localStorage.getItem(storeKeyFor(identity));
-    if (!raw && identity === "anon") {
-      // One-time migration: chats from before history was identity-scoped lived under one shared key.
-      raw = window.localStorage.getItem(LEGACY_STORE_KEY);
-      if (raw) window.localStorage.removeItem(LEGACY_STORE_KEY);
-    }
+    window.localStorage.removeItem(LEGACY_STORE_KEY);
+    window.localStorage.removeItem(storeKeyFor(ANON_IDENTITY));
+  } catch {
+    // storage blocked: nothing to purge
+  }
+}
+
+function loadChats(identity: string): Conversation[] | null {
+  if (identity === ANON_IDENTITY) return null;
+  try {
+    const raw = window.localStorage.getItem(storeKeyFor(identity));
     if (!raw) return null;
     const parsed = JSON.parse(raw) as Conversation[];
     return Array.isArray(parsed) && parsed.length > 0 ? parsed : null;
@@ -56,6 +66,7 @@ function loadChats(identity: string): Conversation[] | null {
 }
 
 function saveChats(identity: string, chats: Conversation[]) {
+  if (identity === ANON_IDENTITY) return; // signed-out chats are never persisted
   try {
     const clean = chats.slice(0, 50).map((c) => ({
       ...c,
@@ -200,6 +211,7 @@ export function Chat() {
     if (prevIdentityRef.current !== null && prevIdentityRef.current !== identity) {
       saveChats(prevIdentityRef.current, chatsRef.current);
     }
+    purgeAnonStorage(); // one-time cleanup of chats a pre-fix build (or this app's own earlier logic) left behind
     const stored = loadChats(identity);
     skipNextSaveRef.current = true;
     if (stored) {
@@ -644,7 +656,9 @@ export function Chat() {
             })}
           </ul>
         </nav>
-        <p className="px-2 pt-3 text-xs leading-5 text-zinc-500">Chats are saved in this browser, so they stay after a refresh.</p>
+        <p className="px-2 pt-3 text-xs leading-5 text-zinc-500">
+          {session ? "Chats are saved to your account, so they stay after a refresh." : "Sign in to save your chats. Without an account, this history clears when you refresh or log out."}
+        </p>
         {session && (
           <div className="mt-2 flex items-center justify-between gap-2 rounded-lg px-2 py-2 text-xs text-zinc-500">
             <span className="min-w-0 truncate">{session.user.email}</span>
