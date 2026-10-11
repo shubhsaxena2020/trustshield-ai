@@ -40,6 +40,8 @@ class Settings:
     store_policy: str = "all"  # "all" (development) or "sandbox_only" (retain nothing but jobs that must be polled)
     store_ttl_s: float = 900.0
     store_max: int = 200
+    supabase_url: str = ""
+    supabase_service_role_key: str = ""
 
     @property
     def strict(self) -> bool:
@@ -77,6 +79,8 @@ class Settings:
             store_policy=os.getenv("TRUSTSHIELD_RESULT_STORE", "sandbox_only" if strict else "all").strip().lower(),
             store_ttl_s=_float("TRUSTSHIELD_RESULT_TTL", 900.0, 30.0, 86_400.0),
             store_max=_int("TRUSTSHIELD_RESULT_MAX", 200, 10, 5_000),
+            supabase_url=os.getenv("SUPABASE_URL", "").strip().rstrip("/"),
+            supabase_service_role_key=os.getenv("SUPABASE_SERVICE_ROLE_KEY", "").strip(),
         )
 
     def problems(self) -> list[str]:
