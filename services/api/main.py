@@ -39,9 +39,11 @@ from services.chat.orchestrator import analyze_turn
 from services.chat.router import MAX_MESSAGE_CHARS, route
 from services.chat.signing import sign, verify
 
+from .auth import CurrentUser, get_current_user
 from .security import BodyLimitMiddleware, ObservabilityMiddleware, RateLimiter, ResultStore, client_key, event_log
 from .settings import Settings
 from .startup import startup_problems
+from services.history import store as history_store
 
 router = APIRouter()
 
@@ -91,6 +93,21 @@ def _publish(request: Request, response: Response, result: AnalysisResult, *, re
                                           "module": name, "status": status}))
     _state(request).store.put(result, retain=retain)
     return result
+
+
+def _record_history(request: Request, user: CurrentUser | None, result: AnalysisResult, raw_text: str) -> None:
+    if user is None:
+        return
+    settings = _state(request).settings
+    if not settings.supabase_url or not settings.supabase_service_role_key:
+        return
+    history_store.save(
+        settings.supabase_url, settings.supabase_service_role_key,
+        user_id=user.id, input_type=result.input_type,
+        input_summary=history_store.summarize(raw_text),
+        risk_score=result.risk.score, risk_label=result.risk.label,
+        result_json=result.model_dump(mode="json"),
+    )
 
 
 async def run_heavy(request: Request, func, *args):
@@ -152,26 +169,35 @@ def readiness(response: Response):
 # ---- analysis endpoints --------------------------------------------------------------------------------------------
 
 @router.post("/api/v1/analyze/text", response_model=AnalysisResult, dependencies=[Depends(limit_light)])
-def analyze_text_endpoint(body: TextIn, request: Request, response: Response):
+def analyze_text_endpoint(body: TextIn, request: Request, response: Response,
+                           user: CurrentUser | None = Depends(get_current_user)):
     try:
-        return _publish(request, response, analyze_text(body.text))
+        result = _publish(request, response, analyze_text(body.text))
     except InvalidInput as e:
         raise HTTPException(422, str(e))
+    _record_history(request, user, result, body.text)
+    return result
 
 
 @router.post("/api/v1/analyze/url", response_model=AnalysisResult, dependencies=[Depends(limit_light)])
-def analyze_url_endpoint(body: UrlIn, request: Request, response: Response):
-    return _publish(request, response, analyze_url(body.url))
+def analyze_url_endpoint(body: UrlIn, request: Request, response: Response,
+                          user: CurrentUser | None = Depends(get_current_user)):
+    result = _publish(request, response, analyze_url(body.url))
+    _record_history(request, user, result, body.url)
+    return result
 
 
 def _image_error(exc: ImageRejected) -> HTTPException:
     return HTTPException(status_code=exc.status_code, detail=exc.message)
 
 
-async def _upload_endpoint(request: Request, response: Response, file: UploadFile, func) -> AnalysisResult:
+async def _upload_endpoint(request: Request, response: Response, file: UploadFile, func,
+                            user: CurrentUser | None, label: str) -> AnalysisResult:
     try:
         data = await file.read(max_upload_size() + 1)  # the extra byte detects oversize input without unbounded reads
-        return _publish(request, response, await run_heavy(request, func, data, file.content_type, file.filename))
+        result = _publish(request, response, await run_heavy(request, func, data, file.content_type, file.filename))
+        _record_history(request, user, result, f"{label} ({result.risk.label})")
+        return result
     except ImageRejected as exc:
         raise _image_error(exc)
     except InvalidInput as exc:
@@ -181,13 +207,15 @@ async def _upload_endpoint(request: Request, response: Response, file: UploadFil
 
 
 @router.post("/api/v1/analyze/image", response_model=AnalysisResult, dependencies=[Depends(limit_heavy)])
-async def analyze_image_endpoint(request: Request, response: Response, file: UploadFile = File(...)):
-    return await _upload_endpoint(request, response, file, analyze_image)
+async def analyze_image_endpoint(request: Request, response: Response, file: UploadFile = File(...),
+                                  user: CurrentUser | None = Depends(get_current_user)):
+    return await _upload_endpoint(request, response, file, analyze_image, user, "Screenshot scan")
 
 
 @router.post("/api/v1/analyze/qr", response_model=AnalysisResult, dependencies=[Depends(limit_heavy)])
-async def analyze_qr_endpoint(request: Request, response: Response, file: UploadFile = File(...)):
-    return await _upload_endpoint(request, response, file, analyze_qr)
+async def analyze_qr_endpoint(request: Request, response: Response, file: UploadFile = File(...),
+                               user: CurrentUser | None = Depends(get_current_user)):
+    return await _upload_endpoint(request, response, file, analyze_qr, user, "QR code scan")
 
 
 @router.get("/api/v1/analysis/{analysis_id}", response_model=AnalysisResult, dependencies=[Depends(limit_light)])
@@ -196,6 +224,42 @@ def get_analysis(analysis_id: str, request: Request):
     if result is None:
         raise HTTPException(404, "analysis not found (results are short-lived and not kept after a restart)")
     return result
+
+
+# ---- history (requires login; anonymous scanning is unaffected) -----------------------------------------------------
+
+def _history_configured(request: Request) -> tuple[str, str]:
+    settings = _state(request).settings
+    if not settings.supabase_url or not settings.supabase_service_role_key:
+        raise HTTPException(503, "History is not configured on this server")
+    return settings.supabase_url, settings.supabase_service_role_key
+
+
+@router.get("/api/v1/history", dependencies=[Depends(limit_light)])
+def list_history(request: Request, user: CurrentUser | None = Depends(get_current_user)):
+    if user is None:
+        raise HTTPException(401, "Log in to view your scan history")
+    url, key = _history_configured(request)
+    return history_store.list_for_user(url, key, user_id=user.id)
+
+
+@router.delete("/api/v1/history/{row_id}", dependencies=[Depends(limit_light)])
+def delete_history_row(row_id: str, request: Request, user: CurrentUser | None = Depends(get_current_user)):
+    if user is None:
+        raise HTTPException(401, "Log in to manage your scan history")
+    url, key = _history_configured(request)
+    if not history_store.delete_for_user(url, key, user_id=user.id, row_id=row_id):
+        raise HTTPException(404, "History entry not found")
+    return {"deleted": row_id}
+
+
+@router.delete("/api/v1/history", dependencies=[Depends(limit_light)])
+def delete_all_history(request: Request, user: CurrentUser | None = Depends(get_current_user)):
+    if user is None:
+        raise HTTPException(401, "Log in to manage your scan history")
+    url, key = _history_configured(request)
+    history_store.delete_all_for_user(url, key, user_id=user.id)
+    return {"deleted": "all"}
 
 
 # ---- conversational API (v1 endpoints above are unchanged) ----------------------------------------------------------------------
@@ -618,8 +682,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     app.add_middleware(BodyLimitMiddleware, max_bytes=settings.max_body_bytes)
     app.add_middleware(ObservabilityMiddleware, settings=settings)
-    app.add_middleware(CORSMiddleware, allow_origins=list(settings.cors_origins), allow_methods=["GET", "POST", "OPTIONS"],
-                       allow_headers=["Content-Type", "X-Request-ID"], expose_headers=["X-Request-ID", "X-Analysis-ID", "Retry-After"],
+    app.add_middleware(CORSMiddleware, allow_origins=list(settings.cors_origins), allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
+                       allow_headers=["Content-Type", "X-Request-ID", "Authorization"], expose_headers=["X-Request-ID", "X-Analysis-ID", "Retry-After"],
                        max_age=600)
     return app
 

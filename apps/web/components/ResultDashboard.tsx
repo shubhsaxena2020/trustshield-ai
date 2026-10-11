@@ -33,6 +33,17 @@ function getModuleDetail(name: string, module: ModuleResult): string | undefined
   return module.detail || undefined;
 }
 
+// "Unavailable" covers two different facts: a check that wasn't configured at all, and one that
+// was configured but failed. Judges reading the coverage panel need to tell those apart, so a
+// status word is shown instead of the raw backend status when the detail text makes clear which
+// one it is. This is a display-only relabel; the underlying status/detail values are unchanged.
+function getModuleStatusLabel(status: string, detail: string | undefined): string {
+  if (status === "unavailable" && detail && /not configured|no .* provider configured/i.test(detail)) {
+    return "Not configured";
+  }
+  return pretty(status);
+}
+
 export function ResultDashboard({ result }: ResultDashboardProps) {
   const label =
     LABELS[result.risk.label] ?? {
@@ -159,7 +170,7 @@ export function ResultDashboard({ result }: ResultDashboardProps) {
             const detail = getModuleDetail(k, m);
             return (
               <li key={k}>
-                <span className="font-mono">{k}</span>: {pretty(m.status)}
+                <span className="font-mono">{k}</span>: {getModuleStatusLabel(m.status, detail)}
                 {detail ? ` — ${detail}` : ""}
               </li>
             );

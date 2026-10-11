@@ -1,0 +1,1540 @@
+Reading additional input from stdin...
+OpenAI Codex v0.160.0
+--------
+workdir: C:\Users\shubh\trustshield-ai
+model: gpt-6-luna
+provider: openai
+approval: never
+sandbox: danger-full-access
+reasoning effort: high
+reasoning summaries: none
+session id: 01a129b7-85e1-73f0-ad14-5bdec834ebf3
+--------
+user
+Security code review of three files in this repo (TrustShield AI, a FastAPI + Next.js scam-detection app that just added opt-in Supabase auth and per-user scan history): services/api/auth.py, services/history/store.py, and the SQL schema/RLS policies recorded in docs/SUPABASE_SETUP.md. Also check their call sites in services/api/main.py (search for get_current_user, history_store, /api/v1/history). Focus specifically on: auth-bypass risk (can a request reach history data without a valid Supabase token?), injection risk in the PostgREST query-building in services/history/store.py (string interpolation into URL query params -- check user_id/row_id handling for injection via crafted values), whether RLS is actually the second line of defense or the only one, and any logic bug that would let one user read or delete another user's scan_history row. Write your findings as a markdown report to docs/security-runs/codex_backend_review.md with one section per finding: title, severity (critical/high/medium/low/informational/false-positive-not-applicable), the exact file:line, the concrete exploit scenario if real, and your suggested fix. If you find nothing exploitable, say so explicitly and explain what you checked -- do not pad the report with stylistic nitpicks framed as security findings.
+warning: Codex is ignoring 13 unrecognized configuration settings. Check for typos or deprecated settings.
+  user (C:\Users\shubh\.codex\config.toml): `mcp_servers.blender.type` is ignored.
+  user (C:\Users\shubh\.codex\config.toml): `mcp_servers.cortex.type` is ignored.
+  user (C:\Users\shubh\.codex\config.toml): `mcp_servers.design-md.type` is ignored.
+  ... and 10 more ignored settings.
+warning: Codex is ignoring 13 unrecognized configuration settings. Check for typos or deprecated settings.
+  user (C:\Users\shubh\.codex\config.toml): `mcp_servers.blender.type` is ignored.
+  user (C:\Users\shubh\.codex\config.toml): `mcp_servers.cortex.type` is ignored.
+  user (C:\Users\shubh\.codex\config.toml): `mcp_servers.design-md.type` is ignored.
+  ... and 10 more ignored settings.
+codex
+I’ll inspect the three requested files and the `main.py` call sites, then trace whether token validation, query construction, and RLS jointly prevent cross-user access. I’ll use the security-review workflow and write only concrete findings to the requested report.
+hook: PreToolUse
+hook: PreToolUse Completed
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content 'C:\\Users\\shubh\\.codex\\memories\\MEMORY.md' -TotalCount 240; Get-Content 'C:\\Users\\shubh\\.codex\\skills\\security-reviewer\\SKILL.md' -TotalCount 240; rg -n \"get_current_user|history_store|/api/v1/history|scan_history|create policy|row level security|RLS\" services/api/auth.py services/history/store.py services/api/main.py docs/SUPABASE_SETUP.md" in C:\Users\shubh\trustshield-ai
+ succeeded in 376ms:
+# Task Group: Portrait enhancement and identity-preserving wardrobe edits
+
+scope: Editing a supplied portrait for restoration/quality and wardrobe changes while retaining the person's identity and original composition.
+applies_to: cwd=C:\Users\shubh\Documents\Codex\2026-10-10\c-users-shubh-downloads-muskan-photo; reuse_rule=reuse the identity-preservation and export-verification workflow for similar portrait edits, but treat the source path and clothing/art-direction details as request-specific.
+
+## Task 1: Enhance portrait and replace clothing, partial
+
+### rollout_summary_files
+
+- rollout_summaries/2026-10-10T08-42-50-Udo9-portrait_enhancement_formal_suit_edit_partial.md (cwd=C:\Users\shubh\Documents\Codex\2026-10-10\c-users-shubh-downloads-muskan-photo, rollout_path=C:\Users\shubh\.codex\sessions\2026\10\10\rollout-2026-10-10T14-12-50-01a124fa-ad5b-7d12-88eb-4ec96533e66d.jsonl, updated_at=2026-10-10T08:45:27+00:00, thread_id=01a124fa-ad5b-7d12-88eb-4ec96533e66d, partial: no verified export)
+
+### keywords
+
+- imagegen, portrait-restoration, identity-preservation, formal-suit, 8K, image-export, muskan photo 2.jpeg, dark navy blazer, ivory blouse
+
+## User preferences
+
+- When editing a portrait, the user said: "Do not change the face of the person in the image." -> preserve facial identity, expression, glasses, hairstyle, pose, and crop; do not reshape, beautify, or age the face. [Task 1]
+- For this type of edit, the user asked for an "8K-style, camera-fresh" result with improved detail/color and a "proper formal suit and well dressed" appearance -> preserve the framing while changing clothing and image quality. [Task 1]
+
+## Reusable knowledge
+
+- For the supplied source `C:\Users\shubh\Downloads\muskan photo 2.jpeg`, effective prompt constraints were: same face shape, eyes, nose, lips, expression, skin tone, hairline, hairstyle, black eyeglasses, centered frontal pose, and original crop; fitted dark navy blazer, ivory blouse, realistic skin texture, balanced exposure, subtle professional color grading, cool blue background, no text, and no added accessories. The particular clothing palette is request-specific. [Task 1]
+- This workspace has `outputs` and `work` directories. Save generated deliverables explicitly to `outputs` and inspect them before reporting success. [Task 1]
+
+## Failures and how to do differently
+
+- Symptom: an image-generation call returned an `image_url`/generated result, but there was no final output file or confirmed path. Cause: generation output was not exported and inspected. Fix: save the returned result under `outputs`, verify the file exists, and inspect it for identity/composition fidelity before claiming completion. [Task 1]
+- The later generation attempt was aborted by the user after 5.9 seconds; do not infer quality, approval, or task completion from that attempt. [Task 1]
+---
+name: security-reviewer
+description: Identifies security vulnerabilities, generates structured audit reports with severity ratings, and provides actionable remediation guidance. Use when conducting security audits, reviewing code for vulnerabilities, or analyzing infrastructure security. Invoke for SAST scans, penetration testing, DevSecOps practices, cloud security reviews, dependency audits, secrets scanning, or compliance checks. Produces vulnerability reports, prioritized recommendations, and compliance checklists.
+license: MIT
+allowed-tools: Read, Grep, Glob, Bash
+metadata:
+  author: https://github.com/Jeffallan
+  version: "1.1.1"
+  domain: security
+  triggers: security review, vulnerability scan, SAST, security audit, penetration test, code audit, security analysis, infrastructure security, DevSecOps, cloud security, compliance audit
+  role: specialist
+  scope: review
+  output-format: report
+  related-skills: secure-code-guardian, code-reviewer, devops-engineer, cloud-architect, kubernetes-specialist, api-designer, mcp-developer
+---
+
+# Security Reviewer
+
+Security analyst specializing in code review, vulnerability identification, penetration testing, and infrastructure security.
+
+## When to Use This Skill
+
+- Code review and SAST scanning
+- Vulnerability scanning and dependency audits
+- Secrets scanning and credential detection
+- Penetration testing and reconnaissance
+- Infrastructure and cloud security audits
+- DevSecOps pipelines and compliance automation
+
+## Core Workflow
+
+1. **Scope** â€” Map attack surface and critical paths. Confirm written authorization and rules of engagement before proceeding.
+2. **Scan** â€” Run SAST, dependency, and secrets tools. Example commands:
+   - `semgrep --config=auto .`
+   - `bandit -r ./src`
+   - `gitleaks detect --source=.`
+   - `npm audit --audit-level=moderate`
+   - `trivy fs .`
+3. **Review** â€” Manual review of auth, input handling, and crypto. Tools miss context â€” manual review is mandatory.
+4. **Test and classify** â€” **Verify written scope authorization before active testing.** Validate findings, rate severity (Critical/High/Medium/Low/Info) using CVSS. Confirm exploitability with proof-of-concept only; do not exceed it.
+5. **Report** â€” Confirm findings with stakeholder before finalizing. Document with location, impact, and remediation. Report critical findings immediately.
+
+## Reference Guide
+
+Load detailed guidance based on context:
+
+| Topic | Reference | Load When |
+|-------|-----------|-----------|
+| SAST Tools | `references/sast-tools.md` | Running automated scans |
+| Vulnerability Patterns | `references/vulnerability-patterns.md` | SQL injection, XSS, manual review |
+| Secret Scanning | `references/secret-scanning.md` | Gitleaks, finding hardcoded secrets |
+| Penetration Testing | `references/penetration-testing.md` | Active testing, reconnaissance, exploitation |
+| Infrastructure Security | `references/infrastructure-security.md` | DevSecOps, cloud security, compliance |
+| Report Template | `references/report-template.md` | Writing security report |
+
+## Constraints
+
+### MUST DO
+- Check authentication/authorization first
+- Run automated tools before manual review
+- Provide specific file/line locations
+- Include remediation for each finding
+- Rate severity consistently
+- Check for secrets in code
+- Verify scope and authorization before active testing
+- Document all testing activities
+- Follow rules of engagement
+- Report critical findings immediately
+
+### MUST NOT DO
+- Skip manual review (tools miss things)
+- Test on production systems without authorization
+- Ignore "low" severity issues
+- Assume frameworks handle everything
+- Share detailed exploits publicly
+- Exploit beyond proof of concept
+- Cause service disruption or data loss
+- Test outside defined scope
+
+## Output Templates
+
+1. Executive summary with risk assessment
+2. Findings table with severity counts
+3. Detailed findings with location, impact, and remediation
+4. Prioritized recommendations
+
+### Example Finding Entry
+
+```
+ID: FIND-001
+Severity: High (CVSS 8.1)
+Title: SQL Injection in user search endpoint
+File: src/api/users.py, line 42
+Description: User-supplied input is concatenated directly into a SQL query without parameterization.
+Impact: An attacker can read, modify, or delete database contents.
+Remediation: Use parameterized queries or an ORM. Replace `cursor.execute(f"SELECT * FROM users WHERE name='{name}'")`
+             with `cursor.execute("SELECT * FROM users WHERE name=%s", (name,))`.
+References: CWE-89, OWASP A03:2021
+```
+
+## Knowledge Reference
+
+OWASP Top 10, CWE, Semgrep, Bandit, ESLint Security, gosec, npm audit, gitleaks, trufflehog, CVSS scoring, nmap, Burp Suite, sqlmap, Trivy, Checkov, HashiCorp Vault, AWS Security Hub, CIS benchmarks, SOC2, ISO27001
+
+[Documentation](https://jeffallan.github.io/claude-skills/skills/security/security-reviewer/)
+docs/SUPABASE_SETUP.md:26:One table, `scan_history`, created via the SQL editor:
+docs/SUPABASE_SETUP.md:29:create table scan_history (
+docs/SUPABASE_SETUP.md:40:alter table scan_history enable row level security;
+docs/SUPABASE_SETUP.md:42:create policy "owner can select own history"
+docs/SUPABASE_SETUP.md:43:  on scan_history for select using (auth.uid() = user_id);
+docs/SUPABASE_SETUP.md:45:create policy "owner can delete own history"
+docs/SUPABASE_SETUP.md:46:  on scan_history for delete using (auth.uid() = user_id);
+docs/SUPABASE_SETUP.md:50:backend's service-role (now secret-key) client, which bypasses RLS by design. RLS is the second
+services/api/main.py:42:from .auth import CurrentUser, get_current_user
+services/api/main.py:46:from services.history import store as history_store
+services/api/main.py:104:    history_store.save(
+services/api/main.py:107:        input_summary=history_store.summarize(raw_text),
+services/api/main.py:173:                           user: CurrentUser | None = Depends(get_current_user)):
+services/api/main.py:184:                          user: CurrentUser | None = Depends(get_current_user)):
+services/api/main.py:211:                                  user: CurrentUser | None = Depends(get_current_user)):
+services/api/main.py:217:                               user: CurrentUser | None = Depends(get_current_user)):
+services/api/main.py:238:@router.get("/api/v1/history", dependencies=[Depends(limit_light)])
+services/api/main.py:239:def list_history(request: Request, user: CurrentUser | None = Depends(get_current_user)):
+services/api/main.py:243:    return history_store.list_for_user(url, key, user_id=user.id)
+services/api/main.py:246:@router.delete("/api/v1/history/{row_id}", dependencies=[Depends(limit_light)])
+services/api/main.py:247:def delete_history_row(row_id: str, request: Request, user: CurrentUser | None = Depends(get_current_user)):
+services/api/main.py:251:    if not history_store.delete_for_user(url, key, user_id=user.id, row_id=row_id):
+services/api/main.py:256:@router.delete("/api/v1/history", dependencies=[Depends(limit_light)])
+services/api/main.py:257:def delete_all_history(request: Request, user: CurrentUser | None = Depends(get_current_user)):
+services/api/main.py:261:    history_store.delete_all_for_user(url, key, user_id=user.id)
+services/api/auth.py:40:def get_current_user(request: Request, authorization: str | None = Header(default=None)) -> CurrentUser | None:
+services/history/store.py:4:RLS on scan_history restricts select/delete to the owning user as a second line of defense;
+services/history/store.py:5:every query here additionally filters by user_id explicitly, so a server-side bug in the RLS
+services/history/store.py:54:        _request("POST", f"{supabase_url}/rest/v1/scan_history", service_role_key, body={
+services/history/store.py:64:    result = _request("GET", f"{supabase_url}/rest/v1/scan_history", service_role_key, params=params)
+services/history/store.py:69:    """Deletes only if row_id belongs to user_id (filtered in the query, not just by RLS)."""
+services/history/store.py:71:    result = _request("DELETE", f"{supabase_url}/rest/v1/scan_history", service_role_key, params=params)
+services/history/store.py:77:    _request("DELETE", f"{supabase_url}/rest/v1/scan_history", service_role_key, params=params)
+
+hook: PreToolUse
+hook: PreToolUse Completed
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content 'C:\\Users\\shubh\\.codex\\skills\\security-reviewer\\references\\report-template.md' -TotalCount 220; "'$files = @('"'services/api/auth.py','services/history/store.py','services/api/main.py','docs/SUPABASE_SETUP.md'); foreach ("'$f in $files) { Write-Output "--- $f"; $i=0; Get-Content $f | ForEach-Object { $i++; '"'{0,4}: {1}' -f "'$i, $_ } }; Get-Command semgrep, bandit, gitleaks -ErrorAction SilentlyContinue | Select-Object Name,Source; git status --short' in C:\Users\shubh\trustshield-ai
+ succeeded in 692ms:
+# Security Report Template
+
+## Full Report Template
+
+```markdown
+# Security Review Report
+
+## Executive Summary
+
+| Field | Value |
+|-------|-------|
+| **Application** | [Application Name] |
+| **Review Date** | [YYYY-MM-DD] |
+| **Reviewer** | [Name] |
+| **Scope** | [Files/modules reviewed] |
+| **Overall Risk Level** | [Critical/High/Medium/Low] |
+
+### Key Findings
+- X Critical vulnerabilities requiring immediate attention
+- Y High-severity issues to address before deployment
+- Z Medium/Low issues for future consideration
+
+## Findings Summary
+
+| Severity | Count | Status |
+|----------|-------|--------|
+| Critical | X | Requires immediate fix |
+| High | X | Fix before deployment |
+| Medium | X | Fix in next sprint |
+| Low | X | Backlog |
+
+## Detailed Findings
+
+### [CRITICAL] SQL Injection in User Search
+
+| Field | Value |
+|-------|-------|
+| **ID** | SEC-001 |
+| **Location** | `src/api/users.ts:45` |
+| **CWE** | CWE-89 |
+| **CVSS** | 9.8 (Critical) |
+
+**Description**
+User input directly concatenated into SQL query without sanitization.
+
+**Vulnerable Code**
+```typescript
+const query = `SELECT * FROM users WHERE name LIKE '%${searchTerm}%'`;
+```
+
+**Proof of Concept**
+```
+GET /api/users?search=' OR '1'='1
+```
+
+**Impact**
+- Full database access
+- Data exfiltration
+- Data modification/deletion
+- Potential RCE via SQL features
+
+**Remediation**
+Use parameterized queries:
+```typescript
+const query = 'SELECT * FROM users WHERE name LIKE $1';
+db.query(query, [`%${searchTerm}%`]);
+```
+
+**Effort**: 1 hour
+**Priority**: Immediate
+
+---
+
+### [HIGH] Weak Password Requirements
+
+| Field | Value |
+|-------|-------|
+| **ID** | SEC-002 |
+| **Location** | `src/auth/validation.ts:12` |
+| **CWE** | CWE-521 |
+| **CVSS** | 7.5 (High) |
+
+**Description**
+Password policy requires only 6 characters with no complexity requirements.
+
+**Current Policy**
+```typescript
+const isValid = password.length >= 6;
+```
+
+**Impact**
+- Susceptible to brute force attacks
+- Dictionary attack vulnerability
+
+**Remediation**
+Implement stronger requirements:
+```typescript
+const isValid =
+  password.length >= 12 &&
+  /[A-Z]/.test(password) &&
+  /[a-z]/.test(password) &&
+  /[0-9]/.test(password) &&
+  /[^A-Za-z0-9]/.test(password);
+```
+
+**Effort**: 30 minutes
+**Priority**: Before deployment
+
+## Automated Scan Results
+
+### Dependency Vulnerabilities
+| Package | Severity | CVE | Fix |
+|---------|----------|-----|-----|
+| lodash | High | CVE-2021-xxxx | Upgrade to 4.17.21 |
+
+### SAST Findings
+| Tool | Critical | High | Medium | Low |
+|------|----------|------|--------|-----|
+| Semgrep | 1 | 3 | 5 | 8 |
+| npm audit | 0 | 2 | 4 | 10 |
+
+## Recommendations
+
+### Immediate (This Sprint)
+1. Fix SQL injection vulnerability (SEC-001)
+2. Implement parameterized queries globally
+3. Update vulnerable dependencies
+
+### Short-term (Next Sprint)
+1. Strengthen password policy (SEC-002)
+2. Add input validation middleware
+3. Enable security headers
+
+### Long-term
+1. Implement SAST in CI/CD pipeline
+2. Schedule regular security reviews
+3. Security training for developers
+
+## Appendix
+
+### Tools Used
+- Semgrep v1.x
+- npm audit
+- Gitleaks v8.x
+- Manual code review
+
+### References
+- OWASP Top 10 2021
+- CWE Database
+- CVSS Calculator
+```
+
+## Severity Definitions
+
+| Severity | CVSS Score | Response Time |
+|----------|------------|---------------|
+| Critical | 9.0 - 10.0 | Immediate |
+| High | 7.0 - 8.9 | 24-48 hours |
+| Medium | 4.0 - 6.9 | 1-2 weeks |
+| Low | 0.1 - 3.9 | Next release |
+
+## Quick Reference
+
+| Section | Purpose |
+|---------|---------|
+| Executive Summary | Management overview |
+| Findings Summary | Quick count by severity |
+| Detailed Findings | Technical details |
+| Scan Results | Automated tool output |
+| Recommendations | Prioritized action items |
+--- services/api/auth.py
+   1: """Resolves the current Supabase user from a request's access token, if any. No password ever
+   2: reaches this service; only short-lived access tokens issued by Supabase Auth."""
+   3: from __future__ import annotations
+   4: 
+   5: import json
+   6: import urllib.error
+   7: import urllib.request
+   8: from dataclasses import dataclass
+   9: 
+  10: from fastapi import Header, HTTPException, Request
+  11: 
+  12: _TIMEOUT_SECONDS = 5
+  13: 
+  14: 
+  15: @dataclass(frozen=True)
+  16: class CurrentUser:
+  17:     id: str
+  18:     email: str
+  19: 
+  20: 
+  21: def _lookup_user(supabase_url: str, service_role_key: str, access_token: str) -> CurrentUser | None:
+  22:     """None for an invalid/expired token; raises for a genuine network/service failure."""
+  23:     req = urllib.request.Request(
+  24:         f"{supabase_url}/auth/v1/user",
+  25:         headers={"apikey": service_role_key, "Authorization": f"Bearer {access_token}"},
+  26:     )
+  27:     try:
+  28:         with urllib.request.urlopen(req, timeout=_TIMEOUT_SECONDS) as r:  # noqa: S310 (fixed https host from settings)
+  29:             body = json.loads(r.read())
+  30:     except urllib.error.HTTPError as exc:
+  31:         if exc.code in (401, 403):
+  32:             return None
+  33:         raise
+  34:     user_id = body.get("id") if isinstance(body, dict) else None
+  35:     if not user_id:
+  36:         return None
+  37:     return CurrentUser(id=str(user_id), email=str(body.get("email", "")))
+  38: 
+  39: 
+  40: def get_current_user(request: Request, authorization: str | None = Header(default=None)) -> CurrentUser | None:
+  41:     """None for an anonymous request (no/non-bearer header). An invalid/expired token raises 401
+  42:     rather than silently degrading to anonymous, so a broken session is visible in the UI
+  43:     instead of silently losing history."""
+  44:     if not authorization:
+  45:         return None
+  46:     scheme, _, token = authorization.partition(" ")
+  47:     if scheme.lower() != "bearer" or not token.strip():
+  48:         return None
+  49:     settings = request.app.state.settings
+  50:     if not settings.supabase_url or not settings.supabase_service_role_key:
+  51:         raise HTTPException(503, "Accounts are not configured on this server")
+  52:     try:
+  53:         user = _lookup_user(settings.supabase_url, settings.supabase_service_role_key, token.strip())
+  54:     except Exception:
+  55:         raise HTTPException(503, "Could not verify your session; please try again shortly")
+  56:     if user is None:
+  57:         raise HTTPException(401, "Your session has expired; please log in again")
+  58:     return user
+--- services/history/store.py
+   1: """Supabase-backed scan history: direct PostgREST calls with the service-role key (no SDK,
+   2: matching services/analysis/reputation/safe_browsing.py's urllib style).
+   3: 
+   4: RLS on scan_history restricts select/delete to the owning user as a second line of defense;
+   5: every query here additionally filters by user_id explicitly, so a server-side bug in the RLS
+   6: policy is not the only thing standing between one user's history and another's."""
+   7: from __future__ import annotations
+   8: 
+   9: import json
+  10: import logging
+  11: import urllib.error
+  12: import urllib.request
+  13: from typing import Any
+  14: 
+  15: _log = logging.getLogger("trustshield.history")
+  16: _TIMEOUT_SECONDS = 5
+  17: _SUMMARY_MAX_CHARS = 120
+  18: 
+  19: 
+  20: def summarize(raw: str) -> str:
+  21:     text = " ".join(raw.split())
+  22:     if len(text) <= _SUMMARY_MAX_CHARS:
+  23:         return text
+  24:     return text[:_SUMMARY_MAX_CHARS] + "â€¦"
+  25: 
+  26: 
+  27: def _headers(service_role_key: str, *, want_representation: bool) -> dict[str, str]:
+  28:     headers = {
+  29:         "apikey": service_role_key,
+  30:         "Authorization": f"Bearer {service_role_key}",
+  31:         "Content-Type": "application/json",
+  32:     }
+  33:     if want_representation:
+  34:         headers["Prefer"] = "return=representation"
+  35:     return headers
+  36: 
+  37: 
+  38: def _request(method: str, url: str, service_role_key: str, *, body: dict | None = None,
+  39:              params: str = "") -> Any:
+  40:     data = json.dumps(body).encode() if body is not None else None
+  41:     req = urllib.request.Request(
+  42:         url + params, data=data, method=method,
+  43:         headers=_headers(service_role_key, want_representation=method in ("POST", "DELETE")),
+  44:     )
+  45:     with urllib.request.urlopen(req, timeout=_TIMEOUT_SECONDS) as r:  # noqa: S310 (fixed https host from settings)
+  46:         raw = r.read()
+  47:         return json.loads(raw) if raw else None
+  48: 
+  49: 
+  50: def save(supabase_url: str, service_role_key: str, *, user_id: str, input_type: str,
+  51:          input_summary: str, risk_score: int, risk_label: str, result_json: dict) -> None:
+  52:     """Best-effort write; failures are logged and never raised (history must not break analysis)."""
+  53:     try:
+  54:         _request("POST", f"{supabase_url}/rest/v1/scan_history", service_role_key, body={
+  55:             "user_id": user_id, "input_type": input_type, "input_summary": input_summary,
+  56:             "risk_score": risk_score, "risk_label": risk_label, "result_json": result_json,
+  57:         })
+  58:     except Exception as exc:
+  59:         _log.warning(json.dumps({"event": "history_write_failed", "error_type": type(exc).__name__}))
+  60: 
+  61: 
+  62: def list_for_user(supabase_url: str, service_role_key: str, *, user_id: str, limit: int = 50) -> list[dict]:
+  63:     params = f"?user_id=eq.{user_id}&order=created_at.desc&limit={limit}"
+  64:     result = _request("GET", f"{supabase_url}/rest/v1/scan_history", service_role_key, params=params)
+  65:     return result if isinstance(result, list) else []
+  66: 
+  67: 
+  68: def delete_for_user(supabase_url: str, service_role_key: str, *, user_id: str, row_id: str) -> bool:
+  69:     """Deletes only if row_id belongs to user_id (filtered in the query, not just by RLS)."""
+  70:     params = f"?id=eq.{row_id}&user_id=eq.{user_id}"
+  71:     result = _request("DELETE", f"{supabase_url}/rest/v1/scan_history", service_role_key, params=params)
+  72:     return bool(result)
+  73: 
+  74: 
+  75: def delete_all_for_user(supabase_url: str, service_role_key: str, *, user_id: str) -> None:
+  76:     params = f"?user_id=eq.{user_id}"
+  77:     _request("DELETE", f"{supabase_url}/rest/v1/scan_history", service_role_key, params=params)
+--- services/api/main.py
+   1: """TrustShield AI API. Run: uvicorn services.api.main:app  (configuration comes from the environment; see .env.example)"""
+   2: from __future__ import annotations
+   3: 
+   4: import asyncio
+   5: import json
+   6: import time
+   7: import logging
+   8: import math
+   9: import os
+  10: import re
+  11: import sys
+  12: from contextlib import asynccontextmanager
+  13: 
+  14: from typing import Literal
+  15: 
+  16: from fastapi import APIRouter, Depends, FastAPI, File, Form, HTTPException, Request, Response, UploadFile
+  17: from fastapi.exceptions import RequestValidationError
+  18: from fastapi.middleware.cors import CORSMiddleware
+  19: from fastapi.responses import StreamingResponse
+  20: from fastapi.responses import JSONResponse
+  21: from pydantic import BaseModel, Field
+  22: from starlette.concurrency import run_in_threadpool
+  23: 
+  24: from services.analysis import pipeline as analysis_pipeline
+  25: from services.analysis.extractors.image_validation import ImageRejected, max_upload_size
+  26: from services.analysis.extractors.ocr import get_ocr_provider
+  27: from services.analysis.fusion.result import SCHEMA_VERSION, AnalysisResult, ModuleResult
+  28: from services.analysis.normalization.text import InvalidInput
+  29: from services.analysis.pipeline import analyze_image, analyze_qr, analyze_text, analyze_url
+  30: 
+  31: from services.chat.contract import ChatAnalysis, to_contract
+  32: from services.chat import agent
+  33: from services.chat.explain import DeterministicExplanationProvider, Reply, followup_intent, get_provider
+  34: 
+  35: _log = logging.getLogger("trustshield.api")
+  36: from services.analysis.normalization.text import extract_urls
+  37: from services.chat.intent import classify_intent, has_action_or_object_risk, has_suspicious_signal, is_question_or_task
+  38: from services.chat.orchestrator import analyze_turn
+  39: from services.chat.router import MAX_MESSAGE_CHARS, route
+  40: from services.chat.signing import sign, verify
+  41: 
+  42: from .auth import CurrentUser, get_current_user
+  43: from .security import BodyLimitMiddleware, ObservabilityMiddleware, RateLimiter, ResultStore, client_key, event_log
+  44: from .settings import Settings
+  45: from .startup import startup_problems
+  46: from services.history import store as history_store
+  47: 
+  48: router = APIRouter()
+  49: 
+  50: 
+  51: class TextIn(BaseModel):
+  52:     text: str = Field(max_length=20_000)
+  53: 
+  54: 
+  55: class UrlIn(BaseModel):
+  56:     url: str = Field(max_length=2048)
+  57: 
+  58: 
+  59: # ---- per-request helpers -------------------------------------------------------------------------------------------
+  60: 
+  61: def _state(request: Request):
+  62:     return request.app.state
+  63: 
+  64: 
+  65: def _client(request: Request) -> str:
+  66:     hops = _state(request).settings.trusted_proxy_hops
+  67:     return client_key((request.client.host, request.client.port) if request.client else None,
+  68:                       request.headers.get("x-forwarded-for"), hops)
+  69: 
+  70: 
+  71: def _limit(limiter_name: str):
+  72:     def dependency(request: Request) -> None:
+  73:         allowed, retry = getattr(_state(request), limiter_name).allow(_client(request))
+  74:         if not allowed:
+  75:             raise HTTPException(429, "Too many requests; please slow down and retry shortly",
+  76:                                 headers={"Retry-After": str(max(1, math.ceil(retry)))})
+  77:     return dependency
+  78: 
+  79: 
+  80: limit_light = _limit("limit_light")
+  81: limit_heavy = _limit("limit_heavy")
+  82: 
+  83: 
+  84: def _publish(request: Request, response: Response, result: AnalysisResult, *, retain: bool = False) -> AnalysisResult:
+  85:     """Attach the analysis id, log module problems (never content), and store only if policy requires it."""
+  86:     response.headers["X-Analysis-ID"] = result.analysis_id
+  87:     request_id = getattr(request.state, "request_id", None)
+  88:     for name, module in result.modules.items():
+  89:         status = module.status
+  90:         if status in {"failed", "timeout"} or (name in {"ml", "ocr", "qr"} and status == "unavailable"):
+  91:             event = "ml_unavailable" if name == "ml" else "ocr_failure" if name == "ocr" else "module_failure"
+  92:             event_log.warning(json.dumps({"event": event, "request_id": request_id, "analysis_id": result.analysis_id,
+  93:                                           "module": name, "status": status}))
+  94:     _state(request).store.put(result, retain=retain)
+  95:     return result
+  96: 
+  97: 
+  98: def _record_history(request: Request, user: CurrentUser | None, result: AnalysisResult, raw_text: str) -> None:
+  99:     if user is None:
+ 100:         return
+ 101:     settings = _state(request).settings
+ 102:     if not settings.supabase_url or not settings.supabase_service_role_key:
+ 103:         return
+ 104:     history_store.save(
+ 105:         settings.supabase_url, settings.supabase_service_role_key,
+ 106:         user_id=user.id, input_type=result.input_type,
+ 107:         input_summary=history_store.summarize(raw_text),
+ 108:         risk_score=result.risk.score, risk_label=result.risk.label,
+ 109:         result_json=result.model_dump(mode="json"),
+ 110:     )
+ 111: 
+ 112: 
+ 113: async def run_heavy(request: Request, func, *args):
+ 114:     """CPU-heavy work (OCR/QR): bounded concurrency, queue timeout, overall timeout, off the event loop."""
+ 115:     state = _state(request)
+ 116:     try:
+ 117:         await asyncio.wait_for(state.heavy_gate.acquire(), state.settings.heavy_queue_timeout_s)
+ 118:     except asyncio.TimeoutError:
+ 119:         raise HTTPException(503, "The server is busy analysing other uploads; please retry shortly", headers={"Retry-After": "5"})
+ 120:     try:
+ 121:         return await asyncio.wait_for(run_in_threadpool(func, *args), state.settings.request_timeout_s)
+ 122:     except asyncio.TimeoutError:
+ 123:         raise HTTPException(504, "The analysis took too long and was stopped")
+ 124:     finally:
+ 125:         state.heavy_gate.release()
+ 126: 
+ 127: 
+ 128: # ---- health --------------------------------------------------------------------------------------------------------
+ 129: 
+ 130: @router.get("/api/v1/health")
+ 131: def health():
+ 132:     ocr = get_ocr_provider()
+ 133:     if __import__("os").getenv("TRUSTSHIELD_ML", "on").strip().lower() == "off":
+ 134:         ml = {"available": False, "reason": "disabled_by_env", "model_name": None, "model_version": None}
+ 135:     else:
+ 136:         classifier = analysis_pipeline._text_classifier()
+ 137:         ml = {"available": classifier.available, "model_name": classifier.model_name,
+ 138:               "model_version": classifier.metadata.get("model_version") if classifier.available else None}
+ 139:         if not classifier.available:
+ 140:             ml["reason"] = getattr(classifier, "reason", "unavailable")
+ 141:     return {"status": "ok", "schema_version": SCHEMA_VERSION, "modules": {
+ 142:         "text": True, "url_static": True,
+ 143:         "ml": ml,
+ 144:         "ocr": {"available": ocr.is_available(), "provider": ocr.name},
+ 145:         "qr": True,
+ 146:     }}
+ 147: 
+ 148: 
+ 149: @router.get("/healthz", include_in_schema=False)
+ 150: @router.get("/api/v1/healthz", include_in_schema=False)
+ 151: def liveness():
+ 152:     return {"status": "alive"}
+ 153: 
+ 154: 
+ 155: @router.get("/readyz", include_in_schema=False)
+ 156: @router.get("/api/v1/readyz", include_in_schema=False)
+ 157: def readiness(response: Response):
+ 158:     reasons: list[str] = []
+ 159:     classifier = analysis_pipeline._text_classifier()
+ 160:     if not classifier.available:
+ 161:         reasons.append("ml_unavailable")
+ 162:     if not get_ocr_provider().is_available():
+ 163:         reasons.append("ocr_unavailable")
+ 164:     if reasons:
+ 165:         response.status_code = 503
+ 166:     return {"ready": not reasons, "reasons": reasons}
+ 167: 
+ 168: 
+ 169: # ---- analysis endpoints --------------------------------------------------------------------------------------------
+ 170: 
+ 171: @router.post("/api/v1/analyze/text", response_model=AnalysisResult, dependencies=[Depends(limit_light)])
+ 172: def analyze_text_endpoint(body: TextIn, request: Request, response: Response,
+ 173:                            user: CurrentUser | None = Depends(get_current_user)):
+ 174:     try:
+ 175:         result = _publish(request, response, analyze_text(body.text))
+ 176:     except InvalidInput as e:
+ 177:         raise HTTPException(422, str(e))
+ 178:     _record_history(request, user, result, body.text)
+ 179:     return result
+ 180: 
+ 181: 
+ 182: @router.post("/api/v1/analyze/url", response_model=AnalysisResult, dependencies=[Depends(limit_light)])
+ 183: def analyze_url_endpoint(body: UrlIn, request: Request, response: Response,
+ 184:                           user: CurrentUser | None = Depends(get_current_user)):
+ 185:     result = _publish(request, response, analyze_url(body.url))
+ 186:     _record_history(request, user, result, body.url)
+ 187:     return result
+ 188: 
+ 189: 
+ 190: def _image_error(exc: ImageRejected) -> HTTPException:
+ 191:     return HTTPException(status_code=exc.status_code, detail=exc.message)
+ 192: 
+ 193: 
+ 194: async def _upload_endpoint(request: Request, response: Response, file: UploadFile, func,
+ 195:                             user: CurrentUser | None, label: str) -> AnalysisResult:
+ 196:     try:
+ 197:         data = await file.read(max_upload_size() + 1)  # the extra byte detects oversize input without unbounded reads
+ 198:         result = _publish(request, response, await run_heavy(request, func, data, file.content_type, file.filename))
+ 199:         _record_history(request, user, result, f"{label} ({result.risk.label})")
+ 200:         return result
+ 201:     except ImageRejected as exc:
+ 202:         raise _image_error(exc)
+ 203:     except InvalidInput as exc:
+ 204:         raise HTTPException(422, str(exc))
+ 205:     finally:
+ 206:         await file.close()
+ 207: 
+ 208: 
+ 209: @router.post("/api/v1/analyze/image", response_model=AnalysisResult, dependencies=[Depends(limit_heavy)])
+ 210: async def analyze_image_endpoint(request: Request, response: Response, file: UploadFile = File(...),
+ 211:                                   user: CurrentUser | None = Depends(get_current_user)):
+ 212:     return await _upload_endpoint(request, response, file, analyze_image, user, "Screenshot scan")
+ 213: 
+ 214: 
+ 215: @router.post("/api/v1/analyze/qr", response_model=AnalysisResult, dependencies=[Depends(limit_heavy)])
+ 216: async def analyze_qr_endpoint(request: Request, response: Response, file: UploadFile = File(...),
+ 217:                                user: CurrentUser | None = Depends(get_current_user)):
+ 218:     return await _upload_endpoint(request, response, file, analyze_qr, user, "QR code scan")
+ 219: 
+ 220: 
+ 221: @router.get("/api/v1/analysis/{analysis_id}", response_model=AnalysisResult, dependencies=[Depends(limit_light)])
+ 222: def get_analysis(analysis_id: str, request: Request):
+ 223:     result = _state(request).store.get(analysis_id)
+ 224:     if result is None:
+ 225:         raise HTTPException(404, "analysis not found (results are short-lived and not kept after a restart)")
+ 226:     return result
+ 227: 
+ 228: 
+ 229: # ---- history (requires login; anonymous scanning is unaffected) -----------------------------------------------------
+ 230: 
+ 231: def _history_configured(request: Request) -> tuple[str, str]:
+ 232:     settings = _state(request).settings
+ 233:     if not settings.supabase_url or not settings.supabase_service_role_key:
+ 234:         raise HTTPException(503, "History is not configured on this server")
+ 235:     return settings.supabase_url, settings.supabase_service_role_key
+ 236: 
+ 237: 
+ 238: @router.get("/api/v1/history", dependencies=[Depends(limit_light)])
+ 239: def list_history(request: Request, user: CurrentUser | None = Depends(get_current_user)):
+ 240:     if user is None:
+ 241:         raise HTTPException(401, "Log in to view your scan history")
+ 242:     url, key = _history_configured(request)
+ 243:     return history_store.list_for_user(url, key, user_id=user.id)
+ 244: 
+ 245: 
+ 246: @router.delete("/api/v1/history/{row_id}", dependencies=[Depends(limit_light)])
+ 247: def delete_history_row(row_id: str, request: Request, user: CurrentUser | None = Depends(get_current_user)):
+ 248:     if user is None:
+ 249:         raise HTTPException(401, "Log in to manage your scan history")
+ 250:     url, key = _history_configured(request)
+ 251:     if not history_store.delete_for_user(url, key, user_id=user.id, row_id=row_id):
+ 252:         raise HTTPException(404, "History entry not found")
+ 253:     return {"deleted": row_id}
+ 254: 
+ 255: 
+ 256: @router.delete("/api/v1/history", dependencies=[Depends(limit_light)])
+ 257: def delete_all_history(request: Request, user: CurrentUser | None = Depends(get_current_user)):
+ 258:     if user is None:
+ 259:         raise HTTPException(401, "Log in to manage your scan history")
+ 260:     url, key = _history_configured(request)
+ 261:     history_store.delete_all_for_user(url, key, user_id=user.id)
+ 262:     return {"deleted": "all"}
+ 263: 
+ 264: 
+ 265: # ---- conversational API (v1 endpoints above are unchanged) ----------------------------------------------------------------------
+ 266: 
+ 267: class Turn(BaseModel):
+ 268:     role: Literal["user", "assistant"]
+ 269:     text: str = Field(max_length=2000)
+ 270: 
+ 271: 
+ 272: class ChatIn(BaseModel):
+ 273:     message: str = Field(default="", max_length=MAX_MESSAGE_CHARS)
+ 274:     context: ChatAnalysis | None = None  # the previous analysis, sent back by the browser (the server stores no conversation)
+ 275:     context_signature: str = Field(default="", max_length=128)
+ 276:     history: list[Turn] = Field(default_factory=list, max_length=6)
+ 277: 
+ 278: 
+ 279: class ReplyOut(BaseModel):
+ 280:     text: str
+ 281:     cited_evidence: list[str] = Field(default_factory=list)
+ 282:     provider: str
+ 283:     grounded: bool = True
+ 284: 
+ 285: 
+ 286: ResponseType = Literal["chat", "analysis", "follow_up", "education", "product_info"]
+ 287: 
+ 288: 
+ 289: class ChatOut(BaseModel):
+ 290:     kind: Literal["analysis", "followup", "chat"]  # kept for compatibility; response_type is the richer field
+ 291:     response_type: ResponseType
+ 292:     intent: dict
+ 293:     route: dict = Field(default_factory=dict)
+ 294:     reply: ReplyOut
+ 295:     analysis: ChatAnalysis | None = None
+ 296:     context_signature: str | None = None
+ 297: 
+ 298: 
+ 299: def _reply_out(reply: Reply) -> ReplyOut:
+ 300:     return ReplyOut(text=reply.text, cited_evidence=reply.cited_evidence[:10], provider=reply.provider, grounded=reply.grounded)
+ 301: 
+ 302: 
+ 303: # Intents handled without ever touching the analysis pipeline: this is the fix for the "yo" -> "Low Risk 0/100" bug. Analysis
+ 304: # always wins when there is a URL, an attachment, or unmatched content (see services/chat/intent.py's priority order).
+ 305: _CHAT_ONLY_REPLY = {
+ 306:     "greeting": ("chat", "reply_greeting"), "assistant_qa": ("chat", "reply_greeting"), "off_topic": ("chat", "reply_off_topic"),
+ 307:     "general_cyber_qa": ("education", "reply_cyber_qa"), "product_qa": ("product_info", "reply_product_qa"),
+ 308:     "general_chat": ("chat", "reply_chat"),
+ 309: }
+ 310: 
+ 311: 
+ 312: 
+ 313: def _refine_with_model(intent_result, message: str, has_image: bool):
+ 314:     """Model decides only the uncertain cases: plain text with soft risk words and no strong scam signal. Strong signals,
+ 315:     links and attachments keep the rule decision. The model may move a question or task to chat, never a pasted message."""
+ 316:     from services.chat.intent import has_suspicious_signal, has_transaction_signal, is_question_or_task
+ 317:     if (intent_result.intent != "analyze_text" or has_image or intent_result.urls or has_suspicious_signal(message)
+ 318:             or not agent.configured() or not is_question_or_task(message) or has_transaction_signal(message)):
+ 319:         return intent_result
+ 320:     verdict = agent.route_text(message)
+ 321:     if verdict == "chat":
+ 322:         from services.chat.intent import IntentResult
+ 323:         return IntentResult("general_chat", "model routing: a question or task, not content to check")
+ 324:     return intent_result
+ 325: 
+ 326: async def _agent_chat(request: Request, response: Response, message: str, history: list[Turn], intent_result) -> ChatOut | None:
+ 327:     """Model-led chat turn. Returns None when the model is unavailable or a reply fails a check."""
+ 328:     captured: dict = {}
+ 329: 
+ 330:     def scan(text: str) -> str:
+ 331:         plan = route(text, False, False, followup_intent)
+ 332:         try:
+ 333:             result, types = analyze_turn(text, None, plan)
+ 334:         except (InvalidInput, ImageRejected) as exc:
+ 335:             return json.dumps({"error": str(exc)[:200]})
+ 336:         analysis = to_contract(result, types, plan.urls)
+ 337:         captured.update(result=result, plan=plan, analysis=analysis)
+ 338:         return json.dumps(analysis.model_dump(mode="json"), default=str)[:6000]
+ 339: 
+ 340:     recent = [{"role": t.role, "text": t.text[:1500]} for t in history[-8:]]
+ 341:     agent_reply = await run_in_threadpool(agent.run, message, recent, scan)
+ 342:     if agent_reply is None:
+ 343:         return None
+ 344:     analysis = captured.get("analysis")
+ 345:     if not agent.reply_is_acceptable(agent_reply.text, analysis.risk_score if analysis is not None else None):
+ 346:         return None
+ 347:     if analysis is not None:
+ 348:         _publish(request, response, captured["result"])
+ 349:         return ChatOut(kind="analysis", response_type="analysis", intent=intent_result.public(), route=captured["plan"].public(),
+ 350:                        reply=ReplyOut(text=agent_reply.text, provider="nilabh", grounded=True), analysis=analysis,
+ 351:                        context_signature=sign(analysis))
+ 352:     response_type = _CHAT_ONLY_REPLY[intent_result.intent][0]
+ 353:     return ChatOut(kind="chat", response_type=response_type, intent=intent_result.public(),
+ 354:                    reply=ReplyOut(text=agent_reply.text, provider="nilabh", grounded=True))
+ 355: 
+ 356: 
+ 357: def _sse(event: dict) -> str:
+ 358:     return "data: " + json.dumps(event, default=str) + "\n\n"
+ 359: 
+ 360: 
+ 361: def _text_events(text: str):
+ 362:     """Deterministic text is sent as word-sized tokens so the client paints it the same way as a streamed model answer."""
+ 363:     for piece in re.findall(r"\S+\s*|\s+", text):
+ 364:         yield _sse({"type": "token", "text": piece})
+ 365: 
+ 366: 
+ 367: _UNAVAILABLE_TEXT = ("The language model isn't responding right now, so I can't answer that yet. "
+ 368:                      "Please send your message again in a moment.")
+ 369: _REJECTED_TEXT = "I couldn't give a reliable answer to that one. Could you ask it another way?"
+ 370: 
+ 371: 
+ 372: _CONVERSATIONAL_REFERENCE = re.compile(
+ 373:     r"\b(this|that|it)\s+(is\s+|was\s+)?(a\s+|an\s+|about\s+|the\s+|related\s+|same\s+|another\s+)*"
+ 374:     r"(question|topic|thing|one|subject|answer|reply|point|query)\b", re.I)
+ 375: 
+ 376: 
+ 377: def _may_scan(message: str) -> bool:
+ 378:     """The scanner is for content the user shares: a link, a fraud or payment signal, or a passage of text. A question, a
+ 379:     request, or a remark about an earlier reply ("but this is a related question") is never scanned."""
+ 380:     if extract_urls(message):
+ 381:         return True
+ 382:     words = len(message.split())
+ 383:     if has_suspicious_signal(message) or has_action_or_object_risk(message):
+ 384:         return not is_question_or_task(message) or words >= 12
+ 385:     if is_question_or_task(message) or _CONVERSATIONAL_REFERENCE.search(message):
+ 386:         return False
+ 387:     return words >= 4
+ 388: 
+ 389: 
+ 390: def _make_scan(message: str, captured: dict):
+ 391:     """The tool the model can call. It refuses anything that is not content the user shared, and records the analysis."""
+ 392:     def scan(text: str) -> str:
+ 393:         if not _may_scan(message):
+ 394:             return json.dumps({"error": "the user asked a question or replied; answer it directly, do not scan"})
+ 395:         plan = route(text, False, False, followup_intent)
+ 396:         try:
+ 397:             result, types = analyze_turn(text, None, plan)
+ 398:         except (InvalidInput, ImageRejected) as exc:
+ 399:             return json.dumps({"error": str(exc)[:200]})
+ 400:         analysis = to_contract(result, types, plan.urls)
+ 401:         captured.update(result=result, plan=plan, analysis=analysis)
+ 402:         return json.dumps(analysis.model_dump(mode="json"), default=str)[:6000]
+ 403:     return scan
+ 404: 
+ 405: 
+ 406: def _analysis_event(captured: dict) -> str:
+ 407:     a = captured["analysis"]
+ 408:     return _sse({"type": "analysis", "analysis": a.model_dump(mode="json"), "signature": sign(a),
+ 409:                  "route": captured["plan"].public(), "response_type": "analysis"})
+ 410: 
+ 411: 
+ 412: def _explain_analysis_events(message: str, analysis):
+ 413:     """The model explains a scanner result (it cannot change it). If the explanation fails a check, the template explanation is shown."""
+ 414:     final_text = ""
+ 415:     if agent.configured():
+ 416:         try:
+ 417:             for kind, payload in agent.stream_explain(message, analysis.model_dump_json()):
+ 418:                 if kind == "token":
+ 419:                     yield _sse({"type": "token", "text": payload})
+ 420:                 elif kind == "final":
+ 421:                     final_text = payload
+ 422:         except Exception:  # model unavailable: the template explanation below is used
+ 423:             final_text = ""
+ 424:     if not (final_text and agent.reply_is_acceptable(final_text, analysis.risk_score, explanation=True)):
+ 425:         yield _sse({"type": "replace", "text": DeterministicExplanationProvider().reply_for_analysis(analysis).text})
+ 426: 
+ 427: 
+ 428: def _model_events(message: str, recent: list[dict], captured: dict, scan):
+ 429:     """Every message goes to the model first. The model answers, and calls the scanner only when agent.stream_turn decides the
+ 430:     user shared content. A failure before any text is shown is retried once. If the model is still down, shared content is
+ 431:     still scanned directly, so a real scam is never left unchecked."""
+ 432:     if not agent.configured():
+ 433:         yield _sse({"type": "replace", "text": _UNAVAILABLE_TEXT})
+ 434:         return
+ 435:     final_text = ""
+ 436:     for attempt in range(3):
+ 437:         shown = False
+ 438:         final_text = ""
+ 439:         ok = False
+ 440:         if attempt:
+ 441:             time.sleep(1.5 * attempt)  # the model host sheds load with 503s; a short pause usually clears it
+ 442:         try:
+ 443:             for kind, payload in agent.stream_turn(message, recent, scan):
+ 444:                 if kind == "token":
+ 445:                     shown = True
+ 446:                     yield _sse({"type": "token", "text": payload})
+ 447:                 elif kind == "reset":
+ 448:                     shown = False
+ 449:                     yield _sse({"type": "reset"})
+ 450:                 elif kind == "scanned" and captured.get("analysis") is not None:
+ 451:                     yield _analysis_event(captured)
+ 452:                 elif kind == "final":
+ 453:                     final_text = payload
+ 454:             # An empty reply (a failed call) is never accepted, so the loop retries it.
+ 455:             ok = captured.get("analysis") is not None or (bool(final_text) and agent.reply_is_acceptable(final_text, None, explanation=True))
+ 456:         except Exception:  # network, timeout or malformed response from the model
+ 457:             final_text = ""
+ 458:         if ok or captured.get("analysis") is not None:
+ 459:             break
+ 460:         # A reply that failed the check (or a failed connection) is retried once, with the earlier text cleared first.
+ 461:         if attempt < 2 and (shown or final_text):
+ 462:             yield _sse({"type": "reset"})
+ 463:     analysis = captured.get("analysis")
+ 464:     if analysis is not None:
+ 465:         if not (final_text and agent.reply_is_acceptable(final_text, analysis.risk_score, explanation=True)):
+ 466:             yield _sse({"type": "replace", "text": DeterministicExplanationProvider().reply_for_analysis(analysis).text})
+ 467:     elif final_text:
+ 468:         if not agent.reply_is_acceptable(final_text, None, explanation=True):
+ 469:             yield _sse({"type": "replace", "text": _REJECTED_TEXT})
+ 470:     elif _may_scan(message) and (has_suspicious_signal(message) or has_action_or_object_risk(message) or extract_urls(message)):
+ 471:         scan(message)  # the model is down: a message with scam signals is still analysed directly
+ 472:         if captured.get("analysis") is not None:
+ 473:             yield _analysis_event(captured)
+ 474:             yield _sse({"type": "replace", "text": DeterministicExplanationProvider().reply_for_analysis(captured["analysis"]).text})
+ 475:         else:
+ 476:             yield _sse({"type": "replace", "text": _UNAVAILABLE_TEXT})
+ 477:     else:
+ 478:         yield _sse({"type": "replace", "text": _UNAVAILABLE_TEXT})
+ 479: 
+ 480: 
+ 481: def _stream_chat_events(message: str, history: list[Turn], context: ChatAnalysis | None, signature: str):
+ 482:     try:
+ 483:         if sum(len(t.text) for t in history) > 12_000:
+ 484:             yield _sse({"type": "error", "detail": "conversation context is too large; start a new chat"})
+ 485:             return
+ 486:         if context is not None and not verify(context, signature):
+ 487:             context = None
+ 488:         provider = get_provider()
+ 489:         recent = [{"role": t.role, "text": t.text[:1500]} for t in history[-8:]]
+ 490:         intent_result = classify_intent(message, False, context is not None, followup_intent)
+ 491:         if intent_result.intent == "empty":
+ 492:             yield _sse({"type": "error", "detail": "Send a message, link, screenshot or QR code to analyse."})
+ 493:             return
+ 494:         meta = intent_result.public()
+ 495: 
+ 496:         # Every message goes to the model first; it decides whether to call the scanner (see _model_events and _may_scan).
+ 497:         response_type = _CHAT_ONLY_REPLY.get(intent_result.intent, ("chat", ""))[0]
+ 498:         yield _sse({"type": "meta", "kind": "chat", "response_type": response_type, "intent": meta})
+ 499:         captured: dict = {}
+ 500:         scan = _make_scan(message, captured)
+ 501:         # Content that carries a link or a scam signal is always scanned first (2026-10-07): the model must not be able to skip a link.
+ 502:         # The model then explains the result; the score is the scanner's.
+ 503:         if _may_scan(message) and (extract_urls(message) or has_suspicious_signal(message) or has_action_or_object_risk(message)):
+ 504:             scan(message)
+ 505:             if captured.get("analysis") is not None:
+ 506:                 yield _analysis_event(captured)
+ 507:                 yield from _explain_analysis_events(message, captured["analysis"])
+ 508:                 yield _sse({"type": "done"})
+ 509:                 return
+ 510:         yield from _model_events(message, recent, captured, scan)
+ 511:         yield _sse({"type": "done"})
+ 512:     except (InvalidInput, ImageRejected) as exc:
+ 513:         yield _sse({"type": "error", "detail": str(exc)[:300]})
+ 514:     except Exception:
+ 515:         _log.exception("chat stream failed")
+ 516:         yield _sse({"type": "error", "detail": "Something went wrong. Please try again."})
+ 517: 
+ 518: 
+ 519: @router.post("/api/v1/chat/stream", dependencies=[Depends(limit_light)])
+ 520: async def chat_stream_endpoint(body: ChatIn):
+ 521:     return StreamingResponse(_stream_chat_events(body.message, body.history, body.context, body.context_signature),
+ 522:                              media_type="text/event-stream", headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+ 523: 
+ 524: 
+ 525: async def _chat_turn(request: Request, response: Response, message: str, context: ChatAnalysis | None, signature: str, history: list[Turn],
+ 526:                      image: tuple[bytes, str | None, str | None] | None) -> ChatOut:
+ 527:     if sum(len(t.text) for t in history) > 12_000:
+ 528:         raise HTTPException(422, "conversation context is too large; start a new chat")
+ 529:     if context is not None and not verify(context, signature):
+ 530:         context = None  # unsigned or altered context is never trusted
+ 531:     provider = get_provider()
+ 532:     intent_result = classify_intent(message, image is not None, context is not None, followup_intent)
+ 533:     if intent_result.intent == "empty":
+ 534:         raise HTTPException(422, "Send a message, link, screenshot or QR code to analyse.")
+ 535: 
+ 536:     if intent_result.intent in _CHAT_ONLY_REPLY and agent.configured():
+ 537:         # The model is the chat assistant and may call the scanner. Any failed check falls through to the deterministic path.
+ 538:         outcome = await _agent_chat(request, response, message, history, intent_result)
+ 539:         if outcome is not None:
+ 540:             return outcome
+ 541: 
+ 542:     if intent_result.intent in _CHAT_ONLY_REPLY:
+ 543:         response_type, method_name = _CHAT_ONLY_REPLY[intent_result.intent]
+ 544:         method = getattr(provider, method_name)
+ 545:         # Every chat-only handler takes the recent turns, so follow-ups and general questions see the conversation.
+ 546:         trimmed = [{"role": t.role, "text": t.text[:1500]} for t in history[-6:]]
+ 547:         reply = await run_in_threadpool(method, message, trimmed)
+ 548:         return ChatOut(kind="chat", response_type=response_type, intent=intent_result.public(), reply=_reply_out(reply))
+ 549: 
+ 550:     if intent_result.intent == "follow_up_analysis":
+ 551:         assert context is not None and intent_result.followup_intent is not None
+ 552:         reply = await run_in_threadpool(provider.reply_for_followup, intent_result.followup_intent, message, context)
+ 553:         return ChatOut(kind="followup", response_type="follow_up", intent=intent_result.public(), reply=_reply_out(reply))
+ 554: 
+ 555:     plan = route(message, image is not None, False, followup_intent)  # follow-up already ruled out above; this call only
+ 556:     # selects which pipeline modules to run (url/text/image) for a message intent classification has already decided to analyse
+ 557:     try:
+ 558:         if image is not None:
+ 559:             result, types = await run_heavy(request, analyze_turn, message, image, plan)
+ 560:         else:
+ 561:             result, types = await run_in_threadpool(analyze_turn, message, None, plan)
+ 562:     except ImageRejected as exc:
+ 563:         raise _image_error(exc)
+ 564:     except InvalidInput as exc:
+ 565:         raise HTTPException(422, str(exc))
+ 566:     analysis = to_contract(result, types, plan.urls)
+ 567:     if image is None and intent_result.intent == "analyze_text" and agent.configured():
+ 568:         # The model reads through spelling mistakes. The scanner checks the corrected text too; the higher risk wins.
+ 569:         corrected = await run_in_threadpool(agent.correct_spelling, message)
+ 570:         if corrected:
+ 571:             plan2 = route(corrected, False, False, followup_intent)
+ 572:             try:
+ 573:                 result2, types2 = await run_in_threadpool(analyze_turn, corrected, None, plan2)
+ 574:             except (InvalidInput, ImageRejected):
+ 575:                 result2 = None
+ 576:             if result2 is not None:
+ 577:                 analysis2 = to_contract(result2, types2, plan2.urls)
+ 578:                 if analysis2.risk_score > analysis.risk_score:
+ 579:                     result, plan, analysis = result2, plan2, analysis2
+ 580:     _publish(request, response, result)
+ 581:     if agent.configured() and message.strip() and analysis.risk_level != "unable_to_verify":
+ 582:         text = await run_in_threadpool(agent.explain, message, analysis.model_dump_json(), analysis.risk_score)
+ 583:         if text:
+ 584:             return ChatOut(kind="analysis", response_type="analysis", intent=intent_result.public(), route=plan.public(),
+ 585:                            reply=ReplyOut(text=text, provider="nilabh", grounded=True), analysis=analysis,
+ 586:                            context_signature=sign(analysis))
+ 587:     reply = await run_in_threadpool(provider.reply_for_analysis, analysis)
+ 588:     return ChatOut(kind="analysis", response_type="analysis", intent=intent_result.public(), route=plan.public(),
+ 589:                    reply=_reply_out(reply), analysis=analysis, context_signature=sign(analysis))
+ 590: 
+ 591: 
+ 592: @router.post("/api/v1/chat", response_model=ChatOut, dependencies=[Depends(limit_light)])
+ 593: async def chat_endpoint(body: ChatIn, request: Request, response: Response):
+ 594:     return await _chat_turn(request, response, body.message, body.context, body.context_signature, body.history, None)
+ 595: 
+ 596: 
+ 597: @router.post("/api/v1/chat/upload", response_model=ChatOut, dependencies=[Depends(limit_heavy)])
+ 598: async def chat_upload_endpoint(request: Request, response: Response, file: UploadFile = File(...),
+ 599:                                message: str = Form(default="", max_length=MAX_MESSAGE_CHARS), context: str = Form(default="", max_length=60_000),
+ 600:                                context_signature: str = Form(default="", max_length=128), history: str = Form(default="[]", max_length=16_000)):
+ 601:     try:
+ 602:         parsed = ChatAnalysis.model_validate_json(context) if context.strip() else None
+ 603:     except ValueError:
+ 604:         raise HTTPException(422, "invalid conversation context")
+ 605:     try:
+ 606:         turns = [Turn.model_validate(t) for t in json.loads(history)] if history.strip() else []
+ 607:     except (ValueError, TypeError):
+ 608:         raise HTTPException(422, "invalid conversation history")
+ 609:     try:
+ 610:         data = await file.read(max_upload_size() + 1)
+ 611:         return await _chat_turn(request, response, message, parsed, context_signature, turns, (data, file.content_type, file.filename))
+ 612:     finally:
+ 613:         await file.close()
+ 614: 
+ 615: 
+ 616: # ---- application factory -------------------------------------------------------------------------------------------
+ 617: 
+ 618: def _configure_logging() -> None:
+ 619:     for name in ("trustshield.access", "trustshield.events"):
+ 620:         logger = logging.getLogger(name)
+ 621:         if not logger.handlers:
+ 622:             handler = logging.StreamHandler(sys.stdout)
+ 623:             handler.setFormatter(logging.Formatter("%(message)s"))
+ 624:             logger.addHandler(handler)
+ 625:             logger.setLevel(logging.INFO)
+ 626:             logger.propagate = False
+ 627: 
+ 628: 
+ 629: def create_app(settings: Settings | None = None) -> FastAPI:
+ 630:     settings = settings or Settings.from_env()
+ 631:     _configure_logging()
+ 632: 
+ 633:     @asynccontextmanager
+ 634:     async def lifespan(app: FastAPI):
+ 635:         if settings.strict:
+ 636:             problems = startup_problems(settings)
+ 637:             if problems:
+ 638:                 for problem in problems:
+ 639:                     event_log.error(json.dumps({"event": "startup_check_failed", "problem": problem}))
+ 640:                 raise RuntimeError("startup checks failed: " + "; ".join(problems))
+ 641:         try:  # load the model at startup so the first request is not slow, and record if it is unavailable
+ 642:             classifier = analysis_pipeline._text_classifier()
+ 643:             if not classifier.available:
+ 644:                 event_log.error(json.dumps({"event": "ml_unavailable", "reason": getattr(classifier, "reason", "unavailable")}))
+ 645:         except Exception as exc:
+ 646:             event_log.error(json.dumps({"event": "ml_load_error", "error_type": type(exc).__name__}))
+ 647:         yield
+ 648: 
+ 649:     app = FastAPI(title="TrustShield AI", version="0.1.0", lifespan=lifespan,
+ 650:                   docs_url="/docs" if settings.docs_enabled else None, redoc_url=None,
+ 651:                   openapi_url="/openapi.json" if settings.docs_enabled else None)
+ 652:     app.state.settings = settings
+ 653:     app.state.store = ResultStore(settings)
+ 654:     app.state.limit_light = RateLimiter(settings.rate_light_per_min)
+ 655:     app.state.limit_heavy = RateLimiter(settings.rate_heavy_per_min)
+ 656:     app.state.heavy_gate = asyncio.Semaphore(settings.heavy_concurrency)
+ 657: 
+ 658:     @app.exception_handler(RequestValidationError)
+ 659:     async def validation_error(request: Request, exc: RequestValidationError):
+ 660:         # Default FastAPI echoes the submitted input back; return only where and why.
+ 661:         details = [{"loc": list(item.get("loc", [])), "msg": item.get("msg", "invalid"), "type": item.get("type", "invalid")}
+ 662:                    for item in exc.errors()]
+ 663:         return JSONResponse(status_code=422, content={"detail": details})
+ 664: 
+ 665:     app.include_router(router)
+ 666:     if os.getenv("TRUSTSHIELD_DEBUG_PROXY", "").strip() == "1":
+ 667:         # Temporary observation window only (scripts/observe_proxy_chain.py, scripts/stress_remote.py): peer address, forwarding
+ 668:         # headers and container memory counters. Never enabled in production (the production preflight fails if it is set).
+ 669:         def cgroup(name: str):
+ 670:             try:
+ 671:                 with open(f"/sys/fs/cgroup/{name}", encoding="utf-8") as handle:
+ 672:                     return handle.read().strip()
+ 673:             except OSError:
+ 674:                 return None
+ 675: 
+ 676:         @app.get("/api/v1/debug/proxy", include_in_schema=False)
+ 677:         def debug_proxy(request: Request):
+ 678:             return {"peer": request.client.host if request.client else None,
+ 679:                     "x_forwarded_for": request.headers.get("x-forwarded-for", ""),
+ 680:                     "x_forwarded_proto": request.headers.get("x-forwarded-proto", ""),
+ 681:                     "memory": {"current": cgroup("memory.current"), "peak": cgroup("memory.peak"), "max": cgroup("memory.max")}}
+ 682: 
+ 683:     app.add_middleware(BodyLimitMiddleware, max_bytes=settings.max_body_bytes)
+ 684:     app.add_middleware(ObservabilityMiddleware, settings=settings)
+ 685:     app.add_middleware(CORSMiddleware, allow_origins=list(settings.cors_origins), allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
+ 686:                        allow_headers=["Content-Type", "X-Request-ID", "Authorization"], expose_headers=["X-Request-ID", "X-Analysis-ID", "Retry-After"],
+ 687:                        max_age=600)
+ 688:     return app
+ 689: 
+ 690: 
+ 691: app = create_app()
+ 692: 
+ 693: 
+ 694: 
+--- docs/SUPABASE_SETUP.md
+   1: # Supabase setup (auth and scan history)
+   2: 
+   3: TrustShield uses one Supabase project for opt-in user accounts and the per-user scan history. It
+   4: is new infrastructure, added alongside the existing stateless analysis pipeline â€” anonymous
+   5: scanning is completely unaffected and nothing about detection/fusion changed.
+   6: 
+   7: ## IMPLEMENTED
+   8: 
+   9: ### Project
+  10: 
+  11: - Project name: `trustshield-ai`, organization `shubhsaxena2020's Org` (Free plan).
+  12: - Region: `ap-south-1` (South Asia, Mumbai) â€” closest available region to the team and most
+  13:   users.
+  14: - Project ref: `xssorflxyuanvkpukjon`. Project URL: `https://xssorflxyuanvkpukjon.supabase.co`.
+  15: - Created 2026-10-11 via browser automation (same approach used for the Google Safe Browsing key
+  16:   in an earlier session). The database password is recorded only in `.env`, never in this doc or
+  17:   in git.
+  18: - This project uses Supabase's current key format (`sb_publishable_...` /
+  19:   `sb_secret_...`) rather than the legacy JWT `anon`/`service_role` keys. Both formats work
+  20:   identically with the `apikey` + `Authorization: Bearer` header pattern used throughout
+  21:   `services/api/auth.py` and `services/history/store.py` â€” nothing in the app code assumes one
+  22:   format over the other.
+  23: 
+  24: ### Schema
+  25: 
+  26: One table, `scan_history`, created via the SQL editor:
+  27: 
+  28: ```sql
+  29: create table scan_history (
+  30:   id uuid primary key default gen_random_uuid(),
+  31:   user_id uuid not null references auth.users(id) on delete cascade,
+  32:   input_type text not null check (input_type in ('text', 'url', 'image', 'qr')),
+  33:   input_summary text not null,
+  34:   risk_score int not null,
+  35:   risk_label text not null,
+  36:   result_json jsonb not null,
+  37:   created_at timestamptz not null default now()
+  38: );
+  39: 
+  40: alter table scan_history enable row level security;
+  41: 
+  42: create policy "owner can select own history"
+  43:   on scan_history for select using (auth.uid() = user_id);
+  44: 
+  45: create policy "owner can delete own history"
+  46:   on scan_history for delete using (auth.uid() = user_id);
+  47: ```
+  48: 
+  49: No insert/update policy exists for the `anon`/`authenticated` roles: every write goes through the
+  50: backend's service-role (now secret-key) client, which bypasses RLS by design. RLS is the second
+  51: line of defense behind the backend's own `user_id` filtering, not the only one â€” see
+  52: `docs/AUTH_AND_HISTORY_ARCHITECTURE.md`.
+  53: 
+  54: ### Auth
+  55: 
+  56: Supabase Auth, email/password only (no OAuth providers configured) â€” opt-in accounts for history,
+  57: never a gate in front of scanning.
+  58: 
+  59: ### Environment variables
+  60: 
+  61: Backend (`.env`, git-ignored):
+  62: 
+  63: ```
+  64: SUPABASE_URL=https://xssorflxyuanvkpukjon.supabase.co
+  65: SUPABASE_SERVICE_ROLE_KEY=<the project's secret key>
+  66: ```
+  67: 
+  68: Frontend (`apps/web/.env.local`, git-ignored):
+  69: 
+  70: ```
+  71: NEXT_PUBLIC_SUPABASE_URL=https://xssorflxyuanvkpukjon.supabase.co
+  72: NEXT_PUBLIC_SUPABASE_ANON_KEY=<the project's publishable key>
+  73: ```
+  74: 
+  75: Both sets of actual secret values live only in the git-ignored env files, never in this
+  76: repository's tracked files.
+  77: 
+  78: ### Recreating this from scratch
+  79: 
+  80: 1. Create a new Supabase project (any region), note its URL and keys from Project Settings â†’
+  81:    API Keys.
+  82: 2. Run the schema SQL above in the SQL editor.
+  83: 3. Set the four environment variables above in `.env` and `apps/web/.env.local`.
+  84: 4. No further manual steps â€” the backend and frontend read these at startup/build time.
+ M docs/superpowers/specs/2026-10-11-auth-supabase-history-uiux-design.md
+?? agent-workspaces/
+?? docs/goals/
+?? docs/reports/
+?? docs/security-runs/
+?? docs/superpowers/plans/
+?? runs/
+?? scripts/security/
+?? uv.err.log
+?? uv.out.log
+?? uvicorn.log
+
+codex
+The auth dependency is intentionally optional for anonymous scanning, so I’m checking that every history route rejects the `None` case before touching storage. The store uses the secret key, which bypasses Supabase RLS; I’m verifying whether the explicit filters still make cross-user reads/deletes impossible and whether interpolated filters can weaken them.
+hook: PreToolUse
+hook: PreToolUse Completed
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$f='"'services/api/main.py'; "'$lines=Get-Content $f; foreach($n in 165..270){ '"'{0,4}: {1}' -f "'$n,$lines[$n-1] }; Write-Output '"'--- architecture'; Get-Content docs/AUTH_AND_HISTORY_ARCHITECTURE.md -ErrorAction SilentlyContinue; Write-Output '--- scanner availability'; foreach("'$name in '"'semgrep','bandit','gitleaks'){ "'$cmd=Get-Command $name -ErrorAction SilentlyContinue; if($cmd){"$name=$($cmd.Source)"}else{"$name=unavailable"} }; Write-Output '"'--- report directory'; Get-ChildItem docs/security-runs -Force | Select-Object Name,Length,LastWriteTime; Write-Output '--- git status requested path'; git status --short -- docs/security-runs/codex_backend_review.md" in C:\Users\shubh\trustshield-ai
+ succeeded in 638ms:
+ 165:         response.status_code = 503
+ 166:     return {"ready": not reasons, "reasons": reasons}
+ 167: 
+ 168: 
+ 169: # ---- analysis endpoints --------------------------------------------------------------------------------------------
+ 170: 
+ 171: @router.post("/api/v1/analyze/text", response_model=AnalysisResult, dependencies=[Depends(limit_light)])
+ 172: def analyze_text_endpoint(body: TextIn, request: Request, response: Response,
+ 173:                            user: CurrentUser | None = Depends(get_current_user)):
+ 174:     try:
+ 175:         result = _publish(request, response, analyze_text(body.text))
+ 176:     except InvalidInput as e:
+ 177:         raise HTTPException(422, str(e))
+ 178:     _record_history(request, user, result, body.text)
+ 179:     return result
+ 180: 
+ 181: 
+ 182: @router.post("/api/v1/analyze/url", response_model=AnalysisResult, dependencies=[Depends(limit_light)])
+ 183: def analyze_url_endpoint(body: UrlIn, request: Request, response: Response,
+ 184:                           user: CurrentUser | None = Depends(get_current_user)):
+ 185:     result = _publish(request, response, analyze_url(body.url))
+ 186:     _record_history(request, user, result, body.url)
+ 187:     return result
+ 188: 
+ 189: 
+ 190: def _image_error(exc: ImageRejected) -> HTTPException:
+ 191:     return HTTPException(status_code=exc.status_code, detail=exc.message)
+ 192: 
+ 193: 
+ 194: async def _upload_endpoint(request: Request, response: Response, file: UploadFile, func,
+ 195:                             user: CurrentUser | None, label: str) -> AnalysisResult:
+ 196:     try:
+ 197:         data = await file.read(max_upload_size() + 1)  # the extra byte detects oversize input without unbounded reads
+ 198:         result = _publish(request, response, await run_heavy(request, func, data, file.content_type, file.filename))
+ 199:         _record_history(request, user, result, f"{label} ({result.risk.label})")
+ 200:         return result
+ 201:     except ImageRejected as exc:
+ 202:         raise _image_error(exc)
+ 203:     except InvalidInput as exc:
+ 204:         raise HTTPException(422, str(exc))
+ 205:     finally:
+ 206:         await file.close()
+ 207: 
+ 208: 
+ 209: @router.post("/api/v1/analyze/image", response_model=AnalysisResult, dependencies=[Depends(limit_heavy)])
+ 210: async def analyze_image_endpoint(request: Request, response: Response, file: UploadFile = File(...),
+ 211:                                   user: CurrentUser | None = Depends(get_current_user)):
+ 212:     return await _upload_endpoint(request, response, file, analyze_image, user, "Screenshot scan")
+ 213: 
+ 214: 
+ 215: @router.post("/api/v1/analyze/qr", response_model=AnalysisResult, dependencies=[Depends(limit_heavy)])
+ 216: async def analyze_qr_endpoint(request: Request, response: Response, file: UploadFile = File(...),
+ 217:                                user: CurrentUser | None = Depends(get_current_user)):
+ 218:     return await _upload_endpoint(request, response, file, analyze_qr, user, "QR code scan")
+ 219: 
+ 220: 
+ 221: @router.get("/api/v1/analysis/{analysis_id}", response_model=AnalysisResult, dependencies=[Depends(limit_light)])
+ 222: def get_analysis(analysis_id: str, request: Request):
+ 223:     result = _state(request).store.get(analysis_id)
+ 224:     if result is None:
+ 225:         raise HTTPException(404, "analysis not found (results are short-lived and not kept after a restart)")
+ 226:     return result
+ 227: 
+ 228: 
+ 229: # ---- history (requires login; anonymous scanning is unaffected) -----------------------------------------------------
+ 230: 
+ 231: def _history_configured(request: Request) -> tuple[str, str]:
+ 232:     settings = _state(request).settings
+ 233:     if not settings.supabase_url or not settings.supabase_service_role_key:
+ 234:         raise HTTPException(503, "History is not configured on this server")
+ 235:     return settings.supabase_url, settings.supabase_service_role_key
+ 236: 
+ 237: 
+ 238: @router.get("/api/v1/history", dependencies=[Depends(limit_light)])
+ 239: def list_history(request: Request, user: CurrentUser | None = Depends(get_current_user)):
+ 240:     if user is None:
+ 241:         raise HTTPException(401, "Log in to view your scan history")
+ 242:     url, key = _history_configured(request)
+ 243:     return history_store.list_for_user(url, key, user_id=user.id)
+ 244: 
+ 245: 
+ 246: @router.delete("/api/v1/history/{row_id}", dependencies=[Depends(limit_light)])
+ 247: def delete_history_row(row_id: str, request: Request, user: CurrentUser | None = Depends(get_current_user)):
+ 248:     if user is None:
+ 249:         raise HTTPException(401, "Log in to manage your scan history")
+ 250:     url, key = _history_configured(request)
+ 251:     if not history_store.delete_for_user(url, key, user_id=user.id, row_id=row_id):
+ 252:         raise HTTPException(404, "History entry not found")
+ 253:     return {"deleted": row_id}
+ 254: 
+ 255: 
+ 256: @router.delete("/api/v1/history", dependencies=[Depends(limit_light)])
+ 257: def delete_all_history(request: Request, user: CurrentUser | None = Depends(get_current_user)):
+ 258:     if user is None:
+ 259:         raise HTTPException(401, "Log in to manage your scan history")
+ 260:     url, key = _history_configured(request)
+ 261:     history_store.delete_all_for_user(url, key, user_id=user.id)
+ 262:     return {"deleted": "all"}
+ 263: 
+ 264: 
+ 265: # ---- conversational API (v1 endpoints above are unchanged) ----------------------------------------------------------------------
+ 266: 
+ 267: class Turn(BaseModel):
+ 268:     role: Literal["user", "assistant"]
+ 269:     text: str = Field(max_length=2000)
+ 270: 
+--- architecture
+--- scanner availability
+semgrep=unavailable
+bandit=unavailable
+gitleaks=unavailable
+--- report directory
+
+Name                                 Length LastWriteTime      
+----                                 ------ -------------      
+codex_backend_review.log                  0 11-10-2026 12:17:32
+prompt_injection_battery_output.json  24820 11-10-2026 12:15:21
+--- git status requested path
+
+
+
+web search: 
+web search: site:docs.postgrest.org duplicate query parameters same key PostgREST filter URL query parameters ...
+codex
+The route checks are present on all three history operations, and invalid bearer tokens fail closed with `401` (verification service failures return `503`). The store’s explicit `user_id=eq.<verified Supabase user id>` predicate also remains in every read/delete query. I found no cross-user exploit through the reviewed paths; the concrete gap is that the report’s claimed RLS backup does not apply to requests made with the service/secret key.
+hook: PreToolUse
+hook: PreToolUse Completed
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$report = @'"'
+# Backend Security Review: Auth and Scan History
+
+**Review date:** 2026-10-11  
+**Scope:** "'`services/api/auth.py`, `services/history/store.py`, the `scan_history` SQL/RLS in `docs/SUPABASE_SETUP.md`, and related `services/api/main.py` call sites (`get_current_user`, `history_store`, `/api/v1/history`).
+
+## Summary
+
+No exploitable unauthenticated access to scan history or cross-user read/delete path was found in the reviewed call sites. All three history routes reject a missing/unresolved user before calling the store. The store also includes an explicit user ID equality filter in each history read/delete query. Invalid or expired bearer tokens return 401; verification failures return 503.
+
+One defense-in-depth statement is inaccurate for the backend path: the backend sends the Supabase service/secret key, which bypasses RLS. Therefore, the explicit `user_id` filters are the effective isolation boundary for requests made by this backend. RLS still applies to requests made with ordinary user credentials.
+
+## Findings
+
+### RLS does not protect backend history queries made with the service/secret key
+
+**Severity:** informational  
+**Location:** `services/history/store.py:27-35`, `services/history/store.py:41-45`; `docs/SUPABASE_SETUP.md:49-52`
+
+**Assessment:** The store puts `service_role_key` in both `apikey` and `Authorization: Bearer` headers. Supabase service/secret-key requests bypass RLS. This contradicts the documentation'"'s claim that RLS is a second line of defense behind the backend's user ID filters for these calls. The backend currently does apply explicit ownership filters, so this is not itself a demonstrated cross-user exploit.
+
+**Concrete scenario:** If a future backend read/delete call using this helper omits or weakens its "'`user_id` filter, the database RLS policies will not contain that mistake; the privileged request can access rows across users. Ordinary clients using publishable keys and user JWTs remain subject to the select/delete policies.
+
+**Suggested fix:** Prefer making user-scoped read/delete requests with the validated user'"'s access token so the database evaluates "'`auth.uid()` and RLS independently. If the backend retains the secret key, correct the documentation to say backend isolation depends on the explicit filters and keep those filters mandatory in every history operation. Never expose the secret key to the frontend.
+
+## Exploitability checks with no finding
+
+### Authentication bypass
+
+`services/api/auth.py:40-58` returns `None` for absent or non-Bearer authorization, resolves Bearer tokens through Supabase Auth, returns `401` for invalid/expired tokens, and returns `503` on verification/configuration failure. `services/api/main.py:238-243`, `246-253`, and `256-262` each reject `user is None` before calling `history_store`. Anonymous analysis endpoints may run, but `_record_history` skips writes without a resolved user (`services/api/main.py:98-110`, called at `171-218`); they do not expose history. No request to the reviewed history routes reaches history data without a valid Supabase user.
+
+### PostgREST query interpolation and cross-user access
+
+`services/history/store.py:62-77` interpolates filter values directly into the URL. `row_id` is request-controlled, so this is brittle query construction and should be URL-encoded/UUID-validated as hardening. However, in the reviewed delete call the server appends the verified `user_id` equality filter after `row_id` (`services/history/store.py:68-72`), and PostgREST combines separate filters with AND by default ([PostgREST filtering documentation](https://docs.postgrest.org/en/stable/references/api/tables_views.html#horizontal-filtering)). Added query fragments from a crafted row ID do not remove the required ownership equality. The `user_id` used in all store calls comes from the verified `/auth/v1/user` response, not from request input. I found no demonstrated way for a crafted `row_id` or `user_id` to read/delete another user'"'s row. Building query strings with a URL encoder and validating "'`row_id` as a UUID would reduce parser ambiguity and malformed-query errors.
+
+### RLS policy behavior
+
+`docs/SUPABASE_SETUP.md:40-46` enables RLS and defines owner-only select/delete policies. Those policies protect direct requests using normal user credentials, but they are bypassed by the backend'"'s secret key as described above. The app's current explicit filters—not RLS—are what constrain backend history reads and deletes to the authenticated user's rows.
+
+## Review method
+
+Focused manual review of the requested files and call sites. "'`semgrep`, `bandit`, and `gitleaks` were not available in the review environment. No active testing or tests were run.
+'"'@; Set-Content -LiteralPath 'docs/security-runs/codex_backend_review.md' -Value "'$report -Encoding utf8; Get-Item '"'docs/security-runs/codex_backend_review.md' | Select-Object FullName,Length; git status --short -- docs/security-runs/codex_backend_review.md; Get-Content 'docs/security-runs/codex_backend_review.md' -TotalCount 110" in C:\Users\shubh\trustshield-ai
+ succeeded in 449ms:
+
+?? docs/security-runs/codex_backend_review.md
+FullName                                                                 Length
+--------                                                                 ------
+C:\Users\shubh\trustshield-ai\docs\security-runs\codex_backend_review.md   4712
+# Backend Security Review: Auth and Scan History
+
+**Review date:** 2026-10-11  
+**Scope:** `services/api/auth.py`, `services/history/store.py`, the `scan_history` SQL/RLS in `docs/SUPABASE_SETUP.md`, and related `services/api/main.py` call sites (`get_current_user`, `history_store`, `/api/v1/history`).
+
+## Summary
+
+No exploitable unauthenticated access to scan history or cross-user read/delete path was found in the reviewed call sites. All three history routes reject a missing/unresolved user before calling the store. The store also includes an explicit user ID equality filter in each history read/delete query. Invalid or expired bearer tokens return 401; verification failures return 503.
+
+One defense-in-depth statement is inaccurate for the backend path: the backend sends the Supabase service/secret key, which bypasses RLS. Therefore, the explicit `user_id` filters are the effective isolation boundary for requests made by this backend. RLS still applies to requests made with ordinary user credentials.
+
+## Findings
+
+### RLS does not protect backend history queries made with the service/secret key
+
+**Severity:** informational  
+**Location:** `services/history/store.py:27-35`, `services/history/store.py:41-45`; `docs/SUPABASE_SETUP.md:49-52`
+
+**Assessment:** The store puts `service_role_key` in both `apikey` and `Authorization: Bearer` headers. Supabase service/secret-key requests bypass RLS. This contradicts the documentation's claim that RLS is a second line of defense behind the backend's user ID filters for these calls. The backend currently does apply explicit ownership filters, so this is not itself a demonstrated cross-user exploit.
+
+**Concrete scenario:** If a future backend read/delete call using this helper omits or weakens its `user_id` filter, the database RLS policies will not contain that mistake; the privileged request can access rows across users. Ordinary clients using publishable keys and user JWTs remain subject to the select/delete policies.
+
+**Suggested fix:** Prefer making user-scoped read/delete requests with the validated user's access token so the database evaluates `auth.uid()` and RLS independently. If the backend retains the secret key, correct the documentation to say backend isolation depends on the explicit filters and keep those filters mandatory in every history operation. Never expose the secret key to the frontend.
+
+## Exploitability checks with no finding
+
+### Authentication bypass
+
+`services/api/auth.py:40-58` returns `None` for absent or non-Bearer authorization, resolves Bearer tokens through Supabase Auth, returns `401` for invalid/expired tokens, and returns `503` on verification/configuration failure. `services/api/main.py:238-243`, `246-253`, and `256-262` each reject `user is None` before calling `history_store`. Anonymous analysis endpoints may run, but `_record_history` skips writes without a resolved user (`services/api/main.py:98-110`, called at `171-218`); they do not expose history. No request to the reviewed history routes reaches history data without a valid Supabase user.
+
+### PostgREST query interpolation and cross-user access
+
+`services/history/store.py:62-77` interpolates filter values directly into the URL. `row_id` is request-controlled, so this is brittle query construction and should be URL-encoded/UUID-validated as hardening. However, in the reviewed delete call the server appends the verified `user_id` equality filter after `row_id` (`services/history/store.py:68-72`), and PostgREST combines separate filters with AND by default ([PostgREST filtering documentation](https://docs.postgrest.org/en/stable/references/api/tables_views.html#horizontal-filtering)). Added query fragments from a crafted row ID do not remove the required ownership equality. The `user_id` used in all store calls comes from the verified `/auth/v1/user` response, not from request input. I found no demonstrated way for a crafted `row_id` or `user_id` to read/delete another user's row. Building query strings with a URL encoder and validating `row_id` as a UUID would reduce parser ambiguity and malformed-query errors.
+
+### RLS policy behavior
+
+`docs/SUPABASE_SETUP.md:40-46` enables RLS and defines owner-only select/delete policies. Those policies protect direct requests using normal user credentials, but they are bypassed by the backend's secret key as described above. The app's current explicit filters—not RLS—are what constrain backend history reads and deletes to the authenticated user's rows.
+
+## Review method
+
+Focused manual review of the requested files and call sites. `semgrep`, `bandit`, and `gitleaks` were not available in the review environment. No active testing or tests were run.
+
+
+
+codex
+Completed the review and saved the report to [codex_backend_review.md](/C:/Users/shubh/trustshield-ai/docs/security-runs/codex_backend_review.md).
+
+It records one informational defense-in-depth gap: backend requests use the secret key, so RLS does not protect those queries. I found no exploitable auth bypass or cross-user read/delete path in the reviewed call sites. Semgrep, Bandit, and Gitleaks were unavailable; no tests or active testing were run.
+tokens used
+46,898
+Completed the review and saved the report to [codex_backend_review.md](/C:/Users/shubh/trustshield-ai/docs/security-runs/codex_backend_review.md).
+
+It records one informational defense-in-depth gap: backend requests use the secret key, so RLS does not protect those queries. I found no exploitable auth bypass or cross-user read/delete path in the reviewed call sites. Semgrep, Bandit, and Gitleaks were unavailable; no tests or active testing were run.

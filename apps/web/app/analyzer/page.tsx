@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { AnalysisResult } from "@/components/types";
 import { FileUpload } from "@/components/FileUpload";
 import { ResultDashboard } from "@/components/ResultDashboard";
+import { authFetch } from "@/lib/authFetch";
 
 // Production is same-origin (Vercel Services routes /api/* to the backend): NEXT_PUBLIC_API_URL is unset and requests use relative
 // URLs. Set it only to point at a separate API origin. The localhost fallback exists for development only.
@@ -81,13 +82,13 @@ export default function Home() {
       let res: Response;
 
       if (mode === "text") {
-        res = await fetch(`${API}/api/v1/analyze/text`, {
+        res = await authFetch(`${API}/api/v1/analyze/text`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ text: value }),
         });
       } else if (mode === "url") {
-        res = await fetch(`${API}/api/v1/analyze/url`, {
+        res = await authFetch(`${API}/api/v1/analyze/url`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ url: value, sandbox: useSandbox && sandboxAvailable }),
@@ -101,7 +102,7 @@ export default function Home() {
         const endpoint = mode === "image" ? "image" : "qr";
 
         // Do not set Content-Type header manually; let fetch set the boundary
-        res = await fetch(`${API}/api/v1/analyze/${endpoint}`, {
+        res = await authFetch(`${API}/api/v1/analyze/${endpoint}`, {
           method: "POST",
           body: formData,
         });
@@ -212,6 +213,11 @@ export default function Home() {
             );
           })}
         </div>
+
+        <p className="mb-4 text-xs text-slate-500 dark:text-slate-400">
+          Scans are saved to your history only when you&apos;re logged in. Scanning without an
+          account stays exactly as private as before — nothing is stored.
+        </p>
 
         <form onSubmit={analyze}>
           {mode === "text" && (

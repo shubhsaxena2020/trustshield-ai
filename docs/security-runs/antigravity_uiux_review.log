@@ -1,0 +1,33 @@
+The UI/UX and accessibility review for **TrustShield AI** (`feature/auth-supabase-history-uiux`) is complete. All findings have been compiled into [antigravity_uiux_review.md](file:///C:/Users/shubh/trustshield-ai/docs/security-runs/antigravity_uiux_review.md).
+
+No source code files were modified.
+
+---
+
+### Executive Summary of Review Findings
+
+| Severity | Category | Target Location | Summary |
+| :--- | :--- | :--- | :--- |
+| **High** | Accessibility / Form Labels | [login/page.tsx](file:///C:/Users/shubh/trustshield-ai/apps/web/app/login/page.tsx#L42-L45), [signup/page.tsx](file:///C:/Users/shubh/trustshield-ai/apps/web/app/signup/page.tsx#L47-L50) | Form inputs rely solely on placeholders with no `<label>` or `id`; constraint hints vanish upon typing; missing `autoComplete` attributes. |
+| **High** | UX / Data Safety | [history/page.tsx](file:///C:/Users/shubh/trustshield-ai/apps/web/app/history/page.tsx#L59-L61) | **"Clear all"** and **"Delete"** execute immediately without confirmation dialogs, risking irreversible data loss. |
+| **High** | Mobile Layout | [NavBar.tsx](file:///C:/Users/shubh/trustshield-ai/apps/web/components/NavBar.tsx#L12-L34) | On mobile (360px–375px), long authenticated emails push logout off-screen and cause horizontal page overflow. |
+| **Medium** | Color Contrast (WCAG 1.4.3) | [button.tsx](file:///C:/Users/shubh/trustshield-ai/apps/web/components/ui/button.tsx#L17-L18), [history/page.tsx](file:///C:/Users/shubh/trustshield-ai/apps/web/app/history/page.tsx#L91) | Shadcn `destructive` button in light mode measured at **4.01:1** contrast on small text, failing the WCAG AA 4.5:1 minimum. |
+| **Medium** | Mobile Table Layout | [history/page.tsx](file:///C:/Users/shubh/trustshield-ai/apps/web/app/history/page.tsx#L72-L96) | Table summary cells lack truncation (`whitespace-nowrap`), pushing action buttons hundreds of pixels off-screen on mobile. |
+| **Medium** | Brand / UX Consistency | [login/page.tsx](file:///C:/Users/shubh/trustshield-ai/apps/web/app/login/page.tsx), [signup/page.tsx](file:///C:/Users/shubh/trustshield-ai/apps/web/app/signup/page.tsx) vs [analyzer/page.tsx](file:///C:/Users/shubh/trustshield-ai/apps/web/app/analyzer/page.tsx) | Auth pages use unskinned near-black shadcn buttons and generic cards, diverging from the "TrustShield Blue" established in `/analyzer`. |
+| **Medium** | Accessibility / Structure | [login/page.tsx](file:///C:/Users/shubh/trustshield-ai/apps/web/app/login/page.tsx), [signup/page.tsx](file:///C:/Users/shubh/trustshield-ai/apps/web/app/signup/page.tsx) | Missing `<main>` landmark and semantic heading tags (`CardTitle` renders as a plain `<div>`). |
+| **Medium** | Visual Polish / Empty State | [history/page.tsx](file:///C:/Users/shubh/trustshield-ai/apps/web/app/history/page.tsx#L72-L98) | When history is empty, an empty table header row is rendered above the "No scans saved yet" message. |
+| **Low** | Accessibility / Screen Reader | [login/page.tsx](file:///C:/Users/shubh/trustshield-ai/apps/web/app/login/page.tsx#L46), [signup/page.tsx](file:///C:/Users/shubh/trustshield-ai/apps/web/app/signup/page.tsx#L51), [history/page.tsx](file:///C:/Users/shubh/trustshield-ai/apps/web/app/history/page.tsx#L63) | Errors lack `role="alert"` / `aria-live` announcements. |
+| **Low** | UX / Loading State | [history/page.tsx](file:///C:/Users/shubh/trustshield-ai/apps/web/app/history/page.tsx#L53) | Blank white screen flash (`return null`) while checking session before redirect. |
+| **Low** | Screen Reader Context | [history/page.tsx](file:///C:/Users/shubh/trustshield-ai/apps/web/app/history/page.tsx#L79) | Table header has an empty `<th>`; "View"/"Delete" buttons lack row context for screen readers. |
+| **Informational** | Navigation UX | [NavBar.tsx](file:///C:/Users/shubh/trustshield-ai/apps/web/components/NavBar.tsx#L16-L33) | Nav links lack active route indicator (`aria-current="page"`). |
+
+---
+
+### What Is Genuinely Fine (No Issues Found)
+1. **[ResultDashboard.tsx](file:///C:/Users/shubh/trustshield-ai/apps/web/components/ResultDashboard.tsx#L36-L45) Coverage Status Copy:** Relabeling unconfigured modules from "Unavailable" to "Not configured" is an excellent UX clarification that prevents judges from mistaking intentional unconfigured integrations for system crashes.
+2. **[NavBar.tsx](file:///C:/Users/shubh/trustshield-ai/apps/web/components/NavBar.tsx#L14) Logo:** `alt="TrustShield AI"` is present, with Next.js image optimization and `priority` flag configured.
+3. **Keyboard Focus Order:** Focus transitions naturally from top-to-bottom through document reading order across all pages with no disruptive `tabIndex` values.
+4. **Light Theme Text Contrast:** Primary copy, buttons, and error text (`text-red-700` at 6.45:1; `text-slate-600` at 7.00:1) comfortably meet WCAG AA and AAA thresholds.
+
+The full breakdown, measured metrics, and remediation code samples are saved in:  
+**[`docs/security-runs/antigravity_uiux_review.md`](file:///C:/Users/shubh/trustshield-ai/docs/security-runs/antigravity_uiux_review.md)**

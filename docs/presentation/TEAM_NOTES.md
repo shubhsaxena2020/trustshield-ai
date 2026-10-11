@@ -38,7 +38,7 @@ The language model (DeepSeek V4.1 Flash via the team's provider; NVIDIA Nemotron
 
 | Claim | Number | Source | How to say it |
 |---|---|---|---|
-| Automated tests | 765 passing, 7 skipped | `pytest tests` (run 2026-10-07) | "765 automated tests pass" |
+| Automated tests | 790 passing, 7 skipped | `pytest tests` (run 2026-10-11) | "790 automated tests pass" |
 | Routing audit | 180 messages; 96.1% correct; 0 of 79 scams missed; 7 false alarms | `docs/BASE_VERSION.md`, `docs/reports/routing_audit.md` | "The rules caught every scam in our audit set; some harmless questions were flagged." |
 | Stress test (chat stream) | 24 of 24 succeeded; first reply p50 0.37 s, p95 7.1 s | `docs/reports/stress_c4_final.json` | "All 24 test requests succeeded. Typical first reply under half a second." (Sample is small.) |
 | Sealed holdout (ML model) | recall 82.1%, specificity 78.3%, precision 82.1%, F1 82.1% | `services/chat/product_metadata.py`, `README.md` | Say the 90% target was NOT met. |
@@ -56,6 +56,23 @@ The language model (DeepSeek V4.1 Flash via the team's provider; NVIDIA Nemotron
 - **Verified on production, 2026-10-07:** the college link in a sentence scores 15; the bare college link scores 0; the tunnel link scores 75; the official SBI (onlinesbi.sbi) and HDFC links score 0.
 - **Public certificate history.** A domain whose first certificate is under 30 days old is flagged. An established institutional domain (.ac.in, .gov.in, .edu with at least a year of certificates) is low risk; psitche.ac.in, the college's official site, scores 15.
 - **Official college notice:** the psitche.ac.in portal no longer shows as a possible phish.
+
+### Updates since 2026-10-10 (accounts, history, UI/UX)
+
+- **Opt-in accounts (Supabase email/password).** New `/login` and `/signup` pages. Logging in is
+  never required to scan — anonymous use is exactly as private as before, nothing is stored.
+- **Scan history, for logged-in users only.** Every analysis is saved to a new `/history` page
+  (list, view the full original result, delete one entry, or clear all) when you're signed in.
+  Verified end to end against the live Supabase project, including that anonymous scans write
+  nothing.
+- **UI/UX pass.** shadcn/ui components, a new session-aware nav bar with the team's new logo, and
+  clearer coverage-panel wording ("Not configured" vs "Unavailable" are now distinguishable).
+- **Security pass before merging:** PentestGPT run against the local instance, a 12-prompt
+  adversarial battery against the chat assistant (no score-override, no system-prompt leak), a
+  rate-limit burst test (confirms 429s under real concurrent pressure), and independent code
+  review from Codex and Hermes — one real hardening fix came out of it (URL-encoding history
+  query parameters against a crafted-id injection surface; no exploit was demonstrated, fixed
+  anyway). Full log: `docs/MULTI_AI_REVIEW_LOG.md`.
 
 ## 5. Live demo script (about 3 minutes)
 
