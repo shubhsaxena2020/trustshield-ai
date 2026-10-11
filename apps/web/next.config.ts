@@ -1,8 +1,10 @@
 import type { NextConfig } from "next";
 
 // The API is a different origin (Render); the browser talks to it directly, so it must be allowed in connect-src.
+// Supabase (auth + optional history) is also browser-reachable directly, so its origin needs the same allowance.
 const apiOrigin = process.env.NEXT_PUBLIC_API_URL ?? "";
-const connectSrc = ["'self'", apiOrigin, process.env.NODE_ENV === "production" ? "" : "http://localhost:8000"].filter(Boolean).join(" ");
+const supabaseOrigin = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+const connectSrc = ["'self'", apiOrigin, supabaseOrigin, process.env.NODE_ENV === "production" ? "" : "http://localhost:8000"].filter(Boolean).join(" ");
 
 const securityHeaders = [
   { key: "X-Content-Type-Options", value: "nosniff" },
