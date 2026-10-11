@@ -682,7 +682,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     app.add_middleware(BodyLimitMiddleware, max_bytes=settings.max_body_bytes)
     app.add_middleware(ObservabilityMiddleware, settings=settings)
-    app.add_middleware(CORSMiddleware, allow_origins=list(settings.cors_origins), allow_methods=["GET", "POST", "OPTIONS"],
+    app.add_middleware(CORSMiddleware, allow_origins=list(settings.cors_origins), allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
                        allow_headers=["Content-Type", "X-Request-ID", "Authorization"], expose_headers=["X-Request-ID", "X-Analysis-ID", "Retry-After"],
                        max_age=600)
     return app
