@@ -532,6 +532,12 @@ async def _chat_turn(request: Request, response: Response, message: str, context
     intent_result = classify_intent(message, image is not None, context is not None, followup_intent)
     if intent_result.intent == "empty":
         raise HTTPException(422, "Send a message, link, screenshot or QR code to analyse.")
+    if intent_result.intent == "analyze_text":
+        # The rules only decide "analyse" with certainty when there is real signal; an ambiguous message (no link, no
+        # suspicious wording) that none of the chat/education/product patterns matched falls through to this safe
+        # default. Before running the scanner on it, give the model's own, narrower judgment (_refine_with_model) a
+        # chance to move it to chat -- this was previously defined but never actually called from either chat endpoint.
+        intent_result = await run_in_threadpool(_refine_with_model, intent_result, message, image is not None)
 
     if intent_result.intent in _CHAT_ONLY_REPLY and agent.configured():
         # The model is the chat assistant and may call the scanner. Any failed check falls through to the deterministic path.
@@ -663,7 +669,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         return JSONResponse(status_code=422, content={"detail": details})
 
     app.include_router(router)
-    if os.getenv("TRUSTSHIELD_DEBUG_PROXY", "").strip() == "1":
+    if os.getenv("TRUSTSHIELD_DEBUG_PROXY", "").strip() == "1" and settings.env == "development":
         # Temporary observation window only (scripts/observe_proxy_chain.py, scripts/stress_remote.py): peer address, forwarding
         # headers and container memory counters. Never enabled in production (the production preflight fails if it is set).
         def cgroup(name: str):

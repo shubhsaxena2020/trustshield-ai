@@ -6,6 +6,7 @@ python-multipart
 tldextract
 opencv-python-headless
 pillow
+pillow-heif
 pytesseract
 numpy
 pandas

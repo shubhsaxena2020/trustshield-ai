@@ -25,9 +25,21 @@ def go(message, has_attachment=False, has_context=False):
     ("Your account has been blocked, verify now", "analyze_text"),
     ("Hi, the team lunch is at 1pm tomorrow", "analyze_text"),
     ("check this", "analyze_text"),
+    # Casual greeting/acknowledgement variants that the original exact-match _GREETINGS set missed and fell through
+    # to analyze_text, returning a risk card for an innocent "hi" or "thanks" (found via live adversarial testing).
+    ("Hi there!", "greeting"), ("hey everyone", "greeting"), ("Thanks for helping me with this demo.", "greeting"),
+    ("thank you so much", "greeting"), ("Thanks a lot!", "greeting"),
 ])
 def test_intent_matrix(message, expected):
     assert go(message) == expected
+
+
+@pytest.mark.parametrize("message", [
+    "Thanks for the OTP",  # a real content-noun/action word after a greeting opener must still win over the greeting pattern
+    "Hi, your account will be blocked, verify the OTP now",
+])
+def test_greeting_pattern_never_overrides_a_real_fraud_signal(message):
+    assert go(message) == "analyze_text"
 
 
 def test_url_always_wins_over_greeting_language():

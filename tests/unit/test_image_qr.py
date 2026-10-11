@@ -102,6 +102,35 @@ def test_mime_parameters_are_accepted():
     assert result.input_type == "image"
 
 
+def heic_bytes(size: tuple[int, int] = (64, 64)) -> bytes:
+    pillow_heif = pytest.importorskip("pillow_heif")
+    pillow_heif.register_heif_opener()
+    image = Image.new("RGB", size, (200, 50, 50))
+    out = BytesIO()
+    image.save(out, format="HEIF")
+    return out.getvalue()
+
+
+def test_heic_upload_from_an_iphone_is_accepted():
+    """iPhones save camera photos as HEIC by default; this used to be rejected before Pillow even saw the bytes."""
+    validated = validate_image(heic_bytes(), "image/heic", "IMG_0001.heic")
+    assert (validated.width, validated.height) == (64, 64)
+
+
+def test_heif_and_heic_declared_mime_are_treated_as_equivalent():
+    # Browsers are inconsistent about which of the two they declare for the same HEIC container.
+    validated = validate_image(heic_bytes(), "image/heif", "IMG_0001.HEIC")
+    assert (validated.width, validated.height) == (64, 64)
+
+
+def test_heic_with_an_unrecognized_declared_mime_is_still_decoded():
+    """Reproduces a real failure: some browsers/OSes have no MIME mapping for HEIC and send
+    application/octet-stream (or nothing) for the file part instead. The declared type must not gate a valid image."""
+    assert validate_image(heic_bytes(), "application/octet-stream", "IMG_0001.heic").width == 64
+    assert validate_image(heic_bytes(), "", "IMG_0001.heic").width == 64
+    assert validate_image(heic_bytes(), None, "IMG_0001.heic").width == 64
+
+
 def test_low_quality_ocr_has_lower_confidence_than_direct_text(monkeypatch):
     monkeypatch.setenv("TRUSTSHIELD_OCR_PROVIDER", "mock")
     monkeypatch.setenv("TRUSTSHIELD_ML", "off")

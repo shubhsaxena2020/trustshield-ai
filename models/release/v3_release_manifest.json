@@ -59,7 +59,7 @@
     "scipy": "1.18.1",
     "joblib": "1.6.0",
     "lock_file": "requirements-lock.txt",
-    "lock_file_sha256": "88585389f7a16dafd1c8809fadf342286a651c9c1634db58feb33a05b6fdbc6c"
+    "lock_file_sha256": "836fcb0e6e1684aa2f4643d59a027b38585553b97c60c9eba60224283391c42a"
   },
   "sealed_v2_evaluation": {
     "status": "spent - permanently; never use for v4 development, tuning or model selection",

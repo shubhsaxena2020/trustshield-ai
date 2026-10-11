@@ -64,6 +64,8 @@ def test_docs_and_openapi_are_disabled_in_production():
     assert client.get("/docs").status_code == 404 and client.get("/openapi.json").status_code == 404
     dev = TestClient(api.create_app(Settings(env="development")))
     assert dev.get("/openapi.json").status_code == 200
+    test_env = TestClient(api.create_app(Settings(env="test")))
+    assert test_env.get("/docs").status_code == 404 and test_env.get("/openapi.json").status_code == 404
 
 
 # ---- errors never leak ---------------------------------------------------------------------------------------------

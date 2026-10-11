@@ -30,3 +30,5 @@ def test_debug_route_exists_only_when_explicitly_enabled(monkeypatch):
     monkeypatch.setenv("TRUSTSHIELD_DEBUG_PROXY", "1")
     body = TestClient(api.create_app(Settings(env="development"))).get("/api/v1/debug/proxy", headers={"X-Forwarded-For": "1.2.3.4"}).json()
     assert body["x_forwarded_for"] == "1.2.3.4" and set(body) == {"peer", "x_forwarded_for", "x_forwarded_proto", "memory"}
+    assert TestClient(api.create_app(Settings(env="production"))).get("/api/v1/debug/proxy").status_code == 404
+    assert TestClient(api.create_app(Settings(env="test"))).get("/api/v1/debug/proxy").status_code == 404

@@ -12,7 +12,8 @@ import type { ChatAnalysis, ChatResponse, Message, ResponseType } from "./types"
 const API = process.env.NEXT_PUBLIC_API_URL ?? (process.env.NODE_ENV === "production" ? "" : "http://localhost:8000");
 const MAX_FILE_BYTES = 4 * 1024 * 1024;
 const MAX_CHARS = 5000;
-const ALLOWED = ["image/png", "image/jpeg", "image/webp"];
+const ALLOWED = ["image/png", "image/jpeg", "image/webp", "image/heic", "image/heif"];
+const ALLOWED_EXT = /\.(png|jpe?g|webp|heic|heif)$/i;
 
 const STARTERS = [
   "I got this text: 'URGENT: your bank account is suspended. Verify now at secure-bank-login.top' — is it real?",
@@ -269,7 +270,11 @@ export function Chat() {
 
   function accept(f: File | undefined | null) {
     if (!f) return;
-    if (!ALLOWED.includes(f.type)) return setNotice("Only PNG, JPEG or WebP images can be attached.");
+    // Some mobile browsers (notably older Android WebViews on a camera capture) report an empty or generic
+    // f.type instead of the real image MIME type. Fall back to the filename extension rather than blocking the
+    // upload outright; the backend decodes and validates the actual bytes regardless of what either side claims.
+    const typeOk = f.type ? ALLOWED.includes(f.type) : ALLOWED_EXT.test(f.name);
+    if (!typeOk) return setNotice("Only PNG, JPEG, WebP or HEIC/HEIF images can be attached.");
     if (f.size > MAX_FILE_BYTES) return setNotice("That image is larger than 4 MB. Please use a smaller screenshot.");
     setNotice("");
     setAttached((prev) => {

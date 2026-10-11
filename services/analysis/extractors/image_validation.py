@@ -6,13 +6,18 @@ import warnings
 from dataclasses import dataclass
 from io import BytesIO
 
+import pillow_heif
 from PIL import Image, ImageOps
+
+# iPhones save camera photos as HEIC/HEIF by default; without this, every such upload was rejected before Pillow even
+# saw the bytes. pillow-heif ships libheif bundled in its wheel, so this needs no extra system package.
+pillow_heif.register_heif_opener()
 
 MAX_DEFAULT_UPLOAD_SIZE = 5 * 1024 * 1024
 MAX_SIDE = 8000
 MAX_PIXELS = 25_000_000
-ALLOWED_MIME = {"image/png", "image/jpeg", "image/webp"}
-FORMAT_MIME = {"PNG": "image/png", "JPEG": "image/jpeg", "WEBP": "image/webp"}
+ALLOWED_MIME = {"image/png", "image/jpeg", "image/webp", "image/heic", "image/heif"}
+FORMAT_MIME = {"PNG": "image/png", "JPEG": "image/jpeg", "WEBP": "image/webp", "HEIF": "image/heic"}
 
 # Pillow's bomb guard is an additional protection; explicit dimension checks below
 # still produce the API's stable 422 response for oversized images.
@@ -44,18 +49,29 @@ def max_upload_size() -> int:
 
 
 def _media_type(declared_mime: str | None) -> str | None:
-    return declared_mime.split(";", 1)[0].strip().lower() if declared_mime else None
+    if not declared_mime:
+        return None
+    media_type = declared_mime.split(";", 1)[0].strip().lower()
+    # HEIC and HEIF are the same container for a single still image; browsers are inconsistent about which they
+    # declare, and the decoded format can only map to one of them (see FORMAT_MIME), so treat them as equivalent.
+    return "image/heic" if media_type == "image/heif" else media_type
 
 
 def validate_image(data: bytes, declared_mime: str | None, filename: str | None) -> ValidatedImage:
-    """Validate decoded pixels; declared MIME and filename are never trusted."""
+    """Validate decoded pixels; declared MIME and filename are never trusted, in either direction: a generic or
+    missing content type (a real-world case -- some browsers/OSes send "application/octet-stream" for HEIC because
+    they have no registered MIME mapping for it, which used to get a genuine photo rejected before Pillow even saw
+    the bytes) never blocks a valid image, and a confidently-claimed but wrong image/* type never lets a mismatched
+    one through."""
     del filename  # retained in the public seam for API callers; it never selects a decoder
     size = len(data or b"")
     media_type = _media_type(declared_mime)
     if size > max_upload_size():
         raise ImageRejected(413, "upload_too_large", "Image exceeds the maximum upload size.")
-    if media_type and media_type not in ALLOWED_MIME:
-        raise ImageRejected(415, "unsupported_mime", "Only PNG, JPEG, and WEBP images are supported.")
+    # Fast-reject only a type that confidently claims to be an image we don't support; a generic/unknown/missing
+    # type (octet-stream, blank, or anything not image/*) falls through to the real decode below instead.
+    if media_type and media_type.startswith("image/") and media_type not in ALLOWED_MIME:
+        raise ImageRejected(415, "unsupported_mime", "Only PNG, JPEG, WEBP, and HEIC/HEIF images are supported.")
     if not data:
         raise ImageRejected(422, "empty_image", "The uploaded image is empty.")
 
@@ -66,7 +82,9 @@ def validate_image(data: bytes, declared_mime: str | None, filename: str | None)
                 detected = (opened.format or "").upper()
                 if detected not in FORMAT_MIME:
                     raise ImageRejected(415, "unsupported_format", "The decoded image format is not supported.")
-                if media_type and media_type != FORMAT_MIME[detected]:
+                # Only a confidently-declared image/* type can mismatch; a generic/unknown declared type (handled
+                # above) has nothing to compare against, so the decoded format alone decides.
+                if media_type and media_type.startswith("image/") and media_type != FORMAT_MIME[detected]:
                     raise ImageRejected(415, "mime_mismatch", "The declared MIME type does not match the decoded image format.")
                 width, height = opened.size
                 if width <= 0 or height <= 0:

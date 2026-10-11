@@ -44,6 +44,16 @@ _GREETINGS = {"yo", "hi", "hey", "hello", "sup", "howdy", "yo!", "hi!", "hey!", 
               "good morning", "good afternoon", "good evening", "morning", "evening",
               "thanks", "thank you", "thanks!", "thx", "cool", "ok", "okay", "lol", "haha",
               "who are you", "who are you?"}
+# Common real-world variants of a bare greeting/acknowledgement ("hi there!", "thanks so much", "thank you for your
+# help") that the exact-match _GREETINGS set above does not cover. These fell through to the analyze_text "safe
+# default" and returned a scary-looking risk card for an innocent "hi" or "thanks" -- found via live testing.
+_GREETING_PATTERN = re.compile(
+    r"^(hi|hey|hello|yo|howdy|sup)\s*(there|all|everyone)?\s*[!.]*$|"
+    r"^(thanks?( you)?|thank you so much|thanks a (lot|ton|bunch))\b.{0,40}$", re.I)
+
+
+def _is_greeting_variant(t: str) -> bool:
+    return bool(_GREETING_PATTERN.match(t)) and not has_action_or_object_risk(t)
 
 _PRODUCT_PATTERNS = [
     r"\btrustshield\b", r"\bwhat (can|do) you do\b", r"\bhow (do|does) you work\b", r"\bhow (do|does) trustshield work\b",
@@ -105,8 +115,9 @@ def _norm(text: str) -> str:
 
 
 def is_greeting(text: str) -> bool:
-    t = _norm(text).rstrip("!.? ")
-    return t in _GREETINGS or (len(t.split()) <= 3 and t in _GREETINGS)
+    t = _norm(text)
+    stripped = t.rstrip("!.? ")
+    return stripped in _GREETINGS or _is_greeting_variant(t)
 
 
 def is_product_question(text: str) -> bool:
@@ -290,12 +301,19 @@ _TASK_VERB_EARLY = re.compile(r"\b(write|writ|generate|genrate|create|creat|make
 
 
 def is_question_or_task(text: str) -> bool:
-    """True when the text reads as a question or a request (not a pasted message). Used to confirm a model's 'chat' verdict."""
+    """True when the text reads as a question or a request (not a pasted message). Used to confirm a model's 'chat' verdict.
+    A '?' anywhere (not just at the very end) counts: real questions are often wrapped in a leading or trailing sentence
+    of context ("For my records: what is phishing? Asking for a class.") and the stricter end-of-string check alone missed
+    these, silently falling through to analyze_text instead of letting the model's route_text() give a second opinion.
+    A task verb counts anywhere in the text, not just the first 6 words, for the same reason -- a genuine pasted scam
+    message is addressed to a victim and essentially never contains an assistant-directed verb like "give me" or
+    "explain" at all, so widening the search doesn't let real scam content slip through this check; it only catches
+    requests with a long lead-in before the actual ask."""
     stripped = text.strip()
     if not stripped:
         return False
-    return bool(stripped.endswith("?") or _QUESTION_START.search(stripped)
-                or _TASK_VERB_EARLY.search(" ".join(stripped.split()[:6]))
+    return bool("?" in stripped or _QUESTION_START.search(stripped)
+                or _TASK_VERB_EARLY.search(stripped)
                 or re.search(r"\b(batao|bataiye|batayein|samjhao|samjhaiye|likho|likhiye)\b", stripped, re.I))
 
 
@@ -307,5 +325,11 @@ def has_transaction_signal(text: str) -> bool:
         return True
     if re.search(r"(rs\.?|rupees?|inr|usd|$|u{20b9})\s*\d|\d[\d,]*\s*(rs|rupees?|inr|usd)\b", t):
         return True
-    return bool(re.search(r"\b(this|these|that|message|link|qr|screenshot|sms|email)\b", t))
+    # A content noun on its own ("message", "link"...) still always counts. A bare pronoun ("this", "that", "it") only
+    # counts when it is actually pointing at one of those nouns ("this message", "that link") -- a bare pronoun used in
+    # ordinary sentence filler ("this is a general question") is not a reference to unseen content and must not block
+    # the model's route_text() second opinion from running on an otherwise clearly ambiguous message.
+    if re.search(r"\b(message|link|qr|screenshot|sms|email)\b", t):
+        return True
+    return bool(re.search(r"\b(this|these|that|those|it)\b\s+(message|link|qr|screenshot|sms|email|text|url|attachment)\b", t))
 

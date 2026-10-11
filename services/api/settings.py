@@ -50,7 +50,7 @@ class Settings:
 
     @property
     def docs_enabled(self) -> bool:
-        return not self.strict
+        return self.env == "development"
 
     @classmethod
     def from_env(cls) -> "Settings":

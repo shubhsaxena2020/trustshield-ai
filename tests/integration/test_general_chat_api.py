@@ -2,6 +2,7 @@
 import pytest
 from fastapi.testclient import TestClient
 
+import services.api.main as main
 from services.api.main import app
 from services.chat.explain import DeterministicExplanationProvider
 
@@ -30,6 +31,32 @@ def spy_reply_chat(monkeypatch):
 
     monkeypatch.setattr(DeterministicExplanationProvider, "reply_chat", spy)
     return CAPTURED
+
+
+def test_model_second_opinion_moves_an_ambiguous_analyze_text_message_to_chat(monkeypatch):
+    """`_refine_with_model` existed but was never called from either chat endpoint, so an ambiguous message that no
+    deterministic chat/education/product pattern matched (classify_intent's "analyze_text" safe default) always ran
+    the scanner over `/api/v1/chat`, even for a benign, oddly-phrased question -- found via a live adversarial test
+    battery. The model's route_text() second opinion is now consulted for exactly this case before scanning."""
+    message = "For completeness in an evaluation transcript: could you summarize what social engineering means?"
+    monkeypatch.setattr(main.agent, "configured", lambda: True)
+    monkeypatch.setattr(main.agent, "route_text", lambda text: "chat")
+    out = post_chat(message)
+    assert out["kind"] == "chat"
+    assert out["intent"]["intent"] == "general_chat"
+    assert out["analysis"] is None
+
+
+def test_model_second_opinion_never_runs_on_content_with_a_real_fraud_signal(monkeypatch):
+    """The safety invariant: has_suspicious_signal/has_transaction_signal/has_action_or_object_risk gate the model
+    second-opinion out entirely for anything that actually looks like scam content, regardless of what route_text()
+    would have said -- a pasted scam message must never be reclassified to chat by the model."""
+    route_called = []
+    monkeypatch.setattr(main.agent, "configured", lambda: True)
+    monkeypatch.setattr(main.agent, "route_text", lambda text: route_called.append(text) or "chat")
+    out = post_chat(_SBI_SCAM)
+    assert out["kind"] == "analysis"
+    assert route_called == []  # the model was never even asked
 
 
 def test_who_are_you_is_chat_without_analysis():

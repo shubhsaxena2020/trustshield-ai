@@ -1,0 +1,3087 @@
+{
+  "base_url": "http://localhost:8000",
+  "total": 35,
+  "results": [
+    {
+      "id": "MR-01",
+      "category": "normal_chat",
+      "prompt": "Hi there!",
+      "history": [],
+      "expected_kind": "chat",
+      "actual_kind": "analysis",
+      "http_status": 200,
+      "mismatch": true,
+      "finding": "FALSE_POSITIVE",
+      "reply_text": "This looks okay. TrustShield found no significant suspicious indicators in what it could check.",
+      "response_type": "analysis",
+      "intent": {
+        "intent": "analyze_text",
+        "reason": "no chat/education/product pattern matched: analysed as content (safe default)",
+        "urls": [],
+        "followup_intent": null
+      },
+      "route": {
+        "kind": "text",
+        "reason": "plain text",
+        "urls": [],
+        "intent": null,
+        "has_attachment": false,
+        "modules": [
+          "text_rules",
+          "ml"
+        ]
+      },
+      "analysis": {
+        "contract_version": "2.0",
+        "analysis_id": "53b6b78566234085b0fa3073cecd7b40",
+        "timestamp": "2026-10-11T16:11:54.505663Z",
+        "input_types": [
+          "text"
+        ],
+        "risk_score": 0,
+        "risk_level": "low_risk",
+        "confidence": "low",
+        "primary_category": "none_detected",
+        "modules_used": [
+          "text_rules",
+          "ml"
+        ],
+        "evidence": [],
+        "extracted_content": null,
+        "urls": [],
+        "qr_payload": null,
+        "qr_payload_type": null,
+        "warnings": [],
+        "uncertainty": [
+          "Limited context: the text is very short, so confidence is reduced."
+        ],
+        "safe_actions": [
+          "No action needed based on this analysis, but never share OTPs or passwords and verify unexpected requests."
+        ],
+        "capabilities": [
+          {
+            "name": "text_rules",
+            "description": "deterministic scam-pattern rules",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "ml",
+            "description": "text classification model (trustshield_text_v3)",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "url_static",
+            "description": "static URL structure analysis (no network request)",
+            "used": false,
+            "reason": "Not applicable to this input."
+          },
+          {
+            "name": "ocr",
+            "description": "screenshot text extraction (OCR)",
+            "used": false,
+            "reason": "Not applicable to this input."
+          },
+          {
+            "name": "qr",
+            "description": "QR code decoding",
+            "used": false,
+            "reason": "Not applicable to this input."
+          },
+          {
+            "name": "reputation",
+            "description": "external reputation / threat-intelligence lookup",
+            "used": false,
+            "reason": "No reputation provider is configured; a link that is not flagged is not the same as a link known to be safe."
+          }
+        ],
+        "ocr_confidence": null
+      },
+      "error": null
+    },
+    {
+      "id": "MR-02",
+      "category": "normal_chat",
+      "prompt": "Good morning, how are you today?",
+      "history": [],
+      "expected_kind": "chat",
+      "actual_kind": "chat",
+      "http_status": 200,
+      "mismatch": false,
+      "finding": null,
+      "reply_text": "Right now I can only answer general questions in a limited form: my language model isn't available at the moment, so I can't reason through open questions or look facts up, and I won't guess at an answer. What I can do: analyse a suspicious message, link, screenshot or QR code for fraud indicators, and explain cybersecurity topics such as phishing, smishing, UPI/QR fraud and digital arrest scams. Send me one of those and I'll help.",
+      "response_type": "chat",
+      "intent": {
+        "intent": "general_chat",
+        "reason": "a question or request with no content to check",
+        "urls": [],
+        "followup_intent": null
+      },
+      "route": {},
+      "analysis": null,
+      "error": null
+    },
+    {
+      "id": "MR-03",
+      "category": "normal_chat",
+      "prompt": "Thanks for helping me with this demo.",
+      "history": [],
+      "expected_kind": "chat",
+      "actual_kind": "analysis",
+      "http_status": 200,
+      "mismatch": true,
+      "finding": "FALSE_POSITIVE",
+      "reply_text": "Nothing alarming stands out here. The checks TrustShield could perform did not reveal material suspicious signals.",
+      "response_type": "analysis",
+      "intent": {
+        "intent": "analyze_text",
+        "reason": "no chat/education/product pattern matched: analysed as content (safe default)",
+        "urls": [],
+        "followup_intent": null
+      },
+      "route": {
+        "kind": "text",
+        "reason": "plain text",
+        "urls": [],
+        "intent": null,
+        "has_attachment": false,
+        "modules": [
+          "text_rules",
+          "ml"
+        ]
+      },
+      "analysis": {
+        "contract_version": "2.0",
+        "analysis_id": "375d8b3185824135b366961acc7153cf",
+        "timestamp": "2026-10-11T16:11:58.644570Z",
+        "input_types": [
+          "text"
+        ],
+        "risk_score": 0,
+        "risk_level": "low_risk",
+        "confidence": "high",
+        "primary_category": "none_detected",
+        "modules_used": [
+          "text_rules",
+          "ml"
+        ],
+        "evidence": [],
+        "extracted_content": null,
+        "urls": [],
+        "qr_payload": null,
+        "qr_payload_type": null,
+        "warnings": [],
+        "uncertainty": [
+          "Limited context: the text is very short, so confidence is reduced."
+        ],
+        "safe_actions": [
+          "No action needed based on this analysis, but never share OTPs or passwords and verify unexpected requests."
+        ],
+        "capabilities": [
+          {
+            "name": "text_rules",
+            "description": "deterministic scam-pattern rules",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "ml",
+            "description": "text classification model (trustshield_text_v3)",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "url_static",
+            "description": "static URL structure analysis (no network request)",
+            "used": false,
+            "reason": "Not applicable to this input."
+          },
+          {
+            "name": "ocr",
+            "description": "screenshot text extraction (OCR)",
+            "used": false,
+            "reason": "Not applicable to this input."
+          },
+          {
+            "name": "qr",
+            "description": "QR code decoding",
+            "used": false,
+            "reason": "Not applicable to this input."
+          },
+          {
+            "name": "reputation",
+            "description": "external reputation / threat-intelligence lookup",
+            "used": false,
+            "reason": "No reputation provider is configured; a link that is not flagged is not the same as a link known to be safe."
+          }
+        ],
+        "ocr_confidence": null
+      },
+      "error": null
+    },
+    {
+      "id": "MR-04",
+      "category": "normal_chat",
+      "prompt": "What is phishing, in simple terms?",
+      "history": [],
+      "expected_kind": "chat",
+      "actual_kind": "chat",
+      "http_status": 200,
+      "mismatch": false,
+      "finding": null,
+      "reply_text": "To explain: Phishing is a fraud message (email, text or chat) that impersonates a trusted sender to trick you into giving up credentials, OTPs or money, or into clicking a malicious link. Warning signs: urgency, a request for credentials or payment, and a link or sender that doesn't quite match the organization it claims to be.",
+      "response_type": "education",
+      "intent": {
+        "intent": "general_cyber_qa",
+        "reason": "matches a general cybersecurity education pattern",
+        "urls": [],
+        "followup_intent": null
+      },
+      "route": {},
+      "analysis": null,
+      "error": null
+    },
+    {
+      "id": "MR-05",
+      "category": "normal_chat",
+      "prompt": "How does two-factor authentication protect an account?",
+      "history": [],
+      "expected_kind": "chat",
+      "actual_kind": "chat",
+      "http_status": 200,
+      "mismatch": false,
+      "finding": null,
+      "reply_text": "I'm honest about my limits: with my language model unavailable right now I can only help with general questions in a limited form, and I'd rather say that than invent something. I can analyse a suspicious message, link, screenshot or QR code, or explain cybersecurity topics like phishing, smishing, UPI fraud and digital arrest scams — send one of those and I'll take a look.",
+      "response_type": "chat",
+      "intent": {
+        "intent": "general_chat",
+        "reason": "general question/request to the assistant with no URL, attachment, fraud-action signal or personal-data request",
+        "urls": [],
+        "followup_intent": null
+      },
+      "route": {},
+      "analysis": null,
+      "error": null
+    },
+    {
+      "id": "MR-06",
+      "category": "normal_chat",
+      "prompt": "What is the difference between smishing and vishing?",
+      "history": [],
+      "expected_kind": "chat",
+      "actual_kind": "chat",
+      "http_status": 200,
+      "mismatch": false,
+      "finding": null,
+      "reply_text": "To explain: Smishing is phishing delivered over SMS/text message — the same tactics (urgency, fake links, credential requests) but sent as a text rather than an email.",
+      "response_type": "education",
+      "intent": {
+        "intent": "general_cyber_qa",
+        "reason": "matches a general cybersecurity education pattern",
+        "urls": [],
+        "followup_intent": null
+      },
+      "route": {},
+      "analysis": null,
+      "error": null
+    },
+    {
+      "id": "MR-07",
+      "category": "normal_chat",
+      "prompt": "What model do you use?",
+      "history": [],
+      "expected_kind": "chat",
+      "actual_kind": "chat",
+      "http_status": 200,
+      "mismatch": false,
+      "finding": null,
+      "reply_text": "Fraud detection is powered by the active model trustshield_text_v3.",
+      "response_type": "product_info",
+      "intent": {
+        "intent": "product_qa",
+        "reason": "matches a question about TrustShield itself",
+        "urls": [],
+        "followup_intent": null
+      },
+      "route": {},
+      "analysis": null,
+      "error": null
+    },
+    {
+      "id": "MR-08",
+      "category": "normal_chat",
+      "prompt": "Who built TrustShield AI?",
+      "history": [],
+      "expected_kind": "chat",
+      "actual_kind": "chat",
+      "http_status": 200,
+      "mismatch": false,
+      "finding": null,
+      "reply_text": "Hi there! I'm TrustShield AI. You can send me any suspicious text, URL, screenshot, or QR code to investigate, or ask about cybersecurity topics like phishing techniques and payment security.",
+      "response_type": "chat",
+      "intent": {
+        "intent": "assistant_qa",
+        "reason": "question addressed to the assistant itself: answered as chat, not scored as content",
+        "urls": [],
+        "followup_intent": null
+      },
+      "route": {},
+      "analysis": null,
+      "error": null
+    },
+    {
+      "id": "MR-09",
+      "category": "normal_chat",
+      "prompt": "Can you write me a short poem about rain?",
+      "history": [],
+      "expected_kind": "chat",
+      "actual_kind": "chat",
+      "http_status": 200,
+      "mismatch": false,
+      "finding": null,
+      "reply_text": "That falls outside what I can answer right now: my language model is unavailable at the moment, so general questions get only a limited answer from me and I never make facts up. What I can do is analyse a suspicious message, link, screenshot or QR code, and explain cybersecurity topics such as phishing, smishing, QR/UPI fraud and digital arrest scams. I'm happy to help with any of those.",
+      "response_type": "chat",
+      "intent": {
+        "intent": "general_chat",
+        "reason": "general question/request to the assistant with no URL, attachment, fraud-action signal or personal-data request",
+        "urls": [],
+        "followup_intent": null
+      },
+      "route": {},
+      "analysis": null,
+      "error": null
+    },
+    {
+      "id": "MR-10",
+      "category": "normal_chat",
+      "prompt": "What's the weather like in Mumbai?",
+      "history": [],
+      "expected_kind": "chat",
+      "actual_kind": "chat",
+      "http_status": 200,
+      "mismatch": false,
+      "finding": null,
+      "reply_text": "My focus is cybersecurity, scams and fraud — I can't help with that, but ask me about phishing, suspicious messages, links, screenshots or QR codes and I can dig in.",
+      "response_type": "chat",
+      "intent": {
+        "intent": "off_topic",
+        "reason": "matches an off-scope request pattern (outside cybersecurity/product scope)",
+        "urls": [],
+        "followup_intent": null
+      },
+      "route": {},
+      "analysis": null,
+      "error": null
+    },
+    {
+      "id": "MR-11",
+      "category": "normal_chat",
+      "prompt": "Help me think of a name for a cybersecurity club.",
+      "history": [],
+      "expected_kind": "chat",
+      "actual_kind": "chat",
+      "http_status": 200,
+      "mismatch": false,
+      "finding": null,
+      "reply_text": "I can't answer general questions like that in full — my language model is unavailable at the moment, so my answers there are limited and I won't make something up. I can analyse a suspicious message, link, screenshot or QR code for fraud indicators, or explain cybersecurity topics: phishing, smishing, UPI/QR fraud, digital arrest scams. Send one of those and I'll dig in.",
+      "response_type": "chat",
+      "intent": {
+        "intent": "general_chat",
+        "reason": "a question or request with no content to check",
+        "urls": [],
+        "followup_intent": null
+      },
+      "route": {},
+      "analysis": null,
+      "error": null
+    },
+    {
+      "id": "MR-12",
+      "category": "normal_chat",
+      "prompt": "Can you explain password managers to a beginner?",
+      "history": [],
+      "expected_kind": "chat",
+      "actual_kind": "analysis",
+      "http_status": 200,
+      "mismatch": true,
+      "finding": "FALSE_POSITIVE",
+      "reply_text": "This looks okay. TrustShield found no significant suspicious indicators in what it could check.",
+      "response_type": "analysis",
+      "intent": {
+        "intent": "analyze_text",
+        "reason": "asks for a payment, credential or action, or names a payment/urgency object: analysed as content, never answered as chat or education",
+        "urls": [],
+        "followup_intent": null
+      },
+      "route": {
+        "kind": "text",
+        "reason": "plain text",
+        "urls": [],
+        "intent": null,
+        "has_attachment": false,
+        "modules": [
+          "text_rules",
+          "ml"
+        ]
+      },
+      "analysis": {
+        "contract_version": "2.0",
+        "analysis_id": "a1c7d9705e9043049e8e68e31b018bfa",
+        "timestamp": "2026-10-11T16:12:17.194672Z",
+        "input_types": [
+          "text"
+        ],
+        "risk_score": 0,
+        "risk_level": "low_risk",
+        "confidence": "high",
+        "primary_category": "none_detected",
+        "modules_used": [
+          "text_rules",
+          "ml"
+        ],
+        "evidence": [],
+        "extracted_content": null,
+        "urls": [],
+        "qr_payload": null,
+        "qr_payload_type": null,
+        "warnings": [],
+        "uncertainty": [],
+        "safe_actions": [
+          "No action needed based on this analysis, but never share OTPs or passwords and verify unexpected requests."
+        ],
+        "capabilities": [
+          {
+            "name": "text_rules",
+            "description": "deterministic scam-pattern rules",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "ml",
+            "description": "text classification model (trustshield_text_v3)",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "url_static",
+            "description": "static URL structure analysis (no network request)",
+            "used": false,
+            "reason": "Not applicable to this input."
+          },
+          {
+            "name": "ocr",
+            "description": "screenshot text extraction (OCR)",
+            "used": false,
+            "reason": "Not applicable to this input."
+          },
+          {
+            "name": "qr",
+            "description": "QR code decoding",
+            "used": false,
+            "reason": "Not applicable to this input."
+          },
+          {
+            "name": "reputation",
+            "description": "external reputation / threat-intelligence lookup",
+            "used": false,
+            "reason": "No reputation provider is configured; a link that is not flagged is not the same as a link known to be safe."
+          }
+        ],
+        "ocr_confidence": null
+      },
+      "error": null
+    },
+    {
+      "id": "MR-13",
+      "category": "normal_chat",
+      "prompt": "Why did you flag that message as suspicious?",
+      "history": [
+        {
+          "role": "user",
+          "text": "Your account will be closed today; verify at http://bank-alert.example/login and share the code."
+        },
+        {
+          "role": "assistant",
+          "text": "That message has been checked and shows warning signs."
+        }
+      ],
+      "expected_kind": "followup",
+      "actual_kind": "analysis",
+      "http_status": 200,
+      "mismatch": true,
+      "finding": "FALSE_POSITIVE",
+      "reply_text": "Nothing alarming stands out here. The checks TrustShield could perform did not reveal material suspicious signals.",
+      "response_type": "analysis",
+      "intent": {
+        "intent": "analyze_text",
+        "reason": "no chat/education/product pattern matched: analysed as content (safe default)",
+        "urls": [],
+        "followup_intent": null
+      },
+      "route": {
+        "kind": "text",
+        "reason": "plain text",
+        "urls": [],
+        "intent": null,
+        "has_attachment": false,
+        "modules": [
+          "text_rules",
+          "ml"
+        ]
+      },
+      "analysis": {
+        "contract_version": "2.0",
+        "analysis_id": "130c7e4791e341ba885847fe61c36f03",
+        "timestamp": "2026-10-11T16:12:19.274325Z",
+        "input_types": [
+          "text"
+        ],
+        "risk_score": 0,
+        "risk_level": "low_risk",
+        "confidence": "high",
+        "primary_category": "none_detected",
+        "modules_used": [
+          "text_rules",
+          "ml"
+        ],
+        "evidence": [],
+        "extracted_content": null,
+        "urls": [],
+        "qr_payload": null,
+        "qr_payload_type": null,
+        "warnings": [],
+        "uncertainty": [],
+        "safe_actions": [
+          "No action needed based on this analysis, but never share OTPs or passwords and verify unexpected requests."
+        ],
+        "capabilities": [
+          {
+            "name": "text_rules",
+            "description": "deterministic scam-pattern rules",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "ml",
+            "description": "text classification model (trustshield_text_v3)",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "url_static",
+            "description": "static URL structure analysis (no network request)",
+            "used": false,
+            "reason": "Not applicable to this input."
+          },
+          {
+            "name": "ocr",
+            "description": "screenshot text extraction (OCR)",
+            "used": false,
+            "reason": "Not applicable to this input."
+          },
+          {
+            "name": "qr",
+            "description": "QR code decoding",
+            "used": false,
+            "reason": "Not applicable to this input."
+          },
+          {
+            "name": "reputation",
+            "description": "external reputation / threat-intelligence lookup",
+            "used": false,
+            "reason": "No reputation provider is configured; a link that is not flagged is not the same as a link known to be safe."
+          }
+        ],
+        "ocr_confidence": null
+      },
+      "error": null
+    },
+    {
+      "id": "MR-14",
+      "category": "normal_chat",
+      "prompt": "What should I do next about the result you just gave me?",
+      "history": [
+        {
+          "role": "user",
+          "text": "Parcel held. Pay a fee at http://parcel.example/claim now."
+        },
+        {
+          "role": "assistant",
+          "text": "The message was analyzed and looks suspicious."
+        }
+      ],
+      "expected_kind": "followup",
+      "actual_kind": "chat",
+      "http_status": 200,
+      "mismatch": false,
+      "finding": null,
+      "reply_text": "I'm honest about my limits: with my language model unavailable right now I can only help with general questions in a limited form, and I'd rather say that than invent something. I can analyse a suspicious message, link, screenshot or QR code, or explain cybersecurity topics like phishing, smishing, UPI fraud and digital arrest scams — send one of those and I'll take a look.",
+      "response_type": "chat",
+      "intent": {
+        "intent": "general_chat",
+        "reason": "general question/request to the assistant with no URL, attachment, fraud-action signal or personal-data request",
+        "urls": [],
+        "followup_intent": null
+      },
+      "route": {},
+      "analysis": null,
+      "error": null
+    },
+    {
+      "id": "MR-15",
+      "category": "normal_chat",
+      "prompt": "Did you check the sender's reputation in the scan we just discussed?",
+      "history": [
+        {
+          "role": "user",
+          "text": "Your bank card is locked. Call the number in this text to unlock it."
+        },
+        {
+          "role": "assistant",
+          "text": "I checked the message for scam indicators."
+        }
+      ],
+      "expected_kind": "followup",
+      "actual_kind": "chat",
+      "http_status": 200,
+      "mismatch": false,
+      "finding": null,
+      "reply_text": "I can't answer general questions like that in full — my language model is unavailable at the moment, so my answers there are limited and I won't make something up. I can analyse a suspicious message, link, screenshot or QR code for fraud indicators, or explain cybersecurity topics: phishing, smishing, UPI/QR fraud, digital arrest scams. Send one of those and I'll dig in.",
+      "response_type": "chat",
+      "intent": {
+        "intent": "general_chat",
+        "reason": "general question/request to the assistant with no URL, attachment, fraud-action signal or personal-data request",
+        "urls": [],
+        "followup_intent": null
+      },
+      "route": {},
+      "analysis": null,
+      "error": null
+    },
+    {
+      "id": "MR-16",
+      "category": "normal_chat",
+      "prompt": "Can you explain what a risk score means generally?",
+      "history": [],
+      "expected_kind": "chat",
+      "actual_kind": "chat",
+      "http_status": 200,
+      "mismatch": false,
+      "finding": null,
+      "reply_text": "I can't answer general questions like that in full — my language model is unavailable at the moment, so my answers there are limited and I won't make something up. I can analyse a suspicious message, link, screenshot or QR code for fraud indicators, or explain cybersecurity topics: phishing, smishing, UPI/QR fraud, digital arrest scams. Send one of those and I'll dig in.",
+      "response_type": "chat",
+      "intent": {
+        "intent": "general_chat",
+        "reason": "general question/request to the assistant with no URL, attachment, fraud-action signal or personal-data request",
+        "urls": [],
+        "followup_intent": null
+      },
+      "route": {},
+      "analysis": null,
+      "error": null
+    },
+    {
+      "id": "MR-17",
+      "category": "normal_chat",
+      "prompt": "I am not sure what to ask. Can you tell me what you can help with?",
+      "history": [],
+      "expected_kind": "chat",
+      "actual_kind": "chat",
+      "http_status": 200,
+      "mismatch": false,
+      "finding": null,
+      "reply_text": "Right now I can only answer general questions in a limited form: my language model isn't available at the moment, so I can't reason through open questions or look facts up, and I won't guess at an answer. What I can do: analyse a suspicious message, link, screenshot or QR code for fraud indicators, and explain cybersecurity topics such as phishing, smishing, UPI/QR fraud and digital arrest scams. Send me one of those and I'll help.",
+      "response_type": "chat",
+      "intent": {
+        "intent": "general_chat",
+        "reason": "a question or request with no content to check",
+        "urls": [],
+        "followup_intent": null
+      },
+      "route": {},
+      "analysis": null,
+      "error": null
+    },
+    {
+      "id": "MR-18",
+      "category": "normal_chat",
+      "prompt": "Tell me a fun fact about the internet.",
+      "history": [],
+      "expected_kind": "chat",
+      "actual_kind": "chat",
+      "http_status": 200,
+      "mismatch": false,
+      "finding": null,
+      "reply_text": "I'm honest about my limits: with my language model unavailable right now I can only help with general questions in a limited form, and I'd rather say that than invent something. I can analyse a suspicious message, link, screenshot or QR code, or explain cybersecurity topics like phishing, smishing, UPI fraud and digital arrest scams — send one of those and I'll take a look.",
+      "response_type": "chat",
+      "intent": {
+        "intent": "general_chat",
+        "reason": "general question/request to the assistant with no URL, attachment, fraud-action signal or personal-data request",
+        "urls": [],
+        "followup_intent": null
+      },
+      "route": {},
+      "analysis": null,
+      "error": null
+    },
+    {
+      "id": "MR-19",
+      "category": "scan_content",
+      "prompt": "Is this real? Your bank account is blocked. Sign in at http://secure-bank-check.example/login and confirm your OTP.",
+      "history": [],
+      "expected_kind": "analysis",
+      "actual_kind": "analysis",
+      "http_status": 200,
+      "mismatch": false,
+      "finding": null,
+      "reply_text": "This looks highly suspicious. The combination of secret requested under pressure, asks for OTP, PIN, password or card details and machine-learning classifier detected phishing content is consistent with fraud. Do not share OTP, PIN, CVV or passwords with anyone who contacts you.",
+      "response_type": "analysis",
+      "intent": {
+        "intent": "analyze_text",
+        "reason": "message contains a URL: analysis always wins over any greeting/question wording",
+        "urls": [
+          "http://secure-bank-check.example/login"
+        ],
+        "followup_intent": null
+      },
+      "route": {
+        "kind": "text",
+        "reason": "message contains text and a URL: analysed as text, with the URL checked structurally",
+        "urls": [
+          "http://secure-bank-check.example/login"
+        ],
+        "intent": null,
+        "has_attachment": false,
+        "modules": [
+          "text_rules",
+          "ml",
+          "url_static"
+        ]
+      },
+      "analysis": {
+        "contract_version": "2.0",
+        "analysis_id": "dee30e532eda47d3be044a339e6fad9a",
+        "timestamp": "2026-10-11T16:12:31.622970Z",
+        "input_types": [
+          "text",
+          "url"
+        ],
+        "risk_score": 75,
+        "risk_level": "high_risk",
+        "confidence": "high",
+        "primary_category": "credential_phishing",
+        "modules_used": [
+          "text_rules",
+          "ml",
+          "url_static"
+        ],
+        "evidence": [
+          {
+            "id": "0e06e44cbec4",
+            "category": "credential_request",
+            "severity": "high",
+            "source_module": "text_rules",
+            "title": "Asks for OTP, PIN, password or card details",
+            "explanation": "Banks and legitimate services never ask you to share these secrets by message or call.",
+            "confidence": 0.8,
+            "raw_signal": {},
+            "provenance": "text_rules:credential_request"
+          },
+          {
+            "id": "21cfebd1fc49",
+            "category": "credential_pressure",
+            "severity": "high",
+            "source_module": "text_rules",
+            "title": "Secret requested under pressure",
+            "explanation": "A request for OTP/PIN/password combined with urgency or an account threat is the core phishing pattern.",
+            "confidence": 0.85,
+            "raw_signal": {},
+            "provenance": "text_rules:credential_pressure"
+          },
+          {
+            "id": "362289fad43e",
+            "category": "account_threat",
+            "severity": "medium",
+            "source_module": "text_rules",
+            "title": "Account suspension / KYC threat",
+            "explanation": "The message threatens loss of access to an account or service unless you act.",
+            "confidence": 0.65,
+            "raw_signal": {},
+            "provenance": "text_rules:account_threat"
+          },
+          {
+            "id": "5132e2d5b807",
+            "category": "ml_phishing_pattern",
+            "severity": "medium",
+            "source_module": "ml_classifier",
+            "title": "Machine-learning classifier detected phishing content",
+            "explanation": "This is a statistical pattern signal from a calibrated classifier, not proof that the message is fraudulent.",
+            "confidence": 0.7788739495798319,
+            "raw_signal": {
+              "model_name": "trustshield_text_v3",
+              "model_version": "phase3-1",
+              "dataset_version": "trustshield-text-v3",
+              "threshold": "0.16",
+              "feature_pipeline_version": "trustshield-text-features-v1",
+              "category": "phishing"
+            },
+            "provenance": "ml_classifier:ml_phishing_pattern"
+          },
+          {
+            "id": "01bd92fa58eb",
+            "category": "no_https",
+            "severity": "low",
+            "source_module": "url_static",
+            "title": "Link does not use HTTPS",
+            "explanation": "Traffic is unencrypted; not proof of fraud on its own.",
+            "confidence": 0.4,
+            "raw_signal": {
+              "scheme": "http"
+            },
+            "provenance": "url_static:no_https"
+          },
+          {
+            "id": "9426708ed558",
+            "category": "credential_path_terms",
+            "severity": "informational",
+            "source_module": "url_static",
+            "title": "URL path mentions account/login terms",
+            "explanation": "Terms: login. Weak signal by itself.",
+            "confidence": 0.3,
+            "raw_signal": {},
+            "provenance": "url_static:credential_path_terms"
+          }
+        ],
+        "extracted_content": null,
+        "urls": [
+          "http://secure-bank-check.example/login"
+        ],
+        "qr_payload": null,
+        "qr_payload_type": null,
+        "warnings": [],
+        "uncertainty": [
+          "The online certificate check was unavailable, so the domain's history was not checked.",
+          "No threat-intelligence reputation information is available; this is not the same as the link being known-clean."
+        ],
+        "safe_actions": [
+          "Do not share OTP, PIN, CVV or passwords with anyone who contacts you.",
+          "Verify the sender independently through an official contact channel.",
+          "If you already interacted, contact your bank and report at cybercrime.gov.in or call 1930."
+        ],
+        "capabilities": [
+          {
+            "name": "text_rules",
+            "description": "deterministic scam-pattern rules",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "ml",
+            "description": "text classification model (trustshield_text_v3)",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "url_static",
+            "description": "static URL structure analysis (no network request)",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "ocr",
+            "description": "screenshot text extraction (OCR)",
+            "used": false,
+            "reason": "Not applicable to this input."
+          },
+          {
+            "name": "qr",
+            "description": "QR code decoding",
+            "used": false,
+            "reason": "Not applicable to this input."
+          },
+          {
+            "name": "reputation",
+            "description": "external reputation / threat-intelligence lookup",
+            "used": false,
+            "reason": "No reputation provider is configured; a link that is not flagged is not the same as a link known to be safe."
+          }
+        ],
+        "ocr_confidence": null
+      },
+      "error": null
+    },
+    {
+      "id": "MR-20",
+      "category": "scan_content",
+      "prompt": "Can you check this link: http://account-verify.example/reset",
+      "history": [],
+      "expected_kind": "analysis",
+      "actual_kind": "analysis",
+      "http_status": 200,
+      "mismatch": false,
+      "finding": null,
+      "reply_text": "This warrants a careful second look. While nothing stands out strongly, machine-learning classifier detected phishing content and link does not use HTTPS is worth taking note of. Do not click the link. Open the organization's official website or app by typing its address yourself.",
+      "response_type": "analysis",
+      "intent": {
+        "intent": "analyze_text",
+        "reason": "message contains a URL: analysis always wins over any greeting/question wording",
+        "urls": [
+          "http://account-verify.example/reset"
+        ],
+        "followup_intent": null
+      },
+      "route": {
+        "kind": "text",
+        "reason": "message contains text and a URL: analysed as text, with the URL checked structurally",
+        "urls": [
+          "http://account-verify.example/reset"
+        ],
+        "intent": null,
+        "has_attachment": false,
+        "modules": [
+          "text_rules",
+          "ml",
+          "url_static"
+        ]
+      },
+      "analysis": {
+        "contract_version": "2.0",
+        "analysis_id": "6ca71661024b43518ecf6f2037631b96",
+        "timestamp": "2026-10-11T16:12:33.724371Z",
+        "input_types": [
+          "text",
+          "url"
+        ],
+        "risk_score": 25,
+        "risk_level": "caution",
+        "confidence": "high",
+        "primary_category": "phishing",
+        "modules_used": [
+          "text_rules",
+          "ml",
+          "url_static"
+        ],
+        "evidence": [
+          {
+            "id": "a01056a643c9",
+            "category": "ml_phishing_pattern",
+            "severity": "medium",
+            "source_module": "ml_classifier",
+            "title": "Machine-learning classifier detected phishing content",
+            "explanation": "This is a statistical pattern signal from a calibrated classifier, not proof that the message is fraudulent.",
+            "confidence": 0.43317029775107796,
+            "raw_signal": {
+              "model_name": "trustshield_text_v3",
+              "model_version": "phase3-1",
+              "dataset_version": "trustshield-text-v3",
+              "threshold": "0.16",
+              "feature_pipeline_version": "trustshield-text-features-v1",
+              "category": "phishing"
+            },
+            "provenance": "ml_classifier:ml_phishing_pattern"
+          },
+          {
+            "id": "a6254e520ca7",
+            "category": "no_https",
+            "severity": "low",
+            "source_module": "url_static",
+            "title": "Link does not use HTTPS",
+            "explanation": "Traffic is unencrypted; not proof of fraud on its own.",
+            "confidence": 0.4,
+            "raw_signal": {
+              "scheme": "http"
+            },
+            "provenance": "url_static:no_https"
+          }
+        ],
+        "extracted_content": null,
+        "urls": [
+          "http://account-verify.example/reset"
+        ],
+        "qr_payload": null,
+        "qr_payload_type": null,
+        "warnings": [],
+        "uncertainty": [
+          "The online certificate check was unavailable, so the domain's history was not checked.",
+          "No threat-intelligence reputation information is available; this is not the same as the link being known-clean."
+        ],
+        "safe_actions": [
+          "Do not click the link. Open the organization's official website or app by typing its address yourself.",
+          "Verify the sender independently through an official contact channel.",
+          "If you already interacted, contact your bank and report at cybercrime.gov.in or call 1930."
+        ],
+        "capabilities": [
+          {
+            "name": "text_rules",
+            "description": "deterministic scam-pattern rules",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "ml",
+            "description": "text classification model (trustshield_text_v3)",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "url_static",
+            "description": "static URL structure analysis (no network request)",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "ocr",
+            "description": "screenshot text extraction (OCR)",
+            "used": false,
+            "reason": "Not applicable to this input."
+          },
+          {
+            "name": "qr",
+            "description": "QR code decoding",
+            "used": false,
+            "reason": "Not applicable to this input."
+          },
+          {
+            "name": "reputation",
+            "description": "external reputation / threat-intelligence lookup",
+            "used": false,
+            "reason": "No reputation provider is configured; a link that is not flagged is not the same as a link known to be safe."
+          }
+        ],
+        "ocr_confidence": null
+      },
+      "error": null
+    },
+    {
+      "id": "MR-21",
+      "category": "scan_content",
+      "prompt": "Someone called pretending to be my bank and said I must read them the code that just arrived by text. Is this suspicious?",
+      "history": [],
+      "expected_kind": "analysis",
+      "actual_kind": "analysis",
+      "http_status": 200,
+      "mismatch": false,
+      "finding": null,
+      "reply_text": "This looks acceptable based on what could be checked. TrustShield did not find significant fraud indicators across the completed checks.",
+      "response_type": "analysis",
+      "intent": {
+        "intent": "analyze_text",
+        "reason": "no chat/education/product pattern matched: analysed as content (safe default)",
+        "urls": [],
+        "followup_intent": null
+      },
+      "route": {
+        "kind": "text",
+        "reason": "plain text",
+        "urls": [],
+        "intent": null,
+        "has_attachment": false,
+        "modules": [
+          "text_rules",
+          "ml"
+        ]
+      },
+      "analysis": {
+        "contract_version": "2.0",
+        "analysis_id": "575225219849441e802f71b9c819363c",
+        "timestamp": "2026-10-11T16:12:35.820751Z",
+        "input_types": [
+          "text"
+        ],
+        "risk_score": 0,
+        "risk_level": "low_risk",
+        "confidence": "high",
+        "primary_category": "none_detected",
+        "modules_used": [
+          "text_rules",
+          "ml"
+        ],
+        "evidence": [],
+        "extracted_content": null,
+        "urls": [],
+        "qr_payload": null,
+        "qr_payload_type": null,
+        "warnings": [],
+        "uncertainty": [],
+        "safe_actions": [
+          "No action needed based on this analysis, but never share OTPs or passwords and verify unexpected requests."
+        ],
+        "capabilities": [
+          {
+            "name": "text_rules",
+            "description": "deterministic scam-pattern rules",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "ml",
+            "description": "text classification model (trustshield_text_v3)",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "url_static",
+            "description": "static URL structure analysis (no network request)",
+            "used": false,
+            "reason": "Not applicable to this input."
+          },
+          {
+            "name": "ocr",
+            "description": "screenshot text extraction (OCR)",
+            "used": false,
+            "reason": "Not applicable to this input."
+          },
+          {
+            "name": "qr",
+            "description": "QR code decoding",
+            "used": false,
+            "reason": "Not applicable to this input."
+          },
+          {
+            "name": "reputation",
+            "description": "external reputation / threat-intelligence lookup",
+            "used": false,
+            "reason": "No reputation provider is configured; a link that is not flagged is not the same as a link known to be safe."
+          }
+        ],
+        "ocr_confidence": null
+      },
+      "error": null
+    },
+    {
+      "id": "MR-22",
+      "category": "scan_content",
+      "prompt": "PhonePe refund pending. Approve this collect request and tell me the OTP to receive ₹4,500.",
+      "history": [],
+      "expected_kind": "analysis",
+      "actual_kind": "analysis",
+      "http_status": 200,
+      "mismatch": false,
+      "finding": null,
+      "reply_text": "This looks questionable. Seeing machine-learning classifier detected payment fraud content and asks for OTP, PIN, password or card details combined is consistent with fraud. Do not share OTP, PIN, CVV or passwords with anyone who contacts you.",
+      "response_type": "analysis",
+      "intent": {
+        "intent": "analyze_text",
+        "reason": "message contains a concrete fraud-action signal (OTP/KYC/account-block/payment wording): analysis wins even if the message also resembles a question or greeting",
+        "urls": [],
+        "followup_intent": null
+      },
+      "route": {
+        "kind": "text",
+        "reason": "plain text",
+        "urls": [],
+        "intent": null,
+        "has_attachment": false,
+        "modules": [
+          "text_rules",
+          "ml"
+        ]
+      },
+      "analysis": {
+        "contract_version": "2.0",
+        "analysis_id": "5e3f92d95568472ba520f70ac5eb8475",
+        "timestamp": "2026-10-11T16:12:37.902871Z",
+        "input_types": [
+          "text"
+        ],
+        "risk_score": 63,
+        "risk_level": "suspicious",
+        "confidence": "high",
+        "primary_category": "credential_theft",
+        "modules_used": [
+          "text_rules",
+          "ml"
+        ],
+        "evidence": [
+          {
+            "id": "8504e81540f3",
+            "category": "credential_request",
+            "severity": "high",
+            "source_module": "text_rules",
+            "title": "Asks for OTP, PIN, password or card details",
+            "explanation": "Banks and legitimate services never ask you to share these secrets by message or call.",
+            "confidence": 0.8,
+            "raw_signal": {},
+            "provenance": "text_rules:credential_request"
+          },
+          {
+            "id": "484cf8503de4",
+            "category": "ml_payment_fraud_pattern",
+            "severity": "high",
+            "source_module": "ml_classifier",
+            "title": "Machine-learning classifier detected payment fraud content",
+            "explanation": "This is a statistical pattern signal from a calibrated classifier, not proof that the message is fraudulent.",
+            "confidence": 0.9562209898649237,
+            "raw_signal": {
+              "model_name": "trustshield_text_v3",
+              "model_version": "phase3-1",
+              "dataset_version": "trustshield-text-v3",
+              "threshold": "0.16",
+              "feature_pipeline_version": "trustshield-text-features-v1",
+              "category": "payment_fraud"
+            },
+            "provenance": "ml_classifier:ml_payment_fraud_pattern"
+          }
+        ],
+        "extracted_content": null,
+        "urls": [],
+        "qr_payload": null,
+        "qr_payload_type": null,
+        "warnings": [],
+        "uncertainty": [],
+        "safe_actions": [
+          "Do not share OTP, PIN, CVV or passwords with anyone who contacts you.",
+          "Verify the sender independently through an official contact channel.",
+          "If you already interacted, contact your bank and report at cybercrime.gov.in or call 1930."
+        ],
+        "capabilities": [
+          {
+            "name": "text_rules",
+            "description": "deterministic scam-pattern rules",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "ml",
+            "description": "text classification model (trustshield_text_v3)",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "url_static",
+            "description": "static URL structure analysis (no network request)",
+            "used": false,
+            "reason": "Not applicable to this input."
+          },
+          {
+            "name": "ocr",
+            "description": "screenshot text extraction (OCR)",
+            "used": false,
+            "reason": "Not applicable to this input."
+          },
+          {
+            "name": "qr",
+            "description": "QR code decoding",
+            "used": false,
+            "reason": "Not applicable to this input."
+          },
+          {
+            "name": "reputation",
+            "description": "external reputation / threat-intelligence lookup",
+            "used": false,
+            "reason": "No reputation provider is configured; a link that is not flagged is not the same as a link known to be safe."
+          }
+        ],
+        "ocr_confidence": null
+      },
+      "error": null
+    },
+    {
+      "id": "MR-23",
+      "category": "scan_content",
+      "prompt": "Congratulations, you are selected for a remote job. Pay a refundable onboarding fee at http://fast-hire.example/apply.",
+      "history": [],
+      "expected_kind": "analysis",
+      "actual_kind": "analysis",
+      "http_status": 200,
+      "mismatch": false,
+      "finding": null,
+      "reply_text": "This looks questionable. Seeing machine-learning classifier detected fake job content, prize / reward lure and link does not use HTTPS combined is consistent with fraud. Genuine prizes do not require fees or personal details. Ignore the message.",
+      "response_type": "analysis",
+      "intent": {
+        "intent": "analyze_text",
+        "reason": "message contains a URL: analysis always wins over any greeting/question wording",
+        "urls": [
+          "http://fast-hire.example/apply"
+        ],
+        "followup_intent": null
+      },
+      "route": {
+        "kind": "text",
+        "reason": "message contains text and a URL: analysed as text, with the URL checked structurally",
+        "urls": [
+          "http://fast-hire.example/apply"
+        ],
+        "intent": null,
+        "has_attachment": false,
+        "modules": [
+          "text_rules",
+          "ml",
+          "url_static"
+        ]
+      },
+      "analysis": {
+        "contract_version": "2.0",
+        "analysis_id": "cb63224215b44696a25f527aaa211178",
+        "timestamp": "2026-10-11T16:12:39.987060Z",
+        "input_types": [
+          "text",
+          "url"
+        ],
+        "risk_score": 50,
+        "risk_level": "suspicious",
+        "confidence": "high",
+        "primary_category": "prize_scam",
+        "modules_used": [
+          "text_rules",
+          "ml",
+          "url_static"
+        ],
+        "evidence": [
+          {
+            "id": "65476a691705",
+            "category": "lottery_prize",
+            "severity": "medium",
+            "source_module": "text_rules",
+            "title": "Prize / reward lure",
+            "explanation": "Unsolicited prizes and rewards are used to lure victims into sharing details or paying fees.",
+            "confidence": 0.55,
+            "raw_signal": {},
+            "provenance": "text_rules:lottery_prize"
+          },
+          {
+            "id": "8cbcdf584f7b",
+            "category": "ml_fake_job_pattern",
+            "severity": "medium",
+            "source_module": "ml_classifier",
+            "title": "Machine-learning classifier detected fake job content",
+            "explanation": "This is a statistical pattern signal from a calibrated classifier, not proof that the message is fraudulent.",
+            "confidence": 0.8024349251895881,
+            "raw_signal": {
+              "model_name": "trustshield_text_v3",
+              "model_version": "phase3-1",
+              "dataset_version": "trustshield-text-v3",
+              "threshold": "0.16",
+              "feature_pipeline_version": "trustshield-text-features-v1",
+              "category": "fake_job"
+            },
+            "provenance": "ml_classifier:ml_fake_job_pattern"
+          },
+          {
+            "id": "ee59085a68bd",
+            "category": "no_https",
+            "severity": "low",
+            "source_module": "url_static",
+            "title": "Link does not use HTTPS",
+            "explanation": "Traffic is unencrypted; not proof of fraud on its own.",
+            "confidence": 0.4,
+            "raw_signal": {
+              "scheme": "http"
+            },
+            "provenance": "url_static:no_https"
+          }
+        ],
+        "extracted_content": null,
+        "urls": [
+          "http://fast-hire.example/apply"
+        ],
+        "qr_payload": null,
+        "qr_payload_type": null,
+        "warnings": [],
+        "uncertainty": [
+          "The online certificate check was unavailable, so the domain's history was not checked.",
+          "No threat-intelligence reputation information is available; this is not the same as the link being known-clean."
+        ],
+        "safe_actions": [
+          "Genuine prizes do not require fees or personal details. Ignore the message.",
+          "Verify the sender independently through an official contact channel.",
+          "If you already interacted, contact your bank and report at cybercrime.gov.in or call 1930."
+        ],
+        "capabilities": [
+          {
+            "name": "text_rules",
+            "description": "deterministic scam-pattern rules",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "ml",
+            "description": "text classification model (trustshield_text_v3)",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "url_static",
+            "description": "static URL structure analysis (no network request)",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "ocr",
+            "description": "screenshot text extraction (OCR)",
+            "used": false,
+            "reason": "Not applicable to this input."
+          },
+          {
+            "name": "qr",
+            "description": "QR code decoding",
+            "used": false,
+            "reason": "Not applicable to this input."
+          },
+          {
+            "name": "reputation",
+            "description": "external reputation / threat-intelligence lookup",
+            "used": false,
+            "reason": "No reputation provider is configured; a link that is not flagged is not the same as a link known to be safe."
+          }
+        ],
+        "ocr_confidence": null
+      },
+      "error": null
+    },
+    {
+      "id": "MR-24",
+      "category": "scan_content",
+      "prompt": "dear custmer ur kyc expiring today click http://kyc-fast.example n send pan + bank passwrd",
+      "history": [],
+      "expected_kind": "analysis",
+      "actual_kind": "analysis",
+      "http_status": 200,
+      "mismatch": false,
+      "finding": null,
+      "reply_text": "Exercise caution with this. The presence of machine-learning classifier detected phishing content, account suspension / KYC threat and link does not use HTTPS is notable, even though overall indicators remain mild. Contact your bank using the number printed on your card or official app, not the one in the message.",
+      "response_type": "analysis",
+      "intent": {
+        "intent": "analyze_text",
+        "reason": "message contains a URL: analysis always wins over any greeting/question wording",
+        "urls": [
+          "http://kyc-fast.example"
+        ],
+        "followup_intent": null
+      },
+      "route": {
+        "kind": "text",
+        "reason": "message contains text and a URL: analysed as text, with the URL checked structurally",
+        "urls": [
+          "http://kyc-fast.example"
+        ],
+        "intent": null,
+        "has_attachment": false,
+        "modules": [
+          "text_rules",
+          "ml",
+          "url_static"
+        ]
+      },
+      "analysis": {
+        "contract_version": "2.0",
+        "analysis_id": "911fdcccd7aa463886486442629fbd81",
+        "timestamp": "2026-10-11T16:12:42.061203Z",
+        "input_types": [
+          "text",
+          "url"
+        ],
+        "risk_score": 43,
+        "risk_level": "caution",
+        "confidence": "high",
+        "primary_category": "account_threat_phishing",
+        "modules_used": [
+          "text_rules",
+          "ml",
+          "url_static"
+        ],
+        "evidence": [
+          {
+            "id": "569038f22048",
+            "category": "account_threat",
+            "severity": "medium",
+            "source_module": "text_rules",
+            "title": "Account suspension / KYC threat",
+            "explanation": "The message threatens loss of access to an account or service unless you act.",
+            "confidence": 0.65,
+            "raw_signal": {},
+            "provenance": "text_rules:account_threat"
+          },
+          {
+            "id": "08102ad7f493",
+            "category": "ml_phishing_pattern",
+            "severity": "medium",
+            "source_module": "ml_classifier",
+            "title": "Machine-learning classifier detected phishing content",
+            "explanation": "This is a statistical pattern signal from a calibrated classifier, not proof that the message is fraudulent.",
+            "confidence": 0.6949958643507032,
+            "raw_signal": {
+              "model_name": "trustshield_text_v3",
+              "model_version": "phase3-1",
+              "dataset_version": "trustshield-text-v3",
+              "threshold": "0.16",
+              "feature_pipeline_version": "trustshield-text-features-v1",
+              "category": "phishing"
+            },
+            "provenance": "ml_classifier:ml_phishing_pattern"
+          },
+          {
+            "id": "8d35379129b0",
+            "category": "no_https",
+            "severity": "low",
+            "source_module": "url_static",
+            "title": "Link does not use HTTPS",
+            "explanation": "Traffic is unencrypted; not proof of fraud on its own.",
+            "confidence": 0.4,
+            "raw_signal": {
+              "scheme": "http"
+            },
+            "provenance": "url_static:no_https"
+          }
+        ],
+        "extracted_content": null,
+        "urls": [
+          "http://kyc-fast.example"
+        ],
+        "qr_payload": null,
+        "qr_payload_type": null,
+        "warnings": [],
+        "uncertainty": [
+          "The online certificate check was unavailable, so the domain's history was not checked.",
+          "No threat-intelligence reputation information is available; this is not the same as the link being known-clean."
+        ],
+        "safe_actions": [
+          "Contact your bank using the number printed on your card or official app, not the one in the message.",
+          "Verify the sender independently through an official contact channel.",
+          "If you already interacted, contact your bank and report at cybercrime.gov.in or call 1930."
+        ],
+        "capabilities": [
+          {
+            "name": "text_rules",
+            "description": "deterministic scam-pattern rules",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "ml",
+            "description": "text classification model (trustshield_text_v3)",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "url_static",
+            "description": "static URL structure analysis (no network request)",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "ocr",
+            "description": "screenshot text extraction (OCR)",
+            "used": false,
+            "reason": "Not applicable to this input."
+          },
+          {
+            "name": "qr",
+            "description": "QR code decoding",
+            "used": false,
+            "reason": "Not applicable to this input."
+          },
+          {
+            "name": "reputation",
+            "description": "external reputation / threat-intelligence lookup",
+            "used": false,
+            "reason": "No reputation provider is configured; a link that is not flagged is not the same as a link known to be safe."
+          }
+        ],
+        "ocr_confidence": null
+      },
+      "error": null
+    },
+    {
+      "id": "MR-25",
+      "category": "scan_content",
+      "prompt": "Click http://parcel-fee.example/pay to release your package; the courier needs your card CVV.",
+      "history": [],
+      "expected_kind": "analysis",
+      "actual_kind": "analysis",
+      "http_status": 200,
+      "mismatch": false,
+      "finding": null,
+      "reply_text": "This looks suspicious. The combination of machine-learning classifier detected delivery scam content and link does not use HTTPS is consistent with fraud. Track the parcel only through the courier's official app or website.",
+      "response_type": "analysis",
+      "intent": {
+        "intent": "analyze_text",
+        "reason": "message contains a URL: analysis always wins over any greeting/question wording",
+        "urls": [
+          "http://parcel-fee.example/pay"
+        ],
+        "followup_intent": null
+      },
+      "route": {
+        "kind": "text",
+        "reason": "message contains text and a URL: analysed as text, with the URL checked structurally",
+        "urls": [
+          "http://parcel-fee.example/pay"
+        ],
+        "intent": null,
+        "has_attachment": false,
+        "modules": [
+          "text_rules",
+          "ml",
+          "url_static"
+        ]
+      },
+      "analysis": {
+        "contract_version": "2.0",
+        "analysis_id": "25f668f37aa840ed93654b50a5127c6a",
+        "timestamp": "2026-10-11T16:12:44.139691Z",
+        "input_types": [
+          "text",
+          "url"
+        ],
+        "risk_score": 50,
+        "risk_level": "suspicious",
+        "confidence": "medium",
+        "primary_category": "delivery_scam",
+        "modules_used": [
+          "text_rules",
+          "ml",
+          "url_static"
+        ],
+        "evidence": [
+          {
+            "id": "1d68a3118fca",
+            "category": "ml_delivery_scam_pattern",
+            "severity": "high",
+            "source_module": "ml_classifier",
+            "title": "Machine-learning classifier detected delivery scam content",
+            "explanation": "This is a statistical pattern signal from a calibrated classifier, not proof that the message is fraudulent.",
+            "confidence": 0.9210035985605757,
+            "raw_signal": {
+              "model_name": "trustshield_text_v3",
+              "model_version": "phase3-1",
+              "dataset_version": "trustshield-text-v3",
+              "threshold": "0.16",
+              "feature_pipeline_version": "trustshield-text-features-v1",
+              "category": "delivery_scam"
+            },
+            "provenance": "ml_classifier:ml_delivery_scam_pattern"
+          },
+          {
+            "id": "4ee82ee31d4f",
+            "category": "no_https",
+            "severity": "low",
+            "source_module": "url_static",
+            "title": "Link does not use HTTPS",
+            "explanation": "Traffic is unencrypted; not proof of fraud on its own.",
+            "confidence": 0.4,
+            "raw_signal": {
+              "scheme": "http"
+            },
+            "provenance": "url_static:no_https"
+          }
+        ],
+        "extracted_content": null,
+        "urls": [
+          "http://parcel-fee.example/pay"
+        ],
+        "qr_payload": null,
+        "qr_payload_type": null,
+        "warnings": [],
+        "uncertainty": [
+          "The online certificate check was unavailable, so the domain's history was not checked.",
+          "No threat-intelligence reputation information is available; this is not the same as the link being known-clean."
+        ],
+        "safe_actions": [
+          "Track the parcel only through the courier's official app or website.",
+          "Verify the sender independently through an official contact channel.",
+          "If you already interacted, contact your bank and report at cybercrime.gov.in or call 1930."
+        ],
+        "capabilities": [
+          {
+            "name": "text_rules",
+            "description": "deterministic scam-pattern rules",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "ml",
+            "description": "text classification model (trustshield_text_v3)",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "url_static",
+            "description": "static URL structure analysis (no network request)",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "ocr",
+            "description": "screenshot text extraction (OCR)",
+            "used": false,
+            "reason": "Not applicable to this input."
+          },
+          {
+            "name": "qr",
+            "description": "QR code decoding",
+            "used": false,
+            "reason": "Not applicable to this input."
+          },
+          {
+            "name": "reputation",
+            "description": "external reputation / threat-intelligence lookup",
+            "used": false,
+            "reason": "No reputation provider is configured; a link that is not flagged is not the same as a link known to be safe."
+          }
+        ],
+        "ocr_confidence": null
+      },
+      "error": null
+    },
+    {
+      "id": "MR-26",
+      "category": "scan_content",
+      "prompt": "Got this sms: electricity disconnect 6pm pay bill now on http://power-payment.example or call 9876543210",
+      "history": [],
+      "expected_kind": "analysis",
+      "actual_kind": "analysis",
+      "http_status": 200,
+      "mismatch": false,
+      "finding": null,
+      "reply_text": "This warrants a careful second look. While nothing stands out strongly, machine-learning classifier detected phishing content and link does not use HTTPS is worth taking note of. Do not click the link. Open the organization's official website or app by typing its address yourself.",
+      "response_type": "analysis",
+      "intent": {
+        "intent": "analyze_text",
+        "reason": "message contains a URL: analysis always wins over any greeting/question wording",
+        "urls": [
+          "http://power-payment.example"
+        ],
+        "followup_intent": null
+      },
+      "route": {
+        "kind": "text",
+        "reason": "message contains text and a URL: analysed as text, with the URL checked structurally",
+        "urls": [
+          "http://power-payment.example"
+        ],
+        "intent": null,
+        "has_attachment": false,
+        "modules": [
+          "text_rules",
+          "ml",
+          "url_static"
+        ]
+      },
+      "analysis": {
+        "contract_version": "2.0",
+        "analysis_id": "a93163dea31f457ab6700f0c95436388",
+        "timestamp": "2026-10-11T16:12:46.255576Z",
+        "input_types": [
+          "text",
+          "url"
+        ],
+        "risk_score": 35,
+        "risk_level": "caution",
+        "confidence": "high",
+        "primary_category": "phishing",
+        "modules_used": [
+          "text_rules",
+          "ml",
+          "url_static"
+        ],
+        "evidence": [
+          {
+            "id": "21fc7c0ec207",
+            "category": "ml_phishing_pattern",
+            "severity": "medium",
+            "source_module": "ml_classifier",
+            "title": "Machine-learning classifier detected phishing content",
+            "explanation": "This is a statistical pattern signal from a calibrated classifier, not proof that the message is fraudulent.",
+            "confidence": 0.6686322279870668,
+            "raw_signal": {
+              "model_name": "trustshield_text_v3",
+              "model_version": "phase3-1",
+              "dataset_version": "trustshield-text-v3",
+              "threshold": "0.16",
+              "feature_pipeline_version": "trustshield-text-features-v1",
+              "category": "phishing"
+            },
+            "provenance": "ml_classifier:ml_phishing_pattern"
+          },
+          {
+            "id": "0fa0fcb37ff8",
+            "category": "no_https",
+            "severity": "low",
+            "source_module": "url_static",
+            "title": "Link does not use HTTPS",
+            "explanation": "Traffic is unencrypted; not proof of fraud on its own.",
+            "confidence": 0.4,
+            "raw_signal": {
+              "scheme": "http"
+            },
+            "provenance": "url_static:no_https"
+          }
+        ],
+        "extracted_content": null,
+        "urls": [
+          "http://power-payment.example"
+        ],
+        "qr_payload": null,
+        "qr_payload_type": null,
+        "warnings": [],
+        "uncertainty": [
+          "The online certificate check was unavailable, so the domain's history was not checked.",
+          "No threat-intelligence reputation information is available; this is not the same as the link being known-clean."
+        ],
+        "safe_actions": [
+          "Do not click the link. Open the organization's official website or app by typing its address yourself.",
+          "Verify the sender independently through an official contact channel.",
+          "If you already interacted, contact your bank and report at cybercrime.gov.in or call 1930."
+        ],
+        "capabilities": [
+          {
+            "name": "text_rules",
+            "description": "deterministic scam-pattern rules",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "ml",
+            "description": "text classification model (trustshield_text_v3)",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "url_static",
+            "description": "static URL structure analysis (no network request)",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "ocr",
+            "description": "screenshot text extraction (OCR)",
+            "used": false,
+            "reason": "Not applicable to this input."
+          },
+          {
+            "name": "qr",
+            "description": "QR code decoding",
+            "used": false,
+            "reason": "Not applicable to this input."
+          },
+          {
+            "name": "reputation",
+            "description": "external reputation / threat-intelligence lookup",
+            "used": false,
+            "reason": "No reputation provider is configured; a link that is not flagged is not the same as a link known to be safe."
+          }
+        ],
+        "ocr_confidence": null
+      },
+      "error": null
+    },
+    {
+      "id": "MR-27",
+      "category": "scan_content",
+      "prompt": "Your crypto wallet has a security hold. Restore access at http://wallet-rescue.example with your recovery phrase.",
+      "history": [],
+      "expected_kind": "analysis",
+      "actual_kind": "analysis",
+      "http_status": 200,
+      "mismatch": false,
+      "finding": null,
+      "reply_text": "Several warning signs stand out here. The presence of machine-learning classifier detected phishing content and link does not use HTTPS matches patterns commonly seen in fraud. Do not click the link. Open the organization's official website or app by typing its address yourself.",
+      "response_type": "analysis",
+      "intent": {
+        "intent": "analyze_text",
+        "reason": "message contains a URL: analysis always wins over any greeting/question wording",
+        "urls": [
+          "http://wallet-rescue.example"
+        ],
+        "followup_intent": null
+      },
+      "route": {
+        "kind": "text",
+        "reason": "message contains text and a URL: analysed as text, with the URL checked structurally",
+        "urls": [
+          "http://wallet-rescue.example"
+        ],
+        "intent": null,
+        "has_attachment": false,
+        "modules": [
+          "text_rules",
+          "ml",
+          "url_static"
+        ]
+      },
+      "analysis": {
+        "contract_version": "2.0",
+        "analysis_id": "6d51d5780c844937bd4a24572822ae27",
+        "timestamp": "2026-10-11T16:12:48.331826Z",
+        "input_types": [
+          "text",
+          "url"
+        ],
+        "risk_score": 50,
+        "risk_level": "suspicious",
+        "confidence": "high",
+        "primary_category": "phishing",
+        "modules_used": [
+          "text_rules",
+          "ml",
+          "url_static"
+        ],
+        "evidence": [
+          {
+            "id": "89fc3cd0daff",
+            "category": "ml_phishing_pattern",
+            "severity": "medium",
+            "source_module": "ml_classifier",
+            "title": "Machine-learning classifier detected phishing content",
+            "explanation": "This is a statistical pattern signal from a calibrated classifier, not proof that the message is fraudulent.",
+            "confidence": 0.8981492109038737,
+            "raw_signal": {
+              "model_name": "trustshield_text_v3",
+              "model_version": "phase3-1",
+              "dataset_version": "trustshield-text-v3",
+              "threshold": "0.16",
+              "feature_pipeline_version": "trustshield-text-features-v1",
+              "category": "phishing"
+            },
+            "provenance": "ml_classifier:ml_phishing_pattern"
+          },
+          {
+            "id": "aec66622e391",
+            "category": "no_https",
+            "severity": "low",
+            "source_module": "url_static",
+            "title": "Link does not use HTTPS",
+            "explanation": "Traffic is unencrypted; not proof of fraud on its own.",
+            "confidence": 0.4,
+            "raw_signal": {
+              "scheme": "http"
+            },
+            "provenance": "url_static:no_https"
+          }
+        ],
+        "extracted_content": null,
+        "urls": [
+          "http://wallet-rescue.example"
+        ],
+        "qr_payload": null,
+        "qr_payload_type": null,
+        "warnings": [],
+        "uncertainty": [
+          "The online certificate check was unavailable, so the domain's history was not checked.",
+          "No threat-intelligence reputation information is available; this is not the same as the link being known-clean."
+        ],
+        "safe_actions": [
+          "Do not click the link. Open the organization's official website or app by typing its address yourself.",
+          "Verify the sender independently through an official contact channel.",
+          "If you already interacted, contact your bank and report at cybercrime.gov.in or call 1930."
+        ],
+        "capabilities": [
+          {
+            "name": "text_rules",
+            "description": "deterministic scam-pattern rules",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "ml",
+            "description": "text classification model (trustshield_text_v3)",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "url_static",
+            "description": "static URL structure analysis (no network request)",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "ocr",
+            "description": "screenshot text extraction (OCR)",
+            "used": false,
+            "reason": "Not applicable to this input."
+          },
+          {
+            "name": "qr",
+            "description": "QR code decoding",
+            "used": false,
+            "reason": "Not applicable to this input."
+          },
+          {
+            "name": "reputation",
+            "description": "external reputation / threat-intelligence lookup",
+            "used": false,
+            "reason": "No reputation provider is configured; a link that is not flagged is not the same as a link known to be safe."
+          }
+        ],
+        "ocr_confidence": null
+      },
+      "error": null
+    },
+    {
+      "id": "MR-28",
+      "category": "scan_content",
+      "prompt": "I received this: 'Mom, new number. I'm stranded. Send ₹8,000 to this UPI ID right away.'",
+      "history": [],
+      "expected_kind": "analysis",
+      "actual_kind": "analysis",
+      "http_status": 200,
+      "mismatch": false,
+      "finding": null,
+      "reply_text": "This looks suspicious. The combination of machine-learning classifier detected impersonation content is consistent with fraud. Verify the sender through an official contact channel before responding.",
+      "response_type": "analysis",
+      "intent": {
+        "intent": "analyze_text",
+        "reason": "asks for a payment, credential or action, or names a payment/urgency object: analysed as content, never answered as chat or education",
+        "urls": [],
+        "followup_intent": null
+      },
+      "route": {
+        "kind": "text",
+        "reason": "plain text",
+        "urls": [],
+        "intent": null,
+        "has_attachment": false,
+        "modules": [
+          "text_rules",
+          "ml"
+        ]
+      },
+      "analysis": {
+        "contract_version": "2.0",
+        "analysis_id": "95b64353137247c4b12c7280e30e2489",
+        "timestamp": "2026-10-11T16:12:50.422640Z",
+        "input_types": [
+          "text"
+        ],
+        "risk_score": 50,
+        "risk_level": "suspicious",
+        "confidence": "medium",
+        "primary_category": "impersonation",
+        "modules_used": [
+          "text_rules",
+          "ml"
+        ],
+        "evidence": [
+          {
+            "id": "581281087223",
+            "category": "ml_impersonation_pattern",
+            "severity": "high",
+            "source_module": "ml_classifier",
+            "title": "Machine-learning classifier detected impersonation content",
+            "explanation": "This is a statistical pattern signal from a calibrated classifier, not proof that the message is fraudulent.",
+            "confidence": 0.9851851851851852,
+            "raw_signal": {
+              "model_name": "trustshield_text_v3",
+              "model_version": "phase3-1",
+              "dataset_version": "trustshield-text-v3",
+              "threshold": "0.16",
+              "feature_pipeline_version": "trustshield-text-features-v1",
+              "category": "impersonation"
+            },
+            "provenance": "ml_classifier:ml_impersonation_pattern"
+          }
+        ],
+        "extracted_content": null,
+        "urls": [],
+        "qr_payload": null,
+        "qr_payload_type": null,
+        "warnings": [],
+        "uncertainty": [],
+        "safe_actions": [
+          "Verify the sender through an official contact channel before responding.",
+          "Verify the sender independently through an official contact channel.",
+          "If you already interacted, contact your bank and report at cybercrime.gov.in or call 1930."
+        ],
+        "capabilities": [
+          {
+            "name": "text_rules",
+            "description": "deterministic scam-pattern rules",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "ml",
+            "description": "text classification model (trustshield_text_v3)",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "url_static",
+            "description": "static URL structure analysis (no network request)",
+            "used": false,
+            "reason": "Not applicable to this input."
+          },
+          {
+            "name": "ocr",
+            "description": "screenshot text extraction (OCR)",
+            "used": false,
+            "reason": "Not applicable to this input."
+          },
+          {
+            "name": "qr",
+            "description": "QR code decoding",
+            "used": false,
+            "reason": "Not applicable to this input."
+          },
+          {
+            "name": "reputation",
+            "description": "external reputation / threat-intelligence lookup",
+            "used": false,
+            "reason": "No reputation provider is configured; a link that is not flagged is not the same as a link known to be safe."
+          }
+        ],
+        "ocr_confidence": null
+      },
+      "error": null
+    },
+    {
+      "id": "MR-29",
+      "category": "scan_content",
+      "prompt": "HR says my salary account will close unless I log in here: http://payroll-fix.example and enter my password.",
+      "history": [],
+      "expected_kind": "analysis",
+      "actual_kind": "analysis",
+      "http_status": 200,
+      "mismatch": false,
+      "finding": null,
+      "reply_text": "Exercise caution with this. The presence of asks for OTP, PIN, password or card details, machine-learning classifier detected phishing content and link does not use HTTPS is notable, even though overall indicators remain mild. Do not share OTP, PIN, CVV or passwords with anyone who contacts you.",
+      "response_type": "analysis",
+      "intent": {
+        "intent": "analyze_text",
+        "reason": "message contains a URL: analysis always wins over any greeting/question wording",
+        "urls": [
+          "http://payroll-fix.example"
+        ],
+        "followup_intent": null
+      },
+      "route": {
+        "kind": "text",
+        "reason": "message contains text and a URL: analysed as text, with the URL checked structurally",
+        "urls": [
+          "http://payroll-fix.example"
+        ],
+        "intent": null,
+        "has_attachment": false,
+        "modules": [
+          "text_rules",
+          "ml",
+          "url_static"
+        ]
+      },
+      "analysis": {
+        "contract_version": "2.0",
+        "analysis_id": "4c57061505fc4364972e7878cdaa962a",
+        "timestamp": "2026-10-11T16:12:52.484732Z",
+        "input_types": [
+          "text",
+          "url"
+        ],
+        "risk_score": 39,
+        "risk_level": "caution",
+        "confidence": "high",
+        "primary_category": "credential_theft",
+        "modules_used": [
+          "text_rules",
+          "ml",
+          "url_static"
+        ],
+        "evidence": [
+          {
+            "id": "2e2ce16cc72f",
+            "category": "credential_request",
+            "severity": "high",
+            "source_module": "text_rules",
+            "title": "Asks for OTP, PIN, password or card details",
+            "explanation": "Banks and legitimate services never ask you to share these secrets by message or call.",
+            "confidence": 0.8,
+            "raw_signal": {},
+            "provenance": "text_rules:credential_request"
+          },
+          {
+            "id": "ccbb740d03f3",
+            "category": "ml_phishing_pattern",
+            "severity": "medium",
+            "source_module": "ml_classifier",
+            "title": "Machine-learning classifier detected phishing content",
+            "explanation": "This is a statistical pattern signal from a calibrated classifier, not proof that the message is fraudulent.",
+            "confidence": 0.19337412587412586,
+            "raw_signal": {
+              "model_name": "trustshield_text_v3",
+              "model_version": "phase3-1",
+              "dataset_version": "trustshield-text-v3",
+              "threshold": "0.16",
+              "feature_pipeline_version": "trustshield-text-features-v1",
+              "category": "phishing"
+            },
+            "provenance": "ml_classifier:ml_phishing_pattern"
+          },
+          {
+            "id": "2dbf83f2715b",
+            "category": "no_https",
+            "severity": "low",
+            "source_module": "url_static",
+            "title": "Link does not use HTTPS",
+            "explanation": "Traffic is unencrypted; not proof of fraud on its own.",
+            "confidence": 0.4,
+            "raw_signal": {
+              "scheme": "http"
+            },
+            "provenance": "url_static:no_https"
+          }
+        ],
+        "extracted_content": null,
+        "urls": [
+          "http://payroll-fix.example"
+        ],
+        "qr_payload": null,
+        "qr_payload_type": null,
+        "warnings": [],
+        "uncertainty": [
+          "The online certificate check was unavailable, so the domain's history was not checked.",
+          "No threat-intelligence reputation information is available; this is not the same as the link being known-clean."
+        ],
+        "safe_actions": [
+          "Do not share OTP, PIN, CVV or passwords with anyone who contacts you.",
+          "Verify the sender independently through an official contact channel.",
+          "If you already interacted, contact your bank and report at cybercrime.gov.in or call 1930."
+        ],
+        "capabilities": [
+          {
+            "name": "text_rules",
+            "description": "deterministic scam-pattern rules",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "ml",
+            "description": "text classification model (trustshield_text_v3)",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "url_static",
+            "description": "static URL structure analysis (no network request)",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "ocr",
+            "description": "screenshot text extraction (OCR)",
+            "used": false,
+            "reason": "Not applicable to this input."
+          },
+          {
+            "name": "qr",
+            "description": "QR code decoding",
+            "used": false,
+            "reason": "Not applicable to this input."
+          },
+          {
+            "name": "reputation",
+            "description": "external reputation / threat-intelligence lookup",
+            "used": false,
+            "reason": "No reputation provider is configured; a link that is not flagged is not the same as a link known to be safe."
+          }
+        ],
+        "ocr_confidence": null
+      },
+      "error": null
+    },
+    {
+      "id": "MR-30",
+      "category": "scan_content",
+      "prompt": "Your tax refund was approved. Submit your Aadhaar and bank details at http://tax-return.example today.",
+      "history": [],
+      "expected_kind": "analysis",
+      "actual_kind": "analysis",
+      "http_status": 200,
+      "mismatch": false,
+      "finding": null,
+      "reply_text": "Several warning signs stand out here. The presence of claimed organization does not match the link's domain, machine-learning classifier detected phishing content and link does not use HTTPS matches patterns commonly seen in fraud. Do not click the link. Open the organization's official website or app by typing its address yourself.",
+      "response_type": "analysis",
+      "intent": {
+        "intent": "analyze_text",
+        "reason": "message contains a URL: analysis always wins over any greeting/question wording",
+        "urls": [
+          "http://tax-return.example"
+        ],
+        "followup_intent": null
+      },
+      "route": {
+        "kind": "text",
+        "reason": "message contains text and a URL: analysed as text, with the URL checked structurally",
+        "urls": [
+          "http://tax-return.example"
+        ],
+        "intent": null,
+        "has_attachment": false,
+        "modules": [
+          "text_rules",
+          "ml",
+          "url_static"
+        ]
+      },
+      "analysis": {
+        "contract_version": "2.0",
+        "analysis_id": "a2acbe44d49b4c2794da10f2847e5534",
+        "timestamp": "2026-10-11T16:12:54.586599Z",
+        "input_types": [
+          "text",
+          "url"
+        ],
+        "risk_score": 62,
+        "risk_level": "suspicious",
+        "confidence": "high",
+        "primary_category": "phishing",
+        "modules_used": [
+          "text_rules",
+          "ml",
+          "url_static"
+        ],
+        "evidence": [
+          {
+            "id": "48deffe2c4bf",
+            "category": "domain_mismatch",
+            "severity": "high",
+            "source_module": "brand_check",
+            "title": "Claimed organization does not match the link's domain",
+            "explanation": "The message mentions UIDAI / Aadhaar, but the link points to 'tax-return.example', which is not an official domain.",
+            "confidence": 0.85,
+            "raw_signal": {
+              "registered_domain": "tax-return.example"
+            },
+            "provenance": "brand_check:domain_mismatch"
+          },
+          {
+            "id": "ba4102a0774b",
+            "category": "ml_phishing_pattern",
+            "severity": "medium",
+            "source_module": "ml_classifier",
+            "title": "Machine-learning classifier detected phishing content",
+            "explanation": "This is a statistical pattern signal from a calibrated classifier, not proof that the message is fraudulent.",
+            "confidence": 0.8543382352941176,
+            "raw_signal": {
+              "model_name": "trustshield_text_v3",
+              "model_version": "phase3-1",
+              "dataset_version": "trustshield-text-v3",
+              "threshold": "0.16",
+              "feature_pipeline_version": "trustshield-text-features-v1",
+              "category": "phishing"
+            },
+            "provenance": "ml_classifier:ml_phishing_pattern"
+          },
+          {
+            "id": "f8b5a3f1939a",
+            "category": "no_https",
+            "severity": "low",
+            "source_module": "url_static",
+            "title": "Link does not use HTTPS",
+            "explanation": "Traffic is unencrypted; not proof of fraud on its own.",
+            "confidence": 0.4,
+            "raw_signal": {
+              "scheme": "http"
+            },
+            "provenance": "url_static:no_https"
+          }
+        ],
+        "extracted_content": null,
+        "urls": [
+          "http://tax-return.example",
+          "tax-return.example"
+        ],
+        "qr_payload": null,
+        "qr_payload_type": null,
+        "warnings": [],
+        "uncertainty": [
+          "The online certificate check was unavailable, so the domain's history was not checked.",
+          "No threat-intelligence reputation information is available; this is not the same as the link being known-clean."
+        ],
+        "safe_actions": [
+          "Do not click the link. Open the organization's official website or app by typing its address yourself.",
+          "Verify the sender independently through an official contact channel.",
+          "If you already interacted, contact your bank and report at cybercrime.gov.in or call 1930."
+        ],
+        "capabilities": [
+          {
+            "name": "text_rules",
+            "description": "deterministic scam-pattern rules",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "ml",
+            "description": "text classification model (trustshield_text_v3)",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "url_static",
+            "description": "static URL structure analysis (no network request)",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "ocr",
+            "description": "screenshot text extraction (OCR)",
+            "used": false,
+            "reason": "Not applicable to this input."
+          },
+          {
+            "name": "qr",
+            "description": "QR code decoding",
+            "used": false,
+            "reason": "Not applicable to this input."
+          },
+          {
+            "name": "reputation",
+            "description": "external reputation / threat-intelligence lookup",
+            "used": false,
+            "reason": "No reputation provider is configured; a link that is not flagged is not the same as a link known to be safe."
+          }
+        ],
+        "ocr_confidence": null
+      },
+      "error": null
+    },
+    {
+      "id": "MR-31",
+      "category": "scan_content",
+      "prompt": "The caller said they are from police cyber cell and I need to transfer my savings to a safe account now.",
+      "history": [],
+      "expected_kind": "analysis",
+      "actual_kind": "analysis",
+      "http_status": 200,
+      "mismatch": false,
+      "finding": null,
+      "reply_text": "This looks okay. TrustShield found no significant suspicious indicators in what it could check.",
+      "response_type": "analysis",
+      "intent": {
+        "intent": "analyze_text",
+        "reason": "asks for a payment, credential or action, or names a payment/urgency object: analysed as content, never answered as chat or education",
+        "urls": [],
+        "followup_intent": null
+      },
+      "route": {
+        "kind": "text",
+        "reason": "plain text",
+        "urls": [],
+        "intent": null,
+        "has_attachment": false,
+        "modules": [
+          "text_rules",
+          "ml"
+        ]
+      },
+      "analysis": {
+        "contract_version": "2.0",
+        "analysis_id": "016108f8eefe4b45a7c7a0f68e9e8a9b",
+        "timestamp": "2026-10-11T16:12:56.691659Z",
+        "input_types": [
+          "text"
+        ],
+        "risk_score": 0,
+        "risk_level": "low_risk",
+        "confidence": "high",
+        "primary_category": "none_detected",
+        "modules_used": [
+          "text_rules",
+          "ml"
+        ],
+        "evidence": [],
+        "extracted_content": null,
+        "urls": [],
+        "qr_payload": null,
+        "qr_payload_type": null,
+        "warnings": [],
+        "uncertainty": [],
+        "safe_actions": [
+          "No action needed based on this analysis, but never share OTPs or passwords and verify unexpected requests."
+        ],
+        "capabilities": [
+          {
+            "name": "text_rules",
+            "description": "deterministic scam-pattern rules",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "ml",
+            "description": "text classification model (trustshield_text_v3)",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "url_static",
+            "description": "static URL structure analysis (no network request)",
+            "used": false,
+            "reason": "Not applicable to this input."
+          },
+          {
+            "name": "ocr",
+            "description": "screenshot text extraction (OCR)",
+            "used": false,
+            "reason": "Not applicable to this input."
+          },
+          {
+            "name": "qr",
+            "description": "QR code decoding",
+            "used": false,
+            "reason": "Not applicable to this input."
+          },
+          {
+            "name": "reputation",
+            "description": "external reputation / threat-intelligence lookup",
+            "used": false,
+            "reason": "No reputation provider is configured; a link that is not flagged is not the same as a link known to be safe."
+          }
+        ],
+        "ocr_confidence": null
+      },
+      "error": null
+    },
+    {
+      "id": "MR-32",
+      "category": "scan_content",
+      "prompt": "hi pls chk this msg: ur parcel stuck pay 12rs here http://ship-track.example fast",
+      "history": [],
+      "expected_kind": "analysis",
+      "actual_kind": "analysis",
+      "http_status": 200,
+      "mismatch": false,
+      "finding": null,
+      "reply_text": "Several warning signs stand out here. The presence of machine-learning classifier detected other fraud content and link does not use HTTPS matches patterns commonly seen in fraud. Verify the sender independently through an official contact channel.",
+      "response_type": "analysis",
+      "intent": {
+        "intent": "analyze_text",
+        "reason": "message contains a URL: analysis always wins over any greeting/question wording",
+        "urls": [
+          "http://ship-track.example"
+        ],
+        "followup_intent": null
+      },
+      "route": {
+        "kind": "text",
+        "reason": "message contains text and a URL: analysed as text, with the URL checked structurally",
+        "urls": [
+          "http://ship-track.example"
+        ],
+        "intent": null,
+        "has_attachment": false,
+        "modules": [
+          "text_rules",
+          "ml",
+          "url_static"
+        ]
+      },
+      "analysis": {
+        "contract_version": "2.0",
+        "analysis_id": "b839870fba7245df86ba9b7c420e6e93",
+        "timestamp": "2026-10-11T16:12:58.801860Z",
+        "input_types": [
+          "text",
+          "url"
+        ],
+        "risk_score": 50,
+        "risk_level": "suspicious",
+        "confidence": "high",
+        "primary_category": "other_fraud",
+        "modules_used": [
+          "text_rules",
+          "ml",
+          "url_static"
+        ],
+        "evidence": [
+          {
+            "id": "8fe938584088",
+            "category": "ml_other_fraud_pattern",
+            "severity": "medium",
+            "source_module": "ml_classifier",
+            "title": "Machine-learning classifier detected other fraud content",
+            "explanation": "This is a statistical pattern signal from a calibrated classifier, not proof that the message is fraudulent.",
+            "confidence": 0.7629449322812979,
+            "raw_signal": {
+              "model_name": "trustshield_text_v3",
+              "model_version": "phase3-1",
+              "dataset_version": "trustshield-text-v3",
+              "threshold": "0.16",
+              "feature_pipeline_version": "trustshield-text-features-v1",
+              "category": "other_fraud"
+            },
+            "provenance": "ml_classifier:ml_other_fraud_pattern"
+          },
+          {
+            "id": "3d9ec40a628c",
+            "category": "no_https",
+            "severity": "low",
+            "source_module": "url_static",
+            "title": "Link does not use HTTPS",
+            "explanation": "Traffic is unencrypted; not proof of fraud on its own.",
+            "confidence": 0.4,
+            "raw_signal": {
+              "scheme": "http"
+            },
+            "provenance": "url_static:no_https"
+          }
+        ],
+        "extracted_content": null,
+        "urls": [
+          "http://ship-track.example"
+        ],
+        "qr_payload": null,
+        "qr_payload_type": null,
+        "warnings": [],
+        "uncertainty": [
+          "The online certificate check was unavailable, so the domain's history was not checked.",
+          "No threat-intelligence reputation information is available; this is not the same as the link being known-clean."
+        ],
+        "safe_actions": [
+          "Verify the sender independently through an official contact channel.",
+          "If you already interacted, contact your bank and report at cybercrime.gov.in or call 1930."
+        ],
+        "capabilities": [
+          {
+            "name": "text_rules",
+            "description": "deterministic scam-pattern rules",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "ml",
+            "description": "text classification model (trustshield_text_v3)",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "url_static",
+            "description": "static URL structure analysis (no network request)",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "ocr",
+            "description": "screenshot text extraction (OCR)",
+            "used": false,
+            "reason": "Not applicable to this input."
+          },
+          {
+            "name": "qr",
+            "description": "QR code decoding",
+            "used": false,
+            "reason": "Not applicable to this input."
+          },
+          {
+            "name": "reputation",
+            "description": "external reputation / threat-intelligence lookup",
+            "used": false,
+            "reason": "No reputation provider is configured; a link that is not flagged is not the same as a link known to be safe."
+          }
+        ],
+        "ocr_confidence": null
+      },
+      "error": null
+    },
+    {
+      "id": "MR-33",
+      "category": "scan_content",
+      "prompt": "Your Microsoft account storage is full; verify your password at http://onedrive-renew.example to avoid deletion.",
+      "history": [],
+      "expected_kind": "analysis",
+      "actual_kind": "analysis",
+      "http_status": 200,
+      "mismatch": false,
+      "finding": null,
+      "reply_text": "Several warning signs stand out here. The presence of claimed organization does not match the link's domain, asks for OTP, PIN, password or card details and machine-learning classifier detected phishing content matches patterns commonly seen in fraud. Do not share OTP, PIN, CVV or passwords with anyone who contacts you.",
+      "response_type": "analysis",
+      "intent": {
+        "intent": "analyze_text",
+        "reason": "message contains a URL: analysis always wins over any greeting/question wording",
+        "urls": [
+          "http://onedrive-renew.example"
+        ],
+        "followup_intent": null
+      },
+      "route": {
+        "kind": "text",
+        "reason": "message contains text and a URL: analysed as text, with the URL checked structurally",
+        "urls": [
+          "http://onedrive-renew.example"
+        ],
+        "intent": null,
+        "has_attachment": false,
+        "modules": [
+          "text_rules",
+          "ml",
+          "url_static"
+        ]
+      },
+      "analysis": {
+        "contract_version": "2.0",
+        "analysis_id": "250b0a6c85ad4a6eb83f9bac80316478",
+        "timestamp": "2026-10-11T16:13:00.865837Z",
+        "input_types": [
+          "text",
+          "url"
+        ],
+        "risk_score": 68,
+        "risk_level": "suspicious",
+        "confidence": "high",
+        "primary_category": "credential_theft",
+        "modules_used": [
+          "text_rules",
+          "ml",
+          "url_static"
+        ],
+        "evidence": [
+          {
+            "id": "a82aa2b92a3b",
+            "category": "credential_request",
+            "severity": "high",
+            "source_module": "text_rules",
+            "title": "Asks for OTP, PIN, password or card details",
+            "explanation": "Banks and legitimate services never ask you to share these secrets by message or call.",
+            "confidence": 0.8,
+            "raw_signal": {},
+            "provenance": "text_rules:credential_request"
+          },
+          {
+            "id": "53cc4276d88a",
+            "category": "domain_mismatch",
+            "severity": "high",
+            "source_module": "brand_check",
+            "title": "Claimed organization does not match the link's domain",
+            "explanation": "The message mentions Microsoft, but the link points to 'onedrive-renew.example', which is not an official domain.",
+            "confidence": 0.85,
+            "raw_signal": {
+              "registered_domain": "onedrive-renew.example"
+            },
+            "provenance": "brand_check:domain_mismatch"
+          },
+          {
+            "id": "9b48a527bc14",
+            "category": "ml_phishing_pattern",
+            "severity": "medium",
+            "source_module": "ml_classifier",
+            "title": "Machine-learning classifier detected phishing content",
+            "explanation": "This is a statistical pattern signal from a calibrated classifier, not proof that the message is fraudulent.",
+            "confidence": 0.5900588290716322,
+            "raw_signal": {
+              "model_name": "trustshield_text_v3",
+              "model_version": "phase3-1",
+              "dataset_version": "trustshield-text-v3",
+              "threshold": "0.16",
+              "feature_pipeline_version": "trustshield-text-features-v1",
+              "category": "phishing"
+            },
+            "provenance": "ml_classifier:ml_phishing_pattern"
+          },
+          {
+            "id": "f7fdce8a0eb3",
+            "category": "no_https",
+            "severity": "low",
+            "source_module": "url_static",
+            "title": "Link does not use HTTPS",
+            "explanation": "Traffic is unencrypted; not proof of fraud on its own.",
+            "confidence": 0.4,
+            "raw_signal": {
+              "scheme": "http"
+            },
+            "provenance": "url_static:no_https"
+          }
+        ],
+        "extracted_content": null,
+        "urls": [
+          "http://onedrive-renew.example",
+          "onedrive-renew.example"
+        ],
+        "qr_payload": null,
+        "qr_payload_type": null,
+        "warnings": [],
+        "uncertainty": [
+          "The online certificate check was unavailable, so the domain's history was not checked.",
+          "No threat-intelligence reputation information is available; this is not the same as the link being known-clean."
+        ],
+        "safe_actions": [
+          "Do not share OTP, PIN, CVV or passwords with anyone who contacts you.",
+          "Verify the sender independently through an official contact channel.",
+          "If you already interacted, contact your bank and report at cybercrime.gov.in or call 1930."
+        ],
+        "capabilities": [
+          {
+            "name": "text_rules",
+            "description": "deterministic scam-pattern rules",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "ml",
+            "description": "text classification model (trustshield_text_v3)",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "url_static",
+            "description": "static URL structure analysis (no network request)",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "ocr",
+            "description": "screenshot text extraction (OCR)",
+            "used": false,
+            "reason": "Not applicable to this input."
+          },
+          {
+            "name": "qr",
+            "description": "QR code decoding",
+            "used": false,
+            "reason": "Not applicable to this input."
+          },
+          {
+            "name": "reputation",
+            "description": "external reputation / threat-intelligence lookup",
+            "used": false,
+            "reason": "No reputation provider is configured; a link that is not flagged is not the same as a link known to be safe."
+          }
+        ],
+        "ocr_confidence": null
+      },
+      "error": null
+    },
+    {
+      "id": "MR-34",
+      "category": "scan_content",
+      "prompt": "Pay ₹2,000 to this UPI ID for the job interview slot, then send the transaction screenshot to the recruiter.",
+      "history": [],
+      "expected_kind": "analysis",
+      "actual_kind": "analysis",
+      "http_status": 200,
+      "mismatch": false,
+      "finding": null,
+      "reply_text": "A cautious approach is advised here. Signals like machine-learning classifier detected payment fraud content and payment or fee requested are worth keeping in mind, though nothing stands out as severe. Do not send money or scan payment QR codes until the request is verified through an official channel.",
+      "response_type": "analysis",
+      "intent": {
+        "intent": "analyze_text",
+        "reason": "asks for a payment, credential or action, or names a payment/urgency object: analysed as content, never answered as chat or education",
+        "urls": [],
+        "followup_intent": null
+      },
+      "route": {
+        "kind": "text",
+        "reason": "plain text",
+        "urls": [],
+        "intent": null,
+        "has_attachment": false,
+        "modules": [
+          "text_rules",
+          "ml"
+        ]
+      },
+      "analysis": {
+        "contract_version": "2.0",
+        "analysis_id": "469906345bcb4263974d61987aa3d604",
+        "timestamp": "2026-10-11T16:13:02.958716Z",
+        "input_types": [
+          "text"
+        ],
+        "risk_score": 40,
+        "risk_level": "caution",
+        "confidence": "high",
+        "primary_category": "payment_fraud",
+        "modules_used": [
+          "text_rules",
+          "ml"
+        ],
+        "evidence": [
+          {
+            "id": "aebef7d318ab",
+            "category": "payment_request",
+            "severity": "medium",
+            "source_module": "text_rules",
+            "title": "Payment or fee requested",
+            "explanation": "The message asks for money, a fee or a deposit, which legitimate offers rarely require up front.",
+            "confidence": 0.65,
+            "raw_signal": {},
+            "provenance": "text_rules:payment_request"
+          },
+          {
+            "id": "3571175b0bb3",
+            "category": "ml_payment_fraud_pattern",
+            "severity": "medium",
+            "source_module": "ml_classifier",
+            "title": "Machine-learning classifier detected payment fraud content",
+            "explanation": "This is a statistical pattern signal from a calibrated classifier, not proof that the message is fraudulent.",
+            "confidence": 0.6602292609351433,
+            "raw_signal": {
+              "model_name": "trustshield_text_v3",
+              "model_version": "phase3-1",
+              "dataset_version": "trustshield-text-v3",
+              "threshold": "0.16",
+              "feature_pipeline_version": "trustshield-text-features-v1",
+              "category": "payment_fraud"
+            },
+            "provenance": "ml_classifier:ml_payment_fraud_pattern"
+          }
+        ],
+        "extracted_content": null,
+        "urls": [],
+        "qr_payload": null,
+        "qr_payload_type": null,
+        "warnings": [],
+        "uncertainty": [],
+        "safe_actions": [
+          "Do not send money or scan payment QR codes until the request is verified through an official channel.",
+          "Verify the sender independently through an official contact channel.",
+          "If you already interacted, contact your bank and report at cybercrime.gov.in or call 1930."
+        ],
+        "capabilities": [
+          {
+            "name": "text_rules",
+            "description": "deterministic scam-pattern rules",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "ml",
+            "description": "text classification model (trustshield_text_v3)",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "url_static",
+            "description": "static URL structure analysis (no network request)",
+            "used": false,
+            "reason": "Not applicable to this input."
+          },
+          {
+            "name": "ocr",
+            "description": "screenshot text extraction (OCR)",
+            "used": false,
+            "reason": "Not applicable to this input."
+          },
+          {
+            "name": "qr",
+            "description": "QR code decoding",
+            "used": false,
+            "reason": "Not applicable to this input."
+          },
+          {
+            "name": "reputation",
+            "description": "external reputation / threat-intelligence lookup",
+            "used": false,
+            "reason": "No reputation provider is configured; a link that is not flagged is not the same as a link known to be safe."
+          }
+        ],
+        "ocr_confidence": null
+      },
+      "error": null
+    },
+    {
+      "id": "MR-35",
+      "category": "scan_content",
+      "prompt": "Boss texted: buy five gift cards now and send me all the codes before the meeting starts.",
+      "history": [],
+      "expected_kind": "analysis",
+      "actual_kind": "analysis",
+      "http_status": 200,
+      "mismatch": false,
+      "finding": null,
+      "reply_text": "Exercise caution with this. The presence of machine-learning classifier detected other fraud content is notable, even though overall indicators remain mild. Verify the sender independently through an official contact channel.",
+      "response_type": "analysis",
+      "intent": {
+        "intent": "analyze_text",
+        "reason": "no chat/education/product pattern matched: analysed as content (safe default)",
+        "urls": [],
+        "followup_intent": null
+      },
+      "route": {
+        "kind": "text",
+        "reason": "plain text",
+        "urls": [],
+        "intent": null,
+        "has_attachment": false,
+        "modules": [
+          "text_rules",
+          "ml"
+        ]
+      },
+      "analysis": {
+        "contract_version": "2.0",
+        "analysis_id": "591cb713034747608e8bb0b197afc77b",
+        "timestamp": "2026-10-11T16:13:05.026195Z",
+        "input_types": [
+          "text"
+        ],
+        "risk_score": 25,
+        "risk_level": "caution",
+        "confidence": "medium",
+        "primary_category": "other_fraud",
+        "modules_used": [
+          "text_rules",
+          "ml"
+        ],
+        "evidence": [
+          {
+            "id": "1be9262f4e3f",
+            "category": "ml_other_fraud_pattern",
+            "severity": "medium",
+            "source_module": "ml_classifier",
+            "title": "Machine-learning classifier detected other fraud content",
+            "explanation": "This is a statistical pattern signal from a calibrated classifier, not proof that the message is fraudulent.",
+            "confidence": 0.1751197458455523,
+            "raw_signal": {
+              "model_name": "trustshield_text_v3",
+              "model_version": "phase3-1",
+              "dataset_version": "trustshield-text-v3",
+              "threshold": "0.16",
+              "feature_pipeline_version": "trustshield-text-features-v1",
+              "category": "other_fraud"
+            },
+            "provenance": "ml_classifier:ml_other_fraud_pattern"
+          }
+        ],
+        "extracted_content": null,
+        "urls": [],
+        "qr_payload": null,
+        "qr_payload_type": null,
+        "warnings": [],
+        "uncertainty": [],
+        "safe_actions": [
+          "Verify the sender independently through an official contact channel.",
+          "If you already interacted, contact your bank and report at cybercrime.gov.in or call 1930."
+        ],
+        "capabilities": [
+          {
+            "name": "text_rules",
+            "description": "deterministic scam-pattern rules",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "ml",
+            "description": "text classification model (trustshield_text_v3)",
+            "used": true,
+            "reason": ""
+          },
+          {
+            "name": "url_static",
+            "description": "static URL structure analysis (no network request)",
+            "used": false,
+            "reason": "Not applicable to this input."
+          },
+          {
+            "name": "ocr",
+            "description": "screenshot text extraction (OCR)",
+            "used": false,
+            "reason": "Not applicable to this input."
+          },
+          {
+            "name": "qr",
+            "description": "QR code decoding",
+            "used": false,
+            "reason": "Not applicable to this input."
+          },
+          {
+            "name": "reputation",
+            "description": "external reputation / threat-intelligence lookup",
+            "used": false,
+            "reason": "No reputation provider is configured; a link that is not flagged is not the same as a link known to be safe."
+          }
+        ],
+        "ocr_confidence": null
+      },
+      "error": null
+    }
+  ]
+}
