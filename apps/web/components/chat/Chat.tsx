@@ -32,12 +32,21 @@ function newConversation(): Conversation {
 }
 
 // Chats are saved in this browser (localStorage), so they survive a page refresh. Uploaded image previews are not saved (a
-// blob URL cannot be restored), and failed-request messages are dropped. Cross-device history needs sign-in, which is not set up.
-const STORE_KEY = "trustshield.chats.v1";
+// blob URL cannot be restored), and failed-request messages are dropped. Storage is scoped per signed-in identity (or "anon"
+// when signed out), so switching accounts on the same device switches history instead of sharing one bucket. Cross-device
+// sync (the same account seeing its chats on a different device) needs a backend store, which is not set up.
+const LEGACY_STORE_KEY = "trustshield.chats.v1";
+const WELCOME_DISMISSED_KEY = "trustshield.welcome_dismissed.v1";
+const storeKeyFor = (identity: string) => `trustshield.chats.v1:${identity}`;
 
-function loadChats(): Conversation[] | null {
+function loadChats(identity: string): Conversation[] | null {
   try {
-    const raw = window.localStorage.getItem(STORE_KEY);
+    let raw = window.localStorage.getItem(storeKeyFor(identity));
+    if (!raw && identity === "anon") {
+      // One-time migration: chats from before history was identity-scoped lived under one shared key.
+      raw = window.localStorage.getItem(LEGACY_STORE_KEY);
+      if (raw) window.localStorage.removeItem(LEGACY_STORE_KEY);
+    }
     if (!raw) return null;
     const parsed = JSON.parse(raw) as Conversation[];
     return Array.isArray(parsed) && parsed.length > 0 ? parsed : null;
@@ -46,7 +55,7 @@ function loadChats(): Conversation[] | null {
   }
 }
 
-function saveChats(chats: Conversation[]) {
+function saveChats(identity: string, chats: Conversation[]) {
   try {
     const clean = chats.slice(0, 50).map((c) => ({
       ...c,
@@ -54,7 +63,7 @@ function saveChats(chats: Conversation[]) {
         .filter((m) => m.role === "user" || m.kind !== "error")
         .map((m) => (m.role === "user" ? { id: m.id, role: m.role, text: m.text, fileName: m.fileName } : m)),
     }));
-    window.localStorage.setItem(STORE_KEY, JSON.stringify(clean));
+    window.localStorage.setItem(storeKeyFor(identity), JSON.stringify(clean));
   } catch {
     // storage full or blocked: the chat still works in memory
   }
@@ -141,7 +150,13 @@ export function Chat() {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const recogRef = useRef<SpeechRecognitionLike | null>(null);
-  const hydrated = useRef(false);
+  const chatsRef = useRef(chats);
+  const prevIdentityRef = useRef<string | null>(null);
+  const skipNextSaveRef = useRef(true);
+  const [showGate, setShowGate] = useState(false);
+
+  // Whose chats are currently loaded: a stable per-account bucket, or "anon" while signed out.
+  const identity = loading ? null : (session?.user.id ?? "anon");
 
   const active = chats.find((c) => c.id === activeId) ?? chats[0];
   const busy = streaming.has(active.id);
@@ -171,22 +186,74 @@ export function Chat() {
 
   useEffect(() => () => recogRef.current?.stop(), []);
 
-  // Restore the saved chats after mount (server render has no localStorage).
+  // Mirrors `chats` on every render so the identity-switch effect below can flush the *outgoing* identity's
+  // latest messages even though that effect itself only reacts to `identity`, not `chats`.
   useEffect(() => {
-    const stored = loadChats();
+    chatsRef.current = chats;
+  });
+
+  // Restore the signed-in (or anonymous) identity's saved chats whenever that identity changes — on mount, after
+  // login, and after logout. Flushes the previous identity's chats synchronously first, so a message sent just
+  // before logging out isn't lost to the save effect's debounce getting cancelled by the identity switch.
+  useEffect(() => {
+    if (identity === null) return; // session still loading: wait rather than briefly flashing anon history
+    if (prevIdentityRef.current !== null && prevIdentityRef.current !== identity) {
+      saveChats(prevIdentityRef.current, chatsRef.current);
+    }
+    const stored = loadChats(identity);
+    skipNextSaveRef.current = true;
     if (stored) {
       setChats(stored);
       setActiveId(stored[0].id);
+    } else {
+      const c = newConversation();
+      setChats([c]);
+      setActiveId(c.id);
     }
-    hydrated.current = true;
-  }, []);
+    prevIdentityRef.current = identity;
+  }, [identity]);
 
   // Save in the background, after the chat has been idle briefly: writing the whole history on every streamed token is slow.
   useEffect(() => {
-    if (!hydrated.current) return;
-    const t = window.setTimeout(() => saveChats(chats), 400);
+    if (identity === null) return;
+    if (skipNextSaveRef.current) {
+      skipNextSaveRef.current = false; // this `chats` value just came from hydration, not a user action
+      return;
+    }
+    const t = window.setTimeout(() => saveChats(identity, chats), 400);
     return () => window.clearTimeout(t);
-  }, [chats]);
+  }, [chats, identity]);
+
+  // Show the sign-in gate once per device for a signed-out visitor, until they skip it or sign in.
+  useEffect(() => {
+    if (loading || session) {
+      setShowGate(false);
+      return;
+    }
+    try {
+      setShowGate(window.localStorage.getItem(WELCOME_DISMISSED_KEY) !== "1");
+    } catch {
+      setShowGate(true);
+    }
+  }, [loading, session]);
+
+  function dismissGate() {
+    setShowGate(false);
+    try {
+      window.localStorage.setItem(WELCOME_DISMISSED_KEY, "1");
+    } catch {
+      // storage blocked: the gate just won't persist across a refresh
+    }
+  }
+
+  function logOut() {
+    try {
+      window.localStorage.removeItem(WELCOME_DISMISSED_KEY);
+    } catch {
+      // storage blocked: harmless, the gate simply won't re-show
+    }
+    void supabase?.auth.signOut();
+  }
 
   function accept(f: File | undefined | null) {
     if (!f) return;
@@ -581,7 +648,7 @@ export function Chat() {
         {session && (
           <div className="mt-2 flex items-center justify-between gap-2 rounded-lg px-2 py-2 text-xs text-zinc-500">
             <span className="min-w-0 truncate">{session.user.email}</span>
-            <button type="button" onClick={() => { void supabase?.auth.signOut(); }} className="shrink-0 hover:text-zinc-900">Log out</button>
+            <button type="button" onClick={logOut} className="shrink-0 hover:text-zinc-900">Log out</button>
           </div>
         )}
       </aside>
@@ -801,6 +868,24 @@ export function Chat() {
           </p>
         </div>
       </div>
+
+      {showGate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div role="dialog" aria-modal="true" aria-labelledby="gate-heading" className="relative w-full max-w-sm rounded-2xl bg-white p-6 text-center shadow-2xl">
+            <button type="button" onClick={dismissGate} aria-label="Skip for now" className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full text-zinc-400 hover:bg-zinc-100 hover:text-zinc-900 focus:outline-none focus:ring-2 focus:ring-teal-500">
+              ✕
+            </button>
+            <Logo className="mx-auto h-10 w-10" />
+            <h2 id="gate-heading" className="mt-4 text-xl font-semibold text-zinc-900">Welcome to TrustShield</h2>
+            <p className="mt-2 text-sm text-zinc-500">Log in or sign up to save your scan history to your account.</p>
+            <div className="mt-6 flex flex-col gap-2">
+              <a href="/login" className="rounded-lg bg-zinc-900 py-2.5 text-sm font-medium text-white hover:bg-zinc-800">Log in</a>
+              <a href="/signup" className="rounded-lg border border-zinc-300 py-2.5 text-sm font-medium text-zinc-900 hover:bg-zinc-50">Sign up</a>
+            </div>
+            <button type="button" onClick={dismissGate} className="mt-4 text-sm text-zinc-500 underline hover:text-zinc-900">Skip for now</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
