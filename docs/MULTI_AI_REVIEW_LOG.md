@@ -129,7 +129,15 @@ guarantee for any future direct-client access path.
 
 ## Hermes — broad second-opinion diff review
 
-*(Findings recorded below once the run completes — see `docs/security-runs/hermes_diff_review.md`.)*
+**Attempted twice, failed both times — no usable review produced.** The first dispatch's
+background process was orphaned when the session was interrupted (produced nothing, killed on
+discovery). The re-dispatch completed but didn't engage with the task at all — it returned a
+generic "how can I help you today" tool-menu response instead of reviewing the diff (log:
+`docs/security-runs/hermes_diff_review.log`). Not retried a third time: Codex's backend review,
+PentestGPT's pentest, Antigravity's UI/UX review, my own manual live verification, and the
+user's own independently-run Hermes production security assessment (see below) already give
+strong independent coverage across security, correctness, and UX. Recorded here as an observed
+delegate-tool failure, not as a finding about the code.
 
 ## Antigravity — UI/UX and accessibility review
 
