@@ -9,3 +9,5 @@
 - 2026-10-22T23:53:05Z: Baseline .venv\Scripts\python -m pytest -q passed: 802 passed, 7 skipped, 5 warnings, 181.26 s. W1-auth and W2-discovery prompts prepared in their package folders; no Hermes launch yet.
 
 - 2026-10-22T23:55:19Z: Launched W1-auth in Lane A (session 2238, PID 13880) and W2-discovery in Lane B (session 37963, PID 22560). W2 resource preflight: 25.95 GB free RAM, CPU samples 7/15/19 percent. REA is listed as enabled in Hermes MCP. Thermal telemetry unavailable; battery reports 100 percent and charging. Package logs were empty at initial observation; normal under Hermes output buffering.
+
+- 2026-10-22T23:58:29Z: Process tree confirms W1 local servers are Lane A-owned: Uvicorn PID 29800 on 8000 and Next/node PID 28236 on 3000. Hermess worker CPU time continues to rise; logs remain buffered/empty, so no hang recovery started.
