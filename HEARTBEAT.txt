@@ -1,1 +1,1 @@
-2026-10-22T23:53:05Z | Baseline passed; preparing W1 and W2
+2026-10-22T23:55:19Z | W1-auth (Lane A), W2-discovery (Lane B)
