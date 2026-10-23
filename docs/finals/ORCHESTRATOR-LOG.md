@@ -23,3 +23,5 @@
 - 20:17 IST: Closed W3 issues #14-#16 and W2 font-token issue #11 after pushed verification; commented on workstream issues #2/#3 and updated tracker #8. Kept #17 open because pre-outage writer attribution is unavailable; opened #18 for lint. Roadmap owner assignments now match the compressed lane schedule.
 
 - 20:24 IST: Applied security-reviewer skill. Automated scanners (semgrep, bandit, gitleaks, trivy) are unavailable; no system installs. Manual review plus small in-memory timing confirmed near-quadratic PDF `_TJ_RE` suffix scanning on unmatched `[` bytes. Filed issue #19, commented on #3; W3 acceptance now also requires a bounded scan and synthetic regression. No large payload sent to API.
+
+- 20:29 IST: After nearly 15 minutes, both lanes had fresh files despite empty buffered logs, so neither process was killed. W2 wrote a 390px screenshot. W3 interim report claims focused CSV/text 27 pass, XLSX hostile 20 pass, and API upload integration 14 pass/1 warning; no acceptance until independent diff/security review plus full pytest. PDF regex blocker #19 remains.

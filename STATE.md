@@ -1,6 +1,6 @@
 ﻿# Finals run state
 
-- Last update: 2026-10-23 20:24 IST / 2026-10-23T14:54Z.
+- Last update: 2026-10-23 20:29 IST / 2026-10-23T14:59Z.
 - Recovery T0: 2026-10-23 19:55 IST. Hard finish: 2026-10-24 01:55 IST.
 - Branch `finals-48h`, HEAD `a2f6e0f`, pushed to `origin/finals-48h`.
 - All pre-outage Hermes sessions are dead: prior Lane B terminal 86379 / Hermes PID 32720 / worker 31084; prior Lane A terminal 91730 / Hermes PID 33368 / worker 28832.
@@ -74,3 +74,10 @@
 
 - `security-reviewer` skill applied to W3 upload parser/API boundary. Automated scanners `semgrep`, `bandit`, `gitleaks`, and `trivy` are not installed; no system tools were installed. Manual parser review found a potential PDF CPU denial of service: `_TJ_RE` in `pdf_text.py` has near-quadratic repeated-suffix scanning on unmatched `[` input, while the deadline is checked outside the regex. Small synthetic timings: 1k=0.0038s, 2k=0.012s, 4k=0.051s, 8k=0.251s, 12k=0.498s.
 - Filed issue #19 and commented on W3 issue #3. Parser is not yet API-wired; do not accept W3 until the regex path is bounded, has an in-memory regression, and the full suite passes. No large payload was sent to an API.
+
+
+## Lane progress (2026-10-23 20:29 IST)
+
+- Both Hermes sessions are still running with empty parent run logs, but fresh work is present. W2 added a 390px viewport capture at 20:28; UI gates still pending.
+- W3 interim report at `work/finals/w3-integration/REPORT.md`: focused CSV/text 27 passed, XLSX hostile cases 20 passed, API upload tests 14 passed/1 warning. It reports new `/api/v1/analyze/document` and `/api/v1/chat/upload` integration. This is worker-reported evidence only; independent route/security review and full pytest are pending.
+- W3 PDF regex issue #19 remains a blocking security finding until a bounded scan and regression are visible in the diff and full suite is green.
