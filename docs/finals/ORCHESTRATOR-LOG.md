@@ -17,3 +17,5 @@
 - 20:11 IST: Consolidated all per-format size checks onto `document_types.max_document_bytes()` and removed unused helper aliases. Focused W3 suite passed 77/77; mandatory full suite passed 1041 passed, 7 skipped, 5 warnings in 189.20s. Opened W2 lint issue #18 for two pre-existing effect-rule errors; typecheck/build pass.
 
 - 20:12 IST: Recovery milestone committed and pushed as `a2f6e0f` after the 1041/7 full-suite gate. W1 regenerated evidence restored to baseline and excluded. API PID 32660, web PID 28920, and gate PID 8076 are live. Tracker and defect issue updates pending before lane launch.
+
+- 20:14 IST: Relaunched Lane A W2 (Hermes PID 32600, command-session 16572) and Lane B W3 (command-session 97179) after preflight checks (gate 8076 active; 22.8/21.9 GB free RAM, CPU 37/70%). No output yet is normal; apply the 15-minute rule.

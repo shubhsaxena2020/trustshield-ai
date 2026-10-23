@@ -1,6 +1,6 @@
 ﻿# Finals run state
 
-- Last update: 2026-10-23 20:12 IST / 2026-10-23T14:42Z.
+- Last update: 2026-10-23 20:14 IST / 2026-10-23T14:44Z.
 - Recovery T0: 2026-10-23 19:55 IST. Hard finish: 2026-10-24 01:55 IST.
 - Branch `finals-48h`, HEAD `a2f6e0f`, pushed to `origin/finals-48h`.
 - All pre-outage Hermes sessions are dead: prior Lane B terminal 86379 / Hermes PID 32720 / worker 31084; prior Lane A terminal 91730 / Hermes PID 33368 / worker 28832.
@@ -52,3 +52,11 @@
 - `NEEDS_SHUBH.md` still records the external Supabase verification gap; no action is needed during this unattended run.
 - Issue #18 tracks the W2 lint errors. Issue #17's W1 evidence path is restored, but the exact pre-outage writer command is unknown; keep the issue open with that limitation.
 - No PR opened; production and Vercel boundaries remain in force.
+
+## Active work lanes (2026-10-23 20:14 IST)
+
+- Lane A W2 resumed via `hermes -z` in `work/finals/w2-resume/`; command-session id 16572; Hermes PID 32600. Initial run log is empty; per MISSION/HEAD_ORDERS do not treat silence under 15 minutes as a hang.
+- Lane B W3 resumed via `hermes -z` in `work/finals/w3-integration/`; command-session id 97179; Hermes PID 30336. It owns API/extractor integration and must not edit `Chat.tsx` while Lane A owns W2.
+- Current active model route remains behind gate PID 8076 on 127.0.0.1:20190. 8 GB minimum launch gate met at 22.8 GB free / 37% CPU for Lane A and 21.9 GB / 70.4% for Lane B.
+- Next schedule handoff: Lane B freezes W3 by 21:30 then W4; Lane A continues W2 to 22:15 then W5. Full suite is required before every code fix/acceptance commit.
+
