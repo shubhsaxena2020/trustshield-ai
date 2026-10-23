@@ -1,1 +1,1 @@
-﻿2026-10-23T01:08:32Z | W1 accepted; W2 discovery active (7 masked captures only in repo evidence); W3 backend extraction stage active
+﻿2026-10-23T01:17:11Z | W1 full suite green (959/7); W2 UI_SPEC/report delivered, visual audit pending; W3 extractors active

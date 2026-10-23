@@ -343,4 +343,3 @@ def test_anonymous_analyze_with_an_unconfigured_server_never_writes(monkeypatch)
     res = _client(configured=False).post("/api/v1/analyze/text", json={"text": "hello there"})
     assert res.status_code == 200
 
-\n
