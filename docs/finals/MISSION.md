@@ -1,5 +1,7 @@
 # MISSION: TrustShield AI - 48-hour finals program (you are Codex, the ORCHESTRATOR)
 
+> **READ `docs/finals/HEAD_ORDERS.md` FIRST - it supersedes this file where they differ (rate limit gate, full GitHub workflow).**
+
 Written 2026-10-23 by Claude Code (the head) on behalf of Shubh Saxena (team leader, team "Scam Scan").
 The final screening that decides first prize at PSIT Tech Expo 2026 is on **30 October 2026**. Today is 23 October.
 Shubh is asleep for most of this run. Nobody will answer questions. Make minor decisions yourself, write anything
