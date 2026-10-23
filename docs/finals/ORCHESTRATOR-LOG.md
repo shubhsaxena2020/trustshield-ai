@@ -343,3 +343,13 @@ Per HEAD DEFECT 01:30, both local W7 battery runs are not model-level results. T
 - Commit 55779ef pushed to origin/finals-48h after the final full-suite pass and HEAD section 9 reread. It records W7 limitations, HEAD-reported production promotion, current tracker items, and status.
 - Stopped only this coordinator's W7 Hermes/API/web processes after handoff. The gate was left running.
 
+
+## Two-hour run acknowledgement (2026-10-24 02:39 IST)
+
+- Re-read all 125 lines of docs/finals/HEAD_ORDERS.md, including section 10, sections 5-9 and every HEAD DEFECT/ORDER/NOTE line; read docs/finals/MISSION.md, root FINAL-REPORT.md, root STATE.md, docs/finals/NEEDS_SHUBH.md, and GitHub issues #2, #3, #4, #18. No Vercel command will be run. Scope excludes ndroid/ and extension/; T0 uses Shubh's newer 02:40 instruction, freeze 04:15, hard end 04:45. Keep cx/gpt-6-luna only, no fallbacks, max two Hermes sessions/six children each, full pytest before acceptance commits, commit/push each verified medium task, re-read HEAD orders every 30 minutes.
+- Acknowledged HEAD defects/notes: W4 3-letter legitimate false positives/IP-floor duplication; W7 batteries were deterministic-only and do not measure model jailbreak/routing; resource-leak search must stay repo-bounded (the eight PIDs listed at 00:20 will be checked narrowly); no production/model/threshold/spent-data changes. HEAD sections 8-9: commit cadence, runtime lock requirement, prior production deployment HEAD-reported; this run does not redeploy.
+- Active REA tools are not registered in Codex's current tool catalog. W2 prompt instructs Hermes to use configured mcp__rea__* tools over isolated Chrome CDP and write its actual tool/evidence ledger before changing UI. Lane A W2 and Lane B PNB review prompts created; no worker has been asked to commit.
+
+
+- 02:40 IST: launched Lane A and B through Hermes after writing separate bounded prompts. hermes status confirms cx/gpt-6-luna via custom:9router; no provider/model override was supplied. Session list shows exactly two active workspace lanes; process inventory shows the configured REA MCP (ea-agents@6.7.0 mcp) under Lane A. The eight exact orphan PIDs listed in HEAD are absent. Free RAM measured 6.4 GB, below the earlier >=8 GB launch gate, so no further session/child launches are authorized until it recovers; W2 remains priority.
+

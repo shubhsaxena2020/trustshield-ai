@@ -360,3 +360,13 @@
 
 
 - 01:53 IST: committed and pushed final W7 report/status handoff as 55779ef. Stopped W7 Hermes and local API/web sessions started by this coordinator after handoff; the existing rate-limit gate was untouched.
+
+## Two-hour run start (2026-10-24 02:39 IST; user T0 02:40)
+
+- User's 2026-10-24 start instruction supersedes HEAD section 10's approximate 02:45 T0: this run starts at 02:40 IST; Codex freeze 04:15; hard end 04:45. No Vercel command or production change; android/ and extension/ excluded. Hermes model must remain configured cx/gpt-6-luna with no fallback; max two sessions, max six children each. Commit/push after each verified phase; full pytest required before each acceptance/fix commit. Re-read HEAD_ORDERS.md every 30 minutes; keep heartbeat and state current.
+- Branch finals-48h, HEAD 42653d3. Current docs/finals/UI_SPEC.md and 17 sanitized captures exist; current full implementation/acceptance still unverified. Issues #2, #3, #4, #18 are open. FINAL-REPORT.md is at repo root; state here was stale from the prior 01:55 handoff.
+- REA instruction written first to work/finals/two-hour-w2/PROMPT.txt, Lane A W2. Lane B W4 PNB review to work/finals/two-hour-w4/PROMPT.txt. Existing unrelated untracked files remain untouched.
+
+
+- 02:40:13 IST launch check: Hermes status reports model cx/gpt-6-luna, provider custom:9router; active workspace sessions are Lane A W2 and Lane B W4, no third session. REA MCP process ea-agents@6.7.0 mcp is present under Lane A. The eight exact orphan PIDs named in HEAD are absent. Free RAM is 6.4 GB, below the prior >=8 GB launch gate; do not launch more sessions or delegates while below it. Existing two lanes are active; prioritize W2 if resources require reducing scope.
+
