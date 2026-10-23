@@ -13,3 +13,5 @@
 - 2026-10-22T23:58:29Z: Process tree confirms W1 local servers are Lane A-owned: Uvicorn PID 29800 on 8000 and Next/node PID 28236 on 3000. Hermess worker CPU time continues to rise; logs remain buffered/empty, so no hang recovery started.
 
 - 2026-10-23T00:05:31Z: Read and acknowledged HEAD_ORDERS.md. The Nilabh proxy listener is present at 127.0.0.1:20190 (PID 25944); 26 rpm and fan-out guidance now governs. Effective current activity is W1's 9 children plus the W2 parent; no W2 child fan-out observed. Local API health is 200, but PID 29800 started before .env changed. Attempt to stop/restart the W1-owned API process was rejected by tool policy; no process was stopped. Will wait for the package to release its server and avoid further termination attempts.
+
+- 2026-10-23T00:08:18Z: Created workstream GitHub issues #1-#7 and pinned tracker #8. Added initial W1/W2 progress comments. Pushed inals-48h through 2ac089c. Reviewed .github/workflows/ci.yml: pull_request triggers full CI; no in-workflow deploy step is present, but Vercel Git integration behavior is unknown. Deferred rolling PR pending resolution against the no-Vercel-deploy rule.
