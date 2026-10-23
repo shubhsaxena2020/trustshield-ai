@@ -25,3 +25,5 @@
 - 2026-10-23T00:28:05Z — W1 restarted its own API server: PID 27952 is a descendant of worker 23624, owns 127.0.0.1:8000, and /api/v1/health returned 200. Updated STATE/heartbeat; no process control performed.
 
 - 2026-10-23T00:32:47Z — W2 discovery fan-out is now visible: seven observation folders (desktop, composer, messages, streaming, responsive, auth, a11y) with captures/probes arriving. About 16 active child scopes across W1/W2, within updated ceiling. No accepted W2 UI_SPEC yet.
+
+- 2026-10-23T00:39:20Z — W1 remains active past its 40-minute target (CPU changed, run.log empty, all nine child reports present; no package summary). W2 has eight observation scopes (17 child scopes observed total). Raw W2 captures show reference branding/copy; review note added and repository promotion is blocked pending masking.

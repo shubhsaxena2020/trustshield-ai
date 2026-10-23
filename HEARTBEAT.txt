@@ -1,1 +1,1 @@
-2026-10-23T00:32:47Z | W1-auth (Lane A; 1 green matrix 92/0/0, all child reports filed), W2-discovery (Lane B; 7 observation scopes capturing)
+2026-10-23T00:39:20Z | W1-auth (over 40m target; 1 green matrix, reports complete, no package summary), W2-discovery (8 observation scopes capturing; raw captures unaccepted)
