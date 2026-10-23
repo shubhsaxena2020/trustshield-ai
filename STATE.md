@@ -1,6 +1,6 @@
 ﻿# Finals run state
 
-- Last update: 2026-10-23 20:18 IST / 2026-10-23T14:48Z.
+- Last update: 2026-10-23 20:24 IST / 2026-10-23T14:54Z.
 - Recovery T0: 2026-10-23 19:55 IST. Hard finish: 2026-10-24 01:55 IST.
 - Branch `finals-48h`, HEAD `a2f6e0f`, pushed to `origin/finals-48h`.
 - All pre-outage Hermes sessions are dead: prior Lane B terminal 86379 / Hermes PID 32720 / worker 31084; prior Lane A terminal 91730 / Hermes PID 33368 / worker 28832.
@@ -68,3 +68,9 @@
 - Issue #18 remains open for the existing two W2 lint errors. Issue #17 remains open because pre-outage screenshot writer attribution is unavailable; W1 files are restored and excluded.
 - `android/` is absent; SDK is installed, but `adb devices` found no attached/emulated device. W4-W7 package prompts are staged under ignored `work/finals/` folders.
 
+
+
+## Security review note (2026-10-23 20:24 IST)
+
+- `security-reviewer` skill applied to W3 upload parser/API boundary. Automated scanners `semgrep`, `bandit`, `gitleaks`, and `trivy` are not installed; no system tools were installed. Manual parser review found a potential PDF CPU denial of service: `_TJ_RE` in `pdf_text.py` has near-quadratic repeated-suffix scanning on unmatched `[` input, while the deadline is checked outside the regex. Small synthetic timings: 1k=0.0038s, 2k=0.012s, 4k=0.051s, 8k=0.251s, 12k=0.498s.
+- Filed issue #19 and commented on W3 issue #3. Parser is not yet API-wired; do not accept W3 until the regex path is bounded, has an in-memory regression, and the full suite passes. No large payload was sent to an API.
