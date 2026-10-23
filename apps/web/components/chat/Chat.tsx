@@ -207,6 +207,12 @@ function ChatWorkspace({ identity, session, loading }: {
   const sidebarRef = useRef<HTMLElement | null>(null);
   const sidebarPrevFocusRef = useRef<HTMLElement | null>(null);
 
+  useLayoutEffect(() => {
+    const input = inputRef.current;
+    if (!input) return;
+    input.style.height = "auto";
+    input.style.height = `${Math.min(input.scrollHeight, 192)}px`;
+  }, [draft]);
 
   const active = chats.find((c) => c.id === activeId) ?? chats[0];
   const busy = streaming.has(active.id);

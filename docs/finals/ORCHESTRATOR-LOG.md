@@ -390,3 +390,10 @@ Per HEAD DEFECT 01:30, both local W7 battery runs are not model-level results. T
 
 - 03:56 IST W2 verification closeout: full repository `.venv\Scripts\python.exe -m pytest -q` passed 1280, skipped 7, 6 warnings in 246.01s. Final web source passes `npm run lint`, `npx tsc --noEmit`, and `npm run build`. Local browser: `/`, `/login`, `/signup` opened; login-gate skip, mobile drawer, logo image attachment preview and scam starter risk card (57/100) verified. Free-text model reply returned configured model-unavailable message, so streaming reply and streaming CLS remain unmeasured. Lighthouse 13.5.0 on optimized local server: performance 94, accessibility 100, page-load CLS .065. No production/Vercel action.
 - W2 geometry acceptance from HEAD DEFECT 03:45: main/title/cards/composer centers matched exactly at widths 390, 834, 1280, 1440, 1536, and 1920. Local screenshots committed to `docs/finals/evidence/w2/`; currently live REA remained blocked by HTTP 403, so no current-reference parity/pixel diff.
+
+- 03:58 IST W2 phase handoff: committed and pushed WIP commit `975f9a2` to `origin/finals-48h`; no production/Vercel action. Full pytest 1280/7/6 and web lint/tsc/build pass. Lighthouse local optimized run 94 performance / 100 accessibility; page-load CLS 0.065, streaming CLS unavailable with product model down. UI center assertion passed at 390, 834, 1280, 1440, 1536, 1920; local scan, image preview, welcome skip, and mobile drawer verified. Current REA 403 prevents current 1:1/pixel comparison. Issues #2, #3, #18 received progress comments and remain open; #4 remains open. Comment ids: #2 6375980573, #18 6375980882, #3 6375981197.
+
+- 04:06 IST W2 composer follow-up: multiline drafts now resize to measured content up to 192 px. Playwright at 390 px: four lines, 48 px to 96 px, textarea scrollTop 0. 
+pm run lint, 
+px tsc --noEmit, 
+pm run build: pass. Full pytest: 1280 passed, 7 skipped, 6 warnings in 208.72s. Documented and preparing follow-up commit; next HEAD reread due 04:10.
