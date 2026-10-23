@@ -11,3 +11,7 @@ No decision blocks Phase 0. The team already supplied the product and safety dec
 ## Opened during execution
 
 Append concrete item, why Shubh is required, evidence already gathered, and the exact decision/action needed. Continue independent work while waiting; do not use this file for routine implementation choices.
+
+## Tool-policy blocker (2026-10-23)
+
+- Claude's head order asks to restart the W1-owned API PID 29800 so it reloads .env (modified 05:29:33 local); the API responds 200 but may have stale chat routing. The tool policy rejected the attempted process stop/restart. I did not stop any process. Current safe next step: wait for W1 to finish/release port 8000, then start a new local API with --env-file .env. If the port remains occupied afterward, Shubh needs to restart or authorize an alternative.

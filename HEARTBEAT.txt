@@ -1,1 +1,1 @@
-2026-10-22T23:58:29Z | W1-auth (Lane A), W2-discovery (Lane B)
+2026-10-23T00:05:31Z | W1-auth (Lane A), W2-discovery (Lane B); rate gate active

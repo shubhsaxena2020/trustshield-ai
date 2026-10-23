@@ -11,3 +11,5 @@
 - 2026-10-22T23:55:19Z: Launched W1-auth in Lane A (session 2238, PID 13880) and W2-discovery in Lane B (session 37963, PID 22560). W2 resource preflight: 25.95 GB free RAM, CPU samples 7/15/19 percent. REA is listed as enabled in Hermes MCP. Thermal telemetry unavailable; battery reports 100 percent and charging. Package logs were empty at initial observation; normal under Hermes output buffering.
 
 - 2026-10-22T23:58:29Z: Process tree confirms W1 local servers are Lane A-owned: Uvicorn PID 29800 on 8000 and Next/node PID 28236 on 3000. Hermess worker CPU time continues to rise; logs remain buffered/empty, so no hang recovery started.
+
+- 2026-10-23T00:05:31Z: Read and acknowledged HEAD_ORDERS.md. The Nilabh proxy listener is present at 127.0.0.1:20190 (PID 25944); 26 rpm and fan-out guidance now governs. Effective current activity is W1's 9 children plus the W2 parent; no W2 child fan-out observed. Local API health is 200, but PID 29800 started before .env changed. Attempt to stop/restart the W1-owned API process was rejected by tool policy; no process was stopped. Will wait for the package to release its server and avoid further termination attempts.
