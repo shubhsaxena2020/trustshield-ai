@@ -28,3 +28,9 @@ and 9Router then returns 503 to every client for a few seconds. A burst of 18 pa
 ## 3. Health facts (Claude Code, 05:35)
 Laptop: 23 GB free RAM, CPU about 10 percent. Nilabh route healthy: single stream ~106 tokens/s, 12 parallel streams ~65-75 tokens/s each; 9Router `nilabh` connection active.
 You are 20 minutes in and the 15 plan documents exist - good. Keep HEARTBEAT.txt fresh.
+
+## 4. UPDATE 05:46 IST - the 30 requests/minute limit is GONE (Shubh's friend removed it); gate retuned
+Re-tested: direct and through the gate, 78 of 78 requests succeeded with zero 429s; 18 parallel long streams ran at about 580 tokens/s together (was 121 under the limit).
+Direct bursts of 30 brand-new connections still drop some TLS handshakes (SSL EOF), so the gate stays as a smoother: I restarted it as PID 4124 at 120 requests/minute
+(0.5 s spacing; 25944 is dead). The earlier "about 26 calls per minute, 8-12 active agents" guidance no longer applies: you may run both sessions with up to 9 children each.
+Keep everything going through 127.0.0.1:20190 and still add no fallback models.

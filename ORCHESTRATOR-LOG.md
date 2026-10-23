@@ -17,3 +17,7 @@
 - 2026-10-23T00:08:18Z: Created workstream GitHub issues #1-#7 and pinned tracker #8. Added initial W1/W2 progress comments. Pushed inals-48h through 2ac089c. Reviewed .github/workflows/ci.yml: pull_request triggers full CI; no in-workflow deploy step is present, but Vercel Git integration behavior is unknown. Deferred rolling PR pending resolution against the no-Vercel-deploy rule.
 
 - 2026-10-23T00:12:54Z: W1 first browser matrix output: 72 passed, 15 failed, 1 skipped. Not acceptance; failures include zero mock auth requests (likely missing dummy Supabase configuration), plus duplicate submit and expected 400/422 console events. I added an orchestrator review note to the W1 package. Local screenshot exposed self-referential sans-font fallback; issues #9-#11 now track verified defects. No package report accepted.
+
+- 2026-10-23T00:15:26Z — W1 corrected local acceptance matrix now reports 90 passed, 1 failed (invalid-credentials alert), 1 skipped. Not accepted; workers remain active. W2 discovery observations continue; no accepted UI_SPEC.md.
+
+- 2026-10-23T00:19:18Z — verified updated proxy state: PID 4124 owns 127.0.0.1:20190; head order sets 120 requests/minute and allows 2x9 fan-out. Direct bursts remain disallowed; route through proxy. W1 corrected matrix 92/0/0 (one run) and W2 still has no accepted spec/report.
