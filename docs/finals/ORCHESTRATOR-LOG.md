@@ -285,3 +285,55 @@ Synthetic static probes: sbl.co.in/login yields only informational credential-pa
 - W6 froze at 01:00 as incomplete. No `android/` source tree, Gradle wrapper, worker report, build, or device smoke evidence was present. Stopped only W6-owned PIDs 33932, 8008, and 16368. Issue #6 remains open.
 - Latest full repository pytest before this documentation-only handoff: 1280 passed, 7 skipped, 6 warnings in 243.06s. No Android source changes existed to test.
 - W7 begins now. The 256-injection and 35-routing battery copies were checked: edits are limited to the repository-root calculation and ignored work-folder output paths. API/web localhost endpoints were unavailable at 00:53; local service startup and HTTP probes are part of W7 preflight.
+
+## W7 start checkpoint — 2026-10-24 01:04:35 +05:30
+
+- W7 Hermes launched with config-default model and no --provider/-m override. Its prompt includes the 00:20 repository-only, 60-second search boundary for all child prompts.
+- Both guarded harness copies were verified before launch: 256 injection prompts and 35 routing prompts; no v1 test, v2 holdout, or codex holdout path references. Raw outputs go only under ignored work/finals/w7-final/.
+- Started local API and web in isolated command sessions after the hidden launcher was rejected: /api/v1/health and / both returned HTTP 200 at preflight. No production endpoint was contacted.
+
+## W7 liveness checkpoint — 2026-10-24 01:18:19 +05:30
+
+- Hermes parent remains alive in the W7 slot. un.log and task outputs are still empty; worker CPU increased slightly since launch, so the MISSION stop condition (empty log plus 15 minutes with no CPU use) is not met. Do not stop this PID.
+- Local API/web remain running and returned HTTP 200 in the last probe. No battery POSTs appeared in the API session log at the prior check.
+
+## HEAD UPDATE 01:30 IST — Hermes route and W7 model availability
+
+Hermes default changed to `cx/gpt-6-luna` through 9Router (Codex account); fallback remains empty. The prior W7 Hermes session was launched under the old `cc/claude-sonnet-5` default and was stopped; the next W7 launch uses the new configured default without `--provider`/`-m`.
+
+The head's 01:12 instruction said to verify one real product chat response before interpreting batteries. That preflight was not done before the first battery; the later head inspection of MR-02 identified the deterministic unavailable-model reply. I then sent one local request and checked metadata without printing reply text: HTTP 200, `response_type=product_info`, `reply.provider=deterministic`. Thus the chat model did not answer.
+
+Per HEAD DEFECT 01:30, both local W7 battery runs are not model-level results. The 35-case result describes deterministic routing plus fallback only; the 256-prompt results cannot measure model-level jailbreak resistance. The exact required report wording is: **"chat model unavailable during W7; model-level results NOT measured"**. The prior 11 Oct model-backed results remain the last real measurement. No app `.env` or product model configuration was changed. A model-backed rerun is recorded in `docs/finals/NEEDS_SHUBH.md` for after Nilabh is restored.
+
+## W7 rate-source correction and session relaunch — 2026-10-24 01:35:19 +05:30
+
+- Corrected the initial characterization of 203 HTTP 429 responses: the battery captured status codes only; this run did not isolate local per-IP middleware from upstream/provider errors. No per-IP enforcement or threshold claim is made. GitHub issues #8 and #22 were corrected.
+- The paced replay was stopped after 160/256 when the new HEAD 01:30 defect confirmed no model-level inference was possible; no product model route was changed.
+- The independent local preflight returned eply.provider=deterministic. Old W7 Hermes session was stopped; restarted at 01:33 on the head's current configured cx/gpt-6-luna default, without --provider or -m.
+- FINAL-REPORT now uses the exact required wording and keeps the 11 Oct model-backed reports as the latest real measurements. Rerun is in docs/finals/NEEDS_SHUBH.md.
+
+## W7 local demo smoke — 2026-10-24 01:36:34 +05:30
+
+- GET /api/v1/health and GET / returned HTTP 200 after starting local API/web in isolated exec sessions. One synthetic text-analysis request returned HTTP 200 with score 35, caution, high confidence, 3 evidence items, and 1 module. No live URLs or personal data were used.
+- This is API smoke evidence, not a completed five-minute browser demo. Product chat preflight remains deterministic fallback; model-dependent demo steps are unavailable while Nilabh is down.
+
+## HEAD ORDER 01:40 IST acknowledgement — 2026-10-24 01:43 IST
+
+- Re-read all of `docs/finals/HEAD_ORDERS.md`. Section 8 says commit and push after every verified phase or medium-sized task; any runtime import must be reflected in `requirements-api.lock.txt` in the same commit. No new runtime imports were added in this W7 closeout.
+- HEAD is deploying a committed snapshot from a separate worktree; this coordinator will not run Vercel commands. No PR, merge, production change, or main-branch push was made here.
+- The mandatory full pytest gate is running before the final documentation handoff. Head-owned `HEAD_ORDERS.md`, `*.orig`, raw data, and log files are excluded from staging.
+
+## Final W7 verification � 2026-10-24 01:48 IST
+
+- Full .venv\Scripts\python -m pytest -q passed: 1280 passed, 7 skipped, 6 warnings in 206.87s. This is the final repository gate before the W7 handoff commit.
+- The report records W7 as frozen with limitations: product chat was deterministic fallback; model-level results were not measured; API/text-analysis smoke passed; browser demo incomplete; deck candidate not applied pending visual QA.
+- Re-read of HEAD_ORDERS.md and final issue #8 progress comment remain before push. Only the explicit documentation allowlist will be staged.
+
+
+- 01:50 IST: updated pinned GitHub issue #8 body from current verified status, including final full-suite result and W7 model-unavailable limitation; final docs push follows the 01:55 HEAD reread.
+
+## HEAD ORDER 01:55 IST acknowledgement - production deployment
+
+- Re-read all of HEAD_ORDERS.md at 01:53 IST. Section 9 reports Shubh explicitly ordered production promotion of c4f783e after preview smoke. Acknowledged the live smoke evidence in FINAL-REPORT.md; this coordinator did not run Vercel.
+- Scope is WIP/unaccepted W2 plus W3/W4. W5/W6 are not part of the web deployment. HEAD-reported checks include health/readyz, scam/legitimate URL scores, DOCX/XLSX uploads, routes, and a production-model response.
+
