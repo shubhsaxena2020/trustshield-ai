@@ -33,3 +33,5 @@
 - 2026-10-23T00:41:53Z — removed 12 unmasked W2 PNG copies from repository evidence path after visual check; working originals remain in ignored package. W2 must regenerate/mask before evidence acceptance.
 
 - 2026-10-23T00:43:02Z — source review filed issue #12 for Shift+Tab escaping the first-visit dialog and clarified issue #10 for signup focus/network rejection. W1 remains unaccepted; independent test reproduction pending.
+
+- 2026-10-23T00:49:25Z — independent tests: focused W1 pytest 180 passed/1 warning/11.64s; full pytest 959 passed/7 skipped/5 warnings/210.59s. W1 source review findings #10/#12 remain open.

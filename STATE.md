@@ -20,3 +20,4 @@
 - Removed 12 unmasked W2 screenshot copies from docs/finals/evidence/w2/ after visual check; originals remain only under ignored work/finals/w2-discovery/. Do not promote until masking is visually verified.
 
 - W1 independent review flagged signup network rejection/focus handling and an initial-container Shift+Tab focus-trap gap; issues #10/#12 and work/finals/w1-auth/ORCHESTRATOR_REVIEW.md track fixes. W1 remains unaccepted pending these findings and independent test reproduction.
+- Independent pytest reproduction passed: focused W1 auth/history/security set 180 passed, 1 warning in 11.64s; full suite 959 passed, 7 skipped, 5 warnings in 210.59s. W1 still unaccepted pending review fixes and independent browser reruns.
