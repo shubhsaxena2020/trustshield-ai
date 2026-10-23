@@ -23,6 +23,8 @@ from starlette.concurrency import run_in_threadpool
 
 from services.analysis import pipeline as analysis_pipeline
 from services.analysis.extractors.image_validation import ImageRejected, max_upload_size
+from services.analysis.extractors.document_types import DocumentRejected, max_document_bytes as max_document_bytes_fn
+from services.analysis.extractors.document_text import extract_document
 from services.analysis.extractors.ocr import get_ocr_provider
 from services.analysis.fusion.result import SCHEMA_VERSION, AnalysisResult, ModuleResult
 from services.analysis.normalization.text import InvalidInput
@@ -194,6 +196,10 @@ def _image_error(exc: ImageRejected) -> HTTPException:
     return HTTPException(status_code=exc.status_code, detail=exc.message)
 
 
+def _document_error(exc: DocumentRejected) -> HTTPException:
+    return HTTPException(status_code=exc.status_code, detail=exc.message)
+
+
 async def _upload_endpoint(request: Request, response: Response, file: UploadFile, func,
                             user: CurrentUser | None, label: str) -> AnalysisResult:
     try:
@@ -203,6 +209,8 @@ async def _upload_endpoint(request: Request, response: Response, file: UploadFil
         return result
     except ImageRejected as exc:
         raise _image_error(exc)
+    except DocumentRejected as exc:
+        raise _document_error(exc)
     except InvalidInput as exc:
         raise HTTPException(422, str(exc))
     finally:
@@ -219,6 +227,21 @@ async def analyze_image_endpoint(request: Request, response: Response, file: Upl
 async def analyze_qr_endpoint(request: Request, response: Response, file: UploadFile = File(...),
                                user: CurrentUser | None = Depends(get_current_user)):
     return await _upload_endpoint(request, response, file, analyze_qr, user, "QR code scan")
+
+@router.post("/api/v1/analyze/document", response_model=AnalysisResult, dependencies=[Depends(limit_heavy)])
+async def analyze_document_endpoint(request: Request, response: Response, file: UploadFile = File(...),
+                                    user: CurrentUser | None = Depends(get_current_user)):
+    try:
+        data = await file.read(max_document_bytes_fn() + 1)
+        result = _publish(request, response, await run_heavy(request, analysis_pipeline.analyze_document, data, file.content_type, file.filename))
+        _record_history(request, user, result, f"Document scan ({result.risk.label})")
+        return result
+    except DocumentRejected as exc:
+        raise _document_error(exc)
+    except InvalidInput as exc:
+        raise HTTPException(422, str(exc))
+    finally:
+        await file.close()
 
 
 @router.get("/api/v1/analysis/{analysis_id}", response_model=AnalysisResult, dependencies=[Depends(limit_light)])
@@ -353,7 +376,7 @@ async def _agent_chat(request: Request, response: Response, message: str, histor
         plan = route(text, False, False, followup_intent)
         try:
             result, types = analyze_turn(text, None, plan)
-        except (InvalidInput, ImageRejected) as exc:
+        except (InvalidInput, ImageRejected, DocumentRejected) as exc:
             return json.dumps({"error": str(exc)[:200]})
         analysis = to_contract(result, types, plan.urls)
         captured.update(result=result, plan=plan, analysis=analysis)
@@ -417,7 +440,7 @@ def _make_scan(message: str, captured: dict):
         plan = route(text, False, False, followup_intent)
         try:
             result, types = analyze_turn(text, None, plan)
-        except (InvalidInput, ImageRejected) as exc:
+        except (InvalidInput, ImageRejected, DocumentRejected) as exc:
             return json.dumps({"error": str(exc)[:200]})
         analysis = to_contract(result, types, plan.urls)
         captured.update(result=result, plan=plan, analysis=analysis)
@@ -531,7 +554,7 @@ def _stream_chat_events(message: str, history: list[Turn], context: ChatAnalysis
                 return
         yield from _model_events(message, recent, captured, scan)
         yield _sse({"type": "done"})
-    except (InvalidInput, ImageRejected) as exc:
+    except (InvalidInput, ImageRejected, DocumentRejected) as exc:
         yield _sse({"type": "error", "detail": str(exc)[:300]})
     except Exception:
         _log.exception("chat stream failed")
@@ -589,6 +612,8 @@ async def _chat_turn(request: Request, response: Response, message: str, context
             result, types = await run_in_threadpool(analyze_turn, message, None, plan)
     except ImageRejected as exc:
         raise _image_error(exc)
+    except DocumentRejected as exc:
+        raise _document_error(exc)
     except InvalidInput as exc:
         raise HTTPException(422, str(exc))
     analysis = to_contract(result, types, plan.urls)
@@ -635,7 +660,7 @@ async def chat_upload_endpoint(request: Request, response: Response, file: Uploa
     except (ValueError, TypeError):
         raise HTTPException(422, "invalid conversation history")
     try:
-        data = await file.read(max_upload_size() + 1)
+        data = await file.read(max(max_upload_size(), max_document_bytes_fn()) + 1)
         return await _chat_turn(request, response, message, parsed, context_signature, turns, (data, file.content_type, file.filename))
     finally:
         await file.close()

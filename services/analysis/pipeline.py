@@ -252,6 +252,16 @@ def analyze_image(data: bytes, declared_mime: str | None = None, filename: str |
     )
 
 
+def analyze_document(data: bytes, declared_mime: str | None = None, filename: str | None = None) -> AnalysisResult:
+    from services.analysis.extractors.document_text import extract_document
+    extracted = extract_document(data, declared_mime, filename)
+    limitations = list(extracted.warnings or [])
+    return analyze_text(
+        extracted.text, input_type="document",
+        extra_limitations=limitations,
+    )
+
+
 def _qr_module(result: QRResult) -> ModuleResult:
     return ModuleResult(status=result.status, detail=result.detail, data={
         "decoder": result.decoder,

@@ -18,7 +18,6 @@ from .document_types import (
 _PDF_HEADER_RE = re.compile(rb"%PDF-")
 _STREAM_RE = re.compile(rb"stream\r?\n(.*?)\r?\n?endstream", re.DOTALL)
 _TYPE_PAGE_RE = re.compile(rb"/Type\s*/Page(?!s)")
-_TJ_RE = re.compile(rb"\[(.*?)\]\s*TJ", re.DOTALL)
 _TJ_STRING_RE = re.compile(rb"\((?:\\.|[^()]*)\)")
 _TJ_SINGLE_RE = re.compile(rb"\((?:\\.|[^()]*)\)\s*Tj", re.DOTALL)
 
@@ -132,10 +131,54 @@ def _decode_pdf_string(raw: bytes) -> str:
 
 def _extract_strings(content: bytes) -> list[str]:
     found: list[str] = []
-    # TJ arrays
-    for m in _TJ_RE.finditer(content):
-        for sm in _TJ_STRING_RE.finditer(m.group(1)):
-            found.append(_decode_pdf_string(sm.group(0)))
+    # Scan text-showing arrays once. A lazy ``\[(.*?)\]\s*TJ`` regex retries
+    # from each unmatched ``[`` and can take quadratic time on malformed data.
+    n = len(content)
+    i = 0
+    while i < n:
+        if content[i] != 0x5B:  # [
+            i += 1
+            continue
+        array_start = i
+        j = i + 1
+        depth = 1
+        string_depth = 0
+        escaped = False
+        while j < n:
+            byte = content[j]
+            if string_depth:
+                if escaped:
+                    escaped = False
+                elif byte == 0x5C:  # backslash
+                    escaped = True
+                elif byte == 0x28:  # nested literal string
+                    string_depth += 1
+                elif byte == 0x29:
+                    string_depth -= 1
+            elif byte == 0x28:
+                string_depth = 1
+            elif byte == 0x5B:
+                depth += 1
+            elif byte == 0x5D:
+                depth -= 1
+                if depth == 0:
+                    tail = j + 1
+                    while tail < n and content[tail] in b" \t\r\n\f\v":
+                        tail += 1
+                    if content[tail:tail + 2] == b"TJ":
+                        for sm in _TJ_STRING_RE.finditer(content[array_start + 1:j]):
+                            found.append(_decode_pdf_string(sm.group(0)))
+                        i = tail + 2
+                    else:
+                        i = j + 1
+                    break
+            j += 1
+        else:
+            # An unmatched opening bracket consumes the rest once, then ends.
+            break
+        if j >= n:
+            break
+
     # single Tj
     for m in _TJ_SINGLE_RE.finditer(content):
         # extract the parenthesized part

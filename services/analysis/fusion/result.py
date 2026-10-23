@@ -36,7 +36,7 @@ class AnalysisResult(BaseModel):
     schema_version: str = SCHEMA_VERSION
     analysis_id: str = Field(default_factory=lambda: uuid.uuid4().hex)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    input_type: Literal["text", "url", "image", "qr"]
+    input_type: Literal["text", "url", "image", "qr", "document"]
     status: Literal["completed", "partial", "failed", "queued", "sandboxing"]
     risk: Risk
     classification: Classification

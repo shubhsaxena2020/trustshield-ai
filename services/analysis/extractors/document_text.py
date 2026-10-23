@@ -151,3 +151,79 @@ def extract_csv(data: bytes, declared_mime: str | None = None, filename: str | N
         },
         warnings=warnings,
     )
+
+
+def extract_document(data: bytes, declared_mime: str | None = None, filename: str | None = None) -> ExtractedDocument:
+    """Format dispatcher used by the API and pipeline.
+
+    Detection order: explicit filename extension, then declared MIME, then
+    magic bytes / decodability. Never raises anything other than
+    ``DocumentRejected`` for a rejected/unsupported upload.
+    """
+    from .document_types import DocumentRejected
+    from .pdf_text import extract_pdf
+    from .docx_text import extract_docx
+    from .xlsx_text import extract_xlsx
+
+    size = len(data or b"")
+    if size == 0:
+        raise DocumentRejected(422, "empty_document", "The uploaded document is empty.")
+    if size > max_document_bytes():
+        raise DocumentRejected(413, "upload_too_large", "Document exceeds the maximum upload size.")
+
+    ext = ""
+    if filename and "." in filename:
+        ext = filename.rsplit(".", 1)[-1].lower().strip()
+    media = ""
+    if declared_mime:
+        media = declared_mime.split(";", 1)[0].strip().lower()
+
+    # Explicit extension wins.
+    if ext == "pdf":
+        return extract_pdf(data, declared_mime, filename)
+    if ext == "docx":
+        return extract_docx(data, declared_mime, filename)
+    if ext == "xlsx":
+        return extract_xlsx(data, declared_mime, filename)
+    if ext == "csv":
+        return extract_csv(data, declared_mime, filename)
+    if ext == "txt":
+        return extract_txt(data, declared_mime, filename)
+
+    # MIME-based detection.
+    if media == "application/pdf":
+        return extract_pdf(data, declared_mime, filename)
+    if media == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+        return extract_docx(data, declared_mime, filename)
+    if media == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+        return extract_xlsx(data, declared_mime, filename)
+    if media == "text/csv":
+        return extract_csv(data, declared_mime, filename)
+    if media == "text/plain" or media.startswith("text/"):
+        return extract_txt(data, declared_mime, filename)
+
+    # Magic-byte / decodability fallback.
+    head = (data or b"")[:8]
+    if head.startswith(b"%PDF"):
+        return extract_pdf(data, declared_mime, filename)
+    if head.startswith(b"PK"):
+        try:
+            import io, zipfile
+            with zipfile.ZipFile(io.BytesIO(data)) as zf:
+                names = set(zf.namelist())
+            if "word/document.xml" in names:
+                return extract_docx(data, declared_mime, filename)
+            if "xl/workbook.xml" in names:
+                return extract_xlsx(data, declared_mime, filename)
+        except Exception:
+            pass
+    # Last resort: try UTF-8 text, but only for genuinely textual bytes.
+    if 0 in (data or b""):
+        raise DocumentRejected(415, "unsupported_format", "The uploaded document format is not supported.")
+    try:
+        (data or b"").decode("utf-8")
+        return extract_txt(data, declared_mime, filename)
+    except UnicodeDecodeError:
+        pass
+
+    raise DocumentRejected(415, "unsupported_format", "The uploaded document format is not supported.")
