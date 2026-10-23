@@ -337,3 +337,9 @@ Per HEAD DEFECT 01:30, both local W7 battery runs are not model-level results. T
 - Re-read all of HEAD_ORDERS.md at 01:53 IST. Section 9 reports Shubh explicitly ordered production promotion of c4f783e after preview smoke. Acknowledged the live smoke evidence in FINAL-REPORT.md; this coordinator did not run Vercel.
 - Scope is WIP/unaccepted W2 plus W3/W4. W5/W6 are not part of the web deployment. HEAD-reported checks include health/readyz, scam/legitimate URL scores, DOCX/XLSX uploads, routes, and a production-model response.
 
+
+## Final docs push - 2026-10-24 01:53 IST
+
+- Commit 55779ef pushed to origin/finals-48h after the final full-suite pass and HEAD section 9 reread. It records W7 limitations, HEAD-reported production promotion, current tracker items, and status.
+- Stopped only this coordinator's W7 Hermes/API/web processes after handoff. The gate was left running.
+

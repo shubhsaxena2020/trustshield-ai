@@ -358,3 +358,5 @@
 - Production includes WIP/unaccepted W2 plus W3/W4; W5/W6 are not in the web deployment. Live reported checks: health/readyz, SBI scam 85 high_risk, onlinesbi.sbi and ubi.com 0, DOCX/XLSX upload HTTP 200, / /login /signup HTTP 200, and a production-model chat response.
 - Final docs commit and push pending now; HEAD_ORDERS.md remains excluded.
 
+
+- 01:53 IST: committed and pushed final W7 report/status handoff as 55779ef. Stopped W7 Hermes and local API/web sessions started by this coordinator after handoff; the existing rate-limit gate was untouched.
