@@ -5,6 +5,7 @@ Official brand domains must never be reported as ``lookalike_domain`` or
 """
 import json
 from pathlib import Path
+from urllib.parse import urlsplit
 
 import pytest
 
@@ -54,10 +55,16 @@ def test_named_miss_is_flagged(url: str, expected_category: str) -> None:
 def test_real_three_letter_and_official_domains_are_not_false_positives(monkeypatch: pytest.MonkeyPatch) -> None:
     fixtures = Path(__file__).parents[1] / "fixtures"
     three_letter = [json.loads(line) for line in (fixtures / "w4_real_three_letter_domains.jsonl").read_text(encoding="utf-8").splitlines() if line]
+    short_domains = [json.loads(line) for line in (fixtures / "w4_real_3_to_5_char_domains.jsonl").read_text(encoding="utf-8").splitlines() if line]
     official = [json.loads(line) for line in (fixtures / "w4_real_official_domains.jsonl").read_text(encoding="utf-8").splitlines() if line]
     registry = [json.loads(line) for line in (fixtures / "w4_link_regression.jsonl").read_text(encoding="utf-8").splitlines() if line]
-    cases = three_letter + official + [case for case in registry if case["source_type"] == "real_local"]
+    cases = three_letter + short_domains + official + [case for case in registry if case["source_type"] == "real_local"]
     assert len(three_letter) >= 20
+    assert len(short_domains) >= 1
+    for case in short_domains:
+        hostname = urlsplit(case["url"]).hostname or ""
+        assert len(hostname.split(".")[0]) in range(3, 6), case
+        assert case.get("source_url") and case.get("source_observation") and case.get("retrieved_on"), case
     assert len(cases) >= 60
     monkeypatch.setattr(pipeline, "domain_evidence", lambda _domain: ([], None))
 

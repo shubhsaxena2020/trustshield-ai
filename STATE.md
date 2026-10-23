@@ -379,3 +379,15 @@
 
 - 02:46 IST: current public logged-out layout captures were visually inspected at 1440x900, 834x1112 and 390x844. They are layout-only, no visible reference branding/copy, and incomplete discovery evidence under docs/finals/evidence/w2/current-empty-*.png. Lane A continues interaction measurements and implementation; W2 remains open.
 
+
+- 02:53 IST: Lane B has begun W4 edits in `tests/unit/test_w4_false_positives.py` and a new `tests/fixtures/w4_real_3_to_5_char_domains.jsonl`; no report or test result yet. These are unaccepted worker changes pending provenance/code review and full-suite verification. Lane A remains on REA discovery; no UI source change observed.
+
+
+- 02:58 IST: independent source review found the W4 worker's initial short-domain provenance overstated one current PNB footer; corrected the fixture to five references with PNB/PNB-affiliated source URLs and removed the unsupported MyGov row. Current PNB pages use pnb.bank.in; official documents show legacy pnb.co.in email addresses but no source establishing the site. The PNB classifier remains unchanged at 34/domain_mismatch. Focused W4 suite passed 138 tests; full pytest pending before commit; issue #4 remains open for missing 60-real-malicious links.
+
+
+- 03:00 IST: Lane A's REA session has now produced a computed-style interaction capture script for empty/focus/multiline and attachment menu states at the three requested widths; it uses the existing isolated CDP endpoint and masks branding before screenshots. Sanitized focus, multiline and drawer images were visually checked; no page copy/branding is visible. Full pytest is running against the W4 fixture update while Lane A remains within web discovery; no app code accepted yet.
+
+
+- 03:04 IST W4 verification: independent full suite passed .venv/Scripts/python.exe -m pytest -q with 1280 passed, 7 skipped, 6 warnings in 229.93s. Focused W4 false-positive suite passed 138 tests. This verifies the sourced short-domain regression only; issue #4 remains open and no PNB matcher/registry change was made.
+

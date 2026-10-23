@@ -362,3 +362,15 @@ Per HEAD DEFECT 01:30, both local W7 battery runs are not model-level results. T
 
 - 02:46 IST: visually checked new current reference screenshots at 1440x900, 834x1112 and 390x844. All are layout-only and show no visible reference branding or page copy. Posted their exact tracked paths to issue #2. This is discovery evidence only; W2 remains unaccepted.
 
+
+- 02:53 IST: W4 worker changes appeared in its bounded fixture/test scope; I have not inspected or accepted them and no test is yet recorded. Need verify domain evidence before any code change and run full pytest before commit. Lane A remains in REA/current-reference inspection and has not changed application source.
+
+
+- 02:58 IST W4 review: independently checked PNB sources and corrected fixture provenance; removed unsupported MyGov row, leaving five references (rbi.org.in, cvc.gov.in, uidai.gov.in, india.gov.in, npci.org.in). No matcher/brand change for pnb.co.in; official evidence confirms PNB email use but not that apex as an official web destination. Focused false-positive suite passes 138 tests; full repository suite is still required before commit. Issue #4 remains open.
+
+
+- 03:00 IST: W2 REA/Playwright capture script and current interaction evidence have appeared under ignored work plus docs/finals/evidence/w2. I reviewed the script method and visually checked representative focus, multiline and drawer screenshots; masking removes reference text/brand. No TrustShield source changes yet. Full pytest is running for the W4 fixture/test milestone; inspect result before any commit.
+
+
+- 03:04 IST full-suite gate completed for the W4 fixture/test milestone: 1280 passed, 7 skipped, 6 warnings in 229.93s. Focused W4 false-positive tests: 138 passed. Domain references were corrected to five records with PNB/PNB-affiliated provenance before the full run. No product-model, threshold, spent-data, or domain-matcher changes. Issue #4 remains open for the real malicious-link gap.
+
