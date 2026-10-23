@@ -278,3 +278,10 @@ Synthetic static probes: sbl.co.in/login yields only informational credential-pa
 - Stopped only W5-owned processes (PIDs 31424, 34440, 18628) at the scheduled freeze. W6 continues.
 - Full repository suite at handoff: **1280 passed, 7 skipped, 6 warnings in 243.06s**. This validates the repository state, not extension behavior.
 - W5 issue #5 remains open with the exact acceptance gaps; W6 #6 remains open. W7 and FINAL-REPORT completion remain outstanding before 01:55 IST.
+
+## 2026-10-24 01:00 IST — W6 handoff and W7 start
+
+- Re-read all of `docs/finals/HEAD_ORDERS.md` at the handoff; no new HEAD DEFECT/ORDER appeared. Re-acknowledged temporary cc/claude-sonnet-5 default/no provider or model override, compressed 01:00–01:55 W7 slot, no artificial GPU load, and bounded repository-only search instruction for every worker prompt.
+- W6 froze at 01:00 as incomplete. No `android/` source tree, Gradle wrapper, worker report, build, or device smoke evidence was present. Stopped only W6-owned PIDs 33932, 8008, and 16368. Issue #6 remains open.
+- Latest full repository pytest before this documentation-only handoff: 1280 passed, 7 skipped, 6 warnings in 243.06s. No Android source changes existed to test.
+- W7 begins now. The 256-injection and 35-routing battery copies were checked: edits are limited to the repository-root calculation and ignored work-folder output paths. API/web localhost endpoints were unavailable at 00:53; local service startup and HTTP probes are part of W7 preflight.

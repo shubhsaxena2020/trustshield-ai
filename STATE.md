@@ -310,3 +310,10 @@
 - Independent checks: `node --check` passed for both JS files; sample manifest parses as JSON. Build and browser behavior were not tested because integrated `manifest.json` and runtime files are absent. README/privacy drafts remain excluded from the WIP commit because claims are not yet source-verified.
 - Latest full `pytest -q` before the snapshot: 1280 passed, 7 skipped, 6 warnings in 243.06s. No extension behavior is covered by this suite.
 - Stopped only the W5-owned process tree at its slot boundary. W6 remains active; W7 remains to run 01:00–01:55.
+
+## W6 handoff (2026-10-24 01:00 IST)
+
+- W6 froze incomplete at its handoff. No Android source tree, Gradle wrapper, worker report, build result, or device smoke result was present. The configured SDK exists; device/emulator availability was not rechecked at this handoff.
+- Stopped only W6-owned processes at 01:00. Issue #6 remains open with exact missing acceptance evidence.
+- Latest full suite: 1280 passed, 7 skipped, 6 warnings in 243.06s at 00:45. No Android files were present.
+- W7 starts 01:00 and has 55 minutes for batteries, local demo/evidence, report, and final push.
