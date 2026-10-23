@@ -408,3 +408,10 @@ Hindi OCR; a second model host so the chat never depends on one provider.
 - **SSE:** server-sent events, the streaming format for the chat.
 - **Registered domain:** the part of a host you buy, for example `sbi.co.in`.
 - **Lookalike (typosquat):** a domain a few characters away from an official one.
+
+## Current run status (2026-10-24)
+
+- Full repository pytest passed: 1280 passed, 7 skipped; this is regression coverage, not security accuracy or model-safety evidence.
+- Model-level security results were NOT measured because the product chat model was unavailable. Treat the sealed-holdout recall/specificity above as the last model-backed measurement.
+- W4 added five sourced short-domain regression cases. No PNB matcher change: available evidence did not establish pnb.co.in as the official web destination; issue #4 remains open.
+- Upload UI acceptance remains open; only local image attachment preview was checked. Per-file lifecycle and mobile upload acceptance were not verified.

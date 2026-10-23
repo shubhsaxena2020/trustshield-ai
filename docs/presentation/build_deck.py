@@ -183,10 +183,10 @@ bullets(s, ["Ask 'what is phishing?'  →  a plain answer, no scanner.",
             "Ask 'what should I do if I already shared my OTP?'  →  clear safe steps and the 1930 helpline."], size=20)
 
 # 10 ── Testing
-s = base(10, "Testing evidence: 765 automated unit and integration tests pass. A routing audit of 180 messages gave 96.1% correct, with 0 of 79 "
+s = base(10, "Testing evidence: the full repository suite passed 1280 tests (7 skipped) on 2026-10-24. A routing audit of 180 messages gave 96.1% correct, with 0 of 79 "
              "scams missed and 7 false alarms. A 24-request stream stress test: all succeeded, median first response about 0.37 s, 95th percentile about 7.1 s.")
 title(s, "Tested, and measured", "Quality")
-big_stat(s, 0.6, 2.2, "765", "automated tests passing (unit + integration)")
+big_stat(s, 0.6, 2.2, "1280", "full repository tests passing (7 skipped, 2026-10-24)")
 big_stat(s, 4.7, 2.2, "0 / 79", "scam messages missed in the routing audit")
 big_stat(s, 8.8, 2.2, "24 / 24", "stress-test requests succeeded (p50 0.37 s first reply)", AMBER)
 bullets(s, ["Routing audit: 180 messages, 96.1% correct, 7 false alarms.", "Stress test p95 first reply: about 7.1 s."], top=5.0, size=18)

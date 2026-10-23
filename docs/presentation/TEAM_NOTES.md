@@ -38,7 +38,7 @@ The language model (DeepSeek V4.1 Flash via the team's provider; NVIDIA Nemotron
 
 | Claim | Number | Source | How to say it |
 |---|---|---|---|
-| Automated tests | 790 passing, 7 skipped | `pytest tests` (run 2026-10-11) | "790 automated tests pass" |
+| Automated tests | 1280 passed, 7 skipped | `.venv\Scripts\python.exe -m pytest -q` (full suite, 2026-10-24) | "The full repository suite passed 1280 tests; 7 were skipped." |
 | Routing audit | 180 messages; 96.1% correct; 0 of 79 scams missed; 7 false alarms | `docs/BASE_VERSION.md`, `docs/reports/routing_audit.md` | "The rules caught every scam in our audit set; some harmless questions were flagged." |
 | Stress test (chat stream) | 24 of 24 succeeded; first reply p50 0.37 s, p95 7.1 s | `docs/reports/stress_c4_final.json` | "All 24 test requests succeeded. Typical first reply under half a second." (Sample is small.) |
 | Sealed holdout (ML model) | recall 82.1%, specificity 78.3%, precision 82.1%, F1 82.1% | `services/chat/product_metadata.py`, `README.md` | Say the 90% target was NOT met. |
@@ -130,3 +130,10 @@ A: A public demo, hosted on Vercel. The model is provided through the team's pro
 - [ ] Each team member can give a 30-second version of the problem and the idea.
 - [ ] Know the four numbers in section 4 and where they come from.
 - [ ] Agree who answers which question type (technical, privacy, results).
+
+### Current run status (2026-10-24)
+
+- Full repository pytest passed: 1280 passed, 7 skipped. This is a regression result, not security accuracy or model-safety evidence.
+- Model-level security results were NOT measured because the product chat model was unavailable; the sealed-holdout values above remain the last model-backed measurement.
+- W4 added five sourced short-domain regression cases. No PNB matcher change was made: evidence did not establish pnb.co.in as the official web destination; issue #4 remains open.
+- Upload UI acceptance remains open. The local run verified an image attachment preview only; per-file status/progress/error/removal and mobile lifecycle were not verified.

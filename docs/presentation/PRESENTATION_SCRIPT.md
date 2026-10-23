@@ -99,11 +99,18 @@ suggestion: swap parts if a member is stronger at a section, but keep the total 
 - **"What is the official-domain list?"** The real domains of each bank, verified by opening the bank sites. Indian banks are moving to .bank.in.
 - **"What if the AI model is down?"** The scanner still checks a message with scam signals. The chat says the assistant is unavailable.
 
+## Current evidence update (2026-10-24)
+
+- Full repository pytest: 1280 passed, 7 skipped. This is a code regression result, not a security accuracy or model-safety result.
+- Model-level security results were NOT measured in this run because the product chat model was unavailable. The sealed-holdout ML measurements below remain the last real model measurement.
+- W4 added five sourced short-domain regression cases. No PNB domain matcher change was made because current official evidence did not establish `pnb.co.in` as the official web destination; issue #4 remains open.
+- Do not claim the requested upload UI lifecycle is complete. The local check verified image attachment preview only; per-file status, progress, failure, removal, and mobile upload acceptance remain open.
+
 ## Before the screening
 
 - [ ] Each member reads their own part aloud at least three times, with a timer.
 - [ ] The whole script runs in under 5:00 with the demo.
 - [ ] The site loads on the presentation laptop, and the recording is ready as a backup.
 - [ ] Two screenshot files are saved on the laptop for the demo: the official SBI page (`sbi_official_home.png`) and the scam SMS (`sms_scam_screenshot.png`). Both were produced during testing; copy them from the team's scratch folder.
-- [ ] Each member knows the four numbers: 765 tests, 180 messages, 82% recall, 78% specificity.
+- [ ] Each member knows the four numbers: 1280 tests (7 skipped), 180 messages, 82% recall, 78% specificity.
 - [ ] Ask the organisers for PSIT's judging rubric, if you have not received it yet.
