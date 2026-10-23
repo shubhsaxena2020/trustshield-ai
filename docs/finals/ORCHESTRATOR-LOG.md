@@ -397,3 +397,5 @@ Per HEAD DEFECT 01:30, both local W7 battery runs are not model-level results. T
 pm run lint, 
 px tsc --noEmit, 
 pm run build: pass. Full pytest: 1280 passed, 7 skipped, 6 warnings in 208.72s. Documented and preparing follow-up commit; next HEAD reread due 04:10.
+
+- 04:04 IST W2 follow-up pushed: commit 31a5db includes multiline composer resize and documented browser verification. Full pytest 1280 passed, 7 skipped, 6 warnings; web lint/typecheck/build passed. No deploy performed.

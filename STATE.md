@@ -413,3 +413,5 @@
 - 03:58 IST W2 phase handoff: committed and pushed WIP commit `975f9a2` to `origin/finals-48h`; no production/Vercel action. Full pytest 1280/7/6 and web lint/tsc/build pass. Lighthouse local optimized run 94 performance / 100 accessibility; page-load CLS 0.065, streaming CLS unavailable with product model down. UI center assertion passed at 390, 834, 1280, 1440, 1536, 1920; local scan, image preview, welcome skip, and mobile drawer verified. Current REA 403 prevents current 1:1/pixel comparison. Issues #2, #3, #18 received progress comments and remain open; #4 remains open. Comment ids: #2 6375980573, #18 6375980882, #3 6375981197.
 
 - 04:06 IST W2 composer follow-up verified: four-line input at 390 px resized 48 to 96 px, scrollTop 0. Web lint/tsc/build clean. Full pytest 1280 passed, 7 skipped, 6 warnings in 208.72s. Updated W2 UI spec/report; follow-up commit/push pending. Reread full HEAD_ORDERS at 04:10, freeze 04:15.
+
+- 04:04 IST: composer follow-up committed and pushed as 31a5db to origin/finals-48h; full pytest 1280 passed, 7 skipped, 6 warnings; web lint/typecheck/build passed. Nothing deployed. Next HEAD reread at 04:10; freeze 04:15.
