@@ -1,1 +1,1 @@
-2026-10-23T00:19:18Z | W1-auth (Lane A; 1 green matrix 92/0/0, pending release + repeat runs), W2-discovery (Lane B; UI observation in progress)
+2026-10-23T00:28:05Z | W1-auth (Lane A; 1 green matrix 92/0/0, all child reports filed, package active), W2-discovery (Lane B; richer REA probes active)

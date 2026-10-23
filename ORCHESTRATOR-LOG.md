@@ -21,3 +21,5 @@
 - 2026-10-23T00:15:26Z — W1 corrected local acceptance matrix now reports 90 passed, 1 failed (invalid-credentials alert), 1 skipped. Not accepted; workers remain active. W2 discovery observations continue; no accepted UI_SPEC.md.
 
 - 2026-10-23T00:19:18Z — verified updated proxy state: PID 4124 owns 127.0.0.1:20190; head order sets 120 requests/minute and allows 2x9 fan-out. Direct bursts remain disallowed; route through proxy. W1 corrected matrix 92/0/0 (one run) and W2 still has no accepted spec/report.
+
+- 2026-10-23T00:28:05Z — W1 restarted its own API server: PID 27952 is a descendant of worker 23624, owns 127.0.0.1:8000, and /api/v1/health returned 200. Updated STATE/heartbeat; no process control performed.
