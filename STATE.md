@@ -1,6 +1,6 @@
 ﻿# Finals run state
 
-- Last update: 2026-10-23 20:17 IST / 2026-10-23T14:47Z.
+- Last update: 2026-10-23 20:18 IST / 2026-10-23T14:48Z.
 - Recovery T0: 2026-10-23 19:55 IST. Hard finish: 2026-10-24 01:55 IST.
 - Branch `finals-48h`, HEAD `a2f6e0f`, pushed to `origin/finals-48h`.
 - All pre-outage Hermes sessions are dead: prior Lane B terminal 86379 / Hermes PID 32720 / worker 31084; prior Lane A terminal 91730 / Hermes PID 33368 / worker 28832.
@@ -60,4 +60,11 @@
 - Current active model route remains behind gate PID 8076 on 127.0.0.1:20190. 8 GB minimum launch gate met at 22.8 GB free / 37% CPU for Lane A and 21.9 GB / 70.4% for Lane B.
 - Next schedule handoff: Lane B freezes W3 by 21:30 then W4; Lane A continues W2 to 22:15 then W5. Full suite is required before every code fix/acceptance commit.
 
+
+
+## GitHub tracker updates (2026-10-23 20:18 IST)
+
+- Closed defect issues #11 and #14-#16 after pushed, independent verification. Posted progress on W2 issue #2 and W3 issue #3; tracker #8 body and comment reflect recovery.
+- Issue #18 remains open for the existing two W2 lint errors. Issue #17 remains open because pre-outage screenshot writer attribution is unavailable; W1 files are restored and excluded.
+- `android/` is absent; SDK is installed, but `adb devices` found no attached/emulated device. W4-W7 package prompts are staged under ignored `work/finals/` folders.
 
