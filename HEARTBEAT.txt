@@ -1,1 +1,1 @@
-﻿2026-10-23T14:41:06Z | 2026-10-23 20:11 IST | recovery gates green: pytest 1041/7, web typecheck/build pass; lint gap issue #18; stage and push reviewed recovery
+﻿2026-10-23T14:42:39Z | 2026-10-23 20:12:39 IST | recovery milestone pushed a2f6e0f; preparing Lane A W2 and Lane B W3
