@@ -36,6 +36,9 @@ BRANDS: dict[str, tuple[str, set[str]]] = {
     "binance": ("Binance", {"binance.com"}),
     "linkedin": ("LinkedIn", {"linkedin.com"}),
     "spotify": ("Spotify", {"spotify.com"}),
+    # IRCTC (Indian Railway Catering and Tourism Corporation). Official site and customer support use irctc.co.in;
+    # equery.irctc.co.in is the same registered domain. Verified via docs/ORCHESTRATOR-LOG.md and IRCTC support pages.
+    "irctc": ("IRCTC", {"irctc.co.in"}),
 }
 
 # Phrases in free text that claim a brand (regex on lowercased text).
@@ -58,6 +61,7 @@ TEXT_CLAIMS: dict[str, str] = {
     "indiapost": r"\bindia post\b",
     "uidai": r"\b(uidai|aadhaar|aadhar)\b",
     "incometax": r"\bincome tax\b",
+    "irctc": r"\birctc\b",
 }
 
 

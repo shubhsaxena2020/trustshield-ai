@@ -70,13 +70,13 @@ export function AppHeader({
           <nav aria-label="Account" className="flex shrink-0 items-center gap-2">
             <a
               href="/login"
-              className="rounded-full bg-zinc-900 px-4 py-2 text-sm font-semibold text-white hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="rounded-full bg-zinc-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-[#3566f0]"
             >
               Log in
             </a>
             <a
               href="/signup"
-              className="rounded-full border border-zinc-200 bg-white px-4 py-2 text-sm font-semibold text-zinc-900 hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-blue-500 max-[800px]:hidden"
+              className="rounded-full border border-zinc-200 bg-white px-4 py-2.5 text-sm font-semibold text-zinc-900 hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-[#3566f0] max-[800px]:hidden"
             >
               Sign up
             </a>

@@ -178,7 +178,7 @@ def analyze_url_static(url: str) -> UrlStaticResult:
             for off in officials:
                 ol = off.split(".")[0]
                 near_token = any(len(p) >= 5 and p != ol and _levenshtein(p, ol) <= 1 for p in label_tokens)
-                short_brand = len(ol) >= 3 and len(reg_label) >= 4 and reg_label != ol and _levenshtein(reg_label, ol) <= 1  # "sbii" for "sbi" (2026-10-06)
+                short_brand = len(ol) >= 3 and len(reg_label) >= 3 and reg_label != ol and _levenshtein(reg_label, ol) <= 1  # 3-letter labels (e.g. "sbl" for "sbi") (2026-10-23)
                 if registered not in officials and ((len(ol) >= 5 and (near_token or (reg_label != ol and _levenshtein(reg_label, ol) <= 2 and abs(len(reg_label) - len(ol)) <= 2))) or short_brand):
                     ev.append(_ev("lookalike_domain", Severity.high, 0.85, f"Domain closely resembles {name}'s domain",
                                   f"'{registered}' differs from '{off}' by a few characters (typosquatting).", brand=name, official=off, registered_domain=registered))
