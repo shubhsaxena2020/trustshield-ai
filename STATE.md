@@ -1,6 +1,6 @@
 ﻿# Finals run state
 
-- Last update: 2026-10-23 20:14 IST / 2026-10-23T14:44Z.
+- Last update: 2026-10-23 20:17 IST / 2026-10-23T14:47Z.
 - Recovery T0: 2026-10-23 19:55 IST. Hard finish: 2026-10-24 01:55 IST.
 - Branch `finals-48h`, HEAD `a2f6e0f`, pushed to `origin/finals-48h`.
 - All pre-outage Hermes sessions are dead: prior Lane B terminal 86379 / Hermes PID 32720 / worker 31084; prior Lane A terminal 91730 / Hermes PID 33368 / worker 28832.
@@ -30,7 +30,7 @@
 
 - Extractor foundation is committed/pushed: bounded PDF/DOCX/XLSX/TXT/CSV extraction, synthetic hostile-input coverage, required `defusedxml`, shared hard upload cap, and normalized corrupt XML/ZIP handling.
 - Latest focused W3 suite: 77 passed in 0.90s. Latest mandatory full suite after all recovery code edits: 1041 passed, 7 skipped, 5 warnings in 189.20s.
-- Issues #14 (hard upload cap), #15 (PDF decompression cap), and #16 (parser exception normalization) are resolved in code and verified locally; update/close after writing progress evidence.
+- Issues #14 (hard upload cap), #15 (PDF decompression cap), and #16 (parser exception normalization) are closed after full-suite and focused verification. Issue #11 font token fix is also closed.
 - W3 remains unaccepted: API route and composer/browser/mobile upload wiring are not complete.
 
 ## W4-W7
@@ -59,4 +59,5 @@
 - Lane B W3 resumed via `hermes -z` in `work/finals/w3-integration/`; command-session id 97179; Hermes PID 30336. It owns API/extractor integration and must not edit `Chat.tsx` while Lane A owns W2.
 - Current active model route remains behind gate PID 8076 on 127.0.0.1:20190. 8 GB minimum launch gate met at 22.8 GB free / 37% CPU for Lane A and 21.9 GB / 70.4% for Lane B.
 - Next schedule handoff: Lane B freezes W3 by 21:30 then W4; Lane A continues W2 to 22:15 then W5. Full suite is required before every code fix/acceptance commit.
+
 

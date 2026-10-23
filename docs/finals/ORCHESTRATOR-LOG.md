@@ -19,3 +19,5 @@
 - 20:12 IST: Recovery milestone committed and pushed as `a2f6e0f` after the 1041/7 full-suite gate. W1 regenerated evidence restored to baseline and excluded. API PID 32660, web PID 28920, and gate PID 8076 are live. Tracker and defect issue updates pending before lane launch.
 
 - 20:14 IST: Relaunched Lane A W2 (Hermes PID 32600, command-session 16572) and Lane B W3 (command-session 97179) after preflight checks (gate 8076 active; 22.8/21.9 GB free RAM, CPU 37/70%). No output yet is normal; apply the 15-minute rule.
+
+- 20:17 IST: Closed W3 issues #14-#16 and W2 font-token issue #11 after pushed verification; commented on workstream issues #2/#3 and updated tracker #8. Kept #17 open because pre-outage writer attribution is unavailable; opened #18 for lint. Roadmap owner assignments now match the compressed lane schedule.
