@@ -79,6 +79,12 @@ def _with_brand_floor(evidence: list[Evidence], score: int) -> int:
         score = max(score, 75 if lure else 50)  # tunnel address: suspicious; with a location/camera lure: high risk (2026-10-07)
     if "free_hosting_subdomain" in categories and lure:
         score = max(score, 50)
+    # A raw IP host combined with a credential/login path is a strong phishing
+    # indicator: legitimate services do not ask for credentials on a bare IP.
+    # Raw IP alone stays at the suspicious band (50); the login path lifts it
+    # to high risk. Official domains are never raw IPs, so they are unaffected.
+    if "ip_address_host" in categories and "credential_path_terms" in categories:
+        score = max(score, 70)
     if "domain_mismatch" in categories:
         mismatch_hosts = " ".join(str(e.metadata.get("registered_domain", "")) for e in evidence if e.category == "domain_mismatch")
         credential_host = any(word in mismatch_hosts for word in ("login", "verify", "secure", "kyc", "netbank", "refund", "update"))
