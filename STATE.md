@@ -2,7 +2,7 @@
 
 - Launch time (T0): 2026-10-22T23:48:19Z UTC
 - Branch: finals-48h; latest verified/pushed milestone: 9a831b3.
-- Last update: 2026-10-23T01:25Z UTC.
+- Last update: 2026-10-23T01:37Z UTC.
 - Phase: W2 discovery evidence reviewed; W2 UI implementation active in Lane B. W3 safe extractor work active in Lane A.
 
 ## W1 - local acceptance restored
@@ -19,8 +19,8 @@
 
 ## W3 - safe extraction foundation active
 
-- Package: `work/finals/w3-uploads/`, terminal session 46515, observed Hermes parent PID 36460 and active Python worker PID 32344. Extractor modules, tests, and synthetic fixtures are in progress. No independent review or API/UI acceptance yet.
-- W3 cannot edit W2-owned chat UI. W3-owned files remain unstaged pending review and full-suite verification.
+- Initial extractor package: `work/finals/w3-uploads/`, terminal session 46515, completed with worker-reported 32 focused and 991/7 full-suite passes. Independent review found three blocking issues, tracked in GitHub #14-#16: unbounded PDF decompression, uncaught malformed XML/ZIP/CSV errors, and an environment override that can exceed the hard size limit.
+- Hardening package: `work/finals/w3-hardening/PROMPT.txt`, terminal session 91730, Hermes PID 33368, Python worker PID 28832. It owns extractor source/tests and does not edit W2 web files. No API/UI acceptance yet.
 
 ## Program controls and open work
 
