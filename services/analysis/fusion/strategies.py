@@ -198,10 +198,6 @@ def ml_aware_weighted(evidence: list[Evidence], module_status: dict[str, str], i
         score = max(score, TIER_MINIMUM_SCORES["strong"])
     if strong_deterministic and ml:
         score = max(score, 70)
-    # Raw IP host + credential/login path -> high risk (deterministic floor).
-    _cats = {e.category for e in evidence}
-    if "ip_address_host" in _cats and "credential_path_terms" in _cats:
-        score = max(score, 70)
     agreement, _, _ = _agreement(evidence, module_status)
     drivers = ["deterministic_evidence"] if rules else []
     if strong_ml:
@@ -239,10 +235,6 @@ def strength_gated(evidence: list[Evidence], module_status: dict[str, str], inpu
     if strong_deterministic:
         score = max(score, minimums["strong"])
     if strong_deterministic and has_ml:
-        score = max(score, 70)
-    # Raw IP host + credential/login path -> high risk (deterministic floor).
-    _cats = {e.category for e in evidence}
-    if "ip_address_host" in _cats and "credential_path_terms" in _cats:
         score = max(score, 70)
     agreement, _, _ = _agreement(evidence, module_status)
     drivers = []

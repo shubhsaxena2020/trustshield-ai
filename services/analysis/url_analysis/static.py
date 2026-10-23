@@ -127,6 +127,8 @@ def analyze_url_static(url: str) -> UrlStaticResult:
     path = parts.path or ""
     facts = {"scheme": scheme, "hostname": host, "hostname_decoded": decoded_host, "registered_domain": registered,
              "subdomain": subdomain, "suffix": ext.suffix, "port": port, "path": path, "query": parts.query, "fragment": parts.fragment}
+    decoded_path = unquote(path)
+    found = sorted(t for t in CRED_TERMS if re.search(rf"(?<![a-z]){t}(?![a-z])", (decoded_path + "?" + parts.query).lower()))
 
     # --- IP literal host
     try:
@@ -178,7 +180,12 @@ def analyze_url_static(url: str) -> UrlStaticResult:
             for off in officials:
                 ol = off.split(".")[0]
                 near_token = any(len(p) >= 5 and p != ol and _levenshtein(p, ol) <= 1 for p in label_tokens)
-                short_brand = len(ol) >= 3 and len(reg_label) >= 4 and reg_label != ol and _levenshtein(reg_label, ol) <= 1  # "sbii" for "sbi" (2026-10-06)
+                short_brand = (
+                    len(ol) >= 3 and len(reg_label) >= 4 and reg_label != ol and _levenshtein(reg_label, ol) <= 1
+                ) or (
+                    len(ol) == 3 and len(reg_label) == 3 and bool(found) and reg_label != ol
+                    and _levenshtein(reg_label, ol) <= 1
+                )
                 if registered not in officials and ((len(ol) >= 5 and (near_token or (reg_label != ol and _levenshtein(reg_label, ol) <= 2 and abs(len(reg_label) - len(ol)) <= 2))) or short_brand):
                     ev.append(_ev("lookalike_domain", Severity.high, 0.85, f"Domain closely resembles {name}'s domain",
                                   f"'{registered}' differs from '{off}' by a few characters (typosquatting).", brand=name, official=off, registered_domain=registered))
@@ -209,7 +216,6 @@ def analyze_url_static(url: str) -> UrlStaticResult:
         ev.append(_ev("unusual_port", Severity.medium, 0.5, f"Non-standard port :{port}", "Legitimate public sites rarely use custom ports.", port=port))
     if scheme == "http":
         ev.append(_ev("no_https", Severity.low, 0.4, "Link does not use HTTPS", "Traffic is unencrypted; not proof of fraud on its own.", scheme=scheme))
-    decoded_path = unquote(path)
     if "%" in path and decoded_path != path and re.search(r"%(?:2e|2f|5c|00|0d|0a)", path, re.I):
         ev.append(_ev("encoded_characters", Severity.low, 0.4, "URL path contains encoded control/path characters", "Encoding can hide traversal or redirects.", path=path[:120]))
     last = decoded_path.rsplit("/", 1)[-1].lower()
@@ -218,7 +224,6 @@ def analyze_url_static(url: str) -> UrlStaticResult:
         ev.append(_ev("executable_download", Severity.high, 0.8, f"Link points to an installable/executable file (.{fext})", "Do not download or open files from unverified links; .apk/.exe are common malware carriers.", extension=fext))
     elif fext in ARCHIVE_EXT:
         ev.append(_ev("archive_download", Severity.medium, 0.5, f"Link points to an archive (.{fext})", "Archives can conceal executables.", extension=fext))
-    found = sorted(t for t in CRED_TERMS if re.search(rf"(?<![a-z]){t}(?![a-z])", (decoded_path + "?" + parts.query).lower()))
     if found:
         ev.append(_ev("credential_path_terms", Severity.informational, 0.3, "URL path mentions account/login terms", f"Terms: {', '.join(found)}. Weak signal by itself.", terms=found))
     if len(raw) > 200:

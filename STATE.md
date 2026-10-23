@@ -209,3 +209,9 @@
 
 - W2 snapshot committed and pushed as eff9e43; WIP only, acceptance remains open. #18 and behavior/performance gaps remain.
 - The shared full-suite result for this commit boundary is 1278 passed, 7 skipped, 6 warnings in 145.10s. W4 safe snapshot is next; static.py's 3-letter broadening and the inaccurate inventory draft are excluded.
+
+## W4 issue #20 repair (2026-10-23 23:05 IST)
+
+- Added regression for 30 real three-letter domains (including ubi.com, sbs.com.au, bi.org), nine additional local-registry official domains, and the existing 21 real-local URLs: 60 real URLs total plus 53 synthetic cases. The three issue false positives stay at 0; sbl.co.in/login and sbii.co.in/login remain detected. Reputation is stubbed in tests; no URL fetch occurs.
+- 3-letter distance-one matching now requires a credential path; 4+ label matching is unchanged. Duplicate IP+credential floor was removed from strategy implementations and remains centralized in fusion engine.
+- Focused tests: 144 passed. Full pytest: 1280 passed, 7 skipped, 6 warnings in 184.55s. Issue #20 repair is verified; W4 acceptance remains open for corrected before/after validation measurements and inventory reconciliation.

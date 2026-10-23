@@ -160,3 +160,10 @@ Synthetic static probes: sbl.co.in/login yields only informational credential-pa
 
 - Committed and pushed the frozen W2 UI/test/evidence snapshot as eff9e43 (WIP: freeze unaccepted W2 web UI state) on inals-48h, after the full suite passed 1278/7/6. W2 remains unaccepted; #18 and the documented keyboard/streaming/regression gaps remain open.
 - Next: commit the separately reviewed W4 snapshot while excluding services/analysis/url_analysis/static.py and the inaccurate W4 inventory draft. The subsequent W4 fix must add at least 20 real legitimate three-letter domains and the issue #20 four URLs, then remove duplicate strategy floor code before W4 can be considered.
+
+## 2026-10-23 23:05 IST — W4 issue #20 repair verified
+
+- Preserved the four required issue cases in the real-domain regression coverage: ubi.com, sbs.com.au, and bi.org must remain at zero risk; sbl.co.in/login must retain its look-alike finding. Added 27 more real three-letter domains (30 total) and 9 additional official registry domains. Together with the existing 21 real-local URLs, the fixed URL set now has 60 real URLs plus 53 labeled synthetic cases.
+- The 3-letter comparison now requires a credential-path lure; >=4-character look-alike matching remains, preserving sbii.co.in. Added an offline full-pipeline test that stubs reputation lookups. Removed duplicate IP+credential floor from both strategies; the engine remains its single application point.
+- Focused regression: 144 passed. Full suite: 1280 passed, 7 skipped, 6 warnings in 184.55s. This resolves issue #20's blocking defect; W4 overall remains open pending updated before/after validation evidence and complete source-inventory reconciliation.
+- Full suite was run after the final source/test/fixture edits. Commit and push the verified repair next; no log/.orig files are included.
