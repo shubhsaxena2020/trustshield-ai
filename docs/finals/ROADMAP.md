@@ -4,11 +4,11 @@ Owners are session slots: Lane A and Lane B. A package is considered **done** on
 
 | Priority | Item | Status at T0 | Owner | Dependency | Planned package / done condition |
 |---|---|---|---|---|---|
-| P0 | Phase 0 plan documents | In progress | Codex | None | Write this suite, hour plan and tracking files; review and commit before baseline tests. |
-| W1 | Auth/backend/login/signup | Left; baseline source exists | A | Phase 0 | `w1-auth`; reproduce matrix, fix, three Playwright passes, pytest, screenshots. |
-| W2 | Reference observation and measured UI spec | Left | B | Phase 0 | `w2-discovery`; REA observation or documented Playwright fallback; deliver UI_SPEC and 3 viewport captures. |
-| W2 | ChatGPT-class web implementation | Left | B | W2 discovery; W1 releases shared paths | `w2-ui`; build from measurements; responsive/accessibility/behavior gates. |
-| W3 | General safe uploads | Left; current UI/API are image-oriented | A | W1 shared UI stable; W2 may finish unaffected paths | `w3-upload`; bounded parsers, synthetic fixture matrix, UI/mobile tests. |
+| P0 | Phase 0 plan documents | Done | Codex | None | Plan suite committed at d02645e; baseline completed. |
+| W1 | Auth/backend/login/signup | Done locally | A | Phase 0 | Full pytest and three-run auth matrix verified; real Supabase delivery/refresh gap is in NEEDS_SHUBH.md. |
+| W2 | Reference observation and measured UI spec | Done | B | Phase 0 | Audited UI_SPEC, report and 17 layout-only captures pushed at 9a831b3. |
+| W2 | ChatGPT-class web implementation | In progress | B | W2 discovery accepted; W1 shared paths released | `w2-ui`; implementation active; responsive/accessibility/behavior gates pending. |
+| W3 | General safe uploads | In progress | A | W1 shared UI stable; W2 may finish unaffected paths | `w3-upload`; bounded parsers, synthetic fixture matrix, UI/mobile tests. |
 | W4 | Accuracy/rules | Left; baseline metrics are 82.1 recall / 78.3 specificity, 90% target not met | B | W1–W3 green; guard review | `w4-rules`; named misses, >=60 links, validation-only report; no v3/default changes. |
 | W5 | MV3 extension | Left; `extension/` absent | A | W1–W3 green | `w5-extension`; policy, rules, UI, tests, README/privacy/build. |
 | W6 | Kotlin/Compose Android | Left; `android/` absent | B | W5 functional; SDK present | `w6-android`; required app flows, build/unit/device evidence. |

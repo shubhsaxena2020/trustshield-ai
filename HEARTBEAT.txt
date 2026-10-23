@@ -1,1 +1,1 @@
-﻿2026-10-23T01:17:54Z | W1 full suite green (959/7); W2 spec/report pending audit; W3 extractors active
+2026-10-23T01:26Z | W1 green; W2 discovery audited/pushed and implementation active (Hermes 32720); W3 extractors active (Hermes 36460)
