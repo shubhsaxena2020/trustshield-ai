@@ -1,0 +1,2179 @@
+{
+  "suite": "W1 auth acceptance matrix",
+  "script": "tests/e2e/test_finals_w1_auth.py",
+  "web": "http://localhost:3001",
+  "api": "http://localhost:8000",
+  "generated_at": "2026-10-23T01:02:57+00:00",
+  "runs": [
+    {
+      "run": 1,
+      "started_at": "2026-10-23T01:00:39+00:00",
+      "passed": 102,
+      "failed": 0,
+      "skipped": 0,
+      "checks": [
+        {
+          "scenario": "01 sign-up with confirmation required",
+          "name": "'Check your email' state is shown",
+          "status": "PASS",
+          "detail": "Sign up\n\nCheck your email to confirm your account, then log in.\n\nAlready have an account? Log in",
+          "at": "2026-10-23T00:59:32+00:00"
+        },
+        {
+          "scenario": "01 sign-up with confirmation required",
+          "name": "the sign-up form is gone",
+          "status": "PASS",
+          "detail": "forms=0",
+          "at": "2026-10-23T00:59:32+00:00"
+        },
+        {
+          "scenario": "01 sign-up with confirmation required",
+          "name": "exactly one signup request",
+          "status": "PASS",
+          "detail": "counts={'signup': 1}",
+          "at": "2026-10-23T00:59:32+00:00"
+        },
+        {
+          "scenario": "01 sign-up with confirmation required",
+          "name": "no session stored while confirmation is pending",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T00:59:32+00:00"
+        },
+        {
+          "scenario": "01 sign-up with confirmation required",
+          "name": "stays on /signup",
+          "status": "PASS",
+          "detail": "http://localhost:3001/signup",
+          "at": "2026-10-23T00:59:32+00:00"
+        },
+        {
+          "scenario": "01 sign-up with confirmation required",
+          "name": "no console errors",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T00:59:32+00:00"
+        },
+        {
+          "scenario": "02 sign-up with confirmation disabled",
+          "name": "a session is stored (autoconfirm signup)",
+          "status": "PASS",
+          "detail": "no sb-*-auth-token key after signup",
+          "at": "2026-10-23T00:59:33+00:00"
+        },
+        {
+          "scenario": "02 sign-up with confirmation disabled",
+          "name": "signup redirects to / and signs the user in",
+          "status": "PASS",
+          "detail": "stayed at http://localhost:3001/ after signup",
+          "at": "2026-10-23T00:59:33+00:00"
+        },
+        {
+          "scenario": "02 sign-up with confirmation disabled",
+          "name": "account email is visible in the sidebar",
+          "status": "PASS",
+          "detail": "aside='TrustShield\\n+\\nNew chat\\n\\nCHATS\\n\\nNew chat\\n\\nChats are saved to your account, so they stay after a refresh.\\n\\nnew@example.test\\nLog out'",
+          "at": "2026-10-23T00:59:33+00:00"
+        },
+        {
+          "scenario": "02 sign-up with confirmation disabled",
+          "name": "first-visit gate is not shown to a signed-in user",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T00:59:33+00:00"
+        },
+        {
+          "scenario": "02 sign-up with confirmation disabled",
+          "name": "no console errors",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T00:59:33+00:00"
+        },
+        {
+          "scenario": "03 sign-up with an already registered email",
+          "name": "the duplicate-email message is shown in role=alert",
+          "status": "PASS",
+          "detail": "'User already registered'",
+          "at": "2026-10-23T00:59:34+00:00"
+        },
+        {
+          "scenario": "03 sign-up with an already registered email",
+          "name": "duplicate-email error focuses the email field",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T00:59:34+00:00"
+        },
+        {
+          "scenario": "03 sign-up with an already registered email",
+          "name": "the sign-up form is still there",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T00:59:34+00:00"
+        },
+        {
+          "scenario": "03 sign-up with an already registered email",
+          "name": "stays on /signup",
+          "status": "PASS",
+          "detail": "http://localhost:3001/signup",
+          "at": "2026-10-23T00:59:34+00:00"
+        },
+        {
+          "scenario": "03 sign-up with an already registered email",
+          "name": "no session stored after a rejected signup",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T00:59:34+00:00"
+        },
+        {
+          "scenario": "03 sign-up with an already registered email",
+          "name": "no console errors",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T00:59:34+00:00"
+        },
+        {
+          "scenario": "03 sign-up with an already registered email",
+          "name": "a network failure shows a retryable signup error",
+          "status": "PASS",
+          "detail": "'Could not reach the server. Check your connection and try again.'",
+          "at": "2026-10-23T00:59:36+00:00"
+        },
+        {
+          "scenario": "03 sign-up with an already registered email",
+          "name": "a network failure focuses the alert",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T00:59:36+00:00"
+        },
+        {
+          "scenario": "03 sign-up with an already registered email",
+          "name": "the signup control is usable again after a network failure",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T00:59:36+00:00"
+        },
+        {
+          "scenario": "03 sign-up with an already registered email",
+          "name": "no session is stored after a network failure",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T00:59:36+00:00"
+        },
+        {
+          "scenario": "03 sign-up with an already registered email",
+          "name": "no unexpected console errors after a handled signup network failure",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T00:59:36+00:00"
+        },
+        {
+          "scenario": "04 sign-in success",
+          "name": "redirected to / after sign-in",
+          "status": "PASS",
+          "detail": "http://localhost:3001/",
+          "at": "2026-10-23T00:59:37+00:00"
+        },
+        {
+          "scenario": "04 sign-in success",
+          "name": "account email is visible in the sidebar",
+          "status": "PASS",
+          "detail": "'TrustShield\\n+\\nNew chat\\n\\nCHATS\\n\\nNew chat\\n\\nChats are saved to your account, so they stay after a refresh.\\n\\na@example.test\\nLog out'",
+          "at": "2026-10-23T00:59:38+00:00"
+        },
+        {
+          "scenario": "04 sign-in success",
+          "name": "first-visit gate is not shown",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T00:59:38+00:00"
+        },
+        {
+          "scenario": "04 sign-in success",
+          "name": "gate never flashed during sign-in",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T00:59:38+00:00"
+        },
+        {
+          "scenario": "04 sign-in success",
+          "name": "exactly one password-grant request",
+          "status": "PASS",
+          "detail": "counts={'password': 1}",
+          "at": "2026-10-23T00:59:38+00:00"
+        },
+        {
+          "scenario": "04 sign-in success",
+          "name": "no console errors",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T00:59:38+00:00"
+        },
+        {
+          "scenario": "05 sign-in with a wrong password",
+          "name": "'Invalid login credentials' is shown in role=alert",
+          "status": "PASS",
+          "detail": "'Invalid login credentials'",
+          "at": "2026-10-23T00:59:39+00:00"
+        },
+        {
+          "scenario": "05 sign-in with a wrong password",
+          "name": "stays on /login",
+          "status": "PASS",
+          "detail": "http://localhost:3001/login",
+          "at": "2026-10-23T00:59:39+00:00"
+        },
+        {
+          "scenario": "05 sign-in with a wrong password",
+          "name": "invalid-credentials error focuses the password field",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T00:59:39+00:00"
+        },
+        {
+          "scenario": "05 sign-in with a wrong password",
+          "name": "no session stored after a failed sign-in",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T00:59:39+00:00"
+        },
+        {
+          "scenario": "05 sign-in with a wrong password",
+          "name": "the submit control is usable again",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T00:59:39+00:00"
+        },
+        {
+          "scenario": "05 sign-in with a wrong password",
+          "name": "no console errors",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T00:59:39+00:00"
+        },
+        {
+          "scenario": "06 sign-out from the sidebar",
+          "name": "the signed-in account's own chat is restored",
+          "status": "PASS",
+          "detail": "'TrustShield\\n+\\nNew chat\\n\\nCHATS\\n\\nALPHA-ACCOUNT-HISTORY\\n\\nChats are saved to your account, so they stay after a refresh.\\n\\na@example.test\\nLog out'",
+          "at": "2026-10-23T00:59:41+00:00"
+        },
+        {
+          "scenario": "06 sign-out from the sidebar",
+          "name": "the first-visit gate reappears after sign-out",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T00:59:42+00:00"
+        },
+        {
+          "scenario": "06 sign-out from the sidebar",
+          "name": "the account email is gone from the sidebar",
+          "status": "PASS",
+          "detail": "'TrustShield\\n+\\nNew chat\\n\\nCHATS\\n\\nNew chat\\n\\nSign in to save your chats. Without an account, this history clears when you refresh or log out.'",
+          "at": "2026-10-23T00:59:42+00:00"
+        },
+        {
+          "scenario": "06 sign-out from the sidebar",
+          "name": "the previous account's chats are not rendered",
+          "status": "PASS",
+          "detail": "'TrustShield\\n+\\nNew chat\\n\\nCHATS\\n\\nNew chat\\n\\nSign in to save your chats. Without an account, this history clears when you refresh or log out.'",
+          "at": "2026-10-23T00:59:42+00:00"
+        },
+        {
+          "scenario": "06 sign-out from the sidebar",
+          "name": "the signed-out header offers Log in / Sign up",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T00:59:42+00:00"
+        },
+        {
+          "scenario": "06 sign-out from the sidebar",
+          "name": "the stored session is cleared",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T00:59:42+00:00"
+        },
+        {
+          "scenario": "06 sign-out from the sidebar",
+          "name": "exactly one logout request",
+          "status": "PASS",
+          "detail": "counts={'password': 1, 'logout': 1}",
+          "at": "2026-10-23T00:59:42+00:00"
+        },
+        {
+          "scenario": "06 sign-out from the sidebar",
+          "name": "no console errors",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T00:59:42+00:00"
+        },
+        {
+          "scenario": "07 token expiry and refresh",
+          "name": "the stored session can be expired for the test",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T00:59:44+00:00"
+        },
+        {
+          "scenario": "07 token expiry and refresh",
+          "name": "an expired session triggers exactly one refresh call",
+          "status": "PASS",
+          "detail": "counts={'refresh': 1}",
+          "at": "2026-10-23T00:59:46+00:00"
+        },
+        {
+          "scenario": "07 token expiry and refresh",
+          "name": "the user stays signed in after the refresh",
+          "status": "PASS",
+          "detail": "'TrustShield\\n+\\nNew chat\\n\\nCHATS\\n\\nNew chat\\n\\nChats are saved to your account, so they stay after a refresh.\\n\\na@example.test\\nLog out'",
+          "at": "2026-10-23T00:59:46+00:00"
+        },
+        {
+          "scenario": "07 token expiry and refresh",
+          "name": "the gate is not shown and never flashed",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T00:59:46+00:00"
+        },
+        {
+          "scenario": "07 token expiry and refresh",
+          "name": "07a: no console errors",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T00:59:46+00:00"
+        },
+        {
+          "scenario": "07 token expiry and refresh",
+          "name": "a failing refresh signs the user out",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T00:59:50+00:00"
+        },
+        {
+          "scenario": "07 token expiry and refresh",
+          "name": "a visible signed-out state is rendered (gate and/or account links)",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T00:59:50+00:00"
+        },
+        {
+          "scenario": "07 token expiry and refresh",
+          "name": "the account email is gone",
+          "status": "PASS",
+          "detail": "'TrustShield\\n+\\nNew chat\\n\\nCHATS\\n\\nNew chat\\n\\nSign in to save your chats. Without an account, this history clears when you refresh or log out.'",
+          "at": "2026-10-23T00:59:50+00:00"
+        },
+        {
+          "scenario": "07 token expiry and refresh",
+          "name": "no stuck spinner: the composer is present and editable",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T00:59:50+00:00"
+        },
+        {
+          "scenario": "07 token expiry and refresh",
+          "name": "no unhandled page error",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T00:59:50+00:00"
+        },
+        {
+          "scenario": "07 token expiry and refresh",
+          "name": "07b: no console errors beyond the mocked 400 response",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T00:59:50+00:00"
+        },
+        {
+          "scenario": "08 first-visit gate dismissal",
+          "name": "the gate receives initial focus",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T00:59:52+00:00"
+        },
+        {
+          "scenario": "08 first-visit gate dismissal",
+          "name": "Shift+Tab from the dialog container stays inside",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T00:59:52+00:00"
+        },
+        {
+          "scenario": "08 first-visit gate dismissal",
+          "name": "Tab wraps inside after Shift+Tab",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T00:59:52+00:00"
+        },
+        {
+          "scenario": "08 first-visit gate dismissal",
+          "name": "the gate appears on a fresh visit to /",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T00:59:53+00:00"
+        },
+        {
+          "scenario": "08 first-visit gate dismissal",
+          "name": "'Skip for now' closes the gate",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T00:59:54+00:00"
+        },
+        {
+          "scenario": "08 first-visit gate dismissal",
+          "name": "the gate does not return after a reload",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T00:59:55+00:00"
+        },
+        {
+          "scenario": "08 first-visit gate dismissal",
+          "name": "08a: no console errors",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T00:59:55+00:00"
+        },
+        {
+          "scenario": "08 first-visit gate dismissal",
+          "name": "the gate appears on a second fresh visit",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T00:59:56+00:00"
+        },
+        {
+          "scenario": "08 first-visit gate dismissal",
+          "name": "the \u2715 control closes the gate",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T00:59:57+00:00"
+        },
+        {
+          "scenario": "08 first-visit gate dismissal",
+          "name": "the \u2715 dismissal also survives a reload",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T00:59:58+00:00"
+        },
+        {
+          "scenario": "08 first-visit gate dismissal",
+          "name": "08b: no console errors",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T00:59:58+00:00"
+        },
+        {
+          "scenario": "08 first-visit gate dismissal",
+          "name": "Escape closes the gate",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:00:01+00:00"
+        },
+        {
+          "scenario": "08 first-visit gate dismissal",
+          "name": "Escape dismissal survives a reload",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:00:01+00:00"
+        },
+        {
+          "scenario": "09 identity-bound chat history",
+          "name": "B sees B's chat",
+          "status": "PASS",
+          "detail": "'TrustShield\\n+\\nNew chat\\n\\nCHATS\\n\\nBRAVO-B-ONLY\\n\\nChats are saved to your account, so they stay after a refresh.\\n\\nb@example.test\\nLog out'",
+          "at": "2026-10-23T01:00:03+00:00"
+        },
+        {
+          "scenario": "09 identity-bound chat history",
+          "name": "B does not see A's chat",
+          "status": "PASS",
+          "detail": "'TrustShield\\n+\\nNew chat\\n\\nCHATS\\n\\nBRAVO-B-ONLY\\n\\nChats are saved to your account, so they stay after a refresh.\\n\\nb@example.test\\nLog out'",
+          "at": "2026-10-23T01:00:03+00:00"
+        },
+        {
+          "scenario": "09 identity-bound chat history",
+          "name": "B does not see the legacy bucket",
+          "status": "PASS",
+          "detail": "'TrustShield\\n+\\nNew chat\\n\\nCHATS\\n\\nBRAVO-B-ONLY\\n\\nChats are saved to your account, so they stay after a refresh.\\n\\nb@example.test\\nLog out'",
+          "at": "2026-10-23T01:00:03+00:00"
+        },
+        {
+          "scenario": "09 identity-bound chat history",
+          "name": "B does not see the anon bucket",
+          "status": "PASS",
+          "detail": "'TrustShield\\n+\\nNew chat\\n\\nCHATS\\n\\nBRAVO-B-ONLY\\n\\nChats are saved to your account, so they stay after a refresh.\\n\\nb@example.test\\nLog out'",
+          "at": "2026-10-23T01:00:03+00:00"
+        },
+        {
+          "scenario": "09 identity-bound chat history",
+          "name": "the legacy and anon buckets are purged",
+          "status": "PASS",
+          "detail": "[None, None]",
+          "at": "2026-10-23T01:00:03+00:00"
+        },
+        {
+          "scenario": "09 identity-bound chat history",
+          "name": "signed out: neither account's chats are rendered",
+          "status": "PASS",
+          "detail": "'TrustShield\\n+\\nNew chat\\n\\nCHATS\\n\\nNew chat\\n\\nSign in to save your chats. Without an account, this history clears when you refresh or log out.'",
+          "at": "2026-10-23T01:00:04+00:00"
+        },
+        {
+          "scenario": "09 identity-bound chat history",
+          "name": "A sees A's chat",
+          "status": "PASS",
+          "detail": "'TrustShield\\n+\\nNew chat\\n\\nCHATS\\n\\nALPHA-A-ONLY\\n\\nChats are saved to your account, so they stay after a refresh.\\n\\na@example.test\\nLog out'",
+          "at": "2026-10-23T01:00:06+00:00"
+        },
+        {
+          "scenario": "09 identity-bound chat history",
+          "name": "A does not see B's chat",
+          "status": "PASS",
+          "detail": "'TrustShield\\n+\\nNew chat\\n\\nCHATS\\n\\nALPHA-A-ONLY\\n\\nChats are saved to your account, so they stay after a refresh.\\n\\na@example.test\\nLog out'",
+          "at": "2026-10-23T01:00:06+00:00"
+        },
+        {
+          "scenario": "09 identity-bound chat history",
+          "name": "no console errors",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:00:06+00:00"
+        },
+        {
+          "scenario": "10 duplicate submit guard",
+          "name": "two submits in one tick send exactly one sign-in request",
+          "status": "PASS",
+          "detail": "requests=1",
+          "at": "2026-10-23T01:00:11+00:00"
+        },
+        {
+          "scenario": "10 duplicate submit guard",
+          "name": "10a: no console errors",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:00:11+00:00"
+        },
+        {
+          "scenario": "10 duplicate submit guard",
+          "name": "two submits in one tick send exactly one signup request",
+          "status": "PASS",
+          "detail": "requests=1",
+          "at": "2026-10-23T01:00:15+00:00"
+        },
+        {
+          "scenario": "10 duplicate submit guard",
+          "name": "10b: no console errors",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:00:15+00:00"
+        },
+        {
+          "scenario": "11 slow auth response",
+          "name": "the submit control is disabled and busy while the response is pending",
+          "status": "PASS",
+          "detail": "samples=[{'t': 41, 'disabled': True, 'text': 'Logging in\u2026'}, {'t': 81, 'disabled': True, 'text': 'Logging in\u2026'}, {'t': 129, 'disabled': True, 'text': 'Logging in\u2026'}, {'t': 161, 'disabled': True, 'text': 'Logging in\u2026'}, {'t': 208, 'disabled': True, 'text': 'Logging in\u2026'}, {'t': 255, 'disabled': True, 'text': 'Logging in\u2026'}]",
+          "at": "2026-10-23T01:00:18+00:00"
+        },
+        {
+          "scenario": "11 slow auth response",
+          "name": "the pending state was actually sampled in-flight",
+          "status": "PASS",
+          "detail": "n=41",
+          "at": "2026-10-23T01:00:18+00:00"
+        },
+        {
+          "scenario": "11 slow auth response",
+          "name": "it settles to the signed-in state",
+          "status": "PASS",
+          "detail": "http://localhost:3001/",
+          "at": "2026-10-23T01:00:18+00:00"
+        },
+        {
+          "scenario": "11 slow auth response",
+          "name": "11a: no console errors",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:00:18+00:00"
+        },
+        {
+          "scenario": "11 slow auth response",
+          "name": "signup: the submit control is disabled and busy while pending",
+          "status": "PASS",
+          "detail": "samples=[{'t': 41, 'disabled': True, 'text': 'Signing up\u2026'}, {'t': 83, 'disabled': True, 'text': 'Signing up\u2026'}, {'t': 131, 'disabled': True, 'text': 'Signing up\u2026'}, {'t': 161, 'disabled': True, 'text': 'Signing up\u2026'}, {'t': 207, 'disabled': True, 'text': 'Signing up\u2026'}, {'t': 254, 'disabled': True, 'text': 'Signing up\u2026'}]",
+          "at": "2026-10-23T01:00:21+00:00"
+        },
+        {
+          "scenario": "11 slow auth response",
+          "name": "signup: it settles to the confirmation state",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:00:21+00:00"
+        },
+        {
+          "scenario": "11 slow auth response",
+          "name": "11b: no console errors",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:00:21+00:00"
+        },
+        {
+          "scenario": "12 mobile 375x812",
+          "name": "/login has no horizontal overflow",
+          "status": "PASS",
+          "detail": "scrollWidth=375 innerWidth=375",
+          "at": "2026-10-23T01:00:22+00:00"
+        },
+        {
+          "scenario": "12 mobile 375x812",
+          "name": "/login inputs accept typing",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:00:22+00:00"
+        },
+        {
+          "scenario": "12 mobile 375x812",
+          "name": "/login primary button is visible without scrolling",
+          "status": "PASS",
+          "detail": "box={16,504,343,44} viewport_h=812",
+          "at": "2026-10-23T01:00:22+00:00"
+        },
+        {
+          "scenario": "12 mobile 375x812",
+          "name": "/signup has no horizontal overflow",
+          "status": "PASS",
+          "detail": "scrollWidth=375 innerWidth=375",
+          "at": "2026-10-23T01:00:23+00:00"
+        },
+        {
+          "scenario": "12 mobile 375x812",
+          "name": "/signup inputs accept typing",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:00:23+00:00"
+        },
+        {
+          "scenario": "12 mobile 375x812",
+          "name": "/signup primary button is visible without scrolling",
+          "status": "PASS",
+          "detail": "box={16,522,343,44} viewport_h=812",
+          "at": "2026-10-23T01:00:23+00:00"
+        },
+        {
+          "scenario": "12 mobile 375x812",
+          "name": "/ gate has no horizontal overflow",
+          "status": "PASS",
+          "detail": "gate=True scrollWidth=375 innerWidth=375",
+          "at": "2026-10-23T01:00:24+00:00"
+        },
+        {
+          "scenario": "12 mobile 375x812",
+          "name": "/ gate primary action is visible without scrolling",
+          "status": "PASS",
+          "detail": "box={40,420,295,40} viewport_h=812",
+          "at": "2026-10-23T01:00:25+00:00"
+        },
+        {
+          "scenario": "12 mobile 375x812",
+          "name": "/ gate dismiss control is reachable without scrolling",
+          "status": "PASS",
+          "detail": "box={150,526,73,20} viewport_h=812",
+          "at": "2026-10-23T01:00:25+00:00"
+        },
+        {
+          "scenario": "12 mobile 375x812",
+          "name": "12c: no console errors",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:00:25+00:00"
+        },
+        {
+          "scenario": "13 anonymous parity (real local API, unmocked)",
+          "name": "a reply renders for an anonymous message",
+          "status": "PASS",
+          "detail": "\"The language model isn't responding right now, so I can't answer that yet. Please send your message again in a moment.\\n\\nCopy\\nRegenerate\"",
+          "at": "2026-10-23T01:00:39+00:00"
+        },
+        {
+          "scenario": "13 anonymous parity (real local API, unmocked)",
+          "name": "the reply is not a connection error",
+          "status": "PASS",
+          "detail": "\"The language model isn't responding right now, so I can't answer that yet. Please send your message again in a moment.\\n\\nCopy\\nRegenerate\"",
+          "at": "2026-10-23T01:00:39+00:00"
+        },
+        {
+          "scenario": "13 anonymous parity (real local API, unmocked)",
+          "name": "the chat request reached the real local API",
+          "status": "PASS",
+          "detail": "requests=['http://localhost:8000/api/v1/health', 'http://localhost:8000/api/v1/health', 'http://localhost:8000/api/v1/chat/stream']",
+          "at": "2026-10-23T01:00:39+00:00"
+        },
+        {
+          "scenario": "13 anonymous parity (real local API, unmocked)",
+          "name": "the anonymous request carried NO Authorization header",
+          "status": "PASS",
+          "detail": "authorization=['']",
+          "at": "2026-10-23T01:00:39+00:00"
+        },
+        {
+          "scenario": "13 anonymous parity (real local API, unmocked)",
+          "name": "no request left the machine",
+          "status": "PASS",
+          "detail": "external hosts=[]",
+          "at": "2026-10-23T01:00:39+00:00"
+        },
+        {
+          "scenario": "13 anonymous parity (real local API, unmocked)",
+          "name": "no console errors",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:00:39+00:00"
+        }
+      ]
+    },
+    {
+      "run": 2,
+      "started_at": "2026-10-23T01:01:47+00:00",
+      "passed": 102,
+      "failed": 0,
+      "skipped": 0,
+      "checks": [
+        {
+          "scenario": "01 sign-up with confirmation required",
+          "name": "'Check your email' state is shown",
+          "status": "PASS",
+          "detail": "Sign up\n\nCheck your email to confirm your account, then log in.\n\nAlready have an account? Log in",
+          "at": "2026-10-23T01:00:40+00:00"
+        },
+        {
+          "scenario": "01 sign-up with confirmation required",
+          "name": "the sign-up form is gone",
+          "status": "PASS",
+          "detail": "forms=0",
+          "at": "2026-10-23T01:00:40+00:00"
+        },
+        {
+          "scenario": "01 sign-up with confirmation required",
+          "name": "exactly one signup request",
+          "status": "PASS",
+          "detail": "counts={'signup': 1}",
+          "at": "2026-10-23T01:00:40+00:00"
+        },
+        {
+          "scenario": "01 sign-up with confirmation required",
+          "name": "no session stored while confirmation is pending",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:00:40+00:00"
+        },
+        {
+          "scenario": "01 sign-up with confirmation required",
+          "name": "stays on /signup",
+          "status": "PASS",
+          "detail": "http://localhost:3001/signup",
+          "at": "2026-10-23T01:00:40+00:00"
+        },
+        {
+          "scenario": "01 sign-up with confirmation required",
+          "name": "no console errors",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:00:40+00:00"
+        },
+        {
+          "scenario": "02 sign-up with confirmation disabled",
+          "name": "a session is stored (autoconfirm signup)",
+          "status": "PASS",
+          "detail": "no sb-*-auth-token key after signup",
+          "at": "2026-10-23T01:00:41+00:00"
+        },
+        {
+          "scenario": "02 sign-up with confirmation disabled",
+          "name": "signup redirects to / and signs the user in",
+          "status": "PASS",
+          "detail": "stayed at http://localhost:3001/ after signup",
+          "at": "2026-10-23T01:00:41+00:00"
+        },
+        {
+          "scenario": "02 sign-up with confirmation disabled",
+          "name": "account email is visible in the sidebar",
+          "status": "PASS",
+          "detail": "aside='TrustShield\\n+\\nNew chat\\n\\nCHATS\\n\\nNew chat\\n\\nChats are saved to your account, so they stay after a refresh.\\n\\nnew@example.test\\nLog out'",
+          "at": "2026-10-23T01:00:41+00:00"
+        },
+        {
+          "scenario": "02 sign-up with confirmation disabled",
+          "name": "first-visit gate is not shown to a signed-in user",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:00:41+00:00"
+        },
+        {
+          "scenario": "02 sign-up with confirmation disabled",
+          "name": "no console errors",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:00:41+00:00"
+        },
+        {
+          "scenario": "03 sign-up with an already registered email",
+          "name": "the duplicate-email message is shown in role=alert",
+          "status": "PASS",
+          "detail": "'User already registered'",
+          "at": "2026-10-23T01:00:42+00:00"
+        },
+        {
+          "scenario": "03 sign-up with an already registered email",
+          "name": "duplicate-email error focuses the email field",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:00:42+00:00"
+        },
+        {
+          "scenario": "03 sign-up with an already registered email",
+          "name": "the sign-up form is still there",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:00:42+00:00"
+        },
+        {
+          "scenario": "03 sign-up with an already registered email",
+          "name": "stays on /signup",
+          "status": "PASS",
+          "detail": "http://localhost:3001/signup",
+          "at": "2026-10-23T01:00:42+00:00"
+        },
+        {
+          "scenario": "03 sign-up with an already registered email",
+          "name": "no session stored after a rejected signup",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:00:42+00:00"
+        },
+        {
+          "scenario": "03 sign-up with an already registered email",
+          "name": "no console errors",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:00:43+00:00"
+        },
+        {
+          "scenario": "03 sign-up with an already registered email",
+          "name": "a network failure shows a retryable signup error",
+          "status": "PASS",
+          "detail": "'Could not reach the server. Check your connection and try again.'",
+          "at": "2026-10-23T01:00:44+00:00"
+        },
+        {
+          "scenario": "03 sign-up with an already registered email",
+          "name": "a network failure focuses the alert",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:00:44+00:00"
+        },
+        {
+          "scenario": "03 sign-up with an already registered email",
+          "name": "the signup control is usable again after a network failure",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:00:44+00:00"
+        },
+        {
+          "scenario": "03 sign-up with an already registered email",
+          "name": "no session is stored after a network failure",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:00:44+00:00"
+        },
+        {
+          "scenario": "03 sign-up with an already registered email",
+          "name": "no unexpected console errors after a handled signup network failure",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:00:44+00:00"
+        },
+        {
+          "scenario": "04 sign-in success",
+          "name": "redirected to / after sign-in",
+          "status": "PASS",
+          "detail": "http://localhost:3001/",
+          "at": "2026-10-23T01:00:45+00:00"
+        },
+        {
+          "scenario": "04 sign-in success",
+          "name": "account email is visible in the sidebar",
+          "status": "PASS",
+          "detail": "'TrustShield\\n+\\nNew chat\\n\\nCHATS\\n\\nNew chat\\n\\nChats are saved to your account, so they stay after a refresh.\\n\\na@example.test\\nLog out'",
+          "at": "2026-10-23T01:00:46+00:00"
+        },
+        {
+          "scenario": "04 sign-in success",
+          "name": "first-visit gate is not shown",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:00:46+00:00"
+        },
+        {
+          "scenario": "04 sign-in success",
+          "name": "gate never flashed during sign-in",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:00:46+00:00"
+        },
+        {
+          "scenario": "04 sign-in success",
+          "name": "exactly one password-grant request",
+          "status": "PASS",
+          "detail": "counts={'password': 1}",
+          "at": "2026-10-23T01:00:46+00:00"
+        },
+        {
+          "scenario": "04 sign-in success",
+          "name": "no console errors",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:00:46+00:00"
+        },
+        {
+          "scenario": "05 sign-in with a wrong password",
+          "name": "'Invalid login credentials' is shown in role=alert",
+          "status": "PASS",
+          "detail": "'Invalid login credentials'",
+          "at": "2026-10-23T01:00:47+00:00"
+        },
+        {
+          "scenario": "05 sign-in with a wrong password",
+          "name": "stays on /login",
+          "status": "PASS",
+          "detail": "http://localhost:3001/login",
+          "at": "2026-10-23T01:00:47+00:00"
+        },
+        {
+          "scenario": "05 sign-in with a wrong password",
+          "name": "invalid-credentials error focuses the password field",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:00:47+00:00"
+        },
+        {
+          "scenario": "05 sign-in with a wrong password",
+          "name": "no session stored after a failed sign-in",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:00:47+00:00"
+        },
+        {
+          "scenario": "05 sign-in with a wrong password",
+          "name": "the submit control is usable again",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:00:47+00:00"
+        },
+        {
+          "scenario": "05 sign-in with a wrong password",
+          "name": "no console errors",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:00:47+00:00"
+        },
+        {
+          "scenario": "06 sign-out from the sidebar",
+          "name": "the signed-in account's own chat is restored",
+          "status": "PASS",
+          "detail": "'TrustShield\\n+\\nNew chat\\n\\nCHATS\\n\\nALPHA-ACCOUNT-HISTORY\\n\\nChats are saved to your account, so they stay after a refresh.\\n\\na@example.test\\nLog out'",
+          "at": "2026-10-23T01:00:49+00:00"
+        },
+        {
+          "scenario": "06 sign-out from the sidebar",
+          "name": "the first-visit gate reappears after sign-out",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:00:50+00:00"
+        },
+        {
+          "scenario": "06 sign-out from the sidebar",
+          "name": "the account email is gone from the sidebar",
+          "status": "PASS",
+          "detail": "'TrustShield\\n+\\nNew chat\\n\\nCHATS\\n\\nNew chat\\n\\nSign in to save your chats. Without an account, this history clears when you refresh or log out.'",
+          "at": "2026-10-23T01:00:50+00:00"
+        },
+        {
+          "scenario": "06 sign-out from the sidebar",
+          "name": "the previous account's chats are not rendered",
+          "status": "PASS",
+          "detail": "'TrustShield\\n+\\nNew chat\\n\\nCHATS\\n\\nNew chat\\n\\nSign in to save your chats. Without an account, this history clears when you refresh or log out.'",
+          "at": "2026-10-23T01:00:50+00:00"
+        },
+        {
+          "scenario": "06 sign-out from the sidebar",
+          "name": "the signed-out header offers Log in / Sign up",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:00:50+00:00"
+        },
+        {
+          "scenario": "06 sign-out from the sidebar",
+          "name": "the stored session is cleared",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:00:50+00:00"
+        },
+        {
+          "scenario": "06 sign-out from the sidebar",
+          "name": "exactly one logout request",
+          "status": "PASS",
+          "detail": "counts={'password': 1, 'logout': 1}",
+          "at": "2026-10-23T01:00:50+00:00"
+        },
+        {
+          "scenario": "06 sign-out from the sidebar",
+          "name": "no console errors",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:00:50+00:00"
+        },
+        {
+          "scenario": "07 token expiry and refresh",
+          "name": "the stored session can be expired for the test",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:00:52+00:00"
+        },
+        {
+          "scenario": "07 token expiry and refresh",
+          "name": "an expired session triggers exactly one refresh call",
+          "status": "PASS",
+          "detail": "counts={'refresh': 1}",
+          "at": "2026-10-23T01:00:53+00:00"
+        },
+        {
+          "scenario": "07 token expiry and refresh",
+          "name": "the user stays signed in after the refresh",
+          "status": "PASS",
+          "detail": "'TrustShield\\n+\\nNew chat\\n\\nCHATS\\n\\nNew chat\\n\\nChats are saved to your account, so they stay after a refresh.\\n\\na@example.test\\nLog out'",
+          "at": "2026-10-23T01:00:53+00:00"
+        },
+        {
+          "scenario": "07 token expiry and refresh",
+          "name": "the gate is not shown and never flashed",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:00:53+00:00"
+        },
+        {
+          "scenario": "07 token expiry and refresh",
+          "name": "07a: no console errors",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:00:53+00:00"
+        },
+        {
+          "scenario": "07 token expiry and refresh",
+          "name": "a failing refresh signs the user out",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:00:57+00:00"
+        },
+        {
+          "scenario": "07 token expiry and refresh",
+          "name": "a visible signed-out state is rendered (gate and/or account links)",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:00:57+00:00"
+        },
+        {
+          "scenario": "07 token expiry and refresh",
+          "name": "the account email is gone",
+          "status": "PASS",
+          "detail": "'TrustShield\\n+\\nNew chat\\n\\nCHATS\\n\\nNew chat\\n\\nSign in to save your chats. Without an account, this history clears when you refresh or log out.'",
+          "at": "2026-10-23T01:00:57+00:00"
+        },
+        {
+          "scenario": "07 token expiry and refresh",
+          "name": "no stuck spinner: the composer is present and editable",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:00:57+00:00"
+        },
+        {
+          "scenario": "07 token expiry and refresh",
+          "name": "no unhandled page error",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:00:57+00:00"
+        },
+        {
+          "scenario": "07 token expiry and refresh",
+          "name": "07b: no console errors beyond the mocked 400 response",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:00:57+00:00"
+        },
+        {
+          "scenario": "08 first-visit gate dismissal",
+          "name": "the gate receives initial focus",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:00:59+00:00"
+        },
+        {
+          "scenario": "08 first-visit gate dismissal",
+          "name": "Shift+Tab from the dialog container stays inside",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:00:59+00:00"
+        },
+        {
+          "scenario": "08 first-visit gate dismissal",
+          "name": "Tab wraps inside after Shift+Tab",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:00:59+00:00"
+        },
+        {
+          "scenario": "08 first-visit gate dismissal",
+          "name": "the gate appears on a fresh visit to /",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:01:01+00:00"
+        },
+        {
+          "scenario": "08 first-visit gate dismissal",
+          "name": "'Skip for now' closes the gate",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:01:01+00:00"
+        },
+        {
+          "scenario": "08 first-visit gate dismissal",
+          "name": "the gate does not return after a reload",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:01:02+00:00"
+        },
+        {
+          "scenario": "08 first-visit gate dismissal",
+          "name": "08a: no console errors",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:01:02+00:00"
+        },
+        {
+          "scenario": "08 first-visit gate dismissal",
+          "name": "the gate appears on a second fresh visit",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:01:04+00:00"
+        },
+        {
+          "scenario": "08 first-visit gate dismissal",
+          "name": "the \u2715 control closes the gate",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:01:04+00:00"
+        },
+        {
+          "scenario": "08 first-visit gate dismissal",
+          "name": "the \u2715 dismissal also survives a reload",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:01:05+00:00"
+        },
+        {
+          "scenario": "08 first-visit gate dismissal",
+          "name": "08b: no console errors",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:01:06+00:00"
+        },
+        {
+          "scenario": "08 first-visit gate dismissal",
+          "name": "Escape closes the gate",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:01:09+00:00"
+        },
+        {
+          "scenario": "08 first-visit gate dismissal",
+          "name": "Escape dismissal survives a reload",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:01:09+00:00"
+        },
+        {
+          "scenario": "09 identity-bound chat history",
+          "name": "B sees B's chat",
+          "status": "PASS",
+          "detail": "'TrustShield\\n+\\nNew chat\\n\\nCHATS\\n\\nBRAVO-B-ONLY\\n\\nChats are saved to your account, so they stay after a refresh.\\n\\nb@example.test\\nLog out'",
+          "at": "2026-10-23T01:01:11+00:00"
+        },
+        {
+          "scenario": "09 identity-bound chat history",
+          "name": "B does not see A's chat",
+          "status": "PASS",
+          "detail": "'TrustShield\\n+\\nNew chat\\n\\nCHATS\\n\\nBRAVO-B-ONLY\\n\\nChats are saved to your account, so they stay after a refresh.\\n\\nb@example.test\\nLog out'",
+          "at": "2026-10-23T01:01:11+00:00"
+        },
+        {
+          "scenario": "09 identity-bound chat history",
+          "name": "B does not see the legacy bucket",
+          "status": "PASS",
+          "detail": "'TrustShield\\n+\\nNew chat\\n\\nCHATS\\n\\nBRAVO-B-ONLY\\n\\nChats are saved to your account, so they stay after a refresh.\\n\\nb@example.test\\nLog out'",
+          "at": "2026-10-23T01:01:11+00:00"
+        },
+        {
+          "scenario": "09 identity-bound chat history",
+          "name": "B does not see the anon bucket",
+          "status": "PASS",
+          "detail": "'TrustShield\\n+\\nNew chat\\n\\nCHATS\\n\\nBRAVO-B-ONLY\\n\\nChats are saved to your account, so they stay after a refresh.\\n\\nb@example.test\\nLog out'",
+          "at": "2026-10-23T01:01:11+00:00"
+        },
+        {
+          "scenario": "09 identity-bound chat history",
+          "name": "the legacy and anon buckets are purged",
+          "status": "PASS",
+          "detail": "[None, None]",
+          "at": "2026-10-23T01:01:11+00:00"
+        },
+        {
+          "scenario": "09 identity-bound chat history",
+          "name": "signed out: neither account's chats are rendered",
+          "status": "PASS",
+          "detail": "'TrustShield\\n+\\nNew chat\\n\\nCHATS\\n\\nNew chat\\n\\nSign in to save your chats. Without an account, this history clears when you refresh or log out.'",
+          "at": "2026-10-23T01:01:12+00:00"
+        },
+        {
+          "scenario": "09 identity-bound chat history",
+          "name": "A sees A's chat",
+          "status": "PASS",
+          "detail": "'TrustShield\\n+\\nNew chat\\n\\nCHATS\\n\\nALPHA-A-ONLY\\n\\nChats are saved to your account, so they stay after a refresh.\\n\\na@example.test\\nLog out'",
+          "at": "2026-10-23T01:01:14+00:00"
+        },
+        {
+          "scenario": "09 identity-bound chat history",
+          "name": "A does not see B's chat",
+          "status": "PASS",
+          "detail": "'TrustShield\\n+\\nNew chat\\n\\nCHATS\\n\\nALPHA-A-ONLY\\n\\nChats are saved to your account, so they stay after a refresh.\\n\\na@example.test\\nLog out'",
+          "at": "2026-10-23T01:01:14+00:00"
+        },
+        {
+          "scenario": "09 identity-bound chat history",
+          "name": "no console errors",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:01:14+00:00"
+        },
+        {
+          "scenario": "10 duplicate submit guard",
+          "name": "two submits in one tick send exactly one sign-in request",
+          "status": "PASS",
+          "detail": "requests=1",
+          "at": "2026-10-23T01:01:19+00:00"
+        },
+        {
+          "scenario": "10 duplicate submit guard",
+          "name": "10a: no console errors",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:01:19+00:00"
+        },
+        {
+          "scenario": "10 duplicate submit guard",
+          "name": "two submits in one tick send exactly one signup request",
+          "status": "PASS",
+          "detail": "requests=1",
+          "at": "2026-10-23T01:01:23+00:00"
+        },
+        {
+          "scenario": "10 duplicate submit guard",
+          "name": "10b: no console errors",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:01:23+00:00"
+        },
+        {
+          "scenario": "11 slow auth response",
+          "name": "the submit control is disabled and busy while the response is pending",
+          "status": "PASS",
+          "detail": "samples=[{'t': 41, 'disabled': True, 'text': 'Logging in\u2026'}, {'t': 94, 'disabled': True, 'text': 'Logging in\u2026'}, {'t': 125, 'disabled': True, 'text': 'Logging in\u2026'}, {'t': 173, 'disabled': True, 'text': 'Logging in\u2026'}, {'t': 203, 'disabled': True, 'text': 'Logging in\u2026'}, {'t': 251, 'disabled': True, 'text': 'Logging in\u2026'}]",
+          "at": "2026-10-23T01:01:26+00:00"
+        },
+        {
+          "scenario": "11 slow auth response",
+          "name": "the pending state was actually sampled in-flight",
+          "status": "PASS",
+          "detail": "n=42",
+          "at": "2026-10-23T01:01:26+00:00"
+        },
+        {
+          "scenario": "11 slow auth response",
+          "name": "it settles to the signed-in state",
+          "status": "PASS",
+          "detail": "http://localhost:3001/",
+          "at": "2026-10-23T01:01:26+00:00"
+        },
+        {
+          "scenario": "11 slow auth response",
+          "name": "11a: no console errors",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:01:26+00:00"
+        },
+        {
+          "scenario": "11 slow auth response",
+          "name": "signup: the submit control is disabled and busy while pending",
+          "status": "PASS",
+          "detail": "samples=[{'t': 41, 'disabled': True, 'text': 'Signing up\u2026'}, {'t': 84, 'disabled': True, 'text': 'Signing up\u2026'}, {'t': 131, 'disabled': True, 'text': 'Signing up\u2026'}, {'t': 162, 'disabled': True, 'text': 'Signing up\u2026'}, {'t': 209, 'disabled': True, 'text': 'Signing up\u2026'}, {'t': 240, 'disabled': True, 'text': 'Signing up\u2026'}]",
+          "at": "2026-10-23T01:01:29+00:00"
+        },
+        {
+          "scenario": "11 slow auth response",
+          "name": "signup: it settles to the confirmation state",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:01:29+00:00"
+        },
+        {
+          "scenario": "11 slow auth response",
+          "name": "11b: no console errors",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:01:29+00:00"
+        },
+        {
+          "scenario": "12 mobile 375x812",
+          "name": "/login has no horizontal overflow",
+          "status": "PASS",
+          "detail": "scrollWidth=375 innerWidth=375",
+          "at": "2026-10-23T01:01:30+00:00"
+        },
+        {
+          "scenario": "12 mobile 375x812",
+          "name": "/login inputs accept typing",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:01:30+00:00"
+        },
+        {
+          "scenario": "12 mobile 375x812",
+          "name": "/login primary button is visible without scrolling",
+          "status": "PASS",
+          "detail": "box={16,504,343,44} viewport_h=812",
+          "at": "2026-10-23T01:01:30+00:00"
+        },
+        {
+          "scenario": "12 mobile 375x812",
+          "name": "/signup has no horizontal overflow",
+          "status": "PASS",
+          "detail": "scrollWidth=375 innerWidth=375",
+          "at": "2026-10-23T01:01:31+00:00"
+        },
+        {
+          "scenario": "12 mobile 375x812",
+          "name": "/signup inputs accept typing",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:01:31+00:00"
+        },
+        {
+          "scenario": "12 mobile 375x812",
+          "name": "/signup primary button is visible without scrolling",
+          "status": "PASS",
+          "detail": "box={16,522,343,44} viewport_h=812",
+          "at": "2026-10-23T01:01:31+00:00"
+        },
+        {
+          "scenario": "12 mobile 375x812",
+          "name": "/ gate has no horizontal overflow",
+          "status": "PASS",
+          "detail": "gate=True scrollWidth=375 innerWidth=375",
+          "at": "2026-10-23T01:01:33+00:00"
+        },
+        {
+          "scenario": "12 mobile 375x812",
+          "name": "/ gate primary action is visible without scrolling",
+          "status": "PASS",
+          "detail": "box={40,420,295,40} viewport_h=812",
+          "at": "2026-10-23T01:01:33+00:00"
+        },
+        {
+          "scenario": "12 mobile 375x812",
+          "name": "/ gate dismiss control is reachable without scrolling",
+          "status": "PASS",
+          "detail": "box={150,526,73,20} viewport_h=812",
+          "at": "2026-10-23T01:01:33+00:00"
+        },
+        {
+          "scenario": "12 mobile 375x812",
+          "name": "12c: no console errors",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:01:33+00:00"
+        },
+        {
+          "scenario": "13 anonymous parity (real local API, unmocked)",
+          "name": "a reply renders for an anonymous message",
+          "status": "PASS",
+          "detail": "\"The language model isn't responding right now, so I can't answer that yet. Please send your message again in a moment.\\n\\nCopy\\nRegenerate\"",
+          "at": "2026-10-23T01:01:47+00:00"
+        },
+        {
+          "scenario": "13 anonymous parity (real local API, unmocked)",
+          "name": "the reply is not a connection error",
+          "status": "PASS",
+          "detail": "\"The language model isn't responding right now, so I can't answer that yet. Please send your message again in a moment.\\n\\nCopy\\nRegenerate\"",
+          "at": "2026-10-23T01:01:47+00:00"
+        },
+        {
+          "scenario": "13 anonymous parity (real local API, unmocked)",
+          "name": "the chat request reached the real local API",
+          "status": "PASS",
+          "detail": "requests=['http://localhost:8000/api/v1/health', 'http://localhost:8000/api/v1/health', 'http://localhost:8000/api/v1/chat/stream']",
+          "at": "2026-10-23T01:01:47+00:00"
+        },
+        {
+          "scenario": "13 anonymous parity (real local API, unmocked)",
+          "name": "the anonymous request carried NO Authorization header",
+          "status": "PASS",
+          "detail": "authorization=['']",
+          "at": "2026-10-23T01:01:47+00:00"
+        },
+        {
+          "scenario": "13 anonymous parity (real local API, unmocked)",
+          "name": "no request left the machine",
+          "status": "PASS",
+          "detail": "external hosts=[]",
+          "at": "2026-10-23T01:01:47+00:00"
+        },
+        {
+          "scenario": "13 anonymous parity (real local API, unmocked)",
+          "name": "no console errors",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:01:47+00:00"
+        }
+      ]
+    },
+    {
+      "run": 3,
+      "started_at": "2026-10-23T01:02:57+00:00",
+      "passed": 102,
+      "failed": 0,
+      "skipped": 0,
+      "checks": [
+        {
+          "scenario": "01 sign-up with confirmation required",
+          "name": "'Check your email' state is shown",
+          "status": "PASS",
+          "detail": "Sign up\n\nCheck your email to confirm your account, then log in.\n\nAlready have an account? Log in",
+          "at": "2026-10-23T01:01:49+00:00"
+        },
+        {
+          "scenario": "01 sign-up with confirmation required",
+          "name": "the sign-up form is gone",
+          "status": "PASS",
+          "detail": "forms=0",
+          "at": "2026-10-23T01:01:49+00:00"
+        },
+        {
+          "scenario": "01 sign-up with confirmation required",
+          "name": "exactly one signup request",
+          "status": "PASS",
+          "detail": "counts={'signup': 1}",
+          "at": "2026-10-23T01:01:49+00:00"
+        },
+        {
+          "scenario": "01 sign-up with confirmation required",
+          "name": "no session stored while confirmation is pending",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:01:49+00:00"
+        },
+        {
+          "scenario": "01 sign-up with confirmation required",
+          "name": "stays on /signup",
+          "status": "PASS",
+          "detail": "http://localhost:3001/signup",
+          "at": "2026-10-23T01:01:49+00:00"
+        },
+        {
+          "scenario": "01 sign-up with confirmation required",
+          "name": "no console errors",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:01:49+00:00"
+        },
+        {
+          "scenario": "02 sign-up with confirmation disabled",
+          "name": "a session is stored (autoconfirm signup)",
+          "status": "PASS",
+          "detail": "no sb-*-auth-token key after signup",
+          "at": "2026-10-23T01:01:50+00:00"
+        },
+        {
+          "scenario": "02 sign-up with confirmation disabled",
+          "name": "signup redirects to / and signs the user in",
+          "status": "PASS",
+          "detail": "stayed at http://localhost:3001/ after signup",
+          "at": "2026-10-23T01:01:50+00:00"
+        },
+        {
+          "scenario": "02 sign-up with confirmation disabled",
+          "name": "account email is visible in the sidebar",
+          "status": "PASS",
+          "detail": "aside='TrustShield\\n+\\nNew chat\\n\\nCHATS\\n\\nNew chat\\n\\nChats are saved to your account, so they stay after a refresh.\\n\\nnew@example.test\\nLog out'",
+          "at": "2026-10-23T01:01:50+00:00"
+        },
+        {
+          "scenario": "02 sign-up with confirmation disabled",
+          "name": "first-visit gate is not shown to a signed-in user",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:01:50+00:00"
+        },
+        {
+          "scenario": "02 sign-up with confirmation disabled",
+          "name": "no console errors",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:01:50+00:00"
+        },
+        {
+          "scenario": "03 sign-up with an already registered email",
+          "name": "the duplicate-email message is shown in role=alert",
+          "status": "PASS",
+          "detail": "'User already registered'",
+          "at": "2026-10-23T01:01:52+00:00"
+        },
+        {
+          "scenario": "03 sign-up with an already registered email",
+          "name": "duplicate-email error focuses the email field",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:01:52+00:00"
+        },
+        {
+          "scenario": "03 sign-up with an already registered email",
+          "name": "the sign-up form is still there",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:01:52+00:00"
+        },
+        {
+          "scenario": "03 sign-up with an already registered email",
+          "name": "stays on /signup",
+          "status": "PASS",
+          "detail": "http://localhost:3001/signup",
+          "at": "2026-10-23T01:01:52+00:00"
+        },
+        {
+          "scenario": "03 sign-up with an already registered email",
+          "name": "no session stored after a rejected signup",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:01:52+00:00"
+        },
+        {
+          "scenario": "03 sign-up with an already registered email",
+          "name": "no console errors",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:01:52+00:00"
+        },
+        {
+          "scenario": "03 sign-up with an already registered email",
+          "name": "a network failure shows a retryable signup error",
+          "status": "PASS",
+          "detail": "'Could not reach the server. Check your connection and try again.'",
+          "at": "2026-10-23T01:01:53+00:00"
+        },
+        {
+          "scenario": "03 sign-up with an already registered email",
+          "name": "a network failure focuses the alert",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:01:53+00:00"
+        },
+        {
+          "scenario": "03 sign-up with an already registered email",
+          "name": "the signup control is usable again after a network failure",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:01:53+00:00"
+        },
+        {
+          "scenario": "03 sign-up with an already registered email",
+          "name": "no session is stored after a network failure",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:01:53+00:00"
+        },
+        {
+          "scenario": "03 sign-up with an already registered email",
+          "name": "no unexpected console errors after a handled signup network failure",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:01:53+00:00"
+        },
+        {
+          "scenario": "04 sign-in success",
+          "name": "redirected to / after sign-in",
+          "status": "PASS",
+          "detail": "http://localhost:3001/",
+          "at": "2026-10-23T01:01:54+00:00"
+        },
+        {
+          "scenario": "04 sign-in success",
+          "name": "account email is visible in the sidebar",
+          "status": "PASS",
+          "detail": "'TrustShield\\n+\\nNew chat\\n\\nCHATS\\n\\nNew chat\\n\\nChats are saved to your account, so they stay after a refresh.\\n\\na@example.test\\nLog out'",
+          "at": "2026-10-23T01:01:55+00:00"
+        },
+        {
+          "scenario": "04 sign-in success",
+          "name": "first-visit gate is not shown",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:01:55+00:00"
+        },
+        {
+          "scenario": "04 sign-in success",
+          "name": "gate never flashed during sign-in",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:01:55+00:00"
+        },
+        {
+          "scenario": "04 sign-in success",
+          "name": "exactly one password-grant request",
+          "status": "PASS",
+          "detail": "counts={'password': 1}",
+          "at": "2026-10-23T01:01:55+00:00"
+        },
+        {
+          "scenario": "04 sign-in success",
+          "name": "no console errors",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:01:55+00:00"
+        },
+        {
+          "scenario": "05 sign-in with a wrong password",
+          "name": "'Invalid login credentials' is shown in role=alert",
+          "status": "PASS",
+          "detail": "'Invalid login credentials'",
+          "at": "2026-10-23T01:01:56+00:00"
+        },
+        {
+          "scenario": "05 sign-in with a wrong password",
+          "name": "stays on /login",
+          "status": "PASS",
+          "detail": "http://localhost:3001/login",
+          "at": "2026-10-23T01:01:56+00:00"
+        },
+        {
+          "scenario": "05 sign-in with a wrong password",
+          "name": "invalid-credentials error focuses the password field",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:01:56+00:00"
+        },
+        {
+          "scenario": "05 sign-in with a wrong password",
+          "name": "no session stored after a failed sign-in",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:01:56+00:00"
+        },
+        {
+          "scenario": "05 sign-in with a wrong password",
+          "name": "the submit control is usable again",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:01:56+00:00"
+        },
+        {
+          "scenario": "05 sign-in with a wrong password",
+          "name": "no console errors",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:01:56+00:00"
+        },
+        {
+          "scenario": "06 sign-out from the sidebar",
+          "name": "the signed-in account's own chat is restored",
+          "status": "PASS",
+          "detail": "'TrustShield\\n+\\nNew chat\\n\\nCHATS\\n\\nALPHA-ACCOUNT-HISTORY\\n\\nChats are saved to your account, so they stay after a refresh.\\n\\na@example.test\\nLog out'",
+          "at": "2026-10-23T01:01:58+00:00"
+        },
+        {
+          "scenario": "06 sign-out from the sidebar",
+          "name": "the first-visit gate reappears after sign-out",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:01:59+00:00"
+        },
+        {
+          "scenario": "06 sign-out from the sidebar",
+          "name": "the account email is gone from the sidebar",
+          "status": "PASS",
+          "detail": "'TrustShield\\n+\\nNew chat\\n\\nCHATS\\n\\nNew chat\\n\\nSign in to save your chats. Without an account, this history clears when you refresh or log out.'",
+          "at": "2026-10-23T01:01:59+00:00"
+        },
+        {
+          "scenario": "06 sign-out from the sidebar",
+          "name": "the previous account's chats are not rendered",
+          "status": "PASS",
+          "detail": "'TrustShield\\n+\\nNew chat\\n\\nCHATS\\n\\nNew chat\\n\\nSign in to save your chats. Without an account, this history clears when you refresh or log out.'",
+          "at": "2026-10-23T01:01:59+00:00"
+        },
+        {
+          "scenario": "06 sign-out from the sidebar",
+          "name": "the signed-out header offers Log in / Sign up",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:01:59+00:00"
+        },
+        {
+          "scenario": "06 sign-out from the sidebar",
+          "name": "the stored session is cleared",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:01:59+00:00"
+        },
+        {
+          "scenario": "06 sign-out from the sidebar",
+          "name": "exactly one logout request",
+          "status": "PASS",
+          "detail": "counts={'password': 1, 'logout': 1}",
+          "at": "2026-10-23T01:01:59+00:00"
+        },
+        {
+          "scenario": "06 sign-out from the sidebar",
+          "name": "no console errors",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:01:59+00:00"
+        },
+        {
+          "scenario": "07 token expiry and refresh",
+          "name": "the stored session can be expired for the test",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:02:01+00:00"
+        },
+        {
+          "scenario": "07 token expiry and refresh",
+          "name": "an expired session triggers exactly one refresh call",
+          "status": "PASS",
+          "detail": "counts={'refresh': 1}",
+          "at": "2026-10-23T01:02:02+00:00"
+        },
+        {
+          "scenario": "07 token expiry and refresh",
+          "name": "the user stays signed in after the refresh",
+          "status": "PASS",
+          "detail": "'TrustShield\\n+\\nNew chat\\n\\nCHATS\\n\\nNew chat\\n\\nChats are saved to your account, so they stay after a refresh.\\n\\na@example.test\\nLog out'",
+          "at": "2026-10-23T01:02:02+00:00"
+        },
+        {
+          "scenario": "07 token expiry and refresh",
+          "name": "the gate is not shown and never flashed",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:02:02+00:00"
+        },
+        {
+          "scenario": "07 token expiry and refresh",
+          "name": "07a: no console errors",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:02:03+00:00"
+        },
+        {
+          "scenario": "07 token expiry and refresh",
+          "name": "a failing refresh signs the user out",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:02:07+00:00"
+        },
+        {
+          "scenario": "07 token expiry and refresh",
+          "name": "a visible signed-out state is rendered (gate and/or account links)",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:02:07+00:00"
+        },
+        {
+          "scenario": "07 token expiry and refresh",
+          "name": "the account email is gone",
+          "status": "PASS",
+          "detail": "'TrustShield\\n+\\nNew chat\\n\\nCHATS\\n\\nNew chat\\n\\nSign in to save your chats. Without an account, this history clears when you refresh or log out.'",
+          "at": "2026-10-23T01:02:07+00:00"
+        },
+        {
+          "scenario": "07 token expiry and refresh",
+          "name": "no stuck spinner: the composer is present and editable",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:02:07+00:00"
+        },
+        {
+          "scenario": "07 token expiry and refresh",
+          "name": "no unhandled page error",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:02:07+00:00"
+        },
+        {
+          "scenario": "07 token expiry and refresh",
+          "name": "07b: no console errors beyond the mocked 400 response",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:02:07+00:00"
+        },
+        {
+          "scenario": "08 first-visit gate dismissal",
+          "name": "the gate receives initial focus",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:02:08+00:00"
+        },
+        {
+          "scenario": "08 first-visit gate dismissal",
+          "name": "Shift+Tab from the dialog container stays inside",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:02:08+00:00"
+        },
+        {
+          "scenario": "08 first-visit gate dismissal",
+          "name": "Tab wraps inside after Shift+Tab",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:02:08+00:00"
+        },
+        {
+          "scenario": "08 first-visit gate dismissal",
+          "name": "the gate appears on a fresh visit to /",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:02:10+00:00"
+        },
+        {
+          "scenario": "08 first-visit gate dismissal",
+          "name": "'Skip for now' closes the gate",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:02:10+00:00"
+        },
+        {
+          "scenario": "08 first-visit gate dismissal",
+          "name": "the gate does not return after a reload",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:02:11+00:00"
+        },
+        {
+          "scenario": "08 first-visit gate dismissal",
+          "name": "08a: no console errors",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:02:11+00:00"
+        },
+        {
+          "scenario": "08 first-visit gate dismissal",
+          "name": "the gate appears on a second fresh visit",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:02:13+00:00"
+        },
+        {
+          "scenario": "08 first-visit gate dismissal",
+          "name": "the \u2715 control closes the gate",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:02:14+00:00"
+        },
+        {
+          "scenario": "08 first-visit gate dismissal",
+          "name": "the \u2715 dismissal also survives a reload",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:02:15+00:00"
+        },
+        {
+          "scenario": "08 first-visit gate dismissal",
+          "name": "08b: no console errors",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:02:15+00:00"
+        },
+        {
+          "scenario": "08 first-visit gate dismissal",
+          "name": "Escape closes the gate",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:02:18+00:00"
+        },
+        {
+          "scenario": "08 first-visit gate dismissal",
+          "name": "Escape dismissal survives a reload",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:02:18+00:00"
+        },
+        {
+          "scenario": "09 identity-bound chat history",
+          "name": "B sees B's chat",
+          "status": "PASS",
+          "detail": "'TrustShield\\n+\\nNew chat\\n\\nCHATS\\n\\nBRAVO-B-ONLY\\n\\nChats are saved to your account, so they stay after a refresh.\\n\\nb@example.test\\nLog out'",
+          "at": "2026-10-23T01:02:21+00:00"
+        },
+        {
+          "scenario": "09 identity-bound chat history",
+          "name": "B does not see A's chat",
+          "status": "PASS",
+          "detail": "'TrustShield\\n+\\nNew chat\\n\\nCHATS\\n\\nBRAVO-B-ONLY\\n\\nChats are saved to your account, so they stay after a refresh.\\n\\nb@example.test\\nLog out'",
+          "at": "2026-10-23T01:02:21+00:00"
+        },
+        {
+          "scenario": "09 identity-bound chat history",
+          "name": "B does not see the legacy bucket",
+          "status": "PASS",
+          "detail": "'TrustShield\\n+\\nNew chat\\n\\nCHATS\\n\\nBRAVO-B-ONLY\\n\\nChats are saved to your account, so they stay after a refresh.\\n\\nb@example.test\\nLog out'",
+          "at": "2026-10-23T01:02:21+00:00"
+        },
+        {
+          "scenario": "09 identity-bound chat history",
+          "name": "B does not see the anon bucket",
+          "status": "PASS",
+          "detail": "'TrustShield\\n+\\nNew chat\\n\\nCHATS\\n\\nBRAVO-B-ONLY\\n\\nChats are saved to your account, so they stay after a refresh.\\n\\nb@example.test\\nLog out'",
+          "at": "2026-10-23T01:02:21+00:00"
+        },
+        {
+          "scenario": "09 identity-bound chat history",
+          "name": "the legacy and anon buckets are purged",
+          "status": "PASS",
+          "detail": "[None, None]",
+          "at": "2026-10-23T01:02:21+00:00"
+        },
+        {
+          "scenario": "09 identity-bound chat history",
+          "name": "signed out: neither account's chats are rendered",
+          "status": "PASS",
+          "detail": "'TrustShield\\n+\\nNew chat\\n\\nCHATS\\n\\nNew chat\\n\\nSign in to save your chats. Without an account, this history clears when you refresh or log out.'",
+          "at": "2026-10-23T01:02:21+00:00"
+        },
+        {
+          "scenario": "09 identity-bound chat history",
+          "name": "A sees A's chat",
+          "status": "PASS",
+          "detail": "'TrustShield\\n+\\nNew chat\\n\\nCHATS\\n\\nALPHA-A-ONLY\\n\\nChats are saved to your account, so they stay after a refresh.\\n\\na@example.test\\nLog out'",
+          "at": "2026-10-23T01:02:23+00:00"
+        },
+        {
+          "scenario": "09 identity-bound chat history",
+          "name": "A does not see B's chat",
+          "status": "PASS",
+          "detail": "'TrustShield\\n+\\nNew chat\\n\\nCHATS\\n\\nALPHA-A-ONLY\\n\\nChats are saved to your account, so they stay after a refresh.\\n\\na@example.test\\nLog out'",
+          "at": "2026-10-23T01:02:23+00:00"
+        },
+        {
+          "scenario": "09 identity-bound chat history",
+          "name": "no console errors",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:02:23+00:00"
+        },
+        {
+          "scenario": "10 duplicate submit guard",
+          "name": "two submits in one tick send exactly one sign-in request",
+          "status": "PASS",
+          "detail": "requests=1",
+          "at": "2026-10-23T01:02:28+00:00"
+        },
+        {
+          "scenario": "10 duplicate submit guard",
+          "name": "10a: no console errors",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:02:28+00:00"
+        },
+        {
+          "scenario": "10 duplicate submit guard",
+          "name": "two submits in one tick send exactly one signup request",
+          "status": "PASS",
+          "detail": "requests=1",
+          "at": "2026-10-23T01:02:33+00:00"
+        },
+        {
+          "scenario": "10 duplicate submit guard",
+          "name": "10b: no console errors",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:02:33+00:00"
+        },
+        {
+          "scenario": "11 slow auth response",
+          "name": "the submit control is disabled and busy while the response is pending",
+          "status": "PASS",
+          "detail": "samples=[{'t': 44, 'disabled': True, 'text': 'Logging in\u2026'}, {'t': 81, 'disabled': True, 'text': 'Logging in\u2026'}, {'t': 121, 'disabled': True, 'text': 'Logging in\u2026'}, {'t': 169, 'disabled': True, 'text': 'Logging in\u2026'}, {'t': 217, 'disabled': True, 'text': 'Logging in\u2026'}, {'t': 248, 'disabled': True, 'text': 'Logging in\u2026'}]",
+          "at": "2026-10-23T01:02:35+00:00"
+        },
+        {
+          "scenario": "11 slow auth response",
+          "name": "the pending state was actually sampled in-flight",
+          "status": "PASS",
+          "detail": "n=41",
+          "at": "2026-10-23T01:02:35+00:00"
+        },
+        {
+          "scenario": "11 slow auth response",
+          "name": "it settles to the signed-in state",
+          "status": "PASS",
+          "detail": "http://localhost:3001/",
+          "at": "2026-10-23T01:02:35+00:00"
+        },
+        {
+          "scenario": "11 slow auth response",
+          "name": "11a: no console errors",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:02:35+00:00"
+        },
+        {
+          "scenario": "11 slow auth response",
+          "name": "signup: the submit control is disabled and busy while pending",
+          "status": "PASS",
+          "detail": "samples=[{'t': 41, 'disabled': True, 'text': 'Signing up\u2026'}, {'t': 82, 'disabled': True, 'text': 'Signing up\u2026'}, {'t': 129, 'disabled': True, 'text': 'Signing up\u2026'}, {'t': 161, 'disabled': True, 'text': 'Signing up\u2026'}, {'t': 208, 'disabled': True, 'text': 'Signing up\u2026'}, {'t': 255, 'disabled': True, 'text': 'Signing up\u2026'}]",
+          "at": "2026-10-23T01:02:38+00:00"
+        },
+        {
+          "scenario": "11 slow auth response",
+          "name": "signup: it settles to the confirmation state",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:02:38+00:00"
+        },
+        {
+          "scenario": "11 slow auth response",
+          "name": "11b: no console errors",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:02:38+00:00"
+        },
+        {
+          "scenario": "12 mobile 375x812",
+          "name": "/login has no horizontal overflow",
+          "status": "PASS",
+          "detail": "scrollWidth=375 innerWidth=375",
+          "at": "2026-10-23T01:02:39+00:00"
+        },
+        {
+          "scenario": "12 mobile 375x812",
+          "name": "/login inputs accept typing",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:02:39+00:00"
+        },
+        {
+          "scenario": "12 mobile 375x812",
+          "name": "/login primary button is visible without scrolling",
+          "status": "PASS",
+          "detail": "box={16,504,343,44} viewport_h=812",
+          "at": "2026-10-23T01:02:39+00:00"
+        },
+        {
+          "scenario": "12 mobile 375x812",
+          "name": "/signup has no horizontal overflow",
+          "status": "PASS",
+          "detail": "scrollWidth=375 innerWidth=375",
+          "at": "2026-10-23T01:02:41+00:00"
+        },
+        {
+          "scenario": "12 mobile 375x812",
+          "name": "/signup inputs accept typing",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:02:41+00:00"
+        },
+        {
+          "scenario": "12 mobile 375x812",
+          "name": "/signup primary button is visible without scrolling",
+          "status": "PASS",
+          "detail": "box={16,522,343,44} viewport_h=812",
+          "at": "2026-10-23T01:02:41+00:00"
+        },
+        {
+          "scenario": "12 mobile 375x812",
+          "name": "/ gate has no horizontal overflow",
+          "status": "PASS",
+          "detail": "gate=True scrollWidth=375 innerWidth=375",
+          "at": "2026-10-23T01:02:42+00:00"
+        },
+        {
+          "scenario": "12 mobile 375x812",
+          "name": "/ gate primary action is visible without scrolling",
+          "status": "PASS",
+          "detail": "box={40,420,295,40} viewport_h=812",
+          "at": "2026-10-23T01:02:42+00:00"
+        },
+        {
+          "scenario": "12 mobile 375x812",
+          "name": "/ gate dismiss control is reachable without scrolling",
+          "status": "PASS",
+          "detail": "box={150,526,73,20} viewport_h=812",
+          "at": "2026-10-23T01:02:42+00:00"
+        },
+        {
+          "scenario": "12 mobile 375x812",
+          "name": "12c: no console errors",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:02:42+00:00"
+        },
+        {
+          "scenario": "13 anonymous parity (real local API, unmocked)",
+          "name": "a reply renders for an anonymous message",
+          "status": "PASS",
+          "detail": "\"The language model isn't responding right now, so I can't answer that yet. Please send your message again in a moment.\\n\\nCopy\\nRegenerate\"",
+          "at": "2026-10-23T01:02:57+00:00"
+        },
+        {
+          "scenario": "13 anonymous parity (real local API, unmocked)",
+          "name": "the reply is not a connection error",
+          "status": "PASS",
+          "detail": "\"The language model isn't responding right now, so I can't answer that yet. Please send your message again in a moment.\\n\\nCopy\\nRegenerate\"",
+          "at": "2026-10-23T01:02:57+00:00"
+        },
+        {
+          "scenario": "13 anonymous parity (real local API, unmocked)",
+          "name": "the chat request reached the real local API",
+          "status": "PASS",
+          "detail": "requests=['http://localhost:8000/api/v1/health', 'http://localhost:8000/api/v1/health', 'http://localhost:8000/api/v1/chat/stream']",
+          "at": "2026-10-23T01:02:57+00:00"
+        },
+        {
+          "scenario": "13 anonymous parity (real local API, unmocked)",
+          "name": "the anonymous request carried NO Authorization header",
+          "status": "PASS",
+          "detail": "authorization=['']",
+          "at": "2026-10-23T01:02:57+00:00"
+        },
+        {
+          "scenario": "13 anonymous parity (real local API, unmocked)",
+          "name": "no request left the machine",
+          "status": "PASS",
+          "detail": "external hosts=[]",
+          "at": "2026-10-23T01:02:57+00:00"
+        },
+        {
+          "scenario": "13 anonymous parity (real local API, unmocked)",
+          "name": "no console errors",
+          "status": "PASS",
+          "detail": "",
+          "at": "2026-10-23T01:02:57+00:00"
+        }
+      ]
+    }
+  ],
+  "note": "Auth is mocked at the network layer for scenarios 01-12; scenario 13 uses the real local API."
+}

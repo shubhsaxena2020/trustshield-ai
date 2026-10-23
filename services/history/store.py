@@ -68,7 +68,22 @@ def _eq(value: str) -> str:
     return "eq." + urllib.parse.quote(value, safe="")
 
 
+def _scoped_user_id(user_id: Any) -> str:
+    """Fail closed: refuse to build a query unless a non-empty user_id was supplied.
+
+    This is the one filter that isolates users, so a missing identity must never turn into a
+    missing filter. Previously ``None`` reached ``urllib.parse.quote`` and raised TypeError
+    (a 500 from the endpoint), while ``""`` produced ``user_id=eq.`` -- a filter that looks
+    like tenant scope but cannot match a real uuid, so PostgREST rejects it instead of
+    returning nothing. Raise a clear ValueError before any request is made.
+    """
+    if not isinstance(user_id, str) or not user_id.strip():
+        raise ValueError("user_id is required for history queries")
+    return user_id
+
+
 def list_for_user(supabase_url: str, service_role_key: str, *, user_id: str, limit: int = 50) -> list[dict]:
+    user_id = _scoped_user_id(user_id)
     params = f"?user_id={_eq(user_id)}&order=created_at.desc&limit={int(limit)}"
     result = _request("GET", f"{supabase_url}/rest/v1/scan_history", service_role_key, params=params)
     return result if isinstance(result, list) else []
@@ -76,11 +91,13 @@ def list_for_user(supabase_url: str, service_role_key: str, *, user_id: str, lim
 
 def delete_for_user(supabase_url: str, service_role_key: str, *, user_id: str, row_id: str) -> bool:
     """Deletes only if row_id belongs to user_id (filtered in the query, not just by RLS)."""
+    user_id = _scoped_user_id(user_id)
     params = f"?id={_eq(row_id)}&user_id={_eq(user_id)}"
     result = _request("DELETE", f"{supabase_url}/rest/v1/scan_history", service_role_key, params=params)
     return bool(result)
 
 
 def delete_all_for_user(supabase_url: str, service_role_key: str, *, user_id: str) -> None:
+    user_id = _scoped_user_id(user_id)
     params = f"?user_id={_eq(user_id)}"
     _request("DELETE", f"{supabase_url}/rest/v1/scan_history", service_role_key, params=params)

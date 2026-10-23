@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import Image from "next/image";
 import { authFetch } from "@/lib/authFetch";
 import { supabase } from "@/lib/supabaseClient";
@@ -166,6 +166,8 @@ export function Chat() {
   const prevIdentityRef = useRef<string | null>(null);
   const skipNextSaveRef = useRef(true);
   const [showGate, setShowGate] = useState(false);
+  const gateRef = useRef<HTMLDivElement>(null);
+  const prevFocusRef = useRef<HTMLElement | null>(null);
 
   // Whose chats are currently loaded: a stable per-account bucket, or "anon" while signed out.
   const identity = loading ? null : (session?.user.id ?? "anon");
@@ -200,14 +202,14 @@ export function Chat() {
 
   // Mirrors `chats` on every render so the identity-switch effect below can flush the *outgoing* identity's
   // latest messages even though that effect itself only reacts to `identity`, not `chats`.
-  useEffect(() => {
+  useLayoutEffect(() => {
     chatsRef.current = chats;
   });
 
   // Restore the signed-in (or anonymous) identity's saved chats whenever that identity changes — on mount, after
   // login, and after logout. Flushes the previous identity's chats synchronously first, so a message sent just
   // before logging out isn't lost to the save effect's debounce getting cancelled by the identity switch.
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (identity === null) return; // session still loading: wait rather than briefly flashing anon history
     if (prevIdentityRef.current !== null && prevIdentityRef.current !== identity) {
       saveChats(prevIdentityRef.current, chatsRef.current);
@@ -249,6 +251,64 @@ export function Chat() {
       setShowGate(true);
     }
   }, [loading, session]);
+
+  // Accessibility: the dialog claims aria-modal="true", so on open it must take focus, trap Tab, close on
+  // Escape, and restore focus when dismissed. Implemented with plain React (no focus-trap dependency).
+  useEffect(() => {
+    if (!showGate) return;
+    prevFocusRef.current = (document.activeElement as HTMLElement) ?? null;
+    gateRef.current?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        dismissGate();
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const dialog = gateRef.current;
+      if (!dialog) return;
+      const focusable = Array.from(
+        dialog.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((el) => el.getClientRects().length > 0);
+      if (focusable.length === 0) {
+        e.preventDefault();
+        return;
+      }
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const active = document.activeElement;
+      if (active === dialog) {
+        e.preventDefault();
+        (e.shiftKey ? last : first).focus();
+        return;
+      }
+      if (e.shiftKey) {
+        if (active === first || !dialog.contains(active)) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else {
+        if (active === last || !dialog.contains(active)) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      const prev = prevFocusRef.current;
+      if (prev && typeof prev.focus === "function") {
+        try {
+          prev.focus();
+        } catch {
+          /* ignore */
+        }
+      }
+    };
+  }, [showGate]);
 
   function dismissGate() {
     setShowGate(false);
@@ -890,18 +950,18 @@ export function Chat() {
 
       {showGate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div role="dialog" aria-modal="true" aria-labelledby="gate-heading" className="relative w-full max-w-sm rounded-2xl bg-white p-6 text-center shadow-2xl">
-            <button type="button" onClick={dismissGate} aria-label="Skip for now" className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full text-zinc-400 hover:bg-zinc-100 hover:text-zinc-900 focus:outline-none focus:ring-2 focus:ring-teal-500">
-              ✕
-            </button>
-            <Logo className="mx-auto h-10 w-10" />
-            <h2 id="gate-heading" className="mt-4 text-xl font-semibold text-zinc-900">Welcome to TrustShield</h2>
-            <p className="mt-2 text-sm text-zinc-500">Log in or sign up to save your scan history to your account.</p>
+          <div role="dialog" aria-modal="true" aria-labelledby="gate-heading" aria-describedby="gate-description" ref={gateRef} tabIndex={-1} className="relative w-full max-w-sm rounded-2xl bg-white p-6 text-center shadow-2xl focus:outline-none">
+              <button type="button" onClick={dismissGate} aria-label="Skip for now" className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full text-zinc-400 hover:bg-zinc-100 hover:text-zinc-900 focus:outline-none focus:ring-2 focus:ring-teal-500 after:absolute after:-inset-2 after:content-['']">
+                ✕
+              </button>
+              <Logo className="mx-auto h-10 w-10" />
+              <h2 id="gate-heading" className="mt-4 text-xl font-semibold text-zinc-900">Welcome to TrustShield</h2>
+              <p id="gate-description" className="mt-2 text-sm text-zinc-500">Log in or sign up to save your scan history to your account.</p>
             <div className="mt-6 flex flex-col gap-2">
               <a href="/login" className="rounded-lg bg-zinc-900 py-2.5 text-sm font-medium text-white hover:bg-zinc-800">Log in</a>
               <a href="/signup" className="rounded-lg border border-zinc-300 py-2.5 text-sm font-medium text-zinc-900 hover:bg-zinc-50">Sign up</a>
             </div>
-            <button type="button" onClick={dismissGate} className="mt-4 text-sm text-zinc-500 underline hover:text-zinc-900">Skip for now</button>
+            <button type="button" onClick={dismissGate} className="relative mt-4 text-sm text-zinc-500 underline hover:text-zinc-900 after:absolute after:-inset-2 after:content-['']">Skip for now</button>
           </div>
         </div>
       )}

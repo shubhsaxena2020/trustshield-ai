@@ -12,12 +12,26 @@ export function useSession() {
       setLoading(false);
       return;
     }
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      setLoading(false);
-    });
+    let active = true;
+    // getSession() rejects when storage is unavailable (blocked storage, private mode) or when a refresh
+    // throws a non-auth error. Unhandled, that is an uncaught rejection in the console and `loading` stays
+    // true forever, so every consumer waits on a session that is never coming. Treat it as signed out.
+    supabase.auth
+      .getSession()
+      .then(({ data }) => {
+        if (active) setSession(data.session);
+      })
+      .catch(() => {
+        if (active) setSession(null);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
     const { data: sub } = supabase.auth.onAuthStateChange((_event, next) => setSession(next));
-    return () => sub.subscription.unsubscribe();
+    return () => {
+      active = false;
+      sub.subscription.unsubscribe();
+    };
   }, []);
 
   return { session, loading };

@@ -41,3 +41,8 @@ px tsc --noEmit passed;
 pm run lint has the same 3 baseline errors in Chat.tsx/useSession.ts (confirmed in HEAD). Build deferred until W1 releases port 3000/.next. Seven promoted W2 captures now visually show layout-only masking.
 
 - 2026-10-23T00:54:46Z — W1 Hermes worker exited; orphan Next PID 28236 remains on :3000, high CPU and /signup requests timeout. Independent Playwright was interrupted before writing evidence; worker run JSON backup matches unchanged evidence. API PID 23820 is healthy on :8000. Do not terminate blocked process; isolate verification.
+
+## 2026-10-23T01:06Z - W1 independent acceptance
+- Reproduced the W1 browser matrix from an isolated worktree on port 3001, with fake Supabase configuration and local API 8000: three runs each 102 passed / 0 failed / 0 skipped. This extends the matrix with signup network rejection/field focus and modal Shift+Tab containment. Promoted 26 inspected screenshots plus JSON; no synthetic password/token values present.
+- Independent pytest: 180 passed (focused); 959 passed, 7 skipped (full). Typecheck and webpack production build pass. Lint remains at the same three baseline set-state-in-effect errors; default Turbopack build cannot traverse the isolated worktree's external node_modules junction, webpack build succeeds.
+- W1 accepted with the live Supabase email-delivery/token-refresh limitation documented in NEEDS_SHUBH.md. The unresponsive pre-existing Next process on port 3000 was left untouched. W2 discovery remains active; 7 layout-only masked captures checked and no UI_SPEC/report accepted yet.

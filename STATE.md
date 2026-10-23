@@ -1,29 +1,30 @@
 # Finals run state
 
 - Launch time (T0): 2026-10-22T23:48:19Z (UTC)
-- Branch: finals-48h; remote pushed through c28e49d; local status/docs commits remain unpushed.
-- Phase: W1/W2 execution; no worker package accepted yet.
-- Lane A: W1-auth; command session 2238; Hermes PID 13880; worker Python PID 23624; nine child reports and work/finals/w1-auth/REPORT.md present. Hermes worker exited; W1 package summary is written. Its orphaned Next dev PID 28236 still owns :3000, consumes high CPU, and times out on `/signup`; independent Playwright rerun is blocked until isolated. Changed but uncommitted: login/signup/chat-gate, auth/API/history code, tests, and W1 browser matrix. Package run log remains empty.
-- Lane B: W2-discovery; command session 37963; Hermes PID 22560; worker Python PID 27928; REA enabled. Eight observation child folders are active (desktop shell, composer, messages, streaming, states, responsive, auth, accessibility); captures/probes are arriving. No accepted UI_SPEC.md/report yet. Package log remains empty.
-- Baseline pytest: 802 passed, 7 skipped, 5 warnings in 181.26 s.
-- W1 first browser run 72/15/1 had invalid setup. Worker corrected matrix now records 3 consecutive runs, each 92/0/0 (00:32:07Z, 00:32:56Z, 00:33:43Z). Not accepted until independently reproduced. No .env.local read/printed. Expected mocked errors must be distinguished from unexpected errors.
-- Defects filed: #9 duplicate auth submission, #10 auth error field association (signup focus/network rejection gap remains), #11 self-referential sans font, #12 first-visit dialog can leak focus on Shift+Tab. Issues #1-#7 are workstreams; #8 pinned tracker. Initial progress comments on #1/#2.
-- Head orders latest verified: local proxy PID 4124 listens on 127.0.0.1:20190 at 120 requests/minute; upstream cap was removed. Keep all calls through the proxy because direct 30-connection bursts had TLS handshake drops. Up to 2 sessions x 9 children allowed. Observed active work is W1 nine child scopes + W2 eight observation scopes (about 17 total).
-- W1 replaced its own prior API process; PID 27952 (descendant of W1 worker 23624) owns 127.0.0.1:8000 and `/api/v1/health` returned 200 at 00:28Z. An earlier stop request was rejected by tool policy; no further termination attempts.
-- GitHub: finals branch pushed; PR deferred because CI runs on pull_request and Vercel preview behavior is unknown under the no-deploy rule; see NEEDS_SHUBH.md.
-- Next: monitor sessions; review complete reports/diffs; rerun corrected W1 matrix 3 times and independently verify.
-- Pre-existing untracked paths remain untouched: .playwright-mcp/, agent-workspaces/, docs/goals/, docs/reports/, runs/, security progress/restart logs, and Uvicorn logs.
+- Branch: `finals-48h`; latest pushed baseline `c28e49d`; W1 acceptance commit is being prepared locally.
+- Phase: W1 accepted; W2 discovery in progress. W3-W7 remain queued by dependency/priority.
+- Last update: 2026-10-23T01:06Z.
 
-> HEAD UPDATE 05:46: rate limit removed upstream. Gate restarted as PID 4124 at 120 req/min; full 2x9 fan-out is allowed. See docs/finals/HEAD_ORDERS.md section 4.
+## W1 - accepted
 
-- W2 raw working captures still show reference branding/copy; they remain in ignored package paths and must be masked/regenerated before promotion. See work/finals/w2-discovery/ORCHESTRATOR_REVIEW.md.
-- Removed 12 unmasked W2 screenshot copies from docs/finals/evidence/w2/ after visual check; originals remain only under ignored work/finals/w2-discovery/. Do not promote until masking is visually verified.
+- Worker package: `work/finals/w1-auth/REPORT.md`; orchestrator review: `work/finals/w1-auth/ORCHESTRATOR_REVIEW.md`.
+- Independent browser verification ran in isolated worktree `work/finals/w1-verify` on web port 3001, using the local API on 8000 and fake Supabase configuration. Result: three consecutive runs, each 102 passed / 0 failed / 0 skipped; all 13 scenarios pass. Promoted 26 screenshots and `docs/finals/evidence/w1/w1-run.json`. Evidence uses synthetic `example.test` addresses; checked for test passwords/tokens before promotion.
+- Independent focused pytest: 180 passed, 1 warning. Independent full pytest: 959 passed, 7 skipped, 5 warnings. Independent `npm run typecheck` passed. `npm run build -- --webpack` passed; default Turbopack build is blocked by the isolated worktree's `node_modules` junction being outside Turbopack's root.
+- `npm run lint` returns 3 set-state-in-effect errors in `Chat.tsx` and `useSession.ts`; source comparison confirms the same errors exist at baseline. No new lint errors.
+- W1 changes address auth/API/history hardening, duplicate submits, signup error focus/network rejection, first-visit dialog focus trapping, and mobile input sizing. Issues #9, #10, and #12 are fixed and independently exercised. Real Supabase email delivery/token refresh remain unverified because no account/mailbox/credentials were used; decision and evidence are in `docs/finals/NEEDS_SHUBH.md`.
+- Main app's original Next dev PID 28236 on port 3000 remains unresponsive; it was not terminated. Isolated verification server on 3001 was stopped cleanly. Independent API session 2417 on 8000 was started by the orchestrator for local verification.
 
-- W1 independent review flagged signup network rejection/focus handling and an initial-container Shift+Tab focus-trap gap; issues #10/#12 and work/finals/w1-auth/ORCHESTRATOR_REVIEW.md track fixes. W1 remains unaccepted pending these findings and independent test reproduction.
-- Independent pytest reproduction passed: focused W1 auth/history/security set 180 passed, 1 warning in 11.64s; full suite 959 passed, 7 skipped, 5 warnings in 210.59s. W1 still unaccepted pending review fixes and independent browser reruns.
+## W2 - active
 
-- Independent frontend checks: 
-px tsc --noEmit passed; 
-pm run lint reports the same 3 pre-existing set-state-in-effect errors in Chat.tsx/useSession.ts (confirmed in HEAD). Build waits for W1 to release Next's :3000/.next. W2 has 7 visually checked masked PNGs in docs/finals/evidence/w2; no accepted UI_SPEC/report yet.
+- Hermes session 37963, worker PID 27928, eight observation scopes. Masked layout-only captures in `docs/finals/evidence/w2/`: 7 PNGs visually checked for absent reference text/logos. Raw captures stay under ignored `work/finals/w2-discovery/`.
+- No accepted `docs/finals/UI_SPEC.md` or final W2 report yet. Continue gathering measurements, write the TrustShield-specific measured spec, and audit every repo-bound screenshot for brand/copy leakage before promotion.
+- Known W2 issue #11: self-referential sans font token. The lint errors currently present at baseline also need a clean, supported explanation/fix before W2's lint gate can pass.
 
-- Independent Playwright run was interrupted after local Next /signup began timing out (scenario 02/03 navigation failures). Worker w1-run.json is backed up under ignored work/ and remains unchanged at 3x92/0/0. Plan isolated verification on a separate worktree/port.
+## Program controls / open items
+
+- Phase 0 plan documents are committed at `d02645e`; baseline tests committed at `ea95e79` (802 passed, 7 skipped, 5 warnings in 181.26s).
+- Latest head order: local Nilabh proxy PID 4124 at `127.0.0.1:20190`, 120 requests/minute; keep calls routed through it. Up to two Hermes sessions with nine children each. No fallback models.
+- GitHub issues #1-#12 track workstreams/defects; update and close W1 issue only after this independently verified milestone is committed. Pinned tracker is #8.
+- No PR opened: Vercel preview behavior is still unverified and MISSION.md prohibits Vercel deployments. Shubh decision is in `docs/finals/NEEDS_SHUBH.md`.
+- Do not read/tune/evaluate spent holdouts, touch production, print secrets, or stop processes not started by the orchestrator. No changes to production or model thresholds.
+- Pre-existing untracked paths left untouched: `.playwright-mcp/`, `agent-workspaces/`, `docs/goals/`, `docs/reports/`, `runs/`, security progress/restart logs, and Uvicorn logs.

@@ -1,1 +1,1 @@
-2026-10-23T00:54:46Z | W1-auth (backend pytest + tsc green; independent browser blocked by hung :3000), W2-discovery (8 scopes active; 7 masked captures checked)
+﻿2026-10-23T01:06:00Z | W1 accepted (3x102/0/0; pytest 959 passed) -> W2 discovery active (8 scopes; masked captures checked)

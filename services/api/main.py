@@ -101,13 +101,16 @@ def _record_history(request: Request, user: CurrentUser | None, result: Analysis
     settings = _state(request).settings
     if not settings.supabase_url or not settings.supabase_service_role_key:
         return
-    history_store.save(
-        settings.supabase_url, settings.supabase_service_role_key,
-        user_id=user.id, input_type=result.input_type,
-        input_summary=history_store.summarize(raw_text),
-        risk_score=result.risk.score, risk_label=result.risk.label,
-        result_json=result.model_dump(mode="json"),
-    )
+    try:
+        history_store.save(
+            settings.supabase_url, settings.supabase_service_role_key,
+            user_id=user.id, input_type=result.input_type,
+            input_summary=history_store.summarize(raw_text),
+            risk_score=result.risk.score, risk_label=result.risk.label,
+            result_json=result.model_dump(mode="json"),
+        )
+    except Exception as exc:  # best-effort: a history-store outage must never change an analysis response
+        _log.warning(json.dumps({"event": "history_write_failed", "error_type": type(exc).__name__}))
 
 
 async def run_heavy(request: Request, func, *args):
@@ -235,12 +238,24 @@ def _history_configured(request: Request) -> tuple[str, str]:
     return settings.supabase_url, settings.supabase_service_role_key
 
 
+def _history_unavailable(exc: Exception, action: str) -> HTTPException:
+    """A history-store outage is a transient upstream failure, not a bug in this service: answer 503 (retryable)
+    instead of letting it surface as an unhandled 500. Log the error type only: never the URL, the service key or
+    anything from a row."""
+    _log.warning(json.dumps({"event": "history_store_unavailable", "action": action, "error_type": type(exc).__name__}))
+    return HTTPException(503, "Scan history is temporarily unavailable; please retry shortly",
+                         headers={"Retry-After": "5"})
+
+
 @router.get("/api/v1/history", dependencies=[Depends(limit_light)])
 def list_history(request: Request, user: CurrentUser | None = Depends(get_current_user)):
     if user is None:
         raise HTTPException(401, "Log in to view your scan history")
     url, key = _history_configured(request)
-    return history_store.list_for_user(url, key, user_id=user.id)
+    try:
+        return history_store.list_for_user(url, key, user_id=user.id)
+    except Exception as exc:
+        raise _history_unavailable(exc, "list") from exc
 
 
 @router.delete("/api/v1/history/{row_id}", dependencies=[Depends(limit_light)])
@@ -248,7 +263,11 @@ def delete_history_row(row_id: str, request: Request, user: CurrentUser | None =
     if user is None:
         raise HTTPException(401, "Log in to manage your scan history")
     url, key = _history_configured(request)
-    if not history_store.delete_for_user(url, key, user_id=user.id, row_id=row_id):
+    try:
+        deleted = history_store.delete_for_user(url, key, user_id=user.id, row_id=row_id)
+    except Exception as exc:
+        raise _history_unavailable(exc, "delete") from exc
+    if not deleted:
         raise HTTPException(404, "History entry not found")
     return {"deleted": row_id}
 
@@ -258,7 +277,10 @@ def delete_all_history(request: Request, user: CurrentUser | None = Depends(get_
     if user is None:
         raise HTTPException(401, "Log in to manage your scan history")
     url, key = _history_configured(request)
-    history_store.delete_all_for_user(url, key, user_id=user.id)
+    try:
+        history_store.delete_all_for_user(url, key, user_id=user.id)
+    except Exception as exc:
+        raise _history_unavailable(exc, "delete_all") from exc
     return {"deleted": "all"}
 
 
@@ -653,6 +675,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         yield
 
     app = FastAPI(title="TrustShield AI", version="0.1.0", lifespan=lifespan,
+                  redirect_slashes=False,
                   docs_url="/docs" if settings.docs_enabled else None, redoc_url=None,
                   openapi_url="/openapi.json" if settings.docs_enabled else None)
     app.state.settings = settings
