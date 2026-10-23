@@ -50,3 +50,76 @@ Disk is intact: `git fsck` reports only dangling objects; the gate (new PID 8076
 4. If a workstream cannot reach acceptance in its slot, freeze it at its best verified state, file an issue with exactly what is missing, and move on. A smaller verified result beats a larger unverified one.
 5. Resources: you may use up to both Hermes sessions with 9 children each continuously. The free-RAM launch gate is relaxed to >= 8 GB. Keep unattended: do not stop for questions.
 6. GPU: Shubh asked to keep the GPU at 100 percent. I am not doing that and you must not either: nothing in this program is GPU-bound (the model runs on the remote Nilabh server; pytest, Gradle, Playwright and git are CPU/IO), and burning the Intel Arc iGPU artificially only adds heat to a laptop that already hit 95 C once. Use the GPU where it helps for real: Chromium/Playwright keep hardware acceleration on, run the Android emulator with `-gpu host`. Do not run local LLMs unless a package needs one.
+
+> HEAD DEFECT 22:47 IST (blocking for W4): see the new GitHub issue "W4 bug: 3-letter look-alike rule flags legitimate domains". The uncommitted static.py change makes ubi.com, sbs.com.au and abi.org score 50 (0 on HEAD). Do not commit or accept W4 until fixed with a regression fixture of real 3-letter domains. Also dedupe the IP+credential floor (engine already applies it to every strategy). Safety backup refreshed on a backup/finals-wip-* branch. Commit+push at every handoff.
+
+## 6. TEMPORARY MODEL SWITCH (Shubh's order, 22:52 IST) - Nilabh is down
+The Nilabh DeepSeek route is failing (its own upstream answers "Rate limit exceeded"; through 9Router every call returns 503).
+Shubh ordered a TEMPORARY switch until his friend fixes it: Hermes now runs on **`cc/claude-sonnet-5`** through 9Router's "Mukesh (PAPA)" Claude Code connection.
+Done by the head and verified: Hermes `model.default` and `delegation.model` = `cc/claude-sonnet-5` (provider custom:9router), `fallback_providers: []` kept;
+a live test ran a parent plus 3 parallel children, all on cc/claude-sonnet-5, 3/3 correct.
+- Every NEW `hermes -z` launch picks this up automatically (do not pass `--provider`/`-m`). Sessions that started on Nilabh are failing now: relaunch them.
+- The PAPA Claude Code quota is a 5-hour session budget (shown as 100 units) plus a weekly budget. It is finite: keep fan-out efficient (coarse tasks, fewer chatty calls). If 9Router starts returning quota errors for cc/*, slow down rather than add other models.
+- The TrustShield app itself (`.env` NILABH_LLM_*) is NOT switched: the product's chat model stays the friend's DeepSeek; tests do not need the live model. Do not change it.
+- Shubh will say when Nilabh is back; the head switches Hermes back then.
+
+> HEAD NOTE 00:05 IST: my full-suite run at 23:54 had 1 failure, tests/unit/test_v2_promotion_eval.py::test_spent_v2_scripts_refuse_without_archival_override (1279 passed). Rerun alone it passes; all four spent-v2 scripts still import require_archival_override and the v2 access log still has exactly 1 entry, so no spent-data access happened. Likely subprocess start-up failure under ~0-4 GB free RAM. Treat as environment flake, but if it recurs in your own full run, investigate before any acceptance.
+
+> HEAD DEFECT 00:20 IST (blocking resource leak): 8 orphaned `find / ...` processes started by Hermes subagents between 20:22 and 21:28 (PIDs 34712 7204 33092 9220 24504 7468 1844 6928; command `...hermes	ools\git...ind.exe / -name ...`) are walking the whole disk and hold the CPU at ~100%; that is why your W6 CPU gate never opens. Their parents are gone. I cannot kill them (Access is denied - they appear to run under the sandbox account); try killing exactly these PIDs from your own session. Add to EVERY worker prompt from now on: never search from `/` or a drive root; search only inside C:\Users\shubh	rustshield-ai (use `rg --files` or `git ls-files`), and wrap any find/search in a 60-second timeout.
+(The line above was cut off by a shell escape; full order below.)
+
+> HEAD DEFECT 00:20 IST (blocking resource leak): 8 orphaned `find / ...` processes started by Hermes subagents between 20:22 and 21:28
+> (PIDs 34712 7204 33092 9220 24504 7468 1844 6928; command `C:\Users\shubh\AppData\Local\hermes\tools\git-2.53.0+3-win32-x64\usr\bin\find.exe / -name ...`)
+> are walking the whole disk and hold the CPU at about 100 percent. That is why your W6 CPU gate never opens. Their parents are gone.
+> The head cannot stop them ("Access is denied"; they appear to run under the sandbox account). Try stopping exactly these PIDs from your own session.
+> Add to EVERY worker prompt from now on: never search from `/` or a drive root; search only inside C:\Users\shubh\trustshield-ai
+> (use `rg --files` or `git ls-files`), and wrap any find or search in a 60-second timeout.
+
+## 7. SECOND TEMPORARY MODEL SWITCH (Shubh's order, 01:00 IST) - PAPA Claude Code limit reached
+`cc/claude-sonnet-5` now answers 429 "would exceed your account's rate limit" (9Router returns 503). Shubh ordered Hermes moved to the
+**Codex (mukku) account through 9Router, model `cx/gpt-6-luna`**. Done by the head and verified: Hermes `model.default`, `delegation.model` and the
+9router provider model are `cx/gpt-6-luna`; `fallback_providers: []` kept; a live test ran a parent plus 3 parallel children, all on cx/gpt-6-luna, 3/3 correct.
+- New `hermes -z` launches use it automatically (still no `--provider`/`-m`). Relaunch any Hermes session that is failing on Sonnet 503s (W6 lane).
+- This 9Router Codex account shares quota with Shubh's Codex usage (including yours). Keep W6/W7 fan-out lean.
+- Still temporary: Nilabh DeepSeek remains the long-term default once Shubh says it is fixed.
+
+> HEAD NOTE 01:12 IST (W7 interpretation): the 256-injection and 35-routing batteries hit the local `/api/v1/chat`, whose model is the Nilabh DeepSeek route (`.env`), which is DOWN tonight. Before running them, send one real chat request and check that the model actually answered. If it did not, record the batteries as "not measured: product chat model unavailable" in FINAL-REPORT.md, not as passes. Do not repoint the app's `.env` to another model.
+
+> HEAD DEFECT 01:30 IST (blocking for FINAL-REPORT): evidence that the batteries ran WITHOUT the chat model. In `work/finals/w7-final/model_routing_battery_35_coord_raw.json`, MR-02 replies "my language model isn't available at the moment ... I won't guess at an answer". The local `/api/v1/chat` answers only from deterministic templates while Nilabh is down.
+> So: the 35-prompt routing result (33/35) measures the deterministic router plus fallback only, and the 256-prompt injection result cannot show model-level jailbreak resistance. FINAL-REPORT.md must say exactly that ("chat model unavailable during W7; model-level results NOT measured"), keep the earlier 11 Oct model-backed results as the last real measurement, and list a rerun as a NEEDS_SHUBH item once Nilabh is back. Do not present tonight's battery numbers as model results.
+
+## 8. Commit cadence + deploy fix (Shubh's order, 01:40 IST)
+- Shubh: commit after every phase or medium-sized piece of work, not only at lane handoffs or the end. A finished sub-task that passes its tests = a commit and a push.
+- The head committed `requirements-api.lock.txt` adding `defusedxml==0.7.1`: the W3 DOCX/XLSX extractors import it at module level and `services/api/main.py` imports them at startup, so the production container would not start without it. Any new runtime import must be added to that lock file in the same commit.
+- Shubh asked for tonight's work to go live. The head is deploying the committed snapshot from a separate worktree (Preview first, smoke-tested, then promote). Do not run vercel commands yourself.
+
+## 9. PRODUCTION DEPLOYED by the head (01:55 IST, Shubh's explicit order)
+Commit `c4f783e` (finals-48h, includes the defusedxml lock fix) is LIVE at https://trustshield-ai-ecru.vercel.app
+(Preview `trustshield-48zbozvvr` verified, promoted -> production deployment `trustshield-8meq14w6d`; previous production `trustshield-9j1cy7l2z` kept for `vercel rollback`).
+Verified on the live site after promotion: health ok (v3, Tesseract, QR), readyz true; SBI scam text 85 high_risk; onlinesbi.sbi 0; ubi.com 0;
+DOCX and XLSX chat uploads HTTP 200 (new capability); chat model answers ("Good morning! I'm doing well..."; production env model, not Nilabh); / /login /signup 200.
+Add this to FINAL-REPORT.md: production now carries the WIP/unaccepted W2 UI state and the W3/W4 work, deployed on Shubh's order; W5/W6 are not part of the web deployment.
+
+## 10. TWO-HOUR RUN (Shubh's order, 2026-10-24 ~02:45 IST) - UI 1:1 clone + leftovers. Android app and Chrome extension are EXCLUDED.
+**T0 = 02:45 IST, Codex freeze = 04:15 IST, head deploys 04:15-04:45, hard end 04:45 IST.** Do not touch `extension/` or `android/`.
+Shubh's complaint: "the live site is not working and the UI has not changed as I asked, it is even worse than before". Head's check at 02:35: the live site loads (/, /login, /signup 200), chat streaming works,
+but the UI is only a loose ChatGPT-style shell (screenshot: `C:\Users\shubh\c language\live-home-1440.png`). Shubh wants the REAL thing: **clone the ChatGPT web UI 1:1, then make minor changes to make it TrustShield's.**
+
+### Model routes tonight (head tested 02:40): ONLY `cx/gpt-6-luna` answers. Nilabh DeepSeek and cc/claude-sonnet-5 both return 503. Hermes is on cx/gpt-6-luna; do not add fallbacks.
+That route shares the Codex quota with you. Use at most 2 Hermes sessions with at most 6 children each; coarse tasks, few chatty calls; stop searching the whole disk (search only inside the repo, 60 s timeouts).
+
+### Lane A - W2: faithful ChatGPT UI clone via REA (Shubh explicitly ordered the REA / reverse-engineering skill)
+1. Write the REA instruction first (you), then hand it to Hermes. Skills: `C:\Users\shubh\Projects\rea\.agents\skills\reverse-engineer-anything` and `rea-tool-design`; REA MCP tools (`mcp__rea__*` in Hermes: list_browser_targets, inspect_web_page, capture_web_screenshot, capture_browser_scenario, compare_web_screenshots, observe_web_session, analyze_web_bundle) work through a Chrome DevTools endpoint: launch an ISOLATED Chrome/Chromium with `--remote-debugging-port=9222 --user-data-dir=<temp dir>` (never Shubh's real profile, no sign-in), open the public logged-out ChatGPT web page, and capture.
+2. Capture at 1440x900, 834x1112 and 390x844: empty state, composer focus/typing/multi-line growth, sidebar expanded/collapsed/mobile drawer, new-chat/history item hover and menus, message layout (user bubble vs assistant plain text), streaming caret, copy/regenerate/edit/feedback icons, code block header, scroll behaviour and scroll-to-bottom button, top bar/model selector, login/signup pages and modals, loading/error/empty states, keyboard shortcuts, animations (durations/easing), light-theme tokens (colors, radii, font sizes/weights/line heights, spacing scale, shadows). Record computed CSS values, not impressions. Save the evidence under `docs/finals/evidence/w2/` (screenshots only; no copied source, no logos).
+3. Write `docs/finals/UI_SPEC.md` with the measured spec, then implement it in `apps/web` (Chat shell, sidebar, composer, messages, login/signup, empty state, mobile drawer) so that side-by-side screenshots at the three viewports are visually indistinguishable in layout, spacing, typography scale, and motion. Use a system/Inter font stack (ChatGPT's own font is proprietary).
+4. THEN the "minor changes" that make it ours: TrustShield name and logo (`apps/web/public`), the white theme with one accent colour, our copy ("Message TrustShield..."), our suggestion cards, and the existing risk card/evidence UI restyled to fit. Do NOT copy OpenAI/ChatGPT logos, names, proprietary fonts/icons, copy text or source code; observe, then implement from scratch.
+5. Acceptance (all with evidence): side-by-side + pixel-diff overlay at 3 viewports; no layout shift while streaming (record CLS < 0.02); Lighthouse a11y >= 95 and performance >= 80 on `/`; `npx tsc --noEmit`, `npm run lint` (the 2 errors of issue #18 FIXED, zero errors), `npm run build`; Playwright E2E: send a chat message and see a streamed reply, scan a scam text, attach a file, login-gate skip, sign-in/out, history isolation, mobile drawer. Fix issue #18 properly (no eslint-disable).
+
+### Lane B - leftovers
+1. W3 uploads in the UI (issue #3): composer attach menu accepts images (PNG/JPEG/WebP/HEIC), PDF, DOCX, XLSX, CSV, TXT; per-file chips with status/progress/error and remove; no glitching on repeated/failed uploads; works at 390x844 with a real mobile-viewport Playwright test; clear errors for corrupt/oversized/password-protected files. Backend contract tests stay green.
+2. W4: check `pnb.co.in` (scores 34 domain_mismatch): decide from repository evidence whether it is an official PNB domain; fix only with evidence, with a regression test. Add real legitimate 3-5 letter domains to the fixture. Do not retrain, do not touch spent data.
+3. W7: update `docs/presentation/` (build_deck.py, TEAM_NOTES*, PRESENTATION_SCRIPT, the .pptx) with the current honest numbers (1280 tests; sealed-holdout numbers unchanged; the W4 fix; uploads; do NOT claim model-level security results from the 24 Oct run), and render the deck to check slides for overflow if LibreOffice is available (it was used on 24 Oct: `work/finals/w7-final/lo_profile`).
+4. FINAL-REPORT.md: append a "2-hour run" section with honest status.
+
+### Rules that stay
+Commit and push after every phase or medium task (small commits, message says what and why). Full pytest suite before every acceptance commit. Spent v1-test/v2 data untouched. No production changes and no Vercel commands by you: the head deploys after your freeze. Re-read this file every 30 minutes. Keep HEARTBEAT.txt/STATE.md current. No fallback models. Never `taskkill /IM`.
