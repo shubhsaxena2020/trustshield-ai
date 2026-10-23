@@ -215,3 +215,24 @@
 - Added regression for 30 real three-letter domains (including ubi.com, sbs.com.au, bi.org), nine additional local-registry official domains, and the existing 21 real-local URLs: 60 real URLs total plus 53 synthetic cases. The three issue false positives stay at 0; sbl.co.in/login and sbii.co.in/login remain detected. Reputation is stubbed in tests; no URL fetch occurs.
 - 3-letter distance-one matching now requires a credential path; 4+ label matching is unchanged. Duplicate IP+credential floor was removed from strategy implementations and remains centralized in fusion engine.
 - Focused tests: 144 passed. Full pytest: 1280 passed, 7 skipped, 6 warnings in 184.55s. Issue #20 repair is verified; W4 acceptance remains open for corrected before/after validation measurements and inventory reconciliation.
+
+## 2026-10-23 23:07 IST — W4/W5 handoff
+
+- W4 issue #20 fix 14f6e81 pushed; 1280 passed, 7 skipped, 6 warnings. Issue #20 closed. W4 overall still unaccepted pending before/after validation measurement and corrected source inventory.
+- Re-read HEAD_ORDERS.md at handoff. Hermes default remains cc/claude-sonnet-5 via 9Router; W5 restarted with no --provider/-m in exec session 13201. Preflight CPU 61.8%, free RAM 9.3 GB.
+- W5 Lane A active; W6 package starts after the 23:15 checkpoint if the resource gate allows. W7/final report remain before hard finish 01:55 IST.
+
+## 2026-10-23 23:08 IST — W5 resource status
+
+- W5 active since 23:06:50; logs are empty/buffered and no source files are present yet. Process tree alive; no kill criterion met.
+- Free RAM 6.3 GB after fan-out. W6 and W4 measurement are held until the >=8 GB gate and non-pinned CPU condition are met.
+
+## Resource gate status (2026-10-23 23:11 IST)
+
+- W5 remains alive, no files/log output yet (<15 minutes). Free RAM 5.3 GB; system inventory shows an existing llama-server process around 5 GB, not started by this coordinator. W6 and W4 measurement remain deferred until free RAM >=8 GB and CPU is not pinned.
+
+## 2026-10-23 23:15 IST — W6 handoff gate
+
+- Re-read HEAD_ORDERS.md in full; no new item. W6 launch held because RAM is 4.4 GB (<8 GB gate); CPU is 76.4%. W5 process is alive and accumulating CPU. Existing local llama-server was not started or stopped by this coordinator.
+- W4 before-fix artifact preserved: 625 validation rows, 501 legitimate, 124 malicious, threshold 0.16, 25 legitimate scores >=16 (4 >=50, 0 >=70). Post-fix measurement waits for memory recovery.
+- W4 inventory draft now reconciles to 60 unique real URLs + 53 synthetic cases; exact files and unverified-source caveat are included.

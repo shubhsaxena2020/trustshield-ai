@@ -167,3 +167,28 @@ Synthetic static probes: sbl.co.in/login yields only informational credential-pa
 - The 3-letter comparison now requires a credential-path lure; >=4-character look-alike matching remains, preserving sbii.co.in. Added an offline full-pipeline test that stubs reputation lookups. Removed duplicate IP+credential floor from both strategies; the engine remains its single application point.
 - Focused regression: 144 passed. Full suite: 1280 passed, 7 skipped, 6 warnings in 184.55s. This resolves issue #20's blocking defect; W4 overall remains open pending updated before/after validation evidence and complete source-inventory reconciliation.
 - Full suite was run after the final source/test/fixture edits. Commit and push the verified repair next; no log/.orig files are included.
+
+## 2026-10-23 23:07 IST — W4 to W5 handoff
+
+- Re-read all of HEAD_ORDERS.md at handoff; no newer HEAD DEFECT/HEAD ORDER item was present. Re-acknowledged section 5 compression, 8 GB free-RAM gate, and section 6 temporary cc/claude-sonnet-5 default with no CLI provider/model override.
+- W4 #20 repair is committed/pushed as 14f6e81; full suite passed 1280/7/6. GitHub #20 closed with evidence. W4 overall remains open for updated validation before/after measurement and source inventory cleanup.
+- Restarted W5 Lane A from the existing prompt using configured Hermes defaults; exec session 13201, directory work/finals/w5-extension, output to its ignored un.log. Prelaunch sample CPU 61.8%, free RAM 9.3 GB. No --provider or -m supplied; no result claimed yet.
+- W6 Android remains absent at repo root; existing work folder is work/finals/w6-android. Recheck the SDK/device and launch only when the 8 GB/CPU resource gate permits. No further lane work is accepted without independent verification.
+
+## 2026-10-23 23:08 IST — W5 startup resource check
+
+- W5 launched at 23:06:50 from work/finals/w5-extension/PROMPT.txt under the section 6 configured default. Its process tree is alive; the parent log is still buffered/empty and no files have landed yet, so the 15-minute no-CPU hang rule is not met.
+- Free RAM fell from 9.3 GB before launch to 6.3 GB after fan-out. Hold W6 launch and W4 validation run until free RAM is at least 8 GB and CPU is not pinned. Do not stop W5 based on empty buffered output.
+- Latest full HEAD_ORDERS reread was at the W4/W5 handoff at 23:06; no new order was present then.
+
+## 2026-10-23 23:11 IST — resource gate held
+
+- W5 process is still alive; output log remains empty after ~4 minutes, which is below the 15-minute idle rule. No package files have appeared yet.
+- Free RAM is now 5.3 GB. A process inventory shows llama-server using about 5.0 GB; this coordinator did not start it and will not stop it. No W6 Hermes session or W4 validation run is launched below the 8 GB gate.
+
+## 2026-10-23 23:15 IST — scheduled W6 handoff check
+
+- Re-read docs/finals/HEAD_ORDERS.md in full at the W6 handoff; no new HEAD DEFECT/HEAD ORDER item appeared. Section 6 still requires the config default cc/claude-sonnet-5 and no provider/model CLI override. Section 5's >=8 GB free-RAM gate is not met.
+- Prelaunch sample: CPU 76.4%, free RAM 4.4 GB. W5 parent/worker remain alive with worker CPU increasing; log still empty. W6 Hermes launch is deferred; the current lane cannot safely start under the resource gate. The unrelated llama-server process remains untouched.
+- Saved the pre-#20-fix deterministic validation artifact as models/evaluation/w4/validation_measurement_before_issue20_fix.json (generated 21:25 IST, 625 rows, 501 legitimate, 124 malicious, threshold 0.16, 25 legitimate scores >=16, 4 >=50, 0 >=70). A post-fix run remains pending resource availability.
+- Corrected W4 inventory draft to reflect 113 regression cases with 60 unique real URLs and 53 synthetic; the 30 three-letter cases were not live-verified and are described only as regression references.
