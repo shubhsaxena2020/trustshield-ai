@@ -1,1 +1,1 @@
-2026-10-23T00:49:25Z | W1-auth (pytest independently green; source findings #10/#12 pending), W2-discovery (8 scopes active; masked screenshot recheck pending)
+2026-10-23T00:50:35Z | W1-auth (pytest + tsc green; code-review fixes and independent matrix pending), W2-discovery (8 scopes active; 7 masked captures checked, spec pending)

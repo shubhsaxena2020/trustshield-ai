@@ -35,3 +35,7 @@
 - 2026-10-23T00:43:02Z — source review filed issue #12 for Shift+Tab escaping the first-visit dialog and clarified issue #10 for signup focus/network rejection. W1 remains unaccepted; independent test reproduction pending.
 
 - 2026-10-23T00:49:25Z — independent tests: focused W1 pytest 180 passed/1 warning/11.64s; full pytest 959 passed/7 skipped/5 warnings/210.59s. W1 source review findings #10/#12 remain open.
+
+- 2026-10-23T00:50:35Z — independent frontend: 
+px tsc --noEmit passed; 
+pm run lint has the same 3 baseline errors in Chat.tsx/useSession.ts (confirmed in HEAD). Build deferred until W1 releases port 3000/.next. Seven promoted W2 captures now visually show layout-only masking.

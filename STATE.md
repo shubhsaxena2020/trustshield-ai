@@ -21,3 +21,7 @@
 
 - W1 independent review flagged signup network rejection/focus handling and an initial-container Shift+Tab focus-trap gap; issues #10/#12 and work/finals/w1-auth/ORCHESTRATOR_REVIEW.md track fixes. W1 remains unaccepted pending these findings and independent test reproduction.
 - Independent pytest reproduction passed: focused W1 auth/history/security set 180 passed, 1 warning in 11.64s; full suite 959 passed, 7 skipped, 5 warnings in 210.59s. W1 still unaccepted pending review fixes and independent browser reruns.
+
+- Independent frontend checks: 
+px tsc --noEmit passed; 
+pm run lint reports the same 3 pre-existing set-state-in-effect errors in Chat.tsx/useSession.ts (confirmed in HEAD). Build waits for W1 to release Next's :3000/.next. W2 has 7 visually checked masked PNGs in docs/finals/evidence/w2; no accepted UI_SPEC/report yet.
