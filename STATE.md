@@ -1,9 +1,9 @@
-# Finals run state
+﻿# Finals run state
 
 - Launch time (T0): 2026-10-22T23:48:19Z (UTC)
-- Branch: `finals-48h`; latest pushed baseline `c28e49d`; W1 acceptance commit is being prepared locally.
-- Phase: W1 accepted; W2 discovery in progress. W3-W7 remain queued by dependency/priority.
-- Last update: 2026-10-23T01:06Z.
+- Branch: `finals-48h`; W1 acceptance commit `2c5b415` pushed to `origin/finals-48h`.
+- Phase: W1 accepted; W2 discovery and W3 backend extraction/fixture stages are active. W4-W7 remain queued by dependency/priority.
+- Last update: 2026-10-23T01:07Z.
 
 ## W1 - accepted
 
@@ -14,7 +14,7 @@
 - W1 changes address auth/API/history hardening, duplicate submits, signup error focus/network rejection, first-visit dialog focus trapping, and mobile input sizing. Issues #9, #10, and #12 are fixed and independently exercised. Real Supabase email delivery/token refresh remain unverified because no account/mailbox/credentials were used; decision and evidence are in `docs/finals/NEEDS_SHUBH.md`.
 - Main app's original Next dev PID 28236 on port 3000 remains unresponsive; it was not terminated. Isolated verification server on 3001 was stopped cleanly. Independent API session 2417 on 8000 was started by the orchestrator for local verification.
 
-## W2 - active
+## W3 - active, backend stage\n\n- Hermes session 46515, PID 36460, package `work/finals/w3-uploads/`. Bounded PDF/DOCX/XLSX/CSV/TXT extraction and synthetic hostile/malformed fixtures; no shared chat UI edits while W2 owns it. Full W3 acceptance still needs API wiring plus browser/mobile integration after W2 releases the UI files.\n\n## W2 - active
 
 - Hermes session 37963, worker PID 27928, eight observation scopes. Masked layout-only captures in `docs/finals/evidence/w2/`: 7 PNGs visually checked for absent reference text/logos. Raw captures stay under ignored `work/finals/w2-discovery/`.
 - No accepted `docs/finals/UI_SPEC.md` or final W2 report yet. Continue gathering measurements, write the TrustShield-specific measured spec, and audit every repo-bound screenshot for brand/copy leakage before promotion.
@@ -28,3 +28,4 @@
 - No PR opened: Vercel preview behavior is still unverified and MISSION.md prohibits Vercel deployments. Shubh decision is in `docs/finals/NEEDS_SHUBH.md`.
 - Do not read/tune/evaluate spent holdouts, touch production, print secrets, or stop processes not started by the orchestrator. No changes to production or model thresholds.
 - Pre-existing untracked paths left untouched: `.playwright-mcp/`, `agent-workspaces/`, `docs/goals/`, `docs/reports/`, `runs/`, security progress/restart logs, and Uvicorn logs.
+

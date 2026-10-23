@@ -46,3 +46,8 @@ pm run lint has the same 3 baseline errors in Chat.tsx/useSession.ts (confirmed 
 - Reproduced the W1 browser matrix from an isolated worktree on port 3001, with fake Supabase configuration and local API 8000: three runs each 102 passed / 0 failed / 0 skipped. This extends the matrix with signup network rejection/field focus and modal Shift+Tab containment. Promoted 26 inspected screenshots plus JSON; no synthetic password/token values present.
 - Independent pytest: 180 passed (focused); 959 passed, 7 skipped (full). Typecheck and webpack production build pass. Lint remains at the same three baseline set-state-in-effect errors; default Turbopack build cannot traverse the isolated worktree's external node_modules junction, webpack build succeeds.
 - W1 accepted with the live Supabase email-delivery/token-refresh limitation documented in NEEDS_SHUBH.md. The unresponsive pre-existing Next process on port 3000 was left untouched. W2 discovery remains active; 7 layout-only masked captures checked and no UI_SPEC/report accepted yet.
+
+## 2026-10-23T01:07Z - W3 started in Lane A
+- W1 acceptance commit `2c5b415` pushed to `origin/finals-48h`; tracker #8 updated; issues #1, #9, #10, #12 closed after independent verification.
+- Started Hermes W3 package in Lane A (PID 36460, session 46515) for bounded local PDF/DOCX/XLSX/CSV/TXT extraction and synthetic security fixtures. It is prohibited from editing W2-owned chat UI; browser/mobile acceptance remains pending UI release. Free RAM was ~25.3 GB and CPU load 39% before launch.
+- W2 remains active in Lane B (PID 22560), with 7 layout-only masked captures inspected. Its UI_SPEC and final report are pending.
