@@ -18,4 +18,11 @@ Append concrete item, why Shubh is required, evidence already gathered, and the 
 
 ## PR and deployment boundary (2026-10-23)
 
-- HEAD_ORDERS.md requests a rolling PR from inals-48h to main. .github/workflows/ci.yml runs CI on pull_request and contains no deploy action, but this checkout does not establish whether Vercel Git integration would create a preview deployment. MISSION.md prohibits Vercel deploys. No PR has been opened. Shubh must confirm whether Vercel previews are disabled/acceptable before opening the rolling PR.
+- HEAD_ORDERS.md requests a rolling PR from finals-48h to main. .github/workflows/ci.yml runs CI on pull_request and contains no deploy action, but this checkout does not establish whether Vercel Git integration would create a preview deployment. MISSION.md prohibits Vercel deploys. No PR has been opened. Shubh must confirm whether Vercel previews are disabled/acceptable before opening the rolling PR.
+
+
+## W1 auth evidence gap (2026-10-23)
+
+- **What is unverified:** real Supabase email-confirmation delivery (does this project require confirmation? does the delivered link land on a working callback?) and real token refresh against the live project. The local API runs with `SUPABASE_URL`/`SUPABASE_SERVICE_ROLE_KEY` unset by design, and no credentials or mailbox were used, so neither flow was exercised against the real service.
+- **What IS verified locally (mocked, deterministic):** `tests/e2e/test_finals_w1_auth.py` mocks `/auth/v1/signup`, `/auth/v1/token` (password + refresh_token grants), `/auth/v1/logout`, `/auth/v1/user` and covers both branches — confirmation required (no session, "Check your email" state) and auto-confirm (session returned, redirect to `/`) — plus expired-session refresh success, failing refresh → signed-out, and duplicate-submit invariants. All 92 checks pass across 3 consecutive runs in `docs/finals/evidence/w1/w1-run.json`.
+- **Exact decision/action needed from Shubh:** either (a) confirm the Supabase project's "Confirm email" setting and provide a disposable test mailbox/alias through the approved secret mechanism so the real delivery + link callback can be run once, or (b) accept the mocked coverage as sufficient for the finals and keep email confirmation disabled for the demo account. No credentials are stored in this repo or in this file.
