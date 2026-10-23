@@ -27,3 +27,5 @@
 - 2026-10-23T00:32:47Z — W2 discovery fan-out is now visible: seven observation folders (desktop, composer, messages, streaming, responsive, auth, a11y) with captures/probes arriving. About 16 active child scopes across W1/W2, within updated ceiling. No accepted W2 UI_SPEC yet.
 
 - 2026-10-23T00:39:20Z — W1 remains active past its 40-minute target (CPU changed, run.log empty, all nine child reports present; no package summary). W2 has eight observation scopes (17 child scopes observed total). Raw W2 captures show reference branding/copy; review note added and repository promotion is blocked pending masking.
+
+- 2026-10-23T00:40:17Z — confirmed w1-run.json records three consecutive worker matrix runs (each 92/0/0) and package REPORT.md exists. Independent reproduction/review remains mandatory; W1 process is still active past target.

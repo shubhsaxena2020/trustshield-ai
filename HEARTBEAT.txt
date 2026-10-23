@@ -1,1 +1,1 @@
-2026-10-23T00:39:20Z | W1-auth (over 40m target; 1 green matrix, reports complete, no package summary), W2-discovery (8 observation scopes capturing; raw captures unaccepted)
+2026-10-23T00:40:17Z | W1-auth (3 worker runs 92/0/0; summary present, independent verification pending), W2-discovery (8 observation scopes; branding mask blocker)
