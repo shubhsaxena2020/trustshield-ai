@@ -370,3 +370,12 @@
 
 - 02:40:13 IST launch check: Hermes status reports model cx/gpt-6-luna, provider custom:9router; active workspace sessions are Lane A W2 and Lane B W4, no third session. REA MCP process ea-agents@6.7.0 mcp is present under Lane A. The eight exact orphan PIDs named in HEAD are absent. Free RAM is 6.4 GB, below the prior >=8 GB launch gate; do not launch more sessions or delegates while below it. Existing two lanes are active; prioritize W2 if resources require reducing scope.
 
+
+- 02:42 IST: available RAM recovered to 16.9 GB after Hermes startup; no extra session/delegate launched. Lane A has generated an ignored 688 KB REA desktop inspection record; current implementation untouched so far. Awaiting the worker's evidence ledger and measured implementation.
+
+
+- 02:45 IST REA checkpoint: fresh logged-out inspection records work/finals/two-hour-w2/raw/current-{390,834,1440}.json were generated through Lane A's REA MCP session; no app code changed yet. Hermes configured MCP list includes ea and hermes fallback list is empty. Lane B remains active; RAM 15.8 GB.
+
+
+- 02:46 IST: current public logged-out layout captures were visually inspected at 1440x900, 834x1112 and 390x844. They are layout-only, no visible reference branding/copy, and incomplete discovery evidence under docs/finals/evidence/w2/current-empty-*.png. Lane A continues interaction measurements and implementation; W2 remains open.
+

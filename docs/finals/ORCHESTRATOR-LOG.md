@@ -353,3 +353,12 @@ Per HEAD DEFECT 01:30, both local W7 battery runs are not model-level results. T
 
 - 02:40 IST: launched Lane A and B through Hermes after writing separate bounded prompts. hermes status confirms cx/gpt-6-luna via custom:9router; no provider/model override was supplied. Session list shows exactly two active workspace lanes; process inventory shows the configured REA MCP (ea-agents@6.7.0 mcp) under Lane A. The eight exact orphan PIDs listed in HEAD are absent. Free RAM measured 6.4 GB, below the earlier >=8 GB launch gate, so no further session/child launches are authorized until it recovers; W2 remains priority.
 
+
+- 02:42 IST resource update: free RAM recovered from 6.4 GB to 16.9 GB after startup. Lane A's ignored aw/rea-inspect-desktop-raw.txt (688 KB) is evidence that the REA path is active; its raw contents remain quarantined under work/finals/ and are not tracked. No extra sessions or delegates launched.
+
+
+- 02:45 IST REA checkpoint: verified the ea server is enabled in Hermes and the configured fallback chain is empty. Lane A has newly captured logged-out page observations at 390, 834 and 1440 px in ignored work storage; this confirms current REA capture rather than reuse of yesterday's measurements. No tracked evidence or app code changed yet; current session count remains two.
+
+
+- 02:46 IST: visually checked new current reference screenshots at 1440x900, 834x1112 and 390x844. All are layout-only and show no visible reference branding or page copy. Posted their exact tracked paths to issue #2. This is discovery evidence only; W2 remains unaccepted.
+
