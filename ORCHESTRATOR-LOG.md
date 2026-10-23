@@ -51,3 +51,4 @@ pm run lint has the same 3 baseline errors in Chat.tsx/useSession.ts (confirmed 
 - W1 acceptance commit `2c5b415` pushed to `origin/finals-48h`; tracker #8 updated; issues #1, #9, #10, #12 closed after independent verification.
 - Started Hermes W3 package in Lane A (PID 36460, session 46515) for bounded local PDF/DOCX/XLSX/CSV/TXT extraction and synthetic security fixtures. It is prohibited from editing W2-owned chat UI; browser/mobile acceptance remains pending UI release. Free RAM was ~25.3 GB and CPU load 39% before launch.
 - W2 remains active in Lane B (PID 22560), with 7 layout-only masked captures inspected. Its UI_SPEC and final report are pending.
+- Evidence audit at 2026-10-23T01:08Z found an unmasked raw REA page-inspection JSON under `docs/finals/evidence/w2/`; moved it to ignored `work/finals/w2-discovery/observations/00-explore/rea/`. Repository W2 evidence now contains only 7 visually checked layout-only masked PNGs.
