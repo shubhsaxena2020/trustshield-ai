@@ -236,3 +236,77 @@
 - Re-read HEAD_ORDERS.md in full; no new item. W6 launch held because RAM is 4.4 GB (<8 GB gate); CPU is 76.4%. W5 process is alive and accumulating CPU. Existing local llama-server was not started or stopped by this coordinator.
 - W4 before-fix artifact preserved: 625 validation rows, 501 legitimate, 124 malicious, threshold 0.16, 25 legitimate scores >=16 (4 >=50, 0 >=70). Post-fix measurement waits for memory recovery.
 - W4 inventory draft now reconciles to 60 unique real URLs + 53 synthetic cases; exact files and unverified-source caveat are included.
+
+## 2026-10-23 23:22 IST — W5 liveness checkpoint
+
+- W5 remains alive. Worker CPU changed 47.4s → 48.9s since prior sample; empty log/no source output alone does not meet the 15-minute stop rule.
+- Free RAM 1.96 GB; existing llama-server uses ~8 GB. W6 and W4 post-fix metrics remain held below the 8 GB gate.
+
+## Critical resource checkpoint (2026-10-23 23:24 IST)
+
+- Free RAM 0.47 GB; largest process is the existing llama-server at ~8 GB, not started/stopped by this coordinator. W5 worker CPU reached 52.7s, so no-CPU hang condition is false despite empty log/no files. Hold all new launches/builds/tests until memory recovers; W6 and W4 validation are gated.
+
+## 2026-10-23 23:29 IST — heartbeat checkpoint
+
+- W5 active; CPU continues increasing, log empty/buffered, no extension files. Free RAM 4.05 GB (<8 GB launch gate); W6 and W4 validation held. HEAD was fully reread at 23:14:51 and had no additional order.
+
+## 2026-10-23 23:35 IST — 30-minute orders and lane status
+
+- Fully reread HEAD_ORDERS.md at 23:35:30; no new item. Temporary cc/claude-sonnet-5 default, no CLI override, and 8 GB resource gate remain in effect.
+- W5 worker is still active (72.8s CPU), no files/log output; no-CPU hang criterion is false. Free RAM 5.74 GB; W6 and W4 validation held.
+
+## W5 browser boundary review (2026-10-23 23:39 IST)
+
+- Found an unexecuted spike script that would navigate to example.com; no profile/browser process existed, so no external navigation occurred. Changed it to bout:blank and added a package prompt instruction to restrict tests to bout:blank/localhost.
+- W5 still active, no extension source/report yet. RAM remains below 8 GB; W6 and W4 validation are held.
+
+## 2026-10-23 23:50 IST — W5 checkpoint
+
+- W5 ~43 minutes active, worker CPU 94.1s and increasing; log empty/no extension source. No-CPU hang rule false. Free RAM 3.9 GB; W6 and W4 post-fix metrics held. No external page was opened.
+
+## HEAD NOTE 00:05 acknowledgement (2026-10-24 00:05 IST)
+
+- Head's 23:54 full run had one likely low-RAM subprocess-startup failure (	est_spent_v2_scripts_refuse_without_archival_override); isolated rerun passed and spent-data guard/import/access-log review found no access. Treat as environment flake, investigate if it recurs.
+- Latest coordinator full suite remains 1280 passed, 7 skipped, 6 warnings on the W4 fix before current docs/worker changes. Current RAM 2.7 GB; no tests/acceptance commit now.
+- W5 remains active (117s cumulative CPU), no extension source/report. W6/W4 measurement held below 8 GB gate.
+
+## 2026-10-24 00:06 IST — report draft
+
+- Created root FINAL-REPORT.md status snapshot; update after remaining lanes and before final push. No acceptance claims beyond logged test/screens evidence.
+- W5 active, no source/report yet; RAM remains below the >=8 GB gate. W6 and post-fix W4 validation held.
+
+## 2026-10-24 00:06 IST — W6 launch held on CPU
+
+- Free RAM 12.1 GB, but preflight CPU sample was 90.0%; W6 launch aborted before Hermes started. Retry only after CPU is not pinned. W5 remains active.
+
+## 2026-10-24 00:08 IST — W6 resource retry
+
+- W6 not launched: 12.1 GB free RAM but CPU average 92%. No new Hermes session started.
+- Highest CPU Python/find processes have creation times before this coordinator session and are not ours; left untouched. W5 remains active, CPU time increasing slowly.
+
+## 2026-10-24 00:11 IST — W5 first files
+
+- extension/src/shared/constants.js and work/finals/w5-extension/CONTRACT.md appeared; not independently reviewed or accepted. No tests run. RAM 10.9 GB, CPU ~91.5%; W6 still held.
+
+## 2026-10-24 00:14 IST — W6 launch
+
+- W6 started in Hermes exec session 38339 after a 26.6% CPU / 26.7 GB RAM preflight. It uses config default cc/claude-sonnet-5, no CLI override. W5 remains active; W6 results unverified.
+
+## 2026-10-24 00:30 IST — W4 evidence / W5-W6 status
+
+- W4 baseline 4a64c2f vs fixed 14f6e81: same deterministic v3 validation metrics (625 rows, 501 legitimate/124 malicious, .16 threshold; FP >=16 25/501, >=50 4, >=70 0; malicious median 2). All 60 unique real URLs scored zero in both snapshots with reputation stubbed. Named misses sbl 0→50, IRCTC 3→60, sbii 50→50, IP login 50→70.
+- W4 #4 remains open because malicious/shortener/tunnel test cases are synthetic, not a 60-real-link malicious set. No candidate model, so candidate-only calibration/leave-source-out checks do not apply. #20 fixed/closed.
+- W5: only constants + contract; W6: no ndroid/ files yet. Both sessions alive; 22.9 GB RAM, 32.9% CPU.
+
+## 2026-10-24 00:35 IST — HEAD resource defect acknowledgement
+
+- Fully reread HEAD_ORDERS.md at 00:34:23. New order identifies eight old root-wide find processes, directs stopping only those PIDs, and bans root/drive-wide search with 60s timeout. Checked all exact PIDs; none existed in this session, so no process was stopped. CPU 39.7%, RAM 22.9 GB.
+- Added the search restriction to W5 prompt/contract and W6 prompt. W5/W6 remain active.
+- W4 baseline/fixed measurements done; latest full pytest: 1280 passed, 7 skipped, 6 warnings (204.19s). W4 issue #4 remains open; #20 closed.
+
+## W5 handoff (2026-10-24 00:45 IST)
+
+- W5 frozen at 00:45 as WIP, not accepted. Present files: shared constants, offline bundle, sample manifest, and build script; worker acceptance report absent.
+- Independent checks: `node --check` passed for both JS files; sample manifest parses as JSON. Build and browser behavior were not tested because integrated `manifest.json` and runtime files are absent. README/privacy drafts remain excluded from the WIP commit because claims are not yet source-verified.
+- Latest full `pytest -q` before the snapshot: 1280 passed, 7 skipped, 6 warnings in 243.06s. No extension behavior is covered by this suite.
+- Stopped only the W5-owned process tree at its slot boundary. W6 remains active; W7 remains to run 01:00–01:55.
