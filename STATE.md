@@ -3,7 +3,7 @@
 - Launch time (T0): 2026-10-22T23:48:19Z (UTC)
 - Branch: finals-48h; remote pushed through c28e49d; local status/docs commits remain unpushed.
 - Phase: W1/W2 execution; no worker package accepted yet.
-- Lane A: W1-auth; command session 2238; Hermes PID 13880; worker Python PID 23624; nine child reports and work/finals/w1-auth/REPORT.md present. Worker exceeded 40-minute target and still consumes CPU; package summary is written but lane has not released. Changed but uncommitted: login/signup/chat-gate, auth/API/history code, tests, and W1 browser matrix. Package run log remains empty.
+- Lane A: W1-auth; command session 2238; Hermes PID 13880; worker Python PID 23624; nine child reports and work/finals/w1-auth/REPORT.md present. Hermes worker exited; W1 package summary is written. Its orphaned Next dev PID 28236 still owns :3000, consumes high CPU, and times out on `/signup`; independent Playwright rerun is blocked until isolated. Changed but uncommitted: login/signup/chat-gate, auth/API/history code, tests, and W1 browser matrix. Package run log remains empty.
 - Lane B: W2-discovery; command session 37963; Hermes PID 22560; worker Python PID 27928; REA enabled. Eight observation child folders are active (desktop shell, composer, messages, streaming, states, responsive, auth, accessibility); captures/probes are arriving. No accepted UI_SPEC.md/report yet. Package log remains empty.
 - Baseline pytest: 802 passed, 7 skipped, 5 warnings in 181.26 s.
 - W1 first browser run 72/15/1 had invalid setup. Worker corrected matrix now records 3 consecutive runs, each 92/0/0 (00:32:07Z, 00:32:56Z, 00:33:43Z). Not accepted until independently reproduced. No .env.local read/printed. Expected mocked errors must be distinguished from unexpected errors.
@@ -25,3 +25,5 @@
 - Independent frontend checks: 
 px tsc --noEmit passed; 
 pm run lint reports the same 3 pre-existing set-state-in-effect errors in Chat.tsx/useSession.ts (confirmed in HEAD). Build waits for W1 to release Next's :3000/.next. W2 has 7 visually checked masked PNGs in docs/finals/evidence/w2; no accepted UI_SPEC/report yet.
+
+- Independent Playwright run was interrupted after local Next /signup began timing out (scenario 02/03 navigation failures). Worker w1-run.json is backed up under ignored work/ and remains unchanged at 3x92/0/0. Plan isolated verification on a separate worktree/port.

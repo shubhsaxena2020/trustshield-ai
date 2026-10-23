@@ -1,1 +1,1 @@
-2026-10-23T00:50:35Z | W1-auth (pytest + tsc green; code-review fixes and independent matrix pending), W2-discovery (8 scopes active; 7 masked captures checked, spec pending)
+2026-10-23T00:54:46Z | W1-auth (backend pytest + tsc green; independent browser blocked by hung :3000), W2-discovery (8 scopes active; 7 masked captures checked)

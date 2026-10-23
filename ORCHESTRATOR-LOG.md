@@ -39,3 +39,5 @@
 - 2026-10-23T00:50:35Z — independent frontend: 
 px tsc --noEmit passed; 
 pm run lint has the same 3 baseline errors in Chat.tsx/useSession.ts (confirmed in HEAD). Build deferred until W1 releases port 3000/.next. Seven promoted W2 captures now visually show layout-only masking.
+
+- 2026-10-23T00:54:46Z — W1 Hermes worker exited; orphan Next PID 28236 remains on :3000, high CPU and /signup requests timeout. Independent Playwright was interrupted before writing evidence; worker run JSON backup matches unchanged evidence. API PID 23820 is healthy on :8000. Do not terminate blocked process; isolate verification.
