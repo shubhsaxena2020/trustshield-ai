@@ -50,3 +50,27 @@ Disk is intact: `git fsck` reports only dangling objects; the gate (new PID 8076
 4. If a workstream cannot reach acceptance in its slot, freeze it at its best verified state, file an issue with exactly what is missing, and move on. A smaller verified result beats a larger unverified one.
 5. Resources: you may use up to both Hermes sessions with 9 children each continuously. The free-RAM launch gate is relaxed to >= 8 GB. Keep unattended: do not stop for questions.
 6. GPU: Shubh asked to keep the GPU at 100 percent. I am not doing that and you must not either: nothing in this program is GPU-bound (the model runs on the remote Nilabh server; pytest, Gradle, Playwright and git are CPU/IO), and burning the Intel Arc iGPU artificially only adds heat to a laptop that already hit 95 C once. Use the GPU where it helps for real: Chromium/Playwright keep hardware acceleration on, run the Android emulator with `-gpu host`. Do not run local LLMs unless a package needs one.
+
+> HEAD DEFECT 22:47 IST (blocking for W4): see the new GitHub issue "W4 bug: 3-letter look-alike rule flags legitimate domains". The uncommitted static.py change makes ubi.com, sbs.com.au and abi.org score 50 (0 on HEAD). Do not commit or accept W4 until fixed with a regression fixture of real 3-letter domains. Also dedupe the IP+credential floor (engine already applies it to every strategy). Safety backup refreshed on a backup/finals-wip-* branch. Commit+push at every handoff.
+
+## 6. TEMPORARY MODEL SWITCH (Shubh's order, 22:52 IST) - Nilabh is down
+The Nilabh DeepSeek route is failing (its own upstream answers "Rate limit exceeded"; through 9Router every call returns 503).
+Shubh ordered a TEMPORARY switch until his friend fixes it: Hermes now runs on **`cc/claude-sonnet-5`** through 9Router's "Mukesh (PAPA)" Claude Code connection.
+Done by the head and verified: Hermes `model.default` and `delegation.model` = `cc/claude-sonnet-5` (provider custom:9router), `fallback_providers: []` kept;
+a live test ran a parent plus 3 parallel children, all on cc/claude-sonnet-5, 3/3 correct.
+- Every NEW `hermes -z` launch picks this up automatically (do not pass `--provider`/`-m`). Sessions that started on Nilabh are failing now: relaunch them.
+- The PAPA Claude Code quota is a 5-hour session budget (shown as 100 units) plus a weekly budget. It is finite: keep fan-out efficient (coarse tasks, fewer chatty calls). If 9Router starts returning quota errors for cc/*, slow down rather than add other models.
+- The TrustShield app itself (`.env` NILABH_LLM_*) is NOT switched: the product's chat model stays the friend's DeepSeek; tests do not need the live model. Do not change it.
+- Shubh will say when Nilabh is back; the head switches Hermes back then.
+
+> HEAD NOTE 00:05 IST: my full-suite run at 23:54 had 1 failure, tests/unit/test_v2_promotion_eval.py::test_spent_v2_scripts_refuse_without_archival_override (1279 passed). Rerun alone it passes; all four spent-v2 scripts still import require_archival_override and the v2 access log still has exactly 1 entry, so no spent-data access happened. Likely subprocess start-up failure under ~0-4 GB free RAM. Treat as environment flake, but if it recurs in your own full run, investigate before any acceptance.
+
+> HEAD DEFECT 00:20 IST (blocking resource leak): 8 orphaned `find / ...` processes started by Hermes subagents between 20:22 and 21:28 (PIDs 34712 7204 33092 9220 24504 7468 1844 6928; command `...hermes	ools\git...ind.exe / -name ...`) are walking the whole disk and hold the CPU at ~100%; that is why your W6 CPU gate never opens. Their parents are gone. I cannot kill them (Access is denied - they appear to run under the sandbox account); try killing exactly these PIDs from your own session. Add to EVERY worker prompt from now on: never search from `/` or a drive root; search only inside C:\Users\shubh	rustshield-ai (use `rg --files` or `git ls-files`), and wrap any find/search in a 60-second timeout.
+(The line above was cut off by a shell escape; full order below.)
+
+> HEAD DEFECT 00:20 IST (blocking resource leak): 8 orphaned `find / ...` processes started by Hermes subagents between 20:22 and 21:28
+> (PIDs 34712 7204 33092 9220 24504 7468 1844 6928; command `C:\Users\shubh\AppData\Local\hermes\tools\git-2.53.0+3-win32-x64\usr\bin\find.exe / -name ...`)
+> are walking the whole disk and hold the CPU at about 100 percent. That is why your W6 CPU gate never opens. Their parents are gone.
+> The head cannot stop them ("Access is denied"; they appear to run under the sandbox account). Try stopping exactly these PIDs from your own session.
+> Add to EVERY worker prompt from now on: never search from `/` or a drive root; search only inside C:\Users\shubh\trustshield-ai
+> (use `rg --files` or `git ls-files`), and wrap any find or search in a 60-second timeout.

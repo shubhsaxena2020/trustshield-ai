@@ -192,3 +192,67 @@ Synthetic static probes: sbl.co.in/login yields only informational credential-pa
 - Prelaunch sample: CPU 76.4%, free RAM 4.4 GB. W5 parent/worker remain alive with worker CPU increasing; log still empty. W6 Hermes launch is deferred; the current lane cannot safely start under the resource gate. The unrelated llama-server process remains untouched.
 - Saved the pre-#20-fix deterministic validation artifact as models/evaluation/w4/validation_measurement_before_issue20_fix.json (generated 21:25 IST, 625 rows, 501 legitimate, 124 malicious, threshold 0.16, 25 legitimate scores >=16, 4 >=50, 0 >=70). A post-fix run remains pending resource availability.
 - Corrected W4 inventory draft to reflect 113 regression cases with 60 unique real URLs and 53 synthetic; the 30 three-letter cases were not live-verified and are described only as regression references.
+
+## 2026-10-23 23:22 IST — W5 15-minute liveness checkpoint
+
+- W5 started 23:06:50. At 23:21:52, the process is alive and cumulative worker CPU advanced from 47.4s to 48.9s since the previous sample. un.log remains empty and no extension/ files exist, but the required kill condition is conjunctive and is not met because CPU advanced. Keep the lane alive and recheck after the next interval.
+- Free RAM is 1.96 GB; the unrelated llama-server uses ~8 GB. Do not launch W6 or the W4 validation measurement under this condition. No process started by this coordinator is stopped.
+
+## 2026-10-23 23:24 IST — critical memory pressure
+
+- Free RAM fell to 0.47 GB at 23:24. System process inventory showed the pre-existing llama-server as the largest consumer (~8 GB); it was not started/stopped by this coordinator. W5 worker CPU increased to 52.7s, so its empty log does not meet the no-CPU hang criterion. Leave it running while it remains active; launch no new tasks or local builds and recheck resources.
+- W6 and W4 validation remain blocked by the >=8 GB launch gate. No production, branch, or spent-data boundary changed.
+
+## 2026-10-23 23:29 IST — heartbeat / W5 status
+
+- W5 remains active; worker CPU has continued to rise (60.3s cumulative at 23:28:57) while the log remains buffered/empty. No extension source files exist yet. The conjunctive 15-minute idle rule is not met.
+- Free RAM recovered to 4.05 GB but remains below 8 GB; do not launch W6 or run W4 validation yet. No new HEAD item since the full reread at 23:14:51.
+
+## 2026-10-23 23:35 IST — 30-minute HEAD_ORDERS reread
+
+- Re-read docs/finals/HEAD_ORDERS.md completely at 23:35:30; no new head item was appended. Existing section 4/5/6, #20 defect, commit-at-handoff, no --provider/-m, and no local-model/GPU rules remain acknowledged.
+- W5 has run ~29 minutes. Worker CPU advanced to 72.8s; log empty and no source yet, so the conjunctive 15-minute idle stop condition remains false. Keep it alive.
+- Free RAM is 5.74 GB (<8 GB). W6 launch and post-fix W4 validation remain deferred; no tests/builds are started under the current memory pressure.
+
+## 2026-10-23 23:39 IST — W5 external-navigation guard
+
+- Reviewed the first W5 Playwright spike. It contained page.goto("https://example.com"), which violated the package's no-external-browsing boundary. The script had not run: no persistent profile or extension directory existed and no browser process targeted the spike. Replaced the target with bout:blank and added an explicit coordinator update to PROMPT.txt. No external page was opened.
+- W5 remains active and its worker CPU is increasing; no source/report output yet. Free RAM remains below the 8 GB gate, so W6 and W4 measurement stay deferred.
+
+## 2026-10-23 23:50 IST — W5 progress/resource checkpoint
+
+- W5 has been running ~43 minutes. Worker CPU advanced to 94.1s cumulative, but un.log remains empty and no extension/ source exists. Since CPU continues to change, the 15-minute no-CPU stop condition is not met; keep it alive and continue checking.
+- Free RAM is 3.9 GB, below gate. W6 and W4 post-fix validation remain held. The W5 spike target has been changed to bout:blank; no external navigation was made.
+
+## 2026-10-24 00:05 IST — new HEAD NOTE acknowledgement
+
+- Re-read HEAD_ORDERS.md completely at 00:05:31; new HEAD NOTE 00:05 records the head's 23:54 full-suite run: 1279 passed, one environment-level failure in 	est_spent_v2_scripts_refuse_without_archival_override; isolated rerun passed, spent-v2 guards/log reviewed, no access occurred. The note attributes likely subprocess startup failure to 0–4 GB free RAM.
+- Acknowledged: do not claim a new full-suite pass from that run; investigate if it recurs in our own run. Our latest verified full suite remains 1280 passed/7 skipped/6 warnings (184.55s) before later docs-only/worker changes. Current RAM 2.7 GB, so no test/acceptance commit is attempted now.
+- W5 remains active with CPU advancing (117s cumulative), but no extension source/report yet. W6 and W4 post-fix measurement remain below the 8 GB launch gate.
+
+## 2026-10-24 00:06 IST — final report draft
+
+- Created root FINAL-REPORT.md as a status snapshot, clearly marked for update after W5/W6/W7. It records only verified results and current gaps; it is not yet committed or final.
+- Latest full HEAD_ORDERS reread at 00:05:31 acknowledged the 00:05 note about one head-side low-RAM subprocess startup failure; isolated rerun passed and no spent-data access occurred.
+- W5 remains active with slow CPU progress and no source/report. Free RAM remains below 8 GB; W6 and W4 post-fix validation are still held.
+
+## 2026-10-24 00:06 IST — W6 resource preflight retry
+
+- RAM recovered to 12.1 GB. W6 Hermes launch attempt was correctly held because the one-second CPU sample was 90.0%, above the strict not-pinned condition. The launch command threw before reading the prompt or starting Hermes; no W6 session was created. Retry after CPU cools.
+- W5 remains active. The 00:05 HEAD note remains acknowledged; no new order since then.
+
+## 2026-10-24 00:08 IST — W6 CPU gate and process ownership
+
+- W6 launch retry was held: 12.1 GB free RAM but three-sample CPU average 92% (not below the not-pinned gate). No Hermes launch occurred.
+- CPU sampling showed the busiest Python process started at 19:19 and several ind.exe processes started between 20:22 and 21:28, all before this coordinator session. They are not coordinator-owned; do not stop them. W5's own process tree remains active with low, increasing CPU time.
+- Retry W6 only when CPU sample is below 90% and RAM remains >=8 GB. W4 validation remains deferred as well.
+
+## 2026-10-24 00:11 IST — first W5 source output
+
+- W5 has created extension/src/shared/constants.js and work/finals/w5-extension/CONTRACT.md; this is progress, not acceptance. Independent review/build/tests still pending. The draft Playwright spike's external URL was removed before execution; no external page was opened.
+- At the latest sample, RAM was 10.9 GB but CPU remained ~91.5%, so W6 launch stays held. W5 process CPU continues to advance.
+
+## 2026-10-24 00:14 IST — W6 resumed after resource recovery
+
+- Resource gate recovered (prelaunch 2-sample CPU average 26.6%, free RAM 26.7 GB). Started W6 Lane B from work/finals/w6-android/PROMPT.txt in exec session 38339, using the configured Hermes default with no --provider/-m. W5 Lane A remains active.
+- No W6 implementation/build result claimed yet. Verify ndroid/ output, run ssembleDebug and tests independently, and document device availability. Keep CPU/RAM gate checked before any additional launch.

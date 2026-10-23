@@ -1,0 +1,981 @@
+{
+  "generated_at": "2026-10-23T18:56:43.256302+00:00",
+  "input_path": "C:\\Users\\shubh\\trustshield-ai\\datasets\\processed\\trustshield-text-v3\\validation.jsonl",
+  "output_path": "C:\\Users\\shubh\\trustshield-ai\\models\\evaluation\\w4\\validation_measurement_after_issue20_fix.json",
+  "mode": {
+    "TRUSTSHIELD_ML": "off",
+    "TRUSTSHIELD_REPUTATION": "off",
+    "TRUSTSHIELD_SAFE_BROWSING": "off"
+  },
+  "threshold": 0.16,
+  "threshold_score": 16,
+  "n_rows": 625,
+  "n_legitimate": 501,
+  "n_malicious": 124,
+  "risk_score_distribution": {
+    "n": 625,
+    "min": 0,
+    "max": 65,
+    "mean": 3.024,
+    "median": 0,
+    "score_counts": {
+      "0": 524,
+      "2": 6,
+      "3": 31,
+      "5": 1,
+      "6": 1,
+      "8": 2,
+      "9": 12,
+      "10": 4,
+      "13": 5,
+      "15": 1,
+      "30": 2,
+      "32": 2,
+      "34": 20,
+      "36": 1,
+      "38": 2,
+      "39": 1,
+      "50": 3,
+      "60": 6,
+      "65": 1
+    },
+    "counts": {
+      "0": 524,
+      "2": 6,
+      "3": 31,
+      "5": 1,
+      "6": 1,
+      "8": 2,
+      "9": 12,
+      "10": 4,
+      "13": 5,
+      "15": 1,
+      "30": 2,
+      "32": 2,
+      "34": 20,
+      "36": 1,
+      "38": 2,
+      "39": 1,
+      "50": 3,
+      "60": 6,
+      "65": 1
+    },
+    "distribution": {
+      "0": 524,
+      "2": 6,
+      "3": 31,
+      "5": 1,
+      "6": 1,
+      "8": 2,
+      "9": 12,
+      "10": 4,
+      "13": 5,
+      "15": 1,
+      "30": 2,
+      "32": 2,
+      "34": 20,
+      "36": 1,
+      "38": 2,
+      "39": 1,
+      "50": 3,
+      "60": 6,
+      "65": 1
+    },
+    "by_score": {
+      "0": 524,
+      "2": 6,
+      "3": 31,
+      "5": 1,
+      "6": 1,
+      "8": 2,
+      "9": 12,
+      "10": 4,
+      "13": 5,
+      "15": 1,
+      "30": 2,
+      "32": 2,
+      "34": 20,
+      "36": 1,
+      "38": 2,
+      "39": 1,
+      "50": 3,
+      "60": 6,
+      "65": 1
+    },
+    "histogram_10": {
+      "00-09": 577,
+      "10-19": 10,
+      "30-39": 28,
+      "50-59": 3,
+      "60-69": 7
+    },
+    "histogram": {
+      "00-09": 577,
+      "10-19": 10,
+      "30-39": 28,
+      "50-59": 3,
+      "60-69": 7
+    }
+  },
+  "legitimate": {
+    "n": 501,
+    "false_positive_count": 25,
+    "false_positive_rate": 0.0499,
+    "false_positives_at_25": 25,
+    "false_positives_at_50": 4,
+    "false_positives_at_70": 0,
+    "risk_score_distribution": {
+      "n": 501,
+      "min": 0,
+      "max": 65,
+      "mean": 1.976,
+      "median": 0,
+      "score_counts": {
+        "0": 463,
+        "2": 3,
+        "3": 7,
+        "8": 1,
+        "9": 1,
+        "10": 1,
+        "30": 1,
+        "32": 2,
+        "34": 17,
+        "39": 1,
+        "50": 2,
+        "60": 1,
+        "65": 1
+      },
+      "counts": {
+        "0": 463,
+        "2": 3,
+        "3": 7,
+        "8": 1,
+        "9": 1,
+        "10": 1,
+        "30": 1,
+        "32": 2,
+        "34": 17,
+        "39": 1,
+        "50": 2,
+        "60": 1,
+        "65": 1
+      },
+      "distribution": {
+        "0": 463,
+        "2": 3,
+        "3": 7,
+        "8": 1,
+        "9": 1,
+        "10": 1,
+        "30": 1,
+        "32": 2,
+        "34": 17,
+        "39": 1,
+        "50": 2,
+        "60": 1,
+        "65": 1
+      },
+      "by_score": {
+        "0": 463,
+        "2": 3,
+        "3": 7,
+        "8": 1,
+        "9": 1,
+        "10": 1,
+        "30": 1,
+        "32": 2,
+        "34": 17,
+        "39": 1,
+        "50": 2,
+        "60": 1,
+        "65": 1
+      },
+      "histogram_10": {
+        "00-09": 475,
+        "10-19": 1,
+        "30-39": 21,
+        "50-59": 2,
+        "60-69": 2
+      },
+      "histogram": {
+        "00-09": 475,
+        "10-19": 1,
+        "30-39": 21,
+        "50-59": 2,
+        "60-69": 2
+      }
+    },
+    "by_source": {
+      "agy-gen-legit-v1": {
+        "n": 77,
+        "false_positive_count": 3,
+        "false_positive_rate": 0.039,
+        "risk_score_distribution": {
+          "n": 77,
+          "min": 0,
+          "max": 65,
+          "mean": 2.039,
+          "median": 0,
+          "score_counts": {
+            "0": 70,
+            "3": 1,
+            "8": 1,
+            "9": 1,
+            "10": 1,
+            "30": 1,
+            "32": 1,
+            "65": 1
+          },
+          "counts": {
+            "0": 70,
+            "3": 1,
+            "8": 1,
+            "9": 1,
+            "10": 1,
+            "30": 1,
+            "32": 1,
+            "65": 1
+          },
+          "distribution": {
+            "0": 70,
+            "3": 1,
+            "8": 1,
+            "9": 1,
+            "10": 1,
+            "30": 1,
+            "32": 1,
+            "65": 1
+          },
+          "by_score": {
+            "0": 70,
+            "3": 1,
+            "8": 1,
+            "9": 1,
+            "10": 1,
+            "30": 1,
+            "32": 1,
+            "65": 1
+          },
+          "histogram_10": {
+            "00-09": 73,
+            "10-19": 1,
+            "30-39": 2,
+            "60-69": 1
+          },
+          "histogram": {
+            "00-09": 73,
+            "10-19": 1,
+            "30-39": 2,
+            "60-69": 1
+          }
+        }
+      },
+      "india_spam_sms": {
+        "n": 200,
+        "false_positive_count": 21,
+        "false_positive_rate": 0.105,
+        "risk_score_distribution": {
+          "n": 200,
+          "min": 0,
+          "max": 60,
+          "mean": 3.855,
+          "median": 0.0,
+          "score_counts": {
+            "0": 174,
+            "2": 3,
+            "3": 2,
+            "32": 1,
+            "34": 17,
+            "39": 1,
+            "50": 1,
+            "60": 1
+          },
+          "counts": {
+            "0": 174,
+            "2": 3,
+            "3": 2,
+            "32": 1,
+            "34": 17,
+            "39": 1,
+            "50": 1,
+            "60": 1
+          },
+          "distribution": {
+            "0": 174,
+            "2": 3,
+            "3": 2,
+            "32": 1,
+            "34": 17,
+            "39": 1,
+            "50": 1,
+            "60": 1
+          },
+          "by_score": {
+            "0": 174,
+            "2": 3,
+            "3": 2,
+            "32": 1,
+            "34": 17,
+            "39": 1,
+            "50": 1,
+            "60": 1
+          },
+          "histogram_10": {
+            "00-09": 179,
+            "30-39": 19,
+            "50-59": 1,
+            "60-69": 1
+          },
+          "histogram": {
+            "00-09": 179,
+            "30-39": 19,
+            "50-59": 1,
+            "60-69": 1
+          }
+        }
+      },
+      "ucI_sms_spam": {
+        "n": 224,
+        "false_positive_count": 1,
+        "false_positive_rate": 0.0045,
+        "risk_score_distribution": {
+          "n": 224,
+          "min": 0,
+          "max": 50,
+          "mean": 0.2768,
+          "median": 0.0,
+          "score_counts": {
+            "0": 219,
+            "3": 4,
+            "50": 1
+          },
+          "counts": {
+            "0": 219,
+            "3": 4,
+            "50": 1
+          },
+          "distribution": {
+            "0": 219,
+            "3": 4,
+            "50": 1
+          },
+          "by_score": {
+            "0": 219,
+            "3": 4,
+            "50": 1
+          },
+          "histogram_10": {
+            "00-09": 223,
+            "50-59": 1
+          },
+          "histogram": {
+            "00-09": 223,
+            "50-59": 1
+          }
+        }
+      }
+    },
+    "false_positive_rows": [
+      {
+        "id": "agy-gen-legit-v1-46450a90",
+        "binary_label": "legitimate",
+        "source_name": "agy-gen-legit-v1",
+        "category_label": "legitimate",
+        "synthetic": true,
+        "risk_score": 65,
+        "risk_label": "suspicious",
+        "primary": "digital_arrest"
+      },
+      {
+        "id": "agy-gen-legit-v1-93e1dfdf",
+        "binary_label": "legitimate",
+        "source_name": "agy-gen-legit-v1",
+        "category_label": "legitimate",
+        "synthetic": true,
+        "risk_score": 32,
+        "risk_label": "caution",
+        "primary": "phishing"
+      },
+      {
+        "id": "agy-gen-legit-v1-f95c399e",
+        "binary_label": "legitimate",
+        "source_name": "agy-gen-legit-v1",
+        "category_label": "legitimate",
+        "synthetic": true,
+        "risk_score": 30,
+        "risk_label": "caution",
+        "primary": "credential_theft"
+      },
+      {
+        "id": "indiaspam-1eb7e097",
+        "binary_label": "legitimate",
+        "source_name": "india_spam_sms",
+        "category_label": "legitimate",
+        "synthetic": false,
+        "risk_score": 34,
+        "risk_label": "caution",
+        "primary": "none_detected"
+      },
+      {
+        "id": "indiaspam-37cab0ec",
+        "binary_label": "legitimate",
+        "source_name": "india_spam_sms",
+        "category_label": "legitimate",
+        "synthetic": false,
+        "risk_score": 34,
+        "risk_label": "caution",
+        "primary": "none_detected"
+      },
+      {
+        "id": "indiaspam-4a9c485c",
+        "binary_label": "legitimate",
+        "source_name": "india_spam_sms",
+        "category_label": "legitimate",
+        "synthetic": false,
+        "risk_score": 34,
+        "risk_label": "caution",
+        "primary": "none_detected"
+      },
+      {
+        "id": "indiaspam-5413c208",
+        "binary_label": "legitimate",
+        "source_name": "india_spam_sms",
+        "category_label": "legitimate",
+        "synthetic": false,
+        "risk_score": 34,
+        "risk_label": "caution",
+        "primary": "none_detected"
+      },
+      {
+        "id": "indiaspam-5551319f",
+        "binary_label": "legitimate",
+        "source_name": "india_spam_sms",
+        "category_label": "legitimate",
+        "synthetic": false,
+        "risk_score": 34,
+        "risk_label": "caution",
+        "primary": "none_detected"
+      },
+      {
+        "id": "indiaspam-70b5c3e0",
+        "binary_label": "legitimate",
+        "source_name": "india_spam_sms",
+        "category_label": "legitimate",
+        "synthetic": false,
+        "risk_score": 34,
+        "risk_label": "caution",
+        "primary": "none_detected"
+      },
+      {
+        "id": "indiaspam-8bea6230",
+        "binary_label": "legitimate",
+        "source_name": "india_spam_sms",
+        "category_label": "legitimate",
+        "synthetic": false,
+        "risk_score": 34,
+        "risk_label": "caution",
+        "primary": "none_detected"
+      },
+      {
+        "id": "indiaspam-9195261a",
+        "binary_label": "legitimate",
+        "source_name": "india_spam_sms",
+        "category_label": "legitimate",
+        "synthetic": false,
+        "risk_score": 34,
+        "risk_label": "caution",
+        "primary": "none_detected"
+      },
+      {
+        "id": "indiaspam-abff9a97",
+        "binary_label": "legitimate",
+        "source_name": "india_spam_sms",
+        "category_label": "legitimate",
+        "synthetic": false,
+        "risk_score": 60,
+        "risk_label": "suspicious",
+        "primary": "phishing"
+      },
+      {
+        "id": "indiaspam-b7df3372",
+        "binary_label": "legitimate",
+        "source_name": "india_spam_sms",
+        "category_label": "legitimate",
+        "synthetic": false,
+        "risk_score": 34,
+        "risk_label": "caution",
+        "primary": "none_detected"
+      },
+      {
+        "id": "indiaspam-be75a770",
+        "binary_label": "legitimate",
+        "source_name": "india_spam_sms",
+        "category_label": "legitimate",
+        "synthetic": false,
+        "risk_score": 34,
+        "risk_label": "caution",
+        "primary": "none_detected"
+      },
+      {
+        "id": "indiaspam-c329cabd",
+        "binary_label": "legitimate",
+        "source_name": "india_spam_sms",
+        "category_label": "legitimate",
+        "synthetic": false,
+        "risk_score": 34,
+        "risk_label": "caution",
+        "primary": "none_detected"
+      },
+      {
+        "id": "indiaspam-c9eac67f",
+        "binary_label": "legitimate",
+        "source_name": "india_spam_sms",
+        "category_label": "legitimate",
+        "synthetic": false,
+        "risk_score": 39,
+        "risk_label": "caution",
+        "primary": "phishing"
+      },
+      {
+        "id": "indiaspam-cf9e2e6a",
+        "binary_label": "legitimate",
+        "source_name": "india_spam_sms",
+        "category_label": "legitimate",
+        "synthetic": false,
+        "risk_score": 34,
+        "risk_label": "caution",
+        "primary": "none_detected"
+      },
+      {
+        "id": "indiaspam-d0b32ded",
+        "binary_label": "legitimate",
+        "source_name": "india_spam_sms",
+        "category_label": "legitimate",
+        "synthetic": false,
+        "risk_score": 34,
+        "risk_label": "caution",
+        "primary": "none_detected"
+      },
+      {
+        "id": "indiaspam-d5037485",
+        "binary_label": "legitimate",
+        "source_name": "india_spam_sms",
+        "category_label": "legitimate",
+        "synthetic": false,
+        "risk_score": 34,
+        "risk_label": "caution",
+        "primary": "none_detected"
+      },
+      {
+        "id": "indiaspam-d7105040",
+        "binary_label": "legitimate",
+        "source_name": "india_spam_sms",
+        "category_label": "legitimate",
+        "synthetic": false,
+        "risk_score": 32,
+        "risk_label": "caution",
+        "primary": "phishing"
+      },
+      {
+        "id": "indiaspam-def2629d",
+        "binary_label": "legitimate",
+        "source_name": "india_spam_sms",
+        "category_label": "legitimate",
+        "synthetic": false,
+        "risk_score": 34,
+        "risk_label": "caution",
+        "primary": "none_detected"
+      },
+      {
+        "id": "indiaspam-e85f8563",
+        "binary_label": "legitimate",
+        "source_name": "india_spam_sms",
+        "category_label": "legitimate",
+        "synthetic": false,
+        "risk_score": 34,
+        "risk_label": "caution",
+        "primary": "none_detected"
+      },
+      {
+        "id": "indiaspam-eca82c1e",
+        "binary_label": "legitimate",
+        "source_name": "india_spam_sms",
+        "category_label": "legitimate",
+        "synthetic": false,
+        "risk_score": 50,
+        "risk_label": "suspicious",
+        "primary": "phishing"
+      },
+      {
+        "id": "indiaspam-fdf825cc",
+        "binary_label": "legitimate",
+        "source_name": "india_spam_sms",
+        "category_label": "legitimate",
+        "synthetic": false,
+        "risk_score": 34,
+        "risk_label": "caution",
+        "primary": "none_detected"
+      },
+      {
+        "id": "ucisms-6eb34f2a",
+        "binary_label": "legitimate",
+        "source_name": "ucI_sms_spam",
+        "category_label": "legitimate",
+        "synthetic": false,
+        "risk_score": 50,
+        "risk_label": "suspicious",
+        "primary": "phishing"
+      }
+    ],
+    "false_positives": [
+      {
+        "id": "agy-gen-legit-v1-46450a90",
+        "binary_label": "legitimate",
+        "source_name": "agy-gen-legit-v1",
+        "category_label": "legitimate",
+        "synthetic": true,
+        "risk_score": 65,
+        "risk_label": "suspicious",
+        "primary": "digital_arrest"
+      },
+      {
+        "id": "agy-gen-legit-v1-93e1dfdf",
+        "binary_label": "legitimate",
+        "source_name": "agy-gen-legit-v1",
+        "category_label": "legitimate",
+        "synthetic": true,
+        "risk_score": 32,
+        "risk_label": "caution",
+        "primary": "phishing"
+      },
+      {
+        "id": "agy-gen-legit-v1-f95c399e",
+        "binary_label": "legitimate",
+        "source_name": "agy-gen-legit-v1",
+        "category_label": "legitimate",
+        "synthetic": true,
+        "risk_score": 30,
+        "risk_label": "caution",
+        "primary": "credential_theft"
+      },
+      {
+        "id": "indiaspam-1eb7e097",
+        "binary_label": "legitimate",
+        "source_name": "india_spam_sms",
+        "category_label": "legitimate",
+        "synthetic": false,
+        "risk_score": 34,
+        "risk_label": "caution",
+        "primary": "none_detected"
+      },
+      {
+        "id": "indiaspam-37cab0ec",
+        "binary_label": "legitimate",
+        "source_name": "india_spam_sms",
+        "category_label": "legitimate",
+        "synthetic": false,
+        "risk_score": 34,
+        "risk_label": "caution",
+        "primary": "none_detected"
+      },
+      {
+        "id": "indiaspam-4a9c485c",
+        "binary_label": "legitimate",
+        "source_name": "india_spam_sms",
+        "category_label": "legitimate",
+        "synthetic": false,
+        "risk_score": 34,
+        "risk_label": "caution",
+        "primary": "none_detected"
+      },
+      {
+        "id": "indiaspam-5413c208",
+        "binary_label": "legitimate",
+        "source_name": "india_spam_sms",
+        "category_label": "legitimate",
+        "synthetic": false,
+        "risk_score": 34,
+        "risk_label": "caution",
+        "primary": "none_detected"
+      },
+      {
+        "id": "indiaspam-5551319f",
+        "binary_label": "legitimate",
+        "source_name": "india_spam_sms",
+        "category_label": "legitimate",
+        "synthetic": false,
+        "risk_score": 34,
+        "risk_label": "caution",
+        "primary": "none_detected"
+      },
+      {
+        "id": "indiaspam-70b5c3e0",
+        "binary_label": "legitimate",
+        "source_name": "india_spam_sms",
+        "category_label": "legitimate",
+        "synthetic": false,
+        "risk_score": 34,
+        "risk_label": "caution",
+        "primary": "none_detected"
+      },
+      {
+        "id": "indiaspam-8bea6230",
+        "binary_label": "legitimate",
+        "source_name": "india_spam_sms",
+        "category_label": "legitimate",
+        "synthetic": false,
+        "risk_score": 34,
+        "risk_label": "caution",
+        "primary": "none_detected"
+      },
+      {
+        "id": "indiaspam-9195261a",
+        "binary_label": "legitimate",
+        "source_name": "india_spam_sms",
+        "category_label": "legitimate",
+        "synthetic": false,
+        "risk_score": 34,
+        "risk_label": "caution",
+        "primary": "none_detected"
+      },
+      {
+        "id": "indiaspam-abff9a97",
+        "binary_label": "legitimate",
+        "source_name": "india_spam_sms",
+        "category_label": "legitimate",
+        "synthetic": false,
+        "risk_score": 60,
+        "risk_label": "suspicious",
+        "primary": "phishing"
+      },
+      {
+        "id": "indiaspam-b7df3372",
+        "binary_label": "legitimate",
+        "source_name": "india_spam_sms",
+        "category_label": "legitimate",
+        "synthetic": false,
+        "risk_score": 34,
+        "risk_label": "caution",
+        "primary": "none_detected"
+      },
+      {
+        "id": "indiaspam-be75a770",
+        "binary_label": "legitimate",
+        "source_name": "india_spam_sms",
+        "category_label": "legitimate",
+        "synthetic": false,
+        "risk_score": 34,
+        "risk_label": "caution",
+        "primary": "none_detected"
+      },
+      {
+        "id": "indiaspam-c329cabd",
+        "binary_label": "legitimate",
+        "source_name": "india_spam_sms",
+        "category_label": "legitimate",
+        "synthetic": false,
+        "risk_score": 34,
+        "risk_label": "caution",
+        "primary": "none_detected"
+      },
+      {
+        "id": "indiaspam-c9eac67f",
+        "binary_label": "legitimate",
+        "source_name": "india_spam_sms",
+        "category_label": "legitimate",
+        "synthetic": false,
+        "risk_score": 39,
+        "risk_label": "caution",
+        "primary": "phishing"
+      },
+      {
+        "id": "indiaspam-cf9e2e6a",
+        "binary_label": "legitimate",
+        "source_name": "india_spam_sms",
+        "category_label": "legitimate",
+        "synthetic": false,
+        "risk_score": 34,
+        "risk_label": "caution",
+        "primary": "none_detected"
+      },
+      {
+        "id": "indiaspam-d0b32ded",
+        "binary_label": "legitimate",
+        "source_name": "india_spam_sms",
+        "category_label": "legitimate",
+        "synthetic": false,
+        "risk_score": 34,
+        "risk_label": "caution",
+        "primary": "none_detected"
+      },
+      {
+        "id": "indiaspam-d5037485",
+        "binary_label": "legitimate",
+        "source_name": "india_spam_sms",
+        "category_label": "legitimate",
+        "synthetic": false,
+        "risk_score": 34,
+        "risk_label": "caution",
+        "primary": "none_detected"
+      },
+      {
+        "id": "indiaspam-d7105040",
+        "binary_label": "legitimate",
+        "source_name": "india_spam_sms",
+        "category_label": "legitimate",
+        "synthetic": false,
+        "risk_score": 32,
+        "risk_label": "caution",
+        "primary": "phishing"
+      },
+      {
+        "id": "indiaspam-def2629d",
+        "binary_label": "legitimate",
+        "source_name": "india_spam_sms",
+        "category_label": "legitimate",
+        "synthetic": false,
+        "risk_score": 34,
+        "risk_label": "caution",
+        "primary": "none_detected"
+      },
+      {
+        "id": "indiaspam-e85f8563",
+        "binary_label": "legitimate",
+        "source_name": "india_spam_sms",
+        "category_label": "legitimate",
+        "synthetic": false,
+        "risk_score": 34,
+        "risk_label": "caution",
+        "primary": "none_detected"
+      },
+      {
+        "id": "indiaspam-eca82c1e",
+        "binary_label": "legitimate",
+        "source_name": "india_spam_sms",
+        "category_label": "legitimate",
+        "synthetic": false,
+        "risk_score": 50,
+        "risk_label": "suspicious",
+        "primary": "phishing"
+      },
+      {
+        "id": "indiaspam-fdf825cc",
+        "binary_label": "legitimate",
+        "source_name": "india_spam_sms",
+        "category_label": "legitimate",
+        "synthetic": false,
+        "risk_score": 34,
+        "risk_label": "caution",
+        "primary": "none_detected"
+      },
+      {
+        "id": "ucisms-6eb34f2a",
+        "binary_label": "legitimate",
+        "source_name": "ucI_sms_spam",
+        "category_label": "legitimate",
+        "synthetic": false,
+        "risk_score": 50,
+        "risk_label": "suspicious",
+        "primary": "phishing"
+      }
+    ]
+  },
+  "malicious": {
+    "n": 124,
+    "risk_score_distribution": {
+      "n": 124,
+      "min": 0,
+      "max": 60,
+      "mean": 7.2581,
+      "median": 2.0,
+      "score_counts": {
+        "0": 61,
+        "2": 3,
+        "3": 24,
+        "5": 1,
+        "6": 1,
+        "8": 1,
+        "9": 11,
+        "10": 3,
+        "13": 5,
+        "15": 1,
+        "30": 1,
+        "34": 3,
+        "36": 1,
+        "38": 2,
+        "50": 1,
+        "60": 5
+      },
+      "counts": {
+        "0": 61,
+        "2": 3,
+        "3": 24,
+        "5": 1,
+        "6": 1,
+        "8": 1,
+        "9": 11,
+        "10": 3,
+        "13": 5,
+        "15": 1,
+        "30": 1,
+        "34": 3,
+        "36": 1,
+        "38": 2,
+        "50": 1,
+        "60": 5
+      },
+      "distribution": {
+        "0": 61,
+        "2": 3,
+        "3": 24,
+        "5": 1,
+        "6": 1,
+        "8": 1,
+        "9": 11,
+        "10": 3,
+        "13": 5,
+        "15": 1,
+        "30": 1,
+        "34": 3,
+        "36": 1,
+        "38": 2,
+        "50": 1,
+        "60": 5
+      },
+      "by_score": {
+        "0": 61,
+        "2": 3,
+        "3": 24,
+        "5": 1,
+        "6": 1,
+        "8": 1,
+        "9": 11,
+        "10": 3,
+        "13": 5,
+        "15": 1,
+        "30": 1,
+        "34": 3,
+        "36": 1,
+        "38": 2,
+        "50": 1,
+        "60": 5
+      },
+      "histogram_10": {
+        "00-09": 102,
+        "10-19": 9,
+        "30-39": 7,
+        "50-59": 1,
+        "60-69": 5
+      },
+      "histogram": {
+        "00-09": 102,
+        "10-19": 9,
+        "30-39": 7,
+        "50-59": 1,
+        "60-69": 5
+      }
+    }
+  },
+  "false_positive_count": 25,
+  "false_positive_rate": 0.0499
+}
