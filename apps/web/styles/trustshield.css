@@ -1,0 +1,124 @@
+/* TrustShield isolated design tokens.
+   Plain CSS. Coordinator imports this file; globals.css is not edited here.
+   System font stack only - no proprietary fonts. */
+
+:root {
+  /* Colors */
+  --ts-color-bg: #fcfcfc;
+  --ts-color-bg-elevated: #ffffff;
+  --ts-color-text: #0d0d0d;
+  --ts-color-text-muted: #8f8f8f;
+  --ts-color-accent: #3566f0;
+  --ts-color-accent-foreground: #ffffff;
+  --ts-color-error: #ba2623;
+  --ts-color-error-foreground: #ffffff;
+  --ts-color-border: rgba(0, 0, 0, 0.1);
+  --ts-color-border-strong: rgba(0, 0, 0, 0.15);
+  --ts-color-hover: #e8e8e8;
+  --ts-color-surface: #f3f3f3;
+  --ts-color-scrim: rgba(0, 0, 0, 0.35);
+  --ts-color-modal-backdrop: rgba(0, 0, 0, 0.5);
+  --ts-color-inverse-bg: #0d0d0d;
+  --ts-color-inverse-text: #fcfcfc;
+
+  /* Spacing (px) */
+  --ts-space-0: 0px;
+  --ts-space-1: 4px;
+  --ts-space-2: 6px;
+  --ts-space-3: 8px;
+  --ts-space-4: 10px;
+  --ts-space-5: 12px;
+  --ts-space-6: 14px;
+  --ts-space-7: 16px;
+  --ts-space-8: 20px;
+  --ts-space-9: 24px;
+  --ts-space-10: 36px;
+  --ts-space-11: 44px;
+  --ts-space-12: 48px;
+  --ts-space-13: 52px;
+  --ts-space-14: 61px;
+
+  /* Radii */
+  --ts-radius-none: 0px;
+  --ts-radius-xs: 4px;
+  --ts-radius-sm: 8px;
+  --ts-radius-md: 10px;
+  --ts-radius-lg: 16px;
+  --ts-radius-xl: 20px;
+  --ts-radius-2xl: 28px;
+  --ts-radius-pill: 999px;
+
+  /* Typography */
+  --ts-font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --ts-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+  --ts-font-size-xs: 12px;
+  --ts-font-size-sm: 14px;
+  --ts-font-size-base: 16px;
+  --ts-font-size-md: 17px;
+  --ts-font-size-lg: 20px;
+  --ts-font-size-xl: 24px;
+  --ts-line-height-tight: 1.17;
+  --ts-line-height-snug: 1.25;
+  --ts-line-height-normal: 1.5;
+  --ts-font-weight-normal: 400;
+  --ts-font-weight-medium: 500;
+  --ts-font-weight-semibold: 600;
+  --ts-font-weight-bold: 700;
+
+  /* Shell geometry */
+  --ts-sidebar-width: 260px;
+  --ts-content-max-width: 768px;
+  --ts-header-height: 61px;
+  --ts-composer-max-width: 768px;
+  --ts-rail-breakpoint: 800px;
+  --ts-modal-width: 448px;
+
+  /* Focus ring */
+  --ts-focus-ring-width: 2px;
+  --ts-focus-ring-color: var(--ts-color-accent);
+  --ts-focus-ring-offset: 2px;
+}
+
+/* Focus-visible ring for interactive elements. */
+:where(a, button, input, textarea, select, [tabindex]:not([tabindex="-1"])):focus-visible {
+  outline: var(--ts-focus-ring-width) solid var(--ts-focus-ring-color);
+  outline-offset: var(--ts-focus-ring-offset);
+}
+
+/* Reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Shell geometry utility classes. */
+.ts-sidebar {
+  width: var(--ts-sidebar-width);
+}
+
+.ts-content-max {
+  max-width: var(--ts-content-max-width);
+  margin-inline: auto;
+}
+
+.ts-header {
+  height: var(--ts-header-height);
+}
+
+.ts-shell-sidebar {
+  width: 260px;
+}
+
+.ts-shell-content-max {
+  max-width: 768px;
+}
+
+.ts-shell-header {
+  height: 61px;
+}

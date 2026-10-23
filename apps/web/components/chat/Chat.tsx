@@ -5,6 +5,8 @@ import Image from "next/image";
 import { authFetch } from "@/lib/authFetch";
 import { supabase } from "@/lib/supabaseClient";
 import { useSession } from "@/lib/useSession";
+import { EmptyState } from "./EmptyState";
+import { AppHeader } from "./AppHeader";
 import { RiskCard } from "./RiskCard";
 import type { ChatAnalysis, ChatResponse, Message, ResponseType } from "./types";
 
@@ -126,7 +128,7 @@ function IconButton({ label, onClick, children, className = "" }: { label: strin
       onClick={onClick}
       aria-label={label}
       title={label}
-      className={`flex h-8 w-8 items-center justify-center rounded-lg text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 focus:outline-none focus:ring-2 focus:ring-teal-500 ${className}`}
+      className={`flex h-8 w-8 items-center justify-center rounded-lg text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 focus:outline-none focus:ring-2 focus:ring-[#3566f0] ${className}`}
     >
       {children}
     </button>
@@ -199,6 +201,18 @@ export function Chat() {
   }, [messages.length, busy]);
 
   useEffect(() => () => recogRef.current?.stop(), []);
+
+  useEffect(() => {
+    if (!sidebarOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        setSidebarOpen(false);
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [sidebarOpen]);
 
   // Mirrors `chats` on every render so the identity-switch effect below can flush the *outgoing* identity's
   // latest messages even though that effect itself only reacts to `identity`, not `chats`.
@@ -660,8 +674,8 @@ export function Chat() {
     >
       {/* Sidebar: desktop always visible, mobile as a drawer */}
       <aside
-        aria-label="Chats"
-        className={`${sidebarOpen ? "fixed inset-y-0 left-0 z-30 w-72 shadow-2xl" : "hidden"} flex flex-col border-r border-zinc-200 bg-zinc-50 p-3 md:static md:flex md:w-64 md:shrink-0`}
+        aria-label="Sidebar"
+        className={`${sidebarOpen ? "fixed inset-y-0 left-0 z-30 w-[310px] shadow-2xl" : "hidden"} flex flex-col border-r border-zinc-200 bg-zinc-50 p-3 md:static md:flex md:w-[260px] md:shrink-0`}
       >
         <div className="flex items-center gap-2 px-2 pb-3 pt-1">
           <Logo className="h-7 w-7 text-xs" />
@@ -670,7 +684,7 @@ export function Chat() {
         <button
           type="button"
           onClick={newChat}
-          className="flex min-h-11 items-center gap-2 rounded-xl border border-zinc-300 px-3 py-2 text-left hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-teal-500"
+          className="flex min-h-11 items-center gap-2 rounded-xl border border-zinc-300 px-3 py-2 text-left hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#3566f0]"
         >
           <span aria-hidden="true" className="text-lg leading-none">+</span> New chat
         </button>
@@ -693,7 +707,7 @@ export function Chat() {
                         if (e.key === "Enter") commitRename();
                         if (e.key === "Escape") setRenaming(null);
                       }}
-                      className="min-w-0 flex-1 rounded-lg bg-white px-3 py-2 text-sm outline-none ring-2 ring-teal-500"
+                      className="min-w-0 flex-1 rounded-lg bg-white px-3 py-2 text-sm outline-none ring-2 ring-[#3566f0]"
                     />
                   ) : (
                     <button
@@ -701,7 +715,7 @@ export function Chat() {
                       onClick={() => switchTo(c.id)}
                       onDoubleClick={() => setRenaming({ id: c.id, title: c.title })}
                       aria-current={isActive ? "true" : undefined}
-                      className="min-w-0 flex-1 truncate rounded-xl px-3 py-2 text-left text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      className="min-w-0 flex-1 truncate rounded-xl px-3 py-2 text-left text-sm focus:outline-none focus:ring-2 focus:ring-[#3566f0]"
                     >
                       {c.title}
                     </button>
@@ -731,60 +745,24 @@ export function Chat() {
           </div>
         )}
       </aside>
-      {sidebarOpen && <button type="button" aria-label="Close chats" onClick={() => setSidebarOpen(false)} className="fixed inset-0 z-20 bg-black/60 md:hidden" />}
+      {sidebarOpen && <button type="button" aria-label="Close chats" onClick={() => setSidebarOpen(false)} className="fixed inset-0 z-20 bg-black/35 md:hidden" />}
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex items-center gap-3 border-b border-zinc-200 px-4 py-3">
-          <button type="button" onClick={() => setSidebarOpen(true)} aria-label="Open chats" className="flex h-11 w-11 items-center justify-center rounded-xl hover:bg-zinc-100 md:hidden">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" /></svg>
-          </button>
-          <h1 className="min-w-0 flex-1 truncate text-sm font-semibold text-zinc-800">{active.title}</h1>
-          <span className="hidden text-xs text-zinc-500 sm:block">Scam checker · evidence-first</span>
-          {!loading && !session && (
-            <nav aria-label="Account" className="flex shrink-0 gap-3 text-sm text-zinc-600">
-              <a href="/login" className="hover:text-zinc-900">Log in</a>
-              <a href="/signup" className="hover:text-zinc-900">Sign up</a>
-            </nav>
-          )}
-        </header>
-
-        {apiUp === false && (
-          <p role="alert" className="mx-4 mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
-            The analysis service is unreachable right now. Please try again shortly.
-          </p>
-        )}
-        {apiUp && mlUp === false && (
-          <p role="status" className="mx-4 mt-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
-            The machine-learning module is unavailable, so results use rule-based checks only.
-          </p>
-        )}
+        <AppHeader
+          title={active.title}
+          session={session}
+          loading={loading}
+          onOpenSidebar={() => setSidebarOpen(true)}
+          apiUp={apiUp}
+          mlUp={mlUp}
+        />
 
         <main className="flex-1 overflow-y-auto px-4">
           <div aria-live="polite" aria-atomic="true" className="sr-only">
             {busy ? "Working on it." : messages.length > 0 && messages[messages.length - 1].role === "assistant" ? "New response received." : ""}
           </div>
 
-          {empty && (
-            <section className="mx-auto flex max-w-2xl flex-col items-center py-16 text-center">
-              <Logo className="mb-5 h-14 w-14 text-lg" />
-              <h2 className="text-3xl font-semibold tracking-tight">What should I check for you?</h2>
-              <p className="mt-3 max-w-xl text-zinc-500">
-                Paste a message or a link, attach a screenshot or QR code, or ask how a scam works. I show the evidence behind every answer and never say something is guaranteed safe.
-              </p>
-              <div className="mt-8 grid w-full gap-2 sm:grid-cols-2">
-                {STARTERS.map((s) => (
-                  <button
-                    key={s}
-                    type="button"
-                    onClick={() => submit(s)}
-                    className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 text-left text-sm leading-6 text-zinc-800 hover:border-zinc-300 hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-teal-500"
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
-            </section>
-          )}
+          {empty && <EmptyState starters={STARTERS} onPick={(s) => submit(s)} />}
 
           <ol className="mx-auto max-w-3xl space-y-7 py-8">
             {messages.map((m, index) => (
@@ -900,7 +878,7 @@ export function Chat() {
           >
             <input ref={fileRef} type="file" accept={ALLOWED.join(",")} className="sr-only" aria-label="Attach an image" tabIndex={-1} onChange={(e) => { accept(e.target.files?.[0]); e.target.value = ""; setAttachOpen(false); }} />
             <div className="relative">
-              <button type="button" onClick={() => setAttachOpen((o) => !o)} aria-label="Attach" aria-expanded={attachOpen} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-2xl text-zinc-800 hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-teal-500">
+              <button type="button" onClick={() => setAttachOpen((o) => !o)} aria-label="Attach" aria-expanded={attachOpen} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-2xl text-zinc-800 hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#3566f0]">
                 +
               </button>
               {attachOpen && (
@@ -934,11 +912,11 @@ export function Chat() {
               className="max-h-48 min-h-11 flex-1 resize-none bg-transparent px-2 py-2.5 text-base text-zinc-900 outline-none placeholder:text-zinc-500"
             />
             {speechSupported && (
-              <button type="button" onClick={toggleListening} aria-pressed={listening} aria-label={listening ? "Stop voice input" : "Speak your message"} className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-teal-500 ${listening ? "bg-red-100" : ""}`}>
+              <button type="button" onClick={toggleListening} aria-pressed={listening} aria-label={listening ? "Stop voice input" : "Speak your message"} className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#3566f0] ${listening ? "bg-red-100" : ""}`}>
                 {listening ? "■" : "🎙"}
               </button>
             )}
-            <button type="submit" disabled={busy || (!draft.trim() && !attached)} aria-label="Send" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-zinc-100 font-semibold text-zinc-900 hover:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 disabled:opacity-40">
+            <button type="submit" disabled={busy || (!draft.trim() && !attached)} aria-label="Send" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-zinc-100 font-semibold text-zinc-900 hover:bg-white focus:outline-none focus:ring-2 focus:ring-[#3566f0] disabled:opacity-40">
               ↑
             </button>
           </form>
@@ -951,7 +929,7 @@ export function Chat() {
       {showGate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
           <div role="dialog" aria-modal="true" aria-labelledby="gate-heading" aria-describedby="gate-description" ref={gateRef} tabIndex={-1} className="relative w-full max-w-sm rounded-2xl bg-white p-6 text-center shadow-2xl focus:outline-none">
-              <button type="button" onClick={dismissGate} aria-label="Skip for now" className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full text-zinc-400 hover:bg-zinc-100 hover:text-zinc-900 focus:outline-none focus:ring-2 focus:ring-teal-500 after:absolute after:-inset-2 after:content-['']">
+              <button type="button" onClick={dismissGate} aria-label="Skip for now" className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full text-zinc-400 hover:bg-zinc-100 hover:text-zinc-900 focus:outline-none focus:ring-2 focus:ring-[#3566f0] after:absolute after:-inset-2 after:content-['']">
                 ✕
               </button>
               <Logo className="mx-auto h-10 w-10" />

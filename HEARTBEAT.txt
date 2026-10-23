@@ -1,1 +1,1 @@
-2026-10-23T01:52Z | W1 auth regression screenshots refreshing under W2; W2 UI implementation active (Hermes 32720); W3 hardening active (Hermes 33368)
+﻿2026-10-23T14:41:06Z | 2026-10-23 20:11 IST | recovery gates green: pytest 1041/7, web typecheck/build pass; lint gap issue #18; stage and push reviewed recovery

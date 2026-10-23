@@ -5,11 +5,10 @@ import { supabase } from "./supabaseClient";
 
 export function useSession() {
   const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => (supabase ? true : false));
 
   useEffect(() => {
     if (!supabase) {
-      setLoading(false);
       return;
     }
     let active = true;

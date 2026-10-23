@@ -14,3 +14,4 @@ scikit-learn
 joblib
 pytest
 httpx
+defusedxml>=0.7.1
