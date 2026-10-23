@@ -24,12 +24,12 @@ export function AppHeader({
 
   return (
     <>
-      <header className="relative flex h-[61px] items-center gap-3 border-b border-zinc-200 bg-white px-4">
+      <header className="relative flex h-[61px] items-center gap-3 border-b border-[rgba(0,0,0,0.1)] bg-[#fcfcfc] px-4">
         <button
           type="button"
           onClick={onOpenSidebar}
           aria-label="Open chats"
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-zinc-700 hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500 min-[801px]:hidden"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-zinc-700 hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#3566f0] min-[801px]:hidden"
         >
           <svg
             width="20"

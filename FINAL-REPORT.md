@@ -85,3 +85,19 @@ npm run build
 ## Production deployment (HEAD-reported, 2026-10-24 01:55 IST)
 
 HEAD reports that Shubh explicitly ordered deployment of commit `c4f783e` to `https://trustshield-ai-ecru.vercel.app`. The preview was smoke-tested and promoted to production. Post-promotion checks reported health and readiness passing (v3, Tesseract, QR), SBI scam text at 85/high_risk, `onlinesbi.sbi` and `ubi.com` at 0, DOCX/XLSX chat uploads HTTP 200, and `/`, `/login`, `/signup` HTTP 200. HEAD also reported a production-model chat response. This report records HEAD's deployment evidence; this coordinator did not run Vercel. Production contains the WIP/unaccepted W2 UI plus W3/W4 work; W5/W6 are not part of the web deployment.
+
+## Two-hour run (2026-10-24 02:40-04:15 IST)
+
+### Verified work
+
+- W4 short-domain regression milestone `119feb3` was committed and pushed to `finals-48h`. The fixture includes five sourced legitimate short-domain references. PNB's official current web domain evidence does not establish that `pnb.co.in` is an official web destination, so its existing score 34 / `domain_mismatch` was not changed. Issue #4 remains open for the broader malicious-link acceptance set.
+- W2 local TrustShield chat layout changed in `apps/web/components/chat/Chat.tsx`, `AppHeader.tsx`, and `EmptyState.tsx`. The account-keyed workspace hydrates and persists per-identity history; the welcome gate uses `useSyncExternalStore`; no `eslint-disable` was added. The title, starter cards, and composer have exactly aligned DOM centers at 390x844, 834x1112, 1280x800, 1440x900, 1536x769, and 1920x1080. See the local screenshots under `docs/finals/evidence/w2/` and `UI_SPEC.md`.
+- W2 `npm run lint`, `npx tsc --noEmit`, and `npm run build` passed. Lighthouse 13.5.0 on the optimized local server scored 94 Performance and 100 Accessibility. Page-load CLS was 0.065; streaming CLS under a real model reply was not measured.
+- The local UI opened `/`, `/login`, and `/signup`; the login-gate skip and mobile drawer worked; an app image displayed its attachment preview; the scam starter rendered a risk card at 57/100. A free-text chat request returned the configured model-unavailable message, not a streamed model response.
+- Full repository suite: 1280 passed, 7 skipped, 6 warnings in 246.01s on 2026-10-24. No Python source was modified in W2.
+
+### Not accepted / remaining
+
+- The current public ChatGPT reference returned Cloudflare HTTP 403 through the REA attempt. No current-live comparison, 1:1 parity, or pixel-diff overlay is claimed. Existing measured captures were used; the UI remains a partial TrustShield adaptation.
+- Model streaming and streaming CLS, real-account sign-in/out and per-identity history isolation, non-image upload analysis, Lighthouse/CLS acceptance on a production deployment, and full keyboard/action coverage remain unverified. Issues #2, #3, #4, and #18 remain open.
+- No production action or Vercel command was run. Android and Chrome extension were excluded as ordered. HEAD deploy window starts after the Codex freeze; this report makes no deployment claim for this run.

@@ -1,5 +1,26 @@
 # W2 Discovery — REPORT
 
+## Follow-up implementation update (2026-10-24)
+
+- REA was attempted first through the configured Hermes MCP session, but the current public ChatGPT page returned Cloudflare HTTP 403 before inspection. This update uses the existing measured `UI_SPEC.md` and sanitized reference captures. It does not claim current-live 1:1 parity or add new reference measurements.
+- Tracked TrustShield changes: `apps/web/components/chat/Chat.tsx`, `AppHeader.tsx`, `EmptyState.tsx`, plus the implementation note in `docs/finals/UI_SPEC.md`. The keyed identity workspace restores per-account history on initialization and flushes the last committed bucket on unmount. Welcome-gate visibility uses `useSyncExternalStore`; no `eslint-disable` was added. Sidebar/new-chat, composer, empty state, message spacing, and mobile drawer geometry/style were adjusted. Auth, scan, chat, and image-upload handlers were retained; login/signup pages were not changed.
+- Local Playwright DOM measurement: the main column, empty-state title, starter-card row, and composer centers differ by 0 px at 390x844, 834x1112, 1280x800, 1440x900, 1536x769, and 1920x1080. Evidence screenshots: `docs/finals/evidence/w2/local-app-390x844.png`, `local-app-834x1112.png`, `local-app-1440x900.png`, `local-app-1280x800.png`, `local-app-1536x769.png`, `local-app-1920x1080.png`, and `local-app-drawer-390.png`.
+- Local browser checks: `/`, `/login`, and `/signup` loaded; welcome-gate skip dismissed the dialog; the mobile drawer opened; a TrustShield image showed an attachment preview; the starter scam scan returned a risk card with score 57. A free-text chat request displayed the local-model-unavailable message instead of a streamed model reply. This is not a model-backed pass.
+- `apps/web` checks: `npm run lint`, `npx tsc --noEmit`, and `npm run build` exited 0. Lighthouse 13.5.0 on optimized local `next start` scored Performance 94 and Accessibility 100; page-load CLS was 0.065, while streaming CLS remains unmeasured. See `docs/finals/evidence/w2/lighthouse-local-2026-10-24.md`.
+- Full Python suite: `.venv\Scripts\python.exe -m pytest -q` passed 1280 tests, skipped 7, and emitted 6 warnings in 246.01s. No Python source changed in the W2 patch.
+- Remaining acceptance gaps: current reference capture/comparison and pixel-diff overlays are unavailable due the 403; the streaming CLS threshold remains unmeasured; live model streaming, authenticated sign-in/out, history isolation between real identities, non-image upload analysis, and full action/keyboard coverage remain unverified. Keep GitHub issues #2, #3, and #18 open.
+
+---
+
+#### Original W2 discovery record (below; not a report of this follow-up)
+
+The original discovery work encountered different conditions at its recorded date. Its methodology/findings below document that past discovery lane, not fresh REA activity from 2026-10-24.
+
+---
+
+#### Original content
+
+
 Package root: `C:\Users\shubh\trustshield-ai\work\finals\w2-discovery`
 Branch: finals-48h. No application source changed. Interim masked evidence was pushed at bdf2a7b; this final discovery spec/report and the remaining audited layout-only captures are now ready for commit.
 Deliverables: `docs/finals/UI_SPEC.md`, `docs/finals/evidence/w2/`, this `REPORT.md`.

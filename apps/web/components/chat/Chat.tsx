@@ -43,7 +43,26 @@ function newConversation(): Conversation {
 const LEGACY_STORE_KEY = "trustshield.chats.v1";
 const ANON_IDENTITY = "anon";
 const WELCOME_DISMISSED_KEY = "trustshield.welcome_dismissed.v1";
+const WELCOME_GATE_EVENT = "trustshield:welcome-gate";
 const storeKeyFor = (identity: string) => `trustshield.chats.v1:${identity}`;
+
+function subscribeToWelcomeGate(onChange: () => void) {
+  window.addEventListener("storage", onChange);
+  window.addEventListener(WELCOME_GATE_EVENT, onChange);
+  return () => {
+    window.removeEventListener("storage", onChange);
+    window.removeEventListener(WELCOME_GATE_EVENT, onChange);
+  };
+}
+
+function getWelcomeGateSnapshot(signedInOrLoading: boolean) {
+  if (signedInOrLoading) return false;
+  try {
+    return window.localStorage.getItem(WELCOME_DISMISSED_KEY) !== "1";
+  } catch {
+    return true;
+  }
+}
 
 // Anonymous chats from before this was identity-scoped (or from an earlier build that persisted them) must never
 // resurface: wipe every local chat key that isn't a specific signed-in account's.
@@ -137,8 +156,21 @@ function IconButton({ label, onClick, children, className = "" }: { label: strin
 
 export function Chat() {
   const { session, loading } = useSession();
-  const [chats, setChats] = useState<Conversation[]>(() => [newConversation()]);
-  const [activeId, setActiveId] = useState<string>(() => "");
+  const identity = loading ? null : (session?.user.id ?? ANON_IDENTITY);
+  return <ChatWorkspace key={identity ?? "session-loading"} identity={identity} session={session} loading={loading} />;
+}
+
+function ChatWorkspace({ identity, session, loading }: {
+  identity: string | null;
+  session: ReturnType<typeof useSession>["session"];
+  loading: boolean;
+}) {
+  const [chats, setChats] = useState<Conversation[]>(() => {
+    if (identity === null || typeof window === "undefined") return [newConversation()];
+    return loadChats(identity) ?? [newConversation()];
+  });
+  const [activeId, setActiveId] = useState<string>(() => chats[0].id);
+  const identityReady = identity !== null;
   const [draft, setDraft] = useState("");
   const [attached, setAttached] = useState<{ file: File; url: string } | null>(null);
   // Conversations whose reply is still streaming. Each has its own controller, so switching chats never cancels a reply.
@@ -165,38 +197,16 @@ export function Chat() {
   const fileRef = useRef<HTMLInputElement>(null);
   const recogRef = useRef<SpeechRecognitionLike | null>(null);
   const chatsRef = useRef(chats);
-  const prevIdentityRef = useRef<string | null>(null);
-  const skipNextSaveRef = useRef(true);
-  const [showGate, setShowGate] = useState(false);
-  // Track the previous loading/session so the gate visibility is adjusted during render (React's
-  // recommended "adjust state when a prop changes" pattern) instead of in an effect, which avoids
-  // the react-hooks/set-state-in-effect cascading-render lint error.
-  const [prevLoading, setPrevLoading] = useState(loading);
-  const [prevSession, setPrevSession] = useState(session);
-  if (prevLoading !== loading || prevSession !== session) {
-    setPrevLoading(loading);
-    setPrevSession(session);
-    if (loading || session) {
-      setShowGate(false);
-    } else {
-      if (typeof window === "undefined") {
-        setShowGate(false);
-      } else {
-        try {
-          setShowGate(window.localStorage.getItem(WELCOME_DISMISSED_KEY) !== "1");
-        } catch {
-          setShowGate(true);
-        }
-      }
-    }
-  }
+  const showGate = useSyncExternalStore(
+    subscribeToWelcomeGate,
+    () => getWelcomeGateSnapshot(loading || Boolean(session)),
+    () => false,
+  );
   const gateRef = useRef<HTMLDivElement>(null);
   const prevFocusRef = useRef<HTMLElement | null>(null);
   const sidebarRef = useRef<HTMLElement | null>(null);
   const sidebarPrevFocusRef = useRef<HTMLElement | null>(null);
 
-  // Whose chats are currently loaded: a stable per-account bucket, or "anon" while signed out.
-  const identity = loading ? null : (session?.user.id ?? "anon");
 
   const active = chats.find((c) => c.id === activeId) ?? chats[0];
   const busy = streaming.has(active.id);
@@ -280,44 +290,25 @@ export function Chat() {
     }
   }, [sidebarOpen]);
 
-  // Mirrors `chats` on every render so the identity-switch effect below can flush the *outgoing* identity's
-  // latest messages even though that effect itself only reacts to `identity`, not `chats`.
   useLayoutEffect(() => {
     chatsRef.current = chats;
-  });
+  }, [chats]);
 
-  // Restore the signed-in (or anonymous) identity's saved chats whenever that identity changes — on mount, after
-  // login, and after logout. Flushes the previous identity's chats synchronously first, so a message sent just
-  // before logging out isn't lost to the save effect's debounce getting cancelled by the identity switch.
-  useLayoutEffect(() => {
-    if (identity === null) return; // session still loading: wait rather than briefly flashing anon history
-    if (prevIdentityRef.current !== null && prevIdentityRef.current !== identity) {
-      saveChats(prevIdentityRef.current, chatsRef.current);
-    }
-    purgeAnonStorage(); // one-time cleanup of chats a pre-fix build (or this app's own earlier logic) left behind
-    const stored = loadChats(identity);
-    skipNextSaveRef.current = true;
-    if (stored) {
-      setChats(stored);
-      setActiveId(stored[0].id);
-    } else {
-      const c = newConversation();
-      setChats([c]);
-      setActiveId(c.id);
-    }
-    prevIdentityRef.current = identity;
+  useEffect(() => {
+    if (!identity) return;
+    purgeAnonStorage();
   }, [identity]);
 
   // Save in the background, after the chat has been idle briefly: writing the whole history on every streamed token is slow.
   useEffect(() => {
     if (identity === null) return;
-    if (skipNextSaveRef.current) {
-      skipNextSaveRef.current = false; // this `chats` value just came from hydration, not a user action
-      return;
-    }
     const t = window.setTimeout(() => saveChats(identity, chats), 400);
     return () => window.clearTimeout(t);
   }, [chats, identity]);
+
+  useEffect(() => () => {
+    if (identity) saveChats(identity, chatsRef.current);
+  }, [identity]);
 
   // The sign-in gate visibility is now adjusted during render (see above), so no effect is needed here.
 
@@ -380,12 +371,12 @@ export function Chat() {
   }, [showGate]);
 
   function dismissGate() {
-    setShowGate(false);
     try {
       window.localStorage.setItem(WELCOME_DISMISSED_KEY, "1");
     } catch {
       // storage blocked: the gate just won't persist across a refresh
     }
+    window.dispatchEvent(new Event(WELCOME_GATE_EVENT));
   }
 
   function logOut() {
@@ -394,6 +385,7 @@ export function Chat() {
     } catch {
       // storage blocked: harmless, the gate simply won't re-show
     }
+    window.dispatchEvent(new Event(WELCOME_GATE_EVENT));
     void supabase?.auth.signOut();
   }
 
@@ -732,27 +724,28 @@ export function Chat() {
         ref={sidebarRef}
         tabIndex={-1}
         aria-label="Sidebar"
-        className={`${sidebarOpen ? "fixed inset-y-0 left-0 z-30 w-[310px] shadow-2xl" : "hidden"} flex flex-col border-r border-[rgba(255,255,255,0.15)] bg-[rgb(33,33,33)] p-3 min-[801px]:static min-[801px]:flex min-[801px]:w-[260px] min-[801px]:shrink-0 min-[801px]:border-[rgba(0,0,0,0.1)] min-[801px]:bg-[rgb(252,252,252)] min-[801px]:shadow-none`}
+        inert={!identityReady}
+        className={`${sidebarOpen ? "fixed inset-y-0 left-0 z-30 w-[310px] shadow-2xl" : "hidden"} flex flex-col border-r border-[rgba(0,0,0,0.1)] bg-[rgb(252,252,252)] p-3 text-zinc-900 min-[801px]:static min-[801px]:flex min-[801px]:w-[260px] min-[801px]:shrink-0 min-[801px]:shadow-none`}
       >
-        <div className="flex items-center gap-2 px-2 pb-3 pt-1">
+        <div className="flex h-[52px] items-center gap-2 px-2 pb-1 pt-0">
           <Logo className="h-7 w-7 text-xs" />
           <span className="font-semibold tracking-tight">TrustShield</span>
         </div>
         <button
           type="button"
           onClick={newChat}
-          className="flex min-h-11 items-center gap-2 rounded-xl border border-zinc-300 px-3 py-2 text-left hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#3566f0]"
+          className="flex min-h-9 items-center gap-2 rounded-[10px] border border-zinc-300 bg-white px-2.5 py-2 text-left text-sm hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#3566f0]"
         >
           <span aria-hidden="true" className="text-lg leading-none">+</span> New chat
         </button>
-        <nav className="mt-4 flex-1 overflow-y-auto" aria-label="Previous chats">
+        <nav className="mt-3 flex-1 overflow-y-auto" aria-label="Previous chats">
           <p className="px-2 pb-2 text-xs font-medium uppercase tracking-wider text-zinc-500">Chats</p>
           <ul className="space-y-0.5">
-            {chats.map((c) => {
+            {identityReady && chats.map((c) => {
               const isActive = c.id === active.id;
               const isRenaming = renaming?.id === c.id;
               return (
-                <li key={c.id} className={`group flex items-center gap-1 rounded-xl pr-1 ${isActive ? "bg-zinc-200" : "hover:bg-zinc-100"}`}>
+                <li key={c.id} className={`group flex items-center gap-1 rounded-[10px] pr-1 ${isActive ? "bg-zinc-200 max-[800px]:bg-white/10" : "hover:bg-zinc-100 max-[800px]:hover:bg-white/10"}`}>
                   {isRenaming ? (
                     <input
                       autoFocus
@@ -772,7 +765,7 @@ export function Chat() {
                       onClick={() => switchTo(c.id)}
                       onDoubleClick={() => setRenaming({ id: c.id, title: c.title })}
                       aria-current={isActive ? "true" : undefined}
-                      className="min-w-0 flex-1 truncate rounded-xl px-3 py-2 text-left text-sm focus:outline-none focus:ring-2 focus:ring-[#3566f0]"
+                      className="min-h-9 min-w-0 flex-1 truncate rounded-[10px] px-2.5 py-2 text-left text-sm focus:outline-none focus:ring-2 focus:ring-[#3566f0]"
                     >
                       {c.title}
                     </button>
@@ -792,21 +785,21 @@ export function Chat() {
             })}
           </ul>
         </nav>
-        <p className="px-2 pt-3 text-xs leading-5 text-zinc-500">
+        <p className="px-2 pt-3 text-xs leading-5 text-zinc-500 max-[800px]:text-zinc-400">
           {session ? "Chats are saved to your account, so they stay after a refresh." : "Sign in to save your chats. Without an account, this history clears when you refresh or log out."}
         </p>
         {session && (
           <div className="mt-2 flex items-center justify-between gap-2 rounded-lg px-2 py-2 text-xs text-zinc-500">
             <span className="min-w-0 truncate">{session.user.email}</span>
-            <button type="button" onClick={logOut} className="shrink-0 hover:text-zinc-900">Log out</button>
+            <button type="button" onClick={logOut} className="shrink-0 hover:text-zinc-900 max-[800px]:text-zinc-100 max-[800px]:hover:text-white">Log out</button>
           </div>
         )}
       </aside>
-      {sidebarOpen && <button type="button" aria-label="Close chats" onClick={() => setSidebarOpen(false)} className="fixed inset-0 z-20 bg-black/35 min-[801px]:hidden" />}
+      {identityReady && sidebarOpen && <button type="button" aria-label="Close chats" onClick={() => setSidebarOpen(false)} className="fixed inset-0 z-20 bg-black/35 min-[801px]:hidden" />}
 
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col" inert={!identityReady}>
         <AppHeader
-          title={active.title}
+          title={identityReady ? active.title : "Your chats"}
           session={session}
           loading={loading}
           onOpenSidebar={() => setSidebarOpen(true)}
@@ -814,14 +807,15 @@ export function Chat() {
           mlUp={mlUp}
         />
 
-        <main className="flex-1 overflow-y-auto px-4">
+        <main className="flex-1 overflow-y-auto bg-[#fcfcfc] px-4" aria-busy={!identityReady}>
           <div aria-live="polite" aria-atomic="true" className="sr-only">
             {busy ? "Working on it." : messages.length > 0 && messages[messages.length - 1].role === "assistant" ? "New response received." : ""}
           </div>
 
-          {empty && <EmptyState starters={STARTERS} onPick={(s) => submit(s)} />}
+          {!identityReady && <p role="status" className="mx-auto mt-12 max-w-3xl text-center text-sm text-zinc-500">Loading your chats…</p>}
+          {identityReady && empty && <EmptyState starters={STARTERS} onPick={(s) => submit(s)} />}
 
-          <ol aria-label="Conversation" className="mx-auto max-w-3xl space-y-7 py-8">
+          {identityReady && <ol aria-label="Conversation" className="mx-auto max-w-3xl space-y-7 py-8">
             {messages.map((m, index) => (
               <li key={m.id} className={m.role === "user" ? "flex justify-end" : "flex gap-3"}>
                 {m.role === "user" ? (
@@ -910,11 +904,11 @@ export function Chat() {
                 <button type="button" onClick={() => controllersRef.current.get(active.id)?.abort()} className="min-h-11 rounded-lg px-2 py-1 font-medium text-zinc-800 underline hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#3566f0]">Stop</button>
               </li>
             )}
-          </ol>
+          </ol>}
           <div ref={endRef} />
         </main>
 
-        <div className={`${empty ? "absolute left-0 right-0 mx-auto top-[calc(50%-18px)] min-[801px]:left-[260px] min-[801px]:top-[calc(50%-38px)] min-[801px]:w-[calc(100%-260px)]" : "mx-auto w-full"} w-full max-w-[800px] px-3 pb-3 pt-2 min-[1024px]:px-4`}>
+        <div className={`${empty ? "absolute left-0 right-0 mx-auto top-[calc(50%-18px)] min-[801px]:left-[260px] min-[801px]:right-0 min-[801px]:w-[calc(100%-260px)] min-[801px]:top-[calc(50%-38px)]" : "mx-auto w-full"} w-full max-w-[800px] px-3 pb-3 pt-2 min-[1024px]:px-4`}>
           {dragging && <p className="mb-2 rounded-2xl border-2 border-dashed border-teal-500 p-3 text-center text-sm">Drop an image to attach it</p>}
           {notice && <p role="alert" className="mb-2 text-sm font-medium text-red-600">{notice}</p>}
           {attached && (
@@ -931,11 +925,11 @@ export function Chat() {
               e.preventDefault();
               submit();
             }}
-            className="relative flex items-end gap-2 rounded-3xl border border-zinc-200 bg-zinc-50 px-2 py-2 shadow-lg shadow-black/20 focus-within:border-zinc-300"
+            className="group relative flex items-center gap-0 rounded-[28px] border border-[rgba(0,0,0,0.1)] bg-white px-1.5 py-[3px] shadow-[0_0_0_1px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.04),0_4px_40px_8px_rgba(0,0,0,0.03)] focus-within:border-zinc-300"
           >
             <input ref={fileRef} type="file" accept={ALLOWED.join(",")} className="sr-only" aria-label="Attach an image" tabIndex={-1} onChange={(e) => { accept(e.target.files?.[0]); e.target.value = ""; setAttachOpen(false); }} />
             <div className="relative">
-              <button type="button" onClick={() => setAttachOpen((o) => !o)} aria-label="Attach" aria-expanded={attachOpen} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-2xl text-zinc-800 hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#3566f0]">
+              <button type="button" onClick={() => setAttachOpen((o) => !o)} aria-label="Attach" aria-expanded={attachOpen} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-2xl text-zinc-800 hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#3566f0] min-[801px]:h-11 min-[801px]:w-11">
                 +
               </button>
               {attachOpen && (
@@ -966,15 +960,15 @@ export function Chat() {
               rows={1}
               aria-label="Message"
               placeholder={lastAnalysis ? "Ask a follow-up, or paste something new to check" : "Message TrustShield, or paste something to check"}
-              className="max-h-48 min-h-11 flex-1 resize-none bg-transparent px-2 py-2.5 text-base text-zinc-900 outline-none placeholder:text-zinc-500"
+              className="max-h-48 min-h-6 flex-1 resize-none bg-transparent px-1.5 py-0 text-base leading-6 text-zinc-900 outline-none placeholder:text-zinc-500 min-[801px]:text-[17px]"
             />
             {speechSupported && (
-              <button type="button" onClick={toggleListening} aria-pressed={listening} aria-label={listening ? "Stop voice input" : "Speak your message"} className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#3566f0] ${listening ? "bg-red-100" : ""}`}>
+              <button type="button" onClick={toggleListening} aria-pressed={listening} aria-label={listening ? "Stop voice input" : "Speak your message"} className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#3566f0] min-[801px]:h-11 min-[801px]:w-11 ${listening ? "bg-red-100" : ""}`}>
                 {listening ? "■" : "🎙"}
               </button>
             )}
-            <button type="submit" disabled={busy || (!draft.trim() && !attached)} aria-label="Send" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-zinc-100 font-semibold text-zinc-900 hover:bg-white focus:outline-none focus:ring-2 focus:ring-[#3566f0] disabled:opacity-40">
-              ↑
+            <button type="submit" disabled={busy || (!draft.trim() && !attached)} aria-label="Send" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-zinc-900 hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#3566f0] disabled:opacity-50 min-[801px]:h-11 min-[801px]:w-11">
+              <span aria-hidden="true" className="flex h-8 w-8 items-center justify-center rounded-full bg-[#3566f0] text-lg font-semibold text-white">↑</span>
             </button>
           </form>
           <p className="mt-2 text-center text-xs text-zinc-500">

@@ -1,5 +1,23 @@
 # TrustShield Chat Experience — UI Specification (W2 Discovery)
 
+## Implementation follow-up (2026-10-24)
+
+The app implementation now uses the existing measured patterns as guidance for its own TrustShield interface: 260 px desktop sidebar, 61 px header, centered 768 px content/message column, 310 px mobile drawer at the 390 px reference viewport, and a white 28 px-radius composer with measured-style padding and subtle border/shadow. The empty-state headline, starter cards, and composer share the main column's center. Local Playwright geometry checks measured zero-pixel center difference at widths 390, 834, 1280, 1440, 1536, and 1920 px; the desktop widths include the 1536 px head defect viewport. The drawer remains light on mobile. These are implementation changes, not new reference observations; they do not establish 1:1 parity.
+
+The current live REA was attempted first for this follow-up but returned Cloudflare HTTP 403 before page inspection. No new REA measurements, screenshots, or current-live parity claims were added. This follow-up relies only on the existing sanitized captures and the previously measured values below. Branding, copy and assets remain TrustShield-owned.
+
+### Updated TrustShield-owned component mapping
+
+- `apps/web/components/chat/Chat.tsx`: identity-keyed chat workspace hydrates account history in its state initializer and persists the latest committed bucket on unmount; a `useSyncExternalStore` gate state preserves the welcome dialog without effect-driven state updates. Shell sidebar geometry/contrast, message column spacing, composer geometry and responsive drawer received local layout changes. History remains account-scoped; anonymous chats are not persisted.
+- `apps/web/components/chat/AppHeader.tsx`: header background/border and mobile focus accent align with the existing light-theme layout tokens.
+- `apps/web/components/chat/EmptyState.tsx`: heading, TrustShield-owned helper copy and prompt starters are placed independently of the composer. Content and labels are not copied from the reference.
+- Authentication pages were not changed in this follow-up.
+
+The live reference returned Cloudflare HTTP 403, so current-reference comparison, pixel-diff overlays, CLS measurement, Lighthouse scores, sign-in/out with a real account, and history isolation under authenticated identities remain unverified. Sanitized local TrustShield screenshots are tracked under `docs/finals/evidence/w2/local-app-*`; additional local working captures and geometry checks are under `work/finals/two-hour-w2/local-after/`. The tracked reference captures remain layout-only and contain no reference copy or logo.
+
+---
+
+
 Source: public reference site web UI (`https://chatgpt.com/`), logged-out surface, observed 2026-10-23.
 Method: REA MCP (`list_browser_targets`, `inspect_web_page`, `capture_web_screenshot`) + Playwright 1.53.0 / Chromium 153.0.8010.12 over a throwaway profile (no cookies, no login, no personal data). All measurements in CSS px at device scale factor 1, light color scheme, en-US, UTC.
 Parent synthesis of `observations/01..09`. Child 9 cross-check corroborated the core geometry; residual conflicts are listed in section 17.
