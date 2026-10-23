@@ -29,3 +29,5 @@
 - 2026-10-23T00:39:20Z — W1 remains active past its 40-minute target (CPU changed, run.log empty, all nine child reports present; no package summary). W2 has eight observation scopes (17 child scopes observed total). Raw W2 captures show reference branding/copy; review note added and repository promotion is blocked pending masking.
 
 - 2026-10-23T00:40:17Z — confirmed w1-run.json records three consecutive worker matrix runs (each 92/0/0) and package REPORT.md exists. Independent reproduction/review remains mandatory; W1 process is still active past target.
+
+- 2026-10-23T00:41:53Z — removed 12 unmasked W2 PNG copies from repository evidence path after visual check; working originals remain in ignored package. W2 must regenerate/mask before evidence acceptance.

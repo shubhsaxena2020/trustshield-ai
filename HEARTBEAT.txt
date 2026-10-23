@@ -1,1 +1,1 @@
-2026-10-23T00:40:17Z | W1-auth (3 worker runs 92/0/0; summary present, independent verification pending), W2-discovery (8 observation scopes; branding mask blocker)
+2026-10-23T00:41:53Z | W1-auth (3 worker runs 92/0/0; independent verification pending), W2-discovery (8 scopes active; raw screenshots quarantined from repository path)

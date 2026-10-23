@@ -17,3 +17,4 @@
 > HEAD UPDATE 05:46: rate limit removed upstream. Gate restarted as PID 4124 at 120 req/min; full 2x9 fan-out is allowed. See docs/finals/HEAD_ORDERS.md section 4.
 
 - W2 raw working captures still show reference branding/copy; they remain in ignored package paths and must be masked/regenerated before promotion. See work/finals/w2-discovery/ORCHESTRATOR_REVIEW.md.
+- Removed 12 unmasked W2 screenshot copies from docs/finals/evidence/w2/ after visual check; originals remain only under ignored work/finals/w2-discovery/. Do not promote until masking is visually verified.
