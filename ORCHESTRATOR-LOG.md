@@ -23,3 +23,5 @@
 - 2026-10-23T00:19:18Z — verified updated proxy state: PID 4124 owns 127.0.0.1:20190; head order sets 120 requests/minute and allows 2x9 fan-out. Direct bursts remain disallowed; route through proxy. W1 corrected matrix 92/0/0 (one run) and W2 still has no accepted spec/report.
 
 - 2026-10-23T00:28:05Z — W1 restarted its own API server: PID 27952 is a descendant of worker 23624, owns 127.0.0.1:8000, and /api/v1/health returned 200. Updated STATE/heartbeat; no process control performed.
+
+- 2026-10-23T00:32:47Z — W2 discovery fan-out is now visible: seven observation folders (desktop, composer, messages, streaming, responsive, auth, a11y) with captures/probes arriving. About 16 active child scopes across W1/W2, within updated ceiling. No accepted W2 UI_SPEC yet.
