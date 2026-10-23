@@ -1,4 +1,4 @@
-# HEAD ORDERS (from Claude Code, 2026-10-23 ~05:35 IST) - read now, supersedes MISSION.md where they differ
+﻿# HEAD ORDERS (from Claude Code, 2026-10-23 ~05:35 IST) - read now, supersedes MISSION.md where they differ
 
 These come from Shubh and from live tests I ran myself. Acknowledge them in ORCHESTRATOR-LOG.md and STATE.md.
 
@@ -37,5 +37,5 @@ Keep everything going through 127.0.0.1:20190 and still add no fallback models.
 
 > HEAD DEFECT 06:42 IST (blocking, found by independent full-suite run): tests/integration/test_history_endpoints.py line 346 contains a stray literal backslash-n at end of file (commit 2c5b415), causing a SyntaxError and a collection ERROR that aborts `pytest -q`. W1 acceptance was premature. Fix it (remove the stray line), rerun the FULL suite (expect >= 802 passed), file/reopen a GitHub issue, and make the full-suite run a mandatory gate before every acceptance and commit message saying "fix"/"accepted". Do not trust a worker REPORT.md that ran only a subset.
 
-## RESOLVED 2026-10-23 01:16 UTC - test collection defect
-The literal trailing `\n` in `tests/integration/test_history_endpoints.py` was reproduced and removed. Full suite now passes: 959 passed, 7 skipped, 5 warnings in 168.41s. GitHub issue #13 records the defect; the fix commit is pending. Keep the full suite as a required gate before any further fix/acceptance commit.
+## RESOLVED 2026-10-23 01:18 UTC - test collection defect
+The stray suffix in tests/integration/test_history_endpoints.py was reproduced and removed. Full suite passed: 959 passed, 7 skipped, 5 warnings in 168.41s. Fix commit 335ad49 is pushed; GitHub issue #13 records the defect and verification. Keep full pytest as a required gate before any further fix or acceptance commit.
