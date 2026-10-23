@@ -34,6 +34,17 @@ Primary validation input: `datasets/processed/trustshield-text-v3/validation.jso
   - `agy-gen-fraud-v1` (synthetic): 79 rows
   - `agy-gen-legit-v1` (synthetic): 77 rows
 
+Deterministic-only before/after artifacts, with reputation and ML disabled:
+
+| Code snapshot | Rows (legit / fraud) | Threshold | Legitimate score ≥16 | ≥25 | ≥50 | ≥70 | Malicious median score |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Pre-W4 committed baseline `4a64c2f` | 625 (501 / 124) | 0.16 | 25 / 501 (4.99%) | 25 | 4 | 0 | 2 |
+| Fixed W4 `14f6e81` | 625 (501 / 124) | 0.16 | 25 / 501 (4.99%) | 25 | 4 | 0 | 2 |
+
+These unchanged SMS-text validation metrics show no measurable change on this URL-poor split; they are not an accuracy gain. Artifacts: `models/evaluation/w4/validation_measurement_baseline_4a64c2f.json` and `models/evaluation/w4/validation_measurement_after_issue20_fix.json`. Both were produced by `scripts/w4_validation_measurement.py`, which forces deterministic-only mode and reads only the named v3 validation file.
+
+The 60 real-domain URL set was also run through baseline code `4a64c2f` and fixed code `14f6e81` with reputation lookups stubbed. Each snapshot scored all 60 unique real URLs at 0. In the baseline, `sbl.co.in/login`, `irctc-refund.xyz/login`, `sbii.co.in/login`, and `192.0.2.8/login` scored 0, 3, 50, and 50. In the fixed snapshot they scored 50, 60, 50, and 70 respectively. This compares the named URL misses and legitimate-domain false-positive guards; it is not a phishing-dataset recall estimate.
+
 Per-source licence / basis:
 
 | Source | Records in v3 validation | Licence / basis | Synthetic? |
@@ -77,3 +88,4 @@ Official-domain / rule sources used for the URL rules (no external browsing in t
 - Official-domain facts for SBI/IRCTC are taken from documented checks in the orchestrator log and local constants, not re-verified by browsing in this window.
 - The illustrative official-style domains in the synthetic regression fixture (`rbi.org.in`, `india.gov.in`, `iitb.ac.in`, `du.ac.in`) are explicitly marked "not verified as real". Do not count them toward the 60 real URLs; investigate any score they receive separately.
 - The 30 three-letter public-domain references were not live-verified in this run; they are regression inputs only and must not be presented as an externally audited allowlist.
+- No model candidate was trained, so candidate-only leave-one-source-out and calibration checks were not applicable. A 60-real-phishing-link set across the requested malicious categories was not independently sourced; W4 issue #4 remains open until that acceptance gap is addressed.
