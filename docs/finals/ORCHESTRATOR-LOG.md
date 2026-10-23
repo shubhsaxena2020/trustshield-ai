@@ -155,3 +155,8 @@ Synthetic static probes: sbl.co.in/login yields only informational credential-pa
 - Acknowledged temporary Hermes model order in section 6: use cc/claude-sonnet-5 via 9Router config default, with no --provider/-m, no fallback, and relaunch only when a lane session is needed. All earlier Hermes sessions are treated as dead.
 - Full suite on the current pre-commit source snapshot: .venv\Scripts\python -m pytest -q — 1278 passed, 7 skipped, 6 warnings in 145.10s. No source files changed during the run.
 - W2 is frozen and not accepted. W4 current static.py widening is excluded from commit. Workstream continuation and each handoff must reread HEAD_ORDERS.md; next scheduled lanes remain W5, W6, then W7, with no production/PR/merge changes and no spent data access.
+
+## 2026-10-23 22:55 IST — W2 WIP handoff commit
+
+- Committed and pushed the frozen W2 UI/test/evidence snapshot as eff9e43 (WIP: freeze unaccepted W2 web UI state) on inals-48h, after the full suite passed 1278/7/6. W2 remains unaccepted; #18 and the documented keyboard/streaming/regression gaps remain open.
+- Next: commit the separately reviewed W4 snapshot while excluding services/analysis/url_analysis/static.py and the inaccurate W4 inventory draft. The subsequent W4 fix must add at least 20 real legitimate three-letter domains and the issue #20 four URLs, then remove duplicate strategy floor code before W4 can be considered.

@@ -204,3 +204,8 @@
 - Full pytest on the current source snapshot passed: 1278 passed, 7 skipped, 6 warnings in 145.10s. Preparing separate W2 WIP and W4 verified commits. The defective three-letter static.py hunk is excluded; issue #20 remains blocking until regression fixture covers at least 20 real legitimate three-letter domains plus the four required URLs.
 - W2 remains NOT accepted (issue #18 and behavioral/performance gaps remain). W4 remains NOT accepted. W5/W6/W7 and final report remain outstanding. Hard finish: 2026-10-24 01:55 IST.
 - Never stage *.orig, logs, .env, or generated pentest uns/; don't read spent data, change production, open PR/merge, or alter the model/threshold.
+
+## W2 WIP commit (2026-10-23 22:55 IST)
+
+- W2 snapshot committed and pushed as eff9e43; WIP only, acceptance remains open. #18 and behavior/performance gaps remain.
+- The shared full-suite result for this commit boundary is 1278 passed, 7 skipped, 6 warnings in 145.10s. W4 safe snapshot is next; static.py's 3-letter broadening and the inaccurate inventory draft are excluded.
