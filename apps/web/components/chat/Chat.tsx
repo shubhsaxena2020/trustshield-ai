@@ -168,8 +168,32 @@ export function Chat() {
   const prevIdentityRef = useRef<string | null>(null);
   const skipNextSaveRef = useRef(true);
   const [showGate, setShowGate] = useState(false);
+  // Track the previous loading/session so the gate visibility is adjusted during render (React's
+  // recommended "adjust state when a prop changes" pattern) instead of in an effect, which avoids
+  // the react-hooks/set-state-in-effect cascading-render lint error.
+  const [prevLoading, setPrevLoading] = useState(loading);
+  const [prevSession, setPrevSession] = useState(session);
+  if (prevLoading !== loading || prevSession !== session) {
+    setPrevLoading(loading);
+    setPrevSession(session);
+    if (loading || session) {
+      setShowGate(false);
+    } else {
+      if (typeof window === "undefined") {
+        setShowGate(false);
+      } else {
+        try {
+          setShowGate(window.localStorage.getItem(WELCOME_DISMISSED_KEY) !== "1");
+        } catch {
+          setShowGate(true);
+        }
+      }
+    }
+  }
   const gateRef = useRef<HTMLDivElement>(null);
   const prevFocusRef = useRef<HTMLElement | null>(null);
+  const sidebarRef = useRef<HTMLElement | null>(null);
+  const sidebarPrevFocusRef = useRef<HTMLElement | null>(null);
 
   // Whose chats are currently loaded: a stable per-account bucket, or "anon" while signed out.
   const identity = loading ? null : (session?.user.id ?? "anon");
@@ -208,10 +232,52 @@ export function Chat() {
       if (e.key === "Escape") {
         e.preventDefault();
         setSidebarOpen(false);
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const aside = sidebarRef.current;
+      if (!aside) return;
+      const focusable = Array.from(
+        aside.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((el) => el.getClientRects().length > 0);
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const active = document.activeElement;
+      if (e.shiftKey) {
+        if (active === first || !aside.contains(active)) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else {
+        if (active === last || !aside.contains(active)) {
+          e.preventDefault();
+          first.focus();
+        }
       }
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
+  }, [sidebarOpen]);
+
+  useEffect(() => {
+    if (sidebarOpen) {
+      sidebarPrevFocusRef.current = (document.activeElement as HTMLElement) ?? null;
+      // Move focus into the drawer for screen-reader/keyboard users.
+      window.requestAnimationFrame(() => sidebarRef.current?.focus());
+    } else {
+      const prev = sidebarPrevFocusRef.current;
+      if (prev && typeof prev.focus === "function") {
+        try {
+          prev.focus();
+        } catch {
+          /* ignore */
+        }
+      }
+      sidebarPrevFocusRef.current = null;
+    }
   }, [sidebarOpen]);
 
   // Mirrors `chats` on every render so the identity-switch effect below can flush the *outgoing* identity's
@@ -253,18 +319,7 @@ export function Chat() {
     return () => window.clearTimeout(t);
   }, [chats, identity]);
 
-  // Show the sign-in gate once per device for a signed-out visitor, until they skip it or sign in.
-  useEffect(() => {
-    if (loading || session) {
-      setShowGate(false);
-      return;
-    }
-    try {
-      setShowGate(window.localStorage.getItem(WELCOME_DISMISSED_KEY) !== "1");
-    } catch {
-      setShowGate(true);
-    }
-  }, [loading, session]);
+  // The sign-in gate visibility is now adjusted during render (see above), so no effect is needed here.
 
   // Accessibility: the dialog claims aria-modal="true", so on open it must take focus, trap Tab, close on
   // Escape, and restore focus when dismissed. Implemented with plain React (no focus-trap dependency).
@@ -660,7 +715,7 @@ export function Chat() {
 
   return (
     <div
-      className="flex h-dvh w-full bg-white text-[15px] text-zinc-900"
+      className="relative flex h-dvh w-full bg-white text-base text-zinc-900"
       onDragOver={(e) => {
         e.preventDefault();
         setDragging(true);
@@ -674,8 +729,10 @@ export function Chat() {
     >
       {/* Sidebar: desktop always visible, mobile as a drawer */}
       <aside
+        ref={sidebarRef}
+        tabIndex={-1}
         aria-label="Sidebar"
-        className={`${sidebarOpen ? "fixed inset-y-0 left-0 z-30 w-[310px] shadow-2xl" : "hidden"} flex flex-col border-r border-zinc-200 bg-zinc-50 p-3 md:static md:flex md:w-[260px] md:shrink-0`}
+        className={`${sidebarOpen ? "fixed inset-y-0 left-0 z-30 w-[310px] shadow-2xl" : "hidden"} flex flex-col border-r border-[rgba(255,255,255,0.15)] bg-[rgb(33,33,33)] p-3 min-[801px]:static min-[801px]:flex min-[801px]:w-[260px] min-[801px]:shrink-0 min-[801px]:border-[rgba(0,0,0,0.1)] min-[801px]:bg-[rgb(252,252,252)] min-[801px]:shadow-none`}
       >
         <div className="flex items-center gap-2 px-2 pb-3 pt-1">
           <Logo className="h-7 w-7 text-xs" />
@@ -721,7 +778,7 @@ export function Chat() {
                     </button>
                   )}
                   {!isRenaming && (
-                    <div className="flex shrink-0 opacity-100 md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100">
+                    <div className="flex shrink-0 opacity-100 min-[801px]:opacity-0 min-[801px]:group-hover:opacity-100 min-[801px]:group-focus-within:opacity-100">
                       <IconButton label={`Rename ${c.title}`} onClick={() => setRenaming({ id: c.id, title: c.title })} className="h-7 w-7">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" /></svg>
                       </IconButton>
@@ -745,7 +802,7 @@ export function Chat() {
           </div>
         )}
       </aside>
-      {sidebarOpen && <button type="button" aria-label="Close chats" onClick={() => setSidebarOpen(false)} className="fixed inset-0 z-20 bg-black/35 md:hidden" />}
+      {sidebarOpen && <button type="button" aria-label="Close chats" onClick={() => setSidebarOpen(false)} className="fixed inset-0 z-20 bg-black/35 min-[801px]:hidden" />}
 
       <div className="flex min-w-0 flex-1 flex-col">
         <AppHeader
@@ -764,7 +821,7 @@ export function Chat() {
 
           {empty && <EmptyState starters={STARTERS} onPick={(s) => submit(s)} />}
 
-          <ol className="mx-auto max-w-3xl space-y-7 py-8">
+          <ol aria-label="Conversation" className="mx-auto max-w-3xl space-y-7 py-8">
             {messages.map((m, index) => (
               <li key={m.id} className={m.role === "user" ? "flex justify-end" : "flex gap-3"}>
                 {m.role === "user" ? (
@@ -799,14 +856,14 @@ export function Chat() {
                       </div>
                     )}
                     {editing?.id !== m.id && (
-                      <div className="flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100">
+                      <div className="flex gap-1 opacity-100 min-[801px]:opacity-0 min-[801px]:group-hover:opacity-100 min-[801px]:group-focus-within:opacity-100">
                         {m.text && (
-                          <button type="button" onClick={() => copyText(m.id, m.text)} className="min-h-8 rounded-lg px-2 text-xs text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900">
+                          <button type="button" onClick={() => copyText(m.id, m.text)} className="min-h-11 rounded-lg px-2 text-xs text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 focus:outline-none focus:ring-2 focus:ring-[#3566f0]">
                             {copied === m.id ? "Copied" : "Copy"}
                           </button>
                         )}
                         {m.text && !busy && (
-                          <button type="button" onClick={() => setEditing({ id: m.id, text: m.text })} className="min-h-8 rounded-lg px-2 text-xs text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900">
+                          <button type="button" onClick={() => setEditing({ id: m.id, text: m.text })} className="min-h-11 rounded-lg px-2 text-xs text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 focus:outline-none focus:ring-2 focus:ring-[#3566f0]">
                             Edit
                           </button>
                         )}
@@ -817,7 +874,7 @@ export function Chat() {
                   <div role="alert" className="w-full rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-red-800">
                     <p>{m.text}</p>
                     {m.retry && (
-                      <button type="button" onClick={m.retry} disabled={busy} className="mt-2 min-h-10 rounded-lg border border-red-200 px-4 py-2 font-medium hover:bg-red-100 disabled:opacity-50">
+                      <button type="button" onClick={m.retry} disabled={busy} className="mt-2 min-h-11 rounded-lg border border-red-200 px-4 py-2 font-medium hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-[#3566f0] disabled:opacity-50">
                         Retry
                       </button>
                     )}
@@ -827,15 +884,15 @@ export function Chat() {
                     <Logo className="mt-0.5 h-7 w-7 text-[10px]" />
                     <div className="group min-w-0 flex-1">
                       <p className="whitespace-pre-wrap break-words leading-7 text-zinc-900">{m.reply.text}</p>
-                      <div className="mt-2 flex flex-wrap items-center gap-1 text-xs text-zinc-500">
+                      <div className="mt-2 flex flex-wrap items-center gap-1 text-xs text-zinc-500 opacity-100 min-[801px]:opacity-0 min-[801px]:group-hover:opacity-100 min-[801px]:group-focus-within:opacity-100">
                         {m.kind === "analysis" && <span className="mr-2">{m.reply.grounded ? "Based on the evidence" : "Not verified against the evidence"}</span>}
                         {m.reply.text && (
-                          <button type="button" onClick={() => copyText(m.id, m.reply.text)} className="min-h-8 rounded-lg px-2 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900">
+                          <button type="button" onClick={() => copyText(m.id, m.reply.text)} className="min-h-11 rounded-lg px-2 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 focus:outline-none focus:ring-2 focus:ring-[#3566f0]">
                             {copied === m.id ? "Copied" : "Copy"}
                           </button>
                         )}
                         {m.reply.text && canRegenerate(index) && (
-                          <button type="button" onClick={() => regenerate(index)} className="min-h-8 rounded-lg px-2 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900">
+                          <button type="button" onClick={() => regenerate(index)} className="min-h-11 rounded-lg px-2 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 focus:outline-none focus:ring-2 focus:ring-[#3566f0]">
                             Regenerate
                           </button>
                         )}
@@ -848,16 +905,16 @@ export function Chat() {
             ))}
             {busy && (
               <li role="status" className="flex items-center gap-3 text-sm text-zinc-500">
-                <Logo className="h-7 w-7 text-[10px] animate-pulse" />
+                <Logo className="h-7 w-7 text-[10px] motion-safe:animate-pulse" />
                 <span>{busyLabel}</span>
-                <button type="button" onClick={() => controllersRef.current.get(active.id)?.abort()} className="rounded-lg px-2 py-1 font-medium text-zinc-800 underline hover:bg-zinc-100">Stop</button>
+                <button type="button" onClick={() => controllersRef.current.get(active.id)?.abort()} className="min-h-11 rounded-lg px-2 py-1 font-medium text-zinc-800 underline hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#3566f0]">Stop</button>
               </li>
             )}
           </ol>
           <div ref={endRef} />
         </main>
 
-        <div className="mx-auto w-full max-w-3xl px-4 pb-3 pt-2">
+        <div className={`${empty ? "absolute left-0 right-0 mx-auto top-[calc(50%-18px)] min-[801px]:left-[260px] min-[801px]:top-[calc(50%-38px)] min-[801px]:w-[calc(100%-260px)]" : "mx-auto w-full"} w-full max-w-[800px] px-3 pb-3 pt-2 min-[1024px]:px-4`}>
           {dragging && <p className="mb-2 rounded-2xl border-2 border-dashed border-teal-500 p-3 text-center text-sm">Drop an image to attach it</p>}
           {notice && <p role="alert" className="mb-2 text-sm font-medium text-red-600">{notice}</p>}
           {attached && (

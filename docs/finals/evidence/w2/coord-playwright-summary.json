@@ -1,0 +1,87 @@
+{
+  "base": "http://localhost:3000",
+  "viewports": {
+    "390x844": {
+      "overflow": {
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "bodyScrollWidth": 390
+      },
+      "console": [
+        {
+          "type": "info",
+          "text": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"
+        },
+        {
+          "type": "log",
+          "text": "[HMR] connected"
+        }
+      ],
+      "gate_before": 1,
+      "gate_after_skip": 0,
+      "gate_skipped": true,
+      "menu_opened": true,
+      "typed_no_submit": true,
+      "drawer": {
+        "opened": true,
+        "focus_after_open": "Sidebar",
+        "escape_closed": true
+      },
+      "screenshot_empty": "coord-empty-390x844.png"
+    },
+    "834x1112": {
+      "overflow": {
+        "scrollWidth": 834,
+        "clientWidth": 834,
+        "bodyScrollWidth": 834
+      },
+      "console": [
+        {
+          "type": "info",
+          "text": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"
+        },
+        {
+          "type": "log",
+          "text": "[HMR] connected"
+        }
+      ],
+      "gate_before": 1,
+      "gate_after_skip": 0,
+      "gate_skipped": true,
+      "menu_opened": true,
+      "typed_no_submit": true,
+      "drawer": {
+        "opened": false,
+        "note": "no hamburger (desktop persistent rail)"
+      },
+      "screenshot_empty": "coord-empty-834x1112.png"
+    },
+    "1440x900": {
+      "overflow": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "bodyScrollWidth": 1440
+      },
+      "console": [
+        {
+          "type": "info",
+          "text": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"
+        },
+        {
+          "type": "log",
+          "text": "[HMR] connected"
+        }
+      ],
+      "gate_before": 1,
+      "gate_after_skip": 0,
+      "gate_skipped": true,
+      "menu_opened": true,
+      "typed_no_submit": true,
+      "drawer": {
+        "opened": false,
+        "note": "no hamburger (desktop persistent rail)"
+      },
+      "screenshot_empty": "coord-empty-1440x900.png"
+    }
+  }
+}
