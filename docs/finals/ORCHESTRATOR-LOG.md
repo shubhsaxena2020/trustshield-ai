@@ -399,3 +399,5 @@ px tsc --noEmit,
 pm run build: pass. Full pytest: 1280 passed, 7 skipped, 6 warnings in 208.72s. Documented and preparing follow-up commit; next HEAD reread due 04:10.
 
 - 04:04 IST W2 follow-up pushed: commit 31a5db includes multiline composer resize and documented browser verification. Full pytest 1280 passed, 7 skipped, 6 warnings; web lint/typecheck/build passed. No deploy performed.
+
+- 04:10 IST: complete 127-line HEAD_ORDERS.md reread. Reconfirmed section 10 scope, only cx/gpt-6-luna/no fallback, 2 Hermes sessions x 6 children max, no android/extension, no production/Vercel, full pytest before acceptance commits, 30-minute reread, and active 03:45 UI center defect criteria. No new HEAD lines since the 03:40 reread; the defect remains verified at 390/834/1280/1440/1536/1920 with 0 px center difference. Current W2 limitations remain: REA Cloudflare 403 blocks fresh reference capture and visual parity; model unavailable blocks streamed-response/streaming-CLS check. Codex freeze 04:15.

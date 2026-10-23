@@ -415,3 +415,5 @@
 - 04:06 IST W2 composer follow-up verified: four-line input at 390 px resized 48 to 96 px, scrollTop 0. Web lint/tsc/build clean. Full pytest 1280 passed, 7 skipped, 6 warnings in 208.72s. Updated W2 UI spec/report; follow-up commit/push pending. Reread full HEAD_ORDERS at 04:10, freeze 04:15.
 
 - 04:04 IST: composer follow-up committed and pushed as 31a5db to origin/finals-48h; full pytest 1280 passed, 7 skipped, 6 warnings; web lint/typecheck/build passed. Nothing deployed. Next HEAD reread at 04:10; freeze 04:15.
+
+- 04:10 IST: reread all of docs/finals/HEAD_ORDERS.md (127 lines); no new head item since prior reread. Active 03:45 UI defect acceptance geometry remains 0 px center difference at 390/834/1280/1440/1536/1920. REA returned 403, so current reference comparison and 1:1 parity are not demonstrated; product model unavailable, so streamed-response and streaming CLS remain unmeasured. W2 commits pushed: 975f9a2, 31a5db, 57b4c8f. Freeze 04:15; do not deploy.
