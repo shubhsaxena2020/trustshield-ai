@@ -39,3 +39,14 @@ Keep everything going through 127.0.0.1:20190 and still add no fallback models.
 
 ## RESOLVED 2026-10-23 01:18 UTC - test collection defect
 The stray suffix in tests/integration/test_history_endpoints.py was reproduced and removed. Full suite passed: 959 passed, 7 skipped, 5 warnings in 168.41s. Fix commit 335ad49 is pushed; GitHub issue #13 records the defect and verification. Keep full pytest as a required gate before any further fix or acceptance commit.
+
+## 5. POWER-OFF RECOVERY + 6-HOUR COMPRESSION (Shubh's order, 2026-10-23 19:55 IST)
+The laptop was shut down at about 07:25 IST and was off for about 12 hours (Shubh's room light failed). Every process died: Codex exec, both Hermes sessions, the local API/web servers.
+Disk is intact: `git fsck` reports only dangling objects; the gate (new PID 8076, 120 req/min, port 20190) and 9Router are up again; the Nilabh route answers; Hermes config still has `fallback_providers: []`.
+**New clock: T0 = 19:55 IST on 2026-10-23. Hard finish = 01:55 IST on 2026-10-24 (6 hours).** Shubh wants the WHOLE program finished in this window, using as much of the machine as needed. PLAN-48H.md is superseded by this compressed schedule:
+1. 19:55-20:25 Recovery. Triage the 32 uncommitted files (W2 UI edits made before the crash; regenerated W1 evidence screenshots/`w1-run.json` are churn - do not commit noise). Keep what passes review, discard what does not, run the FULL pytest suite and `tsc`/lint/build, restart the API (8000) and web (3000), mark every Hermes PID in STATE.md as dead, relaunch both lanes. Commit and push `finals-48h`.
+2. Lane A: W2 web UI (to 22:15), then W5 Chrome extension (22:15-00:45).  Lane B: W3 uploads incl. the open issues #14-#16 (to 21:30), then W4 accuracy + look-alike regression set (21:30-23:15), then W6 Android (23:15-01:00).
+3. 01:00-01:55 W7: full security/regression batteries, demo flow, deck/notes numbers, FINAL-REPORT.md, push, update issue #8. Never cut: the full-suite gate, spent-data rules, honest numbers, no production changes, no PR/merge.
+4. If a workstream cannot reach acceptance in its slot, freeze it at its best verified state, file an issue with exactly what is missing, and move on. A smaller verified result beats a larger unverified one.
+5. Resources: you may use up to both Hermes sessions with 9 children each continuously. The free-RAM launch gate is relaxed to >= 8 GB. Keep unattended: do not stop for questions.
+6. GPU: Shubh asked to keep the GPU at 100 percent. I am not doing that and you must not either: nothing in this program is GPU-bound (the model runs on the remote Nilabh server; pytest, Gradle, Playwright and git are CPU/IO), and burning the Intel Arc iGPU artificially only adds heat to a laptop that already hit 95 C once. Use the GPU where it helps for real: Chromium/Playwright keep hardware acceleration on, run the Android emulator with `-gpu host`. Do not run local LLMs unless a package needs one.
