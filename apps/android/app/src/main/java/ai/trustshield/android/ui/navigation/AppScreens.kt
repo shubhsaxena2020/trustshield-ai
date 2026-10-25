@@ -128,15 +128,6 @@ fun ResultRouteHost(english: Boolean, outcome: ScanOutcome?) {
     if (state == null || outcome == null) return
 
     Column(modifier = Modifier.fillMaxSize()) {
-        Text(
-            text = if (outcome.result.risk.label == RiskLabel.UNABLE_TO_VERIFY) {
-                "Risk score: Unable to Verify"
-            } else {
-                (if (english) "Risk score: " else "Risk score: ") + "${outcome.risk.score}/100"
-            },
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp)
-        )
     ResultScreen(
         state = state,
         language = language,
@@ -209,7 +200,10 @@ object AnalysisToResult {
                 )
             },
             limitations = outcome.result.limitations.map { ToneCopy(it, it) },
-            backendAvailable = false
+            backendAvailable = false,
+            riskScore = outcome.risk.score.takeUnless {
+                outcome.result.risk.label == RiskLabel.UNABLE_TO_VERIFY
+            }
         )
     )
 }
