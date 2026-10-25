@@ -77,6 +77,7 @@ import ai.trustshield.android.ui.theme.onSurface
 fun QrGuardScreen(
     state: QrUiState,
     onEvent: (QrEvent) -> Unit,
+    onSimulateScan: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val dark = isSystemInDarkTheme()
@@ -104,6 +105,12 @@ fun QrGuardScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
+            onSimulateScan?.let { simulate ->
+                OutlinedButton(onClick = simulate, modifier = Modifier.heightIn(min = TsTokens.MinTouchTarget)) {
+                    Text("Simulate scan")
+                }
+            }
+
             LanguageToggle(language = lang, onEvent = onEvent)
 
             CameraStatusPanel(state = state, dark = dark, lang = lang)
@@ -127,7 +134,11 @@ fun QrGuardScreen(
             MandatoryConfirmationBanner(lang = lang, dark = dark)
 
             Text(
-                text = QrStrings.cameraSeamNote.text(lang),
+                text = if (lang == QrLanguage.HINGLISH) {
+                    "Demo scan nakli QR data use karta hai. Asli QR camera se scan hota hai."
+                } else {
+                    "Demo scan uses sample QR data. Real QR codes are scanned with the camera."
+                },
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

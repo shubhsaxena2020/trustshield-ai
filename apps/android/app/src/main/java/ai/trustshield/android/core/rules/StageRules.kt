@@ -261,11 +261,18 @@ private class Rule(
 // ---------------------------------------------------------------------------------------------
 
 /**
- * Compile a rule pattern with Java's UNICODE_CHARACTER_CLASS flag so `\b` treats Devanagari letters
- * and matras as word characters. Without it `\bखाता\b` never matches, and every Hindi rule silently
- * dies while its Roman twin keeps working - the exact bug that makes "Hinglish support" a lie.
+ * Convert Java word tokens to explicit Unicode categories because Android rejects (?U).
+ * Word boundaries include letters, combining marks, numbers and underscore on both runtimes.
  */
-private fun rx(pattern: String): Regex = Regex("(?U)" + pattern)
+private fun rx(pattern: String): Regex {
+    val wordChars = "[\\p{L}\\p{M}\\p{N}_]"
+    val wordBoundary = "(?:(?<![\\p{L}\\p{M}\\p{N}_])(?=[\\p{L}\\p{M}\\p{N}_])|(?<=[\\p{L}\\p{M}\\p{N}_])(?![\\p{L}\\p{M}\\p{N}_]))"
+    val portable = pattern
+        .replace("\\w", wordChars)
+        .replace("\\d", "\\p{Nd}")
+        .replace("\\b", wordBoundary)
+    return Regex(portable)
+}
 
 // ---------------------------------------------------------------------------------------------
 // Shared token vocabulary
