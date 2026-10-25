@@ -245,6 +245,20 @@ class ContractTest {
     }
 
     @Test
+    fun `normalized span beginning at zero includes the first raw character`() {
+        val n = NormalizedText.identity("otp")
+        assertEquals("o", n.rawQuoteOf(0, 1))
+        assertEquals(TextSpan(0, 1), n.spanOf(0, 1))
+    }
+
+    @Test
+    fun `normalized span beginning at zero respects a removed raw prefix`() {
+        val n = NormalizedText.of("\u200Botp", "otp", intArrayOf(1, 2, 3), intArrayOf(2, 3, 4))
+        assertEquals("o", n.rawQuoteOf(0, 1))
+        assertEquals(TextSpan(1, 2), n.spanOf(0, 1))
+    }
+
+    @Test
     fun `normalized text rejects mismatched maps`() {
         val failure = runCatching {
             NormalizedText.of("abc", "abc", IntArray(2) { it }, IntArray(3) { it + 1 })
