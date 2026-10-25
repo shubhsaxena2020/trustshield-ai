@@ -77,4 +77,5 @@ Branch: `android-finals`. Phase: **2 active; three Hermes sessions launched on i
 - 2026-10-25: B01 PR #73 merged as 0f45862. Link logs now expose only URL length; stream reads require one shared budget across a share. ShareReceiverTest 32/32; full Android gate passed on PR and merged base. Issue #33 closed.
 - 2026-10-25: B06 PR #64 merged as 6b5c350. Registration requires initial setup or a passed long-press+PIN gate; accepted re-register replaces the old payee set. QrWatcherTest 17/17; full Android gate passed on PR and merged base. Issue #38 closed.
 - 2026-10-25: B03 PR #69 merged as 417bbf9. Unknown/denied camera permission clears pending work and suppresses stale in-flight results. QrCameraAnalyzerTest 22/22; full Android gate passed on PR and merged base. Issue #35 closed.
+- 2026-10-25: B07 PR #68 merged as 5c58482. The WebP sniffer validates the complete header before reading chunk size; SharedImageReaderTest 38/38 and full Android gate passed on PR and merged base. Issue #39 closed.
 
