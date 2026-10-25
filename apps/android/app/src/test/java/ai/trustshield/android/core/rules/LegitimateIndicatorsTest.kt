@@ -296,6 +296,35 @@ class LegitimateIndicatorsTest {
         assertEquals(1.0, a.riskReduction, 0.0)
     }
 
+    @Test
+    fun `secrecy pressure with a threat is not protective and does not reduce the score`() {
+        val raw = "Main CBI officer hoon. Kisi ko na batayein, warna FIR ho jayegi. " +
+            "Abhi Rs 50,000 transfer karo."
+        val e = engine()
+        val a = e.evaluate(raw)
+        assertFalse("'kisi ko na batayein, warna FIR' must not read as protective advice",
+            a.hasProtectiveIndicator)
+        assertEquals(1.0, a.riskReduction, 0.0)
+        assertEquals("no reduction may be applied", 100, e.reduce(100, false))
+    }
+
+    @Test
+    fun `bare do-not-tell without a named credential is not protective`() {
+        val raw = "Kisi ko na batayein."
+        val a = engine().evaluate(raw)
+        assertFalse(a.hasProtectiveIndicator)
+        assertEquals(1.0, a.riskReduction, 0.0)
+    }
+
+    @Test
+    fun `do-not-tell next to a named credential is protective`() {
+        val raw = "Aapka OTP 123456 hai. Kisi ko na batayein."
+        val a = engine().evaluate(raw)
+        assertTrue(a.hasProtectiveIndicator)
+        assertTrue(a.quotes().isNotEmpty())
+        assertTrue(a.riskReduction < 1.0)
+    }
+
     // ---- other legitimate classes ------------------------------------------------------------
 
     @Test

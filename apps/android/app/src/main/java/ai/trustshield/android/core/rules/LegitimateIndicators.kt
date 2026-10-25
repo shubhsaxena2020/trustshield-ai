@@ -125,8 +125,19 @@ class LegitimateIndicators(private val normalizer: TextNormalizer) {
 
         val hits = ArrayList<Hit>(8)
 
-        // 1. Do-not-share advice. Always protective on its own.
-        firstUnquoted(text, quotedN, SECURITY_ADVICE)?.let { hits += Hit(Kind.SECURITY_ADVICE, it) }
+        val secrecyFraming = SECRECY_FRAMING.containsMatchIn(text)
+
+        // 1. Do-not-share advice. The share-family names the secret implicitly ("never share"), so
+        //    it is protection on its own. The tell-family ("kisi ko na batayein") only counts when a
+        //    credential is named somewhere and nothing about the message looks like isolation
+        //    pressure - otherwise it is the scam's secrecy stage wearing protective clothing.
+        val advice = firstUnquoted(text, quotedN, SECURITY_ADVICE)
+            ?: if (!secrecyFraming && SENSITIVE.containsMatchIn(text)) {
+                firstUnquoted(text, quotedN, SECURITY_ADVICE_TELL)
+            } else {
+                null
+            }
+        advice?.let { hits += Hit(Kind.SECURITY_ADVICE, it) }
 
         // 2. "The bank never asks for an OTP" - educational, protective.
         firstUnquoted(text, quotedN, BANK_NEVER_ASKS)?.let { hits += Hit(Kind.BANK_NEVER_ASKS, it) }
@@ -545,15 +556,40 @@ class LegitimateIndicators(private val normalizer: TextNormalizer) {
                 "|shar(?:e|ing)\\s+(?:na|nahi|nahin|mat)\\s+(?:karein|karen|karo|karna|kijiye|kijiyega)" +
                 "|(?:na|nahi|nahin|mat)\\s+share\\s+(?:karein|karen|karo|karna|kijiye)" +
                 "|kisi\\s+ke\\s+(?:saath|sath)\\s+share\\s+(?:na|nahi|nahin|mat)" +
-                "|kisi\\s+(?:ko|se)\\s+(?:na|nahi|nahin|mat)\\s+(?:batayein|batao)" +
                 "|kabhi\\s+(?:bhi\\s+)?share\\s+(?:na|nahi|nahin|mat)" +
                 "|\u0938\u093E\u091D\u093E\\s+(?:\u0928|\u092E\u0924)\\s+\u0915\u0930\u0947\u0902" +
                 "|\u0936\u0947\u092F\u0930\\s+(?:\u0928|\u092E\u0924)\\s+\u0915\u0930\u0947\u0902" +
-                "|\u0915\u093F\u0938\u0940\\s+\u0915\u094B\\s+(?:\u0928|\u092E\u0924)\\s+\u092C\u0924\u093E\u090F\u0902" +
                 "|\u0915\u093F\u0938\u0940\\s+\u0915\u0947\\s+\u0938\u093E\u0925\\s+(?:\u0938\u093E\u091D\u093E|\u0936\u0947\u092F\u0930)\\s+\u0928" +
                 "|\u0915\u092D\u0940\\s+(?:\u0938\u093E\u091D\u093E|\u0936\u0947\u092F\u0930)\\s+\u0928\\s+\u0915\u0930\u0947\u0902)",
             RegexOption.IGNORE_CASE,
         )
+
+        /**
+         * "kisi ko na batayein" - the tell-family. It names no secret, so on its own it is
+         * indistinguishable from the secrecy stage of a scam ("kisi ko mat batana, warna FIR").
+         * It therefore only counts as protective when the message also names a credential and shows
+         * no secrecy/threat framing - see [SECRECY_FRAMING].
+         */
+        private val SECURITY_ADVICE_TELL = Regex(
+            "(?:kisi\\s+(?:ko|se)\\s+(?:na|nahi|nahin|mat)\\s+(?:batayein|batao|batana)" +
+                "|\u0915\u093F\u0938\u0940\\s+\u0915\u094B\\s+(?:\u0928|\u092E\u0924)\\s+\u092C\u0924\u093E\u090F\u0902)",
+            RegexOption.IGNORE_CASE,
+        )
+
+        /**
+         * Isolation / intimidation framing. Any of these turns a bare "don't tell anyone" from
+         * protective advice into the secrecy stage of a scam, so the tell-family indicator is
+         * dropped and the score is left untouched.
+         */
+        private val SECRECY_FRAMING = Regex(
+            "(?:warna|varna|nahi\\s+toh?|confidential|case\\s+hai|case\\s+darj|" +
+                "\\bfir\\b|police|cbi\\b|customs|narcotics|arrest|giraftaar|giraftar|" +
+                "raid|chhup\\w*|chupa\\w*|legal\\s+action|digital\\s+arrest|" +
+                "\u0935\u0930\u0928\u093E|\u0917\u094B\u092A\u0928\u0940\u092F|\u092A\u0941\u0932\u093F\u0938|" +
+                "\u0917\u093F\u0930\u092B\u094D\u0924\u093E\u0930|\u090F\u092B\u0906\u0908\u0906\u0930)",
+            RegexOption.IGNORE_CASE,
+        )
+
 
         private val BANK_NEVER_ASKS = Regex(
             "(?:bank\\s+(?:kabhi\\s+(?:bhi\\s+)?)?(?:otp|pin|code|password)\\s+(?:nahi|nahin|na)\\s+maang\\w*" +
