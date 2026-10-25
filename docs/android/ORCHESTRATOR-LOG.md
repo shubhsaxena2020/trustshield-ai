@@ -123,3 +123,5 @@ Reviewed B03 PR #69. Its `QrCameraAnalyzerTest` passes 21/21, but a temporary te
 - 2026-10-26 04:58 IST: Tried the focused #126 suites after confirming no connected-test shell was active. Gradle reached Kotlin compilation, but the Kotlin daemon failed to reserve ~760 MiB (`paging file is too small`, errno 1455); zero tests ran. Updated draft PR #126 with the exact failure. No ADB call was made; the emulator lock is still owned by another P3 process.
 
 - 2026-10-26 05:05 IST: The single in-process compiler retry for #126 also failed before task execution because the 2 GB Gradle daemon could not reserve ~760 MiB (`errno=1455`). No tests ran. Updated #126's PR body and recorded the blocker; no further Android build retry while the host paging-file limit is unchanged.
+
+- 2026-10-26 05:08 IST: Updated draft #122 to unignore the original P3-18 D1 journey, plus the standalone Result and Settings recreation instrumentation tests. `git diff --check` passed. This expands the gate; no Android test result is claimed because host paging-file failures persist.
