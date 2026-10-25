@@ -407,7 +407,7 @@ object SpeechCapabilityProbe {
         val app = context.applicationContext ?: context
         val apiLevel = Build.VERSION.SDK_INT
         val serviceAvailable = runCatching { SpeechRecognizer.isRecognitionAvailable(app) }.getOrDefault(false)
-        val onDeviceAvailable = apiLevel >= ON_DEVICE_RECOGNITION_MIN_API &&
+        val onDeviceAvailable = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
             runCatching { SpeechRecognizer.isOnDeviceRecognitionAvailable(app) }.getOrDefault(false)
         return SpeechEnvironment(
             apiLevel = apiLevel,
