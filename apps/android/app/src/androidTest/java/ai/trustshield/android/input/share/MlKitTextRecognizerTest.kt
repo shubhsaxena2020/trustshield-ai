@@ -27,6 +27,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import java.io.ByteArrayOutputStream
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -259,6 +260,22 @@ class MlKitTextRecognizerTest {
             3,
             OcrTextMerge.letterCount("OTP आपका", Character.UnicodeScript.DEVANAGARI),
         )
+    }
+
+    @Test
+    fun classify_doesNotCallUnsupportedScriptsLatin() {
+        val arabic = "\u0645\u0631\u062d\u0628\u0627"
+        assertEquals(OcrScript.OTHER, OcrTextMerge.classify(arabic))
+        assertEquals(OcrScript.OTHER, OcrTextMerge.classify("OTP $arabic"))
+    }
+
+    @Test
+    fun truncateAtCodePoint_doesNotSplitASurrogatePair() {
+        val input = "a".repeat(MlKitTextRecognizer.MAX_TEXT_CHARS - 1) + "\uD83D\uDE00z"
+        val truncated = OcrTextMerge.truncateAtCodePoint(input, MlKitTextRecognizer.MAX_TEXT_CHARS)
+
+        assertEquals(MlKitTextRecognizer.MAX_TEXT_CHARS - 1, truncated.length)
+        assertFalse(Character.isHighSurrogate(truncated.last()))
     }
 
     // ---------------------------------------------------------------------------------------------

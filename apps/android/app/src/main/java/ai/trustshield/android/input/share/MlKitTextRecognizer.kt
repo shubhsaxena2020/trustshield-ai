@@ -40,8 +40,9 @@
  *    Devanagari, so the Devanagari output wins; otherwise the Latin output wins.
  *  - If neither output contains a single letter of either script (digits only), the longer reading wins
  *    and an exact tie goes to Latin - still deterministic, and still no invented content.
- *  - The winning text is then classified LATIN / DEVANAGARI / MIXED by a 20% minority-share threshold,
- *    so one stray English word inside a Hindi sentence does not turn the whole result "MIXED".
+ *  - The winning text is classified OTHER if it contains letters outside Latin/Devanagari; otherwise
+ *    it is LATIN / DEVANAGARI / MIXED by a 20% minority-share threshold, so one stray English word
+ *    inside a Hindi sentence does not turn the whole result "MIXED".
  *  - `meanConfidence` is null unless ML Kit reports at least one positive element confidence; a mean is
  *    never estimated, defaulted to 1.0, or derived from the amount of text found.
  */
@@ -74,6 +75,9 @@ enum class OcrScript {
 
     /** Both scripts are present in a meaningful proportion (see [OcrTextMerge.classify]). */
     MIXED,
+
+    /** The reading contains letters outside the two scripts this adapter supports. */
+    OTHER,
 }
 
 /**
@@ -155,6 +159,16 @@ internal object OcrTextMerge {
         return count
     }
 
+    /** Truncates at a UTF-16 boundary without leaving an unmatched high surrogate. */
+    fun truncateAtCodePoint(text: String, maxChars: Int): String {
+        if (text.length <= maxChars) return text
+        var end = maxChars
+        if (end > 0 && Character.isHighSurrogate(text[end - 1]) && Character.isLowSurrogate(text[end])) {
+            end--
+        }
+        return text.substring(0, end)
+    }
+
     /**
      * LATIN / DEVANAGARI / MIXED for one string.
      *
@@ -164,6 +178,7 @@ internal object OcrTextMerge {
      * Hindi sentence stays [OcrScript.DEVANAGARI].
      */
     fun classify(text: String): OcrScript {
+        if (containsOtherLetters(text)) return OcrScript.OTHER
         val latin = letterCount(text, Character.UnicodeScript.LATIN)
         val devanagari = letterCount(text, Character.UnicodeScript.DEVANAGARI)
         val total = latin + devanagari
@@ -172,6 +187,20 @@ internal object OcrTextMerge {
         if (minority == 0) return if (devanagari > 0) OcrScript.DEVANAGARI else OcrScript.LATIN
         if (minority * 100 >= total * MIXED_MINORITY_PERCENT) return OcrScript.MIXED
         return if (devanagari > latin) OcrScript.DEVANAGARI else OcrScript.LATIN
+    }
+
+    private fun containsOtherLetters(text: String): Boolean {
+        var index = 0
+        while (index < text.length) {
+            val codePoint = text.codePointAt(index)
+            val script = Character.UnicodeScript.of(codePoint)
+            if (Character.isLetter(codePoint) &&
+                script != Character.UnicodeScript.LATIN &&
+                script != Character.UnicodeScript.DEVANAGARI
+            ) return true
+            index += Character.charCount(codePoint)
+        }
+        return false
     }
 
     /**
@@ -339,7 +368,7 @@ class MlKitTextRecognizer(policy: ImagePolicy = ImagePolicy()) : Closeable {
         val winningText = if (decided.fromDevanagari) devanagariText else latinText
 
         val truncated = decided.text.length > MAX_TEXT_CHARS
-        val text = if (truncated) decided.text.take(MAX_TEXT_CHARS) else decided.text
+        val text = OcrTextMerge.truncateAtCodePoint(decided.text, MAX_TEXT_CHARS)
         if (text.none { it.isLetterOrDigit() }) {
             return@coroutineScope OcrOutcome.Failed(OcrFailure.NO_TEXT)
         }
