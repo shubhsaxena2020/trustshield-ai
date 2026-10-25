@@ -1,4 +1,4 @@
-﻿# Android program state
+# Android program state
 
 Branch: `android-finals`. Phase: **3 active; Codex foundation pushed, 18 new P0 packages tracked; fresh Hermes agent1/agent2/agent3 sessions launched at 00:32 IST.** No website, production, dataset holdout, trained model or `.env` changes.
 
@@ -121,3 +121,12 @@ Branch: `android-finals`. Phase: **3 active; Codex foundation pushed, 18 new P0 
 - 2026-10-26 02:25 IST: P3-13 (#92) CameraX/ML Kit adapter merged. Current-base JVM/lint/build and AndroidTest compilation passed. Device preview, CAMERA prompt/recovery and full QR scan are unverified and remain P3-14/P3-18.
 
 - 2026-10-26 02:42 IST: P3-16 sensitivity policy seam merged and current-base gate passed (831 JVM tests, lint, assemble). No production call site consumes the saved sensitivity, so #95 remains open pending real scoring integration; no behavior change is claimed yet.
+
+- 2026-10-26 03:02 IST: P3-17 preference resolver seam merged; current-base gate passed (860 JVM tests, lint, assemble). Helper adoption in production call sites and emulator restart verification are still pending; #96 remains open.
+
+- 2026-10-26 03:15 IST: Current integrated tree passed connectedDebugAndroidTest on trustshield-api36 (34/34). OCR and QR adapter instrumentation passed. End-to-end UI flow/screenshot verification remains pending P3-18.
+
+- 2026-10-26 03:27 IST: P3-11 deterministic script engine merged; current-base gate passed (885 JVM tests, lint, assemble). Required report ladder remains unresolved: actual A05 output is LOW/LOW/LOW/CRITICAL for its four lines. Issue #90 remains OPEN; owner decision needed before item 4 can pass.
+
+- 2026-10-26 02:38 IST: P3-06 implementation is ready for review in the Codex worktree. Home paste and text share produce real offline results (scam 70/100 High; legit bank OTP 12/100 Low); Result UI no longer displays internal module identifiers. QR camera permission and CameraX preview are wired, and Simulate scan reaches the three-valid-mismatch alert. Call Demo Script uses CallDemoRunner. 887 JVM tests, lint and assembleDebug pass; a touch-only 2,000-event monkey run completed and the logcat crash/ANR scan was empty. Physical QR decode and live microphone ASR are not yet verified; P3-10/#89 still owns live Call Shield binding and P3-05/#84 owns screenshot OCR selection. Evidence: docs/android/evidence/p3-06-*.png. x86_64 APK SHA-256: 3E61C32D7E1321A5CA8D25E7F7C81CA8B29258CCF1FBAEF07CF46C6E1AED7A6E (36,971,262 bytes). PR/merge/issue closure pending.
+- 2026-10-26 02:46 IST: P3-03 #109 review found the documented delivery-OTP false positive still present on current base; 4 fixture guards failed. Added a narrowly scoped in-person delivery share exemption plus a regression preserving remote phone asks. Targeted suites and full test/lint/build gate now pass on the replayed current base. PR update/CI/merge remain pending.

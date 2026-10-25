@@ -171,6 +171,17 @@ class StageRulesTest {
     }
 
     @Test
+    fun `delivery OTP shared only with the in-person agent is not a remote ask`() {
+        val inPerson = rules.detect("Delivery OTP 4521, share only with the agent at your door.")
+        val remote = rules.detect("Delivery OTP 4521, share it with the agent by phone.")
+
+        assertFalse(inPerson.stageIds.contains(StageId.ASK))
+        assertTrue(inPerson.askTypes.isEmpty())
+        assertTrue(remote.stageIds.contains(StageId.ASK))
+        assertEquals(setOf(AskType.OTP_PIN), remote.askTypes)
+    }
+
+    @Test
     fun `hindi otp request is caught in Devanagari`() {
         val result = rules.detect("जो ओटीपी आया है वो बता दो")
 
