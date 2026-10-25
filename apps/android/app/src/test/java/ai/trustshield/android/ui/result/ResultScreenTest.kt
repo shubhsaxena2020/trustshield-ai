@@ -10,6 +10,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotSame
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.util.Locale
@@ -120,6 +121,26 @@ class ResultScreenTest {
         assertNotEquals(low.confidence, high.confidence)
         assertEquals(ConfidenceLevel.LOW, low.confidence.level)
         assertEquals(ConfidenceLevel.HIGH, high.confidence.level)
+    }
+
+    @Test
+    fun verifiedResultShowsBoundedEngineScoreInsideRiskBand() {
+        val state = ResultPresenter.build(ResultFixtures.digitalArrestInput.copy(riskScore = 70))
+
+        assertFalse(state.unableToVerify)
+        assertEquals(70, state.risk.score)
+        assertEquals("Score: 70/100", state.visibleStrings(UiLanguage.ENGLISH)
+            .firstOrNull { it.startsWith("Score:") })
+    }
+
+    @Test
+    fun unverifiedResultDoesNotShowEngineScore() {
+        val state = ResultPresenter.build(
+            ResultFixtures.unreadableInput.copy(riskScore = 70)
+        )
+
+        assertTrue(state.unableToVerify)
+        assertNull(state.risk.score)
     }
 
     @Test

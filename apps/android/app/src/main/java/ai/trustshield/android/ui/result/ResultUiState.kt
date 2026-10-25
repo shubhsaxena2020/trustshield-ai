@@ -113,7 +113,9 @@ data class RiskBand(
     val label: ToneCopy,
     val summary: ToneCopy,
     val glyph: String,
-    val contentDescription: ToneCopy
+    val contentDescription: ToneCopy,
+    /** Deterministic engine score, shown only when source evidence verifies the result. */
+    val score: Int? = null
 )
 
 // ---------------------------------------------------------------------------------------------
@@ -293,6 +295,7 @@ data class ResultUiState(
         out += risk.label.pick(language)
         out += risk.summary.pick(language)
         out += risk.contentDescription.pick(language)
+        risk.score?.let { out += "Score: $it/100" }
         out += confidence.label.pick(language)
         out += confidence.reason.pick(language)
         (status as? ResultStatus.UnableToVerify)?.let {
@@ -382,7 +385,9 @@ data class ResultInput(
     val actions: List<ResultActionInput> = emptyList(),
     val limitations: List<ToneCopy> = emptyList(),
     /** Backend enrichment is off by default; a caller must opt in explicitly. */
-    val backendAvailable: Boolean = BackendEnrichment.ENABLED_BY_DEFAULT
+    val backendAvailable: Boolean = BackendEnrichment.ENABLED_BY_DEFAULT,
+    /** A05's deterministic 0..100 reading; omitted for unsupported/unreadable inputs. */
+    val riskScore: Int? = null
 )
 
 // ---------------------------------------------------------------------------------------------
@@ -756,7 +761,8 @@ object ResultPresenter {
                 label = RiskToneCopy.of(input.riskTone).label,
                 summary = ResultCopy.bandSummary(input.riskTone),
                 glyph = RiskToneCopy.of(input.riskTone).glyph,
-                contentDescription = RiskToneCopy.of(input.riskTone).contentDescription
+                contentDescription = RiskToneCopy.of(input.riskTone).contentDescription,
+                score = input.riskScore?.coerceIn(0, 100)
             )
             is ResultStatus.UnableToVerify -> RiskBand(
                 tone = RiskTone.NEUTRAL,

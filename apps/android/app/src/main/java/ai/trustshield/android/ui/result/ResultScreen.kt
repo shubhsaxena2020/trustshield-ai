@@ -176,6 +176,13 @@ private fun RiskHeader(risk: RiskBand, language: UiLanguage) {
                 style = MaterialTheme.typography.bodyLarge,
                 color = risk.tone.onContainer()
             )
+            risk.score?.let { score ->
+                Text(
+                    text = "Score: $score/100",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = risk.tone.onContainer()
+                )
+            }
             // Coarse four-step band, static: no number, no animation, no implied precision.
             RiskBandStrip(tone = risk.tone)
         }
