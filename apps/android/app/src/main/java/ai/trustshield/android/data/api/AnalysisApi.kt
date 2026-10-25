@@ -2,6 +2,9 @@ package ai.trustshield.android.data.api
 
 import ai.trustshield.android.core.model.AnalysisResult
 import ai.trustshield.android.core.model.InputType
+import java.io.IOException
+import java.util.concurrent.CancellationException
+import java.util.concurrent.TimeoutException
 
 /**
  * Backend enrichment is **off** unless a caller opts in explicitly.
@@ -61,7 +64,8 @@ sealed class BackendOutcome {
  * Thin, synchronous adapter for the backend's text and URL analysis endpoints.
  *
  * Contract of this class:
- *  * **Never throws at the UI.** Every failure path is a [BackendOutcome.Unavailable].
+ *  * **Expected transport failures become outcomes.** Interruption and cancellation propagate so
+ *    callers can stop work; interruption status is restored before it propagates.
  *  * **Never opens a URL.** `analyzeUrl` sends the string as JSON; it never resolves, follows or
  *    previews it. The transport interface has no fetch method at all.
  *  * **Never invents a verdict.** Malformed or drifted payloads are rejected
@@ -111,13 +115,20 @@ class AnalysisApi(
 
         val response = try {
             transport.post(path, payload, CONTENT_TYPE_JSON, timeoutMillis)
-        } catch (error: Throwable) {
-            // Recall / security / socket failures all land here. Never rethrow to the UI.
+        } catch (error: InterruptedException) {
+            Thread.currentThread().interrupt()
+            throw error
+        } catch (error: CancellationException) {
+            throw error
+        } catch (error: IOException) {
+            // Socket and other expected I/O failures are safe to show as an unavailable enrichment.
             val timeout = isTimeout(error)
             return BackendOutcome.Unavailable(
                 if (timeout) REASON_TIMEOUT else REASON_OFFLINE,
                 retryable = true,
             )
+        } catch (error: TimeoutException) {
+            return BackendOutcome.Unavailable(REASON_TIMEOUT, retryable = true)
         }
 
         return when {

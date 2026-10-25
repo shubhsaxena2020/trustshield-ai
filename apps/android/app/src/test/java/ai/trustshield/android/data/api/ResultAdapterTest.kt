@@ -246,6 +246,35 @@ class ResultAdapterTest {
     }
 
     @Test
+    fun `transport interruption restores the interrupt flag and propagates`() {
+        try {
+            val error = runCatching {
+                AnalysisApi(
+                    RecordingTransport { _, _ -> throw InterruptedException("cancelled") },
+                    enabled = true,
+                ).analyzeText("hello")
+            }.exceptionOrNull()
+
+            assertTrue(error is InterruptedException)
+            assertTrue(Thread.currentThread().isInterrupted)
+        } finally {
+            Thread.interrupted() // keep the JUnit worker thread clean for subsequent tests
+        }
+    }
+
+    @Test
+    fun `transport cancellation propagates`() {
+        val error = runCatching {
+            AnalysisApi(
+                RecordingTransport { _, _ -> throw java.util.concurrent.CancellationException("cancelled") },
+                enabled = true,
+            ).analyzeText("hello")
+        }.exceptionOrNull()
+
+        assertTrue(error is java.util.concurrent.CancellationException)
+    }
+
+    @Test
     fun `socket timeout maps to TIMEOUT rather than OFFLINE`() {
         val outcome = AnalysisApi(
             RecordingTransport { _, _ -> throw java.net.SocketTimeoutException("read timed out") },
@@ -259,7 +288,7 @@ class ResultAdapterTest {
     fun `wrapped timeout is still classified as TIMEOUT`() {
         val outcome = AnalysisApi(
             RecordingTransport { _, _ ->
-                throw RuntimeException("transport failed", java.util.concurrent.TimeoutException("deadline"))
+                throw java.io.IOException("transport failed", java.util.concurrent.TimeoutException("deadline"))
             },
             enabled = true,
         ).analyzeText("hello")
