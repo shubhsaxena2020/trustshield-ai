@@ -7,6 +7,7 @@ import android.os.Build
 import android.provider.OpenableColumns
 import java.io.ByteArrayOutputStream
 import java.io.IOException
+import java.io.InputStream
 
 /*
  * B01 - Android share intake (issue #33, F01, report section 9.1).
@@ -190,7 +191,7 @@ sealed interface SharedContent {
         }
         override val analysableText: String = SharedContent.merge(parts)
         override val isAnalysable: Boolean get() = analysableText.isNotBlank()
-        override fun toString(): String = "SharedContent.Link(urlMasked=${ShareMasking.summary(url)}, subjectLen=${subject?.length ?: 0})"
+        override fun toString(): String = "SharedContent.Link(urlLen=${url.length}, subjectLen=${subject?.length ?: 0})"
     }
 
     data class TextAndLink(val text: String, val url: String, val subject: String? = null) : SharedContent {
@@ -202,7 +203,7 @@ sealed interface SharedContent {
         override val analysableText: String = SharedContent.merge(parts)
         override val isAnalysable: Boolean get() = analysableText.isNotBlank()
         override fun toString(): String =
-            "SharedContent.TextAndLink(textLen=${text.length}, urlMasked=${ShareMasking.summary(url)}, subjectLen=${subject?.length ?: 0})"
+            "SharedContent.TextAndLink(textLen=${text.length}, urlLen=${url.length}, subjectLen=${subject?.length ?: 0})"
     }
 
     data class Images(val image: ShareImageRef) : SharedContent {
@@ -446,10 +447,11 @@ interface ShareByteSource {
     val sizeBytes: Long?
 
     /**
-     * Reads at most [maxBytes] and never more than the implementation's own cap.
-     * Throws [ShareBoundExceeded] instead of truncating silently.
+     * Reads at most [maxBytes] and consumes from the share-wide [budget]. The same budget must be
+     * passed to every source belonging to one share. Throws [ShareBoundExceeded] instead of
+     * truncating silently.
      */
-    fun readAtMost(maxBytes: Int): ByteArray
+    fun readAtMost(maxBytes: Int, budget: ByteBudget): ByteArray
 }
 
 /**
@@ -474,6 +476,31 @@ class ByteBudget(private val limit: Long = ShareBounds.MAX_TOTAL_BYTES) {
     fun consume(bytes: Long) {
         if (!tryConsume(bytes)) {
             throw ShareBoundExceeded(read = bytes, remaining = remaining, limit = limit)
+        }
+    }
+}
+
+/** Pure bounded reader so aggregate enforcement is covered by JVM tests without a provider. */
+object BoundedShareStream {
+    fun readAtMost(input: InputStream, maxBytes: Int, budget: ByteBudget): ByteArray {
+        require(maxBytes > 0) { "maxBytes must be positive" }
+        val limit = minOf(maxBytes.toLong(), budget.remaining)
+        if (limit == 0L) throw ShareBoundExceeded(1L, budget.remaining, budget.limitBytes)
+
+        val out = ByteArrayOutputStream(minOf(limit, 64L * 1024L).toInt())
+        val buffer = ByteArray(16 * 1024)
+        var total = 0L
+        while (true) {
+            val allowed = limit - total
+            val readLimit = minOf(buffer.size.toLong(), allowed + 1L).toInt()
+            val read = input.read(buffer, 0, readLimit)
+            if (read < 0) return out.toByteArray()
+            budget.consume(read.toLong())
+            total += read
+            if (total > limit) {
+                throw ShareBoundExceeded(total, limit - (total - read), limit)
+            }
+            out.write(buffer, 0, read)
         }
     }
 }
@@ -602,32 +629,15 @@ private fun ContentResolver.safeSize(uri: Uri?): Long? {
 class ContentUriShareByteSource(
     private val resolver: ContentResolver,
     private val uri: Uri,
-    private val capBytes: Long = ShareBounds.MAX_TOTAL_BYTES,
 ) : ShareByteSource {
 
     override val declaredMime: String? get() = resolver.safeType(uri)
 
     override val sizeBytes: Long? get() = resolver.safeSize(uri)
 
-    override fun readAtMost(maxBytes: Int): ByteArray {
-        val limit = minOf(maxBytes.toLong(), capBytes)
-        require(limit > 0L) { "maxBytes must be positive" }
+    override fun readAtMost(maxBytes: Int, budget: ByteBudget): ByteArray {
         val stream = resolver.openInputStream(uri) ?: throw IOException("no stream for share uri")
-        stream.use { input ->
-            val out = ByteArrayOutputStream(limit.coerceAtMost(64L * 1024L).toInt())
-            val buffer = ByteArray(16 * 1024)
-            var total = 0L
-            while (true) {
-                val read = input.read(buffer)
-                if (read < 0) break
-                total += read
-                if (total > limit) {
-                    throw ShareBoundExceeded(read = total, remaining = 0L, limit = limit)
-                }
-                out.write(buffer, 0, read)
-            }
-            return out.toByteArray()
-        }
+        return stream.use { input -> BoundedShareStream.readAtMost(input, maxBytes, budget) }
     }
 }
 

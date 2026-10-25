@@ -432,6 +432,22 @@ class ShareReceiverTest {
     }
 
     @Test
+    fun sourcesWithoutSizeMetadataShareOneStreamingByteBudget() {
+        val budget = ByteBudget(limit = 10L)
+        val first = BoundedShareStream.readAtMost("123456".byteInputStream(), 10, budget)
+        assertEquals("123456", first.decodeToString())
+        assertEquals(6L, budget.consumed)
+
+        try {
+            BoundedShareStream.readAtMost("78901".byteInputStream(), 10, budget)
+            fail("the second source must not exceed the shared total")
+        } catch (e: ShareBoundExceeded) {
+            assertEquals(4L, e.remaining)
+            assertEquals(10L, e.limit)
+        }
+    }
+
+    @Test
     fun maskingRemovesOtpCardPhoneAndUpiBeforeAnyDiagnosticString() {
         val masked = ShareMasking.mask(
             "OTP 123456 bhejo, card 4111 1111 1111 1111, phone 9876543210, upi ram@okhdfcbank",
@@ -458,6 +474,10 @@ class ShareReceiverTest {
         val ref = ref("image/jpeg", 1000, uri = "content://media/external/images/media/42")
         assertFalse(ref.toString().contains("42"))
         assertTrue(ref.toString().contains("content://**"))
+
+        val credentialLink = SharedContent.Link("https://trusted.example/?session=TOPSECRET")
+        assertFalse(credentialLink.toString().contains("TOPSECRET"))
+        assertFalse(credentialLink.toString().contains("session"))
     }
 
     @Test
