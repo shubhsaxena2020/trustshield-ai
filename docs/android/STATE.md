@@ -73,4 +73,5 @@ Branch: `android-finals`. Phase: **2 active; three Hermes sessions launched on i
 - 2026-10-25: A06 PR #62 merged as e442fb1. Expected transport errors become unavailable outcomes; cancellation propagates and interruption restores its thread flag. ResultAdapterTest 52/52; full Android gate passed on PR and merged base. Issue #29 closed.
 - 2026-10-25: A07 PR #63 merged as 9d6a496. Sensitive JSON object/array values are replaced as complete subtrees; RedactionTest 31/31 and full Android gate passed on PR and merged base. The privacy audit confirms signed-in backend history still retains raw message summaries/OCR, so backend enrichment remains disabled. Issue #30 closed.
 - 2026-10-25: C02 PR #61 merged as c629fa5. Light and dark link role guidance now points to text-safe accents. ThemeTest 15/15; full Android gate passed on PR and merged base. Issue #43 closed.
+- 2026-10-25: B02 PR #70 merged as c60f656. The package-only QR/UPI parser diff and 40 parser tests passed; full Android gate passed on PR and merged base. Issue #34 closed.
 
