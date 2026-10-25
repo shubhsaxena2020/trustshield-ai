@@ -1,6 +1,6 @@
 # Android program state
 
-Branch: `android-finals`. Phase: **1 complete; Phase 2 held for Claude Code review**. No website, production, dataset holdout, trained model or `.env` changes.
+Branch: `android-finals`. Phase: **2 active; three Hermes sessions launched on isolated worktrees**. No website, production, dataset holdout, trained model or `.env` changes.
 
 ## Phase 1 evidence
 
@@ -15,6 +15,18 @@ Branch: `android-finals`. Phase: **1 complete; Phase 2 held for Claude Code revi
 - Planning PR #53 merged as `ccb52adb651d3e54f71c740cd698471ac9714121`. All required files exist, `PLAN_SUMMARY.md` has 12 lines, all 27 package IDs and issue labels checked, and the plan was re-read for contradictions. Phase 1 tracker #50 was closed with evidence; package issues remain open.
 - Remote PR #52/#53 CI: frontend passed; backend failed because `requirements-lock.txt` omits `defusedxml`; security failed on existing `requirements-api.lock.txt` versions of certifi, filelock and pillow; container/gate skipped. No Phase 1 diff touches the Python lockfiles or workflow. Defect tracked as #54. This is a **red remote CI gate**, not an Android build failure.
 
+## Phase 2 progress (2026-10-25)
+
+- Phase 2 head orders accepted the Phase 1 plan. Fixed the missing full-lock dependency in PR #56 (`defusedxml==0.7.1`) and refreshed `models/release/v3_release_manifest.json` lock SHA. Merged as `319277083de71f865e24ae742fdd943b5ddb3ff6`; issue #54 closed for the missing test dependency. New audit follow-up #57 tracks the unmodified API lock findings.
+- Local `.venv\Scripts\python.exe -m pytest tests -q`: **1,280 passed, 7 skipped**. Focused release manifest tests: 5 passed.
+- GitHub PR #56: frontend passed; security failed with 41 pip-audit findings; backend dependency installation now passes, then 5 existing frozen/holdout tests fail because private dataset files are unavailable in the hosted runner (1,275 passed, 7 skipped). Container and gate skipped. Treat whole-repo CI as red; do not alter holdouts or conceal the result.
+- Android base checks after merge: `testDebugUnitTest lintDebug assembleDebug` succeeded with `ANDROID_HOME=C:\Users\shubh\AppData\Local\Android\Sdk`. Unit tests remain NO-SOURCE; scaffold APK remains buildable.
+- Created session worktrees `C:\Users\shubh\trustshield-android-wt\agent1` (`phase2/agent1`), `agent2` (`phase2/agent2`), and `agent3` (`phase2/agent3`) at base `3192770`. Hermes profiles agent1/A, agent2/B, agent3/C launched with detailed prompts; only P0 slots A01-A08, B01-B08, C01-C08 may start. Logs are under `%LOCALAPPDATA%\Temp\android\agentN.log`.
+- Emulator/AVD attempt remains open; no device acceptance is claimed.
+
 ## Open gates
 
-Claude Code Phase 1 review; real phone install/Call Shield/QR tests; separate CI lockfile repair #54 before a green whole-repo gate. See `NEEDS_SHUBH.md` for owner inputs. Historical backend 1,280 passed/7 skipped is not re-run in Phase 1 because backend product code is untouched.
+- All Android P0 package PRs, independent review, and green Android unit-test/lint/build checks.
+- Attempt sdkmanager/emulator/AVD and document result; real phone install, Call Shield and QR acceptance remain owner-dependent. See `NEEDS_SHUBH.md`.
+- Whole-repo GitHub CI remains red on audit findings #57 and private frozen/holdout fixtures; these are tracked separately from Android.
+
