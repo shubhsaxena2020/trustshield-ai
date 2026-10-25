@@ -34,7 +34,7 @@ object TsTokens {
 
     // ---- Brand + hazard hues: exact UI_SPEC values -------------------------------------------------
 
-    /** Brand accent, `#2F6BFF`. Fills, focus rings, links, indicators. */
+    /** Brand accent, `#2F6BFF`. Use for fills, focus rings and indicators; use text-safe tokens for links. */
     val Accent = Color(0xFF2F6BFF)
 
     /** Risk green, `#16845B`. 4.68:1 on white, 4.44:1 on [TsPalette.SurfaceLight]. */
