@@ -49,4 +49,5 @@ Reviewed B03 PR #69. Its `QrCameraAnalyzerTest` passes 21/21, but a temporary te
 
 - 2026-10-25 23:14 IST: PR #58 (A01, issue #24) merged after Codex fixed NormalizedText first-character spans, added identity and removed-prefix boundary regressions, and rebased the PR branch onto current android-finals. ContractTest 22/22; testDebugUnitTest lintDebug assembleDebug BUILD SUCCESSFUL (53 tasks) on PR and merged base. Issue #24 closed. Merge commit 91a7e63.
 - 2026-10-25 23:15 IST: PR #60 (A02, issue #25) merged after Codex removed the index-zero span exception, corrected the source-map invariant/test, and removed the stale contract-quirk documentation. NormalizerTest 31/31; full Android gate BUILD SUCCESSFUL (53 tasks) on PR and merged base. Issue #25 closed. Merge commit b9fb80f.
+- 2026-10-25 23:17 IST: PR #59 (A04, issue #27) merged after its secrecy/threat correction was verified against the integrated A01/A02 base; the package diff contains only `LegitimateIndicators.kt` and its test. `LegitimateIndicatorsTest` 33/33; full Android gate BUILD SUCCESSFUL (53 tasks) on PR and merged base. Issue #27 closed. Merge commit 76ffa97.
 
