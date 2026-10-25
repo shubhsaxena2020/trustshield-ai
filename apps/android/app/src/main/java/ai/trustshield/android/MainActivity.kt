@@ -9,6 +9,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -55,13 +56,15 @@ class MainActivity : ComponentActivity() {
     private var incomingText: String? by mutableStateOf(null)
     private var incomingImageUri: String? by mutableStateOf(null)
     private var resultOutcome: ScanOutcome? by mutableStateOf(null)
+    private var visibleRoute: AppRoute by mutableStateOf(AppRoute.HOME)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
         entrySequence = savedInstanceState?.getInt(STATE_ENTRY_SEQUENCE) ?: 0
         resultOutcome = lastCustomNonConfigurationInstance as? ScanOutcome
-        val restoredWithoutOutcome = savedInstanceState != null && resultOutcome == null
+        val restoredRoute = AppRoute.fromWire(savedInstanceState?.getString(STATE_VISIBLE_ROUTE))
+        val restoredWithoutOutcome = restoredRoute == AppRoute.RESULT && resultOutcome == null
         // Edge-to-edge from API 26 up: bar icon colours follow the system light/dark setting, so the
         // status bar is never light-on-light. Insets are consumed by AppNavHost (safeDrawingPadding).
         enableEdgeToEdge()
@@ -131,6 +134,7 @@ class MainActivity : ComponentActivity() {
                     // process recreation returns the user to the same screen; `requestedEntry` only
                     // matters when nothing was saved, or when a genuinely new intent arrives.
                     AppNavHost(entry = requestedEntry, entrySequence = entrySequence) { route ->
+                        SideEffect { visibleRoute = route }
                         TrustShieldRouteContent(
                             route = route,
                             english = preferences.language == AppLanguage.ENGLISH,
@@ -183,6 +187,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         outState.putInt(STATE_ENTRY_SEQUENCE, entrySequence)
+        outState.putString(STATE_VISIBLE_ROUTE, visibleRoute.wireName)
         super.onSaveInstanceState(outState)
     }
 
@@ -215,5 +220,6 @@ class MainActivity : ComponentActivity() {
 
     private companion object {
         const val STATE_ENTRY_SEQUENCE = "trustshield.entry_sequence"
+        const val STATE_VISIBLE_ROUTE = "trustshield.visible_route"
     }
 }

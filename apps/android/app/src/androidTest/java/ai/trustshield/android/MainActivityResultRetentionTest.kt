@@ -1,6 +1,7 @@
 package ai.trustshield.android
 
 import android.content.Intent
+import ai.trustshield.android.ui.navigation.AppRoute
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.ComposeTestRule
@@ -44,6 +45,17 @@ class MainActivityResultRetentionTest {
         scenario?.recreate()
 
         waitForText("Bharosa")
+    }
+
+    @Test
+    fun settingsRouteWithoutAResultStaysOnSettingsAfterActivityRecreation() {
+        val intent = Intent(ApplicationProvider.getApplicationContext(), MainActivity::class.java)
+            .putExtra(AppRoute.EXTRA_ROUTE, AppRoute.SETTINGS.wireName)
+        scenario = ActivityScenario.launch(intent)
+
+        waitForText("Settings")
+        scenario?.recreate()
+        waitForText("Settings")
     }
 
     private fun waitForText(text: String) {
