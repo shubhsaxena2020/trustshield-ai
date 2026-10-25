@@ -53,6 +53,16 @@ import ai.trustshield.android.core.model.Strength
  *  * caps: at most [MAX_SIGNALS] items, first matches in declaration order (deterministic);
  *  * no clock, no randomness, no I/O, no `android.*`, no network. Same text in, same evidence out.
  *
+ * ## Known limitation (stated, not hidden)
+ *
+ * The signal is re-derived from the transcript A05 is analysing, so it lives exactly as long as its
+ * words stay in the rolling window ([ai.trustshield.android.core.score.CallSessionState]) — unlike a
+ * playbook stage, which the session remembers for its TTL after the words are gone. On a two-hour
+ * call the ladder can therefore fall back to `<= 24` once a marker phrase scrolls out of the window,
+ * while the lit stage chips stay lit. Persisting this signal is a session-state change (same shape as
+ * `recordAskTypes`) and is deliberately not part of this defect fix; the demo (4 lines, 16 s) never
+ * reaches that boundary, and a real call repeats itself, which re-arms the signal.
+ *
  * Suppression of quoted speech (a scam example the sender is *reporting*) is not done here: A05
  * already holds A04's `LegitAssessment` and drops evidence whose span is `isQuoted`, so this module
  * stays a pure text-to-phrase matcher.
