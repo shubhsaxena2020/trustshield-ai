@@ -133,8 +133,11 @@ class QrCameraAnalyzer(
     @Volatile
     private var currentPermission: CameraPermissionState = CameraPermissionState.Unknown
 
+    private data class PendingFrame(val frame: FrameStats, val permissionGeneration: Long)
+
     /** Single-slot pending frame (bounded queue of 1). Guarded by [lock]. */
-    private var pending: FrameStats? = null
+    private var pending: PendingFrame? = null
+    private var permissionGeneration: Long = 0L
     private var decoderBusy = false
     private var streakCount = 0
     private var streakStartMs = 0L
@@ -196,12 +199,24 @@ class QrCameraAnalyzer(
                     if (currentState == State.Idle) currentState = State.Running
                     StartResult.Started
                 }
-                CameraPermissionState.Unknown -> StartResult.Refused(REASON_PERMISSION_UNKNOWN)
-                CameraPermissionState.Denied -> StartResult.Refused(REASON_PERMISSION_DENIED)
-                CameraPermissionState.PermanentlyDenied ->
-                    StartResult.Refused(REASON_PERMISSION_PERMANENTLY_DENIED)
+                CameraPermissionState.Unknown -> revokePermission(REASON_PERMISSION_UNKNOWN)
+                CameraPermissionState.Denied -> revokePermission(REASON_PERMISSION_DENIED)
+                CameraPermissionState.PermanentlyDenied -> revokePermission(REASON_PERMISSION_PERMANENTLY_DENIED)
             }
         }
+    }
+
+    /** Caller holds [lock]. Invalidates pending/in-flight work before refusing the camera start. */
+    private fun revokePermission(reason: String): StartResult.Refused {
+        if (currentState == State.Running) {
+            currentState = State.Idle
+            permissionGeneration++
+            pending = null
+            streakCount = 0
+            lastPayload = null
+            lastEmitMs = null
+        }
+        return StartResult.Refused(reason)
     }
 
     /**
@@ -211,7 +226,7 @@ class QrCameraAnalyzer(
      * as the in-flight one finishes.
      */
     fun submitFrame(frame: FrameStats): List<AnalyzerEvent> {
-        val accepted: FrameStats? = synchronized(lock) {
+        val accepted: PendingFrame? = synchronized(lock) {
             when {
                 currentState == State.Closed -> {
                     ignoredAfterCloseCount++
@@ -224,12 +239,12 @@ class QrCameraAnalyzer(
                 decoderBusy -> {
                     // Bounded pending queue of 1: the newest frame wins, the displaced one is dropped.
                     if (pending != null) droppedStaleCount++
-                    pending = frame
+                    pending = PendingFrame(frame, permissionGeneration)
                     null
                 }
                 else -> {
                     decoderBusy = true
-                    frame
+                    PendingFrame(frame, permissionGeneration)
                 }
             }
         }
@@ -266,13 +281,14 @@ class QrCameraAnalyzer(
      * Decode one frame, then keep draining the single pending slot until it is empty or the analyzer
      * closes. Exactly one decoder call is outstanding at a time.
      */
-    private fun drain(first: FrameStats): List<AnalyzerEvent> {
+    private fun drain(first: PendingFrame): List<AnalyzerEvent> {
         val events = ArrayList<AnalyzerEvent>(4)
-        var current: FrameStats? = first
+        var current: PendingFrame? = first
         while (current != null) {
-            val frame = current
+            val work = current
+            val frame = work.frame
             val produced: List<AnalyzerEvent>? = synchronized(lock) {
-                if (currentState != State.Running) {
+                if (currentState != State.Running || work.permissionGeneration != permissionGeneration) {
                     emptyList()
                 } else if (frame.meanLuma0to1 < lowLightThreshold) {
                     // Dark or covered lens: skip the vendor decode entirely, report it as low light.
@@ -287,14 +303,16 @@ class QrCameraAnalyzer(
             } else {
                 val outcome = runDecoder(frame)
                 synchronized(lock) {
-                    if (currentState == State.Running) {
+                    if (currentState == State.Running && work.permissionGeneration == permissionGeneration) {
                         decodedFrameCount++
                         events += applyOutcome(frame, outcome)
                     }
                 }
             }
             current = synchronized(lock) {
-                val next = if (currentState == State.Running) pending else null
+                val next = pending?.takeIf {
+                    currentState == State.Running && it.permissionGeneration == permissionGeneration
+                }
                 pending = null
                 if (next == null) decoderBusy = false
                 next

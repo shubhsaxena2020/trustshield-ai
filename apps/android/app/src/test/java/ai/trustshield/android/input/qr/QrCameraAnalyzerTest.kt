@@ -9,8 +9,7 @@ import org.junit.Test
  * JVM unit tests for the pure QR frame/scan policy (B03, issue #35).
  *
  * No `android.*` type is constructed here: the analyzer is the pure decision core, so these tests run
- * unchanged under JUnit 4 outside the Android runtime. Run with the orchestrator's out-of-tree harness
- * while `:app:testDebugUnitTest` cannot compile test sources (no `testImplementation` in the module yet).
+ * unchanged under JUnit 4 outside the Android runtime.
  */
 class QrCameraAnalyzerTest {
 
@@ -339,6 +338,35 @@ class QrCameraAnalyzerTest {
         assertEquals(StartResult.Started, analyzer.start(CameraPermissionState.Granted))
         assertEquals(1, analyzer.noDecodeStreak)
         assertEquals(1, analyzer.framesDecoded)
+    }
+
+    @Test
+    fun permissionRevocationStopsFramesAndDropsPendingDecodeWork() {
+        lateinit var analyzer: QrCameraAnalyzer
+        val payload = "upi://pay?pa=shop@okaxis"
+        val decoder = FakeDecoder(listOf(payload, payload), onCall = { _, self ->
+            if (self.calls.size == 1) {
+                analyzer.submitFrame(frame(2)) // pending while frame 1 is decoding
+                assertEquals(
+                    StartResult.Refused(QrCameraAnalyzer.REASON_PERMISSION_DENIED),
+                    analyzer.start(CameraPermissionState.Denied),
+                )
+                analyzer.submitFrame(frame(3)) // refused until permission is granted again
+            }
+        })
+        analyzer = started(decoder)
+
+        assertTrue(analyzer.submitFrame(frame(1)).isEmpty())
+        assertEquals(QrCameraAnalyzer.State.Idle, analyzer.state)
+        assertEquals(listOf(1L), decoder.calls)
+        assertEquals(1, analyzer.framesIgnoredWhileNotRunning)
+
+        assertEquals(StartResult.Started, analyzer.start(CameraPermissionState.Granted))
+        assertEquals(
+            listOf(AnalyzerEvent.Decoded(payload, 4L, 400L)),
+            analyzer.submitFrame(frame(4)),
+        )
+        assertEquals(listOf(1L, 4L), decoder.calls)
     }
 
     // ---------------------------------------------------------------- data contract
