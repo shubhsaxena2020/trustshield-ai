@@ -40,3 +40,5 @@ Branch: `android-finals`. Phase: **2 active; three Hermes sessions launched on i
 
 
 - 2026-10-25 22:04:22 +05:30: Re-ran the requested Android gate on android-finals: testDebugUnitTest lintDebug assembleDebug BUILD SUCCESSFUL (50 actionable tasks); unit tests remain NO-SOURCE on the scaffold. This is the pre-feature integration baseline.
+
+- 2026-10-25 22:15:14 +05:30: A01 PR #58 is open. Codex review found NormalizedText.spanOf(0, 1) produces an empty source span; a blocking correction and required tests are posted as a PR comment. No merge until corrected and locally verified. Formal request-changes was unavailable because the authenticated GitHub owner authored the PR. Current checks: frontend passed, backend pending, security failed on the known repository audit gate (#57).
