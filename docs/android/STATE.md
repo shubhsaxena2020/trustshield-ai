@@ -67,4 +67,5 @@ Branch: `android-finals`. Phase: **2 active; three Hermes sessions launched on i
 - 2026-10-25 23:09 IST: PR #73 (B01) blocked on generic URL-token leakage from `SharedContent.Link.toString()` and lack of enforced 8 MiB aggregate stream-read budget when sizes are absent. The official 31-test package suite and full Gradle gate pass; temporary token regression failed and was removed. PR #72 (C04) passes 59 tests and full Gradle gate with no package-specific blocker, but waits on C02 and later C01/A05 wiring. All three Hermes processes alive; logs empty; no provider errors. No feature package merged.
 
 - 2026-10-25: A01 PR #58 merged as 91a7e63 after first-character and removed-prefix span mapping fix. 22 contract tests passed; full Android test/lint/build gate passed on PR and merged base. Issue #24 closed. Next: A02, then A04, A03, A06/A07, C02, then B packages.
+- 2026-10-25: A02 PR #60 merged as b9fb80f after mapping the first normalized character to its actual raw source and removing the index-zero test exception. NormalizerTest 31/31; full Android gate passed on PR and merged base. Issue #25 closed.
 
