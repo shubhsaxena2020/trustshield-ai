@@ -79,6 +79,7 @@ import ai.trustshield.android.input.speech.MicPermission as SpeechMicPermission
 import ai.trustshield.android.input.speech.UtteranceSink
 import ai.trustshield.android.input.speech.AndroidSpeechRecognizerHandle
 import ai.trustshield.android.ui.qr.QrGuardScreen
+import ai.trustshield.android.ui.qr.QrGuardHost
 import ai.trustshield.android.ui.qr.QrEvent
 import ai.trustshield.android.ui.qr.CameraUiStatus
 import ai.trustshield.android.ui.qr.QrReducer
@@ -494,92 +495,7 @@ private fun CallDemoScriptPanel(
  */
 @Composable
 fun QrGuardRouteHost() {
-    val context = LocalContext.current
-    val lifecycleOwner = LocalLifecycleOwner.current
-    val prefs = LocalUserPreferences.current
-    val sink = LocalPreferencesSink.current
-    var state by remember {
-        mutableStateOf(
-            QrUiState(
-                language =
-                    if (prefs.language == AppLanguage.ENGLISH) {
-                        QrLanguage.ENGLISH
-                    } else {
-                        QrLanguage.HINGLISH
-                    }
-            )
-        )
-    }
-    var previewView by remember { mutableStateOf<PreviewView?>(null) }
-    var cameraGranted by remember {
-        mutableStateOf(ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED)
-    }
-    val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        cameraGranted = granted
-        state = QrReducer.reduce(state, if (granted) QrEvent.PermissionGranted else QrEvent.PermissionDenied)
-    }
-    val scanner = remember(context) {
-        CameraXQrScanner(context, onEvent = { event ->
-            val atMs = android.os.SystemClock.elapsedRealtime()
-            state = when (event) {
-                is AnalyzerEvent.Decoded -> {
-                    val decoded = UpiQrParser.parse(event.payload)
-                    val payee = decoded.payeeVpa
-                    if (decoded.isUpi && payee != null) {
-                        QrReducer.reduce(state, QrEvent.ValidFrame(payee, decoded.payeeName, atMs))
-                    } else QrReducer.reduce(state, QrEvent.UnreadableFrame(atMs))
-                }
-                is AnalyzerEvent.Unreadable -> QrReducer.reduce(state, QrEvent.UnreadableFrame(atMs))
-                is AnalyzerEvent.NoDecode -> state
-                else -> state
-            }
-        })
-    }
-    DisposableEffect(scanner, previewView, cameraGranted, lifecycleOwner) {
-        val preview = previewView
-        if (preview != null && cameraGranted) {
-            state = QrReducer.reduce(state, QrEvent.PermissionGranted)
-            scanner.start(lifecycleOwner, preview.surfaceProvider, CameraPermissionState.Granted)
-        }
-        onDispose { scanner.stop() }
-    }
-
-    Column(modifier = Modifier.fillMaxSize()) {
-        if (cameraGranted) {
-            AndroidView(
-                factory = { view -> PreviewView(view).also { previewView = it } },
-                modifier = Modifier.fillMaxWidth().heightIn(min = 220.dp, max = 280.dp)
-            )
-        } else {
-            OutlinedButton(onClick = { permissionLauncher.launch(Manifest.permission.CAMERA) }) {
-                Text("Enable camera")
-            }
-        }
-    QrGuardScreen(
-        state = state,
-        onEvent = { event ->
-            state = QrReducer.reduce(state, event)
-            if (event is QrEvent.SetLanguage) {
-                val language = if (event.language == QrLanguage.ENGLISH) AppLanguage.ENGLISH else AppLanguage.HINGLISH
-                sink(prefs.copy(language = language))
-            }
-        },
-        onSimulateScan = {
-            state = QrUiState(language = state.language)
-            state = QrReducer.reduce(state, QrEvent.RegisterPayee(SimulatedQrFixtures.MERCHANT_PAYEE, "Demo shop"))
-            state = QrReducer.reduce(state, QrEvent.PermissionGranted)
-            state = QrReducer.reduce(state, QrEvent.StartWatch(1L))
-            repeat(3) { index ->
-                state = QrReducer.reduce(state, QrEvent.ValidFrame(
-                    payeeAddress = SimulatedQrFixtures.STICKER_PAYEE,
-                    payeeName = "Demo shop",
-                    atMs = (index + 1L) * 1000L
-                ))
-            }
-            state = state.copy(camera = CameraUiStatus.UNKNOWN)
-        }
-    )
-    }
+    QrGuardHost()
 }
 
 /**

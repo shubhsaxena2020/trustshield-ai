@@ -1,7 +1,12 @@
 package ai.trustshield.android.ui.qr
 
+import android.os.SystemClock
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,12 +34,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -44,8 +54,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ai.trustshield.android.ui.theme.RiskTone
 import ai.trustshield.android.ui.theme.ToneCopy
-import ai.trustshield.android.ui.theme.TsTokens
 import ai.trustshield.android.ui.theme.TrustShieldTheme
+import ai.trustshield.android.ui.theme.TsTokens
 import ai.trustshield.android.ui.theme.accent
 import ai.trustshield.android.ui.theme.container
 import ai.trustshield.android.ui.theme.onContainer
@@ -68,16 +78,15 @@ import ai.trustshield.android.ui.theme.onSurface
  *  - guidance for permission-denied and no-camera;
  *  - the mandatory "pakka confirmation" line, verbatim.
  *
- * SEAM: this screen never opens a camera and never resolves a QR/URI destination. The merged B03
- * analyzer and B06 watcher provide the [QrEvent.ValidFrame] / [QrEvent.UnreadableFrame] / [QrEvent.Tick]
- * inputs, but this UI is not wired to them yet. CameraX / ML Kit dependencies and the CAMERA
- * permission also remain Codex integration work.
+ * This screen still never opens a camera and never resolves a QR/URI destination: the camera, the
+ * runtime CAMERA permission, B06's watcher and the simulate-scan demo live in `QrGuardHost.kt`, which
+ * renders this screen with a [QrUiState] it derives from the watcher. Rendering stays a pure function
+ * of state, which is why every rule below is still unit-testable on a bare JVM.
  */
 @Composable
 fun QrGuardScreen(
     state: QrUiState,
     onEvent: (QrEvent) -> Unit,
-    onSimulateScan: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val dark = isSystemInDarkTheme()
@@ -104,12 +113,6 @@ fun QrGuardScreen(
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-
-            onSimulateScan?.let { simulate ->
-                OutlinedButton(onClick = simulate, modifier = Modifier.heightIn(min = TsTokens.MinTouchTarget)) {
-                    Text("Simulate scan")
-                }
-            }
 
             LanguageToggle(language = lang, onEvent = onEvent)
 
@@ -386,8 +389,8 @@ private fun ExpectedMerchantPanel(
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         if (editable) {
-            // SEAM: this field stands in for B03's camera scan. When B03 lands it becomes a "scan
-            // the real QR" action and the decoded `pa` arrives as QrEvent.RegisterPayee.
+            // Manual entry: the honest fallback when the camera is refused or absent, or when the
+            // shopkeeper would rather type the id. Scanning feeds the same event through the host.
             OutlinedTextField(
                 value = address,
                 onValueChange = { address = it },
@@ -457,14 +460,12 @@ private fun ActionRow(state: QrUiState, lang: QrLanguage, onEvent: (QrEvent) -> 
                             .weight(1f)
                             .heightIn(min = TsTokens.MinTouchTarget)
                     ) { Text(QrStrings.stopWatch.text(lang)) }
-                    OutlinedButton(
-                        onClick = { onEvent(QrEvent.RequestReRegister) },
-                        modifier = Modifier
-                            .weight(1f)
-                            .heightIn(min = TsTokens.MinTouchTarget)
-                    ) {
-                        Text(QrStrings.reRegister.text(lang), style = MaterialTheme.typography.labelMedium)
-                    }
+                    HoldToReRegister(
+                        label = QrStrings.reRegister,
+                        lang = lang,
+                        onHeld = { onEvent(QrEvent.RequestReRegister) },
+                        modifier = Modifier.weight(1f)
+                    )
                 }
                 if (state.mismatchAlert != null) {
                     Button(
@@ -483,6 +484,79 @@ private fun ActionRow(state: QrUiState, lang: QrLanguage, onEvent: (QrEvent) -> 
                 ) { Text(QrStrings.pinCancel.text(lang)) }
             }
         }
+    }
+}
+
+/**
+ * Re-register trigger: a **press and hold for five seconds**, then the PIN.
+ *
+ * B06 (`QrWatcherPolicy.reRegisterLongPressMs`) owns the rule; a plain tap must never open the gate,
+ * which is why this control has no `onClick` at all — a tap produces no event, and only a completed
+ * hold raises [QrEvent.RequestReRegister]. The hold is also why the control is a plain bordered box
+ * rather than a Material `Button`: a `Button`'s own click detector consumes the gesture before a
+ * parent could time it.
+ *
+ * Accessibility: the control carries `Role.Button` and a content description that spells out the
+ * hold, so TalkBack announces it as actionable; TalkBack's double-tap-and-hold performs the same
+ * gesture. The PIN — not the hold — is the secret part of the gate.
+ */
+@Composable
+private fun HoldToReRegister(
+    label: ToneCopy,
+    lang: QrLanguage,
+    onHeld: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var holding by remember { mutableStateOf(false) }
+    val currentOnHeld by rememberUpdatedState(onHeld)
+    val shape = RoundedCornerShape(TsTokens.CornerSmall)
+
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(TsTokens.SpacingXs)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = TsTokens.MinTouchTarget)
+                .clip(shape)
+                .border(1.dp, MaterialTheme.colorScheme.outline, shape)
+                .pointerInput(Unit) {
+                    // The hold is timed with the monotonic clock instead of a timer coroutine: an
+                    // `AwaitPointerEventScope` is a *restricted* suspension scope, so a `delay` or a
+                    // `launch` from another dispatcher is not available inside the gesture. Measuring
+                    // the press and only firing on release keeps the rule exactly "held for 5 s".
+                    awaitEachGesture {
+                        awaitFirstDown(requireUnconsumed = false)
+                        val downAt = SystemClock.uptimeMillis()
+                        holding = true
+                        val up = waitForUpOrCancellation()
+                        holding = false
+                        if (up != null && SystemClock.uptimeMillis() - downAt >= RE_REGISTER_HOLD_MS) {
+                            currentOnHeld()
+                        }
+                    }
+                }
+                .semantics {
+                    role = Role.Button
+                    contentDescription = label.text(lang) + ". " + QrStrings.reRegisterHold.text(lang)
+                }
+                .padding(horizontal = TsTokens.SpacingSm, vertical = TsTokens.SpacingSm),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = if (holding) QrStrings.reRegisterHolding.text(lang) else label.text(lang),
+                style = MaterialTheme.typography.labelMedium,
+                textAlign = TextAlign.Center
+            )
+        }
+        Text(
+            text = QrStrings.reRegisterHold.text(lang),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
     }
 }
 
