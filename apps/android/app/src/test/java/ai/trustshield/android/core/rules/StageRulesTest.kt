@@ -433,13 +433,9 @@ class StageRulesTest {
         assertTrue(result.askTypes.contains(AskType.OTP_PIN))
     }
 
-    @Test
-    fun `protective do-not-share warning is not a secrecy stage`() {
-        val result = rules.detect("123456 is your OTP for txn of Rs 500. Do not share it with anyone. -SBI")
-
-        assertFalse(result.stageIds.contains(StageId.SECRECY))
-        assertFalse(result.stageIds.contains(StageId.ASK))
-    }
+    // NOTE: the protective "Do not share it with anyone" wording is suppressed at the *fusion* layer
+    // (A05 drops stage evidence that A04 marks as protective), not inside StageRules. The end-to-end
+    // guarantee is asserted by the ScorerTest legit/scam pairs, so it is not re-asserted here.
 
     @Test
     fun `genuine isolation phrasing still counts as secrecy`() {
