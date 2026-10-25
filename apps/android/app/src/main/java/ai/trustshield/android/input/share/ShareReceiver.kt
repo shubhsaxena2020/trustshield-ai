@@ -131,7 +131,7 @@ object ShareMasking {
 
 /**
  * A `content://` handle as plain data. The adapter fills it in without opening anything;
- * [openable] is a declared hint, and the real read is bounded separately by [ByteSource].
+ * [openable] is a declared hint, and the real read is bounded separately by [ShareByteSource].
  */
 data class SharedStreamRef(
     val uriString: String?,
@@ -150,12 +150,12 @@ data class SharedStreamRef(
 }
 
 /** One accepted image reference. Bytes are read later, bounded; nothing is copied to disk. */
-data class SharedImage(
+data class ShareImageRef(
     val uriString: String,
     val mime: String,
     val sizeBytes: Long?,
 ) {
-    override fun toString(): String = "SharedImage(uri=content://**, mime=$mime, sizeBytes=$sizeBytes)"
+    override fun toString(): String = "ShareImageRef(uri=content://**, mime=$mime, sizeBytes=$sizeBytes)"
 }
 
 /**
@@ -205,14 +205,14 @@ sealed interface SharedContent {
             "SharedContent.TextAndLink(textLen=${text.length}, urlMasked=${ShareMasking.summary(url)}, subjectLen=${subject?.length ?: 0})"
     }
 
-    data class Images(val image: SharedImage) : SharedContent {
+    data class Images(val image: ShareImageRef) : SharedContent {
         override val parts: List<SharePart> get() = emptyList()
         override val analysableText: String get() = ""
         override val isAnalysable: Boolean get() = true
         override fun toString(): String = "SharedContent.Images($image)"
     }
 
-    data class MultipleImages(val images: List<SharedImage>) : SharedContent {
+    data class MultipleImages(val images: List<ShareImageRef>) : SharedContent {
         override val parts: List<SharePart> get() = emptyList()
         override val analysableText: String get() = ""
         override val isAnalysable: Boolean get() = images.isNotEmpty()
@@ -246,7 +246,7 @@ sealed interface SharedContent {
  * Pure decision core: turns the raw fields of a share intent into [SharedContent].
  *
  * Reads nothing. Opens nothing. Resolves nothing. Every URI is treated as an opaque string, and
- * bounded byte access only happens later through [ByteSource] after the user accepts the review.
+ * bounded byte access only happens later through [ShareByteSource] after the user accepts the review.
  */
 object SharePayloadParser {
 
@@ -345,7 +345,7 @@ object SharePayloadParser {
             return SharedContent.Rejected(ShareRejectReason.NO_URI)
         }
 
-        val accepted = ArrayList<SharedImage>(streams.size)
+        val accepted = ArrayList<ShareImageRef>(streams.size)
         var totalBytes = 0L
         for (ref in streams) {
             val mime: String = ref.effectiveMime
@@ -380,7 +380,7 @@ object SharePayloadParser {
                     )
                 }
             }
-            accepted += SharedImage(uriString = ref.uriString!!, mime = mime, sizeBytes = size)
+            accepted += ShareImageRef(uriString = ref.uriString!!, mime = mime, sizeBytes = size)
         }
 
         return if (accepted.size == 1) {
@@ -441,7 +441,7 @@ data class IncomingShare(
 }
 
 /** Bounded byte access to one shared stream. Adapter-implemented; the bound is not negotiable. */
-interface ByteSource {
+interface ShareByteSource {
     val declaredMime: String?
     val sizeBytes: Long?
 
@@ -493,7 +493,7 @@ class ShareBoundExceeded(val read: Long, val remaining: Long, val limit: Long) :
  * Opens nothing. It reads intent extras and, when a [resolver] is supplied, only provider
  * *metadata* (MIME via `getType`, size via `OpenableColumns.SIZE`) - never the stream bytes,
  * never a URL, never a destination. Bytes stay unread until the user accepts the review and
- * [ContentUriByteSource] is used.
+ * [ContentUriShareByteSource] is used.
  *
  * Call off the main thread when passing a [resolver]: a metadata query is a cross-process call.
  */
@@ -599,11 +599,11 @@ private fun ContentResolver.safeSize(uri: Uri?): Long? {
  * throws [ShareBoundExceeded] instead of silently truncating - a truncated image would be a lie
  * to the OCR stage. Nothing is written to disk and no bytes are retained by this class.
  */
-class ContentUriByteSource(
+class ContentUriShareByteSource(
     private val resolver: ContentResolver,
     private val uri: Uri,
     private val capBytes: Long = ShareBounds.MAX_TOTAL_BYTES,
-) : ByteSource {
+) : ShareByteSource {
 
     override val declaredMime: String? get() = resolver.safeType(uri)
 
