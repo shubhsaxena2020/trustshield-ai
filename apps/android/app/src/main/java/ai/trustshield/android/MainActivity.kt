@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import ai.trustshield.android.ui.navigation.AppNavHost
@@ -26,9 +27,11 @@ class MainActivity : ComponentActivity() {
      * starts at Home.
      */
     private var requestedEntry: AppRoute? by mutableStateOf(null)
+    private var entrySequence by mutableIntStateOf(0)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        entrySequence = savedInstanceState?.getInt(STATE_ENTRY_SEQUENCE) ?: 0
         // Edge-to-edge from API 26 up: bar icon colours follow the system light/dark setting, so the
         // status bar is never light-on-light. Insets are consumed by AppNavHost (safeDrawingPadding).
         enableEdgeToEdge()
@@ -38,7 +41,7 @@ class MainActivity : ComponentActivity() {
                 // The back stack itself is restored by AppNavHost via rememberSaveable, so process
                 // recreation returns the user to the same screen; `requestedEntry` only matters when
                 // nothing was saved, or when a genuinely new intent arrives.
-                AppNavHost(entry = requestedEntry) { route ->
+                AppNavHost(entry = requestedEntry, entrySequence = entrySequence) { route ->
                     TrustShieldRouteContent(route)
                 }
             }
@@ -53,9 +56,21 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        requestedEntry = routeFromIntent(intent)
+        routeFromIntent(intent)?.let { route ->
+            requestedEntry = route
+            entrySequence++
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putInt(STATE_ENTRY_SEQUENCE, entrySequence)
+        super.onSaveInstanceState(outState)
     }
 
     private fun routeFromIntent(intent: Intent?): AppRoute? =
         AppRoute.fromWire(intent?.getStringExtra(AppRoute.EXTRA_ROUTE))
+
+    private companion object {
+        const val STATE_ENTRY_SEQUENCE = "trustshield.entry_sequence"
+    }
 }

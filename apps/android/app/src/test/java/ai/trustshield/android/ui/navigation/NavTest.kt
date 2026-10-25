@@ -248,6 +248,16 @@ class NavTest {
         assertEquals(listOf("home", "result"), entry.serialise())
     }
 
+    @Test
+    fun restoredIntentSequenceDoesNotReplayTheOriginalLaunchEntry() {
+        assertFalse(shouldApplyIntentEntry(AppRoute.RESULT, requestSequence = 3, lastAppliedSequence = 3))
+    }
+
+    @Test
+    fun aNewIntentSequenceAppliesEvenWhenItRepeatsTheSameRoute() {
+        assertTrue(shouldApplyIntentEntry(AppRoute.RESULT, requestSequence = 4, lastAppliedSequence = 3))
+    }
+
     // ------------------------------------------------------------------ equality semantics
 
     @Test

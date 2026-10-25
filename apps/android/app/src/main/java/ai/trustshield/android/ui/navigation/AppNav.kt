@@ -80,16 +80,21 @@ fun AppNavHost(
     modifier: Modifier = Modifier,
     initial: NavBackStack = NavBackStack.Home,
     entry: AppRoute? = null,
+    entrySequence: Int = 0,
     content: @Composable (AppRoute) -> Unit
 ) {
     val state: MutableState<NavBackStack> =
         rememberSaveable(stateSaver = NavBackStackSaver) { mutableStateOf(initial) }
+    val lastAppliedEntrySequence = rememberSaveable { mutableStateOf(Int.MIN_VALUE) }
 
-    // Intent re-entry. Guarded on `current != entry` so a restored stack is not thrown away when the
-    // activity is recreated with the same intent (the common case).
-    LaunchedEffect(entry) {
-        if (entry != null && state.value.current != entry) {
-            state.value = NavBackStack.fromIntentEntry(entry.wireName)
+    // A saved marker prevents the activity's original launch intent from replacing a restored stack.
+    // A monotonically increasing request sequence still lets onNewIntent handle repeated same-route intents.
+    LaunchedEffect(entry, entrySequence) {
+        if (shouldApplyIntentEntry(entry, entrySequence, lastAppliedEntrySequence.value)) {
+            if (state.value.current != entry) {
+                state.value = NavBackStack.fromIntentEntry(entry?.wireName)
+            }
+            lastAppliedEntrySequence.value = entrySequence
         }
     }
 

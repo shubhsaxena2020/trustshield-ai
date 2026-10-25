@@ -55,6 +55,10 @@ enum class AppRoute(val wireName: String) {
     }
 }
 
+/** A route request is new only when its activity-maintained sequence differs from the saved one. */
+internal fun shouldApplyIntentEntry(entry: AppRoute?, requestSequence: Int, lastAppliedSequence: Int): Boolean =
+    entry != null && requestSequence != lastAppliedSequence
+
 /**
  * Immutable back stack over [AppRoute].
  *
