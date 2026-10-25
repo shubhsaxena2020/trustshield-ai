@@ -30,7 +30,7 @@ Open Call Shield and choose **Demo script mode**. Tap through the report's four 
 
 ## 2:35â€“3:00 â€” Show QR simulation and Settings
 
-Open QR Guard, choose **Simulate scan**, and show its explicit simulation disclosure and mismatch result. Then open Settings and briefly show language, theme, sensitivity and haptics controls. Do not claim the settings survive a force-stop/relaunch until the pending P3-18 restart check is complete.
+Open QR Guard, choose **Simulate scan**, and show its explicit simulation disclosure and mismatch result. Then open Settings and briefly show language, theme, sensitivity and haptics controls. A force-stop/relaunch check confirmed saved theme, language, sensitivity and haptics choices reload; dark-theme contrast remains under #123.
 
 ## Honest limits to state if asked
 
