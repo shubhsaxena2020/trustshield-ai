@@ -78,12 +78,22 @@ class CallScreenTest {
         assertEquals(RiskTone.NEUTRAL, afterChunk.tone)
         assertNull(afterChunk.alert)
 
-        // Consent alone is not enough to start listening...
+        // Consent alone is not enough: permission and recognition must be affirmatively ready.
         val consented = CallShieldReducer.reduce(state, CallEvent.GiveConsent)
         assertEquals(SessionPhase.IDLE, consented.phase)
+        assertFalse(consented.canStart)
 
-        // ...and Start then works.
-        val listening = CallShieldReducer.reduce(consented, CallEvent.Start)
+        val stillWaiting = CallShieldReducer.reduce(consented, CallEvent.Start)
+        assertEquals(SessionPhase.IDLE, stillWaiting.phase)
+
+        val permissionGranted = CallShieldReducer.reduce(consented, CallEvent.MicPermissionGranted)
+        assertFalse(permissionGranted.canStart)
+        assertEquals(SessionPhase.IDLE, CallShieldReducer.reduce(permissionGranted, CallEvent.Start).phase)
+
+        val recognizerReady = CallShieldReducer.reduce(permissionGranted, CallEvent.RecognizerAvailable)
+        assertTrue(recognizerReady.canStart)
+
+        val listening = CallShieldReducer.reduce(recognizerReady, CallEvent.Start)
         assertEquals(SessionPhase.LISTENING, listening.phase)
         assertEquals(BlockReason.NONE, listening.blocked)
     }

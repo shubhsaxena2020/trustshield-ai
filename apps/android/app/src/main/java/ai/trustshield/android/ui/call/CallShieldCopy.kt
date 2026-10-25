@@ -75,8 +75,8 @@ object CallShieldCopy {
     }
     val consentAction = ToneCopy("Main samajh gaya, anumati deta hoon", "I understand, give permission")
     val consentGiven = ToneCopy(
-        "Anumati di gayi. Neeche se session shuru karein.",
-        "Permission given. Start the session below."
+        "Anumati note hui. Mic aur speech check ke baad hi session shuru hoga.",
+        "Permission noted. The session starts only after microphone and speech checks."
     )
 
     // ---- controls -------------------------------------------------------------------------------

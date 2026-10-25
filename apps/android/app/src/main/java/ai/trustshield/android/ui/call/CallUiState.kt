@@ -204,8 +204,8 @@ data class CallUiState(
     /** True when the screen may offer the primary Start control. */
     val canStart: Boolean
         get() = consent == ConsentState.GIVEN &&
-            permission != MicPermission.DENIED &&
-            recognizer != RecognizerStatus.UNAVAILABLE
+            permission == MicPermission.GRANTED &&
+            recognizer == RecognizerStatus.AVAILABLE
 }
 
 fun emptyStageChips(): List<StageChip> = CallStage.ordered.map { StageChip(it) }
@@ -370,6 +370,10 @@ object CallShieldReducer {
 
         state.recognizer == RecognizerStatus.UNAVAILABLE ->
             state.copy(phase = SessionPhase.IDLE, blocked = BlockReason.RECOGNIZER_UNAVAILABLE)
+
+        // Unknown capability is not permission to claim an active listening session.
+        state.permission != MicPermission.GRANTED || state.recognizer != RecognizerStatus.AVAILABLE ->
+            state.copy(phase = SessionPhase.IDLE, blocked = BlockReason.NONE)
 
         // A stopped session is finished; Start begins a NEW one with a clean sheet.
         state.phase == SessionPhase.STOPPED -> state.copy(
