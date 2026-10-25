@@ -232,7 +232,10 @@ class NormalizedText private constructor(
     }
 }
 
-/** Produces [NormalizedText] from raw user input. Implemented by A02; faked in other packages' tests. */
-interface TextNormalizer {
+/**
+ * Produces [NormalizedText] from raw user input. Implemented by A02; faked in other packages' tests
+ * as `TextNormalizer { NormalizedText.identity(it) }`.
+ */
+fun interface TextNormalizer {
     fun normalize(raw: String): NormalizedText
 }
