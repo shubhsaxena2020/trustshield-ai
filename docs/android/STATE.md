@@ -31,3 +31,12 @@ Branch: `android-finals`. Phase: **2 active; three Hermes sessions launched on i
 - Attempt sdkmanager/emulator/AVD and document result; real phone install, Call Shield and QR acceptance remain owner-dependent. See `NEEDS_SHUBH.md`.
 - Whole-repo GitHub CI remains red on audit findings #57 and private frozen/holdout fixtures; these are tracked separately from Android.
 
+
+## Phase 2 handoff update (~22:05 IST, 2026-10-25)
+
+- #54 is merged (see commit 3192770 and evidence above). Android 16 emulator baseline is recorded above: base APK installed and one monkey event injected; this is scaffold launch evidence only.
+- Per head report, Nila Claude-opus-4-6-thinking failed around 21:54 with provider 503/connect timeouts. Owner temporarily switched Hermes main and agent1/agent2/agent3 profiles to shubh-void/claude-opus-4-8; head relaunched the three sessions from /tmp/android/agentN.prompt.txt, with /tmp/android/agentN.log logs. Codex did not relaunch or change models.
+- Phase 2 is active. Monitor the three existing worktrees and review/merge worker PRs one at a time. Stop and report if any session dies or its log shows provider errors. Keep the APK buildable with ./gradlew testDebugUnitTest lintDebug assembleDebug; update this state after each phase.
+
+
+- 2026-10-25 22:04:22 +05:30: Re-ran the requested Android gate on android-finals: testDebugUnitTest lintDebug assembleDebug BUILD SUCCESSFUL (50 actionable tasks); unit tests remain NO-SOURCE on the scaffold. This is the pre-feature integration baseline.
