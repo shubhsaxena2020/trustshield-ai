@@ -322,9 +322,57 @@ data class ResultUiState(
     /**
      * The TalkBack announcement for the whole panel: **risk first, then confidence**, exactly the
      * order QUALITY_GATES section 6 asks for (evidence follows separately, card by card).
+     *
+     * [score] is optional and is *spoken only*: when the host knows the engine's figure it is appended
+     * as the third clause, because a screen reader should still hear the number even though the screen
+     * deliberately draws no number (see [RiskScoreSpeech]). Passing `null` keeps the previous wording
+     * byte for byte, so the announcement never invents a figure it was not given.
      */
-    fun screenDescription(language: UiLanguage = UiLanguage.Default): String =
-        risk.contentDescription.pick(language) + ". " + confidence.label.pick(language) + "."
+    fun screenDescription(language: UiLanguage = UiLanguage.Default, score: Int? = null): String {
+        val head = risk.contentDescription.pick(language) + ". " + confidence.label.pick(language) + "."
+        return if (score == null) head else head + " " + RiskScoreSpeech.announcement(score, language)
+    }
+}
+
+// ---------------------------------------------------------------------------------------------
+// Risk score -- spoken, never drawn (issue #115)
+// ---------------------------------------------------------------------------------------------
+
+/**
+ * The wording for the deterministic score behind the band, for TalkBack only.
+ *
+ * The Result screen draws a coarse four-step band and no figure, because a precise-looking number
+ * implies precision the local rules do not have (UI_SPEC "Tokens and motion"). Issue #115 was the
+ * opposite mistake: the navigation host drew `Text("Risk score: 70/100")` above the header row, so a
+ * bare line sat in the status-bar zone. The number now reaches users through
+ * [ResultUiState.screenDescription]'s content description only -- it is never passed to a `Text`.
+ *
+ * [VISIBLE_LITERAL] is the exact stray label that must not come back; keeping it here (rather than in
+ * a comment) lets `ResultScreenStrayTextTest` assert the predicate over every string the screen draws.
+ */
+object RiskScoreSpeech {
+
+    /** The stray user-visible label removed in issue #115. */
+    const val VISIBLE_LITERAL: String = "Risk score"
+
+    /** True when [text] is (or contains) the stray score line -- the regression predicate. */
+    fun isStrayScoreLine(text: String): Boolean =
+        text.contains(VISIBLE_LITERAL, ignoreCase = true)
+
+    /**
+     * Spoken form of [score] out of 100.
+     *
+     * Clamped to 0..100 so a bad engine value cannot be read out as "140/100"; the spoken phrasing is
+     * Hinglish by default like the rest of the screen, and "out of" is spelled out because TalkBack
+     * reads a slash as noise.
+     */
+    fun announcement(score: Int, language: UiLanguage = UiLanguage.Default): String {
+        val clamped = score.coerceIn(0, 100)
+        return when (language) {
+            UiLanguage.ENGLISH -> "$VISIBLE_LITERAL $clamped out of 100"
+            UiLanguage.HINGLISH -> "$VISIBLE_LITERAL $clamped, 100 mein se"
+        }
+    }
 }
 
 // ---------------------------------------------------------------------------------------------
