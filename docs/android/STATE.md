@@ -1,7 +1,15 @@
-# Android program state
+﻿# Android program state
 
-Branch: `android-finals`. Phase: **2 active; three Hermes sessions launched on isolated worktrees**. No website, production, dataset holdout, trained model or `.env` changes.
+Branch: `android-finals`. Phase: **3 active; Codex foundation pushed, 18 new P0 packages tracked; fresh Hermes sessions launching.** No website, production, dataset holdout, trained model or `.env` changes.
 
+## Phase 3 progress (2026-10-26)
+
+- Main checkout fast-forwarded from `5476c7a` to `2de982c8f2cbe02e00cd4b2b074df4600b5da135`; the locally untracked Phase 3 order was copied before fast-forward and compared byte-for-byte with the fetched tracked order. All unrelated untracked paths, including `.playwright*` and `agent-workspaces/`, remain untouched.
+- Codex foundation commit `fe7f54e6701887b50a54723a73838db52e5105d2` was pushed to `android-finals`: CameraX 1.6.2, bundled ML Kit barcode 17.3.0 and Latin/Devanagari text recognition 16.0.1, core splash screen, Compose/AndroidX instrumentation dependencies, CAMERA/RECORD_AUDIO optional-device declarations, SEND/SEND_MULTIPLE text/image filters, app label, adaptive/monochrome icon and splash theme. Backend/network access was not enabled.
+- `:app:testDebugUnitTest :app:lintDebug :app:assembleDebug :app:assembleDebugAndroidTest` succeeded. JVM tests: 630 passed, 0 failed, 0 skipped. The installed APK starts on `emulator-5554`; package queries resolve TrustShield for text SEND, image SEND and image SEND_MULTIPLE. APK is 80,770,326 bytes, SHA-256 `2B8D204ADEAE1EF98170EABB4DBE8B97811A76A815221E97863BFB4E9D3AD6A2`.
+- Phase 3 package map is `PHASE3_PACKAGES.md`; issues #80-#97 each carry `android` and `p0`. 9Router `/v1/models` check returned HTTP 200 and includes `shubh-void/claude-opus-4-8`.
+- Old Phase 2 `agent1` and `agent3` processes had empty logs and no commits for more than 20 minutes; those processes were stopped to free the named profiles. Their worktrees, branches, issue records, and logs were retained. No open Phase 2 PRs were present at the check. The fresh Phase 3 sessions use new isolated worktrees under `C:\Users\shubh\trustshield-android-p3\`.
+- Real scan/share/OCR/call/QR flows and screenshot evidence are not yet integrated; no Phase 3 done item is claimed complete.
 ## Phase 1 evidence
 
 - Head orders and senior report read; repo API/fusion/normalization/QR, finals reports, extension scaffold and web design context inspected. Existing Graphify graph queried. Official Android, Google, Gradle and WhatsApp source pages checked; `ARCHITECTURE.md` records corrections.
@@ -11,7 +19,7 @@ Branch: `android-finals`. Phase: **2 active; three Hermes sessions launched on i
 - Debug APK `apps/android/app/build/outputs/apk/debug/app-debug.apk`: 10,090,308 bytes; `ai.trustshield.android`, minSdk 26, target/compile SDK 36; SHA-256 `A39995443D4C79EC91A0443C27905F5A0508A86EC17BEF51DD6A8079A408F766`. `apksigner verify --print-certs` passed with the Android Debug certificate.
 - `:app:testDebugUnitTest :app:lintDebug` **BUILD SUCCESSFUL in 43s**. Unit tests are `NO-SOURCE` at hello-world stage; lint completed.
 - `adb devices`: no phone. SDK has no emulator executable/system image/AVD, and firmware virtualization was reported disabled. No install or launch claim.
-- Build-proof PR #52 merged as `b332e08c24f2f1d9c41bc057d3c7e437654c7697` and pulled to `android-finals`. Package issues #24–#49 and #51 plus Phase 1 tracker #50 opened with labels `android` and priorities.
+- Build-proof PR #52 merged as `b332e08c24f2f1d9c41bc057d3c7e437654c7697` and pulled to `android-finals`. Package issues #24â€“#49 and #51 plus Phase 1 tracker #50 opened with labels `android` and priorities.
 - Planning PR #53 merged as `ccb52adb651d3e54f71c740cd698471ac9714121`. All required files exist, `PLAN_SUMMARY.md` has 12 lines, all 27 package IDs and issue labels checked, and the plan was re-read for contradictions. Phase 1 tracker #50 was closed with evidence; package issues remain open.
 - Remote PR #52/#53 CI: frontend passed; backend failed because `requirements-lock.txt` omits `defusedxml`; security failed on existing `requirements-api.lock.txt` versions of certifi, filelock and pillow; container/gate skipped. No Phase 1 diff touches the Python lockfiles or workflow. Defect tracked as #54. This is a **red remote CI gate**, not an Android build failure.
 
@@ -88,3 +96,4 @@ Branch: `android-finals`. Phase: **2 active; three Hermes sessions launched on i
 - 2026-10-25 23:56 IST: C05 PR #77 merged as 6eba05c. Capability-based speech disclosure and conservative retention copy passed 26 tests plus the full Android gate on PR and merged base. Issue #46 closed. B05/A05 are not yet wired to the screen.
 - 2026-10-26 00:09 IST: A05 (#78) is merged at `8ecdfc4`; issue #28 closed. Review fix added two A03 ask-detection regressions. Clean PR gate: 630 JVM tests, lint, and assembleDebug passed. Merged-tree tests and APK build passed (APK SHA-256 `993DD980F2B4342A90743117EDA36CAB0722CC75A0C2D6669FED6234A75E16F7`), while post-merge lint retries hit a locked Compose lint-cache jar; PR-tree lint was green. Only open PR observed: #79 C-integration. C04 selected sensitivity still has no scoring effect, and result/call screens are not yet wired to A05. Backend history raw-summary/OCR retention remains a separate privacy caveat; enrichment stays disabled by default.
 - 2026-10-26 00:18 IST: C-integration (#79) merged at `e56a895`. Codex removed already-merged C05 history from its PR diff, persisted screen language toggles, and closed Call Shield's fail-open UNKNOWN readiness gate. PR-tree full gate passed: 630 JVM tests, lint, APK build. Merged-base tests and APK build passed; SHA-256 `F776B9B16F47DDBEF58C60044DE1669711273BA9A625191D00F4B937D4F2D5E3`. Post-merge lint remains blocked by the Compose registry jar file lock in this worktree; lint passed on the exact PR tree. No open PR observed. Remaining integration gaps: Home/Scan placeholder, labelled Result fixture, Call Shield B04/B05 host wiring, QR camera/parser/watcher host wiring, C04 sensitivity not connected to scoring. Backend raw-summary/OCR history caveat remains; enrichment is disabled by default.
+
