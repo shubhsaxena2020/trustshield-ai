@@ -14,7 +14,7 @@ Created after the main checkout fast-forwarded to `2de982c8f2cbe02e00cd4b2b074df
 
 | ID / issue | Scope | Exclusive files | Dependencies | Done when |
 |---|---|---|---|---|
-| [P3-01 #80](https://github.com/shubhsaxena2020/trustshield-ai/issues/80) | Build the real scan input screen | `apps/android/app/src/main/java/ai/trustshield/android/ui/home/ScanScreen.kt`<br>`apps/android/app/src/test/java/ai/trustshield/android/ui/home/ScanScreenTest.kt` | P3-02, P3-06 | Multiline paste field, paste/clear, bounded character count with truncation notice, example chips, offline check action, and complete empty/error states. |
+| [P3-01 #80](https://github.com/shubhsaxena2020/trustshield-ai/issues/80) | Build the real scan input screen | `apps/android/app/src/main/java/ai/trustshield/android/ui/home/ScanScreen.kt`<br>`apps/android/app/src/test/java/ai/trustshield/android/ui/home/ScanScreenTest.kt` | P3-02 | Multiline paste field, paste/clear, bounded character count with truncation notice, example chips, offline check action, and complete empty/error states. |
 | [P3-02 #81](https://github.com/shubhsaxena2020/trustshield-ai/issues/81) | Wire the offline local analysis pipeline | `apps/android/app/src/main/java/ai/trustshield/android/core/analysis/LocalScanPipeline.kt`<br>`apps/android/app/src/test/java/ai/trustshield/android/core/analysis/LocalScanPipelineTest.kt` | A01-A05 | Run normalization, stage rules, legitimate indicators and A05 fusion fully offline; keep risk separate from confidence and exact source quotes; fail to Unable to Verify when unsupported. |
 | [P3-03 #82](https://github.com/shubhsaxena2020/trustshield-ai/issues/82) | Add seven Hinglish scan regression fixtures | `apps/android/app/src/test/java/ai/trustshield/android/core/analysis/DemoMessagesTest.kt`<br>`apps/android/app/src/test/java/ai/trustshield/android/core/analysis/DemoMessages.kt` | P3-02 | Cover SBI KYC/OTP, digital arrest, electricity bill, job fee, legitimate OTP, credit alert and delivery OTP; assert sensible scam/legit bands and report misses honestly. |
 | [P3-04 #83](https://github.com/shubhsaxena2020/trustshield-ai/issues/83) | Add bundled Latin and Devanagari OCR adapter | `apps/android/app/src/main/java/ai/trustshield/android/input/share/MlKitTextRecognizer.kt`<br>`apps/android/app/src/androidTest/java/ai/trustshield/android/input/share/MlKitTextRecognizerTest.kt` | P3-02 | Recognize Latin and Devanagari with bundled ML Kit; honor B07 bounds; keep bitmap/text ephemeral and never log or persist content. |
@@ -69,3 +69,5 @@ Created after the main checkout fast-forwarded to `2de982c8f2cbe02e00cd4b2b074df
 - P3-16: #95 — Android Phase 3: Connect sensitivity setting to scoring behavior
 - P3-17: #96 — Android Phase 3: Apply saved language, theme and haptics consistently
 - P3-18: #97 — Android Phase 3: Verify accessibility and end-to-end emulator journeys
+
+
