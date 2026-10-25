@@ -182,23 +182,28 @@ class NormalizedText private constructor(
 
     /** Raw start offset of normalized index [index], clamped to `[0, raw.length]`. */
     fun rawStart(index: Int): Int = when {
-        index <= 0 -> 0
+        text.isEmpty() -> 0
+        index <= 0 -> starts[0].coerceIn(0, raw.length)
         index >= text.length -> raw.length
         else -> starts[index].coerceIn(0, raw.length)
     }
 
     /** Raw end offset of normalized index [index], clamped to `[0, raw.length]`. */
     fun rawEnd(index: Int): Int = when {
-        index <= 0 -> 0
+        text.isEmpty() -> 0
+        index <= 0 -> ends[0].coerceIn(0, raw.length)
         index >= text.length -> raw.length
         else -> ends[index].coerceIn(0, raw.length)
     }
 
     /** Map a normalized half-open range back to a raw span. */
     fun spanOf(normalizedStart: Int, normalizedEnd: Int): TextSpan {
-        val start = rawStart(normalizedStart.coerceIn(0, text.length))
-        val end = rawEnd((normalizedEnd - 1).coerceIn(0, maxOf(text.length - 1, 0)))
-        return if (end >= start) TextSpan(start, end) else TextSpan(start, text.length.coerceAtMost(raw.length))
+        val startIndex = normalizedStart.coerceIn(0, text.length)
+        val endIndex = normalizedEnd.coerceIn(startIndex, text.length)
+        val start = if (startIndex == text.length) raw.length else rawStart(startIndex)
+        if (startIndex == endIndex) return TextSpan(start, start)
+        val end = rawEnd(endIndex - 1)
+        return if (end >= start) TextSpan(start, end) else TextSpan(start, start)
     }
 
     /** Raw text for a normalized range, taken from the raw input (never from substituted text). */
