@@ -446,6 +446,90 @@ private val URGENCY_RULES: List<Rule> = listOf(
 // Stage 4 — SECRECY / isolation. Alone: MEDIUM/MODERATE ("moderate with a claim/threat").
 // ---------------------------------------------------------------------------------------------
 
+/**
+ * Isolation / intimidation framing. Mirrors the vocabulary A04 uses for the same decision, so the
+ * two modules agree on what "isolation pressure" looks like. When any of this sits in the same
+ * sentence as a tell-family phrase, that phrase is the scam's stage 4 and the credential-scoped
+ * skip below must not be applied.
+ */
+private const val SECRECY_THREAT_FRAMING =
+    "(?:warna|varna|nahi\\s+to|confidential|gopniya|गोपनीय|\\bfir\\b|एफआईआर|police|पुलिस|cbi|सीबीआई|" +
+        "customs|narcotics|arrest|giraftar|गिरफ़्तार|गिरफ्तार|raid|legal\\s+action|digital\\s+arrest|" +
+        "case\\s+(?:hai|darj|registered)|chhup\\w*|chupa\\w*|video\\s+call|call\\s+cut|akele|अकेले)"
+
+/** Verbs that turn a nearby credential into a *request* instead of advice. Never skipped. */
+private const val SECRECY_ASK_VERB =
+    "(?:batao|bata\\s*do|batado|bata\\s*de|bhejo|bhej\\s*do|bhej\\s*de|de\\s*do|dedo|" +
+        "share\\s*karo|send|forward|reply|bol\\s*do|bolo|daal\\s*do|daalo|likho)"
+
+/**
+ * Roman-Hindi imperatives that turn the *tail* of the sentence into a request. Narrower than
+ * [SECRECY_ASK_VERB] on purpose: English "send"/"forward" in a tail is ordinary bank boilerplate
+ * ("we will never send you a link"), a bare Hindi imperative after a protective clause is not.
+ */
+private const val SECRECY_TRAILING_ASK =
+    "(?:batao|bata\\s*do|bata\\s*dena|batado|bata\\s*de|bhejo|bhej\\s*do|bhej\\s*de|de\\s*do|dedo|" +
+        "share\\s*karo|bol\\s*do|bolo|daal\\s*do|daalo)"
+
+/**
+ * Protective, credential-scoped sharing advice — the one construction that must never be read as
+ * stage-4 secrecy (issue #114; BEHAVIOR_SPEC "Negation and legitimate pairs", report §3.4).
+ *
+ * Stage 4 is about **isolation**: "kisi ko mat batana" is isolation pressure only when the thing the
+ * sender wants kept quiet is the case itself. When the same sentence scopes the tell-family phrase to
+ * a **credential** ("Yeh OTP kisi ko na batayein", "code kisi ko mat batana"), the speaker is telling
+ * the reader *not to hand the secret over* — that is the bank's own safety line, A04 already emits it
+ * as a legitimate indicator, and the two cards must never contradict each other.
+ *
+ * Deterministic scoping rule (no clock, no model, no score feedback):
+ *
+ *  1. **Same sentence.** The pattern is anchored to a sentence start (`^` or after `.` `!` `?` `;`
+ *     `|` newline) and never crosses a sentence break, so a credential in a *different* sentence is
+ *     not "the same advice".
+ *  2. **Credential first, adjacent.** A credential noun ([OTP_WORD]: OTP / code / PIN / CVV /
+ *     password / "6 digit code" / ओटीपी …) must appear *before* the tell-family phrase, inside the
+ *     detector's existing `SKIP_WINDOW` (24 chars either side of the secrecy match) and with at most
+ *     16 characters between the noun and the phrase.
+ *  3. **No ask verb in the gap.** If an ask verb (`batao`, `bhejo`, `de do`, `share karo`, …) sits
+ *     between the credential and the phrase, the phrase is not advice about that credential —
+ *     "Mera password hai, batao kisi ko mat" keeps its stage 4.
+ *  4. **Threat scope wins.** If the sentence also carries [SECRECY_THREAT_FRAMING] (`warna`,
+ *     `confidential`, `police`, `FIR`, `arrest`, `case hai`, `video call`, `call cut`, `akele`, …)
+ *     the skip is *not* applied. "Kisi ko mat batana, warna police case kar degi. OTP batao." and
+ *     "Yeh confidential case hai, OTP kisi ko mat batana" keep stage 4; a credential word never
+ *     overrides an explicit threat or isolation clause. The check runs from the sentence start, so
+ *     framing *before* the phrase counts too.
+ *  5. **No ask in the tail.** A Roman-Hindi imperative after the phrase ([SECRECY_TRAILING_ASK]) makes
+ *     the sentence a request — "Aapka OTP 123456 kisi ko mat batana, turant batao" keeps stage 4.
+ *  6. **English share-family.** "Do not share it with anyone" names no credential because "share"
+ *     already implies the secret, and "with anyone / no one" names the protection, so that shape is
+ *     skipped on its own (same reason A04 treats the share-family as protective).
+ *
+ * Known bound: framing further back than the sentence start (or a credential in the previous
+ * sentence, "OTP aaya hai. Ise kisi ko na batayein") does not skip, so the stage-4 card stays. That
+ * direction is deliberate — a visible isolation card is the safe failure, a hidden one is not.
+ *
+ * Not applied: the ask side keeps its own negation guard, and this skip neither adds nor removes an
+ * [AskType]. Residual risk is bounded: a message that pairs credential-scoped advice with a real
+ * unnegated ask still fires stage 5 (weight 30) on its own, so the verdict never drops below the ask
+ * floor because stage 4 was correctly suppressed.
+ */
+private val SKIP_CREDENTIAL_SHARE_ADVICE = rx(
+    "(?:^|[.!?;\\n|])\\s*" +
+        "(?![^.!?;\\n|]{0,80}?$SECRECY_THREAT_FRAMING)" +
+        "(?:" +
+        "(?:(?!$SECRECY_ASK_VERB)[^.!?;\\n|]){0,16}?\\b$OTP_WORD\\b" +
+        "(?:(?!$SECRECY_ASK_VERB)[^.!?;\\n|]){0,16}?" +
+        "(?:kisi\\s+(?:ko|se)|kisi\\s+bhi\\s+ko|ghar\\s+wa\\w*\\s+ko|family\\s+ko|wife\\s+ko|" +
+        "husband\\s+ko|papa\\s+ko|mummy\\s+ko|bachch?on\\s+ko|किसी\\s+को|घर\\s+वालों\\s+को)\\s*" +
+        "(?:mat|na|nahi|nahin|मत|न)\\b" +
+        "|" +
+        "(?:do\\s+not|don'?t|never)\\s+(?:share|disclose|reveal|forward)\\b[^.!?;\\n|]{0,24}?" +
+        "with\\s+(?:anyone|anybody|any\\s*one|no\\s*one|others)" +
+        ")" +
+        "(?![^.!?;\\n|]{0,30}?$SECRECY_TRAILING_ASK)",
+)
+
 private val SECRECY_RULES: List<Rule> = listOf(
     Rule(
         titleHinglish = "Kisi ko batane se roka",
@@ -464,6 +548,8 @@ private val SECRECY_RULES: List<Rule> = listOf(
                     """\b(?:batana|bataye\w*|batao|batana hai|tell|inform|share|bhoolna)\b""",
             ),
         ),
+        // Issue #114: "OTP kisi ko na batayein" is the bank's own safety line, not isolation.
+        skip = SKIP_CREDENTIAL_SHARE_ADVICE,
     ),
     Rule(
         titleHinglish = "Confidential case",
