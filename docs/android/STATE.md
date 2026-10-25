@@ -117,3 +117,5 @@ Branch: `android-finals`. Phase: **3 active; Codex foundation pushed, 18 new P0 
 - 2026-10-26 01:56 IST: P3-01 (#80) scan input component merged and current-base gate passed (778 JVM tests, lint, assemble). It is not yet reachable; navigation and pipeline wiring remain P3-06/P3-18. Known backend/security CI failures are unrelated and tracked separately.
 
 - 2026-10-26 02:08 IST: P3-09 (#88) speech adapter merged. Current-base gate passed (804 JVM tests, lint, assemble). Capability/consent gates and transcript clearing are covered; device ASR/model/offline behavior is unmeasured. Visible host wiring remains P3-10/P3-18.
+
+- 2026-10-26 02:25 IST: P3-13 (#92) CameraX/ML Kit adapter merged. Current-base JVM/lint/build and AndroidTest compilation passed. Device preview, CAMERA prompt/recovery and full QR scan are unverified and remain P3-14/P3-18.
