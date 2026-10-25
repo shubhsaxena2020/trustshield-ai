@@ -25,9 +25,9 @@ import ai.trustshield.android.ui.theme.ToneCopy
 //  * The registered payee id is masked everywhere it can be seen or logged — `RegisteredPayee`,
 //    `ObservedQr` and `QrUiState` all override `toString()` to the masked form.
 //
-// SEAM (B02/B03/B06 do not exist yet — their branches are empty):
-//   B03 camera + QR decode  -> produces `QrEvent.ValidFrame` / `QrEvent.UnreadableFrame`
-//   B02 UPI QR parser       -> validates/normalises `pa` before it reaches this reducer
+// SEAM (B02/B03/B06 are merged; their adapters are not wired into this UI yet):
+//   B03 analyzer + QR decode -> produces `QrEvent.ValidFrame` / `QrEvent.UnreadableFrame`
+//   B02 UPI QR parser        -> validates/normalises `pa` before it reaches this reducer
 //   B06 watcher state machine -> owns the 10-30 s poll loop and calls `QrReducer.reduce`
 // This file does not create `input/qr/**`, open a camera, or depend on CameraX / ML Kit.
 // =====================================================================================================

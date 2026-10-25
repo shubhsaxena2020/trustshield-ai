@@ -68,10 +68,10 @@ import ai.trustshield.android.ui.theme.onSurface
  *  - guidance for permission-denied and no-camera;
  *  - the mandatory "pakka confirmation" line, verbatim.
  *
- * SEAM: this screen never opens a camera and never resolves a QR/URI destination. B03 (camera +
- * decode) and B06 (watch loop) will emit [QrEvent.ValidFrame] / [QrEvent.UnreadableFrame] /
- * [QrEvent.Tick] into the same reducer. CameraX / ML Kit are NOT on the classpath today and must be
- * added by Codex, together with `<uses-permission android:name="android.permission.CAMERA"/>`.
+ * SEAM: this screen never opens a camera and never resolves a QR/URI destination. The merged B03
+ * analyzer and B06 watcher provide the [QrEvent.ValidFrame] / [QrEvent.UnreadableFrame] / [QrEvent.Tick]
+ * inputs, but this UI is not wired to them yet. CameraX / ML Kit dependencies and the CAMERA
+ * permission also remain Codex integration work.
  */
 @Composable
 fun QrGuardScreen(
