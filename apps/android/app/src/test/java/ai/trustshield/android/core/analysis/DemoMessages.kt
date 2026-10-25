@@ -78,16 +78,6 @@ data class DemoResultRow(
  * account, `5000` as an advertised daily earning), which `DemoMessagesTest` pins so nobody can paste
  * a believable phone number, card number or customer id into this file later.
  *
- * ## Known miss, recorded not hidden (measured 2026-10-26, P3-03)
- *
- * Fixture 7 (`delivery-otp`) is expected to stay `LOW_RISK` with no ask, and the engine puts it in
- * `CAUTION` (score 30, confidence HIGH) with an `ASK` stage. Cause: `StageRules` matches the OTP ask
- * pattern `OTP … share` on "share only with the agent at your door", and its negation guard only
- * looks for `na/nahi/mat/not/never`, so an in-person share destination is indistinguishable from a
- * remote request. `LegitimateIndicators` already proves the two rules disagree: the same run reports
- * the `DELIVERY_AT_DOOR` indicator *and* a strong ask. The expectation below is left exactly as the
- * spec states it, so `DemoMessagesTest` fails and names this fixture. The fix belongs to A03
- * (`core/rules/StageRules.kt`), not to this package.
  */
 object DemoMessages {
 
@@ -178,18 +168,16 @@ object DemoMessages {
         ),
         DemoMessage(
             id = ID_ELECTRICITY_BILL,
-            titleHinglish = "Bijli bill: aaj raat kat jayegi + personal number",
-            text = "Aapka bijli bill due date 30 Oct hai. Aaj raat bijli kat jayegi, turant " +
-                "98XXXXXX12 par call karein.",
+            titleHinglish = "Bijli connection cut ki dhamki + personal callback",
+            text = "Bijli vibhag: Aaj raat 9 baje aapka connection kat jayega. Turant is " +
+                "personal number par call karke bill clear karein.",
             expectation = DemoExpectation(
-                allowedLabels = setOf(RiskLabel.LOW_RISK, RiskLabel.CAUTION),
-                requiredStages = setOf(StageId.URGENCY),
-                forbiddenStages = setOf(StageId.ASK),
-                note = "BEHAVIOR_SPEC 'Rule gates': authority or reward with no ask stays low/watch, " +
-                    "and a validated ask is what moves the needle. This message has urgency and a " +
-                    "veiled threat with a personal callback number but no credential, money or " +
-                    "remote-access ask, so it must stay at watch level. It exists to prove the app " +
-                    "does not cry wolf: reaching HIGH_RISK or SUSPICIOUS here would be a false alarm.",
+                allowedLabels = setOf(RiskLabel.CAUTION, RiskLabel.SUSPICIOUS, RiskLabel.HIGH_RISK),
+                requiredStages = setOf(StageId.THREAT_OR_REWARD, StageId.URGENCY, StageId.ASK),
+                forbiddenStages = emptySet(),
+                note = "BEHAVIOR_SPEC report section 3.4: an immediate utility cutoff threat plus " +
+                    "a request to call a personal number differs from a routine due-date notice. " +
+                    "The callback ask is verified separately from the threat and urgency stages.",
             ),
         ),
         DemoMessage(

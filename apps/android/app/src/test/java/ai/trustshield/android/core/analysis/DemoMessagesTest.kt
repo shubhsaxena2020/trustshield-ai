@@ -4,6 +4,7 @@ import ai.trustshield.android.core.model.Confidence
 import ai.trustshield.android.core.model.RiskLabel
 import ai.trustshield.android.core.model.StageId
 import ai.trustshield.android.core.rules.LegitimateIndicators
+import ai.trustshield.android.ui.home.ScanExamples
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -235,23 +236,48 @@ class DemoMessagesTest {
     }
 
     @Test
-    fun `electricity bill fixture never reaches the alarm bands`() {
+    fun `electricity cutoff fixture has a threat urgency and personal callback ask`() {
         val fixture = assertHasFixture(DemoMessages.ID_ELECTRICITY_BILL)
         val outcome = pipeline.analyzeText(fixture.text)
         val where = "electricity-bill (score=${outcome.risk.score} confidence=${outcome.risk.confidence} " +
             "stages=${outcome.result.stages})"
 
-        // BEHAVIOR_SPEC: threat + urgency with no ask stays at watch level. Reaching an alarm band
-        // here is a false alarm on a routine utility message, which is the failure this guards.
-        assertFalse("$where: must not reach HIGH_RISK", outcome.risk.label == RiskLabel.HIGH_RISK)
-        assertFalse("$where: must not reach SUSPICIOUS", outcome.risk.label == RiskLabel.SUSPICIOUS)
-        assertFalse("$where: must not reach UNABLE_TO_VERIFY", outcome.risk.label == RiskLabel.UNABLE_TO_VERIFY)
         assertTrue(
-            "$where: must stay at or below CAUTION, was ${outcome.risk.label}",
-            outcome.risk.label == RiskLabel.LOW_RISK || outcome.risk.label == RiskLabel.CAUTION,
+            "$where: report's cutoff + callback scam should be Medium or higher",
+            outcome.risk.score >= 25,
         )
-        assertFalse("$where: a personal callback number is not a credential or money ask", outcome.verifiedAsk)
-        assertFalse("$where: no ask stage without an ask", outcome.result.stages.contains(StageId.ASK))
+        assertTrue("$where: utility cutoff threat was missed", outcome.result.stages.contains(StageId.THREAT_OR_REWARD))
+        assertTrue("$where: urgency was missed", outcome.result.stages.contains(StageId.URGENCY))
+        assertTrue("$where: callback ask was missed", outcome.result.stages.contains(StageId.ASK))
+        assertTrue("$where: callback ask must be verified", outcome.verifiedAsk)
+    }
+
+    @Test
+    fun `utility cutoff with personal mobile callback is at least medium while due notice stays low`() {
+        val scam = pipeline.analyzeText(
+            "Dear customer, aapka bijli connection aaj raat 9:30 baje kat jayega. " +
+                "Turant is number par call karein 98XXXXXX12."
+        )
+        val legitimate = pipeline.analyzeText(
+            "Your electricity bill of Rs 1,240 is due on 30 Oct. Please pay using the official app."
+        )
+        val exampleChip = ScanExamples.DEFAULT_ENTRIES.single { it.id == "electricity_bill" }
+        val chipOutcome = pipeline.analyzeText(exampleChip.text)
+
+        assertTrue("the cutoff threat must be evidence", scam.result.stages.contains(StageId.THREAT_OR_REWARD))
+        assertTrue("immediate cutoff must be evidence", scam.result.stages.contains(StageId.URGENCY))
+        assertTrue("personal callback request must be an ask", scam.result.stages.contains(StageId.ASK))
+        assertTrue(scam.verifiedAsk)
+        assertTrue(
+            "cutoff plus personal callback should reach at least Medium, was ${scam.risk.score}/${scam.risk.label}",
+            scam.risk.score >= 25,
+        )
+        assertEquals(RiskLabel.LOW_RISK, legitimate.risk.label)
+        assertFalse(legitimate.verifiedAsk)
+        assertFalse(legitimate.result.stages.contains(StageId.THREAT_OR_REWARD))
+        assertTrue("the Bijli bill example chip should be Medium or higher", chipOutcome.risk.score >= 25)
+        assertTrue(chipOutcome.result.stages.contains(StageId.THREAT_OR_REWARD))
+        assertTrue(chipOutcome.result.stages.contains(StageId.ASK))
     }
 
     // ---------------------------------------------------------------------------------------

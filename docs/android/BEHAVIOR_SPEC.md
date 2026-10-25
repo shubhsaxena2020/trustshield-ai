@@ -8,7 +8,7 @@ All stages produce explicit evidence `{id,module,title_hinglish,detail,severity,
 2. **Threat/reward:** account closure, arrest, parcel charge, lottery or outsized return. Alone: weak/watch.
 3. **Urgency:** “abhi”, “aaj raat”, deadline; weak alone.
 4. **Secrecy/isolation:** “kisi ko mat batana”, “call cut mat karna”; moderate with a claim/threat.
-5. **Ask:** OTP/PIN/CVV, money transfer, remote access, APK install, personal data. Action and direction matter. “Do not share OTP” is not an ask.
+5. **Ask:** OTP/PIN/CVV, money transfer, remote access, APK install, personal data, or a request to call a personal mobile number linked to a threat or service cutoff. Action and direction matter. “Do not share OTP” is not an ask.
 
 Rule gates: validated **ask + any two other independent stages** qualifies for high-risk floor; a validated ask alone is at most caution/medium until another corroborating signal; authority or reward with no ask stays low/watch unless a separate strong deterministic signal applies. Identical repeated utterances do not count as independent stages. “Critical” is a UI escalation for a high-risk money/credential ask with multiple corroborations, not a new backend risk label. Sensitivity can move thresholds within documented bounds but cannot suppress a verified strong ask or turn unverified into safe. Local and API results remain separately attributed until the merge is formally tested.
 

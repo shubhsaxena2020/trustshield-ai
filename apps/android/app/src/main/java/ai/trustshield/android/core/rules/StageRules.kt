@@ -19,6 +19,8 @@ enum class AskType {
     APK_INSTALL,
     /** Identity and card data. */
     PERSONAL_INFO,
+    /** A request to call a personal mobile number tied to a threat or service cutoff. */
+    TELEPHONE_CALLBACK,
 }
 
 /** One playbook stage that matched, with the evidence that proves it. */
@@ -307,6 +309,10 @@ private val SKIP_POLICE_AFTER = rx(
 private val SKIP_DELIVERY_SHARE_TO_AGENT = rx(
     """\bshare\s+only\s+with\s+(?:the\s+)?(?:delivery\s+)?agent\b""",
 )
+private val SKIP_PROTECTIVE_CREDENTIAL_WARNING = rx(
+    """\by(?:eh|our)\s+(?:otp|pin|cvv|password|passcode|code)\b""" +
+        """[^.!?\n]{0,20}\bkisi ko na bataye\w*\b""",
+)
 
 // ---------------------------------------------------------------------------------------------
 // Stage 1 — AUTHORITY. Alone: LOW/WEAK (BEHAVIOR_SPEC: "Alone: weak/watch").
@@ -368,8 +374,26 @@ private const val ACCOUNT_NOUN =
 private const val ACCOUNT_HARM =
     "(?:block\\w*|band ho\\w*|band\\b|बंद|suspend\\w*|freez\\w*|deactivat\\w*|close\\w*|closed|expire\\w*|" +
         "restrict\\w*|terminat\\w*|seize\\w*|band ho jayega)"
+private const val PERSONAL_MOBILE = "(?:[6-9]\\d{4}[\\s-]?\\d{5}|[6-9][\\dxX*]{9})"
 
 private val THREAT_RULES: List<Rule> = listOf(
+    Rule(
+        titleHinglish = "Bijli connection kaatne ki dhamki",
+        detail = "Message bijli ya power connection kaatne ka turant darr dikhata hai. Asli bill " +
+            "ko official app ya printed bill par verify karein.",
+        severity = Severity.LOW,
+        strength = Strength.WEAK,
+        patterns = listOf(
+            rx(
+                """\b(?:bijli|electricity|power)\b[^.!?\n]{0,36}?\b(?:connection|supply|line)\b""" +
+                    """[^.!?\n]{0,40}?\b(?:cut|kat\w*|disconnect\w*|band ho\w*)\b""",
+            ),
+            rx(
+                """\b(?:connection|supply|line)\b[^.!?\n]{0,32}?\b(?:cut|kat\w*|disconnect\w*|band ho\w*)\b""" +
+                    """[^.!?\n]{0,32}?\b(?:bijli|electricity|power)\b""",
+            ),
+        ),
+    ),
     Rule(
         titleHinglish = "Account band karne ki dhamki",
         detail = "Message account, KYC, SIM ya card band/suspend hone ki dhamki deta hai. " +
@@ -464,6 +488,7 @@ private val SECRECY_RULES: List<Rule> = listOf(
                     """\b(?:batana|bataye\w*|batao|batana hai|tell|inform|share|bhoolna)\b""",
             ),
         ),
+        skip = SKIP_PROTECTIVE_CREDENTIAL_WARNING,
     ),
     Rule(
         titleHinglish = "Confidential case",
@@ -527,6 +552,29 @@ private val SECRECY_RULES: List<Rule> = listOf(
 // ---------------------------------------------------------------------------------------------
 
 private val ASK_RULES: List<Rule> = listOf(
+    Rule(
+        titleHinglish = "Personal mobile par call karne ko kaha gaya",
+        detail = "Message aapse personal mobile number par call karne ko keh raha hai. Bill ya " +
+            "account ko official app, printed bill ya verified helpline se check karein.",
+        severity = Severity.HIGH,
+        strength = Strength.STRONG,
+        patterns = listOf(
+            rx(
+                """\b$PERSONAL_MOBILE\b[^.!?\n]{0,32}?\b(?:call|phone|contact|dial|call kar\w*|phone kar\w*)\b""",
+            ),
+            rx(
+                """\b(?:call|phone|contact|dial|call kar\w*|phone kar\w*)\b[^.!?\n]{0,32}?\b$PERSONAL_MOBILE\b""",
+            ),
+            rx(
+                """\bpersonal (?:mobile )?number\b[^.!?\n]{0,28}?\b(?:call|phone|contact|dial|call kar\w*|phone kar\w*)\b""",
+            ),
+            rx(
+                """\b(?:call|phone|contact|dial|call kar\w*|phone kar\w*)\b[^.!?\n]{0,28}?\bpersonal (?:mobile )?number\b""",
+            ),
+        ),
+        askType = AskType.TELEPHONE_CALLBACK,
+        guarded = true,
+    ),
     Rule(
         titleHinglish = "OTP/PIN maanga gaya",
         detail = "Message OTP, PIN, CVV ya password wapas maang raha hai. Bank kabhi bhi OTP/PIN " +

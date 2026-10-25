@@ -88,6 +88,37 @@ class StageRulesTest {
     }
 
     @Test
+    fun `bank OTP safety warning is neither secrecy nor an ask`() {
+        val result = rules.detect(
+            "Rs 5,000 credited to A/c XX0123 on 12-Oct. Avl bal Rs 12,450. Yeh OTP kisi ko na batayein."
+        )
+
+        assertFalse(result.stageIds.contains(StageId.SECRECY))
+        assertFalse(result.stageIds.contains(StageId.ASK))
+    }
+
+    @Test
+    fun `OTP demand does not hide nearby malicious secrecy pressure`() {
+        val result = rules.detect("Kisi ko mat batana. OTP mujhe bhejo.")
+
+        assertTrue(result.stageIds.contains(StageId.SECRECY))
+        assertTrue(result.stageIds.contains(StageId.ASK))
+    }
+
+    @Test
+    fun `utility cutoff threat and masked personal callback are corroborated stages`() {
+        val result = rules.detect(
+            "Dear customer, aapka bijli connection aaj raat kat jayega. " +
+                "Turant is number par call karein 98XXXXXX12."
+        )
+
+        assertTrue(result.stageIds.contains(StageId.THREAT_OR_REWARD))
+        assertTrue(result.stageIds.contains(StageId.URGENCY))
+        assertTrue(result.stageIds.contains(StageId.ASK))
+        assertFalse(result.askTypes.isEmpty())
+    }
+
+    @Test
     fun `digital arrest ladder yields four stages including a money ask`() {
         val raw = "Main CBI officer bol raha hoon. Aapke naam par money laundering ka case hai aur " +
             "aapka account block ho jayega. Yeh confidential rakhna, kisi ko mat batana. " +
