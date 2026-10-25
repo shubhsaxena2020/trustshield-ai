@@ -251,13 +251,12 @@ class NormalizerTest {
     }
 
     @Test
-    fun `index zero is pinned to zero by the contract`() {
+    fun `first normalized character maps to its source after trimming`() {
         val n = normalizer.normalize("  OTP batao")
-        assertEquals(0, n.rawStart(0))
-        assertEquals(0, n.rawEnd(0))
-        // The quote is widened by the trimmed whitespace but is still an exact substring.
-        assertEquals("  otp", n.rawQuoteOf(0, 3).lowercase())
-        assertTrue(n.raw.contains(n.rawQuoteOf(0, 3)))
+        assertEquals(2, n.rawStart(0))
+        assertEquals(5, n.rawEnd(0))
+        assertEquals("OTP", n.rawQuoteOf(0, 1))
+        assertEquals("OTP", n.rawQuoteOf(0, 3))
     }
 
     @Test
@@ -328,15 +327,12 @@ class NormalizerTest {
             assertTrue("rawStart($i)=$start must be >= 0", start >= 0)
             assertTrue("rawStart($i)=$start > rawEnd($i)=$end", start <= end)
             assertTrue("rawEnd($i)=$end past raw length ${n.raw.length}", end <= n.raw.length)
-            // rawEnd(0) is pinned to 0 by the A01 contract, so only later indices must be non-empty.
-            if (i >= 1) {
-                val quote = n.rawQuoteOf(i, i + 1)
-                assertTrue("empty quote at $i in <${n.raw}>", quote.isNotEmpty())
-                assertTrue(
-                    "quote <$quote> is not a substring of <${n.raw}>",
-                    n.raw.substring(start, end) == quote,
-                )
-            }
+            val quote = n.rawQuoteOf(i, i + 1)
+            assertTrue("empty quote at $i in <${n.raw}>", quote.isNotEmpty())
+            assertTrue(
+                "quote <$quote> is not a substring of <${n.raw}>",
+                n.raw.substring(start, end) == quote,
+            )
         }
     }
 

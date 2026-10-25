@@ -52,10 +52,8 @@ data class ScriptProfile(
  * Determinism: pure function of the input, no state, no I/O, no `android.*` imports, no clock, so it
  * is safe to call from any thread.
  *
- * Known contract quirk (documented, not worked around): A01 pins `rawStart(0)` and `rawEnd(0)` to `0`
- * regardless of the map, so a match that begins at normalized index 0 yields a *widened but still
- * exact* raw quote (it may include the leading whitespace that trimming removed). Quotes are never
- * invented, only widened.
+ * Trimming and substitutions preserve each normalized character's actual raw source range, including
+ * the first character; evidence quotes therefore do not need special handling at index zero.
  */
 class HinglishNormalizer : TextNormalizer {
 
