@@ -19,6 +19,12 @@ enum class AskType {
     APK_INSTALL,
     /** Identity and card data. */
     PERSONAL_INFO,
+    /**
+     * A callback to a personal number ("is personal number par call karein 98765 43210") - report §3.1
+     * stage 5's "money/info via phone number" and §3.3's "personal number se bank banna". The theft
+     * happens on the call, so the ask is the number, not a URL.
+     */
+    CALLBACK,
 }
 
 /** One playbook stage that matched, with the evidence that proves it. */
@@ -123,6 +129,8 @@ class StageRules(private val normalizer: TextNormalizer) {
 
     /** First accepted occurrence of [pattern] for [rule], skipping protective/skip zones. */
     private fun firstAccepted(text: String, rule: Rule, pattern: Regex): MatchResult? {
+        // Whole-text precondition (see [Rule.requires]): constant for this text, so check it once.
+        if (rule.requires != null && !rule.requires.containsMatchIn(text)) return null
         for (match in pattern.findAll(text)) {
             val start = match.range.first
             val end = match.range.last + 1
@@ -246,7 +254,7 @@ class StageRules(private val normalizer: TextNormalizer) {
 private class Hit(val rule: Rule, val start: Int, val end: Int)
 
 /** A single stage rule: bilingual patterns plus the evidence shape it emits. */
-private class Rule(
+internal class Rule(
     val titleHinglish: String,
     val detail: String,
     val severity: Severity,
@@ -255,6 +263,13 @@ private class Rule(
     val askType: AskType? = null,
     val guarded: Boolean = false,
     val skip: Regex? = null,
+    /**
+     * Whole-text precondition. A rule that only makes sense against a second fact the regex cannot
+     * reach - a personal mobile is only an ask when the same message names a bank or a utility, and
+     * that name may sit in an earlier sentence - declares it here. Checked once per text, outside
+     * the match loop, so it costs nothing and cannot move a quote boundary.
+     */
+    val requires: Regex? = null,
 )
 // ---------------------------------------------------------------------------------------------
 // Pattern compilation
@@ -264,7 +279,7 @@ private class Rule(
  * Convert Java word tokens to explicit Unicode categories because Android rejects (?U).
  * Word boundaries include letters, combining marks, numbers and underscore on both runtimes.
  */
-private fun rx(pattern: String): Regex {
+internal fun rx(pattern: String): Regex {
     val wordChars = "[\\p{L}\\p{M}\\p{N}_]"
     val wordBoundary = "(?:(?<![\\p{L}\\p{M}\\p{N}_])(?=[\\p{L}\\p{M}\\p{N}_])|(?<=[\\p{L}\\p{M}\\p{N}_])(?![\\p{L}\\p{M}\\p{N}_]))"
     val portable = pattern
@@ -415,7 +430,7 @@ private val THREAT_RULES: List<Rule> = listOf(
             rx("""\b(?:selected|select ho gaye|congratulations|badhai ho)\b[^.!?\n]{0,30}?\b(?:job|prize|reward|offer)\b"""),
         ),
     ),
-)
+) + UTILITY_DISCONNECT_RULES
 // ---------------------------------------------------------------------------------------------
 // Stage 3 — URGENCY. Alone: LOW/WEAK ("Akele: weak").
 // ---------------------------------------------------------------------------------------------
@@ -624,7 +639,7 @@ private val ASK_RULES: List<Rule> = listOf(
         askType = AskType.PERSONAL_INFO,
         guarded = true,
     ),
-)
+) + UTILITY_SERVICE_ASK_RULES
 
 // ---------------------------------------------------------------------------------------------
 // Analyzer-directed manipulation ("prompt injection") is DATA, never an instruction. It becomes
