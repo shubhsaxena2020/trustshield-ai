@@ -240,6 +240,17 @@ class SharedImageReaderTest {
     }
 
     @Test
+    fun truncatedWebpChunkHeaderIsCorruptWithoutThrowing() {
+        val header = Bytes().ascii("RIFF").u32le(12).ascii("WEBP").ascii("VP8 ").zeros(3).build()
+        assertEquals(19, header.size)
+
+        val image = reader().read(InMemoryByteSource(header), "image/webp")
+
+        assertFalse(image.accepted)
+        assertEquals(ImageReason.Corrupt, image.reason)
+    }
+
+    @Test
     fun riffThatIsNotWebpIsUnsupported() {
         val riff = Bytes().ascii("RIFF").u32le(16).ascii("WAVE").zeros(8).build()
 

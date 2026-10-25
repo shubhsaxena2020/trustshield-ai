@@ -300,7 +300,7 @@ object ImageHeaderSniffer {
 
     /** WEBP: RIFF container; the first chunk tells us which of the three layouts to read. */
     private fun sniffWebp(b: ByteArray, n: Int): HeaderResult {
-        if (n < 16) return HeaderResult.Corrupt
+        if (n < 20) return HeaderResult.Corrupt // chunk size occupies bytes 16..19
         // A RIFF that is not WEBP is simply a container we do not handle (WAV, AVI, ...).
         if (!tagAt(b, n, 8, "WEBP")) return HeaderResult.UnsupportedType
         val chunkSize = le32(b, 16)
