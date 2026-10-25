@@ -1,9 +1,11 @@
 package ai.trustshield.android.ui.navigation
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
@@ -121,7 +123,12 @@ fun AppNavHost(
     }
 
     CompositionLocalProvider(LocalNavActions provides actions) {
-        Box(modifier = modifier.fillMaxSize().safeDrawingPadding()) {
+        Box(
+            modifier = modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .safeDrawingPadding()
+        ) {
             content(state.value.current)
         }
     }
