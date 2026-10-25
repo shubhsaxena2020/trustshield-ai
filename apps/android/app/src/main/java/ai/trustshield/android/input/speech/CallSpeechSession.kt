@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
@@ -489,6 +490,20 @@ interface RecognizerHandle {
     fun destroy()
 }
 
+/** The explicit platform route selected from the current B04 capability report. */
+enum class SpeechRecognitionMode {
+    OnDevice,
+    DefaultMayUseNetwork,
+}
+
+/** An OnDeviceReady report must use the on-device API; all other usable reports may use default. */
+internal fun recognitionModeFor(report: SpeechCapabilityReport): SpeechRecognitionMode? = when {
+    !report.sessionPossible -> null
+    report.offlineCapable && !report.cloudMayBeUsed -> SpeechRecognitionMode.OnDevice
+    report.cloudMayBeUsed -> SpeechRecognitionMode.DefaultMayUseNetwork
+    else -> null
+}
+
 // ---------------------------------------------------------------------- Android adapter
 
 /**
@@ -513,7 +528,9 @@ interface RecognizerHandle {
 class AndroidSpeechRecognizerHandle(
     private val context: Context,
     private val session: CallSpeechSession,
+    private val capability: SpeechCapabilityReport,
     private val languageTag: String = DEFAULT_LANGUAGE_TAG,
+    private val recognizerFactory: (Context, SpeechRecognitionMode) -> SpeechRecognizer? = ::createPlatformRecognizer,
 ) : RecognizerHandle {
 
     private var recognizer: SpeechRecognizer? = null
@@ -529,7 +546,16 @@ class AndroidSpeechRecognizerHandle(
             session.onRecognizerError(RecognizerErrorCode.CLIENT)
             return
         }
-        val r = SpeechRecognizer.createSpeechRecognizer(context)
+        val mode = recognitionModeFor(capability)
+        if (mode == null) {
+            session.onRecognizerError(RecognizerErrorCode.CLIENT)
+            return
+        }
+        val r = recognizerFactory(context, mode)
+        if (r == null) {
+            session.onRecognizerError(RecognizerErrorCode.CLIENT)
+            return
+        }
         r.setRecognitionListener(Forwarder())
         r.startListening(buildIntent())
         recognizer = r
@@ -549,7 +575,6 @@ class AndroidSpeechRecognizerHandle(
         putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, languageTag)
         putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
         putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
-        putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, true)
     }
 
     private inner class Forwarder : RecognitionListener {
@@ -587,6 +612,18 @@ class AndroidSpeechRecognizerHandle(
 
     companion object {
         const val DEFAULT_LANGUAGE_TAG: String = "hi-IN"
+
+        private fun createPlatformRecognizer(
+            context: Context,
+            mode: SpeechRecognitionMode,
+        ): SpeechRecognizer? = when (mode) {
+            SpeechRecognitionMode.OnDevice -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                SpeechRecognizer.createOnDeviceSpeechRecognizer(context)
+            } else {
+                null
+            }
+            SpeechRecognitionMode.DefaultMayUseNetwork -> SpeechRecognizer.createSpeechRecognizer(context)
+        }
 
         /** `RECORD_AUDIO` must be granted at runtime by whoever owns consent (B04/C05). */
         fun hasAudioPermission(context: Context): Boolean =

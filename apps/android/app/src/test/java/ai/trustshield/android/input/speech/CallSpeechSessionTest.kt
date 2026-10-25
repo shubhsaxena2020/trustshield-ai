@@ -15,6 +15,48 @@ import org.junit.Test
  */
 class CallSpeechSessionTest {
 
+    @Test
+    fun onDeviceCapabilitySelectsOnlyOnDeviceRecognizer() {
+        val report = SpeechCapabilityReport(
+            status = SpeechStatus.OnDeviceReady,
+            languageTag = SpeechLanguage.HI_IN,
+            offlineCapable = true,
+            cloudMayBeUsed = false,
+            degraded = false,
+            reasons = listOf(CapabilityReason.OnDeviceNotMeasured),
+        )
+
+        assertEquals(SpeechRecognitionMode.OnDevice, recognitionModeFor(report))
+    }
+
+    @Test
+    fun cloudCapableReportSelectsExplicitPossiblyNetworkRecognizer() {
+        val report = SpeechCapabilityReport(
+            status = SpeechStatus.CloudOnly,
+            languageTag = SpeechLanguage.EN_IN,
+            offlineCapable = false,
+            cloudMayBeUsed = true,
+            degraded = true,
+            reasons = listOf(CapabilityReason.DefaultRecognizerMayUseNetwork),
+        )
+
+        assertEquals(SpeechRecognitionMode.DefaultMayUseNetwork, recognitionModeFor(report))
+    }
+
+    @Test
+    fun unavailableCapabilityCannotCreateARecognizer() {
+        val report = SpeechCapabilityReport(
+            status = SpeechStatus.Unavailable,
+            languageTag = "fr-FR",
+            offlineCapable = false,
+            cloudMayBeUsed = false,
+            degraded = true,
+            reasons = listOf(CapabilityReason.LanguageNotSelectable),
+        )
+
+        assertNull(recognitionModeFor(report))
+    }
+
     // ------------------------------------------------------------------ fakes
 
     private class MutableClock(var now: Long = 1_000L) {
