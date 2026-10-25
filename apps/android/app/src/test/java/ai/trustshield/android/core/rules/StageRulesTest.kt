@@ -23,6 +23,22 @@ class StageRulesTest {
 
     private val rules = StageRules(TextNormalizer { NormalizedText.identity(it) })
 
+    @Test
+    fun politeBatayeinOtpRequestIsDetectedAsAsk() {
+        val result = rules.detect("Jo OTP aaya hai woh batayein")
+
+        assertTrue(result.stageIds.contains(StageId.ASK))
+        assertEquals(setOf(AskType.OTP_PIN), result.askTypes)
+    }
+
+    @Test
+    fun moneyAskWithIntermediaryAccountInstructionsIsDetected() {
+        val result = rules.detect("₹50,000 RBI verification account mein bhejo")
+
+        assertTrue(result.stageIds.contains(StageId.ASK))
+        assertEquals(setOf(AskType.MONEY_TRANSFER), result.askTypes)
+    }
+
     // ---- F03 core: stage combinations -----------------------------------------------------
 
     @Test
