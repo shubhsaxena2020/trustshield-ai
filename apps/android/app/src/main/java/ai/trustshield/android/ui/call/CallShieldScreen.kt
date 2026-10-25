@@ -58,10 +58,9 @@ import ai.trustshield.android.ui.theme.onSurface
  * consent gating, five-chip stage tracking, the low-confidence hold, the haptic single-shot rule,
  * the stop/clear rules -- lives in `CallUiState.kt`, which is unit-tested on the JVM.
  *
- * // SEAM: nothing here opens a microphone. B05 (`input/speech/CallSpeechSession.kt`) will drive
- * // [CallEvent.Start]/[CallEvent.Stop]/[CallEvent.Tick]/[CallEvent.Chunk]; B04 supplies the mic
- * // permission and recogniser availability events. Until those packages land this screen is a
- * // user-visible session shell with an honest, non-live empty state.
+ * // SEAM: nothing here opens a microphone. The merged B05 session is not wired into this screen
+ * // yet; host integration must drive [CallEvent.Start]/[CallEvent.Stop]/[CallEvent.Tick]/[CallEvent.Chunk]
+ * // and map B04 capability through [SpeechCapabilityReport.toCallRecognitionDisclosure].
  *
  * Honesty rules baked into the copy and layout:
  *  - "profile" of words only, never an accusation against a person;
@@ -250,7 +249,7 @@ private fun ConsentCard(state: CallUiState, onEvent: (CallEvent) -> Unit) {
         )
         Spacer(Modifier.height(TsTokens.SpacingSm))
         Text(
-            text = CallShieldCopy.consentBody.forLanguage(language),
+            text = CallShieldCopy.consentBody(state.recognitionDisclosure).forLanguage(language),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -267,7 +266,7 @@ private fun ConsentCard(state: CallUiState, onEvent: (CallEvent) -> Unit) {
 }
 
 // -------------------------------------------------------------------------------------------------
-// Status: mic, offline/backend label, active timer, session controls
+// Status: mic, recognition-path/backend disclosure, active timer, session controls
 // -------------------------------------------------------------------------------------------------
 
 @Composable
@@ -294,7 +293,7 @@ private fun StatusCard(state: CallUiState, onEvent: (CallEvent) -> Unit) {
                 )
                 Spacer(Modifier.height(TsTokens.SpacingXs))
                 Text(
-                    text = CallShieldCopy.analysisLocal.forLanguage(language),
+                    text = CallShieldCopy.analysisDisclosure(state.recognitionDisclosure).forLanguage(language),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

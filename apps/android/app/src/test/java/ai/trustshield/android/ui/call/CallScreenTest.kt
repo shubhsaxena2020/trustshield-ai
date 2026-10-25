@@ -445,7 +445,7 @@ class CallScreenTest {
         val all = listOf(
             CallShieldCopy.subtitle,
             CallShieldCopy.honestyNote,
-            CallShieldCopy.consentBody,
+            CallShieldCopy.consentBody(RecognitionDisclosure.NOT_CHECKED),
             CallShieldCopy.warningCaution,
             CallShieldCopy.warningHigh,
             CallShieldCopy.warningCritical,
@@ -471,11 +471,62 @@ class CallScreenTest {
         val text = (CallShieldCopy.subtitle.hinglish + " " + CallShieldCopy.subtitle.english +
             " " + CallShieldCopy.honestyNote.hinglish + " " + CallShieldCopy.honestyNote.english).lowercase()
         assertTrue(text.contains("mic"))
-        assertFalse(text.contains("record") )
+        assertFalse(text.contains("records the other side"))
         assertTrue(
             "honesty note must say the other side is not captured",
             CallShieldCopy.honestyNote.hinglish.contains("doosre taraf ki awaaz nahi") ||
                 CallShieldCopy.honestyNote.english.contains("does not capture")
         )
+    }
+
+    @Test
+    fun uncheckedRecognitionPathWarnsThatAudioMayLeaveTheDevice() {
+        val copy = CallShieldCopy.consentBody(RecognitionDisclosure.NOT_CHECKED)
+        assertTrue(copy.english.contains("path not checked"))
+        assertTrue(copy.english.contains("audio may leave this device"))
+        assertTrue(copy.english.contains("does not store audio recordings"))
+    }
+
+    @Test
+    fun onDeviceRecognitionCopySaysOfflineBehaviorIsUnverified() {
+        val copy = CallShieldCopy.consentBody(RecognitionDisclosure.ON_DEVICE_UNVERIFIED)
+        assertTrue(copy.english.contains("offline behavior is unverified"))
+        assertTrue(copy.hinglish.contains("test nahi hua"))
+    }
+
+    @Test
+    fun cloudCapableRecognitionCopyDoesNotClaimOfflineProcessing() {
+        val copy = CallShieldCopy.consentBody(RecognitionDisclosure.MAY_USE_NETWORK)
+        assertTrue(copy.english.contains("may use the internet"))
+        assertTrue(copy.english.contains("audio may leave this device"))
+        assertFalse(copy.english.contains("offline"))
+    }
+
+    @Test
+    fun b04CloudOnlyCapabilityMapsToPossibleOffDeviceDisclosure() {
+        val report = ai.trustshield.android.input.speech.SpeechCapabilityReport(
+            status = ai.trustshield.android.input.speech.SpeechStatus.CloudOnly,
+            languageTag = "hi-IN",
+            offlineCapable = false,
+            cloudMayBeUsed = true,
+            degraded = true,
+            reasons = emptyList()
+        )
+
+        assertEquals(RecognitionDisclosure.MAY_USE_NETWORK, report.toCallRecognitionDisclosure())
+    }
+
+    @Test
+    fun b04OnDeviceCapabilityMapsToUnverifiedOfflineDisclosure() {
+        val report = ai.trustshield.android.input.speech.SpeechCapabilityReport(
+            status = ai.trustshield.android.input.speech.SpeechStatus.OnDeviceReady,
+            languageTag = "hi-IN",
+            offlineCapable = true,
+            cloudMayBeUsed = false,
+            degraded = false,
+            reasons = listOf(ai.trustshield.android.input.speech.CapabilityReason.OnDeviceNotMeasured)
+        )
+
+        assertEquals(RecognitionDisclosure.ON_DEVICE_UNVERIFIED, report.toCallRecognitionDisclosure())
     }
 }

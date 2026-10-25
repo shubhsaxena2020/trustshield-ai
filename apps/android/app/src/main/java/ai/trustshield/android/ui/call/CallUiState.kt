@@ -2,6 +2,8 @@ package ai.trustshield.android.ui.call
 
 import ai.trustshield.android.ui.theme.RiskTone
 import ai.trustshield.android.ui.theme.ToneCopy
+import ai.trustshield.android.input.speech.SpeechCapabilityReport
+import ai.trustshield.android.input.speech.SpeechStatus
 
 /*
  * Pure-Kotlin UI state + reducer for the Call Shield screen (work package C05, issue #46).
@@ -19,8 +21,8 @@ import ai.trustshield.android.ui.theme.ToneCopy
  * // RecognizerListener callbacks into [CallEvent.Chunk] / [CallEvent.Tick] and the lifecycle events
  * // below. B04 (`input/speech/SpeechCapability.kt`) supplies [MicPermission] and [RecognizerStatus].
  * // A05 replaces [CallRiskGate] with the real deterministic scorer and real StageRules evidence.
- * // Until B04/B05 land, NOTHING in this package opens a microphone: the screen consumes this state
- * // and the integration point is this event seam.
+ * // B04/B05 are merged, but this package remains a presentation layer until the host wires their
+ * // capability report and session events into this state.
  */
 
 // -------------------------------------------------------------------------------------------------
@@ -60,6 +62,18 @@ enum class MicPermission { UNKNOWN, GRANTED, DENIED }
 
 /** Whether an on-device speech recogniser exists for the locale (B04 probe). */
 enum class RecognizerStatus { UNKNOWN, AVAILABLE, UNAVAILABLE }
+
+/** Disclosure selected from B04's capability report; the default must not imply offline recognition. */
+enum class RecognitionDisclosure { NOT_CHECKED, ON_DEVICE_UNVERIFIED, MAY_USE_NETWORK, UNAVAILABLE }
+
+/** Map B04 capability to copy that never upgrades an OS report into a measured offline claim. */
+fun SpeechCapabilityReport.toCallRecognitionDisclosure(): RecognitionDisclosure = when {
+    status == SpeechStatus.Unavailable || status == SpeechStatus.MissingService ->
+        RecognitionDisclosure.UNAVAILABLE
+    offlineCapable -> RecognitionDisclosure.ON_DEVICE_UNVERIFIED
+    cloudMayBeUsed -> RecognitionDisclosure.MAY_USE_NETWORK
+    else -> RecognitionDisclosure.NOT_CHECKED
+}
 
 /** Audio quality as reported by the speech layer, not inferred from risk. */
 enum class AudioQuality { UNKNOWN, CLEAR, UNCLEAR, UNREADABLE }
@@ -155,6 +169,8 @@ data class CallUiState(
     val language: CallLanguage = CallLanguage.HINGLISH,
     val permission: MicPermission = MicPermission.UNKNOWN,
     val recognizer: RecognizerStatus = RecognizerStatus.UNKNOWN,
+    /** Caller maps B04 capability to this value before showing the corresponding recognition copy. */
+    val recognitionDisclosure: RecognitionDisclosure = RecognitionDisclosure.NOT_CHECKED,
     /** Active-session timer, supplied as input by the screen's tick; there is no clock in here. */
     val elapsedSeconds: Int = 0,
     /** Exactly five chips, always in [CallStage.ordered] order. */

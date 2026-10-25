@@ -25,8 +25,8 @@ object CallShieldCopy {
     )
 
     val honestyNote = ToneCopy(
-        "Yeh app call ke doosre taraf ki awaaz nahi pakadta. Kuch save nahi hota, analysis isi phone par chalti hai.",
-        "This app does not capture the other side of a call. Nothing is saved; analysis runs on this phone."
+        "Yeh app call ke doosre taraf ki awaaz nahi pakadta. Sirf aapki anumati se mic tak pahunchi awaaz check hoti hai.",
+        "This app does not capture the other side of a call. It checks only audio reaching the microphone with your consent."
     )
 
     // ---- status ---------------------------------------------------------------------------------
@@ -36,7 +36,24 @@ object CallShieldCopy {
     val micOff = ToneCopy("Mic: band", "Mic: off")
     val micDenied = ToneCopy("Mic: anumati nahi mili", "Mic: permission not granted")
 
-    val analysisLocal = ToneCopy("Analysis: is phone par (offline)", "Analysis: on this phone (offline)")
+    fun analysisDisclosure(disclosure: RecognitionDisclosure): ToneCopy = when (disclosure) {
+        RecognitionDisclosure.NOT_CHECKED -> ToneCopy(
+            "Recognition path abhi check nahi hua; kuch audio device se bahar ja sakta hai.",
+            "Recognition path not checked; some audio may leave this device."
+        )
+        RecognitionDisclosure.ON_DEVICE_UNVERIFIED -> ToneCopy(
+            "On-device path report hua; offline kaam karna is device par test nahi hua.",
+            "On-device path reported; offline behavior is unverified on this device."
+        )
+        RecognitionDisclosure.MAY_USE_NETWORK -> ToneCopy(
+            "Recognizer internet use kar sakta hai; kuch audio device se bahar ja sakta hai.",
+            "The recognizer may use the internet; some audio may leave this device."
+        )
+        RecognitionDisclosure.UNAVAILABLE -> ToneCopy(
+            "Is device par speech recognition available nahi hai.",
+            "Speech recognition is unavailable on this device."
+        )
+    }
     val backendOff = ToneCopy("Backend check: band", "Backend check: off")
 
     val timerLabel = ToneCopy("Samay", "Elapsed")
@@ -45,14 +62,17 @@ object CallShieldCopy {
     // ---- consent --------------------------------------------------------------------------------
 
     val consentTitle = ToneCopy("Pehle anumati", "Permission first")
-    val consentBody = ToneCopy(
-        "Call Shield tabhi sunta hai jab aap shuru karein. Jo awaaz mic tak aati hai uska text " +
-            "banaya jata hai, aur wo text sirf is phone par, is session ke liye rehta hai. Session " +
-            "rokne par mic band ho jata hai aur text hat jata hai.",
-        "Call Shield listens only after you start it. Audio reaching the microphone is turned into " +
-            "text, and that text stays on this phone, for this session only. Stopping the session " +
-            "turns the microphone off and clears the text."
-    )
+    fun consentBody(disclosure: RecognitionDisclosure): ToneCopy {
+        val path = analysisDisclosure(disclosure)
+        val storageHi = "App audio recording store nahi karta; pehchana gaya text sirf is session ki memory me " +
+            "rehta hai aur Stop par hata diya jata hai."
+        val storageEn = "The app does not store audio recordings; recognized text stays in session memory only " +
+            "and is cleared when you stop."
+        return ToneCopy(
+            "Call Shield tabhi mic use karta hai jab aap shuru karein. ${path.hinglish} $storageHi",
+            "Call Shield uses the microphone only after you start it. ${path.english} $storageEn"
+        )
+    }
     val consentAction = ToneCopy("Main samajh gaya, anumati deta hoon", "I understand, give permission")
     val consentGiven = ToneCopy(
         "Anumati di gayi. Neeche se session shuru karein.",
