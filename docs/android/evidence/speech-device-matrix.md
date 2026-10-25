@@ -408,7 +408,7 @@ package produces it, on that device.
 | 13 | Vosk `hi-IN` end-to-end latency | **UNMEASURED** - model download not permitted this window; `org.vosk.*` not on the classpath | - | **UNMEASURED** |
 | 14 | Vosk `hi-IN` RSS/PSS delta | **UNMEASURED** - same reason | - | **UNMEASURED** |
 | 15 | Vosk Hinglish error rate on 10 scripted calls | **UNMEASURED** - same reason | - | **UNMEASURED** |
-| 16 | APK size with ASR model | **Debug APK measured: `10,090,308` bytes** (`app/build/outputs/apk/debug/app-debug.apk`, built 22:50 IST from this branch). Gate is `<=50 MB without optional ASR model` (`QUALITY_GATES.md` §5). The 42 MB model size is the **brief's figure, not measured here** (no download permitted); adding it as an asset would take the measured 9.6 MB APK past 50 MB by simple arithmetic | `./gradlew :app:assembleDebug --offline` + `ls -l` | **UNMEASURED** |
+| 16 | APK size with ASR model | **Debug APK measured: `10,090,308` bytes** (`app/build/outputs/apk/debug/app-debug.apk`, built 22:50 IST from this branch). Gate is `<=50 MB without optional ASR model` (`QUALITY_GATES.md` §5). The 42 MB model size is the **brief's figure, not measured here** (no download permitted); adding that estimated asset size to the measured APK size projects a package over 50 MB by simple arithmetic | `./gradlew :app:assembleDebug --offline` + `ls -l` | **UNMEASURED** |
 | 17 | Peak PSS of a live speech session | **UNMEASURED**; gate is `<=250 MB` on a *named mid-range device* | - | **UNMEASURED** |
 
 **Count, stated precisely:** every row's *real phone* column is **UNMEASURED** (no phone attached). On the emulator,
@@ -453,9 +453,9 @@ exists to produce: latency, RAM delta and Hinglish error rate. That is the findi
 4. **The requirement already forbids the claim.** `REQUIREMENTS.md` N02: "No claim that OS speech recognition is
    offline until the selected device passes an offline test." Vosk would be *our* offline engine, but the same
    standard applies to it - and it has not been measured either.
-5. **It collides with the size gate.** `QUALITY_GATES.md` §5 sets `APK <= 50 MB without optional ASR model`.
-   This branch's debug APK measures **10,090,308 bytes** (9.6 MB); the brief's figure for the Hindi model is
-   42 MB, which as an APK asset lands past the gate. Not a close call, and not something to discover after merging.
+5. **It risks the size gate.** `QUALITY_GATES.md` §5 sets `APK <= 50 MB without optional ASR model`.
+   This branch's debug APK measures **10,090,308 bytes** (about 9.6 MB); the brief's unmeasured estimate for the Hindi model is
+   42 MB. Adding that estimate to the measured APK size projects a package over the gate. Not a close call, and not something to discover after merging.
 6. **It needs a dependency I may not add.** `COMMON.md` BUILD REALITY 3: `org.vosk.*` is not on the classpath;
    `*.gradle.kts` is Codex-owned. Bundling would be a Gradle change plus an asset pipeline plus ProGuard/native-lib
    handling - unauthorised for me and unverified by anyone.
