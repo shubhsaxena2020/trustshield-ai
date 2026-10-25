@@ -54,11 +54,14 @@ class MainActivity : ComponentActivity() {
     private var entrySequence by mutableIntStateOf(0)
     private var incomingText: String? by mutableStateOf(null)
     private var incomingImageUri: String? by mutableStateOf(null)
+    private var resultOutcome: ScanOutcome? by mutableStateOf(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
         entrySequence = savedInstanceState?.getInt(STATE_ENTRY_SEQUENCE) ?: 0
+        resultOutcome = lastCustomNonConfigurationInstance as? ScanOutcome
+        val restoredWithoutOutcome = savedInstanceState != null && resultOutcome == null
         // Edge-to-edge from API 26 up: bar icon colours follow the system light/dark setting, so the
         // status bar is never light-on-light. Insets are consumed by AppNavHost (safeDrawingPadding).
         enableEdgeToEdge()
@@ -72,6 +75,15 @@ class MainActivity : ComponentActivity() {
             requestedEntry = AppRoute.HOME
             entrySequence++
         }
+        val explicitRoute = routeFromIntent(intent)
+        if (restoredWithoutOutcome && incomingText == null && incomingImageUri == null &&
+            (explicitRoute == null || explicitRoute == AppRoute.RESULT)
+        ) {
+            // A process-death restore cannot recover the in-memory verdict without persisting the
+            // scanned text. Return to Home instead of restoring an empty Result destination.
+            requestedEntry = AppRoute.HOME
+            entrySequence++
+        }
 
         // C04's store. It persists five setting values and nothing else; no analysed text, quote,
         // transcript, OTP, PIN, phone number or UPI id can reach it (see UserPreferences tests).
@@ -82,7 +94,6 @@ class MainActivity : ComponentActivity() {
             // wiring for C04's model). Read once on the main thread: a five-key file.
             var preferences: UserPreferences by remember { mutableStateOf(store.load()) }
             var scanState by remember { mutableStateOf(ScanInputState()) }
-            var resultOutcome by remember { mutableStateOf<ScanOutcome?>(null) }
 
             LaunchedEffect(entrySequence, incomingText) {
                 val shared = incomingText ?: return@LaunchedEffect
@@ -166,6 +177,9 @@ class MainActivity : ComponentActivity() {
             entrySequence++
         }
     }
+
+    /** Keep the in-memory result through configuration changes; it is never written to saved state. */
+    override fun onRetainCustomNonConfigurationInstance(): Any? = resultOutcome
 
     override fun onSaveInstanceState(outState: Bundle) {
         outState.putInt(STATE_ENTRY_SEQUENCE, entrySequence)
