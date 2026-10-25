@@ -16,3 +16,4 @@ Probability is qualitative and may change after a target phone is available.
 | Sideload, mic and camera permission friction in expo | Medium / high | Install a day early, permission walkthrough, no background capture dependency, backup demo clearly labeled. |
 | WhatsApp pricing/onboarding claims drift | Medium / low for APK | Cut integration; recheck official rate card before later purchase; no “free reply” promise in demo. |
 | Optional large model exceeds APK/memory/start budgets | Medium / high | Do not bundle unmeasured Whisper; use device OS service first, then measured Vosk trial. |
+| Existing whole-repo CI is red on Python locks unrelated to Phase 1 | Confirmed / high for later merges | Issue #54 tracks missing `defusedxml` in `requirements-lock.txt` and dependency-audit findings in `requirements-api.lock.txt`. Android build/lint passed locally; keep remote CI status explicit until separate repair. |
