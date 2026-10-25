@@ -161,6 +161,9 @@ class CapabilityTest {
         val stranger = SpeechCapabilityRules.evaluate(env(), "fr-FR")
         assertTrue(stranger.degraded)
         assertTrue(stranger.has(CapabilityReason.LanguageNotSelectable))
+        assertFalse(stranger.offlineCapable)
+        assertFalse(stranger.cloudMayBeUsed)
+        assertFalse(stranger.sessionPossible)
 
         val blank = SpeechCapabilityRules.evaluate(env(), "   ")
         assertEquals(SpeechLanguage.HI_IN, blank.languageTag)
@@ -169,7 +172,7 @@ class CapabilityTest {
 
     @Test
     fun englishSelectionKeepsTheSameHonestyRules() {
-        val report = SpeechCapabilityRules.evaluate(env(apiLevel = 30, onDevice = false, model = false), "en-IN")
+        val report = SpeechCapabilityRules.evaluate(env(apiLevel = 31, onDevice = true, model = true), "en-IN")
         assertEquals(SpeechLanguage.EN_IN, report.languageTag)
         assertFalse(report.offlineCapable)
         assertTrue(report.cloudMayBeUsed)
@@ -254,6 +257,14 @@ class CapabilityTest {
         val report = SpeechCapabilityRules.evaluate(env(service = false))
         val decision = ConsentGate.check(SpeechConsent.initial(), report)
         assertEquals(ConsentDecision.Block(ConsentBlockReason.RecognizerUnavailable), decision)
+    }
+
+    @Test
+    fun grantedConsentCannotAllowUnsupportedApiCapability() {
+        val report = SpeechCapabilityRules.evaluate(env(apiLevel = 25))
+        val decision = ConsentGate.check(SpeechConsent.initial().grant(), report)
+
+        assertEquals(ConsentDecision.Block(ConsentBlockReason.CapabilityUnavailable), decision)
     }
 
     // ---------------------------------------------------------------------- copy

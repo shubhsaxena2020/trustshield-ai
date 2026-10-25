@@ -22,6 +22,7 @@ enum class SpeechConsentState { NotAsked, Granted, Denied, Withdrawn }
 /** Why a session may not start. Each maps to one short Hinglish line. */
 enum class ConsentBlockReason {
     RecognizerUnavailable,
+    CapabilityUnavailable,
     ConsentNotAsked,
     ConsentDenied,
     ConsentWithdrawn,
@@ -107,6 +108,9 @@ object ConsentGate {
     fun check(consent: SpeechConsent, report: SpeechCapabilityReport): ConsentDecision {
         if (report.status == SpeechStatus.MissingService) {
             return ConsentDecision.Block(ConsentBlockReason.RecognizerUnavailable)
+        }
+        if (report.status == SpeechStatus.Unavailable) {
+            return ConsentDecision.Block(ConsentBlockReason.CapabilityUnavailable)
         }
         when (consent.state) {
             SpeechConsentState.NotAsked -> return ConsentDecision.Block(ConsentBlockReason.ConsentNotAsked)

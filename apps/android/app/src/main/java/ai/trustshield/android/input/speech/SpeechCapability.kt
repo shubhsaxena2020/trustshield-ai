@@ -243,21 +243,28 @@ object SpeechCapabilityRules {
         }
 
         val tag = normaliseTag(languageTag)
+        if (!SpeechLanguage.isSelectable(tag)) {
+            return SpeechCapabilityReport(
+                status = SpeechStatus.Unavailable,
+                languageTag = tag,
+                offlineCapable = false,
+                cloudMayBeUsed = false,
+                degraded = true,
+                reasons = listOf(CapabilityReason.LanguageNotSelectable),
+            )
+        }
         var degraded = false
 
-        if (!SpeechLanguage.isSelectable(tag)) {
-            degraded = true
-            reasons += CapabilityReason.LanguageNotSelectable
-        }
         if (env.apiLevel < ON_DEVICE_RECOGNITION_MIN_API) {
             reasons += CapabilityReason.OnDeviceRequiresApi31
         }
-        if (!env.hiInSupported) {
+        val isHiIn = tag == SpeechLanguage.HI_IN
+        if (isHiIn && !env.hiInSupported) {
             degraded = true
             reasons += CapabilityReason.HiInLanguageUnsupported
         }
 
-        val onDeviceUsable = env.apiLevel >= ON_DEVICE_RECOGNITION_MIN_API &&
+        val onDeviceUsable = isHiIn && env.apiLevel >= ON_DEVICE_RECOGNITION_MIN_API &&
             env.onDeviceAvailable &&
             env.hiInSupported
         if (onDeviceUsable && !env.hiInModelDownloaded) {
@@ -407,8 +414,15 @@ object SpeechCapabilityProbe {
         val app = context.applicationContext ?: context
         val apiLevel = Build.VERSION.SDK_INT
         val serviceAvailable = runCatching { SpeechRecognizer.isRecognitionAvailable(app) }.getOrDefault(false)
-        val onDeviceAvailable = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
-            runCatching { SpeechRecognizer.isOnDeviceRecognitionAvailable(app) }.getOrDefault(false)
+        val onDeviceAvailable = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            try {
+                SpeechRecognizer.isOnDeviceRecognitionAvailable(app)
+            } catch (_: RuntimeException) {
+                false
+            }
+        } else {
+            false
+        }
         return SpeechEnvironment(
             apiLevel = apiLevel,
             recognizerServiceAvailable = serviceAvailable,
@@ -430,11 +444,20 @@ object SpeechCapabilityProbe {
             return
         }
         val app = context.applicationContext ?: context
-        if (!runCatching { SpeechRecognizer.isOnDeviceRecognitionAvailable(app) }.getOrDefault(false)) {
+        val onDeviceAvailable = try {
+            SpeechRecognizer.isOnDeviceRecognitionAvailable(app)
+        } catch (_: RuntimeException) {
+            false
+        }
+        if (!onDeviceAvailable) {
             onResult(false)
             return
         }
-        val recognizer = runCatching { SpeechRecognizer.createOnDeviceSpeechRecognizer(app) }.getOrNull()
+        val recognizer = try {
+            SpeechRecognizer.createOnDeviceSpeechRecognizer(app)
+        } catch (_: RuntimeException) {
+            null
+        }
         if (recognizer == null) {
             onResult(false)
             return
@@ -451,7 +474,7 @@ object SpeechCapabilityProbe {
             // EXTRA_PREFER_OFFLINE is intentionally not set anywhere: it is a hint the platform
             // may ignore, and it never feeds an offline capability claim.
         }
-        runCatching {
+        try {
             recognizer.checkRecognitionSupport(
                 intent,
                 executor,
@@ -470,7 +493,9 @@ object SpeechCapabilityProbe {
                     }
                 },
             )
-        }.onFailure { finish(false) }
+        } catch (_: RuntimeException) {
+            finish(false)
+        }
     }
 
     private fun resolveMic(context: Context, hint: MicPermission): MicPermission = when {
