@@ -250,7 +250,7 @@ The shipped piece for rules 4 and 5 is `Redactor`
 `redactJson` (also masks values under `otp`/`pin`/`card`/`phone`/`upi`-style keys), `isSensitive`,
 and `MASK = "[REDACTED]"`. It is standalone — no dependency on any other package — deterministic,
 idempotent, bounded on a 20 000-character input, and fails closed rather than throwing. It is
-covered by 29 JUnit cases in
+covered by 31 JUnit cases in
 `apps/android/app/src/test/java/ai/trustshield/android/core/privacy/RedactionTest.kt`.
 
 ---

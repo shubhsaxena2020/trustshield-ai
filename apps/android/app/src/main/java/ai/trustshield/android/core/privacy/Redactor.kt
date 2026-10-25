@@ -175,26 +175,117 @@ object Redactor {
     fun redactJson(json: String): String {
         if (json.isEmpty()) return json
         return try {
-            val keyed = JSON_MEMBER.replace(json) { match ->
-                val rawKey = match.groupValues[1]
-                val literal = match.groupValues[2].trim()
-                // A JSON null carries no secret: leave the literal alone so the payload still
-                // deserialises to null rather than a masked string.
-                if (!isSensitive(rawKey) || literal == "null") match.value else "$rawKey: \"$MASK\""
-            }
+            val keyed = redactSensitiveJsonValues(json) ?: return MASK
             redact(keyed)
         } catch (_: Throwable) {
             MASK
         }
     }
 
-    /**
-     * A `"key": value` member, where the value is a JSON string (possibly escaped) or a bare
-     * token. Deliberately not a full parser: it must work on truncated payloads too.
-     */
-    private val JSON_MEMBER = Regex(
-        """("(?:[^"\\]|\\.)*")\s*:\s*("(?:[^"\\]|\\.)*"|[^,}\]\s]+)""",
-    )
+    /** Replaces a sensitive JSON member's complete value, including any nested arrays or objects. */
+    private fun redactSensitiveJsonValues(json: String): String? {
+        val out = StringBuilder(json.length)
+        var i = 0
+        while (i < json.length) {
+            if (json[i] != '"') {
+                out.append(json[i++])
+                continue
+            }
+            val keyEnd = jsonStringEnd(json, i) ?: return null
+            val key = decodeJsonString(json, i, keyEnd) ?: return null
+            var colon = keyEnd
+            while (colon < json.length && json[colon].isWhitespace()) colon++
+            if (colon < json.length && json[colon] == ':') {
+                var valueStart = colon + 1
+                while (valueStart < json.length && json[valueStart].isWhitespace()) valueStart++
+                if (isSensitive(key)) {
+                    val valueEnd = jsonValueEnd(json, valueStart) ?: return null
+                    if (json.substring(valueStart, valueEnd) == "null") {
+                        out.append(json, i, valueEnd)
+                        i = valueEnd
+                        continue
+                    }
+                    out.append(json, i, valueStart)
+                    out.append('"').append(MASK).append('"')
+                    i = valueEnd
+                    continue
+                }
+            }
+            out.append(json, i, keyEnd)
+            i = keyEnd
+        }
+        return out.toString()
+    }
+
+    private fun jsonStringEnd(json: String, start: Int): Int? {
+        var i = start + 1
+        while (i < json.length) {
+            when (json[i]) {
+                '\\' -> i += 2
+                '"' -> return i + 1
+                else -> i++
+            }
+        }
+        return null
+    }
+
+    private fun decodeJsonString(json: String, start: Int, end: Int): String? {
+        val out = StringBuilder(end - start - 2)
+        var i = start + 1
+        while (i < end - 1) {
+            val ch = json[i++]
+            if (ch != '\\') {
+                out.append(ch)
+                continue
+            }
+            if (i >= end - 1) return null
+            when (val escaped = json[i++]) {
+                '"', '\\', '/' -> out.append(escaped)
+                'b' -> out.append('\b')
+                'f' -> out.append('\u000C')
+                'n' -> out.append('\n')
+                'r' -> out.append('\r')
+                't' -> out.append('\t')
+                'u' -> {
+                    if (i + 4 > end - 1) return null
+                    val code = json.substring(i, i + 4).toIntOrNull(16) ?: return null
+                    out.append(code.toChar())
+                    i += 4
+                }
+                else -> return null
+            }
+        }
+        return out.toString()
+    }
+
+    /** Returns the exclusive end of one complete JSON value, or null when it is truncated. */
+    private fun jsonValueEnd(json: String, start: Int): Int? {
+        if (start >= json.length) return null
+        if (json[start] == '"') return jsonStringEnd(json, start)
+        if (json[start] == '{' || json[start] == '[') {
+            val stack = ArrayDeque<Char>()
+            stack.addLast(if (json[start] == '{') '}' else ']')
+            var i = start + 1
+            while (i < json.length) {
+                when (json[i]) {
+                    '"' -> i = jsonStringEnd(json, i) ?: return null
+                    '{' -> { stack.addLast('}'); i++ }
+                    '[' -> { stack.addLast(']'); i++ }
+                    '}', ']' -> {
+                        if (stack.removeLastOrNull() != json[i]) return null
+                        i++
+                        if (stack.isEmpty()) return i
+                    }
+                    else -> i++
+                }
+            }
+            return null
+        }
+        var end = start
+        while (end < json.length && json[end] != ',' && json[end] != '}' && json[end] != ']') end++
+        while (end > start && json[end - 1].isWhitespace()) end--
+        return end.takeIf { it > start }
+    }
 
     // ---- passes ----------------------------------------------------------------------------
 

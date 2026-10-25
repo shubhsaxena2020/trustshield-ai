@@ -170,6 +170,23 @@ class RedactionTest {
     }
 
     @Test
+    fun `sensitive json object value is replaced as one complete subtree`() {
+        val out = Redactor.redactJson("""{"otp":{"safe":"x","value":"123456"}}""")
+
+        assertEquals("""{"otp":"[REDACTED]"}""", out)
+        assertFalse(out.contains("123456"))
+    }
+
+    @Test
+    fun `sensitive json array value is replaced as one complete subtree`() {
+        val out = Redactor.redactJson("""{"pin":[{"value":"482913"},"1234"]}""")
+
+        assertEquals("""{"pin":"[REDACTED]"}""", out)
+        assertFalse(out.contains("482913"))
+        assertFalse(out.contains("1234"))
+    }
+
+    @Test
     fun `json values under card phone and upi keys are masked`() {
         val json = """{"card_number": "4111 1111 1111 1111", "phone": "9876543210", "upi_id": "ramesh@okaxis"}"""
         val out = Redactor.redactJson(json)
@@ -194,10 +211,11 @@ class RedactionTest {
     }
 
     @Test
-    fun `json tolerates null and truncated payloads`() {
+    fun `json tolerates null and redacts a truncated sensitive value`() {
         val out = Redactor.redactJson("""{"otp": null, "pin": "1234"""")
-        assertFalse("null handling leaked a pin: $out", out.contains("1234"))
+        assertFalse("truncated JSON leaked a pin: $out", out.contains("1234"))
         assertTrue(out.contains("null"))
+        assertEquals("""{"otp":null}""", Redactor.redactJson("""{"otp":null}"""))
     }
 
     @Test
