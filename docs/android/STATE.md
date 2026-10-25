@@ -80,3 +80,4 @@ Branch: `android-finals`. Phase: **2 active; three Hermes sessions launched on i
 - 2026-10-25: B07 PR #68 merged as 5c58482. The WebP sniffer validates the complete header before reading chunk size; SharedImageReaderTest 38/38 and full Android gate passed on PR and merged base. Issue #39 closed.
 
 - 2026-10-25 23:38 IST: B04 PR #66 merged as 37d10f1. Selectable-language/model capability checks, API 25 consent blocking, and the lint-visible API guard passed `testDebugUnitTest lintDebug assembleDebug` on PR and merged base (53 actionable tasks). Issue #36 closed.
+- 2026-10-25 23:41 IST: B05 PR #67 merged as f103a00. Required B04 report and explicit on-device/cloud-capable route selection passed `CallSpeechSessionTest` 38/38 and full Android gate on PR and merged base. Issue #37 closed. Device behavior remains UNMEASURED.
