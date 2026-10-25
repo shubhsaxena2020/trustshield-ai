@@ -109,3 +109,21 @@ Branch: `android-finals`. Phase: **3 active; Codex foundation pushed, 18 new P0 
 - 2026-10-26 01:18:24 +05:30 IST: P3-15 QR simulation fixtures merged as 2319210; issue #94 closed. Fixed the unreadable-flow narration from 4m50 to the actual 2m20 since the last valid decode and added a regression. On the exact current-base tree, 687 JVM tests passed with 0 failures/skips; lintDebug and assembleDebug passed. Frontend CI passed; backend/security failures are unrelated repo-wide issues recorded on the PR and #57.
 
 - 2026-10-26 01:27:32 +05:30 IST: P3-02 offline analysis pipeline merged as eaf25b0; issue #81 closed. Verified on current-base tree: 709 JVM tests, 0 failures/skips, lintDebug and assembleDebug pass. This is core-only; actual scan UI/navigation remains in P3-01/P3-06.
+
+- 2026-10-26 01:35 IST: P3-04 (#83) merged at 57a112f. Review fixed OTHER-script detection and Unicode-safe truncation; 709 JVM tests, lint, assemble, and 18 connected API 36 emulator tests passed on current base. GitHub backend/security remain blocked by known unrelated repo findings. Issue #83 closed. Real-photo OCR accuracy remains unmeasured; P3-05/P3-18 own image UI and end-to-end screenshots.
+
+- 2026-10-26 01:46 IST: P3-07 (#86) merged as share-intent reader; current-base gate passed (753 JVM tests, lint, assemble). Adapter redacts untrusted metadata and caps/deduplicates URI probes. End-to-end SEND launch/prefill verification remains in dependent navigation/emulator package. Existing backend/security CI failures remain tracked separately.
+
+- 2026-10-26 01:56 IST: P3-01 (#80) scan input component merged and current-base gate passed (778 JVM tests, lint, assemble). It is not yet reachable; navigation and pipeline wiring remain P3-06/P3-18. Known backend/security CI failures are unrelated and tracked separately.
+
+- 2026-10-26 02:08 IST: P3-09 (#88) speech adapter merged. Current-base gate passed (804 JVM tests, lint, assemble). Capability/consent gates and transcript clearing are covered; device ASR/model/offline behavior is unmeasured. Visible host wiring remains P3-10/P3-18.
+
+- 2026-10-26 02:25 IST: P3-13 (#92) CameraX/ML Kit adapter merged. Current-base JVM/lint/build and AndroidTest compilation passed. Device preview, CAMERA prompt/recovery and full QR scan are unverified and remain P3-14/P3-18.
+
+- 2026-10-26 02:42 IST: P3-16 sensitivity policy seam merged and current-base gate passed (831 JVM tests, lint, assemble). No production call site consumes the saved sensitivity, so #95 remains open pending real scoring integration; no behavior change is claimed yet.
+
+- 2026-10-26 03:02 IST: P3-17 preference resolver seam merged; current-base gate passed (860 JVM tests, lint, assemble). Helper adoption in production call sites and emulator restart verification are still pending; #96 remains open.
+
+- 2026-10-26 03:15 IST: Current integrated tree passed connectedDebugAndroidTest on trustshield-api36 (34/34). OCR and QR adapter instrumentation passed. End-to-end UI flow/screenshot verification remains pending P3-18.
+
+- 2026-10-26 03:27 IST: P3-11 deterministic script engine merged; current-base gate passed (885 JVM tests, lint, assemble). Required report ladder remains unresolved: actual A05 output is LOW/LOW/LOW/CRITICAL for its four lines. Issue #90 remains OPEN; owner decision needed before item 4 can pass.
