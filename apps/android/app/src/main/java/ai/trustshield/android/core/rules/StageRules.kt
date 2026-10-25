@@ -261,11 +261,18 @@ private class Rule(
 // ---------------------------------------------------------------------------------------------
 
 /**
- * Compile a rule pattern with Java's UNICODE_CHARACTER_CLASS flag so `\b` treats Devanagari letters
- * and matras as word characters. Without it `\bखाता\b` never matches, and every Hindi rule silently
- * dies while its Roman twin keeps working - the exact bug that makes "Hinglish support" a lie.
+ * Convert Java word tokens to explicit Unicode categories because Android rejects (?U).
+ * Word boundaries include letters, combining marks, numbers and underscore on both runtimes.
  */
-private fun rx(pattern: String): Regex = Regex("(?U)" + pattern)
+private fun rx(pattern: String): Regex {
+    val wordChars = "[\\p{L}\\p{M}\\p{N}_]"
+    val wordBoundary = "(?:(?<![\\p{L}\\p{M}\\p{N}_])(?=[\\p{L}\\p{M}\\p{N}_])|(?<=[\\p{L}\\p{M}\\p{N}_])(?![\\p{L}\\p{M}\\p{N}_]))"
+    val portable = pattern
+        .replace("\\w", wordChars)
+        .replace("\\d", "\\p{Nd}")
+        .replace("\\b", wordBoundary)
+    return Regex(portable)
+}
 
 // ---------------------------------------------------------------------------------------------
 // Shared token vocabulary
@@ -296,6 +303,9 @@ private val SKIP_POLICE_HELPLINE = rx(
 )
 private val SKIP_POLICE_AFTER = rx(
     """(?:complaint|complain|report|register|call back)[^.!?\n]{0,30}?(?:police|cyber|helpline|1930|bank)""",
+)
+private val SKIP_DELIVERY_SHARE_TO_AGENT = rx(
+    """\bshare\s+only\s+with\s+(?:the\s+)?(?:delivery\s+)?agent\b""",
 )
 
 // ---------------------------------------------------------------------------------------------
@@ -530,6 +540,7 @@ private val ASK_RULES: List<Rule> = listOf(
         ),
         askType = AskType.OTP_PIN,
         guarded = true,
+        skip = SKIP_DELIVERY_SHARE_TO_AGENT,
     ),
     Rule(
         titleHinglish = "Paise bhejne ko kaha gaya",
