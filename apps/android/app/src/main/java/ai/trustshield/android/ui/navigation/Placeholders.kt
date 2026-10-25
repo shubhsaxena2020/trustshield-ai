@@ -282,11 +282,13 @@ fun SettingsPlaceholder(english: Boolean = false, modifier: Modifier = Modifier)
 @Composable
 fun TrustShieldRouteContent(route: AppRoute, english: Boolean = false) {
     when (route) {
+        // Home/Scan is not owned by any C package yet, so the shell keeps a labelled stand-in.
         AppRoute.HOME -> HomePlaceholder(english)
-        AppRoute.RESULT -> ResultPlaceholder(english)
-        AppRoute.CALL_SHIELD -> CallShieldPlaceholder(english)
-        AppRoute.QR_GUARD -> QrGuardPlaceholder(english)
-        AppRoute.SETTINGS -> SettingsPlaceholder(english)
+        // Real screens, contributed by C03/C04/C05/C06 and wired by C01 (see AppScreens.kt).
+        AppRoute.RESULT -> ResultRouteHost(english)
+        AppRoute.CALL_SHIELD -> CallShieldRouteHost(english)
+        AppRoute.QR_GUARD -> QrGuardRouteHost(english)
+        AppRoute.SETTINGS -> SettingsRouteHost()
     }
 }
 
