@@ -70,4 +70,5 @@ Branch: `android-finals`. Phase: **2 active; three Hermes sessions launched on i
 - 2026-10-25: A02 PR #60 merged as b9fb80f after mapping the first normalized character to its actual raw source and removing the index-zero test exception. NormalizerTest 31/31; full Android gate passed on PR and merged base. Issue #25 closed.
 - 2026-10-25: A04 PR #59 merged as 76ffa97. Secrecy/threat framing no longer counts as protective advice or reduces risk. LegitimateIndicatorsTest 33/33; full Android gate passed on PR and merged base. Issue #27 closed.
 - 2026-10-25: A03 PR #71 merged as 3832e68. Remote-app/APK mentions require directional action, so uninstall/removal advice does not trigger an ask. StageRulesTest 32/32; full Android gate passed on PR and merged base. Issue #26 closed.
+- 2026-10-25: A06 PR #62 merged as e442fb1. Expected transport errors become unavailable outcomes; cancellation propagates and interruption restores its thread flag. ResultAdapterTest 52/52; full Android gate passed on PR and merged base. Issue #29 closed.
 
