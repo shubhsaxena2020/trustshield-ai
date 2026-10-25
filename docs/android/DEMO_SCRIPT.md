@@ -34,7 +34,7 @@ Open QR Guard, choose **Simulate scan**, and show its explicit simulation disclo
 
 ## Honest limits to state if asked
 
-- A SEND text run has a later unresolved observation (#120): one emulator run reached Result but displayed Unable to Verify although JVM analysis of the same text produced HIGH_RISK. Reproduction and diagnosis are pending; do not use SEND as a success claim until rechecked.
+- A correctly quoted SEND run with the full 174-character sample produced 75/100 High and four verified quotes on `emulator-5554`. The earlier Unable to Verify observation (#120) was caused by PowerShell stripping the remote shell argument quotes, so only the first eight characters reached the app; #120 is closed as a harness error. In PowerShell, pass the full remote `am start` command as one quoted argument.
 - The emulator speech service returned `ERR_INTERNET_DISCONNECTED`; live ASR produced no transcript in that run. Call Shield only processes speech recognized while the app is visibly active. It does not capture the remote side of cellular or VoIP calls.
 - The emulator's CameraX preview is synthetic. QR simulation is a demo path; physical QR decode is not claimed from that preview.
 - P3-18 accessibility journeys, 1.3x font scale and true process-restart verification remain open. Current evidence and any gaps are tracked in `STATE.md` and issue #97.
