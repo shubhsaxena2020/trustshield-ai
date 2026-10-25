@@ -278,7 +278,8 @@ private const val OTP_WORD =
 
 /** Verbs that move a secret towards the sender (stage 5 direction). */
 private const val TELL =
-    "(?:batao|bata do|batado|btao|bataye|batayen|batana|bata de|share|send|bhejo|bhej do|bhej de|" +
+    "(?:batao|bata do|batado|btao|bataye|batayen|batayein|bataiye|bataayein|batana|bata dena|" +
+        "bata dein|bata de|bataao|share|send|bhejo|bhej do|bhej de|" +
         "bhejna|de do|dedo|dena|provide|tell|type|enter|daal do|daalo|daal|forward|reply|confirm|" +
         "verify|likho|bol do|bolo|read out|बताओ|बता दो|बताइए|भेजो|भेज दो|शेयर करो)"
 
@@ -449,10 +450,27 @@ private val SECRECY_RULES: List<Rule> = listOf(
                     """papa ko|mummy ko|bachchon ko|bachon ko|kisi bhi ko|किसी को|घर वालों को)\s*""" +
                     """(?:mat|na|nahi|nahin|मत|न)\b""",
             ),
+        ),
+    ),
+    Rule(
+        titleHinglish = "Kisi ko batane se roka",
+        detail = "Message kisi ko batane se rok raha hai. Asli bank ya police aapse ghar walon ko " +
+            "chhupane ko nahi kehti.",
+        severity = Severity.MEDIUM,
+        strength = Strength.MODERATE,
+        patterns = listOf(
             rx(
                 """\b(?:mat|na|nahi|nahin|never|do not|don't|dont)\b[^.!?\n]{0,20}?""" +
                     """\b(?:batana|bataye\w*|batao|batana hai|tell|inform|share|bhoolna)\b""",
             ),
+        ),
+        // "Do not share IT / the OTP / your PIN with anyone" is the protective wording of a genuine
+        // bank alert (BEHAVIOR_SPEC legit-vs-scam pair 1), not an isolation tactic. Only
+        // secret-carrying objects are skipped, so "do not tell anyone about this case" still counts
+        // as secrecy.
+        skip = rx(
+            """\b(?:it|the code|the number|the otp|your otp|your pin|your card|otp|pin|cvv|password|""" +
+                """passcode|code)\b""",
         ),
     ),
     Rule(
@@ -538,8 +556,20 @@ private val ASK_RULES: List<Rule> = listOf(
         severity = Severity.HIGH,
         strength = Strength.STRONG,
         patterns = listOf(
-            rx("""(?:₹|rs\.?|inr)\s?\d[\d,]*[^.!?\n]{0,28}?\b$SEND_MONEY\b"""),
+            // A currency-marked amount in the same sentence as a send verb is an ask. The window has
+            // to be wide: the digital-arrest script says "₹50,000 RBI verification account mein bhejo",
+            // where the account wording sits between the amount and the verb (29+ chars).
+            rx("""(?:₹|rs\.?|inr)\s?\d[\d,]*[^.!?\n]{0,60}?\b$SEND_MONEY\b"""),
             rx("""\b\d{3,}[\d,]*[^.!?\n]{0,28}?\b$SEND_MONEY\b"""),
+            // The "verification / safe / supervised account" lure is a strong tell even without an
+            // adjacent amount: no real RBI, bank or government account ever takes a transfer to
+            // "verify" anything.
+            rx(
+                """\b(?:verification|safe|supervised|government|govt)\s+account\b[^.!?\n]{0,44}?\b$SEND_MONEY\b""",
+            ),
+            rx(
+                """\b$SEND_MONEY\b[^.!?\n]{0,44}?\b(?:verification|safe|supervised)\s+account\b""",
+            ),
             rx("""\b(?:paise|paisa|money|amount|rakam|rupees|rupaye|rupya)\b[^.!?\n]{0,28}?\b$SEND_MONEY\b"""),
             rx(
                 """\b(?:processing|registration|clearance|service|file|security|advance|refundable|customs|gst|""" +

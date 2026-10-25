@@ -379,4 +379,77 @@ class StageRulesTest {
         assertTrue(result.askTypes.isEmpty())
         assertFalse(result.stageIds.contains(StageId.URGENCY))
     }
+
+    // ---- regressions found by the orchestrator's integration probe (2026-10-25) --------------
+    // These three failures were invisible to the original package tests: the hero digital-arrest
+    // script scored 24 / LOW_RISK because the money ask was never detected, the report's own
+    // "batayein" wording was not in TELL, and a protective bank warning was read as secrecy.
+
+    @Test
+    fun `hero digital-arrest ladder produces the full ask including the money transfer`() {
+        val result = rules.detect(
+            "Hello, main Mumbai Cyber Crime se Inspector Rathore bol raha hoon. Aapke Aadhaar se " +
+                "bheje gaye parcel mein drugs mile hain. Yeh confidential case hai, kisi ko mat " +
+                "batana, video call cut mat karna. Case clear karne ke liye ₹50,000 RBI " +
+                "verification account mein bhejo.",
+        )
+
+        assertTrue(result.stageIds.contains(StageId.AUTHORITY))
+        assertTrue(result.stageIds.contains(StageId.THREAT_OR_REWARD))
+        assertTrue(result.stageIds.contains(StageId.SECRECY))
+        assertTrue(result.stageIds.contains(StageId.ASK))
+        assertTrue(result.askTypes.contains(AskType.MONEY_TRANSFER))
+    }
+
+    @Test
+    fun `verification-account money lure is an ask even with the account wording in between`() {
+        val result = rules.detect("₹50,000 RBI verification account mein bhejo")
+
+        assertTrue(result.stageIds.contains(StageId.ASK))
+        assertTrue(result.askTypes.contains(AskType.MONEY_TRANSFER))
+    }
+
+    @Test
+    fun `safe-account money lure is an ask without an adjacent amount`() {
+        val result = rules.detect("Paise safe account mein transfer karo, case close ho jayega")
+
+        assertTrue(result.stageIds.contains(StageId.ASK))
+        assertTrue(result.askTypes.contains(AskType.MONEY_TRANSFER))
+    }
+
+    @Test
+    fun `report wording batayein is read as an OTP ask`() {
+        val result = rules.detect("Sir, jo OTP aaya hai woh batayein")
+
+        assertTrue(result.stageIds.contains(StageId.ASK))
+        assertTrue(result.askTypes.contains(AskType.OTP_PIN))
+    }
+
+    @Test
+    fun `bataiye variant is read as an OTP ask`() {
+        val result = rules.detect("jo code aaya hai woh bataiye")
+
+        assertTrue(result.stageIds.contains(StageId.ASK))
+        assertTrue(result.askTypes.contains(AskType.OTP_PIN))
+    }
+
+    @Test
+    fun `protective do-not-share warning is not a secrecy stage`() {
+        val result = rules.detect("123456 is your OTP for txn of Rs 500. Do not share it with anyone. -SBI")
+
+        assertFalse(result.stageIds.contains(StageId.SECRECY))
+        assertFalse(result.stageIds.contains(StageId.ASK))
+    }
+
+    @Test
+    fun `genuine isolation phrasing still counts as secrecy`() {
+        assertTrue(
+            rules.detect("Yeh confidential case hai, kisi ko mat batana")
+                .stageIds.contains(StageId.SECRECY),
+        )
+        assertTrue(
+            rules.detect("Do not tell anyone about this case")
+                .stageIds.contains(StageId.SECRECY),
+        )
+    }
 }
