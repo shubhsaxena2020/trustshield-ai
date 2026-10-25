@@ -79,3 +79,4 @@ Branch: `android-finals`. Phase: **2 active; three Hermes sessions launched on i
 - 2026-10-25: B03 PR #69 merged as 417bbf9. Unknown/denied camera permission clears pending work and suppresses stale in-flight results. QrCameraAnalyzerTest 22/22; full Android gate passed on PR and merged base. Issue #35 closed.
 - 2026-10-25: B07 PR #68 merged as 5c58482. The WebP sniffer validates the complete header before reading chunk size; SharedImageReaderTest 38/38 and full Android gate passed on PR and merged base. Issue #39 closed.
 
+- 2026-10-25 23:38 IST: B04 PR #66 merged as 37d10f1. Selectable-language/model capability checks, API 25 consent blocking, and the lint-visible API guard passed `testDebugUnitTest lintDebug assembleDebug` on PR and merged base (53 actionable tasks). Issue #36 closed.
