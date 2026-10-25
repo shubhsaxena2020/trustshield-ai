@@ -119,3 +119,5 @@ Branch: `android-finals`. Phase: **3 active; Codex foundation pushed, 18 new P0 
 - 2026-10-26 02:08 IST: P3-09 (#88) speech adapter merged. Current-base gate passed (804 JVM tests, lint, assemble). Capability/consent gates and transcript clearing are covered; device ASR/model/offline behavior is unmeasured. Visible host wiring remains P3-10/P3-18.
 
 - 2026-10-26 02:25 IST: P3-13 (#92) CameraX/ML Kit adapter merged. Current-base JVM/lint/build and AndroidTest compilation passed. Device preview, CAMERA prompt/recovery and full QR scan are unverified and remain P3-14/P3-18.
+
+- 2026-10-26 02:42 IST: P3-16 sensitivity policy seam merged and current-base gate passed (831 JVM tests, lint, assemble). No production call site consumes the saved sensitivity, so #95 remains open pending real scoring integration; no behavior change is claimed yet.
