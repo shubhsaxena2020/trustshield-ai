@@ -9,7 +9,8 @@ import ai.trustshield.android.ui.theme.ToneCopy
  * **These are fixtures, not model output.** Every string below was typed by hand to exercise the
  * screen's states; nothing here was produced by the score engine, and no number in this file is a
  * measured metric. They exist so the screen and the demo journey (C08) have representative Hinglish
- * content before A01/A05 land.
+ * content before A05 lands. A01's shared contract is already available; these fixtures remain
+ * hand-written presentation examples rather than engine output.
  *
  * `// SEAM:` when A05 exists, these inputs are replaced by real deterministic output; the presenter
  * and the screen stay exactly as they are.

@@ -23,9 +23,9 @@ import ai.trustshield.android.ui.theme.ToneCopy
  *    every tone).
  *
  * ## SEAM
- * Packages A01 (shared contract) and A05 (local deterministic scorer) do not exist yet, so this
- * file defines a **presentation-layer input** ([ResultInput]) that mirrors the engine output shape
- * documented in BEHAVIOR_SPEC (`{id, module, title_hinglish, detail, severity, strength, quote}`).
+ * A01's shared contract is available, while A05's local deterministic scorer is not merged yet, so
+ * this file defines a **presentation-layer input** ([ResultInput]) that mirrors the engine output
+ * shape documented in BEHAVIOR_SPEC (`{id, module, title_hinglish, detail, severity, strength, quote}`).
  * No domain verdict type, no model under `core/` and no scoring logic is created here: A05 will compute
  * the band, the confidence and the evidence list, and the caller maps that onto [ResultInput].
  * `// SEAM:` markers below show the exact places an adapter will plug in.
