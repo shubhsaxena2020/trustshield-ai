@@ -201,6 +201,12 @@ class DigitalArrestSignalTest {
                 .append(step.haptics).append('|')
                 .append(step.chips.filter { it.lit }.joinToString(",") { it.stage.name })
                 .appendLine()
+            for (chip in step.chips.filter { it.lit }) {
+                sb.append("    chip ").append(step.index).append(' ')
+                    .append(chip.stage.name).append(" -> ")
+                    .append(chip.quotes.joinToString(" | "))
+                    .appendLine()
+            }
         }
         val rendered = sb.toString()
         val out = File(System.getProperty("java.io.tmpdir"), "ts-ladder.txt")
