@@ -75,4 +75,5 @@ Branch: `android-finals`. Phase: **2 active; three Hermes sessions launched on i
 - 2026-10-25: C02 PR #61 merged as c629fa5. Light and dark link role guidance now points to text-safe accents. ThemeTest 15/15; full Android gate passed on PR and merged base. Issue #43 closed.
 - 2026-10-25: B02 PR #70 merged as c60f656. The package-only QR/UPI parser diff and 40 parser tests passed; full Android gate passed on PR and merged base. Issue #34 closed.
 - 2026-10-25: B01 PR #73 merged as 0f45862. Link logs now expose only URL length; stream reads require one shared budget across a share. ShareReceiverTest 32/32; full Android gate passed on PR and merged base. Issue #33 closed.
+- 2026-10-25: B06 PR #64 merged as 6b5c350. Registration requires initial setup or a passed long-press+PIN gate; accepted re-register replaces the old payee set. QrWatcherTest 17/17; full Android gate passed on PR and merged base. Issue #38 closed.
 
