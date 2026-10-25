@@ -118,8 +118,9 @@ data class ShareIntentStreamSnapshot(
     /** Redacted: a content URI can point at one personal document, so it is never printed. */
     override fun toString(): String =
         "ShareIntentStreamSnapshot(uri=${if (uriString.isNullOrBlank()) "null" else "present"}, " +
-            "scheme=$scheme, declaredMime=$declaredMime, declaredBytes=$declaredBytes, " +
-            "providerMime=$providerMime, openable=$openable)"
+            "scheme=${scheme?.trim()?.lowercase()?.takeIf { it == "content" } ?: if (scheme == null) "null" else "other"}, " +
+            "declaredMime=${if (declaredMime.isNullOrBlank()) "null" else "present"}, declaredBytes=$declaredBytes, " +
+            "providerMime=${if (providerMime.isNullOrBlank()) "null" else "present"}, openable=$openable)"
 }
 
 /**
@@ -145,7 +146,8 @@ data class ShareIntentSnapshot(
 ) {
     /** Redacted: lengths and counts only. The payload text itself is never printable. */
     override fun toString(): String =
-        "ShareIntentSnapshot(action=$action, declaredMime=$declaredMime, " +
+        "ShareIntentSnapshot(action=${action?.trim()?.takeIf { it == ShareActions.ACTION_SEND || it == ShareActions.ACTION_SEND_MULTIPLE } ?: if (action == null) "null" else "other"}, " +
+            "declaredMime=${if (declaredMime.isNullOrBlank()) "null" else "present"}, " +
             "textLen=${text?.length ?: 0}, subjectLen=${subject?.length ?: 0}, " +
             "titleLen=${title?.length ?: 0}, htmlLen=${htmlText?.length ?: 0}, " +
             "clipItemCount=$clipItemCount, clipTextParts=${clipTextParts.size}, " +
@@ -465,38 +467,88 @@ class ShareIntentReader(private val context: Context) {
         val clipMime = guarded({ clip?.description?.getMimeType(0) }, null)
         val clipItemCount = guarded({ clip?.itemCount ?: 0 }, 0)
 
-        val clipTextParts = ArrayList<String>(clipItemCount)
-        val clipUris = ArrayList<ShareIntentStreamSnapshot>(clipItemCount)
+        val clipTextParts = ArrayList<String>(minOf(clipItemCount, ShareBounds.MAX_IMAGES + 1))
+        val clipUris = ArrayList<ShareIntentStreamSnapshot>(minOf(clipItemCount, ShareBounds.MAX_IMAGES + 1))
+        val seenUriStrings = LinkedHashSet<String>(ShareBounds.MAX_IMAGES)
+        var nullStreamRecorded = false
         for (index in 0 until clipItemCount) {
             val item = guarded({ clip?.getItemAt(index) }, null)
             val itemText = guarded({ item?.text?.toString() }, null)
             val itemUri = guarded({ item?.uri }, null)
             if (!itemText.isNullOrBlank()) clipTextParts += itemText
             when {
-                itemUri != null -> clipUris += streamSnapshot(itemUri, clipMime ?: intentMime)
+                itemUri != null -> {
+                    val uriString = safe { itemUri.toString() }?.trim()
+                    if (uriString.isNullOrEmpty()) {
+                        if (!nullStreamRecorded) {
+                            clipUris += ShareIntentStreamSnapshot(
+                                uriString = null,
+                                scheme = null,
+                                declaredMime = clipMime,
+                            )
+                            nullStreamRecorded = true
+                        }
+                    } else if (!seenUriStrings.add(uriString)) {
+                        issues += ShareIntentIssue.DUPLICATE_STREAM
+                    } else {
+                        if (seenUriStrings.size > ShareBounds.MAX_IMAGES) {
+                            return ShareIntentRead.Refused(
+                                reason = ShareRejectReason.TOO_MANY_IMAGES,
+                                issues = issues.distinct(),
+                            )
+                        }
+                        clipUris += streamSnapshot(itemUri, clipMime ?: intentMime)
+                    }
+                }
                 // A clip slot with neither text nor a handle is a lost attachment, not an empty share.
-                itemText.isNullOrBlank() -> clipUris += ShareIntentStreamSnapshot(
-                    uriString = null,
-                    scheme = null,
-                    declaredMime = clipMime,
-                    declaredBytes = null,
-                    providerMime = null,
-                )
+                itemText.isNullOrBlank() -> if (!nullStreamRecorded) {
+                    clipUris += ShareIntentStreamSnapshot(
+                        uriString = null,
+                        scheme = null,
+                        declaredMime = clipMime,
+                        declaredBytes = null,
+                        providerMime = null,
+                    )
+                    nullStreamRecorded = true
+                }
             }
         }
 
         val extraStreamUris = ArrayList<ShareIntentStreamSnapshot>(2)
         for (uri in streamExtras(intent, issues)) {
             if (uri != null) {
-                extraStreamUris += streamSnapshot(uri, intentMime)
+                val uriString = safe { uri.toString() }?.trim()
+                if (uriString.isNullOrEmpty()) {
+                    if (!nullStreamRecorded) {
+                        extraStreamUris += ShareIntentStreamSnapshot(
+                            uriString = null,
+                            scheme = null,
+                            declaredMime = intentMime,
+                        )
+                        nullStreamRecorded = true
+                    }
+                } else if (!seenUriStrings.add(uriString)) {
+                    issues += ShareIntentIssue.DUPLICATE_STREAM
+                } else {
+                    if (seenUriStrings.size > ShareBounds.MAX_IMAGES) {
+                        return ShareIntentRead.Refused(
+                            reason = ShareRejectReason.TOO_MANY_IMAGES,
+                            issues = issues.distinct(),
+                        )
+                    }
+                    extraStreamUris += streamSnapshot(uri, intentMime)
+                }
             } else {
-                extraStreamUris += ShareIntentStreamSnapshot(
-                    uriString = null,
-                    scheme = null,
-                    declaredMime = intentMime,
-                    declaredBytes = null,
-                    providerMime = null,
-                )
+                if (!nullStreamRecorded) {
+                    extraStreamUris += ShareIntentStreamSnapshot(
+                        uriString = null,
+                        scheme = null,
+                        declaredMime = intentMime,
+                        declaredBytes = null,
+                        providerMime = null,
+                    )
+                    nullStreamRecorded = true
+                }
             }
         }
 

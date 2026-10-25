@@ -633,6 +633,25 @@ class ShareIntentReaderTest {
     }
 
     @Test
+    fun toStringDoesNotPrintUntrustedActionOrMimeMetadata() {
+        val marker = "PRIVATE_PAYLOAD_991122"
+        val stream = ShareIntentStreamSnapshot(
+            uriString = "content://example/$marker",
+            scheme = marker,
+            declaredMime = marker,
+            providerMime = marker,
+        )
+        val share = ShareIntentSnapshot(
+            action = marker,
+            declaredMime = marker,
+            clipUris = listOf(stream),
+        )
+
+        val printed = listOf(share.toString(), stream.toString()).joinToString("\n")
+        assertFalse("untrusted metadata leaked: $printed", printed.contains(marker))
+    }
+
+    @Test
     fun acceptedShareToStringIsRedactedToo() {
         val read = accepted(
             ShareIntentReaderCore.read(
