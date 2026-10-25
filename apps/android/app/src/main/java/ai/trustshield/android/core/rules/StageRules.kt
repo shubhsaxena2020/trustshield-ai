@@ -561,9 +561,16 @@ private val ASK_RULES: List<Rule> = listOf(
         patterns = listOf(
             rx(
                 """\b(?:anydesk|any desk|team ?viewer|teamviewer|quick ?support|quicksupport|rustdesk|""" +
-                    """remotedesk|remote desk|remote (?:access|desktop|support)|screen ?shar\w*|""" +
-                    """share (?:your |apna )?screen|screen ?mirror\w*|desktop share)\b""",
+                    """remotedesk|remote desk|remote (?:access|desktop|support)|screen ?mirror|desktop share)\b""" +
+                    """[^.!?\n]{0,32}\b(?:download|install|open|launch|run|connect|share|enable|allow|grant|khol|kholo|chalao|jodo)\b""",
             ),
+            rx(
+                """\b(?:download|install|open|launch|run|connect|share|enable|allow|grant|khol|kholo|chalao|jodo)\b""" +
+                    """[^.!?\n]{0,32}\b(?:anydesk|any desk|team ?viewer|teamviewer|quick ?support|quicksupport|rustdesk|""" +
+                    """remotedesk|remote desk|remote (?:access|desktop|support)|screen ?mirror|desktop share)\b""",
+            ),
+            rx("""\bscreen\s*share\s*(?:karo|kar|please|now)\b"""),
+            rx("""\bshare\s+(?:your|apna)\s+screen\b"""),
         ),
         askType = AskType.REMOTE_APP,
         guarded = true,
@@ -575,9 +582,8 @@ private val ASK_RULES: List<Rule> = listOf(
         severity = Severity.HIGH,
         strength = Strength.STRONG,
         patterns = listOf(
-            rx("""\.apk\b"""),
-            rx("""\bapk\b"""),
-            rx("""\b(?:download|install)\w*\b[^.!?\n]{0,26}?\b(?:apk|\.apk)\b"""),
+            rx("""\b(?:download|install)\b[^.!?\n]{0,26}?(?:[\w.-]+\.apk|\bapk\b)"""),
+            rx("""(?:[\w.-]+\.apk|\bapk\b)[^.!?\n]{0,26}?\b(?:download|install)\b"""),
         ),
         askType = AskType.APK_INSTALL,
         guarded = true,

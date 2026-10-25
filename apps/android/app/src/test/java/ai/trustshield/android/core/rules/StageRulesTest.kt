@@ -135,6 +135,17 @@ class StageRulesTest {
     }
 
     @Test
+    fun `protective removal advice about remote apps and APKs is not an ask`() {
+        val result = rules.detect(
+            "Your phone has AnyDesk installed; uninstall it now. " +
+                "This APK is malicious. Delete the file and report it.",
+        )
+
+        assertFalse(result.stageIds.contains(StageId.ASK))
+        assertTrue(result.askTypes.isEmpty())
+    }
+
+    @Test
     fun `otp request maps to OTP PIN with high severity`() {
         val result = rules.detect("Jo OTP aaya hai woh batao")
 
