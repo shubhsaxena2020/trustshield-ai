@@ -113,3 +113,5 @@ Branch: `android-finals`. Phase: **3 active; Codex foundation pushed, 18 new P0 
 - 2026-10-26 01:35 IST: P3-04 (#83) merged at 57a112f. Review fixed OTHER-script detection and Unicode-safe truncation; 709 JVM tests, lint, assemble, and 18 connected API 36 emulator tests passed on current base. GitHub backend/security remain blocked by known unrelated repo findings. Issue #83 closed. Real-photo OCR accuracy remains unmeasured; P3-05/P3-18 own image UI and end-to-end screenshots.
 
 - 2026-10-26 01:46 IST: P3-07 (#86) merged as share-intent reader; current-base gate passed (753 JVM tests, lint, assemble). Adapter redacts untrusted metadata and caps/deduplicates URI probes. End-to-end SEND launch/prefill verification remains in dependent navigation/emulator package. Existing backend/security CI failures remain tracked separately.
+
+- 2026-10-26 01:56 IST: P3-01 (#80) scan input component merged and current-base gate passed (778 JVM tests, lint, assemble). It is not yet reachable; navigation and pipeline wiring remain P3-06/P3-18. Known backend/security CI failures are unrelated and tracked separately.
