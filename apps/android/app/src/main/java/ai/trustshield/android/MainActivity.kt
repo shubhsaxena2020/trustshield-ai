@@ -24,6 +24,9 @@ import ai.trustshield.android.core.score.LocalScorer
 import ai.trustshield.android.input.share.ShareIntentReader
 import ai.trustshield.android.input.share.ShareIntentRead
 import ai.trustshield.android.input.share.SharedContent
+import ai.trustshield.android.input.share.ShareIngestCoordinator
+import ai.trustshield.android.input.share.ShareIngestOutcome
+import ai.trustshield.android.input.share.ShareIngestRequest
 import ai.trustshield.android.ui.home.ScanInputEvent
 import ai.trustshield.android.ui.home.ScanInputState
 import ai.trustshield.android.ui.home.reduce
@@ -50,6 +53,7 @@ class MainActivity : ComponentActivity() {
     private var requestedEntry: AppRoute? by mutableStateOf(null)
     private var entrySequence by mutableIntStateOf(0)
     private var incomingText: String? by mutableStateOf(null)
+    private var incomingImageUri: String? by mutableStateOf(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
@@ -60,7 +64,11 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         requestedEntry = routeFromIntent(intent)
         incomingText = sharedText(intent)
+        incomingImageUri = sharedImageUri(intent)
         if (incomingText != null) {
+            requestedEntry = AppRoute.HOME
+            entrySequence++
+        } else if (incomingImageUri != null) {
             requestedEntry = AppRoute.HOME
             entrySequence++
         }
@@ -84,7 +92,12 @@ class MainActivity : ComponentActivity() {
                     ai.trustshield.android.data.preferences.Sensitivity.BALANCED -> LocalScorer.Sensitivity.STANDARD
                     ai.trustshield.android.data.preferences.Sensitivity.HIGH -> LocalScorer.Sensitivity.HIGH
                 }
-                resultOutcome = LocalScanPipeline(sensitivity = sensitivity).analyzeText(shared)
+                resultOutcome = when (val share = ShareIngestCoordinator(
+                    pipeline = LocalScanPipeline(sensitivity = sensitivity)
+                ).ingest(ShareIngestRequest.Text(shared))) {
+                    is ShareIngestOutcome.Analysed -> share.outcome
+                    else -> null
+                }
                 incomingText = null
                 requestedEntry = AppRoute.RESULT
                 entrySequence++
@@ -112,6 +125,9 @@ class MainActivity : ComponentActivity() {
                             english = preferences.language == AppLanguage.ENGLISH,
                             scanState = scanState,
                             resultOutcome = resultOutcome,
+                            sharedImageUri = incomingImageUri,
+                            onSharedImageConsumed = { incomingImageUri = null },
+                            onImageResult = { resultOutcome = it },
                             onScanEvent = { event -> scanState = reduce(scanState, event) },
                             onCheck = { text ->
                                 val sensitivity = when (preferences.sensitivity) {
@@ -137,7 +153,11 @@ class MainActivity : ComponentActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         incomingText = sharedText(intent)
+        incomingImageUri = sharedImageUri(intent)
         if (incomingText != null) {
+            requestedEntry = AppRoute.HOME
+            entrySequence++
+        } else if (incomingImageUri != null) {
             requestedEntry = AppRoute.HOME
             entrySequence++
         }
@@ -165,6 +185,16 @@ class MainActivity : ComponentActivity() {
         return when (val content = accepted.content) {
             is SharedContent.Text, is SharedContent.Link, is SharedContent.TextAndLink ->
                 accepted.analysableOrNull()?.takeIf { it.isNotBlank() }
+            else -> null
+        }
+    }
+
+    private fun sharedImageUri(intent: Intent?): String? {
+        if (intent == null) return null
+        val read = ShareIntentReader(this).read(intent) as? ShareIntentRead.Accepted ?: return null
+        return when (val content = read.share.accept().content) {
+            is SharedContent.Images -> content.image.uriString
+            is SharedContent.MultipleImages -> content.images.firstOrNull()?.uriString
             else -> null
         }
     }

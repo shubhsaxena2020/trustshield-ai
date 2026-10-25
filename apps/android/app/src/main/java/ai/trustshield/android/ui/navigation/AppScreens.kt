@@ -12,6 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.Button
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -21,6 +22,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
+import android.net.Uri
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.camera.view.PreviewView
@@ -30,6 +32,9 @@ import android.Manifest
 import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import kotlinx.coroutines.delay
 import ai.trustshield.android.core.analysis.ScanOutcome
 import ai.trustshield.android.core.model.Confidence
 import ai.trustshield.android.core.model.RiskLabel
@@ -40,6 +45,12 @@ import ai.trustshield.android.data.preferences.Sensitivity
 import ai.trustshield.android.ui.home.ScanInputEvent
 import ai.trustshield.android.ui.home.ScanInputState
 import ai.trustshield.android.ui.home.ScanScreen
+import ai.trustshield.android.ui.home.ImageScanController
+import ai.trustshield.android.ui.home.OcrRecognizer
+import ai.trustshield.android.ui.home.rememberImageScanLauncher
+import ai.trustshield.android.ui.home.isContentUri
+import ai.trustshield.android.input.share.ContentResolverByteSource
+import ai.trustshield.android.input.share.MlKitTextRecognizer
 import ai.trustshield.android.ui.result.ActionPriority
 import ai.trustshield.android.ui.result.ConfidenceLevel
 import ai.trustshield.android.ui.result.EvidenceSeverity
@@ -56,6 +67,17 @@ import ai.trustshield.android.ui.call.CallUiState
 import ai.trustshield.android.ui.call.CallDemoRunner
 import ai.trustshield.android.ui.call.CallDemoScript
 import ai.trustshield.android.ui.call.DemoProgress
+import ai.trustshield.android.ui.call.CallShieldHost
+import ai.trustshield.android.input.speech.CallSpeechSession
+import ai.trustshield.android.input.speech.SpeechSessionCoordinator
+import ai.trustshield.android.input.speech.SpeechCapabilityProbe
+import ai.trustshield.android.input.speech.SpeechCapabilityRules
+import ai.trustshield.android.input.speech.SpeechLanguage
+import ai.trustshield.android.input.speech.SpeechConsent
+import ai.trustshield.android.input.speech.SpeechCapabilityReport
+import ai.trustshield.android.input.speech.MicPermission as SpeechMicPermission
+import ai.trustshield.android.input.speech.UtteranceSink
+import ai.trustshield.android.input.speech.AndroidSpeechRecognizerHandle
 import ai.trustshield.android.ui.qr.QrGuardScreen
 import ai.trustshield.android.ui.qr.QrEvent
 import ai.trustshield.android.ui.qr.CameraUiStatus
@@ -199,43 +221,99 @@ fun TrustShieldRouteContent(
     scanState: ScanInputState = ScanInputState(),
     resultOutcome: ScanOutcome? = null,
     onScanEvent: (ScanInputEvent) -> Unit = {},
-    onCheck: (String) -> Unit = {}
+    onCheck: (String) -> Unit = {},
+    onImageResult: (ScanOutcome) -> Unit = {},
+    sharedImageUri: String? = null,
+    onSharedImageConsumed: () -> Unit = {}
 ) {
     val nav = LocalNavActions.current
     val clipboard = LocalClipboardManager.current
     when (route) {
-        AppRoute.HOME -> Column(modifier = Modifier.fillMaxSize()) {
-            ScanScreen(
-                state = scanState,
-                english = english,
-                onEvent = onScanEvent,
-                onCheck = { text ->
-                    onCheck(text)
-                    nav.navigate(AppRoute.RESULT)
-                },
-                onPickImage = {},
-                onOpenSettings = { nav.navigate(AppRoute.SETTINGS) },
-                modifier = Modifier.weight(1f),
-                clipboardText = { clipboard.getText()?.text }
-            )
-            androidx.compose.foundation.layout.Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                OutlinedButton(
-                    onClick = { nav.navigate(AppRoute.CALL_SHIELD) },
-                    modifier = Modifier.weight(1f).heightIn(min = 48.dp)
-                ) { Text("Call Shield") }
-                OutlinedButton(
-                    onClick = { nav.navigate(AppRoute.QR_GUARD) },
-                    modifier = Modifier.weight(1f).heightIn(min = 48.dp)
-                ) { Text("QR Guard") }
-            }
-        }
+        AppRoute.HOME -> HomeRouteHost(
+            english = english,
+            scanState = scanState,
+            onScanEvent = onScanEvent,
+            onCheck = { text -> onCheck(text); nav.navigate(AppRoute.RESULT) },
+            onImageResult = { outcome -> onImageResult(outcome); nav.navigate(AppRoute.RESULT) },
+            sharedImageUri = sharedImageUri,
+            onSharedImageConsumed = onSharedImageConsumed,
+            clipboardText = { clipboard.getText()?.text },
+            onOpenSettings = { nav.navigate(AppRoute.SETTINGS) },
+            onOpenCall = { nav.navigate(AppRoute.CALL_SHIELD) },
+            onOpenQr = { nav.navigate(AppRoute.QR_GUARD) }
+        )
         AppRoute.RESULT -> ResultRouteHost(english, resultOutcome)
         AppRoute.CALL_SHIELD -> CallShieldRouteHost()
         AppRoute.QR_GUARD -> QrGuardRouteHost()
         AppRoute.SETTINGS -> SettingsRouteHost()
+    }
+}
+
+@Composable
+private fun HomeRouteHost(
+    english: Boolean,
+    scanState: ScanInputState,
+    onScanEvent: (ScanInputEvent) -> Unit,
+    onCheck: (String) -> Unit,
+    onImageResult: (ScanOutcome) -> Unit,
+    sharedImageUri: String?,
+    onSharedImageConsumed: () -> Unit,
+    clipboardText: () -> String?,
+    onOpenSettings: () -> Unit,
+    onOpenCall: () -> Unit,
+    onOpenQr: () -> Unit,
+) {
+    val context = LocalContext.current
+    val sensitivity = when (LocalUserPreferences.current.sensitivity) {
+        Sensitivity.LOW -> LocalScorer.Sensitivity.LOW
+        Sensitivity.BALANCED -> LocalScorer.Sensitivity.STANDARD
+        Sensitivity.HIGH -> LocalScorer.Sensitivity.HIGH
+    }
+    val recognizer = remember { MlKitTextRecognizer() }
+    DisposableEffect(recognizer) { onDispose { recognizer.close() } }
+    val controller = remember(recognizer, sensitivity) {
+        ImageScanController(
+            pipeline = ai.trustshield.android.core.analysis.LocalScanPipeline(sensitivity = sensitivity),
+            recognizer = OcrRecognizer { bytes, mime -> recognizer.recognize(bytes, mime) },
+            readBytes = { raw ->
+                if (isContentUri(raw)) ContentResolverByteSource(context.contentResolver, Uri.parse(raw)) else null
+            }
+        )
+    }
+    var imageError by remember(controller) { mutableStateOf<ai.trustshield.android.ui.home.ImageScanError?>(null) }
+    val actions = rememberImageScanLauncher(controller, english) { imageState ->
+        imageError = imageState.error
+        imageState.outcome?.let(onImageResult)
+    }
+    LaunchedEffect(sharedImageUri) {
+        val image = sharedImageUri ?: return@LaunchedEffect
+        actions.acceptSharedUri(image)
+        onSharedImageConsumed()
+    }
+    Column(modifier = Modifier.fillMaxSize()) {
+        ScanScreen(
+            state = scanState,
+            english = english,
+            onEvent = onScanEvent,
+            onCheck = onCheck,
+            onPickImage = { actions.launch() },
+            onOpenSettings = onOpenSettings,
+            modifier = Modifier.weight(1f),
+            clipboardText = clipboardText
+        )
+        imageError?.let { error ->
+            Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp)) {
+                Text(error.message(english), color = MaterialTheme.colorScheme.error)
+                Text(error.nextStep(english), style = MaterialTheme.typography.bodySmall)
+            }
+        }
+        androidx.compose.foundation.layout.Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            OutlinedButton(onClick = onOpenCall, modifier = Modifier.weight(1f).heightIn(min = 48.dp)) { Text("Call Shield") }
+            OutlinedButton(onClick = onOpenQr, modifier = Modifier.weight(1f).heightIn(min = 48.dp)) { Text("QR Guard") }
+        }
     }
 }
 
@@ -247,11 +325,27 @@ fun TrustShieldRouteContent(
  */
 @Composable
 fun CallShieldRouteHost() {
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val session = remember { CallSpeechSession(consentGranted = true) }
+    var capability by remember {
+        mutableStateOf(SpeechCapabilityRules.evaluate(SpeechCapabilityProbe.probe(context), SpeechLanguage.DEFAULT))
+    }
+    val coordinator = remember(session) {
+        SpeechSessionCoordinator(session) { _ ->
+            AndroidSpeechRecognizerHandle(context, session, capability, SpeechLanguage.DEFAULT)
+        }
+    }
+    val host = remember(coordinator) { CallShieldHost(coordinator) }
     val prefs = LocalUserPreferences.current
     val sink = LocalPreferencesSink.current
-    var state by remember {
+    var consent by remember { mutableStateOf(SpeechConsent.initial()) }
+    var micGranted by remember {
+        mutableStateOf(ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED)
+    }
+    var state by remember(host) {
         mutableStateOf(
-            CallUiState(
+            host.state.copy(
                 recognizer = RecognizerStatus.UNAVAILABLE,
                 language =
                     if (prefs.language == AppLanguage.ENGLISH) {
@@ -272,23 +366,42 @@ fun CallShieldRouteHost() {
     val demoRunner = remember(demoSensitivity) { CallDemoRunner(sensitivity = demoSensitivity) }
     var demoProgress by remember { mutableStateOf(demoRunner.progress()) }
     var demoOpen by remember { mutableStateOf(false) }
+    val permissionRequest = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        micGranted = granted
+    }
 
     Column(modifier = Modifier.fillMaxSize()) {
     CallShieldScreen(
         state = state,
         modifier = Modifier.weight(1f),
         onEvent = { event ->
-            state = CallShieldReducer.reduce(state, event)
-            if (event is CallEvent.SetLanguage) {
-                sink(
-                    prefs.copy(
-                        language = if (event.language == CallLanguage.ENGLISH) {
-                            AppLanguage.ENGLISH
-                        } else {
-                            AppLanguage.HINGLISH
-                        }
-                    )
-                )
+            when (event) {
+                CallEvent.GiveConsent -> {
+                    consent = consent.grant()
+                    state = CallShieldReducer.reduce(state, event)
+                }
+                CallEvent.MicPermissionGranted -> permissionRequest.launch(Manifest.permission.RECORD_AUDIO)
+                CallEvent.Start -> {
+                    host.onCapability(consent, capability, if (micGranted) ai.trustshield.android.ui.call.MicPermission.GRANTED else ai.trustshield.android.ui.call.MicPermission.DENIED)
+                    host.onStartRequested()
+                    state = host.state
+                }
+                CallEvent.Stop -> { host.onStop(); state = host.state }
+                CallEvent.Pause -> { host.onHostPaused(); state = host.state }
+                CallEvent.Resume -> { host.onStartRequested(); state = host.state }
+                is CallEvent.SetLanguage -> {
+                    state = CallShieldReducer.reduce(state, event)
+                    sink(prefs.copy(language = if (event.language == CallLanguage.ENGLISH) AppLanguage.ENGLISH else AppLanguage.HINGLISH))
+                }
+                is CallEvent.SetHaptics -> {
+                    state = CallShieldReducer.reduce(state, event)
+                    sink(prefs.copy(haptics = event.enabled))
+                }
+                is CallEvent.SetReducedMotion -> {
+                    state = CallShieldReducer.reduce(state, event)
+                    sink(prefs.copy(reducedMotion = event.reducedMotion))
+                }
+                else -> state = CallShieldReducer.reduce(state, event)
             }
         },
         onOpenStagedDemo = { demoOpen = true },
@@ -305,6 +418,45 @@ fun CallShieldRouteHost() {
             onBack = { demoProgress = demoRunner.back() },
             onReset = { demoProgress = demoRunner.reset() }
         )
+    }
+    LaunchedEffect(consent, micGranted) {
+        val mic = if (micGranted) SpeechMicPermission.Granted else SpeechMicPermission.Denied
+        capability = SpeechCapabilityRules.evaluate(SpeechCapabilityProbe.probe(context, mic), SpeechLanguage.DEFAULT)
+        host.onCapability(consent, capability, if (micGranted) ai.trustshield.android.ui.call.MicPermission.GRANTED else ai.trustshield.android.ui.call.MicPermission.DENIED)
+        state = host.state.copy(
+            language = if (prefs.language == AppLanguage.ENGLISH) CallLanguage.ENGLISH else CallLanguage.HINGLISH,
+            hapticsEnabled = prefs.haptics,
+            reducedMotion = prefs.reducedMotion
+        )
+    }
+    remember(host) {
+        session.setUtteranceSink(UtteranceSink { utterance ->
+            if (utterance.isFinal) host.onUtterance(utterance.text, utterance.confidence, utterance.tsMs)
+            state = host.state
+        })
+        host
+    }
+    DisposableEffect(lifecycleOwner, host) {
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_PAUSE -> { host.onHostPaused(); state = host.state }
+                Lifecycle.Event.ON_RESUME -> { host.onHostResumed(); state = host.state }
+                else -> Unit
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+            session.setUtteranceSink(null)
+            host.onCleared()
+        }
+    }
+    LaunchedEffect(host) {
+        while (true) {
+            delay(1_000)
+            host.onTick(state.elapsedSeconds + 1)
+            state = host.state
+        }
     }
     }
 }
