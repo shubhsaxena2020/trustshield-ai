@@ -293,7 +293,7 @@ object SimulatedQrFixtures {
                 clock.now = FRAME_INTERVAL_MS * 15
                 record(
                     SimulatedFrameKind.BLURRED_FRAME,
-                    "Frame: roshni kam ya glare - camera ko kuch nahi mila. 4 minute 50 second ho gaye.",
+                    "Frame: roshni kam ya glare - camera ko kuch nahi mila. 2 minute 20 second ho gaye.",
                     watcher.observeUnreadable(),
                 )
 

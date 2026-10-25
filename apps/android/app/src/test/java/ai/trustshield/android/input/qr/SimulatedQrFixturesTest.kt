@@ -143,6 +143,7 @@ class SimulatedQrFixturesTest {
         // The budget comes from the shipped policy, not from a demo-specific relaxation.
         assertEquals(300_000L, QrWatcherPolicy().occlusionMs)
         assertTrue(result.elapsedMs >= QrWatcherPolicy().occlusionMs)
+        assertTrue(result.steps[6].narration.contains("2 minute 20 second"))
     }
 
     @Test
