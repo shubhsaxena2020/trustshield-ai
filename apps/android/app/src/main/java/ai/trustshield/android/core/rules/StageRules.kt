@@ -297,6 +297,9 @@ private val SKIP_POLICE_HELPLINE = rx(
 private val SKIP_POLICE_AFTER = rx(
     """(?:complaint|complain|report|register|call back)[^.!?\n]{0,30}?(?:police|cyber|helpline|1930|bank)""",
 )
+private val SKIP_DELIVERY_SHARE_TO_AGENT = rx(
+    """\bshare\s+only\s+with\s+(?:the\s+)?(?:delivery\s+)?agent\b""",
+)
 
 // ---------------------------------------------------------------------------------------------
 // Stage 1 — AUTHORITY. Alone: LOW/WEAK (BEHAVIOR_SPEC: "Alone: weak/watch").
@@ -530,6 +533,7 @@ private val ASK_RULES: List<Rule> = listOf(
         ),
         askType = AskType.OTP_PIN,
         guarded = true,
+        skip = SKIP_DELIVERY_SHARE_TO_AGENT,
     ),
     Rule(
         titleHinglish = "Paise bhejne ko kaha gaya",

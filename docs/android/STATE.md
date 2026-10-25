@@ -127,3 +127,5 @@ Branch: `android-finals`. Phase: **3 active; Codex foundation pushed, 18 new P0 
 - 2026-10-26 03:15 IST: Current integrated tree passed connectedDebugAndroidTest on trustshield-api36 (34/34). OCR and QR adapter instrumentation passed. End-to-end UI flow/screenshot verification remains pending P3-18.
 
 - 2026-10-26 03:27 IST: P3-11 deterministic script engine merged; current-base gate passed (885 JVM tests, lint, assemble). Required report ladder remains unresolved: actual A05 output is LOW/LOW/LOW/CRITICAL for its four lines. Issue #90 remains OPEN; owner decision needed before item 4 can pass.
+
+- 2026-10-26 02:46 IST: P3-03 #109 review found the documented delivery-OTP false positive still present on current base; 4 fixture guards failed. Added a narrowly scoped in-person delivery share exemption plus a regression preserving remote phone asks. Targeted suites and full test/lint/build gate now pass on the replayed current base. PR update/CI/merge remain pending.
