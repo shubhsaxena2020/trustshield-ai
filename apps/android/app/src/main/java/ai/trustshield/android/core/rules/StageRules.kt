@@ -278,7 +278,7 @@ private const val OTP_WORD =
 
 /** Verbs that move a secret towards the sender (stage 5 direction). */
 private const val TELL =
-    "(?:batao|bata do|batado|btao|bataye|batayen|batana|bata de|share|send|bhejo|bhej do|bhej de|" +
+    "(?:batao|bata do|batado|btao|bataye\\w*|batayen|batana|bata de|share|send|bhejo|bhej do|bhej de|" +
         "bhejna|de do|dedo|dena|provide|tell|type|enter|daal do|daalo|daal|forward|reply|confirm|" +
         "verify|likho|bol do|bolo|read out|बताओ|बता दो|बताइए|भेजो|भेज दो|शेयर करो)"
 
@@ -538,9 +538,9 @@ private val ASK_RULES: List<Rule> = listOf(
         severity = Severity.HIGH,
         strength = Strength.STRONG,
         patterns = listOf(
-            rx("""(?:₹|rs\.?|inr)\s?\d[\d,]*[^.!?\n]{0,28}?\b$SEND_MONEY\b"""),
-            rx("""\b\d{3,}[\d,]*[^.!?\n]{0,28}?\b$SEND_MONEY\b"""),
-            rx("""\b(?:paise|paisa|money|amount|rakam|rupees|rupaye|rupya)\b[^.!?\n]{0,28}?\b$SEND_MONEY\b"""),
+            rx("""(?:₹|rs\.?|inr)\s?\d[\d,]*[^.!?\n]{0,40}?\b$SEND_MONEY\b"""),
+            rx("""\b\d{3,}[\d,]*[^.!?\n]{0,40}?\b$SEND_MONEY\b"""),
+            rx("""\b(?:paise|paisa|money|amount|rakam|rupees|rupaye|rupya)\b[^.!?\n]{0,40}?\b$SEND_MONEY\b"""),
             rx(
                 """\b(?:processing|registration|clearance|service|file|security|advance|refundable|customs|gst|""" +
                     """penalty|challan|court)\s?(?:fee|fees|charges?|deposit|duty|amount)\b""",
