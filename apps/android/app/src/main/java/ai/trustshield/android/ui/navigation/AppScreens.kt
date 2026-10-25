@@ -14,11 +14,7 @@ import ai.trustshield.android.ui.call.CallEvent
 import ai.trustshield.android.ui.call.CallShieldReducer
 import ai.trustshield.android.ui.call.CallShieldScreen
 import ai.trustshield.android.ui.call.CallUiState
-import ai.trustshield.android.ui.qr.QrGuardScreen
-import ai.trustshield.android.ui.qr.QrEvent
-import ai.trustshield.android.ui.qr.QrLanguage
-import ai.trustshield.android.ui.qr.QrReducer
-import ai.trustshield.android.ui.qr.QrUiState
+import ai.trustshield.android.ui.qr.QrGuardHost
 import ai.trustshield.android.ui.result.ResultFixtures
 import ai.trustshield.android.ui.result.ResultPresenter
 import ai.trustshield.android.ui.result.ResultScreen
@@ -127,45 +123,14 @@ fun CallShieldRouteHost() {
 /**
  * QR Guard destination host.
  *
- * SEAM: B02 (UPI parser), B03 (camera) and B06 (watcher) are merged, but not connected to this
- * screen. No camera is opened and no QR payload is resolved or opened -- payloads are inert data.
- * The registered-payee setup flow works locally; the watch loop waits for B03/B06 to emit
- * `QrEvent.ValidFrame`/`UnreadableFrame`.
+ * The whole wired screen — camera, runtime CAMERA recovery, B06 watcher, simulate-scan demo — lives
+ * in `ui/qr/QrGuardHost.kt`; this route only points at it. QR payloads stay inert data: the host never
+ * opens a scanned destination, and the only `startActivity` in the flow is this app's own settings page
+ * for a permanently denied camera.
  */
 @Composable
 fun QrGuardRouteHost() {
-    val prefs = LocalUserPreferences.current
-    val sink = LocalPreferencesSink.current
-    var state by remember {
-        mutableStateOf(
-            QrUiState(
-                language =
-                    if (prefs.language == AppLanguage.ENGLISH) {
-                        QrLanguage.ENGLISH
-                    } else {
-                        QrLanguage.HINGLISH
-                    }
-            )
-        )
-    }
-
-    QrGuardScreen(
-        state = state,
-        onEvent = { event ->
-            state = QrReducer.reduce(state, event)
-            if (event is QrEvent.SetLanguage) {
-                sink(
-                    prefs.copy(
-                        language = if (event.language == QrLanguage.ENGLISH) {
-                            AppLanguage.ENGLISH
-                        } else {
-                            AppLanguage.HINGLISH
-                        }
-                    )
-                )
-            }
-        }
-    )
+    QrGuardHost()
 }
 
 /**
