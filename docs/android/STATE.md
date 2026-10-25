@@ -115,3 +115,5 @@ Branch: `android-finals`. Phase: **3 active; Codex foundation pushed, 18 new P0 
 - 2026-10-26 01:46 IST: P3-07 (#86) merged as share-intent reader; current-base gate passed (753 JVM tests, lint, assemble). Adapter redacts untrusted metadata and caps/deduplicates URI probes. End-to-end SEND launch/prefill verification remains in dependent navigation/emulator package. Existing backend/security CI failures remain tracked separately.
 
 - 2026-10-26 01:56 IST: P3-01 (#80) scan input component merged and current-base gate passed (778 JVM tests, lint, assemble). It is not yet reachable; navigation and pipeline wiring remain P3-06/P3-18. Known backend/security CI failures are unrelated and tracked separately.
+
+- 2026-10-26 02:08 IST: P3-09 (#88) speech adapter merged. Current-base gate passed (804 JVM tests, lint, assemble). Capability/consent gates and transcript clearing are covered; device ASR/model/offline behavior is unmeasured. Visible host wiring remains P3-10/P3-18.
