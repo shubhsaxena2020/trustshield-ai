@@ -238,6 +238,7 @@ class QrWatcher(
 
     private var state: QrGuardState =
         if (registry.registered().isEmpty()) QrGuardState.Setup else QrGuardState.Watching
+    private var registrationAuthorized: Boolean = registry.registered().isEmpty()
 
     private var consecutiveMismatches: Int = 0
     private var lastValidDecodeAt: Long? = null
@@ -324,6 +325,8 @@ class QrWatcher(
             return ReRegisterResult.Refused(ReRegisterRefusal.PIN_REQUIRED)
         }
         val now = clock()
+        registry.clear()
+        registrationAuthorized = true
         state = QrGuardState.Setup
         consecutiveMismatches = 0
         lastMismatchMasked = null
@@ -334,8 +337,10 @@ class QrWatcher(
 
     /** Registers [vpa] as an expected payee (hashed by the registry) and resumes watching. */
     fun registerPayee(vpa: String): QrWatcherStatus {
+        check(registrationAuthorized) { "payee registration requires setup or approved re-register" }
         val now = clock()
         registry.register(vpa)
+        registrationAuthorized = false
         consecutiveMismatches = 0
         lastMismatchMasked = null
         lastValidDecodeAt = now

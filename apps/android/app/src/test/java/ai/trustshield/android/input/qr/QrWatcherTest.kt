@@ -13,9 +13,7 @@ import org.junit.Test
  * Pure JVM: no `android.*` type is constructed. `PayeeExtractor` is stubbed here exactly as the integration
  * will bind it to `UpiQrParser` (B02) — this file does not import B02 or parse UPI itself.
  *
- * NOTE (BUILD REALITY): `:app:testDebugUnitTest` cannot compile tests in this repo — `app/build.gradle.kts`
- * declares no `testImplementation`, so `import org.junit.Test` fails with `Unresolved reference: junit`.
- * These tests are executed by the orchestrator's out-of-tree JVM harness; see the PR body for verbatim output.
+ * These tests run on the JVM and need no Android runtime, content provider or network access.
  */
 class QrWatcherTest {
 
@@ -239,6 +237,21 @@ class QrWatcherTest {
     // ---------------------------------------------------------------- re-register
 
     @Test
+    fun directRegistrationCannotBypassTheReRegisterGate() {
+        val clock = TestClock()
+        val watcher = watcher(phonePe, clock = clock)
+
+        val error = runCatching { watcher.registerPayee(attacker) }.exceptionOrNull()
+
+        assertTrue(error is IllegalStateException)
+        assertEquals(1, watcher.status().registeredCount)
+        clock.now = 1_000
+        val matching = watcher.observeDecoded(payloadFor(phonePe))
+        assertEquals(0, matching.consecutiveMismatches)
+        assertEquals(QrGuardState.Watching, matching.state)
+    }
+
+    @Test
     fun reRegisterRefusedWithoutTheFiveSecondLongPress() {
         val clock = TestClock()
         val watcher = watcher(phonePe, clock = clock)
@@ -278,8 +291,13 @@ class QrWatcherTest {
         clock.now = 8_000
         val registered = watcher.registerPayee("newshop@okhdfc")
         assertEquals(QrGuardState.Watching, registered.state)
-        assertEquals(2, registered.registeredCount)
+        assertEquals(1, registered.registeredCount)
         assertTrue(registered.message.isNotEmpty())
+
+        clock.now = 9_000
+        val oldPayee = watcher.observeDecoded(payloadFor(phonePe))
+        assertEquals(1, oldPayee.consecutiveMismatches)
+        assertEquals("ra***@okaxis", oldPayee.lastMismatchMasked)
     }
 
     // ---------------------------------------------------------------- tamper stickiness
