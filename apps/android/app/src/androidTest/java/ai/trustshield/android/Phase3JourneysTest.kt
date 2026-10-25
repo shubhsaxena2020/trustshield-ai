@@ -22,7 +22,6 @@ import ai.trustshield.android.ui.navigation.AppRoute
 import org.junit.After
 import org.junit.Assert.assertTrue
 import org.junit.Assume
-import org.junit.Ignore
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -276,12 +275,6 @@ class Phase3JourneysTest {
      * deterministic version of that observation.
      */
     @Test
-    @Ignore(
-        "Known defect D1 (reproducible on emulator-5554 and head-api36): the Result screen loses " +
-            "its outcome when the activity is recreated, so it renders empty. See " +
-            "docs/android/evidence/device-run.md#defect-d1. Remove this @Ignore when the route host " +
-            "keeps the ScanOutcome across recreation."
-    )
     fun resultJourney_survivesActivityRecreation() {
         launch()
         waitForText(SCAN_FIELD_LABEL)
