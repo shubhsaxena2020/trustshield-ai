@@ -66,3 +66,4 @@ urllib3==2.8.0
 uvicorn==0.53.0
 xxhash==4.0.1
 yarl==1.25.1
+defusedxml==0.7.1
