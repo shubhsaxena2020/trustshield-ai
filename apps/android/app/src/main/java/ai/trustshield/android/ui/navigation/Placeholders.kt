@@ -286,8 +286,8 @@ fun TrustShieldRouteContent(route: AppRoute, english: Boolean = false) {
         AppRoute.HOME -> HomePlaceholder(english)
         // Real screens, contributed by C03/C04/C05/C06 and wired by C01 (see AppScreens.kt).
         AppRoute.RESULT -> ResultRouteHost(english)
-        AppRoute.CALL_SHIELD -> CallShieldRouteHost(english)
-        AppRoute.QR_GUARD -> QrGuardRouteHost(english)
+        AppRoute.CALL_SHIELD -> CallShieldRouteHost()
+        AppRoute.QR_GUARD -> QrGuardRouteHost()
         AppRoute.SETTINGS -> SettingsRouteHost()
     }
 }
