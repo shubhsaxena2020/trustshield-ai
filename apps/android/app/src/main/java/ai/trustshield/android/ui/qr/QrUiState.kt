@@ -791,6 +791,14 @@ object QrStrings {
 
     // re-register / pin
     val reRegister = ToneCopy("Naya QR register karein (PIN)", "Register a new QR (PIN)")
+    val reRegisterHold = ToneCopy(
+        "Naya QR lagane ke liye 5 second dabayein",
+        "Press and hold for 5 seconds to set a new QR"
+    )
+    val reRegisterHolding = ToneCopy(
+        "Pakad kar rakhein… 5 second pure hone par PIN poochha jayega",
+        "Keep holding… the PIN is asked once the 5 seconds are up"
+    )
     val reRegisterHint = ToneCopy(
         "Asli dukaandaar hi naya QR register kar sakta hai — isliye app PIN chahiye.",
         "Only the real shopkeeper can register a new QR, so the app PIN is required."
@@ -812,11 +820,7 @@ object QrStrings {
         "PIN accepted — now register the real QR."
     )
 
-    // seam note + mandatory footer
-    val cameraSeamNote = ToneCopy(
-        "Camera aur QR decode module abhi juda nahi hai (B02/B03/B06 baaki hain).",
-        "The camera and QR decode module are not wired yet (B02/B03/B06 pending)."
-    )
+    // mandatory footer
 
     /** MANDATORY on the QR Guard screen, verbatim (BEHAVIOR_SPEC §"QR and payment semantics"). */
     val mandatoryConfirmation = ToneCopy(
