@@ -342,3 +342,8 @@ Branch: `android-finals`. Phase: **3 active; Codex foundation pushed, 18 new P0 
 - Owner filed #144 (`phone`) for QR setup confirmation followed by duplicate-frame recapture and missing visible registered state. Acceptance includes a masked payee confirmation, Start watching, repeated-frame idempotence, and watch match/mismatch behavior. Owner owns the phone reproduction and retest.
 - The issue overlaps dirty agent1 `QrGuardHost.kt` fallback work. A nine-task prompt for the next agent1 safe boundary is prepared at `%LOCALAPPDATA%\Temp\android\agent1.phase4.phone144.swarm.work.txt`; it is not launched. No phone/emulator work occurred.
 - Exact current root waves: agent1 `[9]` (8 children active), agent2 `[]`, agent3 `[3]` (children complete). No lane safe boundary; 19.0 GB free RAM, emulator lock remains with agent3.
+
+### 2026-10-27 00:06 IST checkpoint
+- Owner filed #146 (phone) for live-mic recognition timeouts/deaf gaps and #147 (phone) for the under-scored imminent utility-disconnection threat. Codex/Hermes will not access the owner phone; these await source/JVM/emulator work and owner retest.
+- #147 is queued first for agent1's existing clean `wt-137` fixture PR worktree; exact nine-task prompt is prepared at `%LOCALAPPDATA%\Temp\android\agent1.phase4.phone147.swarm.work.txt`. #144 and #146 are queued next as a combined package in `agent1.phase4.phone144-146.swarm.work.txt`. #143 remains queued for agent3. No prompt is launched before a lane boundary.
+- Current root wave sizes: agent1 `[9]` (3 children active), agent2 `[]`, agent3 `[3]` (all children complete); no current package has reached a commit boundary. Free RAM 17.5 GB; no phone, emulator or Gradle action by Codex.
