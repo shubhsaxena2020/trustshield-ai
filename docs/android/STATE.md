@@ -379,3 +379,10 @@ Branch: `android-finals`. Phase: **3 active; Codex foundation pushed, 18 new P0 
 - Agent3's state.db terminal call showed a debug APK install to `emulator-5554` followed by the accessibility matrix runner. The lock marker named agent2 P4-138 as the sole emulator owner. The install completed before observation; matrix results are incomplete and not acceptable as evidence.
 - Stopped only matrix subprocesses 15428 and 6096. Left Hermes agent3, agent1/agent2, and emulator.exe running. The active emulator remains agent2's; no adb command by Codex, no use of phone serial `63b0de52`. Do not let agent3 rerun emulator work until the lock is released; rerun acceptance after safe boundary.
 - Main checkout's tracked files were clean and synced at `4ebfbf4`; unrelated untracked files remain. No Phase 4 completion claim.
+
+### 2026-10-27 00:29 IST checkpoint
+- state.db wave audit: agent1 `[9]` (2 children active), agent2 `[9]` (9 active), agent3 `[3]` (0 active). No safe relaunch boundary: agent1/agent3 worktrees are dirty; agent2's wave and emulator lock remain active.
+- Agent3 invoked the accessibility matrix a second time after a successful debug install while the emulator lock still named agent2. The dump directory had zero captures at check time; no runner is active now. Matrix evidence remains incomplete. No Codex adb was run and serial `63b0de52` was not accessed.
+- RAM available was 18.55 GB. Agent2 retains `emulator-5554`; no Gradle command was active at this check.
+- Prepared next-wave workfiles now each specify exactly 9 disjoint tasks, one `delegate_task` call per wave, wait/review/integration, and state.db verification. One-line `launch-hermes.ps1` pointer prompts are ready but no lane was relaunched.
+- Main tracked files were synced at `fb85ad8`; unrelated untracked files remain. Phase 4 remains incomplete.
