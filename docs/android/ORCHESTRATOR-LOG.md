@@ -125,3 +125,35 @@ Reviewed B03 PR #69. Its `QrCameraAnalyzerTest` passes 21/21, but a temporary te
 - 2026-10-26 05:05 IST: The single in-process compiler retry for #126 also failed before task execution because the 2 GB Gradle daemon could not reserve ~760 MiB (`errno=1455`). No tests ran. Updated #126's PR body and recorded the blocker; no further Android build retry while the host paging-file limit is unchanged.
 
 - 2026-10-26 05:08 IST: Updated draft #122 to unignore the original P3-18 D1 journey, plus the standalone Result and Settings recreation instrumentation tests. `git diff --check` passed. This expands the gate; no Android test result is claimed because host paging-file failures persist.
+
+
+## 2026-10-26 07:08 IST ? Phase 3 orchestration closeout
+
+- Fast-forwarded `android-finals` through `origin/android-finals`; final source HEAD is `f23a8700ab709e5f8be7e542b2a4915bcf562d9a`.
+- Reviewed and merged in requested order: PR #127 D-114 `5651fd00ffe0090010d1cf99e7027caa09959fb8`; #128 D-118 `bf4bc5ddff7fcd8a888754a01c45e53099fb026c`; #129 D-115 `d8762c3974d046c46786da2e24f91d017d39f2a0`; #130 D-119 `b8478be3a2b7faab636a0e4185ec10e72d19760a`. Then merged #122 Result/Settings Activity recreation `f026b29c213cd7fd53b5cc83851378b19bca2634` and #125 selected theme/window bars `f23a8700ab709e5f8be7e542b2a4915bcf562d9a`.
+- Reconciled user drafts: #126 closed as superseded by #127/#128; duplicate #131 closed because #127 already contains the reviewed secrecy fix. Issues #90, #114, #115, #118, #119, and #123 are closed with evidence; #97 intentionally stays open.
+- Current merged-tree gate passed: 1,061 JVM tests, lint, debug APK assembly, and Android-test APK assembly. P3-18 connected emulator journeys passed 9/9, including the enabled Result recreation journey; focused Result/Settings recreation instrumentation passed 2/2. Journey selectors were aligned to current UI copy and accessible meter descriptions.
+- Call Shield report ?6 ladder measured through deterministic A05: LOW 10/100, MEDIUM 44/100, HIGH 52/100, CRITICAL 75/100. The second line visibly includes the report-sourced digital-arrest phrase; the screen displays the words actually scored. Reset returned to LOW and cleared the in-memory transcript. Evidence: `evidence/p3-119-demo-step1.png` through `step4.png`, and `p3-119-demo-reset.png`.
+- Theme check on API 36: light mode uses dark system icons on the light window; dark mode paints the full window dark with readable light status/navigation icons. Evidence: `evidence/p3-125-settings-light-window-bars.png` and `p3-125-settings-dark-window-bars.png`.
+- Final artifact built from this main checkout, installed, and signature-verified: `apps/android/app/build/outputs/apk/debug/app-x86_64-debug.apk`, 37,060,136 bytes, SHA-256 `373A74D5E1E49775B62101F6DC9E04984EEF6D571527F07DF63E8898B23F82F7`, Android Debug certificate, minSdk 26, targetSdk 36. Install handoff: `INSTALL.md`.
+- Stability: controlled touch-only monkey injected 2,000/2,000 events without injection errors; the final 10,000-line logcat scan had no app FATAL/ANR matches. The exact unfiltered `monkey -p ai.trustshield.android 2000` also completed 2,000 events but logged EACCES for some flip-event injections. Both outputs and the crash scan are in `evidence/p3-final-monkey*.txt` and `evidence/p3-final-crash-scan.txt`.
+- The single `trustshield-api36` qemu process was stopped after evidence collection. A second `head-api36` qemu that appeared during testing was also stopped by its qemu PID only; neither Hermes sessions agent1/agent2/agent3 nor their parent processes were stopped or relaunched.
+
+### Phase 3 definition of done
+
+| # | Item | Result | Evidence / remaining gap |
+|---|---|---|---|
+| 1 | Scan flow | PASS | P3-06 scan screenshots and the 9/9 integrated journey suite; offline local pipeline and Result presentation verified. |
+| 2 | Share flow | PASS | P3-06 SEND text/share evidence and `shareJourney_sentTextIsAnalysed`; image selection path also exercised in the P3-06 emulator run. |
+| 3 | Screenshot/image scan | PASS | `p3-06-integrated-image-ocr-result.png`; bundled OCR fed the local pipeline; image is not retained. |
+| 4 | Call Shield | PASS | Four distinct A05 bands and quotes measured; `p3-119-demo-step1.png`?`step4.png`, reset proof. Live ASR remains phone/service dependent. |
+| 5 | QR Guard | FAIL | Simulated mismatch and unreadable distinctions pass, but emulator camera preview is synthetic; printed QR decode is not verified. |
+| 6 | Settings behavior | PASS | Preference restart evidence `p3-96-settings-before.png`/`after.png`; app-theme window and bars `p3-125-settings-*-window-bars.png`. |
+| 7 | Polish/accessibility | FAIL | #97 remains open: manual TalkBack traversal, 320 dp width, 200% font, physical phone, and some motion/device checks are unverified. 1.3x and 411 dp evidence exists. |
+| 8 | No crash | PASS | Final controlled monkey: 2,000 injected events; no FATAL/ANR matches in last 10,000 logcat lines. Generic monkey flip-event EACCES is recorded. |
+| 9 | Release artifact | PASS | Debug-signed x86_64 APK installed and `apksigner` verified; path, size, minSdk, targetSdk, and SHA-256 recorded in `INSTALL.md`. |
+| 10 | Privacy | PASS | Local verdict path, backend disabled by default, no raw content persisted/logged; regression/source evidence in Android tests and `device-run.md`. |
+
+All requested Phase 3 merge/review/evidence actions in the current head orders are complete. The two FAIL rows remain explicit product acceptance gaps; #97 is open and no claim is made that physical-device accessibility or QR/ASR acceptance passed.
+
+PHASE 3 COMPLETE

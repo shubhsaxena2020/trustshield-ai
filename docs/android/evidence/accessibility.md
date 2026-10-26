@@ -101,3 +101,12 @@ exists precisely because the spec hexes miss 4.5:1 for normal text on light.
 | Haptics | opt-in toggle verified persisted; the vibration itself is **unmeasurable on the emulator**. |
 | Call Shield and Settings expose only 2 `contentDescription` sites each | most of their controls are plain text buttons/switches with visible labels (acceptable), but a TalkBack pass should confirm the risk meter and the five stage chips are announced usefully. |
 | Landscape / tablet layout | **not tested.** |
+
+
+## 8. Current result-recreation and theme status (2026-10-26)
+
+The D1 rotation/configuration defect described above was fixed in PR #122 (`f026b29`). The dedicated Result/Settings recreation instrumentation passed 2/2, and the re-enabled Result recreation journey passed as part of the 9/9 connected P3-18 suite. This does not verify process-death recovery of the result: by design the in-memory verdict is discarded and the user returns Home, so raw content is never persisted.
+
+PR #125 (`f23a870`) now paints the root window using the selected app theme and sets status/navigation icon appearance from that theme. The light and dark device captures are `p3-125-settings-light-window-bars.png` and `p3-125-settings-dark-window-bars.png`.
+
+Still unverified: a manual spoken TalkBack pass, 320 dp width, 200% font scale, reduced-motion visual behavior, physical-phone behavior, and landscape/tablet layout. Issue #97 remains open for these gaps; no accessibility-complete claim is made.

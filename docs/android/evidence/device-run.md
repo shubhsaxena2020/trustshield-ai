@@ -150,3 +150,12 @@ change was involved. This is a machine-capacity limitation, not a code defect.
 | QR decode of a printed QR | **not possible** — the emulator camera has no QR in view; the simulate path and `CameraXBarcodeDecoderTest` are the evidence, and the mismatch journey above is explicitly labelled as a demo inside the app. |
 | TalkBack spoken pass, 320 dp, 200 % text | see `accessibility.md` §7. |
 | Bleed-through of other sessions | the shared emulator had English/haptics persisted from another run and its logcat buffer was cleared twice mid-session; both are handled in the suite (`@Before` reset) and disclosed here. |
+
+
+## 8. Current merged-tree verification addendum (2026-10-26)
+
+The earlier D1 finding above is historical and has been fixed by PR #122 (`f026b29`). `MainActivityResultRetentionTest` passed 2/2 Activity-recreation tests (Result remains in memory across configuration changes; Settings remains on its route). The formerly ignored `resultJourney_survivesActivityRecreation` is enabled and passed in the 9/9 `Phase3JourneysTest` run on the single `trustshield-api36` AVD. The journey selectors were updated for current Result, Call Shield, and QR copy.
+
+Final merged-tree Android gate: 1,061 JVM tests passed, lint passed, debug APK and Android-test APK assembled. The final x86_64 APK installed successfully and its local debug signature verified. A 2,000-event controlled touch-only monkey run completed without injection failures; the last 10,000 logcat lines contained no app FATAL/ANR records. The generic unfiltered monkey invocation completed 2,000 events but reported EACCES for some flip-event injections; see `p3-final-monkey.txt` and `p3-final-crash-scan.txt`.
+
+Result recreation is now verified for Activity recreation. Process death intentionally drops the in-memory result and returns to Home; message content is not saved to disk or instance state. Issue #97 remains open: manual TalkBack traversal, 320 dp and 200% font scale, physical-phone install, real camera QR decode, and live Hindi ASR have not been verified. The new dark/light system-bar captures are `p3-125-settings-light-window-bars.png` and `p3-125-settings-dark-window-bars.png`.

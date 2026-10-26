@@ -1,5 +1,20 @@
 ﻿# Android program state
 
+## Current status (2026-10-26 07:08 IST)
+
+Branch `android-finals` is at `f23a8700ab709e5f8be7e542b2a4915bcf562d9a`. Phase 3 orchestration closeout work is complete; acceptance gaps remain explicit below.
+
+- Merged and locally gated: #127 D-114 (`5651fd0`), #128 D-118 (`bf4bc5d`), #129 D-115 (`d8762c3`), #130 D-119 (`b8478be`), #122 Result recreation (`f026b29`), and #125 app-theme/system-bars (`f23a870`).
+- Closed duplicate/superseded work: PR #126 (covered by #127/#128) and duplicate PR #131 (covered by #127). Issues #90, #114, #115, #118, #119, and #123 are closed. Issue #97 remains open.
+- Final merged-tree Android gate: 1,061 JVM tests passed; lint, debug APK, and Android-test APK assembly passed. P3-18 connected journeys passed 9/9; dedicated Result/Settings recreation passed 2/2.
+- Four Call Shield demo readings on the emulator: 10/100 LOW, 44/100 MEDIUM, 52/100 HIGH, 75/100 CRITICAL. Screenshots and reset proof are under `evidence/p3-119-demo-*.png`.
+- Final x86_64 debug APK: `apps/android/app/build/outputs/apk/debug/app-x86_64-debug.apk`, 37,060,136 bytes, SHA-256 `373A74D5E1E49775B62101F6DC9E04984EEF6D571527F07DF63E8898B23F82F7`; Android Debug v2 signature verified; minSdk 26, targetSdk 36.
+- Installed final APK completed a 2,000-event controlled touch-only monkey run with no injection failures and no app crash/ANR matches in the 10,000-line logcat scan. The unfiltered monkey command also completed 2,000 events but reported EACCES for some flip events; captured in `evidence/p3-final-monkey.txt`.
+- Emulator qemu PID was stopped after device verification; no emulator is currently attached. Hermes sessions were not stopped or relaunched.
+- Remaining #97 gaps: manual TalkBack spoken traversal, 320 dp width, 200% font scale, physical-phone acceptance, real camera QR decode, and live Hindi ASR. Process death intentionally drops the in-memory result and returns to Home.
+
+The historical status and progress notes below describe earlier checkpoints and are superseded where they conflict with this current status.
+
 Branch: `android-finals`. Phase: **3 active; Codex foundation pushed, 18 new P0 packages tracked; fresh Hermes agent1/agent2/agent3 sessions launched at 00:32 IST.** No website, production, dataset holdout, trained model or `.env` changes.
 
 ## Phase 3 progress (2026-10-26)

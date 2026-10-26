@@ -26,17 +26,17 @@ Choose a synthetic screenshot with visible Latin or Devanagari scam text using t
 
 ## 2:05â€“2:35 â€” Show Call Shield demo mode
 
-Open Call Shield and choose **Demo script mode**. Tap through the report's four lines and explain the A05 output honestly: the current deterministic script measures **LOW, LOW, LOW, CRITICAL**, rather than four distinct Low/Medium/High/Critical levels. Do not relabel or invent a score. The expected four-rung ladder remains open in issue #90.
+Open Call Shield, choose **Staged demo (live mic nahi)**, and tap **Agli line** four times. The deterministic A05 readings move through **LOW (10/100) → MEDIUM (44/100) → HIGH (52/100) → CRITICAL (75/100)**. Confidence is a separate reading. The parcel/drugs line includes the report's own "Aap digital arrest mein hain" marker; point out the quoted words actually analyzed. These are engine outputs, not scores set by the screen. Reset returns to LOW and clears the in-memory transcript. Evidence: `evidence/p3-119-demo-step1.png` through `p3-119-demo-step4.png`, plus `evidence/p3-119-demo-reset.png`.
 
 ## 2:35â€“3:00 â€” Show QR simulation and Settings
 
-Open QR Guard, choose **Simulate scan**, and show its explicit simulation disclosure and mismatch result. Then open Settings and briefly show language, theme, sensitivity and haptics controls. A force-stop/relaunch check confirmed saved theme, language, sensitivity and haptics choices reload; dark-theme contrast remains under #123.
+Open QR Guard, choose **Simulate scan**, and show its explicit simulation disclosure and mismatch result. Then open Settings and briefly show language, theme, sensitivity and haptics controls. A force-stop/relaunch check confirmed saved preferences reload. Current light and dark theme screenshots show readable content and system bars: `evidence/p3-125-settings-light-window-bars.png` and `evidence/p3-125-settings-dark-window-bars.png`.
 
 ## Honest limits to state if asked
 
 - A correctly quoted SEND run with the full 174-character sample produced 75/100 High and four verified quotes on `emulator-5554`. The earlier Unable to Verify observation (#120) was caused by PowerShell stripping the remote shell argument quotes, so only the first eight characters reached the app; #120 is closed as a harness error. In PowerShell, pass the full remote `am start` command as one quoted argument.
 - The emulator speech service returned `ERR_INTERNET_DISCONNECTED`; live ASR produced no transcript in that run. Call Shield only processes speech recognized while the app is visibly active. It does not capture the remote side of cellular or VoIP calls.
 - The emulator's CameraX preview is synthetic. QR simulation is a demo path; physical QR decode is not claimed from that preview.
-- P3-18 accessibility journeys, 1.3x font scale and true process-restart verification remain open. Current evidence and any gaps are tracked in `STATE.md` and issue #97.
+- The P3-18 emulator journeys now pass, including Result and Settings Activity recreation. Issue #97 remains open for manual TalkBack traversal, 320 dp / 200% font-scale coverage, physical-device checks, and other owner-dependent evidence; see `evidence/accessibility.md` and `evidence/device-run.md`.
 - The app's deterministic risk score is not a probability or an accuracy claim. Unsupported or unreadable content may return Unable to Verify.
 - Do not enter real OTPs, PINs, payment details, phone numbers, UPI IDs or personal messages during the demo.
