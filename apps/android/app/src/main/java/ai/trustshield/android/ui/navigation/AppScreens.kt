@@ -1,5 +1,7 @@
 package ai.trustshield.android.ui.navigation
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -29,6 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
@@ -401,6 +404,7 @@ fun CallShieldRouteHost() {
         CallDemoExperience(
             progress = demoProgress,
             english = prefs.language == AppLanguage.ENGLISH,
+            hapticsEnabled = prefs.haptics,
             onToggleLanguage = {
                 sink(prefs.copy(language = if (prefs.language == AppLanguage.ENGLISH) AppLanguage.HINGLISH else AppLanguage.ENGLISH))
             },
@@ -505,6 +509,7 @@ fun CallShieldRouteHost() {
 private fun CallDemoExperience(
     progress: DemoProgress,
     english: Boolean,
+    hapticsEnabled: Boolean,
     onToggleLanguage: () -> Unit,
     onClose: () -> Unit,
     onAdvance: () -> Unit,
@@ -520,8 +525,14 @@ private fun CallDemoExperience(
         DemoRiskPosition.HIGH, DemoRiskPosition.CRITICAL -> RiskTone.RED
     }
 
-    LaunchedEffect(step?.haptics) {
-        if (step?.haptics == true) view.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS)
+    // The demo vibrates only when the engine says "this step enters CRITICAL" AND the user has haptics
+    // switched on in Settings (issue #119 defect B review: the screen used to buzz even when haptics
+    // were disabled). `step.haptics` is true only on the transition into CRITICAL, so a repeated
+    // CRITICAL step never re-fires.
+    LaunchedEffect(step?.index, step?.haptics, hapticsEnabled) {
+        if (hapticsEnabled && step?.haptics == true) {
+            view.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS)
+        }
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -563,6 +574,11 @@ private fun CallDemoExperience(
                             else if (english) "Ready for line 1" else "Pehli line ke liye taiyaar",
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold
+                    )
+                    DemoPositionBand(
+                        position = step?.position ?: if (showResetLow) DemoRiskPosition.LOW else null,
+                        tone = tone,
+                        english = english,
                     )
                     if (step != null) {
                         val confidence = when (step.confidence) {
@@ -705,4 +721,55 @@ fun SettingsRouteHost() {
             state = next
         }
     )
+}
+
+/**
+ * How many of the four meter segments are filled for [position].
+ *
+ * `0` before the demo runs (no reading yet, so no segment - the card must never show a fabricated
+ * "0/100"), otherwise one segment per rung: LOW 1, MEDIUM 2, HIGH 3, CRITICAL 4. Pure and
+ * deterministic: it reads the engine's position and invents nothing.
+ */
+internal fun demoBandSegments(position: DemoRiskPosition?): Int = when (position) {
+    null -> 0
+    DemoRiskPosition.LOW -> 1
+    DemoRiskPosition.MEDIUM -> 2
+    DemoRiskPosition.HIGH -> 3
+    DemoRiskPosition.CRITICAL -> 4
+}
+
+/**
+ * The four-position band of the demo meter (issue #119 acceptance: the meter must visibly climb
+ * Low -> Medium -> High -> Critical). Colour is never the only signal - the rung label above it and
+ * the content description carry the same information for TalkBack.
+ */
+@Composable
+private fun DemoPositionBand(position: DemoRiskPosition?, tone: RiskTone, english: Boolean) {
+    val filled = demoBandSegments(position)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 8.dp)
+            .semantics {
+                contentDescription = if (position == null) {
+                    if (english) "Risk meter empty" else "Khatre ka meter khali hai"
+                } else {
+                    "${position.label(english)}, ${filled} of 4"
+                }
+            },
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        repeat(4) { index ->
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(6.dp)
+                    .clip(RoundedCornerShape(3.dp))
+                    .background(
+                        if (index < filled) tone.onContainer()
+                        else tone.onContainer().copy(alpha = 0.20f),
+                    ),
+            )
+        }
+    }
 }
