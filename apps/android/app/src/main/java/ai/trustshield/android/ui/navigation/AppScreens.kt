@@ -28,6 +28,7 @@ import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
@@ -86,6 +87,7 @@ import ai.trustshield.android.ui.call.DemoProgress
 import ai.trustshield.android.ui.call.DemoRiskPosition
 import ai.trustshield.android.ui.call.CallShieldHost
 import ai.trustshield.android.ui.call.CallShieldCopy
+import ai.trustshield.android.ui.call.withStoredChoices
 import ai.trustshield.android.ui.call.CallStage
 import ai.trustshield.android.ui.call.forLanguage
 import ai.trustshield.android.input.speech.CallSpeechSession
@@ -368,23 +370,32 @@ fun CallShieldRouteHost() {
     val host = remember(coordinator) { CallShieldHost(coordinator) }
     val prefs = LocalUserPreferences.current
     val sink = LocalPreferencesSink.current
+    // Issue #138. `CallShieldHost` owns the call session, not the user's presentation choices, and
+    // it is built before this screen reads any preference — so `host.state` always carries
+    // `CallUiState`'s defaults (HINGLISH, haptics on). Copying it verbatim (start / stop / pause /
+    // resume / ASR utterance / the lifecycle observer below) therefore reset the screen to Hinglish
+    // and re-enabled haptics behind an English, haptics-off preference. Measured on `emulator-5554`
+    // with `settings.language = ENGLISH` persisted across a force-stop: the screen rendered Hinglish
+    // and its language button still offered "English". Every host snapshot now goes through `synced`
+    // so the stored choices survive; the session's own fields are passed through untouched.
+    //
+    // The three values are `rememberUpdatedState`-backed on purpose: the 1-second tick loop and the
+    // utterance sink are launched once and keep their closure, so a plain `prefs` capture would let a
+    // later tick write a stale language back over a change made after the effect started.
+    val storedLanguage by rememberUpdatedState(
+        if (prefs.language == AppLanguage.ENGLISH) CallLanguage.ENGLISH else CallLanguage.HINGLISH
+    )
+    val storedHaptics by rememberUpdatedState(prefs.haptics)
+    val storedReducedMotion by rememberUpdatedState(prefs.reducedMotion)
+    fun synced(from: CallUiState): CallUiState =
+        from.withStoredChoices(storedLanguage, storedHaptics, storedReducedMotion)
     var consent by remember { mutableStateOf(SpeechConsent.initial()) }
     var micGranted by remember {
         mutableStateOf(ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED)
     }
     var state by remember(host) {
         mutableStateOf(
-            host.state.copy(
-                recognizer = RecognizerStatus.UNAVAILABLE,
-                language =
-                    if (prefs.language == AppLanguage.ENGLISH) {
-                        CallLanguage.ENGLISH
-                    } else {
-                        CallLanguage.HINGLISH
-                    },
-                hapticsEnabled = prefs.haptics,
-                reducedMotion = prefs.reducedMotion
-            )
+            synced(host.state.copy(recognizer = RecognizerStatus.UNAVAILABLE))
         )
     }
     val demoSensitivity = when (prefs.sensitivity) {
@@ -429,11 +440,11 @@ fun CallShieldRouteHost() {
                 CallEvent.Start -> {
                     host.onCapability(consent, capability, if (micGranted) ai.trustshield.android.ui.call.MicPermission.GRANTED else ai.trustshield.android.ui.call.MicPermission.DENIED)
                     host.onStartRequested()
-                    state = host.state
+                    state = synced(host.state)
                 }
-                CallEvent.Stop -> { host.onStop(); state = host.state }
-                CallEvent.Pause -> { host.onHostPaused(); state = host.state }
-                CallEvent.Resume -> { host.onStartRequested(); state = host.state }
+                CallEvent.Stop -> { host.onStop(); state = synced(host.state) }
+                CallEvent.Pause -> { host.onHostPaused(); state = synced(host.state) }
+                CallEvent.Resume -> { host.onStartRequested(); state = synced(host.state) }
                 is CallEvent.SetLanguage -> {
                     state = CallShieldReducer.reduce(state, event)
                     sink(prefs.copy(language = if (event.language == CallLanguage.ENGLISH) AppLanguage.ENGLISH else AppLanguage.HINGLISH))
@@ -467,24 +478,20 @@ fun CallShieldRouteHost() {
         val mic = if (micGranted) SpeechMicPermission.Granted else SpeechMicPermission.Denied
         capability = SpeechCapabilityRules.evaluate(SpeechCapabilityProbe.probe(context, mic), SpeechLanguage.DEFAULT)
         host.onCapability(consent, capability, if (micGranted) ai.trustshield.android.ui.call.MicPermission.GRANTED else ai.trustshield.android.ui.call.MicPermission.DENIED)
-        state = host.state.copy(
-            language = if (prefs.language == AppLanguage.ENGLISH) CallLanguage.ENGLISH else CallLanguage.HINGLISH,
-            hapticsEnabled = prefs.haptics,
-            reducedMotion = prefs.reducedMotion
-        )
+        state = synced(host.state)
     }
     remember(host) {
         session.setUtteranceSink(UtteranceSink { utterance ->
             if (utterance.isFinal) host.onUtterance(utterance.text, utterance.confidence, utterance.tsMs)
-            state = host.state
+            state = synced(host.state)
         })
         host
     }
     DisposableEffect(lifecycleOwner, host) {
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
-                Lifecycle.Event.ON_PAUSE -> { host.onHostPaused(); state = host.state }
-                Lifecycle.Event.ON_RESUME -> { host.onHostResumed(); state = host.state }
+                Lifecycle.Event.ON_PAUSE -> { host.onHostPaused(); state = synced(host.state) }
+                Lifecycle.Event.ON_RESUME -> { host.onHostResumed(); state = synced(host.state) }
                 else -> Unit
             }
         }
@@ -499,7 +506,7 @@ fun CallShieldRouteHost() {
         while (true) {
             delay(1_000)
             host.onTick(state.elapsedSeconds + 1)
-            state = host.state
+            state = synced(host.state)
         }
     }
     }
