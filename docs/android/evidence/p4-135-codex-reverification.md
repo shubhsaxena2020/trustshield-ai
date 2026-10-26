@@ -10,6 +10,7 @@ Candidate commit: `2b12406d742f0944852236deb67d1cadb09722af` (`android/P4-133`).
 - `:app:compileDebugAndroidTestKotlin`: passed.
 - Fresh x86_64 debug APK: 30,312,428 bytes; SHA-256 `54C5CFF28A672FED208A9BAD5189C7A3680C4C11A7A17CC6D8E8243376389A4F`.
 - APK archive inspection found no `libbarhopper` entries.
+- Full `:app:connectedDebugAndroidTest` re-run: **54 tests passed, 0 failed, 1 skipped** on API 36. The one skipped case is the suite's existing offline journey.
 
 ## Emulator
 
@@ -23,4 +24,4 @@ Candidate commit: `2b12406d742f0944852236deb67d1cadb09722af` (`android/P4-133`).
 | 7 | 2,000 | 0 | PASS — same scan |
 | 99 | 2,000 | 0 | PASS — same scan |
 
-Per-seed monkey output and crash scans are in adjacent `p4-135-codex-seed-*` files. This proves emulator/JVM behavior only; real-camera QR decoding remains on the held phone checklist.
+Each run also printed an emulator `EACCES` for an attempted `/dev/input/event0` flip event (`// Injection Failed`); Monkey nevertheless reported all 2,000 events injected and exited 0. This is an emulator input limitation, separate from the crash/ANR scan. Per-seed monkey output and crash scans are in adjacent `p4-135-codex-seed-*` files. This proves emulator/JVM behavior only; real-camera QR decoding remains on the held phone checklist.
