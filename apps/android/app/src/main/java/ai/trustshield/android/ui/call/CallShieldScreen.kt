@@ -35,12 +35,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import ai.trustshield.android.ui.a11y.SpokenDescriptions
 import ai.trustshield.android.ui.theme.RiskTone
 import ai.trustshield.android.ui.theme.RiskToneCopy
 import ai.trustshield.android.ui.theme.TsMotion
@@ -155,7 +159,10 @@ private fun Header(state: CallUiState, onEvent: (CallEvent) -> Unit) {
                     text = CallShieldCopy.title.forLanguage(language),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onBackground
+                    color = MaterialTheme.colorScheme.onBackground,
+                    // Heading rank so TalkBack users can jump straight to the screen title; Call
+                    // Shield had no heading at all before #97.
+                    modifier = Modifier.semantics { heading() }
                 )
                 Text(
                     text = CallShieldCopy.subtitle.forLanguage(language),
@@ -196,7 +203,16 @@ private fun WarningBanner(alert: CallAlert, state: CallUiState) {
         modifier = Modifier
             .fillMaxWidth()
             .semantics(mergeDescendants = true) {
-                contentDescription = body + " " + noAccusation
+                // The band label is announced first: before #97 this banner spoke the body and the
+                // "no accusation" line only, so the risk level itself was visible but never heard.
+                contentDescription = SpokenDescriptions.warningBanner(
+                    toneLabel = presentation.label.forLanguage(language),
+                    body = body,
+                    noAccusation = noAccusation
+                )
+                // A new alert is the escalation event; announce it. Polite, never Assertive, so it
+                // cannot talk over the user's own screen-reader navigation (#97).
+                liveRegion = LiveRegionMode.Polite
             },
         color = alert.tone.container(),
         contentColor = alert.tone.onContainer()
@@ -385,8 +401,17 @@ private fun RiskMeter(state: CallUiState) {
         modifier = Modifier
             .fillMaxWidth()
             .semantics(mergeDescendants = true) {
-                contentDescription = "$toneLabel. $toneDescription. " +
-                    CallShieldCopy.confidenceHeading.forLanguage(language) + ": " + confidenceLabel
+                // The two explainer sentences are the honesty copy ("confidence is not a probability
+                // that anyone is guilty"). A merged node with an explicit description does not
+                // reliably speak its child text, so both are folded into the announcement (#97).
+                contentDescription = SpokenDescriptions.riskMeter(
+                    toneLabel = toneLabel,
+                    toneDescription = toneDescription,
+                    confidenceHeading = CallShieldCopy.confidenceHeading.forLanguage(language),
+                    confidenceLabel = confidenceLabel,
+                    confidenceExplainer = CallShieldCopy.confidenceExplainer.forLanguage(language),
+                    riskExplainer = CallShieldCopy.riskExplainer.forLanguage(language)
+                )
             },
         shape = RoundedCornerShape(TsTokens.CornerLarge),
         color = containerColor,

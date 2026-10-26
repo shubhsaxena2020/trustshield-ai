@@ -31,6 +31,7 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import ai.trustshield.android.ui.a11y.SpokenDescriptions
 import ai.trustshield.android.ui.theme.RiskTone
 import ai.trustshield.android.ui.theme.ToneCopy
 import ai.trustshield.android.ui.theme.TsTokens
@@ -167,7 +168,13 @@ private fun RiskHeader(risk: RiskBand, language: UiLanguage) {
         modifier = Modifier
             .fillMaxWidth()
             .semantics(mergeDescendants = true) {
-                contentDescription = risk.contentDescription.pick(language)
+                // The band summary carries the caveat ("... par yeh guarantee nahi hai"). A merged
+                // node with an explicit description does not reliably read its child text, so the
+                // summary is part of the announcement itself (#97).
+                contentDescription = SpokenDescriptions.resultRiskCard(
+                    riskDescription = risk.contentDescription.pick(language),
+                    summary = risk.summary.pick(language)
+                )
             },
         color = risk.tone.container(),
         shape = RoundedCornerShape(TsTokens.CornerLarge)

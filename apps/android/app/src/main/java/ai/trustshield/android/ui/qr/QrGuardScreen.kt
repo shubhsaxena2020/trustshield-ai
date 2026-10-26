@@ -45,6 +45,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -208,7 +209,11 @@ private fun LanguageToggle(language: QrLanguage, onEvent: (QrEvent) -> Unit) {
 
 @Composable
 private fun LanguageChip(label: ToneCopy, selected: Boolean, onClick: () -> Unit) {
-    val minHeight = Modifier.heightIn(min = TsTokens.MinTouchTarget)
+    // Selection was conveyed only by filled-vs-outlined styling, so TalkBack heard two identical
+    // buttons. `selected` makes the active language audible as well as visible (#97).
+    val minHeight = Modifier
+        .heightIn(min = TsTokens.MinTouchTarget)
+        .semantics { this.selected = selected }
     if (selected) {
         Button(onClick = onClick, modifier = minHeight) {
             Text(label.hinglish, style = MaterialTheme.typography.labelMedium)

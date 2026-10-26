@@ -29,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -81,7 +82,9 @@ fun SettingsScreen(
         Text(
             text = copy(SettingsCopy.screenTitle),
             style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.onSurface
+            color = MaterialTheme.colorScheme.onSurface,
+            // Settings had no heading, so "jump to heading" skipped the whole screen (#97).
+            modifier = Modifier.semantics { heading() }
         )
         Text(
             text = copy(SettingsCopy.screenSubtitle),

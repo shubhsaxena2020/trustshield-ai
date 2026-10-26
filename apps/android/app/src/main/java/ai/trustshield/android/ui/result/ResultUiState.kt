@@ -339,13 +339,16 @@ data class ResultUiState(
 // ---------------------------------------------------------------------------------------------
 
 /**
- * The wording for the deterministic score behind the band, for TalkBack only.
+ * The wording for the deterministic score behind the band.
  *
- * The Result screen draws a coarse four-step band and no figure, because a precise-looking number
- * implies precision the local rules do not have (UI_SPEC "Tokens and motion"). Issue #115 was the
- * opposite mistake: the navigation host drew `Text("Risk score: 70/100")` above the header row, so a
- * bare line sat in the status-bar zone. The number now reaches users through
- * [ResultUiState.screenDescription]'s content description only -- it is never passed to a `Text`.
+ * The Result screen draws a coarse four-step band, and since #121 it also draws the engine score
+ * inside the risk card (`RiskHeader`, "Score: <n>/100") rather than as a bare line above the header
+ * — that was issue #115's defect. This object supplies the *spoken* form for
+ * [ResultUiState.screenDescription], spelled out ("out of") because TalkBack reads a slash as noise.
+ *
+ * Corrected 2026-10-26 (#97 evidence pass): this KDoc used to claim the number was "never passed to a
+ * `Text`", which stopped being true when #121 moved the score into the card. The figure shown there is
+ * the engine's own deterministic score and is only present when source evidence verifies the result.
  *
  * [VISIBLE_LITERAL] is the exact stray label that must not come back; keeping it here (rather than in
  * a comment) lets `ResultScreenStrayTextTest` assert the predicate over every string the screen draws.
