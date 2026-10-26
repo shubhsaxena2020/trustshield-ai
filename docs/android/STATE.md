@@ -362,6 +362,11 @@ Branch: `android-finals`. Phase: **3 active; Codex foundation pushed, 18 new P0 
 - Incorporated the owner ASR addendum: one first-wave child performs a <=2-hour emulator bake-off (Vosk small/full vs sherpa-onnx Whisper tiny/base), using synthetic and publicly licensed recordings, then writes `docs/android/ASR_BAKEOFF.md`. Only that child may use the locked emulator; no phone access. Prepared P5 prompt updated accordingly.
 - Existing live roots remain agent1 `[9]` (3 active), agent2 `[9]` (9 active), agent3 `[3]` (children complete; root waiting). The emulator lock belongs to agent2. RAM 19.9 GB. The owner directive edit remains unstaged.
 
+### 2026-10-27 00:14 IST checkpoint
+- Owner raised the next Hermes wave to 18 tasks per session; global and profile configs are set to 18. If 9Router returns 429/503, use 12 for that wave and log it. Do not interrupt current waves; the change applies at each next safe launch.
+- Prepared P5-ASR/#148, #144 and #143/#147 prompts now each define 18 disjoint task files. The P5 first-wave bake-off child is the only child allowed to use the emulator after the shared lock is released.
+- Current DB widths remain agent1 `[9]` (3 children active), agent2 `[9]` (9 active), agent3 `[3]` (children complete; root streaming). Emulator lock: agent2. RAM 20.0 GB. Owner changes to HEAD directives remain unstaged.
+
 ### 2026-10-27 00:07 IST checkpoint
 - Fast-forward verification: main `android-finals` was already equal to freshly fetched `origin/android-finals`. Committed and pushed the owner's released-phone directive and offline Hindi ASR directive as `dfd3483`; no other main-checkout artifacts were staged.
 - Physical-device boundary: the owner owns Redmi serial `63b0de52`; Codex/Hermes must never run adb against it. No adb commands were run.
