@@ -119,7 +119,11 @@ class LegitScamPairsTest {
                 listOf(StageId.THREAT_OR_REWARD, StageId.URGENCY, StageId.ASK),
             ),
         )
-        assertTrue("two corroborations + a strong ask is the documented escalation", scored.escalateCritical)
+        // Hardening follow-up: the flagship's ask is a CALLBACK (a number to ring), which is stage 5 and
+        // earns the HIGH floor, but the full-screen release is reserved for a value ask (credential,
+        // money, remote access, APK, identity data) - a real outage notice also prints a mobile number.
+        // The threat + urgency + callback ask therefore stops at HIGH_RISK without escalating.
+        assertFalse("a callback-only ask must not release the full-screen alert", scored.escalateCritical)
     }
 
     @Test
@@ -157,6 +161,88 @@ class LegitScamPairsTest {
         ).forEach { text ->
             val risk = scorer.analyze(text).risk
             assertTrue("'$text' must stay <= 24, was ${risk.score}", risk.score <= 24)
+        }
+    }
+
+    // ---------------------------------------------------------------------------------------
+    // Report §3.4 row 5, both natural phrasings (issue #118 review follow-up)
+    // ---------------------------------------------------------------------------------------
+
+    /**
+     * Row 5 in the words people actually type. Telling the customer to hand the delivery OTP to the
+     * courier **at the door** is the correct behaviour, so it is not an ask; every way of moving the
+     * same OTP away from the door is. Bands are inclusive and the label is derived from the band, so
+     * a row that improves past its band (45 -> 50, say) does not turn the suite red.
+     */
+    private data class Band(val name: String, val text: String, val min: Int, val max: Int, val ask: Boolean)
+
+    private val deliveryDoorRows = listOf(
+        Band(
+            name = "5l delivery OTP handed to the agent at the door",
+            text = "Your parcel will arrive today. Share the delivery OTP with the agent at your door.",
+            min = 0,
+            max = 24,
+            ask = false,
+        ),
+        Band(
+            name = "5s courier asks for the OTP on the phone",
+            text = "Courier se bol rahe hain, parcel cancel hoga, OTP phone pe bata do",
+            min = 25,
+            max = 100,
+            ask = true,
+        ),
+        Band(
+            name = "5s redirect: phone par bata do, agent ko mat dena",
+            text = "OTP phone par bata do, delivery agent ko mat dena",
+            min = 25,
+            max = 100,
+            ask = true,
+        ),
+        Band(
+            name = "5s bare 'jo OTP aaya hai woh batayein'",
+            text = "Jo OTP aaya hai woh batayein",
+            min = 25,
+            max = 100,
+            ask = true,
+        ),
+        Band(
+            name = "5s SBI KYC 24 ghante + OTP batao stays high",
+            text = "SBI KYC 24 ghante main band ho jaayega Link par KYC update karo aur OTP batao",
+            min = 70,
+            max = 100,
+            ask = true,
+        ),
+    )
+
+    @Test
+    fun `delivery OTP rows land in their measured bands with the right ask`() {
+        for (row in deliveryDoorRows) {
+            val scored = scorer.analyzeScored(row.text)
+            val where = "${row.name}: score=${scored.result.risk.score} " +
+                "label=${scored.result.risk.label} stages=${scored.result.stages}"
+
+            assertTrue("$where - expected ${row.min}..${row.max}", scored.result.risk.score in row.min..row.max)
+            assertEquals("$where - ask evidence", row.ask, scored.verifiedAsk)
+            when {
+                row.max <= 24 -> assertEquals("$where - must be LOW_RISK", RiskLabel.LOW_RISK, scored.result.risk.label)
+                row.min >= 70 -> assertEquals("$where - must be HIGH_RISK", RiskLabel.HIGH_RISK, scored.result.risk.label)
+                else -> assertTrue(
+                    "$where - a scam row must not be LOW_RISK",
+                    scored.result.risk.label != RiskLabel.LOW_RISK,
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `delivery OTP rows quote only text they contain`() {
+        for (row in deliveryDoorRows) {
+            val scored = scorer.analyzeScored(row.text)
+            val unverified = scored.result.unverifiableEvidence(scored.analyzedText)
+            assertTrue(
+                "${row.name}: unverifiable quotes ${unverified.map { it.quote }}",
+                unverified.isEmpty(),
+            )
         }
     }
 

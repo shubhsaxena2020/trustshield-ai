@@ -182,6 +182,23 @@ class StageRulesTest {
     }
 
     @Test
+    fun `delivery OTP at the door is not an ask in the everyday phrasing`() {
+        // "Share the delivery OTP with the agent at your door" never said "share only with", so the
+        // narrow spec phrasing missed it and the OTP rule read a handover as a remote ask.
+        val door = rules.detect(
+            "Your parcel will arrive today. Share the delivery OTP with the agent at your door.",
+        )
+        // Same OTP, moved away from the door: out loud on a call, or to an agent in a chat app.
+        val redirect = rules.detect("OTP phone par bata do, delivery agent ko mat dena")
+        val chatApp = rules.detect("Share the OTP with our agent on WhatsApp")
+
+        assertFalse(door.stageIds.contains(StageId.ASK))
+        assertTrue(door.askTypes.isEmpty())
+        assertEquals(setOf(AskType.OTP_PIN), redirect.askTypes)
+        assertEquals(setOf(AskType.OTP_PIN), chatApp.askTypes)
+    }
+
+    @Test
     fun `hindi otp request is caught in Devanagari`() {
         val result = rules.detect("जो ओटीपी आया है वो बता दो")
 
