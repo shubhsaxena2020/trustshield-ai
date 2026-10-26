@@ -330,7 +330,7 @@ Each excerpt preserves the constructor arguments so every hard-coded Hinglish/En
 - Added `SYSTEM`, `HINGLISH`, `ENGLISH`, and `HINDI`; new preferences default to `SYSTEM`. `resolveLanguage` maps Hindi and English device locales directly and uses Hinglish for other/unknown locales without replacing the stored `SYSTEM` choice.
 - Added a persisted shared-shell language menu across Home/Scan, Result, Call Shield, QR Guard, and Settings. Settings also exposes all four choices.
 - `ToneCopy` and Settings copy now resolve reviewed static Devanagari text through the `HindiCopy` table (265 entries; unmatched dynamic copy retains its supplied wording). Product names, exact evidence quotations, and user-entered content remain unchanged.
-- Added preference resolver/persistence tests. They have not been run in this worktree because the machine-wide Gradle lock is owned by P0 work; no emulator/device test was attempted.
+- Added preference resolver/persistence tests. The Android unit suite passed (1,090 tests, 0 failures, 0 skipped), as did `:app:lintDebug` and `:app:assembleDebug`. Disposable-emulator checks covered Hindi Home/Scan, Call Shield, QR Guard, Settings, and Result, plus switching the shared selector to English. Physical serial `63b0de52` was not accessed.
 - This inventory remains the baseline constructor and literal audit. The 51 literal lines include dynamic/source-backed content; they must not be bulk translated. Remaining copy that is composed at runtime is documented in code at its presentation site and is a follow-up for the full destination-by-destination UI pass.
 
 ### Additional hard-coded strings introduced by the language selector/demo pass
