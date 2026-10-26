@@ -184,6 +184,33 @@ internal data class QrPermissionUi(
 }
 
 /**
+ * The routes that must stay open when the camera is not usable. Data only; [QrHostCopy]
+ * `permissionFallback` decides which ones each permission state offers, and the screen renders them.
+ */
+internal enum class QrFallbackAction {
+    /** Launch the system CAMERA prompt (only while Android still shows it). */
+    REQUEST_PERMISSION,
+
+    /** Deep-link to the app's settings page (the only route after a permanent refusal). */
+    OPEN_SETTINGS,
+
+    /** The labelled "Simulate scan (demo)" control: never live decoding, always available. */
+    SIMULATE_SCAN,
+
+    /** Typing a UPI id by hand, so a refused camera still lets the shop register its QR. */
+    MANUAL_ENTRY
+}
+
+/** One permission state's explanation plus the fallback routes it must offer. */
+internal data class QrPermissionFallback(
+    val help: ToneCopy,
+    val actions: List<QrFallbackAction>
+) {
+    /** True when the labelled simulation control is offered, i.e. a demo path exists without a camera. */
+    val offersSimulation: Boolean get() = actions.contains(QrFallbackAction.SIMULATE_SCAN)
+}
+
+/**
  * The permission decision, as a pure function of the four facts Android will tell us.
  *
  * ## Why these four facts
@@ -837,6 +864,49 @@ internal object QrHostCopy {
         "If the camera is not available, type the UPI ID below to register it."
     )
 
+    /**
+     * One state's fallback, as data: the explanation to show plus the routes that stay open.
+     *
+     * This exists so "camera not granted still leaves a labelled way forward" is a contract the JVM
+     * tests assert (`QrCameraPermissionFallbackTest`) instead of a claim about a screenshot. Every
+     * state that cannot use the camera offers [QrFallbackAction.SIMULATE_SCAN] - the labelled
+     * "Simulate scan (demo)" control, which is explicitly not live decoding - and the two permission
+     * states also offer the manual UPI entry. Only [QrPermissionState.GRANTED] has no fallback,
+     * because there is nothing to fall back from.
+     */
+    fun permissionFallback(state: QrPermissionState): QrPermissionFallback = when (state) {
+        QrPermissionState.GRANTED -> QrPermissionFallback(
+            help = cameraGranted,
+            actions = emptyList(),
+        )
+
+        QrPermissionState.CAN_ASK -> QrPermissionFallback(
+            help = cameraAskHelp,
+            actions = listOf(
+                QrFallbackAction.REQUEST_PERMISSION,
+                QrFallbackAction.SIMULATE_SCAN,
+                QrFallbackAction.MANUAL_ENTRY,
+            ),
+        )
+
+        QrPermissionState.PERMANENTLY_DENIED -> QrPermissionFallback(
+            help = permanentlyDeniedHelp,
+            actions = listOf(
+                QrFallbackAction.OPEN_SETTINGS,
+                QrFallbackAction.SIMULATE_SCAN,
+                QrFallbackAction.MANUAL_ENTRY,
+            ),
+        )
+
+        QrPermissionState.NO_CAMERA -> QrPermissionFallback(
+            help = noCameraHelp,
+            actions = listOf(
+                QrFallbackAction.SIMULATE_SCAN,
+                QrFallbackAction.MANUAL_ENTRY,
+            ),
+        )
+    }
+
     val setupCaptureHeading = ToneCopy("Yeh QR mila", "This QR was read")
     val setupCaptureHelp = ToneCopy(
         "Camera ne yeh UPI ID padhi. Agar yeh aapke dukaan ka asli QR hai to register karein — tabhi nazar shuru hogi.",
@@ -1109,35 +1179,26 @@ private fun CameraPanel(
             )
         }
 
-        when (permission.state) {
-            QrPermissionState.GRANTED -> Unit
-
-            QrPermissionState.CAN_ASK -> {
-                Text(
-                    text = QrHostCopy.cameraAskHelp.text(lang),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Button(
-                    onClick = onRequestPermission,
-                    modifier = Modifier.heightIn(min = TsTokens.MinTouchTarget)
-                ) { Text(QrHostCopy.allowCamera.text(lang)) }
-            }
-
-            QrPermissionState.PERMANENTLY_DENIED -> {
-                Text(
-                    text = QrHostCopy.permanentlyDeniedHelp.text(lang),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Button(
-                    onClick = onOpenSettings,
-                    modifier = Modifier.heightIn(min = TsTokens.MinTouchTarget)
-                ) { Text(QrHostCopy.openSettings.text(lang)) }
-            }
-
-            QrPermissionState.NO_CAMERA -> Text(
-                text = QrHostCopy.noCameraHelp.text(lang),
+        // The fallback contract, not an ad-hoc `when`: QrHostCopy owns which explanation and which
+        // routes each permission state gets, so a state without a way forward cannot be introduced
+        // here silently (QrCameraPermissionFallbackTest asserts the same contract).
+        val fallback = QrHostCopy.permissionFallback(permission.state)
+        if (permission.state != QrPermissionState.GRANTED) {
+            Text(
+                text = fallback.help.text(lang),
                 style = MaterialTheme.typography.bodyMedium
             )
+        }
+        when {
+            fallback.actions.contains(QrFallbackAction.REQUEST_PERMISSION) -> Button(
+                onClick = onRequestPermission,
+                modifier = Modifier.heightIn(min = TsTokens.MinTouchTarget)
+            ) { Text(QrHostCopy.allowCamera.text(lang)) }
+
+            fallback.actions.contains(QrFallbackAction.OPEN_SETTINGS) -> Button(
+                onClick = onOpenSettings,
+                modifier = Modifier.heightIn(min = TsTokens.MinTouchTarget)
+            ) { Text(QrHostCopy.openSettings.text(lang)) }
         }
 
         if (!permission.canUseCamera) {

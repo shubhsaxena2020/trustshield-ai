@@ -51,6 +51,73 @@ object SpeechLanguage {
     fun isSelectable(tag: String): Boolean = selectable.contains(tag)
 }
 
+/**
+ * What the hi-IN support probe actually learned, in the only three shapes Android can honestly give.
+ *
+ * [NotChecked] is not a soft "unsupported": it means Android could not answer at all - the support
+ * callback only exists from API 33, and a callback error is not a verdict about Hindi. Callers must
+ * keep [NotChecked] and [Unsupported] apart, because "we could not ask" and "this phone says no"
+ * are different claims to the user (see `ui/settings/DeviceCheck.kt`).
+ */
+enum class HindiLocaleSupportOutcome { Supported, Unsupported, NotChecked }
+
+/**
+ * The hi-IN support probe as a pure decision core, so the JVM tests can drive every branch without
+ * a device, a recogniser or a microphone. The Android adapter at the bottom of this file only reads
+ * platform facts and calls these functions; it holds no rules of its own.
+ *
+ * Encoded honesty rules:
+ *  - Below API 33 the platform exposes no support callback, so the outcome is [NotChecked].
+ *  - A missing recognition service is a real, answerable "no": [Unsupported].
+ *  - A callback error reports [NotChecked]; it is never turned into [Unsupported].
+ *  - This probe NEVER starts a recognition session (`startListening`). It creates a recogniser,
+ *    asks a question, destroys the recogniser. `startsRecognition` is the machine-checked statement
+ *    of that invariant.
+ */
+object HindiLocaleSupportRules {
+
+    /** `Build.VERSION_CODES.TIRAMISU`: the first API with `checkRecognitionSupport`. */
+    const val SUPPORT_CALLBACK_MIN_API: Int = 33
+
+    /** True only when Android can answer the hi-IN question at all. */
+    fun probeAllowed(apiLevel: Int): Boolean = apiLevel >= SUPPORT_CALLBACK_MIN_API
+
+    /** Case-insensitive hi-IN match; a null/blank tag never matches. */
+    fun matchesHiIn(tag: String?): Boolean =
+        SpeechLanguage.HI_IN.equals(tag?.trim(), ignoreCase = true)
+
+    /** Reads a `RecognitionSupport` answer: hi-IN in either the online or on-device list. */
+    fun supportedFromLanguages(onlineLanguages: List<String>, onDeviceLanguages: List<String>): Boolean =
+        (onlineLanguages + onDeviceLanguages).any { matchesHiIn(it) }
+
+    /** A completed callback that named no hi-IN path at all. */
+    fun outcomeForSupport(supported: Boolean): HindiLocaleSupportOutcome =
+        if (supported) HindiLocaleSupportOutcome.Supported else HindiLocaleSupportOutcome.Unsupported
+
+    /** A callback error, or a recogniser that could not be created: Android did not answer. */
+    fun outcomeForError(): HindiLocaleSupportOutcome = HindiLocaleSupportOutcome.NotChecked
+
+    /** No recognition service exists: the phone can answer this, and the answer is "no". */
+    fun outcomeForMissingService(): HindiLocaleSupportOutcome = HindiLocaleSupportOutcome.Unsupported
+
+    /** The outcome when the probe is not allowed to run on this Android version: nothing was asked. */
+    fun outcomeWhenNotMeasurable(): HindiLocaleSupportOutcome = HindiLocaleSupportOutcome.NotChecked
+
+    /**
+     * The invariant this file is built on: the support probe never starts recognition, on any API
+     * level. `DeviceCheckFallbackTest` and `HindiRecognitionCapabilityTest` both assert it.
+     */
+    @Suppress("UNUSED_PARAMETER")
+    fun startsRecognition(apiLevel: Int): Boolean = false
+
+    /** The nullable form the UI callback uses: null means [HindiLocaleSupportOutcome.NotChecked]. */
+    fun toNullable(outcome: HindiLocaleSupportOutcome): Boolean? = when (outcome) {
+        HindiLocaleSupportOutcome.Supported -> true
+        HindiLocaleSupportOutcome.Unsupported -> false
+        HindiLocaleSupportOutcome.NotChecked -> null
+    }
+}
+
 /** Microphone permission as observed by the caller. Never inferred from audio or text. */
 enum class MicPermission { Unknown, Granted, Denied, PermanentlyDenied }
 
@@ -502,15 +569,18 @@ object SpeechCapabilityProbe {
      * Reports whether the installed default recogniser advertises hi-IN. This is a capability
      * probe only: it does not start recognition or open the microphone. Android only exposes the
      * support callback from API 33; older versions return `null` (not checked).
+     *
+     * The decisions themselves live in [HindiLocaleSupportRules]; this function only reads the
+     * platform and forwards the outcome as `Boolean?` (null = not checked).
      */
     fun probeHindiLocaleSupport(context: Context, executor: Executor, onResult: (Boolean?) -> Unit) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-            onResult(null)
+        if (!HindiLocaleSupportRules.probeAllowed(Build.VERSION.SDK_INT)) {
+            onResult(HindiLocaleSupportRules.toNullable(HindiLocaleSupportRules.outcomeWhenNotMeasurable()))
             return
         }
         val app = context.applicationContext ?: context
         if (!runCatching { SpeechRecognizer.isRecognitionAvailable(app) }.getOrDefault(false)) {
-            onResult(false)
+            onResult(HindiLocaleSupportRules.toNullable(HindiLocaleSupportRules.outcomeForMissingService()))
             return
         }
         val recognizer = try {
@@ -519,15 +589,15 @@ object SpeechCapabilityProbe {
             null
         }
         if (recognizer == null) {
-            onResult(null)
+            onResult(HindiLocaleSupportRules.toNullable(HindiLocaleSupportRules.outcomeForError()))
             return
         }
         var finished = false
-        fun finish(supported: Boolean?) {
+        fun finish(outcome: HindiLocaleSupportOutcome) {
             if (finished) return
             finished = true
             runCatching { recognizer.destroy() }
-            runCatching { onResult(supported) }
+            runCatching { onResult(HindiLocaleSupportRules.toNullable(outcome)) }
         }
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
             putExtra(RecognizerIntent.EXTRA_LANGUAGE, SpeechLanguage.HI_IN)
@@ -539,18 +609,21 @@ object SpeechCapabilityProbe {
                 object : RecognitionSupportCallback {
                     override fun onSupportResult(support: RecognitionSupport) {
                         val supported = runCatching {
-                            (support.onlineLanguages + support.supportedOnDeviceLanguages).any {
-                                it.equals(SpeechLanguage.HI_IN, ignoreCase = true)
-                            }
+                            HindiLocaleSupportRules.supportedFromLanguages(
+                                onlineLanguages = support.onlineLanguages.orEmpty(),
+                                onDeviceLanguages = support.supportedOnDeviceLanguages.orEmpty(),
+                            )
                         }.getOrDefault(false)
-                        finish(supported)
+                        finish(HindiLocaleSupportRules.outcomeForSupport(supported))
                     }
 
-                    override fun onError(error: Int) = finish(null)
+                    override fun onError(error: Int) {
+                        finish(HindiLocaleSupportRules.outcomeForError())
+                    }
                 },
             )
         } catch (_: RuntimeException) {
-            finish(null)
+            finish(HindiLocaleSupportRules.outcomeForError())
         }
     }
 

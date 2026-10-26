@@ -243,7 +243,7 @@ fun SettingsScreen(
 private fun DeviceCheckPanel(english: Boolean) {
     val context = LocalContext.current
     var expanded by remember { mutableStateOf(false) }
-    var hindiLocale by remember { mutableStateOf(DeviceCheckLocale.NOT_CHECKED) }
+    var hindiLocale by remember { mutableStateOf(DeviceCheckLocaleRules.initialStatus()) }
     val current = DeviceCheckProbe.snapshot(context, hindiLocale)
 
     SettingsSection(title = if (english) "Device check" else "Device check") {

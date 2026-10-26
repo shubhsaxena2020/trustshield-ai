@@ -5,10 +5,35 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.content.ContextCompat
+import ai.trustshield.android.input.speech.HindiLocaleSupportOutcome
+import ai.trustshield.android.input.speech.HindiLocaleSupportRules
 import ai.trustshield.android.input.speech.SpeechCapabilityProbe
 import java.util.concurrent.Executor
 
 internal enum class DeviceCheckLocale { SUPPORTED, UNSUPPORTED, NOT_CHECKED }
+
+/**
+ * The one place the hi-IN probe outcome becomes a Device-check row value.
+ *
+ * The distinction this object exists to protect: [HindiLocaleSupportOutcome.NotChecked] ("Android
+ * could not answer: below API 33, a callback error, or a recogniser that could not be created") must
+ * never be shown as [DeviceCheckLocale.UNSUPPORTED] ("this phone says no"). Pure Kotlin, so the
+ * mapping is pinned on the JVM by `DeviceCheckFallbackTest` without a recogniser or a microphone.
+ */
+internal object DeviceCheckLocaleRules {
+
+    fun statusFor(outcome: HindiLocaleSupportOutcome): DeviceCheckLocale = when (outcome) {
+        HindiLocaleSupportOutcome.Supported -> DeviceCheckLocale.SUPPORTED
+        HindiLocaleSupportOutcome.Unsupported -> DeviceCheckLocale.UNSUPPORTED
+        HindiLocaleSupportOutcome.NotChecked -> DeviceCheckLocale.NOT_CHECKED
+    }
+
+    /** The row before any probe has run: nothing has been checked yet on this Android version. */
+    fun initialStatus(): DeviceCheckLocale = DeviceCheckLocale.NOT_CHECKED
+
+    /** True only when the probe may run at all, i.e. the row can stop saying "not checked". */
+    fun canCheckOnThisApiLevel(apiLevel: Int): Boolean = HindiLocaleSupportRules.probeAllowed(apiLevel)
+}
 
 internal data class DeviceCheckSnapshot(
     val androidVersion: String,
@@ -64,11 +89,13 @@ internal object DeviceCheckProbe {
     fun checkHindiLocale(context: Context, executor: Executor, onResult: (DeviceCheckLocale) -> Unit) {
         SpeechCapabilityProbe.probeHindiLocaleSupport(context, executor) { supported ->
             onResult(
-                when (supported) {
-                    true -> DeviceCheckLocale.SUPPORTED
-                    false -> DeviceCheckLocale.UNSUPPORTED
-                    null -> DeviceCheckLocale.NOT_CHECKED
-                },
+                DeviceCheckLocaleRules.statusFor(
+                    when (supported) {
+                        true -> HindiLocaleSupportOutcome.Supported
+                        false -> HindiLocaleSupportOutcome.Unsupported
+                        null -> HindiLocaleSupportOutcome.NotChecked
+                    },
+                ),
             )
         }
     }
