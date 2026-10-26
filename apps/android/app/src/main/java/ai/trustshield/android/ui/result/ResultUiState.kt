@@ -43,12 +43,19 @@ import ai.trustshield.android.ui.theme.ToneCopy
  */
 enum class UiLanguage {
     HINGLISH,
-    ENGLISH;
+    ENGLISH,
+    HINDI;
 
     companion object {
         val Default: UiLanguage = HINGLISH
 
         fun of(english: Boolean): UiLanguage = if (english) ENGLISH else HINGLISH
+        fun of(language: ai.trustshield.android.data.preferences.AppLanguage): UiLanguage = when (language) {
+            ai.trustshield.android.data.preferences.AppLanguage.SYSTEM,
+            ai.trustshield.android.data.preferences.AppLanguage.HINGLISH -> HINGLISH
+            ai.trustshield.android.data.preferences.AppLanguage.ENGLISH -> ENGLISH
+            ai.trustshield.android.data.preferences.AppLanguage.HINDI -> HINDI
+        }
     }
 }
 
@@ -56,6 +63,7 @@ enum class UiLanguage {
 fun ToneCopy.pick(language: UiLanguage = UiLanguage.Default): String = when (language) {
     UiLanguage.HINGLISH -> hinglish
     UiLanguage.ENGLISH -> english.ifBlank { hinglish }
+    UiLanguage.HINDI -> hindi.ifBlank { english.ifBlank { hinglish } }
 }
 
 /** Builds a bilingual pair, falling back to Hinglish when the English variant is missing. */
@@ -371,6 +379,7 @@ object RiskScoreSpeech {
         return when (language) {
             UiLanguage.ENGLISH -> "$VISIBLE_LITERAL $clamped out of 100"
             UiLanguage.HINGLISH -> "$VISIBLE_LITERAL $clamped, 100 mein se"
+            UiLanguage.HINDI -> "स्कोर $clamped में से 100"
         }
     }
 }

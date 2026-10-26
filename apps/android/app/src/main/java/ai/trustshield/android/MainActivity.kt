@@ -20,6 +20,7 @@ import ai.trustshield.android.data.preferences.AppLanguage
 import ai.trustshield.android.data.preferences.SharedPreferencesUserPreferencesStore
 import ai.trustshield.android.data.preferences.ThemeMode
 import ai.trustshield.android.data.preferences.UserPreferences
+import ai.trustshield.android.data.preferences.resolveLanguage
 import ai.trustshield.android.core.analysis.LocalScanPipeline
 import ai.trustshield.android.core.analysis.ScanOutcome
 import ai.trustshield.android.core.score.LocalScorer
@@ -39,6 +40,7 @@ import ai.trustshield.android.ui.navigation.LocalPreferencesSink
 import ai.trustshield.android.ui.navigation.LocalUserPreferences
 import ai.trustshield.android.ui.navigation.TrustShieldRouteContent
 import ai.trustshield.android.ui.theme.TrustShieldTheme
+import java.util.Locale
 
 /**
  * The single activity. It owns nothing but the theme and the navigation host: no scoring, no network,
@@ -144,7 +146,8 @@ class MainActivity : ComponentActivity() {
                         SideEffect { visibleRoute = route }
                         TrustShieldRouteContent(
                             route = route,
-                            english = preferences.language == AppLanguage.ENGLISH,
+                            language = resolveLanguage(preferences.language, Locale.getDefault().toLanguageTag()),
+                            english = resolveLanguage(preferences.language, Locale.getDefault().toLanguageTag()) == AppLanguage.ENGLISH,
                             scanState = scanState,
                             resultOutcome = resultOutcome,
                             sharedImageUri = incomingImageUri,

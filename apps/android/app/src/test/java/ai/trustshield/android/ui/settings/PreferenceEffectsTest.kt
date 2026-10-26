@@ -7,6 +7,7 @@ import ai.trustshield.android.data.preferences.SettingsKeys
 import ai.trustshield.android.data.preferences.SettingsStorage
 import ai.trustshield.android.data.preferences.ThemeMode
 import ai.trustshield.android.data.preferences.UserPreferences
+import ai.trustshield.android.data.preferences.resolveLanguage
 import ai.trustshield.android.ui.call.CallLanguage
 import ai.trustshield.android.ui.qr.QrLanguage
 import ai.trustshield.android.ui.result.UiLanguage
@@ -137,13 +138,23 @@ class PreferenceEffectsTest {
     fun everyStoredLanguageLandsInAllThreeScreenTypesConsistently() {
         for (language in AppLanguage.values()) {
             val effects = resolve(preferences(language = language), systemInDarkTheme = false)
-            val expectedName = language.name
+            val expectedName = resolveLanguage(language, null).name
             assertEquals("QR copy for $language", expectedName, effects.qrLanguage.name)
             assertEquals("Call copy for $language", expectedName, effects.callLanguage.name)
             assertEquals("Result copy for $language", expectedName, effects.resultLanguage.name)
         }
         // Guard against a fourth screen language type being added later without a mapping here.
-        assertEquals(2, AppLanguage.values().size)
+        assertEquals(4, AppLanguage.values().size)
+    }
+
+    @Test
+    fun systemLanguageResolvesFromTheProvidedPhoneLocale() {
+        val hindi = resolve(preferences(language = AppLanguage.SYSTEM), false, systemLanguageTag = "hi-IN")
+        assertEquals(AppLanguage.HINDI, hindi.language)
+        assertEquals(QrLanguage.HINDI, hindi.qrLanguage)
+        val english = resolve(preferences(language = AppLanguage.SYSTEM), false, systemLanguageTag = "en-US")
+        assertEquals(AppLanguage.ENGLISH, english.language)
+        assertEquals(CallLanguage.ENGLISH, english.callLanguage)
     }
 
     @Test

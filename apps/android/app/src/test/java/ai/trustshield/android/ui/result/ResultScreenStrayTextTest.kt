@@ -149,7 +149,7 @@ class ResultScreenStrayTextTest {
             assertTrue("the score must be announced: \"$spoken\"", spoken.contains("70"))
             assertTrue(
                 "the announcement must name the scale: \"$spoken\"",
-                spoken.contains("70 out of 100") || spoken.contains("70, 100 mein se")
+                spoken.contains("70 out of 100") || spoken.contains("70, 100 mein se") || spoken.contains("70 में से 100")
             )
 
             // ... and the very same wording must not be one of the strings the screen draws.

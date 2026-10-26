@@ -1,0 +1,345 @@
+# Android internationalization audit
+
+Snapshot: 27 Oct 2026, branch `android/P6-U1-language`, from `origin/android-finals`. Scope: app UI Kotlin under `apps/android/app/src/main/java/ai/trustshield/android/ui`.
+
+## Findings
+
+- 257 bilingual copy constructors (`ToneCopy` and Settings `SettingText`) carry hard-coded Hinglish/English text. They are centralized copy data, but currently have no Hindi Devanagari field.
+- 51 source lines contain visible Compose text/semantics literals outside those copy constructors or dynamic strings that need review. Sample scam messages and evidence quotes are source data and must retain their exact source wording; labels around them need localization.
+- The existing persisted enum has only `HINGLISH` and `ENGLISH`; default is hard-coded to Hinglish. Call, QR, and Result each keep their own two-language enum/boolean adapters. Settings uses a parallel `SettingText` layer.
+- Main-screen strings outside the copy layer include navigation actions, staged-demo controls, and score labels. Device/system permission dialogs are OS-owned; user text, message samples, exact quotes, URLs, score values, and proper product names are data, not translatable labels.
+
+## Copy-layer literals (complete constructor inventory)
+
+Each excerpt preserves the constructor arguments so every hard-coded Hinglish/English pair is enumerated; line numbers point to the source snapshot.
+
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:19` — `ToneCopy("Call Shield", "Call Shield")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:22` — `ToneCopy( "Sirf woh awaaz jo phone ke mic tak pahunchti hai, aur sirf jab yeh screen khuli ho.", "Only audio that reaches the phone microphone, and only while this screen is open." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:27` — `ToneCopy( "Yeh app call ke doosre taraf ki awaaz nahi pakadta. Sirf aapki anumati se mic tak pahunchi awaaz check hoti hai.", "This app does not capture the other side of a call. It checks only audio reaching the microphone with your consent." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:34` — `ToneCopy("Mic: sun raha hai", "Mic: listening")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:35` — `ToneCopy("Mic: pause hai", "Mic: paused")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:36` — `ToneCopy("Mic: band", "Mic: off")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:37` — `ToneCopy("Mic: anumati nahi mili", "Mic: permission not granted")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:40` — `ToneCopy( "Recognition path abhi check nahi hua; kuch audio device se bahar ja sakta hai.", "Recognition path not checked; some audio may leave this device." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:44` — `ToneCopy( "On-device path report hua; offline kaam karna is device par test nahi hua.", "On-device path reported; offline behavior is unverified on this device." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:48` — `ToneCopy( "Recognizer internet use kar sakta hai; kuch audio device se bahar ja sakta hai.", "The recognizer may use the internet; some audio may leave this device." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:52` — `ToneCopy( "Is device par speech recognition available nahi hai.", "Speech recognition is unavailable on this device." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:57` — `ToneCopy("Backend check: band", "Backend check: off")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:59` — `ToneCopy("Samay", "Elapsed")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:60` — `ToneCopy("English", "Hinglish")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:64` — `ToneCopy("Pehle anumati", "Permission first")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:71` — `ToneCopy( "Call Shield tabhi mic use karta hai jab aap shuru karein. ${path.hinglish} $storageHi", "Call Shield uses the microphone only after you start it. ${path.english} $storageEn" )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:76` — `ToneCopy("Main samajh gaya, anumati deta hoon", "I understand, give permission")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:77` — `ToneCopy( "Anumati note hui. Mic aur speech check ke baad hi session shuru hoga.", "Permission noted. The session starts only after microphone and speech checks." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:84` — `ToneCopy("Session shuru karein", "Start session")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:85` — `ToneCopy("Nayi session shuru karein", "Start a new session")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:86` — `ToneCopy("Thodi der rok dein", "Pause")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:87` — `ToneCopy("Phir shuru karein", "Resume")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:88` — `ToneCopy("Stop — sunna band karein", "Stop — stop listening")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:89` — `ToneCopy( "Stop dabate hi mic band ho jata hai. Back dabane par bhi session band ho jata hai.", "Stop immediately turns the microphone off. Back also ends the session." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:93` — `ToneCopy("Session band hai", "Session stopped")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:94` — `ToneCopy( "Mic band hai. Neeche ke stages sirf is session ke natije hain — baat-cheet ka text hata diya gaya hai.", "The microphone is off. The stages below are this session's outcome only — the spoken text has been cleared." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:102` — `ToneCopy("Pehchaan", "Authority")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:103` — `ToneCopy("Darr ya laalach", "Threat or reward")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:104` — `ToneCopy("Jaldbaazi", "Urgency")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:105` — `ToneCopy("Akela karna", "Secrecy or isolation")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:106` — `ToneCopy("Maang", "Ask")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:110` — `ToneCopy( "Bank, police, CBI, ED, customs ya courier ka daawa.", "A claimed bank, police, CBI, ED, customs or courier role." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:115` — `ToneCopy( "Account band, arrest, parcel charge, lottery ya bada return.", "Account closure, arrest, parcel charge, lottery or an outsized return." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:120` — `ToneCopy( "Abhi, aaj raat, ya deadline ka dabav.", "Now, tonight, or a deadline pressure." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:125` — `ToneCopy( "Kisi ko mat batana, call cut mat karna.", "Do not tell anyone, do not cut the call." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:130` — `ToneCopy( "OTP, PIN, paise, remote access, APK ya personal data ki maang.", "A request for OTP, PIN, money, remote access, an APK or personal data." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:145` — `ToneCopy("mil gaya", "found")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:146` — `ToneCopy("abhi nahi mila", "not yet")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:150` — `ToneCopy("Khatre ka level", "Risk level")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:151` — `ToneCopy( "Level sirf baaton ke pattern se banta hai, kisi vyakti ke baare mein faisla nahi.", "The level comes from the pattern of words only; it is not a judgement about any person." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:156` — `ToneCopy("Confidence", "Confidence")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:157` — `ToneCopy( "Confidence batata hai ki awaaz kitni saaf samajh aayi — kisi par shak ka percentage nahi.", "Confidence describes how clearly the audio was understood — not a probability that anyone is guilty." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:163` — `ToneCopy("Verify nahi ho paya", "Unable to verify")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:164` — `ToneCopy("Kam", "Low")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:165` — `ToneCopy("Theek", "Medium")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:166` — `ToneCopy("Achhi", "High")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:171` — `ToneCopy( "Dhyan dein: kuch scam jaise words mile. Call kaat kar official number se verify karein; " + "paise bheje hon to 1930 par call karein.", "Careful: some scam-like words were heard. End the call and verify through an official " + "number; if you already sent money, call 1930." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:178` — `ToneCopy( "Digital arrest scam ka pattern mila. Call kaat dijiye aur official number se verify karein; " + "paise bheje hon to 1930 par call karein. Koi police/CBI video call par arrest nahi karti " + "aur paise 'verify' nahi karwati.", "This matches a digital-arrest scam pattern. End the call and verify through an official " + "number; if you already sent money, call 1930. No police or CBI officer arrests anyone " + "over a video call, and nobody needs your money to 'verify' it." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:187` — `ToneCopy( "Digital arrest scam ka pattern mila, aur paise/OTP ki maang bhi hai. Turant call kaat dijiye. " + "Official number se verify karein; paise bheje hon to 1930 par call karein. Kisi ko OTP, " + "PIN ya remote access na dein.", "This matches a digital-arrest scam pattern and there is a request for money or a code. End " + "the call now. Verify through an official number; if you already sent money, call 1930. " + "Do not give anyone an OTP, PIN or remote access." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:202` — `ToneCopy( hinglish = "Yeh digital arrest scam ka pattern hai. Koi bhi police ya CBI video call pe " + "arrest nahi karti. Call kaat dijiye aur 1930 pe call karein.", english = "This is a digital-arrest scam pattern. No police or CBI officer arrests anyone " + "over a video call. End the call and call 1930." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:210` — `ToneCopy( "Yeh alert sirf baaton ke pattern par hai. Yeh kisi vyakti par ilzaam nahi lagata.", "This alert is about the pattern of words only. It does not accuse any person." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:225` — `ToneCopy("Awaaz saaf nahi", "Audio not clear")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:226` — `ToneCopy( "Kuch baat theek se samajh nahi aayi, isliye alert roka gaya hai. Dobara boliye, ya phone ke " + "paas aaiye, warna yeh alert nahi dikhega.", "Some speech could not be understood, so the alert is on hold. Repeat it, or move closer to " + "the phone, otherwise the alert is not shown." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:232` — `ToneCopy("Dobara sunnein", "Listen again")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:234` — `ToneCopy("Mic ki anumati nahi mili", "Microphone permission not granted")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:235` — `ToneCopy("Anumati dein", "Grant permission")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:236` — `ToneCopy( "Phone ki Settings mein is app ke liye Microphone allow karein, phir wapas aakar session " + "shuru karein. Bina anumati ke app sun nahi sakta.", "Allow Microphone for this app in your phone Settings, then come back and start the session. " + "Without permission the app cannot listen." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:243` — `ToneCopy( "Is phone par Hindi speech recognition nahi mila", "Hindi speech recognition is not available on this phone" )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:247` — `ToneCopy( "Live speech-to-text is device par nahi chal raha, isliye koi live alert nahi milega. " + "Speech service install karein, ya neeche se typed transcript / staged demo use karein — " + "wo live ASR nahi hai.", "Live speech-to-text is not running on this device, so no live alert is available. Install a " + "speech service, or use the typed transcript / staged demo below — that is not live ASR." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:255` — `ToneCopy("Staged demo (live mic nahi)", "Staged demo (not live mic)")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:256` — `ToneCopy("Typed transcript", "Typed transcript")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:258` — `ToneCopy("Verify nahi ho paya", "Unable to verify")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:261` — `ToneCopy( "Awaaz theek se sunai nahi di (shor ya doori). Koi alert nahi diya gaya. Phone ke paas " + "aakar dobara boliye.", "Speech could not be heard clearly (noise or distance). No alert was raised. Move closer " + "to the phone and repeat." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:268` — `ToneCopy( "Is bhasha ko abhi poori tarah check nahi kar sakte, isliye koi alert nahi diya gaya.", "This language cannot be fully checked yet, so no alert was raised." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:273` — `ToneCopy( "Mic uplabdh nahi hai. Anumati dein ya typed transcript use karein.", "The microphone is not available. Grant permission or use a typed transcript." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:278` — `ToneCopy( "Speech recognition uplabdh nahi hai. Typed transcript ya staged demo use karein.", "Speech recognition is not available. Use a typed transcript or the staged demo." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:283` — `ToneCopy( "Abhi tak koi baat samajh nahi aayi. Session chal raha hai, boliye.", "No speech understood yet. The session is running — go ahead and speak." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:288` — `ToneCopy("", "")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:293` — `ToneCopy( "Baat-cheet ka text 2 minute baad apne aap hat jata hai, aur Stop par turant.", "Spoken text drops out after 2 minutes on its own, and immediately on Stop." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldCopy.kt:298` — `ToneCopy( "Alert kyun aaya: neeche woh stages dekhein jinke saamne 'mil gaya' likha hai, har ek ke " + "saath suni gayi asli line.", "Why this alert: see the stages marked 'found' below — each one keeps the exact line that was heard." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/home/ScanScreen.kt:81` — `ToneCopy("Scan karein", "Check a message")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/home/ScanScreen.kt:82` — `ToneCopy( "Koi bhi suspicious message, link ya SMS text yahan paste karein. Verdict device par hi banta hai.", "Paste any suspicious message, link or SMS text here. The verdict is worked out on this device." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/home/ScanScreen.kt:86` — `ToneCopy( "Local rules internet ke bina bhi chalte hain. Online check abhi available nahi hai, " + "isliye result sirf device par bane rules se aata hai.", "Local rules work without internet. Online checks are not available yet, so the result " + "comes only from rules that run on the device." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/home/ScanScreen.kt:93` — `ToneCopy("Message yahan paste karein", "Paste the message here")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/home/ScanScreen.kt:94` — `ToneCopy( "Poora message jaisa aaya hai waisa hi chipkayein", "Paste the whole message exactly as it arrived" )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/home/ScanScreen.kt:98` — `ToneCopy("Characters:", "Characters:")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/home/ScanScreen.kt:100` — `ToneCopy("Paste", "Paste")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/home/ScanScreen.kt:101` — `ToneCopy( "Clipboard se message paste karein", "Paste a message from the clipboard" )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/home/ScanScreen.kt:105` — `ToneCopy("Clear", "Clear")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/home/ScanScreen.kt:106` — `ToneCopy( "Message hata kar field khaali karein", "Clear the message field" )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/home/ScanScreen.kt:111` — `ToneCopy( "Check karne layak text nahi mila. Pehle message paste ya type karein.", "There is no text to check yet. Paste or type a message first." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/home/ScanScreen.kt:115` — `ToneCopy( "Message bahut lamba hai - sirf pehle 20,000 characters check honge", "The message is too long - only the first 20,000 characters will be checked" )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/home/ScanScreen.kt:120` — `ToneCopy("Examples (nakli sample)", "Examples (synthetic samples)")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/home/ScanScreen.kt:121` — `ToneCopy( "Yeh sirf demo ke liye banaye gaye nakli messages hain. Inme kisi ka asli data nahi hai.", "These are synthetic demo messages. They contain no real person's data." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/home/ScanScreen.kt:125` — `ToneCopy("Example bharein:", "Fill in the example:")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/home/ScanScreen.kt:127` — `ToneCopy("Check karein (offline)", "Check (offline)")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/home/ScanScreen.kt:128` — `ToneCopy( "Message ko isi device par check karein, internet ke bina", "Check the message on this device, without internet" )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/home/ScanScreen.kt:132` — `ToneCopy( "Verdict isi phone par banta hai — internet ki zarurat nahi.", "The verdict is computed on this phone — no internet needed." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/home/ScanScreen.kt:137` — `ToneCopy("Screenshot se check karein", "Check from a screenshot")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/home/ScanScreen.kt:138` — `ToneCopy( "Screenshot chunein; OCR text padh kar wahi local check chalega", "Pick a screenshot; OCR reads the text and the same local check runs" )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/home/ScanScreen.kt:142` — `ToneCopy( "Screenshot ka text OCR se nikala jata hai. OCR kabhi galat padh sakta hai, " + "isliye bharosa kam ho sakta hai.", "Screenshot text is read by OCR. OCR can misread, so confidence may be lower." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/home/ScanScreen.kt:148` — `ToneCopy( "Kisi bhi app se Share karke bhejein — message yahan khud aa jayega.", "Share from any app and the message lands here by itself." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/home/ScanScreen.kt:152` — `ToneCopy("Settings", "Settings")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/home/ScanScreen.kt:153` — `ToneCopy( "Bhasha aur sensitivity ki settings kholein", "Open the language and sensitivity settings" )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/home/ScanScreen.kt:157` — `ToneCopy( "Aapka message sirf isi phone par check hota hai. App use save, share ya upload nahi karta.", "Your message is checked only on this phone. The app does not save, share or upload it." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/home/ScanScreen.kt:162` — `ToneCopy("Dhyan dein", "Error")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/home/ScanScreen.kt:163` — `ToneCopy( "Type karte hi yeh error hat jayega.", "Typing clears this error." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/home/ScanScreen.kt:169` — `ToneCopy( "Khaali message check nahi ho sakta. Pehle text paste ya type karein.", "An empty message cannot be checked. Paste or type some text first." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/home/ScanScreen.kt:173` — `ToneCopy( "Message limit se lamba hai. Text chhota karein ya dobara paste karein.", "The message is longer than the limit. Shorten it or paste it again." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/home/ScanScreen.kt:177` — `ToneCopy( "Clipboard khaali hai ya text copy nahi hua. Message copy karke Paste dobara dabayein.", "The clipboard is empty or nothing was copied. Copy the message and tap Paste again." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/home/ScanScreen.kt:426` — `ToneCopy("SBI KYC", "SBI KYC")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/home/ScanScreen.kt:432` — `ToneCopy("Bijli bill", "Power bill")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/home/ScanScreen.kt:438` — `ToneCopy("Bank credit", "Bank credit")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/home/ScanScreen.kt:444` — `ToneCopy("Delivery OTP", "Delivery OTP")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/navigation/AppScreens.kt:236` — `ToneCopy(it, it)`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrGuardHost.kt:812` — `ToneCopy("Camera", "Camera")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrGuardHost.kt:813` — `ToneCopy("Camera chalu hai", "Camera is on")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrGuardHost.kt:814` — `ToneCopy( "Emulator par live camera band hai", "Live camera scanning is off on this emulator" )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrGuardHost.kt:817` — `ToneCopy( "QR ko frame ke beech mein rakhein. Camera sirf QR padhta hai — photo save nahi hoti.", "Keep the QR inside the frame. The camera only reads the QR — no photo is saved." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrGuardHost.kt:821` — `ToneCopy( "QR Guard ko QR dekhne ke liye camera chahiye. 'Camera allow karein' dabayein — permission sirf QR padhne ke liye hai.", "QR Guard needs the camera to see the QR. Tap 'Allow camera' — the permission is only used to read the QR." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrGuardHost.kt:825` — `ToneCopy( "Camera permission band hai. Phone ki Settings mein QR Guard ke liye Camera allow karein, phir yahan wapas aayein — camera khud chalu ho jaayega.", "Camera permission is blocked. Allow Camera for QR Guard in the phone's Settings, then come back here — the camera starts on its own." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrGuardHost.kt:829` — `ToneCopy( "Is phone par camera nahi mila. UPI ID neeche haath se likh kar register kar sakte hain; live nazar is phone par nahi chalegi.", "No camera was found on this phone. You can still register a UPI ID by typing it below; live watching will not run here." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrGuardHost.kt:833` — `ToneCopy("Camera allow karein", "Allow camera")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrGuardHost.kt:834` — `ToneCopy("Settings kholein", "Open settings")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrGuardHost.kt:835` — `ToneCopy( "Camera na ho to UPI ID neeche haath se likh kar register karein.", "If the camera is not available, type the UPI ID below to register it." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrGuardHost.kt:840` — `ToneCopy("Yeh QR mila", "This QR was read")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrGuardHost.kt:841` — `ToneCopy( "Camera ne yeh UPI ID padhi. Agar yeh aapke dukaan ka asli QR hai to register karein — tabhi nazar shuru hogi.", "The camera read this UPI ID. Register it only if this is your shop's real QR — watching starts after that." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrGuardHost.kt:845` — `ToneCopy("Haan, yeh mera QR hai — register karein", "Yes, this is my QR — register")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrGuardHost.kt:846` — `ToneCopy("Nahi, dobara dekhein", "No, scan again")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrGuardHost.kt:848` — `ToneCopy("Simulate scan (demo)", "Simulate scan (demo)")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrGuardHost.kt:849` — `ToneCopy( "Yeh simulation hai — camera se live decode nahi hota.", "This is a simulation — it is not live camera decoding." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrGuardHost.kt:853` — `ToneCopy( "Bina doosre QR ke demo chalane ke liye. Wahi watcher chalta hai jo asli camera par chalta hai.", "For demos without a second QR. It drives the same watcher the real camera drives." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrGuardHost.kt:857` — `ToneCopy("Demo: match", "Demo: match")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrGuardHost.kt:858` — `ToneCopy("Demo: sticker tamper", "Demo: sticker tamper")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrGuardHost.kt:859` — `ToneCopy("Demo: unreadable", "Demo: unreadable")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrGuardHost.kt:860` — `ToneCopy("Demo: do QR ek stand", "Demo: two QRs, one stand")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrGuardHost.kt:862` — `ToneCopy("Pehle QR badalne ka PIN banayein", "First create a PIN for changing the QR")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrGuardHost.kt:863` — `ToneCopy( "4 se 6 ank ka PIN chunein. Naya QR register karne ke liye yahi PIN lagega, taaki koi doosra aapka QR na badal sake.", "Choose a 4 to 6 digit PIN. The same PIN is required to register a new QR, so nobody else can swap yours." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrGuardHost.kt:867` — `ToneCopy("Naya PIN", "New PIN")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrGuardHost.kt:868` — `ToneCopy("PIN set karein", "Set PIN")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrGuardHost.kt:869` — `ToneCopy("PIN 4 se 6 ank ka hona chahiye.", "The PIN must be 4 to 6 digits.")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrGuardHost.kt:870` — `ToneCopy( "Yeh PIN sirf is phone par rehta hai aur app band hone par dobara banana hoga.", "This PIN stays on this phone only and has to be created again after the app closes." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrGuardHost.kt:875` — `ToneCopy( "Camera is phone par shuru nahi ho paya. Demo se QR Guard chal kar dekh sakte hain.", "The camera could not start on this phone. You can still run QR Guard from the demo." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrGuardHost.kt:879` — `ToneCopy( "Camera kisi aur app mein chal raha hai. Use band karke dobara try karein, ya QR Guard ka demo chalayein.", "Another app is using the camera. Close it and try again, or run the QR Guard demo." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrGuardHost.kt:883` — `ToneCopy( "Camera ka frame padha nahi ja raha. QR saaf karein ya phone ko hila kar dobara try karein.", "The camera frames cannot be read. Clean the QR or move the phone and try again." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrGuardHost.kt:887` — `ToneCopy( "Emulator par camera default se band hai. QR Guard ko Simulate scan se try karein.", "Camera is off by default on emulators. Try QR Guard with Simulate scan." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrGuardHost.kt:899` — `ToneCopy( "Camera permission mili hai, emulator par live scan band hai", "Camera permission is granted, live scan is off on this emulator" )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrGuardHost.kt:905` — `ToneCopy("camera chalu hai", "camera is on")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrGuardHost.kt:906` — `ToneCopy("camera ki permission chahiye", "camera permission is needed")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrGuardHost.kt:908` — `ToneCopy("camera permission band hai", "camera permission is blocked")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrGuardHost.kt:909` — `ToneCopy("is phone par camera nahi hai", "this phone has no camera")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrGuardHost.kt:911` — `ToneCopy("Camera panel — ", "Camera panel — ")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrGuardHost.kt:916` — `ToneCopy( "Simulate scan demo — camera se live decode nahi", "Simulate scan demo — not live camera decoding" )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrGuardHost.kt:1053` — `ToneCopy("Camera ki permission chahiye", "Camera permission is needed")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrGuardHost.kt:1055` — `ToneCopy("Camera permission band hai", "Camera permission is blocked")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:716` — `ToneCopy("QR Guard", "QR Guard")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:717` — `ToneCopy( "Dukaan ke QR par nazar — upar chipke nakli sticker ko pakadne ke liye", "Keeps an eye on the shop QR to catch a sticker pasted on top" )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:721` — `ToneCopy("Bhasha", "Language")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:722` — `ToneCopy("Hinglish", "Hinglish")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:723` — `ToneCopy("English", "English")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:726` — `ToneCopy("Camera", "Camera")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:727` — `ToneCopy("Camera check ho raha hai", "Checking the camera")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:728` — `ToneCopy( "Camera chalu hai — QR ko frame ke beech mein rakhein", "Camera is on — keep the QR inside the frame" )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:732` — `ToneCopy( "Emulator par live camera band hai", "Live camera scanning is off on this emulator" )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:736` — `ToneCopy("Camera ki permission nahi mili", "Camera permission was denied")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:737` — `ToneCopy( "Phone ki Settings mein camera permission dein, phir yahan wapas aayein. Permission ke bina QR Guard kaam nahi karta.", "Allow camera access in the phone's Settings, then come back here. QR Guard cannot work without it." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:741` — `ToneCopy("Is phone par camera nahi mila", "No camera found on this phone")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:742` — `ToneCopy( "QR Guard ko QR dekhne ke liye camera chahiye. Aap UPI ID haath se likh kar register kar sakte hain, lekin live nazar sirf camera se hoti hai.", "QR Guard needs a camera to see the QR. You can still register a UPI ID by typing it, but live watching needs the camera." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:748` — `ToneCopy("Expected merchant", "Expected merchant")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:749` — `ToneCopy( "Abhi koi UPI ID register nahi hai. Pehle asli QR register karein.", "No UPI ID is registered yet. Register the real QR first." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:753` — `ToneCopy( "QR par likha naam badla ja sakta hai. Bharosa sirf UPI ID ki tulna par karein.", "The name printed on a QR can be swapped. Trust only the UPI ID comparison." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:757` — `ToneCopy("UPI ID (jaise dukaan@okaxis)", "UPI ID (e.g. shop@okaxis)")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:758` — `ToneCopy("Naam (optional)", "Name (optional)")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:759` — `ToneCopy("Register karein", "Register")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:760` — `ToneCopy("Hatayein", "Remove")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:761` — `ToneCopy( "Poora UPI ID kabhi screen par ya log mein nahi dikhta.", "The full UPI ID is never shown on screen or written to logs." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:765` — `ToneCopy( "Kam se kam ek UPI ID register karein, phir nazar shuru karein.", "Register at least one UPI ID, then start watching." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:769` — `ToneCopy( "Camera ke bina nazar shuru nahi hoti.", "Watching cannot start without the camera." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:774` — `ToneCopy("Nazar shuru karein", "Start watching")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:775` — `ToneCopy("Band karein", "Stop")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:776` — `ToneCopy( "Monitoring band hai. Camera dobara on karne ke liye nazar shuru karein.", "Monitoring is stopped. Start watching to turn the camera back on." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:782` — `ToneCopy("Lagatar valid mismatch", "Consecutive valid mismatch")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:783` — `ToneCopy("QR dikhna band (timer)", "No QR visible (timer)")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:784` — `ToneCopy( "QR na dikhna tamper ka saboot nahi hai.", "Not seeing the QR is not proof of tampering." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:790` — `ToneCopy("Samajh gaya — alert band karein", "Understood — dismiss alert")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:791` — `ToneCopy( "Abhi payment mat karein.", "Do not pay right now." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:797` — `ToneCopy("Naya QR register karein (PIN)", "Register a new QR (PIN)")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:798` — `ToneCopy( "Naya QR lagane ke liye 5 second dabayein", "Press and hold for 5 seconds to set a new QR" )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:802` — `ToneCopy( "Pakad kar rakhein… 5 second pure hone par PIN poochha jayega", "Keep holding… the PIN is asked once the 5 seconds are up" )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:806` — `ToneCopy( "Asli dukaandaar hi naya QR register kar sakta hai — isliye app PIN chahiye.", "Only the real shopkeeper can register a new QR, so the app PIN is required." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:810` — `ToneCopy("App PIN", "App PIN")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:811` — `ToneCopy("PIN se kholein", "Unlock with PIN")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:812` — `ToneCopy("Wapas", "Back")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:813` — `ToneCopy("PIN galat hai. Dobara koshish karein.", "Wrong PIN. Try again.")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:814` — `ToneCopy( "Bahut baar galat PIN. Re-register band hai — app ko dobara kholein.", "Too many wrong PINs. Re-register is locked — reopen the app." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:818` — `ToneCopy( "Pehle Settings mein app PIN set karein, tabhi naya QR register ho sakta hai.", "Set an app PIN in Settings first; only then can a new QR be registered." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:822` — `ToneCopy( "PIN sahi hai — ab asli QR register karein.", "PIN accepted — now register the real QR." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:830` — `ToneCopy( "Pakka confirmation sirf aapke bank SMS ya UPI app ki history mein milega.", "Final confirmation only comes from your bank SMS or your UPI app history." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:854` — `ToneCopy("Setup adhura hai", "Setup is incomplete")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:855` — `ToneCopy( "Pehle asli dukaan ka QR register karein, phir camera se nazar rakhein.", "Register the shop's real QR first, then keep an eye on it with the camera." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:861` — `ToneCopy("Setup adhura hai", "Setup is incomplete")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:867` — `ToneCopy("Nazar chal rahi hai", "Watching")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:868` — `ToneCopy( "QR ka intezaar hai. Customer ke saamne bhi phone QR ki taraf rakha rahe.", "Waiting for the QR. Keep the phone pointed at it while a customer is paying." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:874` — `ToneCopy("Nazar chal rahi hai, QR ka intezaar", "Watching, waiting for the QR")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:880` — `ToneCopy("QR match hua", "QR matches")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:881` — `ToneCopy( "Yeh QR aapke register kiye UPI ID se milta hai. Amount aur naam payment screen par khud check karein.", "This QR matches a registered UPI ID. Still check the amount and name on the payment screen yourself." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:887` — `ToneCopy("QR aapke register kiye UPI ID se match hua", "QR matches a registered UPI ID")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:893` — `ToneCopy("QR badal gaya lagta hai", "QR looks changed")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:894` — `ToneCopy( "Lagatar valid mismatch mile hain — QR ka UPI ID aapke register kiye ID se alag hai. Payment mat karein, dukaandaar se poochhein.", "Consecutive valid mismatches — the QR's UPI ID differs from the registered one. Do not pay; check with the shopkeeper." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:900` — `ToneCopy( "Khatra: QR ka UPI ID aapke register kiye ID se alag hai", "Warning: the QR's UPI ID differs from the registered one" )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:909` — `ToneCopy("QR nahi dikh raha", "QR not visible")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:910` — `ToneCopy( "5 minute se QR padha nahi ja saka — dhak gaya, hil gaya ya sticker aadha chipka hai. Yeh tamper ka saboot nahi hai: camera ka angle, roshni aur QR saaf karein.", "The QR has not been readable for 5 minutes — covered, moved, or half a sticker. This is not proof of tampering: fix the angle, the light and clear the QR." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:916` — `ToneCopy("QR nahi dikh raha — tamper ka saboot nahi", "QR not visible — not proof of tampering")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:922` — `ToneCopy("Camera band hai", "Camera is blocked")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:923` — `ToneCopy( "Camera ke bina nazar nahi ho sakti. Permission dein ya doosra phone use karein.", "Without the camera there is no watching. Grant permission or use another phone." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:929` — `ToneCopy("Camera band hai, nazar ruki hui", "Camera is blocked, watching is paused")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:935` — `ToneCopy("Monitoring band hai", "Monitoring stopped")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:936` — `ToneCopy( "Session band hai aur QR ka data clear ho gaya. Dobara shuru karne ke liye nazar shuru karein.", "The session is over and the QR data is cleared. Start watching to begin again." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:942` — `ToneCopy("Monitoring band hai", "Monitoring stopped")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:972` — `ToneCopy("", "")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:974` — `ToneCopy( QrStrings.cameraDenied.hinglish + " " + QrStrings.cameraDeniedHelp.hinglish, QrStrings.cameraDenied.english + " " + QrStrings.cameraDeniedHelp.english )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:978` — `ToneCopy( QrStrings.cameraNone.hinglish + " " + QrStrings.cameraNoneHelp.hinglish, QrStrings.cameraNone.english + " " + QrStrings.cameraNoneHelp.english )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrUiState.kt:983` — `ToneCopy( QrSignalCopy.of(QrSignal.MISMATCH).detail.hinglish + " " + QrStrings.stopPaymentNow.hinglish, QrSignalCopy.of(QrSignal.MISMATCH).detail.english + " " + QrStrings.stopPaymentNow.english )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/result/ResultUiState.kt:65` — `ToneCopy(hi, en.ifBlank { hi })`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/result/ResultUiState.kt:910` — `ToneCopy( AbsoluteSafetyGuard.sanitize(source.hinglish, ResultCopy.ABSOLUTE_CLAIM_REPLACEMENT.hinglish), AbsoluteSafetyGuard.sanitize(source.english, ResultCopy.ABSOLUTE_CLAIM_REPLACEMENT.english) )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:18` — `SettingText(val hinglish: String, val english: String)`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:31` — `SettingText("Settings", "Settings")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:32` — `SettingText( "App ko apne hisaab se set karein.", "Set the app up the way you like." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:37` — `SettingText("Theme", "Theme")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:38` — `SettingText("Phone jaisa (system)", "Match phone (system)")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:39` — `SettingText( "Phone ke light/dark mode ko follow karega.", "Follows your phone's light/dark mode." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:43` — `SettingText("Hamesha light", "Always light")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:44` — `SettingText("Hamesha dark", "Always dark")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:46` — `SettingText("Bhasha / Language", "Language")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:47` — `SettingText("Hinglish (default)", "Hinglish (default)")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:48` — `SettingText("English", "English")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:49` — `SettingText( "Hinglish default hai. Simple English chahiye to yahan badlein.", "Hinglish is the default. Switch here if you prefer plain English." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:54` — `SettingText("Sensitivity", "Sensitivity")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:55` — `SettingText("Kam alerts — LOW", "Fewer alerts — LOW")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:56` — `SettingText( "Sirf saaf, strong pattern par alert. Kuch mild cases miss ho sakte hain.", "Alerts only on clear, strong patterns. Some mild cases may be missed." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:60` — `SettingText("Balanced — default", "Balanced — default")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:61` — `SettingText( "Recommended. Strong pattern par alert, bina panic ke.", "Recommended. Alerts on strong patterns without over-warning." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:65` — `SettingText("Zyada alerts — HIGH", "More alerts — HIGH")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:66` — `SettingText( "Zyada cheezein alert karengi, isliye kuch extra warnings aa sakti hain.", "More things will alert, so expect some extra warnings." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:75` — `SettingText( "Important: sensitivity sirf alert ki likelihood badalti hai. Verified strong ask (OTP, " + "paise, remote access) kabhi \"safe\" nahi dikhega — warnings poori tarah band karne " + "ka koi option nahi hai.", "Important: sensitivity only changes how often you are warned. A verified strong ask " + "(OTP, money, remote access) is never shown as \"safe\" — there is no option to turn " + "warnings off completely." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:84` — `SettingText("Haptics", "Haptics")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:85` — `SettingText("High risk par halka vibrate", "Vibrate on high risk")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:86` — `SettingText( "Sirf ek baar, jab risk naya high ho — har line par nahi.", "Once only, when a risk newly turns high — not on every line." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:91` — `SettingText("Reduced motion", "Reduced motion")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:92` — `SettingText("Animations kam karein", "Reduce animations")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:93` — `SettingText( "Transitions turant honge. Koi pulsing ya flashing alert nahi.", "Transitions become instant. No pulsing or flashing alerts." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:98` — `SettingText("Default par reset karein", "Reset to defaults")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:99` — `SettingText("Reset to defaults?", "Reset to defaults?")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:100` — `SettingText( "Theme, bhasha, sensitivity, haptics aur reduced motion default par chale jayenge. " + "Yeh settings koi message ya data save nahi karti, isliye delete karne ke liye " + "kuch nahi hai.", "Theme, language, sensitivity, haptics and reduced motion go back to defaults. These " + "settings store no message or data, so there is nothing to delete." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:107` — `SettingText("Reset karein", "Reset")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:108` — `SettingText("Cancel", "Cancel")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:109` — `SettingText("Defaults lag gaye.", "Defaults applied.")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:111` — `SettingText( "Yahan sirf aapke choices save hote hain — koi message, quote, OTP, phone number ya UPI " + "id nahi.", "Only your choices are saved here — no message, quote, OTP, phone number or UPI id." )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/theme/RiskToneSemantics.kt:7` — `ToneCopy(val hinglish: String, val english: String)`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/theme/RiskToneSemantics.kt:43` — `ToneCopy("Jaankari", "Information")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/theme/RiskToneSemantics.kt:46` — `ToneCopy( "Jaankari — koi khatra nahi mila", "Information — no risk signal found" )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/theme/RiskToneSemantics.kt:54` — `ToneCopy("Kam khatra", "Low risk")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/theme/RiskToneSemantics.kt:57` — `ToneCopy( "Kam khatra — sirf sanket kam mile", "Low risk — few warning signals found" )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/theme/RiskToneSemantics.kt:65` — `ToneCopy("Dhyan dein", "Caution")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/theme/RiskToneSemantics.kt:68` — `ToneCopy( "Dhyan dein — kuch khatre ke sanket mile", "Caution — some warning signals found" )`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/theme/RiskToneSemantics.kt:76` — `ToneCopy("Zyada khatra", "High risk")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/theme/RiskToneSemantics.kt:79` — `ToneCopy( "Zyada khatra — turant rukhein aur verify karein", "High risk — stop and verify now" )`
+
+## Visible literals and dynamic labels outside copy objects
+
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldScreen.kt:388` — `contentDescription = "$toneLabel. $toneDescription. " +`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldScreen.kt:533` — `text = "\u201C" + quote + "\u201D",`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldScreen.kt:808` — `text = "Case clear karne ke liye 50,000 bhejo",`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/call/CallShieldScreen.kt:832` — `text = "kuch saaf nahi suna",`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/home/ScanScreen.kt:427` — `text = "SBI: Aapka KYC 24 ghante mein band ho jayega. Turant is link se KYC update " +`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/home/ScanScreen.kt:433` — `text = "Bijli vibhag: Aaj raat 9 baje aapka connection kat jayega. Turant is " +`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/home/ScanScreen.kt:439` — `text = "Rs 5,000 credited to A/c XX0123 on 12-Oct. Avl bal Rs 12,450. " +`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/home/ScanScreen.kt:445` — `text = "Aapka parcel aaj shaam aa raha hai. OTP sirf darwaze par khade delivery " +`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/home/ScanScreen.kt:736` — `contentDescription = "$label. $message $dismissHint"`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/navigation/AppScreens.kt:154` — `// Issue #115: this host used to draw a \`Text("Risk score: N/100")\` *before* the panel, so a bare`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/navigation/AppScreens.kt:343` — `OutlinedButton(onClick = onOpenCall, modifier = Modifier.weight(1f).heightIn(min = 48.dp)) { Text("Call Shield") }`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/navigation/AppScreens.kt:344` — `OutlinedButton(onClick = onOpenQr, modifier = Modifier.weight(1f).heightIn(min = 48.dp)) { Text("QR Guard") }`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/navigation/AppScreens.kt:544` — `Text(if (english) "Close demo" else "Demo band karein")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/navigation/AppScreens.kt:547` — `Text(if (english) "Hinglish" else "English")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/navigation/AppScreens.kt:621` — `Text(if (english) "Why this step" else "Yeh sanket kyun", style = MaterialTheme.typography.titleSmall)`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/navigation/AppScreens.kt:652` — `Text("“$quote”", style = MaterialTheme.typography.bodySmall)`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/navigation/AppScreens.kt:657` — `Text("“${step.line.text}”", style = MaterialTheme.typography.bodyMedium)`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/navigation/AppScreens.kt:677` — `Text(if (english) "Back" else "Peeche")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/navigation/AppScreens.kt:680` — `Text(if (english) "Next line" else "Agli line")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/navigation/AppScreens.kt:683` — `Text(if (english) "Reset" else "Phir se")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrGuardScreen.kt:300` — `text = "Mila: " + alert.observedMasked + "  |  Expected: " +`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/qr/QrGuardScreen.kt:307` — `text = "QR par likha naam: " + observedName,`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/result/ResultScreen.kt:70` — `* Issue #115: this used to be a visible \`Text("Risk score: N/100")\` in the navigation host, drawn`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/result/ResultScreen.kt:135` — `) { Text("\u2039 " + if (language == UiLanguage.ENGLISH) "Back" else "Peeche") }`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/result/ResultScreen.kt:199` — `text = "Score: $score/100",`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/result/ResultScreen.kt:459` — `text = "\u2022",`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/result/ResultUiState.kt:346` — `* opposite mistake: the navigation host drew \`Text("Risk score: 70/100")\` above the header row, so a`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsScreen.kt:254` — `Text(if (expanded) {`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsScreen.kt:384` — `contentDescription = "$label. $detail"`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsScreen.kt:440` — `Text("OK")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:31` — `val screenTitle = SettingText("Settings", "Settings")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:37` — `val themeSection = SettingText("Theme", "Theme")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:38` — `val themeSystem = SettingText("Phone jaisa (system)", "Match phone (system)")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:43` — `val themeLight = SettingText("Hamesha light", "Always light")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:44` — `val themeDark = SettingText("Hamesha dark", "Always dark")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:46` — `val languageSection = SettingText("Bhasha / Language", "Language")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:47` — `val languageHinglish = SettingText("Hinglish (default)", "Hinglish (default)")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:48` — `val languageEnglish = SettingText("English", "English")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:54` — `val sensitivitySection = SettingText("Sensitivity", "Sensitivity")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:55` — `val sensitivityLow = SettingText("Kam alerts — LOW", "Fewer alerts — LOW")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:60` — `val sensitivityBalanced = SettingText("Balanced — default", "Balanced — default")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:65` — `val sensitivityHigh = SettingText("Zyada alerts — HIGH", "More alerts — HIGH")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:84` — `val hapticsSection = SettingText("Haptics", "Haptics")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:85` — `val hapticsLabel = SettingText("High risk par halka vibrate", "Vibrate on high risk")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:91` — `val reducedMotionSection = SettingText("Reduced motion", "Reduced motion")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:92` — `val reducedMotionLabel = SettingText("Animations kam karein", "Reduce animations")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:98` — `val resetAction = SettingText("Default par reset karein", "Reset to defaults")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:99` — `val resetDialogTitle = SettingText("Reset to defaults?", "Reset to defaults?")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:107` — `val resetConfirm = SettingText("Reset karein", "Reset")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:108` — `val resetCancel = SettingText("Cancel", "Cancel")`
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/settings/SettingsState.kt:109` — `val resetApplied = SettingText("Defaults lag gaye.", "Defaults applied.")`
+
+## Phase 6 implementation status
+
+- Added `SYSTEM`, `HINGLISH`, `ENGLISH`, and `HINDI`; new preferences default to `SYSTEM`. `resolveLanguage` maps Hindi and English device locales directly and uses Hinglish for other/unknown locales without replacing the stored `SYSTEM` choice.
+- Added a persisted shared-shell language menu across Home/Scan, Result, Call Shield, QR Guard, and Settings. Settings also exposes all four choices.
+- `ToneCopy` and Settings copy now resolve reviewed static Devanagari text through the `HindiCopy` table (265 entries; unmatched dynamic copy retains its supplied wording). Product names, exact evidence quotations, and user-entered content remain unchanged.
+- Added preference resolver/persistence tests. They have not been run in this worktree because the machine-wide Gradle lock is owned by P0 work; no emulator/device test was attempted.
+- This inventory remains the baseline constructor and literal audit. The 51 literal lines include dynamic/source-backed content; they must not be bulk translated. Remaining copy that is composed at runtime is documented in code at its presentation site and is a follow-up for the full destination-by-destination UI pass.
+
+### Additional hard-coded strings introduced by the language selector/demo pass
+
+The following new static copy is intentionally passed through `ToneCopy`; the third argument is Devanagari and the middle argument is English:
+
+- Shared selector: system language, Hinglish, English, and Hindi option labels.
+- Call demo controls: close, language-cycle label, Back, Next line, and Reset.
+- Call demo state: ready/reset state, current step, risk and confidence captions, stage found/not-found labels, meter accessibility text, and demo limitation disclosure.
+- Dynamic values interpolated into copy: step count, score, and risk-meter rung count. These values are data; their surrounding labels are localized.
+
+Still intentionally not localized: sample call lines, exact evidence quotes, observed user input, variable OCR/QR values, and platform-owned Android permission/system dialogs.

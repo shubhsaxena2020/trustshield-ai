@@ -3,9 +3,18 @@ package ai.trustshield.android.ui.navigation
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
@@ -19,7 +28,14 @@ import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.unit.dp
+import ai.trustshield.android.data.preferences.AppLanguage
+import ai.trustshield.android.data.preferences.resolveLanguage
+import ai.trustshield.android.ui.theme.ToneCopy
+import java.util.Locale
 
 /**
  * Navigation verbs handed to screens as plain callbacks.
@@ -129,7 +145,49 @@ fun AppNavHost(
                 .background(MaterialTheme.colorScheme.background)
                 .safeDrawingPadding()
         ) {
-            content(state.value.current)
+            Column(Modifier.fillMaxSize()) {
+                var languageMenuOpen by remember { mutableStateOf(false) }
+                val preferences = LocalUserPreferences.current
+                val preferencesSink = LocalPreferencesSink.current
+                val selectedLanguage = resolveLanguage(
+                    preferences.language,
+                    Locale.getDefault().toLanguageTag()
+                )
+                val languageOptions = listOf(
+                    AppLanguage.SYSTEM to ToneCopy("Phone ki bhasha", "Use system language"),
+                    AppLanguage.HINGLISH to ToneCopy("Hinglish", "Hinglish", "हिंग्लिश"),
+                    AppLanguage.ENGLISH to ToneCopy("English", "English", "अंग्रेज़ी"),
+                    AppLanguage.HINDI to ToneCopy("Hindi", "Hindi", "हिन्दी")
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).padding(horizontal = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box {
+                        TextButton(onClick = { languageMenuOpen = true }) {
+                            Text(languageOptions.first { it.first == preferences.language }
+                                .second.forLanguage(selectedLanguage))
+                        }
+                        DropdownMenu(
+                            expanded = languageMenuOpen,
+                            onDismissRequest = { languageMenuOpen = false }
+                        ) {
+                            languageOptions.forEach { (language, label) ->
+                                DropdownMenuItem(
+                                    text = { Text(label.forLanguage(selectedLanguage)) },
+                                    onClick = {
+                                        preferencesSink(preferences.copy(language = language))
+                                        languageMenuOpen = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+                Box(Modifier.weight(1f).fillMaxWidth()) {
+                    content(state.value.current)
+                }
+            }
         }
     }
 }

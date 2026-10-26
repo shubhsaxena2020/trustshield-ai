@@ -67,6 +67,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import java.security.SecureRandom
 import kotlinx.coroutines.delay
 import ai.trustshield.android.data.preferences.AppLanguage
+import ai.trustshield.android.data.preferences.resolveLanguage
 import ai.trustshield.android.input.qr.AnalyzerEvent
 import ai.trustshield.android.input.qr.CameraPermissionState
 import ai.trustshield.android.input.qr.CameraXQrScanner
@@ -1424,6 +1425,10 @@ fun QrGuardHost(modifier: Modifier = Modifier) {
 
     val session = remember { QrGuardSession(language = preferences.language.toQrLanguage()) }
 
+    LaunchedEffect(preferences.language) {
+        session.onUiEvent(QrEvent.SetLanguage(preferences.language.toQrLanguage()))
+    }
+
     val hasCamera = remember(context) {
         context.packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)
     }
@@ -1532,10 +1537,10 @@ fun QrGuardHost(modifier: Modifier = Modifier) {
         onLanguageChanged = { language ->
             preferencesSink(
                 preferences.copy(
-                    language = if (language == QrLanguage.ENGLISH) {
-                        AppLanguage.ENGLISH
-                    } else {
-                        AppLanguage.HINGLISH
+                    language = when (language) {
+                        QrLanguage.HINGLISH -> AppLanguage.HINGLISH
+                        QrLanguage.ENGLISH -> AppLanguage.ENGLISH
+                        QrLanguage.HINDI -> AppLanguage.HINDI
                     }
                 )
             )
@@ -1584,4 +1589,8 @@ private fun Context.openAppSettings() {
 
 /** Maps the persisted language choice onto QR copy. */
 private fun AppLanguage.toQrLanguage(): QrLanguage =
-    if (this == AppLanguage.ENGLISH) QrLanguage.ENGLISH else QrLanguage.HINGLISH
+    when (resolveLanguage(this, java.util.Locale.getDefault().toLanguageTag())) {
+        AppLanguage.SYSTEM, AppLanguage.HINGLISH -> QrLanguage.HINGLISH
+        AppLanguage.ENGLISH -> QrLanguage.ENGLISH
+        AppLanguage.HINDI -> QrLanguage.HINDI
+    }

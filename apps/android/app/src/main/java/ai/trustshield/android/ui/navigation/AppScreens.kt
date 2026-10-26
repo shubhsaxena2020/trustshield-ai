@@ -39,6 +39,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import android.net.Uri
+import java.util.Locale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.camera.view.PreviewView
@@ -57,6 +58,7 @@ import ai.trustshield.android.core.model.RiskLabel
 import ai.trustshield.android.core.score.LocalScorer
 import ai.trustshield.android.data.preferences.AppLanguage
 import ai.trustshield.android.data.preferences.UserPreferences
+import ai.trustshield.android.data.preferences.resolveLanguage
 import ai.trustshield.android.data.preferences.Sensitivity
 import ai.trustshield.android.ui.home.ScanInputEvent
 import ai.trustshield.android.ui.home.ScanInputState
@@ -141,12 +143,12 @@ val LocalPreferencesSink: ProvidableCompositionLocal<(UserPreferences) -> Unit> 
  * The state comes from the in-memory local analysis result; no sample fixture is used in the app.
  */
 @Composable
-fun ResultRouteHost(english: Boolean, outcome: ScanOutcome?) {
+fun ResultRouteHost(appLanguage: AppLanguage, outcome: ScanOutcome?) {
     val nav = LocalNavActions.current
     val prefs = LocalUserPreferences.current
     val sink = LocalPreferencesSink.current
     val state = remember(outcome) { outcome?.let(AnalysisToResult::build) }
-    var language by remember(english) { mutableStateOf(UiLanguage.of(english)) }
+    var language by remember(appLanguage) { mutableStateOf(UiLanguage.of(appLanguage)) }
 
     if (state == null || outcome == null) return
 
@@ -166,11 +168,18 @@ fun ResultRouteHost(english: Boolean, outcome: ScanOutcome?) {
         language = language,
         riskScore = announcedScore,
         onToggleLanguage = {
-            language =
-                if (language == UiLanguage.ENGLISH) UiLanguage.HINGLISH else UiLanguage.ENGLISH
+            language = when (language) {
+                UiLanguage.HINGLISH -> UiLanguage.ENGLISH
+                UiLanguage.ENGLISH -> UiLanguage.HINDI
+                UiLanguage.HINDI -> UiLanguage.HINGLISH
+            }
             sink(
                 prefs.copy(
-                    language = if (language == UiLanguage.ENGLISH) AppLanguage.ENGLISH else AppLanguage.HINGLISH
+                    language = when (language) {
+                        UiLanguage.HINGLISH -> AppLanguage.HINGLISH
+                        UiLanguage.ENGLISH -> AppLanguage.ENGLISH
+                        UiLanguage.HINDI -> AppLanguage.HINDI
+                    }
                 )
             )
         },
@@ -247,6 +256,7 @@ object AnalysisToResult {
 fun TrustShieldRouteContent(
     route: AppRoute,
     english: Boolean = false,
+    language: AppLanguage = if (english) AppLanguage.ENGLISH else AppLanguage.HINGLISH,
     scanState: ScanInputState = ScanInputState(),
     resultOutcome: ScanOutcome? = null,
     onScanEvent: (ScanInputEvent) -> Unit = {},
@@ -260,6 +270,7 @@ fun TrustShieldRouteContent(
     when (route) {
         AppRoute.HOME -> HomeRouteHost(
             english = english,
+            language = language,
             scanState = scanState,
             onScanEvent = onScanEvent,
             onCheck = { text -> onCheck(text); nav.navigate(AppRoute.RESULT) },
@@ -271,8 +282,8 @@ fun TrustShieldRouteContent(
             onOpenCall = { nav.navigate(AppRoute.CALL_SHIELD) },
             onOpenQr = { nav.navigate(AppRoute.QR_GUARD) }
         )
-        AppRoute.RESULT -> ResultRouteHost(english, resultOutcome)
-        AppRoute.CALL_SHIELD -> CallShieldRouteHost()
+        AppRoute.RESULT -> ResultRouteHost(language, resultOutcome)
+        AppRoute.CALL_SHIELD -> CallShieldRouteHost(language)
         AppRoute.QR_GUARD -> QrGuardRouteHost()
         AppRoute.SETTINGS -> SettingsRouteHost()
     }
@@ -281,6 +292,7 @@ fun TrustShieldRouteContent(
 @Composable
 private fun HomeRouteHost(
     english: Boolean,
+    language: AppLanguage,
     scanState: ScanInputState,
     onScanEvent: (ScanInputEvent) -> Unit,
     onCheck: (String) -> Unit,
@@ -323,6 +335,7 @@ private fun HomeRouteHost(
         ScanScreen(
             state = scanState,
             english = english,
+            language = language,
             onEvent = onScanEvent,
             onCheck = onCheck,
             onPickImage = { actions.launch() },
@@ -340,8 +353,12 @@ private fun HomeRouteHost(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            OutlinedButton(onClick = onOpenCall, modifier = Modifier.weight(1f).heightIn(min = 48.dp)) { Text("Call Shield") }
-            OutlinedButton(onClick = onOpenQr, modifier = Modifier.weight(1f).heightIn(min = 48.dp)) { Text("QR Guard") }
+            OutlinedButton(onClick = onOpenCall, modifier = Modifier.weight(1f).heightIn(min = 48.dp)) {
+                Text(ToneCopy("Call Shield", "Call Shield").forLanguage(language))
+            }
+            OutlinedButton(onClick = onOpenQr, modifier = Modifier.weight(1f).heightIn(min = 48.dp)) {
+                Text(ToneCopy("QR Guard", "QR Guard").forLanguage(language))
+            }
         }
     }
 }
@@ -353,7 +370,7 @@ private fun HomeRouteHost(
  * of a cellular or VoIP call through this screen.
  */
 @Composable
-fun CallShieldRouteHost() {
+fun CallShieldRouteHost(appLanguage: AppLanguage) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val session = remember { CallSpeechSession(consentGranted = true) }
@@ -368,6 +385,7 @@ fun CallShieldRouteHost() {
     val host = remember(coordinator) { CallShieldHost(coordinator) }
     val prefs = LocalUserPreferences.current
     val sink = LocalPreferencesSink.current
+    val selectedLanguage = resolveLanguage(appLanguage, Locale.getDefault().toLanguageTag())
     var consent by remember { mutableStateOf(SpeechConsent.initial()) }
     var micGranted by remember {
         mutableStateOf(ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED)
@@ -376,12 +394,7 @@ fun CallShieldRouteHost() {
         mutableStateOf(
             host.state.copy(
                 recognizer = RecognizerStatus.UNAVAILABLE,
-                language =
-                    if (prefs.language == AppLanguage.ENGLISH) {
-                        CallLanguage.ENGLISH
-                    } else {
-                        CallLanguage.HINGLISH
-                    },
+                language = selectedLanguage.toCallLanguage(),
                 hapticsEnabled = prefs.haptics,
                 reducedMotion = prefs.reducedMotion
             )
@@ -403,10 +416,15 @@ fun CallShieldRouteHost() {
     if (demoOpen) {
         CallDemoExperience(
             progress = demoProgress,
-            english = prefs.language == AppLanguage.ENGLISH,
+            language = selectedLanguage.toCallLanguage(),
             hapticsEnabled = prefs.haptics,
             onToggleLanguage = {
-                sink(prefs.copy(language = if (prefs.language == AppLanguage.ENGLISH) AppLanguage.HINGLISH else AppLanguage.ENGLISH))
+                sink(prefs.copy(language = when (selectedLanguage) {
+                    AppLanguage.HINGLISH -> AppLanguage.ENGLISH
+                    AppLanguage.ENGLISH -> AppLanguage.HINDI
+                    AppLanguage.HINDI -> AppLanguage.HINGLISH
+                    AppLanguage.SYSTEM -> AppLanguage.HINGLISH
+                }))
             },
             onClose = { demoOpen = false },
             onAdvance = { demoStarted = true; demoProgress = demoRunner.advance() },
@@ -435,8 +453,9 @@ fun CallShieldRouteHost() {
                 CallEvent.Pause -> { host.onHostPaused(); state = host.state }
                 CallEvent.Resume -> { host.onStartRequested(); state = host.state }
                 is CallEvent.SetLanguage -> {
-                    state = CallShieldReducer.reduce(state, event)
-                    sink(prefs.copy(language = if (event.language == CallLanguage.ENGLISH) AppLanguage.ENGLISH else AppLanguage.HINGLISH))
+                    host.onLanguageChanged(event.language)
+                    state = host.state
+                    sink(prefs.copy(language = event.language.toAppLanguage()))
                 }
                 is CallEvent.SetHaptics -> {
                     state = CallShieldReducer.reduce(state, event)
@@ -458,17 +477,17 @@ fun CallShieldRouteHost() {
     ) {
         Text(
             CallShieldCopy.stagedDemo.forLanguage(
-                if (prefs.language == AppLanguage.ENGLISH) CallLanguage.ENGLISH else CallLanguage.HINGLISH
+                selectedLanguage.toCallLanguage()
             )
         )
     }
     }
-    LaunchedEffect(consent, micGranted) {
+    LaunchedEffect(consent, micGranted, prefs.language) {
         val mic = if (micGranted) SpeechMicPermission.Granted else SpeechMicPermission.Denied
         capability = SpeechCapabilityRules.evaluate(SpeechCapabilityProbe.probe(context, mic), SpeechLanguage.DEFAULT)
         host.onCapability(consent, capability, if (micGranted) ai.trustshield.android.ui.call.MicPermission.GRANTED else ai.trustshield.android.ui.call.MicPermission.DENIED)
+        host.onLanguageChanged(selectedLanguage.toCallLanguage())
         state = host.state.copy(
-            language = if (prefs.language == AppLanguage.ENGLISH) CallLanguage.ENGLISH else CallLanguage.HINGLISH,
             hapticsEnabled = prefs.haptics,
             reducedMotion = prefs.reducedMotion
         )
@@ -508,7 +527,7 @@ fun CallShieldRouteHost() {
 @Composable
 private fun CallDemoExperience(
     progress: DemoProgress,
-    english: Boolean,
+    language: CallLanguage,
     hapticsEnabled: Boolean,
     onToggleLanguage: () -> Unit,
     onClose: () -> Unit,
@@ -517,6 +536,7 @@ private fun CallDemoExperience(
     onReset: () -> Unit,
     showResetLow: Boolean
 ) {
+    val english = language == CallLanguage.ENGLISH
     val view = LocalView.current
     val step = progress.steps.lastOrNull()
     val tone = when (step?.position ?: DemoRiskPosition.LOW) {
@@ -541,10 +561,10 @@ private fun CallDemoExperience(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             TextButton(onClick = onClose, modifier = Modifier.heightIn(min = 48.dp)) {
-                Text(if (english) "Close demo" else "Demo band karein")
+                Text(ToneCopy("Demo band karein", "Close demo", "\u0921\u0947\u092e\u094b \u092c\u0902\u0926 \u0915\u0930\u0947\u0902").forLanguage(language))
             }
             TextButton(onClick = onToggleLanguage, modifier = Modifier.heightIn(min = 48.dp)) {
-                Text(if (english) "Hinglish" else "English")
+                Text(ToneCopy("English", "Hinglish", "हिंग्लिश").forLanguage(language))
             }
         }
 
@@ -554,8 +574,10 @@ private fun CallDemoExperience(
         ) {
             Surface(
                 modifier = Modifier.fillMaxWidth().semantics {
-                    contentDescription = step?.let { "${it.position.label(english)} risk, ${it.score} out of 100" }
-                        ?: if (showResetLow) "Low risk, transcript cleared" else if (english) "Demo ready" else "Demo taiyaar hai"
+                    contentDescription = step?.let {
+                        "${it.position.label(language)} ${ToneCopy("risk", "risk", "\u091c\u094b\u0916\u093f\u092e").forLanguage(language)}, ${it.score} ${ToneCopy("out of 100", "out of 100", "100 \u092e\u0947\u0902 \u0938\u0947").forLanguage(language)}"
+                    } ?: if (showResetLow) ToneCopy("Reset - KAM. Memory wala transcript saaf ho gaya.", "Low risk, transcript cleared", "\u0915\u092e \u091c\u094b\u0916\u093f\u092e\u0964 \u092e\u0947\u092e\u094b\u0930\u0940 \u092e\u0947\u0902 \u0930\u0916\u093e \u091f\u094d\u0930\u093e\u0902\u0938\u0915\u094d\u0930\u093f\u092a\u094d\u091f \u092e\u093f\u091f\u093e \u0926\u093f\u092f\u093e \u0917\u092f\u093e\u0964").forLanguage(language)
+                    else ToneCopy("Demo taiyaar hai", "Demo ready", "\u0921\u0947\u092e\u094b \u0924\u0948\u092f\u093e\u0930 \u0939\u0948").forLanguage(language)
                 },
                 color = tone.container(),
                 contentColor = tone.onContainer(),
@@ -563,39 +585,38 @@ private fun CallDemoExperience(
             ) {
                 Column(Modifier.padding(16.dp)) {
                     Text(
-                        if (english) "Call Shield · Demo · ${step?.let { "Step ${it.index + 1} of ${CallDemoScript.size}" } ?: "Ready"}"
-                        else "Call Shield · Script demo · ${step?.let { "${it.index + 1} / ${CallDemoScript.size}" } ?: "Taiyaar"}",
+                        ToneCopy("Call Shield · Script demo · ${step?.let { "${it.index + 1} / ${CallDemoScript.size}" } ?: "Taiyaar"}", "Call Shield · Demo · ${step?.let { "Step ${it.index + 1} of ${CallDemoScript.size}" } ?: "Ready"}", "Call Shield · स्क्रिप्ट डेमो · ${step?.let { "${it.index + 1} / ${CallDemoScript.size}" } ?: "तैयार"}").forLanguage(language),
                         style = MaterialTheme.typography.titleSmall
                     )
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        step?.position?.label(english)
-                            ?: if (showResetLow) DemoRiskPosition.LOW.label(english)
-                            else if (english) "Ready for line 1" else "Pehli line ke liye taiyaar",
+                        step?.position?.label(language)
+                            ?: if (showResetLow) DemoRiskPosition.LOW.label(language)
+                            else ToneCopy("Pehli line ke liye taiyaar", "Ready for line 1", "\u092a\u0939\u0932\u0940 \u092a\u0902\u0915\u094d\u0924\u093f \u0915\u0947 \u0932\u093f\u090f \u0924\u0948\u092f\u093e\u0930").forLanguage(language),
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold
                     )
                     DemoPositionBand(
                         position = step?.position ?: if (showResetLow) DemoRiskPosition.LOW else null,
                         tone = tone,
-                        english = english,
+                        language = language,
                     )
                     if (step != null) {
                         val confidence = when (step.confidence) {
-                            ai.trustshield.android.core.model.Confidence.HIGH -> if (english) "High" else "Zyada"
-                            ai.trustshield.android.core.model.Confidence.MEDIUM -> if (english) "Medium" else "Theek-thaak"
-                            ai.trustshield.android.core.model.Confidence.LOW -> if (english) "Low" else "Kam"
+                            ai.trustshield.android.core.model.Confidence.HIGH -> ToneCopy("Zyada", "High", "\u091c\u093c\u094d\u092f\u093e\u0926\u093e").forLanguage(language)
+                            ai.trustshield.android.core.model.Confidence.MEDIUM -> ToneCopy("Theek-thaak", "Medium", "\u092e\u0927\u094d\u092f\u092e").forLanguage(language)
+                            ai.trustshield.android.core.model.Confidence.LOW -> ToneCopy("Kam", "Low", "\u0915\u092e").forLanguage(language)
                         }
                         Text(
-                            "${step.score}/100 · ${if (english) "Confidence" else "Samajh"}: $confidence",
+                            "${step.score}/100 · ${ToneCopy("Samajh", "Confidence", "\u092d\u0930\u094b\u0938\u0947 \u0915\u093e \u0938\u094d\u0924\u0930").forLanguage(language)}: $confidence",
                             style = MaterialTheme.typography.titleMedium
                         )
-                        Text(step.position.explanation(english), style = MaterialTheme.typography.bodySmall)
+                        Text(step.position.explanation(language), style = MaterialTheme.typography.bodySmall)
                     }
                 }
             }
 
-            step?.alertText(english)?.let { alert ->
+            step?.alertText(language)?.let { alert ->
                 Surface(
                     modifier = Modifier.fillMaxWidth().semantics { contentDescription = alert },
                     color = RiskTone.RED.container(),
@@ -609,32 +630,24 @@ private fun CallDemoExperience(
             if (step == null) {
                 Text(
                     if (showResetLow) {
-                        if (english) "Reset · LOW. The in-memory transcript was cleared." else "Reset · KAM. Memory wala transcript saaf ho gaya."
-                    } else if (english) {
-                        "Tap Next line to run the deterministic A05 script."
+                        ToneCopy("Reset - KAM. Memory wala transcript saaf ho gaya.", "Reset · LOW. The in-memory transcript was cleared.", "\u0915\u092e \u091c\u094b\u0916\u093f\u092e\u0964 \u092e\u0947\u092e\u094b\u0930\u0940 \u092e\u0947\u0902 \u0930\u0916\u093e \u091f\u094d\u0930\u093e\u0902\u0938\u0915\u094d\u0930\u093f\u092a\u094d\u091f \u092e\u093f\u091f\u093e \u0926\u093f\u092f\u093e \u0917\u092f\u093e\u0964").forLanguage(language)
                     } else {
-                        "A05 script chalane ke liye Agli line dabayein."
+                        ToneCopy("A05 script chalane ke liye Agli line dabayein.", "Tap Next line to run the deterministic A05 script.", "A05 \u0938\u094d\u0915\u094d\u0930\u093f\u092a\u094d\u091f \u091a\u0932\u093e\u0928\u0947 \u0915\u0947 \u0932\u093f\u090f \u0905\u0917\u0932\u0940 \u092a\u0902\u0915\u094d\u0924\u093f \u0926\u092c\u093e\u090f\u0901").forLanguage(language)
                     },
                     style = MaterialTheme.typography.bodyMedium
                 )
             } else {
-                Text(if (english) "Why this step" else "Yeh sanket kyun", style = MaterialTheme.typography.titleSmall)
+                Text(ToneCopy("Yeh sanket kyun", "Why this step", "\u092f\u0939 \u0938\u0902\u0915\u0947\u0924 \u0915\u094d\u092f\u094b\u0902").forLanguage(language), style = MaterialTheme.typography.titleSmall)
                 step.chips.forEach { chip ->
                     val chipTone = if (chip.lit) RiskTone.AMBER else RiskTone.NEUTRAL
                     val stageLabel = CallShieldCopy.stageLabel(chip.stage).forLanguage(
-                        if (english) CallLanguage.ENGLISH else CallLanguage.HINGLISH
+                        language
                     )
                     Surface(
                         modifier = Modifier.fillMaxWidth().semantics {
                             contentDescription = buildString {
                                 append(stageLabel)
-                                append(
-                                    if (english) {
-                                        if (chip.lit) ", found" else ", not found"
-                                    } else {
-                                        if (chip.lit) ", mila" else ", nahi mila"
-                                    }
-                                )
+                                append(if (chip.lit) ", ${ToneCopy("mila", "found", "\u092e\u093f\u0932\u093e").forLanguage(language)}" else ", ${ToneCopy("nahi mila", "not found", "\u0928\u0939\u0940\u0902 \u092e\u093f\u0932\u093e").forLanguage(language)}")
                                 chip.quotes.forEach { append(" $it") }
                             }
                         },
@@ -644,7 +657,7 @@ private fun CallDemoExperience(
                     ) {
                         Column(Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
                             Text(
-                                stageLabel + if (chip.lit) " · ${if (english) "Found" else "Mila"}" else " · ${if (english) "Not found" else "Nahi mila"}",
+                                stageLabel + if (chip.lit) " · ${ToneCopy("Mila", "Found", "\u092e\u093f\u0932\u093e").forLanguage(language)}" else " · ${ToneCopy("Nahi mila", "Not found", "\u0928\u0939\u0940\u0902 \u092e\u093f\u0932\u093e").forLanguage(language)}",
                                 style = MaterialTheme.typography.labelLarge,
                                 fontWeight = FontWeight.SemiBold
                             )
@@ -658,11 +671,11 @@ private fun CallDemoExperience(
             }
 
             Text(
-                if (english) {
-                    "This typed demo is not a real call recording. The meter follows deterministic local rules. Deepfake voices are not checked."
-                } else {
-                    CallDemoScript.honestLimits.take(3).joinToString(" ")
-                },
+                ToneCopy(
+                    CallDemoScript.honestLimits.take(3).joinToString(" "),
+                    "This typed demo is not a real call recording. The meter follows deterministic local rules. Deepfake voices are not checked.",
+                    "\u092f\u0939 \u091f\u093e\u0907\u092a \u0915\u093f\u092f\u093e \u0917\u092f\u093e \u0921\u0947\u092e\u094b \u0939\u0948, \u0905\u0938\u0932\u0940 \u0915\u0949\u0932 \u0930\u093f\u0915\u0949\u0930\u094d\u0921\u093f\u0902\u0917 \u0928\u0939\u0940\u0902\u0964 \u092e\u0940\u091f\u0930 \u0938\u094d\u0925\u093e\u0928\u0940\u092f \u0928\u093f\u092f\u092e\u094b\u0902 \u0938\u0947 \u091a\u0932\u0924\u093e \u0939\u0948\u0964 \u0921\u0940\u092a\u092b\u0947\u0915 \u0906\u0935\u093e\u091c\u093c\u094b\u0902 \u0915\u0940 \u091c\u093e\u0902\u091a \u0928\u0939\u0940\u0902 \u0939\u094b\u0924\u0940\u0964"
+                ).forLanguage(language),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -674,13 +687,13 @@ private fun CallDemoExperience(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             OutlinedButton(onClick = onBack, enabled = progress.steps.isNotEmpty(), modifier = Modifier.weight(1f).heightIn(min = 48.dp)) {
-                Text(if (english) "Back" else "Peeche")
+                Text(ToneCopy("Peeche", "Back", "\u092a\u0940\u091b\u0947").forLanguage(language))
             }
             Button(onClick = onAdvance, enabled = !progress.finished, modifier = Modifier.weight(1.25f).heightIn(min = 48.dp)) {
-                Text(if (english) "Next line" else "Agli line")
+                Text(ToneCopy("Agli line", "Next line", "\u0905\u0917\u0932\u0940 \u092a\u0902\u0915\u094d\u0924\u093f").forLanguage(language))
             }
             OutlinedButton(onClick = onReset, modifier = Modifier.weight(1f).heightIn(min = 48.dp)) {
-                Text(if (english) "Reset" else "Phir se")
+                Text(ToneCopy("Phir se", "Reset", "\u092b\u093f\u0930 \u0938\u0947").forLanguage(language))
             }
         }
     }
@@ -738,13 +751,27 @@ internal fun demoBandSegments(position: DemoRiskPosition?): Int = when (position
     DemoRiskPosition.CRITICAL -> 4
 }
 
+private fun AppLanguage.toCallLanguage(): CallLanguage = when (
+    resolveLanguage(this, Locale.getDefault().toLanguageTag())
+) {
+    AppLanguage.SYSTEM, AppLanguage.HINGLISH -> CallLanguage.HINGLISH
+    AppLanguage.ENGLISH -> CallLanguage.ENGLISH
+    AppLanguage.HINDI -> CallLanguage.HINDI
+}
+
+private fun CallLanguage.toAppLanguage(): AppLanguage = when (this) {
+    CallLanguage.HINGLISH -> AppLanguage.HINGLISH
+    CallLanguage.ENGLISH -> AppLanguage.ENGLISH
+    CallLanguage.HINDI -> AppLanguage.HINDI
+}
+
 /**
  * The four-position band of the demo meter (issue #119 acceptance: the meter must visibly climb
  * Low -> Medium -> High -> Critical). Colour is never the only signal - the rung label above it and
  * the content description carry the same information for TalkBack.
  */
 @Composable
-private fun DemoPositionBand(position: DemoRiskPosition?, tone: RiskTone, english: Boolean) {
+private fun DemoPositionBand(position: DemoRiskPosition?, tone: RiskTone, language: CallLanguage) {
     val filled = demoBandSegments(position)
     Row(
         modifier = Modifier
@@ -752,9 +779,9 @@ private fun DemoPositionBand(position: DemoRiskPosition?, tone: RiskTone, englis
             .padding(top = 8.dp)
             .semantics {
                 contentDescription = if (position == null) {
-                    if (english) "Risk meter empty" else "Khatre ka meter khali hai"
+                    ToneCopy("Khatre ka meter khali hai", "Risk meter empty", "\u091c\u094b\u0916\u093f\u092e \u092e\u0940\u091f\u0930 \u0916\u093e\u0932\u0940 \u0939\u0948").forLanguage(language)
                 } else {
-                    "${position.label(english)}, ${filled} of 4"
+                    "${position.label(language)}, $filled ${ToneCopy("mein se", "of", "\u092e\u0947\u0902 \u0938\u0947").forLanguage(language)} 4"
                 }
             },
         horizontalArrangement = Arrangement.spacedBy(4.dp),

@@ -1,10 +1,22 @@
 package ai.trustshield.android.ui.theme
 
+import ai.trustshield.android.data.preferences.AppLanguage
+
 /**
- * A short bilingual label. Same shape the rest of the app uses for copy (`docs/android` section 5):
- * simple Hinglish by default, English available as an option.
+ * A short label in Hinglish, English, and Hindi. Missing Hindi entries use the reviewed static
+ * English-to-Hindi copy table.
  */
-data class ToneCopy(val hinglish: String, val english: String)
+data class ToneCopy(
+    val hinglish: String,
+    val english: String,
+    val hindi: String = HindiCopy.forEnglish(english)
+) {
+    fun forLanguage(language: AppLanguage): String = when (language) {
+        AppLanguage.SYSTEM, AppLanguage.HINGLISH -> hinglish
+        AppLanguage.ENGLISH -> english
+        AppLanguage.HINDI -> hindi
+    }
+}
 
 /**
  * Everything a screen must render alongside a [RiskTone] so that **colour is never the only

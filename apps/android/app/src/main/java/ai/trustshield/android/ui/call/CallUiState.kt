@@ -54,8 +54,8 @@ enum class ConsentState { NOT_GIVEN, GIVEN }
 /** Visible session lifecycle. [STOPPED] is terminal for that session; a later Start begins a new one. */
 enum class SessionPhase { IDLE, LISTENING, PAUSED, STOPPED }
 
-/** Hinglish is the default; English is an explicit user choice (HEAD_ORDERS sec 2 rule 6). */
-enum class CallLanguage { HINGLISH, ENGLISH }
+/** Resolved copy language for the Call Shield screen. */
+enum class CallLanguage { HINGLISH, ENGLISH, HINDI }
 
 /** Runtime microphone permission, reported by B04/B05 -- never assumed. */
 enum class MicPermission { UNKNOWN, GRANTED, DENIED }
@@ -222,6 +222,7 @@ fun formatElapsed(totalSeconds: Int): String {
 fun ToneCopy.forLanguage(language: CallLanguage): String = when (language) {
     CallLanguage.HINGLISH -> hinglish
     CallLanguage.ENGLISH -> english
+    CallLanguage.HINDI -> hindi
 }
 
 // -------------------------------------------------------------------------------------------------

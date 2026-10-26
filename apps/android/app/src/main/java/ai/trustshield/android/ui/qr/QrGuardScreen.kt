@@ -297,14 +297,21 @@ private fun SignalBanner(
                     if (alert != null) {
                         // Masked ids only — an alert can be read by TalkBack or screenshotted.
                         Text(
-                            text = "Mila: " + alert.observedMasked + "  |  Expected: " +
-                                alert.expectedMasked.joinToString(", "),
+                            text = ToneCopy(
+                                "Mila: ${alert.observedMasked}  |  Expected: ${alert.expectedMasked.joinToString(", ")}",
+                                "Found: ${alert.observedMasked}  |  Expected: ${alert.expectedMasked.joinToString(", ")}",
+                                "मिला: ${alert.observedMasked}  |  अपेक्षित: ${alert.expectedMasked.joinToString(", ")}"
+                            ).text(lang),
                             style = MaterialTheme.typography.bodySmall
                         )
                         val observedName = alert.observedName
                         if (observedName != null) {
                             Text(
-                                text = "QR par likha naam: " + observedName,
+                                text = ToneCopy(
+                                    "QR par likha naam: $observedName",
+                                    "Name printed on QR: $observedName",
+                                    "QR पर लिखा नाम: $observedName"
+                                ).text(lang),
                                 style = MaterialTheme.typography.bodySmall
                             )
                         }

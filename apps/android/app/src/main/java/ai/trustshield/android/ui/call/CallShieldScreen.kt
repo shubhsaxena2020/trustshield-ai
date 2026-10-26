@@ -167,13 +167,17 @@ private fun Header(state: CallUiState, onEvent: (CallEvent) -> Unit) {
                 onClick = {
                     onEvent(
                         CallEvent.SetLanguage(
-                            if (language == CallLanguage.HINGLISH) CallLanguage.ENGLISH else CallLanguage.HINGLISH
+                            when (language) {
+                                CallLanguage.HINGLISH -> CallLanguage.ENGLISH
+                                CallLanguage.ENGLISH -> CallLanguage.HINDI
+                                CallLanguage.HINDI -> CallLanguage.HINGLISH
+                            }
                         )
                     )
                 },
                 modifier = Modifier.heightIn(min = TsTokens.MinTouchTarget)
             ) {
-                Text(CallShieldCopy.languageSwitch.forLanguage(language))
+                Text(CallShieldCopy.nextLanguageLabel(language).forLanguage(language))
             }
         }
         Spacer(Modifier.height(TsTokens.SpacingSm))
