@@ -319,8 +319,27 @@ private val SKIP_POLICE_HELPLINE = rx(
 private val SKIP_POLICE_AFTER = rx(
     """(?:complaint|complain|report|register|call back)[^.!?\n]{0,30}?(?:police|cyber|helpline|1930|bank)""",
 )
+/**
+ * Report §3.4 row 5 / BEHAVIOR_SPEC "Negation and legitimate pairs": handing the delivery OTP to
+ * the courier **at the door** is correct behaviour, so an instruction to give it to a delivery
+ * persona is not an ask. Two forms, both forward-order:
+ *
+ *  * the spec's literal phrasing — "share only with [the] [delivery] agent";
+ *  * the everyday phrasing — "Share the delivery OTP with the agent at your door", where the give
+ *    verb, the OTP and the delivery persona sit in one clause in that order.
+ *
+ * The reverse order ("OTP … agent") is deliberately *not* matched: it is exactly the shape of the
+ * redirect this skip must never swallow. "OTP phone par bata do, delivery agent ko mat dena" asks
+ * the customer to read the OTP out on a call and only mentions the agent to forbid the handover, so
+ * it stays an ask. For the same reason the persona must not be tied to a remote channel — "share
+ * the OTP with our agent on WhatsApp" is the same redirect one clause further on.
+ */
 private val SKIP_DELIVERY_SHARE_TO_AGENT = rx(
-    """\bshare\s+only\s+with\s+(?:the\s+)?(?:delivery\s+)?agent\b""",
+    """(?:\bshare\s+only\s+with\s+(?:the\s+)?(?:delivery\s+)?agent\b|""" +
+        """\b(?:share|give|hand over|de do|de dena|dedo)\b[^.!?\n]{0,24}?(?:delivery\s+)?otp\b""" +
+        """[^.!?\n]{0,32}?\b(?:agent|delivery (?:boy|person|partner)|courier)\b""" +
+        """(?!\s*(?:on|par|pe|via|over|through)\b[^.!?\n]{0,14}?""" +
+        """\b(?:whats\w*|telegram|phone|call|chat|video|app|sms)\b))""",
 )
 
 // ---------------------------------------------------------------------------------------------
