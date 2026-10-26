@@ -232,12 +232,14 @@ sealed interface SpeechStartOutcome {
  */
 class SpeechSessionCoordinator(
     private val session: CallSpeechSession,
+    private val retryScheduler: (Long, () -> Unit) -> Unit = { _, action -> action() },
     private val handleFactory: (SpeechRecognitionMode) -> RecognizerHandle,
 ) {
 
     private val lock = Any()
     private var plan: SpeechSessionPlan? = null
     private var error: SpeechSessionState.Error? = null
+    private var retryAttempt = 0
 
     /** The last plan [prepare] handed out; `null` before the first successful prepare. */
     val currentPlan: SpeechSessionPlan?
@@ -358,16 +360,36 @@ class SpeechSessionCoordinator(
      */
     fun onError(code: Int): SpeechEvent {
         val event = session.onRecognizerError(code)
-        if (event is SpeechEvent.Failed) {
+        val activePlan = currentPlan
+        if (event is SpeechEvent.NoSpeech) {
+            synchronized(lock) { retryAttempt = 0; error = null }
+            if (activePlan != null) session.replaceRecognizer(handleFactory(activePlan.recognitionMode))
+        } else if (event is SpeechEvent.Failed) {
             synchronized(lock) { error = SpeechSessionState.Error(event.reason, event.retryable, event.code) }
-            session.stop()
+            if (event.code == RecognizerErrorCode.CLIENT || event.reason == ErrorReason.BUSY || event.reason == ErrorReason.NETWORK) {
+                val delay = if (event.code == RecognizerErrorCode.CLIENT) 0L else synchronized(lock) {
+                    val backoff = (500L shl retryAttempt.coerceAtMost(3)).coerceAtMost(4_000L)
+                    retryAttempt = (retryAttempt + 1).coerceAtMost(3)
+                    backoff
+                }
+                if (activePlan != null) retryScheduler(delay) {
+                    if (session.state is SpeechSessionState.Error) {
+                        val replacement = handleFactory(activePlan.recognitionMode)
+                        if (session.restart(replacement)) synchronized(lock) { error = null }
+                        else replacement.destroy()
+                    }
+                }
+            } else {
+                session.stop()
+            }
         }
         return event
     }
 
     /** Final hypothesis from a recogniser. Text only; B05 bounds and timestamps it. */
-    fun onUtterance(text: String?, confidence: Float? = null): SpeechEvent =
-        session.onFinalResult(text, confidence)
+    fun onUtterance(text: String?, confidence: Float? = null): SpeechEvent = session.onFinalResult(text, confidence).also {
+        if (it is SpeechEvent.Accepted) synchronized(lock) { retryAttempt = 0; error = null }
+    }
 
     /** Interim hypothesis, forwarded so the host sees the same words the user hears. */
     fun onPartialUtterance(text: String?, confidence: Float? = null): SpeechEvent =
@@ -479,11 +501,16 @@ class AndroidSpeechRecognizerAdapter(
     private var report: SpeechCapabilityReport =
         SpeechCapabilityRules.evaluate(SpeechCapabilityProbe.probe(context, observedMicPermission()), languageTag)
 
-    private val coordinator = SpeechSessionCoordinator(session) { _ ->
+    private val mainHandler = android.os.Handler(android.os.Looper.getMainLooper())
+    private val coordinator: SpeechSessionCoordinator = SpeechSessionCoordinator(session, { delay, action ->
+        mainHandler.postDelayed(action, delay)
+    }, { _ ->
         // The mode parameter is informational: the handle re-derives it from the same report, so a
         // caller cannot hand it a mode the report does not support.
-        AndroidSpeechRecognizerHandle(context, session, report, languageTag, recognizerFactory)
-    }
+        AndroidSpeechRecognizerHandle(context, session, report, languageTag, recognizerFactory) { code ->
+            this@AndroidSpeechRecognizerAdapter.onError(code)
+        }
+    })
 
     /** True while the session this adapter drives is live (`Starting` / `Listening`). */
     val isActive: Boolean

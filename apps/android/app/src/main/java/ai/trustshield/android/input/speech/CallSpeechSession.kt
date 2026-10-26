@@ -152,6 +152,31 @@ class CallSpeechSession(
         toDestroy?.destroy()
     }
 
+    /** Replaces a failed recogniser while preserving the user's active session and transcript. */
+    fun restart(handle: RecognizerHandle): Boolean {
+        synchronized(lock) {
+            if (currentState !is SpeechSessionState.Error) return false
+            currentState = SpeechSessionState.Starting
+            this.handle = handle
+        }
+        handle.start()
+        return true
+    }
+
+    /** Replaces the platform recogniser after a callback while keeping this session active. */
+    fun replaceRecognizer(handle: RecognizerHandle): Boolean {
+        val previous = synchronized(lock) {
+            if (!acceptingResults()) return false
+            val old = this.handle
+            this.handle = handle
+            currentState = SpeechSessionState.Starting
+            old
+        }
+        previous?.destroy()
+        handle.start()
+        return true
+    }
+
     // ---------------------------------------------------------------- recogniser callbacks
 
     /** `onReadyForSpeech`: the microphone is genuinely open. */
@@ -531,6 +556,7 @@ class AndroidSpeechRecognizerHandle(
     private val capability: SpeechCapabilityReport,
     private val languageTag: String = DEFAULT_LANGUAGE_TAG,
     private val recognizerFactory: (Context, SpeechRecognitionMode) -> SpeechRecognizer? = ::createPlatformRecognizer,
+    private val errorListener: ((Int) -> Unit)? = null,
 ) : RecognizerHandle {
 
     private var recognizer: SpeechRecognizer? = null
@@ -596,7 +622,7 @@ class AndroidSpeechRecognizerHandle(
         override fun onEndOfSpeech() = Unit
 
         override fun onError(error: Int) {
-            session.onRecognizerError(error)
+            errorListener?.invoke(error) ?: session.onRecognizerError(error)
         }
 
         override fun onResults(results: Bundle?) {
