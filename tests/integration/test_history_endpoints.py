@@ -66,11 +66,29 @@ def test_analyze_text_writes_history_when_logged_in(monkeypatch):
     saved = {}
     monkeypatch.setattr(history_store, "save", lambda *a, **k: saved.update(k))
     client = _client()
-    res = client.post("/api/v1/analyze/text", json={"text": "hello there, free gift card now"},
+    sample = "PRIVATE-SAMPLE-123456: hello there, free gift card now"
+    res = client.post("/api/v1/analyze/text", json={"text": sample},
                        headers={"Authorization": "Bearer good"})
     assert res.status_code == 200
     assert saved["user_id"] == "u1"
     assert saved["input_type"] == "text"
+    assert sample not in saved["input_summary"]
+    assert sample not in json.dumps(saved["result_json"])
+
+
+def test_analyze_url_history_does_not_store_submitted_url(monkeypatch):
+    monkeypatch.setattr(auth_module, "_lookup_user",
+                         lambda *a, **k: auth_module.CurrentUser(id="u1", email="a@b.com"))
+    saved = {}
+    monkeypatch.setattr(history_store, "save", lambda *a, **k: saved.update(k))
+    client = _client()
+    sample = "https://private-sample.invalid/path?token=PRIVATE-123456"
+    res = client.post("/api/v1/analyze/url", json={"url": sample},
+                      headers={"Authorization": "Bearer good"})
+    assert res.status_code == 200
+    assert saved["input_type"] == "url"
+    assert sample not in saved["input_summary"]
+    assert sample not in json.dumps(saved["result_json"])
 
 
 def test_analyze_text_writes_nothing_when_anonymous(monkeypatch):
