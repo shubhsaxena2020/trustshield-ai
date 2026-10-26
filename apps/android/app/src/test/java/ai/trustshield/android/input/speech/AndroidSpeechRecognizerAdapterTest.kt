@@ -440,7 +440,7 @@ class AndroidSpeechRecognizerAdapterTest {
     }
 
     @Test
-    fun busyErrorIsRetryableDestroysTheRecogniserAndDoesNotRestart() {
+    fun busyErrorRetriesAndKeepsTheSessionTranscript() {
         val harness = Harness()
         startPlan(harness)
         harness.coordinator.onUtterance("aakhri vaakya", 0.7f)
@@ -448,10 +448,11 @@ class AndroidSpeechRecognizerAdapterTest {
         val event = harness.coordinator.onError(RecognizerErrorCode.RECOGNIZER_BUSY)
 
         assertEquals(SpeechEvent.Failed(ErrorReason.BUSY, retryable = true, code = 8), event)
-        assertEquals(1, harness.handle.destroyCount)
-        assertEquals(1, harness.factoryCalls) // no automatic restart loop
-        assertTrue(harness.session.transcript().isEmpty())
-        assertEquals(true, harness.coordinator.lastError?.retryable)
+        assertEquals(1, harness.handles[0].destroyCount)
+        assertEquals(2, harness.factoryCalls)
+        assertEquals(1, harness.session.transcript().size)
+        assertTrue(harness.coordinator.isActive)
+        assertNull(harness.coordinator.lastError)
     }
 
     @Test
@@ -463,9 +464,58 @@ class AndroidSpeechRecognizerAdapterTest {
 
         assertEquals(SpeechEvent.NoSpeech(NoSpeechReason.NO_MATCH), event)
         assertEquals(1, harness.session.noSpeechCount)
-        assertEquals(0, harness.handle.destroyCount)
+        assertEquals(1, harness.handles[0].destroyCount)
         assertEquals(SpeechSessionState.Listening, harness.session.state)
         assertNull(harness.coordinator.lastError)
+    }
+
+    @Test
+    fun repeatedSilenceAndClientErrorsRecreateImmediatelyWithoutKillingSession() {
+        val clock = FakeClock()
+        val session = CallSpeechSession(clock = clock::read, consentGranted = true)
+        val handles = mutableListOf<FakeHandle>()
+        val delays = mutableListOf<Long>()
+        val coordinator = SpeechSessionCoordinator(session, { delay, action -> delays += delay; action() }, {
+            FakeHandle(onStart = { session.onReadyForSpeech() }).also { handles += it }
+        })
+        val plan = ready(coordinator.prepare(granted(), report()))
+        assertEquals(StartResult.Started, coordinator.start(plan))
+
+        repeat(4) {
+            coordinator.onError(RecognizerErrorCode.SPEECH_TIMEOUT)
+            coordinator.onError(RecognizerErrorCode.NO_MATCH)
+            coordinator.onError(RecognizerErrorCode.CLIENT)
+            assertTrue("session remains active", coordinator.isActive)
+            assertEquals(SpeechSessionState.Listening, session.state)
+        }
+
+        assertEquals(List(4) { 0L }, delays)
+        assertEquals(13, handles.size)
+        assertEquals(12, handles.count { it.destroyCount == 1 })
+        assertEquals(0, handles.last().destroyCount)
+    }
+
+    @Test
+    fun busyErrorsUseCappedExponentialRetryAndSessionCanStartAgainAfterStop() {
+        val session = CallSpeechSession(consentGranted = true)
+        val handles = mutableListOf<FakeHandle>()
+        val pending = mutableListOf<Pair<Long, () -> Unit>>()
+        val delays = mutableListOf<Long>()
+        val coordinator = SpeechSessionCoordinator(session, { delay, action -> delays += delay; pending += delay to action }, {
+            FakeHandle(onStart = { session.onReadyForSpeech() }).also { handles += it }
+        })
+        val plan = ready(coordinator.prepare(granted(), report()))
+        assertEquals(StartResult.Started, coordinator.start(plan))
+
+        repeat(5) {
+            coordinator.onError(RecognizerErrorCode.RECOGNIZER_BUSY)
+            pending.removeAt(0).second()
+            assertTrue(coordinator.isActive)
+        }
+        assertEquals(listOf(500L, 1_000L, 2_000L, 4_000L, 4_000L), delays)
+        coordinator.stop()
+        assertEquals(StartResult.Started, coordinator.start(plan))
+        assertTrue(coordinator.isActive)
     }
 
     // ------------------------------------------------------- transcript discard

@@ -324,6 +324,9 @@ class CallShieldHost(
         if (cleared) return
         val event = coordinator.onError(code)
         if (event is SpeechEvent.Failed) {
+            if (event.code == ai.trustshield.android.input.speech.RecognizerErrorCode.CLIENT ||
+                event.reason == ErrorReason.BUSY || event.reason == ErrorReason.NETWORK
+            ) return
             // The recogniser is gone: nothing may stay listening and nothing may keep the words.
             endSession()
         }

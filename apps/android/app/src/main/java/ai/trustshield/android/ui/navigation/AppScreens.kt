@@ -361,9 +361,14 @@ fun CallShieldRouteHost() {
         mutableStateOf(SpeechCapabilityRules.evaluate(SpeechCapabilityProbe.probe(context), SpeechLanguage.DEFAULT))
     }
     val coordinator = remember(session) {
-        SpeechSessionCoordinator(session) { _ ->
-            AndroidSpeechRecognizerHandle(context, session, capability, SpeechLanguage.DEFAULT)
+        lateinit var created: SpeechSessionCoordinator
+        val handler = android.os.Handler(android.os.Looper.getMainLooper())
+        created = SpeechSessionCoordinator(session, { delay, action -> handler.postDelayed(action, delay) }) { _ ->
+            AndroidSpeechRecognizerHandle(context, session, capability, SpeechLanguage.DEFAULT) { code ->
+                created.onError(code)
+            }
         }
+        created
     }
     val host = remember(coordinator) { CallShieldHost(coordinator) }
     val prefs = LocalUserPreferences.current

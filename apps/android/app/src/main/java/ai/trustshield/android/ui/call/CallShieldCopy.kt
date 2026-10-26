@@ -32,6 +32,7 @@ object CallShieldCopy {
     // ---- status ---------------------------------------------------------------------------------
 
     val micListening = ToneCopy("Mic: sun raha hai", "Mic: listening")
+    val micNoSpeechYet = ToneCopy("Sun raha hai - abhi koi awaaz nahi suni", "Listening - no speech heard yet")
     val micPaused = ToneCopy("Mic: pause hai", "Mic: paused")
     val micOff = ToneCopy("Mic: band", "Mic: off")
     val micDenied = ToneCopy("Mic: anumati nahi mili", "Mic: permission not granted")

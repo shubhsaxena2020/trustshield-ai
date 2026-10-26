@@ -297,6 +297,13 @@ private fun StatusCard(state: CallUiState, onEvent: (CallEvent) -> Unit) {
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+                if (state.phase == SessionPhase.LISTENING && state.transcript.isEmpty()) {
+                    Text(
+                        text = CallShieldCopy.micNoSpeechYet.forLanguage(language),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
                 Text(
                     text = CallShieldCopy.backendOff.forLanguage(language),
                     style = MaterialTheme.typography.bodySmall,
