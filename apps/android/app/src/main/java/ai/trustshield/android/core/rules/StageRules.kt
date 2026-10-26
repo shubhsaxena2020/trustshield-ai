@@ -340,8 +340,8 @@ private val SKIP_DELIVERY_SHARE_TO_AGENT = rx(
         """[^.!?\n]{0,32}?\b(?:agent|delivery (?:boy|person|partner)|courier)\b""" +
         """(?!\s*(?:on|par|pe|via|over|through)\b[^.!?\n]{0,14}?""" +
         """\b(?:whats\w*|telegram|phone|call|chat|video|app|sms)\b)|""" +
-        """(?:\b(?:डिलीवरी\s+)?ओटीपी\b[^.!?\n]{0,36}(?:दरवाज़े|दरवाजे)\s+पर[^.!?\n]{0,24}एजेंट\b""" +
-        """(?![^.!?\n]{0,32}(?:फोन|कॉल|व्हाट्सएप|video\s+call)))""",
+        """(?:\b(?:डिलीवरी\s+)?(?:otp|ओटीपी)\b[^.!?\n]{0,36}(?:दरवाज़े|दरवाजे)\s+पर[^.!?\n]{0,24}एजेंट\b""" +
+        """(?![^.!?\n]{0,32}(?:फोन|कॉल|व्हाट्सएप|video\s+call))))""",
 )
 
 /**
