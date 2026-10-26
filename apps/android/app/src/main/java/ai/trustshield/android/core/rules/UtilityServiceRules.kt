@@ -75,8 +75,12 @@ internal const val UTILITY_SERVICE_NOUN =
  */
 internal const val SERVICE_DISCONNECT =
     "(?:" +
-        "kat(?:a|na|ne)? (?:ja(?:yega|yegi|yenge|ega|egi|enge)|gaya|gayi)" +
-        "|kat(?:ega|egi|enge|engi)" +
+        // "kaat diya jayega" (issue #147: the owner's own shared fixture) and the plain
+        // "kat jayega" family. Accepting both spellings of the vowel, and the optional "diya",
+        // covers the compound future ("kaat diya jayega", "kat diya jayega") that the owner's phone
+        // fixture used and the earlier rules missed.
+        "(?:kat|kaat)(?:a|na|ne)? (?:diya )?(?:ja(?:yega|yegi|yenge|ega|egi|enge)|gaya|gayi)" +
+        "|(?:kat|kaat)(?:ega|egi|enge|engi)" +
         "|band (?:ho )?(?:ja(?:yega|yegi|yenge|ega|egi|enge)|gaya|gayi)" +
         "|band kar (?:diya jayega|diya jaega|denge|diya gaya)" +
         "|block ho (?:ja(?:yega|yegi|ega|egi))" +
@@ -84,7 +88,8 @@ internal const val SERVICE_DISCONNECT =
         "|suspend kar (?:diya|denge)" +
         "|disconnect(?:ed)? (?:ho )?(?:ja(?:yega|yegi|ega|egi)|kar diya|karna|kar denge)" +
         "|cut ho (?:ja(?:yega|yegi|ega|egi))" +
-        "|कट (?:जाएगा|जाएगी)|बंद (?:हो जाएगा|हो जाएगी)|रुक (?:जाएगा|जाएगी)" +
+        "|(?:कट|काट) (?:दिया )?(?:जाएगा|जाएगी)" +
+        "|बंद (?:हो जाएगा|हो जाएगी)|रुक (?:जाएगा|जाएगी)" +
         ")"
 
 /**
