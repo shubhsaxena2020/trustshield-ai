@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Night-mode splash colours (#139). The platform shows the splash before Compose starts, so it cannot
+  read the app's ThemeMode preference; it follows the system/device night setting, which is what the
+  user sees at cold start. Values are the app's own dark tokens:
+  background = TsPalette.SurfaceDark (#12161F), mark = TsTokens.AccentDark (#8FB4FF, 8.74:1 on it).
+-->
+<resources>
+    <color name="splash_background">#12161F</color>
+    <color name="splash_mark">#8FB4FF</color>
+</resources>

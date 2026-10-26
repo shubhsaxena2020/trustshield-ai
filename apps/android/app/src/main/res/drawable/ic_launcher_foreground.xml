@@ -3,14 +3,20 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
+    <!--
+      TrustShield launcher mark: shield silhouette + "T" (#139).
+
+      The blue field comes from `@color/launcher_background` (#2F6BFF), so the shield is drawn white
+      and the T is drawn in the brand blue. Geometry budget: an adaptive-icon mask may crop to the
+      centre 72x72 of this 108x108 viewport, and only the centre 66-dp circle (r = 33 about 54,54) is
+      guaranteed visible. Every point below stays within r <= 29.7 of the centre, so no launcher mask
+      (squircle, circle, teardrop, square) can clip the shield or the T. The previous artwork spanned
+      x 20..88 / y 8..101 (r up to 47.4) and lost its shoulders and tip to the mask.
+    -->
     <path
         android:fillColor="#FFFFFFFF"
-        android:pathData="M54,8 L88,21 L88,49 C88,72 73,91 54,101 C35,91 20,72 20,49 L20,21 Z" />
+        android:pathData="M54,25 L74.5,32.5 L74.5,53 C74.5,69 65,79.5 54,83.5 C43,79.5 33.5,69 33.5,53 L33.5,32.5 Z" />
     <path
-        android:fillColor="#00000000"
-        android:pathData="M37,55 L49,67 L73,42"
-        android:strokeColor="#2F6BFF"
-        android:strokeLineCap="round"
-        android:strokeLineJoin="round"
-        android:strokeWidth="7" />
+        android:fillColor="#FF2F6BFF"
+        android:pathData="M41,41 L67,41 L67,49 L58,49 L58,70 L50,70 L50,49 L41,49 Z" />
 </vector>

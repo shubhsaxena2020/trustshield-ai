@@ -1,0 +1,24 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!--
+      Splash mark (#139): the shield-T, drawn with the brand hue from `@color/splash_mark` and the T
+      punched out so the splash background reads through it.
+
+      Why a separate drawable: `windowSplashScreenAnimatedIcon` used to point at
+      `ic_launcher_foreground`, which fills the shield WHITE. On the light splash background
+      (#F7F9FC) white-on-near-white is about 1.05:1, so only the blue check stroke survived and the
+      splash read as a bare Android check mark. Here the shield is the accent (4.27:1 on #F7F9FC,
+      8.74:1 with the night accent on #12161F) and the T is negative space, so the mark is legible on
+      both backgrounds without a second artwork.
+
+      Geometry stays inside r <= 29.7 of (54,54): the platform scales a splash icon to 288 dp and
+      shows only its centre two-thirds, so anything outside this box would be cropped.
+    -->
+    <path
+        android:fillColor="@color/splash_mark"
+        android:fillType="evenOdd"
+        android:pathData="M54,25 L74.5,32.5 L74.5,53 C74.5,69 65,79.5 54,83.5 C43,79.5 33.5,69 33.5,53 L33.5,32.5 Z M41,41 L67,41 L67,49 L58,49 L58,70 L50,70 L50,49 L41,49 Z" />
+</vector>

@@ -2,4 +2,7 @@
     <color name="trustshield_blue">#2F6BFF</color>
     <color name="launcher_background">#2F6BFF</color>
     <color name="splash_background">#F7F9FC</color>
+    <!-- Splash mark hue. Light: brand accent #2F6BFF, 4.27:1 on splash_background. Night override
+         lives in values-night/colors.xml (#8FB4FF on #12161F, 8.74:1). #139. -->
+    <color name="splash_mark">#2F6BFF</color>
 </resources>

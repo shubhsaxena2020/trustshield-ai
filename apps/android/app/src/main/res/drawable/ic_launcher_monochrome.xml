@@ -3,14 +3,16 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
+    <!--
+      Themed (monochrome) launcher layer for API 33+ (#139).
+
+      A themed icon is tinted from this drawable's alpha channel, so it must be ONE path: the shield
+      and the "T" are siblings under `evenOdd`, which punches the T out of the shield as a hole.
+      The previous version stroked the glyph in white over a white fill, so every pixel carried the
+      same alpha and the themed icon rendered as a featureless blob.
+    -->
     <path
         android:fillColor="#FFFFFFFF"
-        android:pathData="M54,8 L88,21 L88,49 C88,72 73,91 54,101 C35,91 20,72 20,49 L20,21 Z" />
-    <path
-        android:fillColor="#00000000"
-        android:pathData="M37,55 L49,67 L73,42"
-        android:strokeColor="#FFFFFFFF"
-        android:strokeLineCap="round"
-        android:strokeLineJoin="round"
-        android:strokeWidth="7" />
+        android:fillType="evenOdd"
+        android:pathData="M54,25 L74.5,32.5 L74.5,53 C74.5,69 65,79.5 54,83.5 C43,79.5 33.5,69 33.5,53 L33.5,32.5 Z M41,41 L67,41 L67,49 L58,49 L58,70 L50,70 L50,49 L41,49 Z" />
 </vector>
