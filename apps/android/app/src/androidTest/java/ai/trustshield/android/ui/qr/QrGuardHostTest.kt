@@ -130,6 +130,30 @@ class QrGuardHostTest {
         assertAbsent("abhi juda nahi", "(seam note removed)")
     }
 
+    @Test
+    fun confirmedLiveQrShowsMaskedRegistrationAndDoesNotReopenCapture() {
+        val session = render()
+        val liveQr = "upi://pay?pa=demo-recipient@upi&pn=TRUSTSHIELD%20DEMO%20ONLY&am=0.00&cu=INR"
+        session.onUiEvent(QrEvent.SetLanguage(QrLanguage.ENGLISH))
+
+        session.onDecoded(liveQr)
+        compose.waitForIdle()
+        click(QrHostCopy.setupCaptureConfirm.english)
+
+        assertEquals(1, session.snapshot().state.payees.size)
+        assertVisible("Registered: dem***@upi", "(confirmed payee is visibly registered)")
+        assertVisible(QrStrings.startWatch.english, "(primary start action)")
+        assertVisible(QrStrings.addPayeeHint.english, "(another QR can be added)")
+        assertVisible(QrStrings.registeredNextQr.english, "(another QR can be scanned)")
+        assertAbsent("demo-recipient@upi", "(full UPI ID must stay hidden)")
+
+        repeat(5) { session.onDecoded(liveQr) }
+        compose.waitForIdle()
+        assertEquals(1, session.snapshot().state.payees.size)
+        assertEquals(null, session.snapshot().pendingSetup)
+        assertAbsent(QrHostCopy.setupCaptureConfirm.english, "(registered QR cannot reopen setup confirmation)")
+    }
+
     // ------------------------------------------------------------ 2. simulate: matching flow ----
 
     @Test

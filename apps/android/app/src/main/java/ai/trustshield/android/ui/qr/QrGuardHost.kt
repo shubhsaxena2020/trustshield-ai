@@ -669,6 +669,13 @@ internal class QrGuardSession(
      */
     private fun captureSetup(payload: String) {
         val vpa = extractor.extract(payload) ?: return
+        if (state.payees.any { it.key == normalizePayeeId(vpa) }) {
+            if (pendingSetup != null) {
+                pendingSetup = null
+                publish()
+            }
+            return
+        }
         val name = UpiQrParser.parse(payload).payeeName?.trim()?.takeIf { it.isNotEmpty() }
         // Masked with the renderer's own helper: one screen must not use two masking styles.
         pendingSetup = SetupCapture(vpa = vpa, masked = maskPayeeId(vpa), name = name)
@@ -1015,7 +1022,13 @@ internal fun QrGuardHostContent(
         }
 
         if (view.state.phase == QrPhase.SETUP) {
-            SetupCapturePanel(session = session, capture = view.pendingSetup, dark = dark, lang = lang)
+            SetupCapturePanel(
+                session = session,
+                state = view.state,
+                capture = view.pendingSetup,
+                dark = dark,
+                lang = lang
+            )
         }
 
         if (view.state.phase == QrPhase.RE_REGISTER && !view.hasPin) {
@@ -1154,6 +1167,7 @@ private fun CameraPanel(
 @Composable
 private fun SetupCapturePanel(
     session: QrGuardSession,
+    state: QrUiState,
     capture: SetupCapture?,
     dark: Boolean,
     lang: QrLanguage
@@ -1165,10 +1179,24 @@ private fun SetupCapturePanel(
             modifier = Modifier.semantics { heading() }
         )
         if (capture == null) {
-            Text(
-                text = QrStrings.setupNeedsPayee.text(lang),
-                style = MaterialTheme.typography.bodyMedium
-            )
+            if (state.payees.isEmpty()) {
+                Text(
+                    text = QrStrings.setupNeedsPayee.text(lang),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            } else {
+                state.payees.forEach { payee ->
+                    Text(
+                        text = QrStrings.registeredPayee.text(lang).replace("{id}", payee.maskedHandle),
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+                Text(
+                    text = QrStrings.registeredNextQr.text(lang),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
             return@HostPanel
         }
         Text(text = QrHostCopy.setupCaptureHelp.text(lang), style = MaterialTheme.typography.bodySmall)
