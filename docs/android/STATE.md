@@ -1,11 +1,13 @@
-## Current status (2026-10-26 21:16 IST)
+## Current status (2026-10-26 21:19 IST)
 
 `android-finals` includes the Phase 4 crash/advisory fixes and local signed-release configuration. Codex added a collapsed Settings Device check with Android/API, ABI, recognizer service, `hi-IN` locale support, and camera/mic permission status; a camera-in-use fault now offers a QR Guard demo recovery. Missing mic/recognizer paths continue to expose typed/staged fallback.
 
-- Fresh phone-free gate: 1,086 JVM tests passed; `lintDebug` and `assembleDebugAndroidTest` passed. The new Device check UI assertion compiled but has not yet run on an emulator.
+- Fresh phone-free gate: 1,086 JVM tests passed; `lintDebug` and `assembleDebugAndroidTest` passed. Connected API 36 instrumentation: 55 tests, 54 passed, 0 failed, 1 existing airplane-mode precondition skip. The Settings Device check assertion passed.
 - Camera-in-use maps CameraX `CAMERA_IN_USE` / `CAMERA_MAX_IN_USE` to explicit recovery copy. No physical phone was used.
 - Existing Hermes agent1/agent2/agent3 sessions remain alive, unchanged. No open Phase 4 lane PR was visible at this checkpoint. Unrelated untracked repository paths remain untouched.
-- Next: run the Settings/QR fallback instrumentation checks on one emulator under the shared locks; review lane PRs; finish fixtures/settings/conversation/payment; rebuild and verify release after final icon/splash integration.
+- Evidence: `evidence/p4-device-check-connected.md`. The single `trustshield-api36` emulator was stopped and its lock released after testing; no physical phone used.
+- The four-card synthetic QR PDF was rendered for visual inspection; layout and zero-amount/do-not-pay labels are clear. Real camera decode remains phone-only and unrun.
+- Next: review lane PRs; finish fixtures/settings/conversation/payment; rebuild and verify release after final icon/splash integration.
 
 ## Current status (2026-10-26 21:10 IST)
 

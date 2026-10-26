@@ -195,5 +195,11 @@ PHASE 3 COMPLETE
 
 - Added a Settings-hidden, collapsed Device check panel for Android/API, primary ABI, recognizer service, `hi-IN` locale support when the API can report it, and CAMERA/RECORD_AUDIO grant state. Locale support uses Android's recognition support callback and never starts listening; older Android reports that the locale could not be checked.
 - Added camera-in-use recovery copy when CameraX reports `CAMERA_IN_USE` or `CAMERA_MAX_IN_USE`; QR Guard retains the labelled simulation path. Existing Call Shield missing-mic/missing-recognizer state and typed/staged demo paths were confirmed in source and already have JVM coverage.
-- Added JVM coverage for Device check status copy and camera-busy recovery copy, plus an instrumentation assertion for the Device check screen. Phone-free gate passed: 1,086 JVM tests, `lintDebug`, and `assembleDebugAndroidTest`. Device check UI assertion is compiled only so far; emulator execution is still pending.
+- Added JVM coverage for Device check status copy and camera-busy recovery copy, plus an instrumentation assertion for the Device check screen. Phone-free gate passed: 1,086 JVM tests, `lintDebug`, and `assembleDebugAndroidTest`.
 - `adb devices` was empty and both shared locks were free at this checkpoint. The owner phone hold remains in force; no physical device work was performed. Existing Hermes sessions were left alive.
+
+## 2026-10-26 21:19 IST — Device check connected proof
+
+- Started only `trustshield-api36` (`emulator-5554`, API 36, x86_64) with 2 GB and no snapshot, ran `:app:connectedDebugAndroidTest`, then shut it down and released both locks.
+- Result: 55 instrumentation tests, 54 passed, 0 failed, 1 pre-existing airplane-mode precondition skip; `settingsDeviceCheck_reportsPlatformAndPermissionSnapshot` passed. Evidence: `evidence/p4-device-check-connected.md`.
+- Visually inspected the one-page A4 `phone-kit/demo_upi_qr_cards.pdf`: four large QR cards and synthetic-only/zero-amount warning are legible. Physical decode remains pending the owner's release of the phone hold.
