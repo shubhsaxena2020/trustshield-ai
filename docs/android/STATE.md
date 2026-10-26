@@ -322,3 +322,8 @@ Branch: `android-finals`. Phase: **3 active; Codex foundation pushed, 18 new P0 
 ### 2026-10-26 23:42 IST checkpoint
 - Read-only visual review of agent3's committed icon/splash previews passed: shield-T is clear at launcher sizes and light/night splash; the paths fit the documented adaptive mask safe area. Label is TrustShield; manifest, Gradle, and signing were untouched by the lane.
 - This is not final acceptance. The accessibility matrix is still active on agent3's single emulator; its report/harness are dirty and no PR is open. No additional emulator or phone action occurred.
+
+### 2026-10-26 23:44 IST checkpoint
+- The owner now owns the real-device session and explicitly forbids Codex/Hermes from touching serial `63b0de52`. Continue emulator/JVM only. No phone command was run.
+- No open GitHub issue carries the `phone` label yet. The head directive itself is an unstaged owner edit in the shared checkout and was left untouched.
+- Agent3 still owns the only emulator; Gradle lock is free. Existing Hermes sessions remain running.

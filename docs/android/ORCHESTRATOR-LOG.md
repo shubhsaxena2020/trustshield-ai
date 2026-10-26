@@ -382,3 +382,10 @@ PHASE 3 COMPLETE
 - Inspected agent3's four committed #139/#97 commits without changing its worktree. The launcher and light/night splash previews are legible at 48/108 px; the vector paths stay within the documented 33 dp adaptive-mask radius. The app label is `TrustShield`; the changes do not touch the manifest, Gradle, or signing setup.
 - This is only a source/artwork review, not emulator acceptance. Agent3 still owns the sole emulator lock and has uncommitted accessibility harness/report edits; no final #139/#97 PR or post-fix matrix report is available yet. No device was started or stopped by Codex.
 - Main `android-finals` remains synced after the documentation checkpoint. No phone release signal or physical-phone work.
+
+## 2026-10-26 23:44 IST - owner takes physical phone session
+
+- Read the new owner addition in `HEAD_DIRECTIVE_PHONE_HOLD.md`: head has the Redmi Note 5 Pro (API 28) and owns serial `63b0de52`; Codex/Hermes must not run adb against it. This supersedes the earlier expectation that Codex would conduct the phone checklist. Emulator-only work remains permitted.
+- `gh issue list --state open --label phone` returned no issues at 23:44 IST. No phone-connected tests, installs, adb queries, or waits were performed by Codex.
+- The shared API 36 emulator remains locked by agent3; Gradle lock is free. Existing Hermes processes remain untouched.
+- The owner's directive addition is present as an unstaged change in the shared main checkout; it was not staged or altered here. Main source/docs commit `0aa30a0` equals `origin/android-finals`.
