@@ -75,7 +75,10 @@ internal const val UTILITY_SERVICE_NOUN =
  */
 internal const val SERVICE_DISCONNECT =
     "(?:" +
-        "kat(?:a|na|ne)? (?:ja(?:yega|yegi|yenge|ega|egi|enge)|gaya|gayi)" +
+        "kaat(?:a|na|ne)? (?:diya (?:jayega|jaega|jayegi|jaegi)|ja(?:yega|yegi|yenge|ega|egi|enge))" +
+        "|kaat(?:ega|egi|enge|engi)" +
+        "|kat(?:a|na|ne)? diya (?:jayega|jaega|jayegi|jaegi)" +
+        "|kat(?:a|na|ne)? (?:ja(?:yega|yegi|yenge|ega|egi|enge)|gaya|gayi)" +
         "|kat(?:ega|egi|enge|engi)" +
         "|band (?:ho )?(?:ja(?:yega|yegi|yenge|ega|egi|enge)|gaya|gayi)" +
         "|band kar (?:diya jayega|diya jaega|denge|diya gaya)" +
@@ -83,7 +86,7 @@ internal const val SERVICE_DISCONNECT =
         "|suspend(?:ed)? (?:ho )?(?:ja(?:yega|yegi|ega|egi))" +
         "|suspend kar (?:diya|denge)" +
         "|disconnect(?:ed)? (?:ho )?(?:ja(?:yega|yegi|ega|egi)|kar diya|karna|kar denge)" +
-        "|cut ho (?:ja(?:yega|yegi|ega|egi))" +
+        "|cut (?:ho )?ja(?:yega|yegi|yenge|ega|egi|enge)" +
         "|कट (?:जाएगा|जाएगी)|बंद (?:हो जाएगा|हो जाएगी)|रुक (?:जाएगा|जाएगी)" +
         ")"
 
@@ -213,6 +216,21 @@ internal val UTILITY_DISCONNECT_RULES: List<Rule> = listOf(
 // ---------------------------------------------------------------------------------------------
 
 internal val UTILITY_SERVICE_ASK_RULES: List<Rule> = listOf(
+    Rule(
+        titleHinglish = "Dhamki ke saath bill update karne ko kaha",
+        detail = "Message bijli ya utility connection kaatne ki dhamki ke saath bill update karne " +
+            "ko keh raha hai aur personal mobile number deta hai. Yeh exact call-to-action scam " +
+            "message ke andar mila hai.",
+        severity = Severity.HIGH,
+        strength = Strength.STRONG,
+        patterns = listOf(
+            rx("""\b(?:bill|bijli bill|electricity bill|power bill)\b[^.!?\n]{0,18}?\bupdate\w*\b"""),
+            rx("""\bupdate\w*\b[^.!?\n]{0,18}?\b(?:bill|bijli bill|electricity bill|power bill)\b"""),
+        ),
+        askType = AskType.PERSONAL_INFO,
+        guarded = true,
+        requires = rx("""\b$UTILITY_SERVICE_NOUN\b[^.!?\n]{0,70}\b(?:$SERVICE_DISCONNECT)\b[\s\S]{0,160}\b$INDIAN_PERSONAL_MOBILE\b"""),
+    ),
     Rule(
         titleHinglish = "Personal number par call karne ko kaha",
         detail = "Message bank ya bijli/paani jaisi service ke naam par ek personal number par call " +
