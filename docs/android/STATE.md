@@ -337,3 +337,8 @@ Branch: `android-finals`. Phase: **3 active; Codex foundation pushed, 18 new P0 
 - Triage: new issue #143 (phone) reports dark-theme Home/Result title contrast, light-splash status-bar icon contrast, a +7.485s debug cold start (release measurement requested), and an empty-input validation line shown on initial Home.
 - The issue overlaps agent3's active Result/splash #139/#97 files and the Home scan renderer. No code or device action was taken; wait for the current lane's safe boundary. The head owns phone screenshots, measurements and serial.
 - No further `phone`-labelled issues are open. Emulator lock held by agent3; Gradle lock free.
+
+### 2026-10-26 23:55 IST checkpoint
+- Owner filed #144 (`phone`) for QR setup confirmation followed by duplicate-frame recapture and missing visible registered state. Acceptance includes a masked payee confirmation, Start watching, repeated-frame idempotence, and watch match/mismatch behavior. Owner owns the phone reproduction and retest.
+- The issue overlaps dirty agent1 `QrGuardHost.kt` fallback work. A nine-task prompt for the next agent1 safe boundary is prepared at `%LOCALAPPDATA%\Temp\android\agent1.phase4.phone144.swarm.work.txt`; it is not launched. No phone/emulator work occurred.
+- Exact current root waves: agent1 `[9]` (8 children active), agent2 `[]`, agent3 `[3]` (children complete). No lane safe boundary; 19.0 GB free RAM, emulator lock remains with agent3.
