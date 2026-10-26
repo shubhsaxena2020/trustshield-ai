@@ -496,3 +496,11 @@ PHASE 3 COMPLETE
 - Two extra root sessions per profile were observed from overlapping coordinators; all had zero delegate_task calls and zero child sessions. No Hermes process or child session for those extra roots was visible at the check; their state.db rows had no end timestamp, so a clean shutdown is not claimed. The only Hermes processes currently active are the three roots listed above; no duplicate lane is running.
 - The active roots have not yet created their waves. Agent1 is receiving a provider response, agent2 is waiting for a provider response, and agent3 is receiving a provider response. No worktree has changed since launch.
 - Emulator lock and emulator process remain absent; free RAM was 22.9 GB at the last check. Do not run a build or emulator task without taking the shared lock first. No ADB was run against `63b0de52`.
+
+
+## 2026-10-27 00:44 IST - lane startup and phone boundary audit
+
+- Active root sessions remain agent1 `20261027_003830_f0cb6a`, agent2 `20261027_003841_271549`, agent3 `20261027_003844_e5a822`. No root has a delegate_task call yet; current wave sizes are `[]`, so relaunch compliance is still pending.
+- Agent1 owns `phase4-gradle.lock` for its baseline `:app:testDebugUnitTest` invocation. No second Gradle build was started. No emulator process or emulator lock is active.
+- Lane3 initialization ran one broad `adb devices -l` inventory and its output listed the owner's `63b0de52`. No serial-targeted command or phone operation was observed. Do not use broad device enumeration again; all future device commands must explicitly target `emulator-5554` after taking the emulator lock. The head remains the only phone operator.
+- Free RAM last measured 22.8 GB. No APK build or P0 acceptance result is recorded. Continue checking state.db until each new root calls exactly one delegate_task with nine tasks.

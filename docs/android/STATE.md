@@ -398,3 +398,10 @@ Branch: `android-finals`. Phase: **3 active; Codex foundation pushed, 18 new P0 
 - A duplicate startup was observed: six startup sessions briefly existed (two per profile). The extra roots had no delegate_task calls, no child tasks, and exited before modifying lane work. One active root per profile remains.
 - The three active new roots have not yet recorded a delegate_task call. Do not report a compliant wave until `tasks` length equals exactly 9 in each profile state.db.
 - There is no active emulator lock or emulator process. No phone serial `63b0de52` was accessed.
+
+
+### 2026-10-27 00:44 IST checkpoint
+- Three new roots are live for the priority order, but none has yet recorded a delegate_task wave: agent1 `20261027_003830_f0cb6a`, agent2 `20261027_003841_271549`, agent3 `20261027_003844_e5a822`. No wave is counted until state.db confirms `tasks` length 9.
+- Agent1 owns the shared Gradle lock for baseline `:app:testDebugUnitTest`; no other build was started. No emulator process or lock is active. Free RAM last measured 22.8 GB.
+- One non-targeted `adb devices -l` inventory from lane3 listed `63b0de52`; no serial-targeted command or phone operation was observed. Never run further ADB against the owner's phone. Any future ADB command must explicitly target the emulator after taking the emulator lock.
+- P0 implementation and phone-ready APK are still outstanding.
