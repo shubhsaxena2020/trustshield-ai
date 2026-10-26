@@ -318,3 +318,7 @@ Branch: `android-finals`. Phase: **3 active; Codex foundation pushed, 18 new P0 
 - PR #142 GitHub frontend passed. Backend failed the frozen v1 hash assertion and four holdout tests because the raw private holdout CSV is not present in CI (1,275 passed / 7 skipped); security failed the repo-wide Python dependency audit. The Android local gate remains green: 1,097 JVM tests, lintDebug and assembleDebug.
 - PR #141 remains open with 47/47 fixture rows and the local Android gate green; its required emulator spot check is still outstanding. Its repository backend/security checks also failed.
 - The sole emulator/lock remains with agent3. Gradle lock is free. Agent sessions are still active; no one was interrupted. Phone hold remains active with no owner release.
+
+### 2026-10-26 23:42 IST checkpoint
+- Read-only visual review of agent3's committed icon/splash previews passed: shield-T is clear at launcher sizes and light/night splash; the paths fit the documented adaptive mask safe area. Label is TrustShield; manifest, Gradle, and signing were untouched by the lane.
+- This is not final acceptance. The accessibility matrix is still active on agent3's single emulator; its report/harness are dirty and no PR is open. No additional emulator or phone action occurred.
