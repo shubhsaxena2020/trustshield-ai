@@ -303,3 +303,7 @@ Branch: `android-finals`. Phase: **3 active; Codex foundation pushed, 18 new P0 
 - Phone kit statically reviewed; all four synthetic QR cards in the one-page A4 PDF decode through ZXing with zero amount. Helper scripts were not executed during the phone hold. README now identifies the correct default helper log path.
 - Current Hermes wave widths remain agent1 `[]`, agent2 `[]`, agent3 `[3]`; no compliant nine-task wave. Provider is returning 503 for the recommended fallback probe; no model switch.
 - Free RAM 19.55 GB. Shared emulator and Gradle locks are held; Codex started neither. `adb devices` shows emulator-5554 only, and the owner has not explicitly released physical-phone work.
+
+### 2026-10-26 23:27 IST correction
+- Corrected the earlier wave-width snapshots: agent1's actual `oneshot` parent session `20261026_224554_363105` made one `delegate_task` call at 23:08:28 with 9 tasks, and state.db contains nine active child sessions with distinct owned files. This is a compliant width-9 wave; the children remain in provider retry/backoff and have not returned results. The call omitted explicit `max_concurrent_children`, although all nine children were dispatched; require it explicitly on the next wave where supported.
+- Agent2 new session has zero calls/children. Agent3's active lane has only the earlier legacy width-3 call, whose three children have completed. Do not interrupt dirty lane work.
