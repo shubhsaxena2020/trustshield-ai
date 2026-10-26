@@ -107,6 +107,7 @@ internal class ImageProxyFrame(private val proxy: ImageProxy) : FrameSource {
         val plane = planes[0]
         val width = widthPx
         val height = heightPx
+        require(width > 0 && height > 0 && width.toLong() * height <= QrLuminanceFrame.MAX_PIXELS)
         val source = plane.getBuffer().duplicate()
         val bytes = ByteArray(width * height)
         val rowStride = plane.getRowStride()
