@@ -1,0 +1,98 @@
+# Android UI/UX source catalogue
+
+Research checkpoint: 27 Oct 2026. This is a source catalogue for the Phase 6 UI directions, not a dependency recommendation. Scope is Compose patterns, Material components, animation, onboarding, dashboard/chart presentation and visual accessibility. Selection is based on the upstream repository and its GitHub license endpoint (`/license`); no code or assets from these projects have been copied into TrustShield.
+
+## License and use rules
+
+- **Adaptable** means the repository reports MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause or CC0. Before copying any specific code or asset, verify its own path-level notice, retain attribution where required, and include the complete upstream license text in the resulting distribution. A repository-level license does not automatically license bundled artwork, fonts, sample data or third-party assets.
+- **Study only** means no permissive license was confirmed, the source is a design/specification rather than an open-source code repository, or redistribution rights are unclear. This catalogue currently contains permissively licensed code repositories only; each one is marked adaptable subject to the checks above.
+- The license names below are backed by each repository's primary GitHub `/license` page (linked in the License column). License metadata is not a substitute for reading the exact license and any asset-specific terms before implementation.
+- Do not add a library based on this catalogue alone. Measure APK size delta, maintenance fit, accessibility, supported Android/Compose versions and motion reduction behavior first. Keep TrustShield's deterministic scoring, evidence wording, privacy and reduced-motion rules authoritative.
+
+## Catalogue (63 sources)
+
+| # | Source | URL | LICENSE | What is useful for TrustShield |
+|---:|---|---|---|---|
+| 1 | Android Compose samples | [repo](https://github.com/android/compose-samples) | [Apache-2.0](https://github.com/android/compose-samples/license) — adaptable | Official Compose sample patterns; inspect navigation, state and adaptive layouts. |
+| 2 | Now in Android | [repo](https://github.com/android/nowinandroid) | [Apache-2.0](https://github.com/android/nowinandroid/license) — adaptable | Production-scale Compose app structure, accessibility semantics, theming and loading/error states. |
+| 3 | Sunflower | [repo](https://github.com/android/sunflower) | [Apache-2.0](https://github.com/android/sunflower/license) — adaptable | Compose migration examples and simple content-first screen composition. |
+| 4 | Google Accompanist | [repo](https://github.com/google/accompanist) | [Apache-2.0](https://github.com/google/accompanist/license) — adaptable | Historical Compose extensions and migration lessons; check current API status before use. |
+| 5 | Molecule | [repo](https://github.com/cashapp/molecule) | [Apache-2.0](https://github.com/cashapp/molecule/license) — adaptable | Compose runtime state production patterns; architecture reference, not a UI dependency. |
+| 6 | Haze | [repo](https://github.com/chrisbanes/haze) | [Apache-2.0](https://github.com/chrisbanes/haze/license) — adaptable | Blur surfaces and layered material treatments; use sparingly and benchmark. |
+| 7 | Jetpack Compose Tutorials | [repo](https://github.com/SmartToolFactory/Jetpack-Compose-Tutorials) | [Apache-2.0](https://github.com/SmartToolFactory/Jetpack-Compose-Tutorials/license) — adaptable | Focused examples for layout, gestures, Canvas, animation and widgets. |
+| 8 | Jetpack Compose Playground | [repo](https://github.com/Foso/Jetpack-Compose-Playground) | [MIT](https://github.com/Foso/Jetpack-Compose-Playground/license) — adaptable | Small isolated Compose recipes for quick pattern comparison. |
+| 9 | Learn Jetpack Compose by Example | [repo](https://github.com/vinaygaba/Learn-Jetpack-Compose-By-Example) | [Apache-2.0](https://github.com/vinaygaba/Learn-Jetpack-Compose-By-Example/license) — adaptable | Concise idiomatic examples; useful for component-level implementation ideas. |
+| 10 | Mindorks Compose Examples | [repo](https://github.com/MindorksOpenSource/Jetpack-Compose-Android-Examples) | [Apache-2.0](https://github.com/MindorksOpenSource/Jetpack-Compose-Android-Examples/license) — adaptable | Broad UI/widget examples, useful for comparing common Compose patterns. |
+| 11 | Jetpack Compose Calculator | [repo](https://github.com/ahmedrizwan/JetpackComposeCalculator) | [MIT](https://github.com/ahmedrizwan/JetpackComposeCalculator/license) — adaptable | Compact keypad, status and arithmetic-result hierarchy; adapt layout ideas only. |
+| 12 | Compose Pokédex | [repo](https://github.com/zsoltk/compose-pokedex) | [MIT](https://github.com/zsoltk/compose-pokedex/license) — adaptable | Card hierarchy, detail navigation and image-led dashboard composition. |
+| 13 | ReFra gallery | [repo](https://github.com/IacobIonut01/ReFra) | [Apache-2.0](https://github.com/IacobIonut01/ReFra/license) — adaptable | Media gallery screen organization and empty/loading state ideas. |
+| 14 | Maps Compose | [repo](https://github.com/googlemaps/android-maps-compose) | [Apache-2.0](https://github.com/googlemaps/android-maps-compose/license) — adaptable | Compose interop and location context patterns; not a planned TrustShield feature. |
+| 15 | WebRTC in Compose | [repo](https://github.com/GetStream/webrtc-in-jetpack-compose) | [Apache-2.0](https://github.com/GetStream/webrtc-in-jetpack-compose/license) — adaptable | Live-session status and connection-state presentation reference. |
+| 16 | Compose Chat | [repo](https://github.com/leavesczy/compose_chat) | [Apache-2.0](https://github.com/leavesczy/compose_chat/license) — adaptable | Message boundaries and conversation visual hierarchy for share/chat review. |
+| 17 | Compose Markdown | [repo](https://github.com/jeziellago/compose-markdown) | [MIT](https://github.com/jeziellago/compose-markdown/license) — adaptable | Rich text rendering patterns; verify quote highlighting and accessibility before reuse. |
+| 18 | Jetpack Compose Animation examples | [repo](https://github.com/worstkiller/jetpack_compose_animation) | [MIT](https://github.com/worstkiller/jetpack_compose_animation/license) — adaptable | Simple transitions and motion primitives to compare against reduced-motion needs. |
+| 19 | Skydoves Compose Animations | [repo](https://github.com/skydoves/compose-animations) | [Apache-2.0](https://github.com/skydoves/compose-animations/license) — adaptable | Animation recipes and tunable timing; suitable for non-critical state changes only. |
+| 20 | Compose Animation Playground | [repo](https://github.com/sampingantech/jetpack-compose-animation-playground) | [MIT](https://github.com/sampingantech/jetpack-compose-animation-playground/license) — adaptable | Experimental transition patterns to study, not adopt wholesale. |
+| 21 | Jetpack Compose Animations guide | [repo](https://github.com/nisaefendioglu/JetpackComposeAnimations) | [MIT](https://github.com/nisaefendioglu/JetpackComposeAnimations/license) — adaptable | Beginner-friendly movement and scale examples for board prototyping. |
+| 22 | Compose Animation Lists | [repo](https://github.com/MakeItEasyDev/Jetpack-Compose-Animation-Lists) | [Apache-2.0](https://github.com/MakeItEasyDev/Jetpack-Compose-Animation-Lists/license) — adaptable | Expand/collapse and list transition ideas for evidence groups. |
+| 23 | MagicSprinkles | [repo](https://github.com/maiatoday/MagicSprinkles) | [MIT](https://github.com/maiatoday/MagicSprinkles/license) — adaptable | Compose animation exploration; study motion construction and keep decorative effects out of warnings. |
+| 24 | Bouncing Ball Animation | [repo](https://github.com/ardakazanci/BouncingBallAnimation) | [MIT](https://github.com/ardakazanci/BouncingBallAnimation/license) — adaptable | Basic animated Canvas reference; not appropriate for critical alerts. |
+| 25 | turbo-giggle Compose sample | [repo](https://github.com/maiatoday/turbo-giggle) | [MIT](https://github.com/maiatoday/turbo-giggle/license) — adaptable | Small Compose motion experiment for prototyping transitions. |
+| 26 | Jetpack Compose Animations course materials | [repo](https://github.com/kodecocodes/video-jca-materials) | [Apache-2.0](https://github.com/kodecocodes/video-jca-materials/license) — adaptable | Structured animation examples and explanations for evaluating motion options. |
+| 27 | Delightful Animations | [repo](https://github.com/Swapnil-J-Patil/Delightful_Animations) | [MIT](https://github.com/Swapnil-J-Patil/Delightful_Animations/license) — adaptable | Button/card transition sketches; use only low-emphasis interactions. |
+| 28 | Compose Charts | [repo](https://github.com/humawork/compose-charts) | [Apache-2.0](https://github.com/humawork/compose-charts/license) — adaptable | Chart composition reference if a verified trend visualization is ever needed. |
+| 29 | Compose Charts (bytebeats) | [repo](https://github.com/bytebeats/compose-charts) | [MIT](https://github.com/bytebeats/compose-charts/license) — adaptable | Lightweight chart rendering and labels; do not imply false risk-score precision. |
+| 30 | SuperChart | [repo](https://github.com/robyrawat/SuperChart) | [MIT](https://github.com/robyrawat/SuperChart/license) — adaptable | Accessibility and interaction ideas for chart axes, descriptions and animation. |
+| 31 | Compose Onboarding ViewPager | [repo](https://github.com/MakeItEasyDev/Jetpack-Compose-OnBoarding-Screen-ViewPager) | [Apache-2.0](https://github.com/MakeItEasyDev/Jetpack-Compose-OnBoarding-Screen-ViewPager/license) — adaptable | Intro sequence, progress and skip affordance patterns. |
+| 32 | Spotly onboarding | [repo](https://github.com/Bahar-Developer/spotly-onboarding) | [MIT](https://github.com/Bahar-Developer/spotly-onboarding/license) — adaptable | Spotlight onboarding and target highlighting; evaluate TalkBack and motion reduction. |
+| 33 | Lottie Android | [repo](https://github.com/airbnb/lottie-android) | [Apache-2.0](https://github.com/airbnb/lottie-android/license) — adaptable | Vector animation runtime and Compose integration examples; dependency size/asset cost must be measured. |
+| 34 | Meta Lottie Android | [repo](https://github.com/stash-oss/meta-lottie-android) | [Apache-2.0](https://github.com/stash-oss/meta-lottie-android/license) — adaptable | Lottie extensions and rendering integration patterns. |
+| 35 | Lottie Android sample | [repo](https://github.com/adhinugraha/lottie-android-sample) | [MIT](https://github.com/adhinugraha/lottie-android-sample/license) — adaptable | Minimal integration sample; prefer static/short feedback animation where motion is enabled. |
+| 36 | Rive Android | [repo](https://github.com/rive-app/rive-android) | [MIT](https://github.com/rive-app/rive-android/license) — adaptable | Interactive vector runtime reference. Runtime is permissively licensed; individual Rive files/assets still need their own rights check. |
+| 37 | Rive Compose Multiplatform | [repo](https://github.com/muazkadan/Rive-CMP) | [Apache-2.0](https://github.com/muazkadan/Rive-CMP/license) — adaptable | Wrapper architecture reference; check maturity, transitive dependencies and APK delta. |
+| 38 | Compose Scrollbars | [repo](https://github.com/GIGAMOLE/ComposeScrollbars) | [MIT](https://github.com/GIGAMOLE/ComposeScrollbars/license) — adaptable | Scroll-position affordance option for long evidence/history screens. |
+| 39 | Compose Shadows Plus | [repo](https://github.com/GIGAMOLE/ComposeShadowsPlus) | [MIT](https://github.com/GIGAMOLE/ComposeShadowsPlus/license) — adaptable | Elevation/shadow rendering examples; preserve contrast and avoid decorative clutter. |
+| 40 | Compose Fading Edges | [repo](https://github.com/GIGAMOLE/ComposeFadingEdges) | [MIT](https://github.com/GIGAMOLE/ComposeFadingEdges/license) — adaptable | Edge treatment patterns; only where scrollability is also communicated accessibly. |
+| 41 | Compose Levitation | [repo](https://github.com/GIGAMOLE/ComposeLevitation) | [MIT](https://github.com/GIGAMOLE/ComposeLevitation/license) — adaptable | Float/elevation motion ideas; likely study-only in product due to restraint and battery concerns. |
+| 42 | Android Compose UI library | [repo](https://github.com/mrkivan/android-compose-ui-lib) | [Apache-2.0](https://github.com/mrkivan/android-compose-ui-lib/license) — adaptable | Reusable UI pattern examples to compare with native Material 3 components. |
+| 43 | Android Compose UI Components | [repo](https://github.com/tarunyadav13/Android-Compose-UI-Components) | [MIT](https://github.com/tarunyadav13/Android-Compose-UI-Components/license) — adaptable | App bar, list, floating action and Material 3 component arrangement ideas. |
+| 44 | Compose countdown | [repo](https://github.com/RanjithRagavan/countdown) | [Apache-2.0](https://github.com/RanjithRagavan/countdown/license) — adaptable | Countdown/timer presentation; Call Shield timer must never be confused with risk score. |
+| 45 | Compose Ice Cream UI template | [repo](https://github.com/BoltUIX/compose-ice-cream-template) | [Apache-2.0](https://github.com/BoltUIX/compose-ice-cream-template/license) — adaptable | Multi-screen template flow and card/detail transitions; product imagery is not reusable without asset rights review. |
+| 46 | Compose Destinations | [repo](https://github.com/raamcosta/compose-destinations) | [Apache-2.0](https://github.com/raamcosta/compose-destinations/license) — adaptable | Navigation approach reference; compare with current app routing before introducing generators. |
+| 47 | Voyager | [repo](https://github.com/adrielcafe/voyager) | [MIT](https://github.com/adrielcafe/voyager/license) — adaptable | Navigation and screen lifecycle patterns; architectural reference only. |
+| 48 | Koin | [repo](https://github.com/InsertKoinIO/koin) | [Apache-2.0](https://github.com/InsertKoinIO/koin/license) — adaptable | Dependency-injection integration reference for Compose. |
+| 49 | Coil | [repo](https://github.com/coil-kt/coil) | [Apache-2.0](https://github.com/coil-kt/coil/license) — adaptable | Image loading and Compose image-state patterns; not needed unless remote/local imagery is introduced. |
+| 50 | Tivi | [repo](https://github.com/chrisbanes/tivi) | [Apache-2.0](https://github.com/chrisbanes/tivi/license) — adaptable | End-to-end Compose architecture, adaptive layouts and state handling. |
+| 51 | Google I/O app | [repo](https://github.com/google/iosched) | [Apache-2.0](https://github.com/google/iosched/license) — adaptable | Large app navigation, event cards and schedule/list density. |
+| 52 | Horologist | [repo](https://github.com/google/horologist) | [Apache-2.0](https://github.com/google/horologist/license) — adaptable | Google Compose utilities and UI implementation patterns; inspect module fit individually. |
+| 53 | Kizitonwose Calendar | [repo](https://github.com/kizitonwose/Calendar) | [MIT](https://github.com/kizitonwose/Calendar/license) — adaptable | Calendar UI and selection semantics; potential history date grouping reference. |
+| 54 | Compose Reorderable | [repo](https://github.com/Calvin-LL/Reorderable) | [Apache-2.0](https://github.com/Calvin-LL/Reorderable/license) — adaptable | Drag/reorder gesture and accessibility reference; no current settings reorder requirement. |
+| 55 | Landscapist | [repo](https://github.com/skydoves/landscapist) | [Apache-2.0](https://github.com/skydoves/landscapist/license) — adaptable | Compose image-loading composables and placeholders; evaluate necessity before dependency use. |
+| 56 | WhatIf | [repo](https://github.com/skydoves/whatif) | [Apache-2.0](https://github.com/skydoves/whatif/license) — adaptable | Small Kotlin utility examples; peripheral to direct UI design. |
+| 57 | Balloon | [repo](https://github.com/skydoves/balloon) | [Apache-2.0](https://github.com/skydoves/balloon/license) — adaptable | Tooltip/coach-mark presentation reference; avoid hiding essential instructions in transient tips. |
+| 58 | Material Design Icons | [repo](https://github.com/google/material-design-icons) | [Apache-2.0](https://github.com/google/material-design-icons/license) — adaptable | Icon source and naming; choose icons with text labels and confirm font/asset licensing for selected files. |
+| 59 | Compose Navigation Transitions | [repo](https://github.com/jianastrero/compose-nav-transitions) | [MIT](https://github.com/jianastrero/compose-nav-transitions/license) — adaptable | Screen transition examples; keep transition duration short and disable nonessential movement when reduced motion is on. |
+| 60 | iOS Glass Navigation for Compose | [repo](https://github.com/slaviboy/iOSGlassNavigation) | [Apache-2.0](https://github.com/slaviboy/iOSGlassNavigation/license) — adaptable | Alternative navigation experiments for visual study; not a target direction recommendation. |
+| 61 | Material 3 Pull Refresh | [repo](https://github.com/Omico/androidx-compose-material3-pullrefresh) | [Apache-2.0](https://github.com/Omico/androidx-compose-material3-pullrefresh/license) — adaptable | Refresh affordance example; verify against current upstream Material 3 pull-to-refresh support first. |
+| 62 | Material 3 Theming showcase | [repo](https://github.com/tarunyadav13/Android-Compose-Material3-Theming) | [MIT](https://github.com/tarunyadav13/Android-Compose-Material3-Theming/license) — adaptable | Dynamic color, system/light/dark theme switching and transition demo. |
+| 63 | Compose preview techniques | [repo](https://github.com/rf43/android-compose-preview) | [MIT](https://github.com/rf43/android-compose-preview/license) — adaptable | Preview and component-state inspection techniques for screen boards and QA. |
+
+## High-value clones inspected outside the repository
+
+Cloned with shallow history to `C:\Users\shubh\ui-research` for study only:
+
+- `compose-samples` — official, broad Compose patterns; Apache-2.0.
+- `compose-animations` — focused animation examples; Apache-2.0.
+- `lottie-android` — runtime/API and integration details; Apache-2.0.
+- `nowinandroid` — production-scale Compose app structure; Apache-2.0. (Clone attempted; check local path before relying on it.)
+
+No third-party source, assets or license files were added to this repo. Any later adaptation must bring along the upstream license text and preserve required notices. No dependency/APK delta was measured because no dependency was proposed or added.
+
+## Relevance and cautions for design boards
+
+- Prefer native Material 3 foundations and Android samples for the baseline. Use the selected app's own contrast, 48 dp touch target, language coverage and large-text requirements as acceptance criteria.
+- TrustShield's result panel should borrow information hierarchy from dashboard/evidence patterns, while keeping risk and confidence separate, quotes verbatim and actions explicit. Avoid numeric animation that suggests accuracy beyond the deterministic score.
+- Call Shield may use a subtle stage transition or static timer treatment; never pulse critical states. Stop, microphone permission and offline status remain visibly labeled.
+- QR Guard should emphasize expected merchant/payee versus decoded value and clear unreadable/occluded states. No decorative animation should imply tampering when decoding fails.
+- Hinglish, English and Hindi Devanagari must be tested in every direction, including long strings and font scaling. Do not assume Latin-only layout samples wrap correctly for Devanagari.
+- The friend's GitHub website-source collection URL is still pending from the owner. It is intentionally not guessed or represented by substitute links here.
