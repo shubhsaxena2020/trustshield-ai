@@ -416,6 +416,12 @@ PHASE 3 COMPLETE
 - Reordered agent1's prepared queue by risk: finish fallback package, then #147 on `wt-137`, then #144/#146 on `wt-fallbacks`. Prepared the combined follow-up at `C:\Users\shubh\AppData\Local\Temp\android\agent1.phase4.phone144-146.swarm.work.txt`; both prompts require exactly nine disjoint tasks and `max_concurrent_children=9`. Agent3's #143 prompt remains queued for its next safe boundary.
 - Exact roots remain agent1 `[9]` with 3/9 children active, agent2 `[]`, agent3 `[3]` with children complete. No lane has committed the current package. Free RAM is 17.5 GB. No phone command or emulator/Gradle action was started.
 
+## 2026-10-27 00:07 IST - binding P5-ASR directive and new width-9 wave
+
+- Read the new owner directive `HEAD_DIRECTIVE_OFFLINE_ASR.md`: P5-ASR requires bundled Vosk Hindi recognition, automatic offline fallback, Devanagari playbook coverage, privacy-safe PCM/session handling, a synthetic Hindi WAV on emulator, license attribution, APK-size proof, and owner-only airplane-mode phone acceptance. This supersedes the earlier standalone #146 queue; #146 timeout recovery is now part of P5-ASR.
+- Prepared `C:\Users\shubh\AppData\Local\Temp\android\agent1.phase4.p5-asr.swarm.work.txt` with nine disjoint tasks, and reordered agent1 follow-ups: finish P4 fallbacks, P5-ASR/#146, #147, then #144. #143 remains queued for agent3. No new lane is launched before its current commit boundary.
+- Exact root state.db audit: agent1 `[9]` with 3/9 children active; agent2 now has a new `[9]` wave with 9/9 children active; agent3 remains at legacy `[3]` with all children complete. agent2's stored call arguments contain `tasks` only (no `max_concurrent_children` key) despite the prompt; nine child sessions were created. Require explicit max on subsequent waves if the tool accepts it. Free RAM is 17.3 GB, above the alarm. No Gradle/emulator/phone action by Codex.
+
 ## 2026-10-27 00:07 IST - new P0 priority and safe-boundary handoff
 
 - Fetched `origin/android-finals`; main was already at the remote tip. Committed and pushed the owner changes to `HEAD_DIRECTIVE_OFFLINE_ASR.md` and `HEAD_DIRECTIVE_PHONE_HOLD.md` as `dfd3483` (only these two files staged).

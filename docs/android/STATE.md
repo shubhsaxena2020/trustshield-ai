@@ -349,6 +349,11 @@ Branch: `android-finals`. Phase: **3 active; Codex foundation pushed, 18 new P0 
 - Current root wave sizes: agent1 `[9]` (3 children active), agent2 `[]`, agent3 `[3]` (all children complete); no current package has reached a commit boundary. Free RAM 17.5 GB; no phone, emulator or Gradle action by Codex.
 
 ### 2026-10-27 00:07 IST checkpoint
+- New binding owner directive `HEAD_DIRECTIVE_OFFLINE_ASR.md` makes P5-ASR the next agent1 package after current fallback work. Issue #146 timeout recovery is included in that offline Hindi recognizer package. Directive will be tracked with this checkpoint.
+- Agent1's prepared queue is now: P4 fallback commit, P5-ASR/#146, #147, #144. Agent3 still owns #143. All follow-up prompts use exact nine-task waves and forbid the owner phone serial.
+- Current state.db wave widths: agent1 `[9]` (3 children active), agent2 `[9]` (9 children active), agent3 `[3]` legacy (children complete). Agent2's call omitted the explicit max key though nine children were launched. Free RAM 17.3 GB; no Codex device/build action.
+
+### 2026-10-27 00:07 IST checkpoint
 - Fast-forward verification: main `android-finals` was already equal to freshly fetched `origin/android-finals`. Committed and pushed the owner's released-phone directive and offline Hindi ASR directive as `dfd3483`; no other main-checkout artifacts were staged.
 - Physical-device boundary: the owner owns Redmi serial `63b0de52`; Codex/Hermes must never run adb against it. No adb commands were run.
 - Current state.db root wave audit: agent1 `20261026_224554_363105` has one `delegate_task` call with 9 tasks; 6 child sessions remain active. Agent2 `20261026_231901_29df0d` has one call with 9 tasks; all 9 child sessions remain active. Neither lane is at a safe stop boundary. Agent3 `20261026_202312_681c4f` has its legacy width-3 wave completed, with dirty accessibility evidence and four local commits ahead; not safe to stop before its worktree is resolved.
