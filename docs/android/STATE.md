@@ -353,6 +353,11 @@ Branch: `android-finals`. Phase: **3 active; Codex foundation pushed, 18 new P0 
 - Agent1's prepared queue is now: P4 fallback commit, P5-ASR/#146, #147, #144. Agent3 still owns #143. All follow-up prompts use exact nine-task waves and forbid the owner phone serial.
 - Current state.db wave widths: agent1 `[9]` (3 children active), agent2 `[9]` (9 children active), agent3 `[3]` legacy (children complete). Agent2's call omitted the explicit max key though nine children were launched. Free RAM 17.3 GB; no Codex device/build action.
 
+### 2026-10-27 00:10 IST checkpoint
+- Binding lane assignments: agent1 P5-ASR/#148 plus #146; agent2 #144; agent3 #143 plus #147. Their nine-task prompt files are prepared; no lane relaunch until a safe commit boundary.
+- Live wave widths: agent1 `[9]` with 3 active children, agent2 `[9]` with 9 active children, agent3 `[3]` legacy with all children complete. Stored call args omit max_concurrent_children, although nine children were created for agent2. Emulator lock belongs to agent2; 17.4 GB free RAM.
+- No physical serial access, no new build, and no emulator action by Codex. Phone acceptance remains owner-only.
+
 ### 2026-10-27 00:07 IST checkpoint
 - Fast-forward verification: main `android-finals` was already equal to freshly fetched `origin/android-finals`. Committed and pushed the owner's released-phone directive and offline Hindi ASR directive as `dfd3483`; no other main-checkout artifacts were staged.
 - Physical-device boundary: the owner owns Redmi serial `63b0de52`; Codex/Hermes must never run adb against it. No adb commands were run.
