@@ -281,3 +281,10 @@ Branch: `android-finals`. Phase: **3 active; Codex foundation pushed, 18 new P0 
 - PR #141 remains open: local Android checks pass, frontend passes, backend/security fail on unrelated repo artifact/holdout and dependency-audit findings; callback false-positive review item remains open.
 - PR #142 remains open: local Android checks pass, frontend passes, backend/security fail on the same repository-wide checks; English Result evidence localization remains a P0 gap.
 - Free RAM 19.53 GB; one API 36 emulator lock is active. No physical phone activity; no owner release signal received.
+
+## 2026-10-26 23:17 IST - #141 callback false-positive regression fixed
+
+- Added F40, a synthetic unbranded apartment-maintenance bill with an ordinary support mobile, to reproduce the new generic callback stake gate. RED run: `DetectionFixturesTest` failed because the row carried a verified ask. After removing routine `bill`/`dues` from `ACCOUNT_OR_SERVICE_STAKES`, F40 measured `LOW_RISK 0`, no verified ask. The existing electricity-bill callback example also matches the pre-existing `SERVICE_OR_BANK_BRAND` rule; that older behavior was explicitly distinguished in a follow-up PR comment and is not claimed fixed here.
+- Pushed commit `d2ee5b6` onto PR #141. Updated the fixtures table and PR body to 47 rows (28 scam, 19 legitimate; probes/controls included in those totals). Full gate on the PR branch: 1,093 JVM tests, 0 failures/errors/skips; `lintDebug` and `assembleDebug` passed. `git diff --check` passed.
+- PR #141 remains open; no emulator spot check yet. GitHub security check failed on the tracked dependency audit; frontend/backend checks are still running at this snapshot. The API 36 emulator lock remains held by agent3, and the Gradle lock is currently held by a Phase 4 lane. Codex started neither. No physical phone used; no owner release received.
+- PR #142 remains open and explicitly incomplete for #138 because Result evidence still mixes Hinglish in English mode; its P1 work is deferred until P0 acceptance is complete.
