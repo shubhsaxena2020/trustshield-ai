@@ -1,4 +1,12 @@
-﻿# Android program state
+## Current status (2026-10-26 20:34 IST)
+
+Branch `android-finals` is at `96d88977dc83ceae9e3001e09a2eeba5d113fce0`, equal to `origin/android-finals`. Phase 4 continues. The owner has ordered a physical-phone hold until explicit connection confirmation, no later than 22:45 IST. No physical-phone action has been run in this resume.
+
+- Existing Phase 4 Hermes profiles agent1/agent2/agent3 were confirmed alive and left running. Open PRs #134, #135 and #136 await review/merge; their Android validation must be completed on emulator/JVM as applicable.
+- Phone hold is documented in `HEAD_DIRECTIVE_PHONE_HOLD.md`. The phone-ready plan/scripts and printable synthetic QR cards are in `phone-kit/`; the generated card payloads use demo-only identities and amount zero.
+- Main checkout was already at the fetched origin head; unrelated pre-existing untracked paths remain untouched.
+- Remaining work is tracked in `HEAD_DIRECTIVE_PHONE_HOLD.md`; no Phase 4 completion claim is made.
+# Android program state
 
 ## Current status (2026-10-26 07:08 IST)
 
