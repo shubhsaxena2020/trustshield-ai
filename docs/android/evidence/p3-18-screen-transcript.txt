@@ -1,0 +1,434 @@
+[03:58:17] screenshot p3-18-scan-light-hinglish.png
+--- SCREEN HOME_SCAN_LIGHT_HINGLISH ---
+    Scan karein
+    Koi bhi suspicious message, link ya SMS text yahan paste karein. Verdict device par hi banta hai.
+    Local rules internet ke bina bhi chalte hain. Online check abhi available nahi hai, isliye result sirf device par bane rules se aata hai.
+    Message yahan paste karein
+    0 / 20,000
+    Clipboard se message paste karein
+    Paste
+    Message hata kar field khaali karein
+    Clear
+    Check karne layak text nahi mila. Pehle message paste ya type karein.
+    Examples (nakli sample)
+    Yeh sirf demo ke liye banaye gaye nakli messages hain. Inme kisi ka asli data nahi hai.
+    Example bharein: SBI KYC
+    SBI KYC
+    Example bharein: Bijli bill
+    Bijli bill
+    Example bharein: Bank credit
+    Bank credit
+    Example bharein: Delivery OTP
+    Delivery OTP
+    Message ko isi device par check karein, internet ke bina
+    Check karein (offline)
+    Verdict isi phone par banta hai — internet ki zarurat nahi.
+    Khaali message check nahi ho sakta. Pehle text paste ya type karein.
+    Screenshot chunein; OCR text padh kar wahi local check chalega
+    Call Shield
+    QR Guard
+    Screenshot se check karein
+    Screenshot ka text OCR se nikala jata hai. OCR kabhi galat padh sakta hai, isliye bharosa kam ho sakta hai.
+    Kisi bhi app se Share karke bhejein — message yahan khud aa jayega.
+    Aapka message sirf isi phone par check hota hai. App use save, share ya upload nahi karta.
+    Bhasha aur sensitivity ki settings kholein
+    Settings
+[03:58:38] screen HOME_SCAN_LIGHT_HINGLISH: 33 strings
+[03:58:51] screenshot p3-18-result-light-hinglish.png
+--- SCREEN RESULT_LIGHT_HINGLISH ---
+    Risk score: 70/100
+    ‹ Peeche
+    Result
+    Bhasha badlein
+    English
+    Zyada khatra — turant rukhein aur verify karein
+    !!
+    Zyada khatra
+    Scam ka pattern mila. Turant rukein aur official number se verify karein.
+    Bharosa: Zyada bharosa. Saare dikhaye gaye quotes source text se match hue.
+    ●
+    Bharosa: Zyada bharosa
+    Saare dikhaye gaye quotes source text se match hue.
+    Kya mila (exact quote ke saath)
+    ℹ
+    Jaankari
+    Pattern check
+    Account band karne ki dhamki
+    Message account, KYC, SIM ya card band/suspend hone ki dhamki deta hai. Yeh darr stage 2 hai; akele CRITICAL nahi banta.
+    Exact quote
+    KYC 24 ghante mein band ho
+    Jaldbaazi (time pressure)
+    Message turant act karne ka dabaav banata hai. Akele urgency scam ka saboot nahi hai.
+    Turant
+    ‼
+    Pakka sanket
+    OTP/PIN maanga gaya
+    Message OTP, PIN, CVV ya password wapas maang raha hai. Bank kabhi bhi OTP/PIN phone, message ya kisi app par nahi maangta.
+    OTP aaya hai woh batao
+    Aap kya kar sakte hain
+    Abhi ruk jaayein: OTP, PIN, password ya paise mat dein.
+    Yeh agla kadam aapke faisle ke liye hai.
+    Bank ya police ko official number par khud call back karke verify karein.
+    Kya yeh check nahi kar sakta
+    •
+    Sirf isi text par check hua hai, aapki poori chat ya call par nahi.
+    Yeh legal proof nahi hai aur kisi vyakti ko scammer declare nahi karta.
+    Backend check band hai, isliye kuch signal miss ho sakte hain.
+    ○ Backend check band hai
+    Yeh result sirf device par chale local rules se bana hai. Online enrichment abhi available nahi hai.
+    Itne characters check hue:112
+    Yeh verdict deterministic rules se aata hai, kisi AI ke andaze se nahi.
+    Yeh result final legal proof nahi hai. Paise ya OTP diye hain to turant bank aur 1930 par report karein.
+[03:59:11] screen RESULT_LIGHT_HINGLISH: 43 strings
+[03:59:22] screenshot p3-18-settings-light-hinglish.png
+--- SCREEN SETTINGS_LIGHT_HINGLISH ---
+    Settings
+    App ko apne hisaab se set karein.
+    Theme
+    Phone jaisa (system). Phone ke light/dark mode ko follow karega.
+    Phone jaisa (system)
+    Phone ke light/dark mode ko follow karega.
+    Hamesha light
+    Hamesha dark
+    Bhasha / Language
+    Hinglish (default)
+    English
+    Hinglish default hai. Simple English chahiye to yahan badlein.
+    Sensitivity
+    Kam alerts — LOW. Sirf saaf, strong pattern par alert. Kuch mild cases miss ho sakte hain.
+    Kam alerts — LOW
+    Sirf saaf, strong pattern par alert. Kuch mild cases miss ho sakte hain.
+    Balanced — default. Recommended. Strong pattern par alert, bina panic ke.
+    Balanced — default
+    Recommended. Strong pattern par alert, bina panic ke.
+    Zyada alerts — HIGH. Zyada cheezein alert karengi, isliye kuch extra warnings aa sakti hain.
+    Zyada alerts — HIGH
+    Zyada cheezein alert karengi, isliye kuch extra warnings aa sakti hain.
+    Important: sensitivity sirf alert ki likelihood badalti hai. Verified strong ask (OTP, paise, remote access) kabhi "safe" nahi dikhega — warnings poori tarah band karne ka koi option nahi hai.
+    Haptics
+    High risk par halka vibrate. Sirf ek baar, jab risk naya high ho — har line par nahi.
+    High risk par halka vibrate
+    Sirf ek baar, jab risk naya high ho — har line par nahi.
+    Reduced motion
+    Animations kam karein. Transitions turant honge. Koi pulsing ya flashing alert nahi.
+    Animations kam karein
+    Transitions turant honge. Koi pulsing ya flashing alert nahi.
+    Default par reset karein
+    Yahan sirf aapke choices save hote hain — koi message, quote, OTP, phone number ya UPI id nahi.
+[03:59:43] screen SETTINGS_LIGHT_HINGLISH: 33 strings
+[03:59:48] screenshot p3-18-settings-dark-hinglish.png
+[03:59:55] screenshot p3-18-settings-dark-english.png
+--- SCREEN SETTINGS_DARK_ENGLISH ---
+    Settings
+    Set the app up the way you like.
+    Theme
+    Match phone (system). Follows your phone's light/dark mode.
+    Match phone (system)
+    Follows your phone's light/dark mode.
+    Always light
+    Always dark
+    Language
+    Hinglish (default)
+    English
+    Hinglish is the default. Switch here if you prefer plain English.
+    Sensitivity
+    Fewer alerts — LOW. Alerts only on clear, strong patterns. Some mild cases may be missed.
+    Fewer alerts — LOW
+    Alerts only on clear, strong patterns. Some mild cases may be missed.
+    Balanced — default. Recommended. Alerts on strong patterns without over-warning.
+    Balanced — default
+    Recommended. Alerts on strong patterns without over-warning.
+    More alerts — HIGH. More things will alert, so expect some extra warnings.
+    More alerts — HIGH
+    More things will alert, so expect some extra warnings.
+    Important: sensitivity only changes how often you are warned. A verified strong ask (OTP, money, remote access) is never shown as "safe" — there is no option to turn warnings off completely.
+    Haptics
+    Vibrate on high risk. Once only, when a risk newly turns high — not on every line.
+    Vibrate on high risk
+    Once only, when a risk newly turns high — not on every line.
+    Reduced motion
+    Reduce animations. Transitions become instant. No pulsing or flashing alerts.
+    Reduce animations
+    Transitions become instant. No pulsing or flashing alerts.
+    Reset to defaults
+    Only your choices are saved here — no message, quote, OTP, phone number or UPI id.
+[04:00:16] screen SETTINGS_DARK_ENGLISH: 33 strings
+[04:00:32] screenshot p3-18-home-dark-english-persisted.png
+--- SCREEN HOME_AFTER_RESTART_DARK_ENGLISH ---
+    Check a message
+    Paste any suspicious message, link or SMS text here. The verdict is worked out on this device.
+    Local rules work without internet. Online checks are not available yet, so the result comes only from rules that run on the device.
+    Paste the message here
+    0 / 20,000
+    Paste a message from the clipboard
+    Paste
+    Clear the message field
+    Clear
+    There is no text to check yet. Paste or type a message first.
+    Examples (synthetic samples)
+    These are synthetic demo messages. They contain no real person's data.
+    Fill in the example: SBI KYC
+    SBI KYC
+    Fill in the example: Power bill
+    Power bill
+    Fill in the example: Bank credit
+    Bank credit
+    Fill in the example: Delivery OTP
+    Delivery OTP
+    Check the message on this device, without internet
+    Check (offline)
+    The verdict is computed on this phone — no internet needed.
+    An empty message cannot be checked. Paste or type some text first.
+    Pick a screenshot; OCR reads the text and the same local check runs
+    Check from a screenshot
+    Call Shield
+    QR Guard
+    Screenshot text is read by OCR. OCR can misread, so confidence may be lower.
+    Share from any app and the message lands here by itself.
+    Your message is checked only on this phone. The app does not save, share or upload it.
+    Open the language and sensitivity settings
+    Settings
+[04:00:53] screen HOME_AFTER_RESTART_DARK_ENGLISH: 33 strings
+[04:01:04] screenshot p3-18-scan-font13-english.png
+--- SCREEN SCAN_FONT13_ENGLISH ---
+    Check a message
+    Paste any suspicious message, link or SMS text here. The verdict is worked out on this device.
+    Local rules work without internet. Online checks are not available yet, so the result comes only from rules that run on the device.
+    Paste the message here
+    0 / 20,000
+    Paste a message from the clipboard
+    Paste
+    Clear the message field
+    Clear
+    There is no text to check yet. Paste or type a message first.
+    Examples (synthetic samples)
+    These are synthetic demo messages. They contain no real person's data.
+    Fill in the example: SBI KYC
+    SBI KYC
+    Fill in the example: Power bill
+    Power bill
+    Fill in the example: Bank credit
+    Bank credit
+    Fill in the example: Delivery OTP
+    Call Shield
+    QR Guard
+    Check the message on this device, without internet
+    Check (offline)
+    The verdict is computed on this phone — no internet needed.
+    An empty message cannot be checked. Paste or type some text first.
+    Pick a screenshot; OCR reads the text and the same local check runs
+    Check from a screenshot
+    Screenshot text is read by OCR. OCR can misread, so confidence may be lower.
+    Share from any app and the message lands here by itself.
+    Your message is checked only on this phone. The app does not save, share or upload it.
+    Open the language and sensitivity settings
+    Settings
+[04:01:26] screen SCAN_FONT13_ENGLISH: 32 strings
+[04:01:38] screenshot p3-18-result-font13-english.png
+--- SCREEN RESULT_FONT13_ENGLISH ---
+    Check a message
+    Paste any suspicious message, link or SMS text here. The verdict is worked out on this device.
+    Local rules work without internet. Online checks are not available yet, so the result comes only from rules that run on the device.
+    SBI: Aapka KYC 24 ghante mein band ho jayega. Turant is link se KYC update karein aur jo OTP aaya hai woh batao.
+    Paste the message here
+    112 / 20,000
+    Paste a message from the clipboard
+    Paste
+    Clear the message field
+    Clear
+    Examples (synthetic samples)
+    These are synthetic demo messages. They contain no real person's data.
+    Fill in the example: SBI KYC
+    SBI KYC
+    Fill in the example: Power bill
+    Power bill
+    Fill in the example: Bank credit
+    Bank credit
+    Fill in the example: Delivery OTP
+    Check the message on this device, without internet
+    Check (offline)
+    Call Shield
+    QR Guard
+    The verdict is computed on this phone — no internet needed.
+    Pick a screenshot; OCR reads the text and the same local check runs
+    Check from a screenshot
+    Screenshot text is read by OCR. OCR can misread, so confidence may be lower.
+    Share from any app and the message lands here by itself.
+    Your message is checked only on this phone. The app does not save, share or upload it.
+    Open the language and sensitivity settings
+    Settings
+[04:01:59] screen RESULT_FONT13_ENGLISH: 31 strings
+[04:02:12] screenshot p3-18-qr-camera-denied.png
+--- SCREEN QR_CAMERA_DENIED ---
+    Enable camera
+    QR Guard
+    Keeps an eye on the shop QR to catch a sticker pasted on top
+    Simulate scan
+    Language
+    Hinglish
+    English
+    …
+    Camera
+    Checking the camera
+    i
+    Setup is incomplete
+    Register the shop's real QR first, then keep an eye on it with the camera.
+    Register at least one UPI ID, then start watching.
+    Expected merchant
+    No UPI ID is registered yet. Register the real QR first.
+    The name printed on a QR can be swapped. Trust only the UPI ID comparison.
+    The full UPI ID is never shown on screen or written to logs.
+    UPI ID (e.g. shop@okaxis)
+    Name (optional)
+    Register
+    Start watching
+    Consecutive valid mismatch: 0 / 3
+    No QR visible (timer): -
+    Not seeing the QR is not proof of tampering.
+    Final confirmation only comes from your bank SMS or your UPI app history.
+    Demo scan uses sample QR data. Real QR codes are scanned with the camera.
+[04:02:34] screen QR_CAMERA_DENIED: 27 strings
+[04:02:41] screenshot p3-18-qr-simulated.png
+--- SCREEN QR_SIMULATED ---
+    Enable camera
+    QR Guard
+    Keeps an eye on the shop QR to catch a sticker pasted on top
+    Simulate scan
+    Language
+    Hinglish
+    English
+    …
+    Camera
+    Checking the camera
+    !!
+    QR looks changed
+    Consecutive valid mismatches — the QR's UPI ID differs from the registered one. Do not pay; check with the shopkeeper.
+    Do not pay right now.
+    Mila: dem***@ybl  |  Expected: duk***@okaxis
+    QR par likha naam: Demo shop
+    Consecutive valid mismatches — the QR's UPI ID differs from the registered one. Do not pay; check with the shopkeeper. Do not pay right now.
+    Expected merchant
+    duk***@okaxis
+    Demo shop
+    The name printed on a QR can be swapped. Trust only the UPI ID comparison.
+    The full UPI ID is never shown on screen or written to logs.
+    Stop
+    Register a new QR (PIN)
+    Understood — dismiss alert
+    Consecutive valid mismatch: 3 / 3
+    No QR visible (timer): -
+    Not seeing the QR is not proof of tampering.
+    dem***@ybl (mismatch)
+    Final confirmation only comes from your bank SMS or your UPI app history.
+    Demo scan uses sample QR data. Real QR codes are scanned with the camera.
+[04:03:03] screen QR_SIMULATED: 31 strings
+[04:03:21] screenshot p3-18-qr-camera-live.png
+--- SCREEN QR_CAMERA_LIVE ---
+    QR Guard
+    Keeps an eye on the shop QR to catch a sticker pasted on top
+    Simulate scan
+    Language
+    Hinglish
+    English
+    ●
+    Camera
+    Camera is on — keep the QR inside the frame
+    i
+    Setup is incomplete
+    Register the shop's real QR first, then keep an eye on it with the camera.
+    Register at least one UPI ID, then start watching.
+    Expected merchant
+    No UPI ID is registered yet. Register the real QR first.
+    The name printed on a QR can be swapped. Trust only the UPI ID comparison.
+    The full UPI ID is never shown on screen or written to logs.
+    UPI ID (e.g. shop@okaxis)
+    Name (optional)
+    Register
+    Start watching
+    Consecutive valid mismatch: 0 / 3
+    No QR visible (timer): -
+    Not seeing the QR is not proof of tampering.
+    Final confirmation only comes from your bank SMS or your UPI app history.
+    Demo scan uses sample QR data. Real QR codes are scanned with the camera.
+[04:03:43] screen QR_CAMERA_LIVE: 26 strings
+[04:03:55] screenshot p3-18-call-consent.png
+--- SCREEN CALL_CONSENT ---
+    Call Shield
+    Sirf woh awaaz jo phone ke mic tak pahunchti hai, aur sirf jab yeh screen khuli ho.
+    English
+    Pehle anumati
+    Call Shield tabhi mic use karta hai jab aap shuru karein. Recognizer internet use kar sakta hai; kuch audio device se bahar ja sakta hai. App audio recording store nahi karta; pehchana gaya text sirf is session ki memory me rehta hai aur Stop par hata diya jata hai.
+    Main samajh gaya, anumati deta hoon
+    Mic: anumati nahi mili
+    Recognizer internet use kar sakta hai; kuch audio device se bahar ja sakta hai.
+    Backend check: band
+    Samay
+    00:00
+    Session shuru karein
+    Jaankari. Jaankari — koi khatra nahi mila. Confidence: Verify nahi ho paya
+    Khatre ka level
+    i
+    Jaankari
+    Confidence: Verify nahi ho paya
+    Confidence batata hai ki awaaz kitni saaf samajh aayi — kisi par shak ka percentage nahi.
+    Level sirf baaton ke pattern se banta hai, kisi vyakti ke baare mein faisla nahi.
+    Stop — sunna band karein
+    Demo script mode
+    Alert kyun aaya: neeche woh stages dekhein jinke saamne 'mil gaya' likha hai, har ek ke saath suni gayi asli line.
+    ①
+    Pehchaan — abhi nahi mila
+    Bank, police, CBI, ED, customs ya courier ka daawa.
+    ②
+    Darr ya laalach — abhi nahi mila
+    Account band, arrest, parcel charge, lottery ya bada return.
+    ③
+    Jaldbaazi — abhi nahi mila
+    Abhi, aaj raat, ya deadline ka dabav.
+    ④
+    Akela karna — abhi nahi mila
+    Kisi ko mat batana, call cut mat karna.
+    ⑤
+    Maang — abhi nahi mila
+    OTP, PIN, paise, remote access, APK ya personal data ki maang.
+    Mic ki anumati nahi mili
+    Phone ki Settings mein is app ke liye Microphone allow karein, phir wapas aakar session shuru karein. Bina anumati ke app sun nahi sakta.
+    Anumati dein
+    Baat-cheet ka text 2 minute baad apne aap hat jata hai, aur Stop par turant.
+    Stop dabate hi mic band ho jata hai. Back dabane par bhi session band ho jata hai.
+    Yeh app call ke doosre taraf ki awaaz nahi pakadta. Sirf aapki anumati se mic tak pahunchi awaaz check hoti hai.
+[04:04:16] screen CALL_CONSENT: 43 strings
+[04:04:31] screenshot p3-18-call-demo.png
+--- SCREEN CALL_DEMO ---
+    Call Shield
+    Sirf woh awaaz jo phone ke mic tak pahunchti hai, aur sirf jab yeh screen khuli ho.
+    English
+    Pehle anumati
+    Call Shield tabhi mic use karta hai jab aap shuru karein. Recognizer internet use kar sakta hai; kuch audio device se bahar ja sakta hai. App audio recording store nahi karta; pehchana gaya text sirf is session ki memory me rehta hai aur Stop par hata diya jata hai.
+    Main samajh gaya, anumati deta hoon
+    Mic: anumati nahi mili
+    Recognizer internet use kar sakta hai; kuch audio device se bahar ja sakta hai.
+    Backend check: band
+    Samay
+    00:00
+    Session shuru karein
+    Jaankari. Jaankari — koi khatra nahi mila. Confidence: Verify nahi ho paya
+    Khatre ka level
+    Stop — sunna band karein
+    Close demo script
+    Scripted demo only. No microphone or call recording.
+    Kam · 10/100 · HIGH
+    Ji sir, boliye.
+    Yeh ek typed demo script hai, asli call record nahi hoti. Meter sirf is script ke deterministic rules se badalta hai. Deepfake awaaz check nahi hoti.
+    Back
+    Next line
+    Reset
+[04:04:53] screen CALL_DEMO: 23 strings
+--- DEVICE STATE ---
+    airplane_mode_on = 1
+    font_scale = 1.0
+    wm size = Physical size: 1080x2400
+    wm density = Physical density: 420
+    model = sdk_gphone64_x86_64
+    sdk = 36
+    abi = x86_64
+    build_type = userdebug

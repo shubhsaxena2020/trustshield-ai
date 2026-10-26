@@ -64,6 +64,16 @@ import ai.trustshield.android.ui.theme.onSurface
 fun ResultScreen(
     state: ResultUiState,
     language: UiLanguage = UiLanguage.Default,
+    /**
+     * The deterministic score behind the band, for TalkBack only.
+     *
+     * Issue #115: this used to be a visible `Text("Risk score: N/100")` in the navigation host, drawn
+     * above the header row. The screen's visual design is a coarse band with no figure (see the class
+     * doc), so the number is only ever *spoken* -- [ResultUiState.screenDescription] appends
+     * [RiskScoreSpeech.announcement] to the panel's content description. `null` (the default, and the
+     * Unable-to-Verify case) means no figure is announced at all.
+     */
+    riskScore: Int? = null,
     onToggleLanguage: () -> Unit = {},
     onAction: (String) -> Unit = {},
     onBack: (() -> Unit)? = null,
@@ -76,7 +86,13 @@ fun ResultScreen(
             .padding(horizontal = TsTokens.SpacingLg, vertical = TsTokens.SpacingLg),
         verticalArrangement = Arrangement.spacedBy(TsTokens.SpacingMd)
     ) {
-        ResultTopBar(state = state, language = language, onToggleLanguage = onToggleLanguage, onBack = onBack)
+        ResultTopBar(
+            state = state,
+            language = language,
+            riskScore = riskScore,
+            onToggleLanguage = onToggleLanguage,
+            onBack = onBack
+        )
 
         if (state.status is ResultStatus.UnableToVerify) {
             UnableToVerifyBanner(status = state.status, language = language)
@@ -104,6 +120,7 @@ fun ResultScreen(
 private fun ResultTopBar(
     state: ResultUiState,
     language: UiLanguage,
+    riskScore: Int?,
     onToggleLanguage: () -> Unit,
     onBack: (() -> Unit)?
 ) {
@@ -121,10 +138,11 @@ private fun ResultTopBar(
         Text(
             text = if (language == UiLanguage.ENGLISH) ResultCopy.TITLE_ENGLISH else ResultCopy.TITLE_HINGLISH,
             style = MaterialTheme.typography.headlineSmall,
-            // One announcement for the whole panel head: risk first, then confidence.
+            // One announcement for the whole panel head: risk first, then confidence, then the score
+            // in words. The score is *only* here -- it is never drawn as text (issue #115).
             modifier = Modifier
                 .weight(1f)
-                .semantics { contentDescription = state.screenDescription(language) }
+                .semantics { contentDescription = state.screenDescription(language, riskScore) }
         )
         TextButton(
             onClick = onToggleLanguage,
@@ -176,6 +194,13 @@ private fun RiskHeader(risk: RiskBand, language: UiLanguage) {
                 style = MaterialTheme.typography.bodyLarge,
                 color = risk.tone.onContainer()
             )
+            risk.score?.let { score ->
+                Text(
+                    text = "Score: $score/100",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = risk.tone.onContainer()
+                )
+            }
             // Coarse four-step band, static: no number, no animation, no implied precision.
             RiskBandStrip(tone = risk.tone)
         }

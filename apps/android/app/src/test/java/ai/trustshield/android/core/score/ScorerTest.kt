@@ -179,13 +179,20 @@ class ScorerTest {
         assertTrue(legit.result.risk.score < CAUTION_FLOOR)
         assertTrue(legit.result.evidence.any { it.module == "legit_indicators" })
 
-        // Gap, stated openly: A03 has no "personal callback" rule yet, so the scam twin stays in the
-        // watch band. What fusion can still guarantee is that the pressure is visible as an urgency
-        // stage, that the routine notice has no stage at all, and that neither becomes an accusation.
+        // Issue #118 closed the gap this test used to state openly: A03 now has the
+        // utility-disconnection threat (stage 2) and the "call this personal number" ask (stage 5,
+        // AskType.CALLBACK), so the report's row-4 scam twin is no longer a watch-band miss. The
+        // routine due-date notice opposite it is still stage-free, which is the half that proves the
+        // rules did not simply get louder.
+        assertTrue("expected THREAT_OR_REWARD, was ${scam.result.stages}", scam.result.stages.contains(StageId.THREAT_OR_REWARD))
         assertTrue(scam.result.stages.contains(StageId.URGENCY))
+        assertTrue(scam.result.stages.contains(StageId.ASK))
+        assertTrue("the callback must be a real ask, was ${scam.result.evidence}", scam.verifiedAsk)
+        assertTrue("expected >= $CAUTION_FLOOR, was ${scam.result.risk.score}", scam.result.risk.score >= CAUTION_FLOOR)
         assertFalse(legit.result.stages.contains(StageId.URGENCY))
-        assertTrue(scam.result.risk.score < CAUTION_FLOOR)
-        assertNotEquals(RiskLabel.HIGH_RISK, scam.result.risk.label)
+        assertFalse(legit.result.stages.contains(StageId.ASK))
+        assertFalse(legit.verifiedAsk)
+        assertTrue(scam.result.risk.score > legit.result.risk.score)
     }
 
     @Test

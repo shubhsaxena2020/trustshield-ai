@@ -175,18 +175,21 @@ fun ResultRouteHost(english: Boolean, outcome: ScanOutcome?) {
             var language by remember(english) { mutableStateOf(UiLanguage.of(english)) }
 
             Column(modifier = Modifier.fillMaxSize()) {
-                Text(
-                    text = if (outcome.result.risk.label == RiskLabel.UNABLE_TO_VERIFY) {
-                        "Risk score: Unable to Verify"
-                    } else {
-                        (if (english) "Risk score: " else "Risk score: ") + "${outcome.risk.score}/100"
-                    },
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp)
-                )
+                // Issue #115: this host used to draw a `Text("Risk score: N/100")` *before* the panel, so
+                // a bare debug line sat above the header row, in the status-bar zone. The number is
+                // deliberately not part of the visual design -- the styled card carries a coarse
+                // four-step band, never a figure (UI_SPEC "Tokens and motion": no number implies
+                // precision the local rules do not have). The score therefore travels as a
+                // TalkBack-only label: nothing is drawn above the header row, and the panel's single
+                // announcement still gives the number to a screen reader. A score is only announced
+                // when the engine could actually verify the band; Unable to Verify stays a refusal to
+                // state a figure, not a `0/100`.
+                val announcedScore: Int? =
+                    if (outcome.result.risk.label == RiskLabel.UNABLE_TO_VERIFY) null else outcome.risk.score
                 ResultScreen(
                     state = state,
                     language = language,
+                    riskScore = announcedScore,
                     onToggleLanguage = {
                         language =
                             if (language == UiLanguage.ENGLISH) UiLanguage.HINGLISH else UiLanguage.ENGLISH
@@ -296,7 +299,10 @@ object AnalysisToResult {
                 )
             },
             limitations = outcome.result.limitations.map { ToneCopy(it, it) },
-            backendAvailable = false
+            backendAvailable = false,
+            riskScore = outcome.risk.score.takeUnless {
+                outcome.result.risk.label == RiskLabel.UNABLE_TO_VERIFY
+            }
         )
     )
 }
