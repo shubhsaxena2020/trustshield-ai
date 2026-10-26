@@ -4,6 +4,9 @@ import ai.trustshield.android.data.preferences.AppLanguage
 import ai.trustshield.android.data.preferences.Sensitivity
 import ai.trustshield.android.data.preferences.ThemeMode
 import ai.trustshield.android.data.preferences.UserPreferences
+import ai.trustshield.android.data.preferences.resolveLanguage
+import ai.trustshield.android.ui.theme.ToneCopy
+import java.util.Locale
 
 /**
  * Pure state + reducer for the Settings screen (work package C04, issue #45).
@@ -16,8 +19,14 @@ import ai.trustshield.android.data.preferences.UserPreferences
 
 /** Bilingual copy: simple Hinglish plus an English variant (HEAD_ORDERS §2 rule 6). */
 data class SettingText(val hinglish: String, val english: String) {
-    fun forLanguage(language: AppLanguage): String =
-        if (language == AppLanguage.ENGLISH) english else hinglish
+    fun forLanguage(language: AppLanguage): String = when (
+        resolveLanguage(language, Locale.getDefault().toLanguageTag())
+    ) {
+        AppLanguage.SYSTEM -> english
+        AppLanguage.HINGLISH -> hinglish
+        AppLanguage.ENGLISH -> english
+        AppLanguage.HINDI -> ToneCopy(hinglish, english).hindi
+    }
 }
 
 /**
@@ -44,11 +53,13 @@ object SettingsCopy {
     val themeDark = SettingText("Hamesha dark", "Always dark")
 
     val languageSection = SettingText("Bhasha / Language", "Language")
-    val languageHinglish = SettingText("Hinglish (default)", "Hinglish (default)")
+    val languageSystem = SettingText("Phone ki bhasha", "Use phone language")
+    val languageHinglish = SettingText("Hinglish", "Hinglish")
     val languageEnglish = SettingText("English", "English")
+    val languageHindi = SettingText("Hindi", "Hindi")
     val languageHint = SettingText(
-        "Hinglish default hai. Simple English chahiye to yahan badlein.",
-        "Hinglish is the default. Switch here if you prefer plain English."
+        "Phone ki bhasha default hai. Hinglish, English ya Hindi yahan chunein.",
+        "The system language is selected by default. Choose Hinglish, English or Hindi here."
     )
 
     val sensitivitySection = SettingText("Sensitivity", "Sensitivity")
@@ -113,19 +124,25 @@ object SettingsCopy {
             "id nahi.",
         "Only your choices are saved here — no message, quote, OTP, phone number or UPI id."
     )
+    val dismissOk = SettingText("Theek hai", "OK")
+    val aboutSection = SettingText("TrustShield AI ke baare mein", "About TrustShield AI")
+    val aboutBody = SettingText(
+        "Sandigdh messages ko isi device par check karein. Natija samajhne ke liye evidence dekhein.",
+        "Check suspicious messages on this device. Review the evidence to understand the result."
+    )
 
     /** All copy, for tests that guard against a "disable all warnings" preset creeping in. */
     fun all(): List<SettingText> = listOf(
         screenTitle, screenSubtitle,
         themeSection, themeSystem, themeSystemDetail, themeLight, themeDark,
-        languageSection, languageHinglish, languageEnglish, languageHint,
+        languageSection, languageSystem, languageHinglish, languageEnglish, languageHindi, languageHint,
         sensitivitySection, sensitivityLow, sensitivityLowDetail,
         sensitivityBalanced, sensitivityBalancedDetail,
         sensitivityHigh, sensitivityHighDetail, sensitivitySafetyNote,
         hapticsSection, hapticsLabel, hapticsDetail,
         reducedMotionSection, reducedMotionLabel, reducedMotionDetail,
         resetAction, resetDialogTitle, resetDialogBody, resetConfirm, resetCancel, resetApplied,
-        privacyNote
+        privacyNote, dismissOk, aboutSection, aboutBody
     )
 }
 

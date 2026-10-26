@@ -32,12 +32,25 @@ enum class ThemeMode {
 }
 
 /**
- * Language of user-facing copy. [HINGLISH] is the product default (HEAD_ORDERS §2 rule 6); English
- * is an explicit opt-in, never the fallback.
+ * Language of user-facing copy. New installs follow the system language; unsupported locales resolve
+ * to Hinglish. English, Hinglish, and Hindi can also be selected explicitly.
  */
 enum class AppLanguage {
+    SYSTEM,
     HINGLISH,
-    ENGLISH
+    ENGLISH,
+    HINDI
+}
+
+/** Resolve the persisted choice for rendering without replacing SYSTEM in storage. */
+fun resolveLanguage(language: AppLanguage, systemLanguageTag: String?): AppLanguage {
+    if (language != AppLanguage.SYSTEM) return language
+    val tag = systemLanguageTag?.trim()?.lowercase().orEmpty()
+    return when {
+        tag == "hi" || tag.startsWith("hi-") -> AppLanguage.HINDI
+        tag == "en" || tag.startsWith("en-") -> AppLanguage.ENGLISH
+        else -> AppLanguage.HINGLISH
+    }
 }
 
 /**
@@ -178,12 +191,12 @@ object SettingsKeys {
 }
 
 /**
- * Immutable settings model. Defaults are the shipping defaults:
- * Hinglish + BALANCED + SYSTEM theme, haptics on, reduced motion off.
+ * Immutable settings model. Defaults follow the system language, with BALANCED sensitivity and
+ * SYSTEM theme, haptics on, reduced motion off.
  */
 data class UserPreferences(
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
-    val language: AppLanguage = AppLanguage.HINGLISH,
+    val language: AppLanguage = AppLanguage.SYSTEM,
     val sensitivity: Sensitivity = Sensitivity.BALANCED,
     val haptics: Boolean = true,
     val reducedMotion: Boolean = false

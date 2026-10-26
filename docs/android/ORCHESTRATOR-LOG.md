@@ -504,3 +504,31 @@ PHASE 3 COMPLETE
 - Agent1 owns `phase4-gradle.lock` for its baseline `:app:testDebugUnitTest` invocation. No second Gradle build was started. No emulator process or emulator lock is active.
 - Lane3 initialization ran one broad `adb devices -l` inventory and its output listed the owner's `63b0de52`. No serial-targeted command or phone operation was observed. Do not use broad device enumeration again; all future device commands must explicitly target `emulator-5554` after taking the emulator lock. The head remains the only phone operator.
 - Free RAM last measured 22.8 GB. No APK build or P0 acceptance result is recorded. Continue checking state.db until each new root calls exactly one delegate_task with nine tasks.
+
+# PHASE 6
+
+## 2026-10-27 02:26 IST — isolated work started
+
+- `android-finals` checkout is dirty with unrelated existing activity, so Phase 6 work is in isolated `C:\Users\shubh\trustshield-android-wt\p6-*` worktrees. Main checkout and all P0 worktrees remain untouched.
+- U1 branch `android/P6-U1-language`: copied the original web `logo.png` and `logo-icon.png` into Android `drawable-nodpi`, switched adaptive launcher foreground and splash icon to the original icon, and added the initial complete source inventory in `docs/android/I18N_AUDIT.md` (257 ToneCopy/SettingText entries; 51 visible literal lines to review). System-language persistence/resolution tests are drafted; implementation is pending the shared Gradle lock so the required failing test can run first.
+- U3 catalogue is complete: 63 sources, four useful clones outside the repo, no third-party files copied. Commit `68c1bd7` pushed and PR #154 opened; U4 board work is now underway from those sources.
+- B1 audit filed backend issues #152 and #153. The raw-history storage defect is fixed with metadata-only history and focused tests on `android/P6-backend-audit`; commit `aa0dc8f`, PR #155. Focused API/history tests: 48 passed. Broad suite: 319 passed, 2 skipped, 8 failed because the local model artifact is unavailable (readiness 503); no 9Router calls.
+- Shared Gradle and emulator lock markers are present and a P0 `:app:testDebugUnitTest` process is active in another worktree; no Android build, emulator, or ADB command has been started here. Free RAM sampled at 18.1 GB (above 8 GB alarm). Physical serial `63b0de52` has not been accessed.
+
+## 2026-10-27 — Phase 6 delivery checkpoint
+
+- U3/U4: research catalogue (63 sources) and six interactive design boards are on PR #154: https://github.com/shubhsaxena2020/trustshield-ai/pull/154. Four useful permissively licensed repositories are cloned outside the repo at `C:\Users\shubh\ui-research`; no third-party code was copied into the project.
+- B1: backend audit PR #155: https://github.com/shubhsaxena2020/trustshield-ai/pull/155. Issues #152 (blank submissions) and #153 (raw input persisted in history) were filed with `backend`; #153 has a metadata-only persistence fix. API suite result was 319 passed, 2 skipped, 8 unavailable-model failures; the focused privacy/history suite had 48 passes.
+- L: landing app PR #156: https://github.com/shubhsaxena2020/trustshield-ai/pull/156. Original web logo assets were restored and used. New Vercel project preview: https://trustshield-ai-landing-p6-mmm16rrqj-shubh-saxena-s-projects.vercel.app. The friend's 3D reference repo URL and release APK facts remain TODOs; the existing production project was not modified.
+- U1: isolated branch `android/P6-U1-language` now has the persisted shared language selector, SYSTEM locale resolution, Hindi copy table, screen adapters, settings choices, tests, original logo resources, and `docs/android/I18N_AUDIT.md`. The branch has not yet been built or tested: the shared Gradle lock remains owned by a P0 lane and the required wait window elapsed. No emulator or ADB command was run by this worktree; phone serial `63b0de52` remains untouched.
+- Static validation so far: `git diff --check` passes. Android compilation, unit tests, and live UI path verification remain blocked on the shared Gradle/emulator resources; do not claim them as passed.
+
+### U1 verification update
+
+- The Android SDK was unavailable through environment variables in this isolated worktree; used the installed SDK at `C:\Users\shubh\AppData\Local\Android\Sdk` for the build.
+- `:app:testDebugUnitTest`, `:app:lintDebug`, and `:app:assembleDebug` pass under the shared lock with `--no-daemon` and a 2 GB JVM limit. JUnit XML reports 1,090 tests, 0 failures, 0 skipped.
+- Installed and exercised the debug APK on the dedicated `trustshield-api36` emulator only. Checked system/language menu behavior and Hindi UI paths on Home/Scan, Call Shield, staged Call demo with risk evidence, QR Guard, Settings, and Result. Switched the same running app to English and verified Home/Scan copy. Reinstalled after the final Result copy additions; verified Hindi Result labels and next-step text.
+- No operation targeted phone serial `63b0de52`. The emulator was shut down, and the Phase 6 Gradle/emulator lock markers were released after their owned processes exited.
+- `docs/android/I18N_AUDIT.md` retains the full source snapshot inventory (257 copy constructor sites and 51 direct/dynamic literal lines) and records the static Hindi catalogue count (265 entries). Exact quotes and user-entered text remain source data.
+
+- U1 delivery: commit 4b59e6b pushed on ndroid/P6-U1-language; PR #160: https://github.com/shubhsaxena2020/trustshield-ai/pull/160. Build, unit tests, lint, and disposable-emulator UI verification passed as recorded above.

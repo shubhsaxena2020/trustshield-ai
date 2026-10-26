@@ -1,6 +1,7 @@
 package ai.trustshield.android.ui.home
 
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -24,6 +26,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
@@ -33,6 +36,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ai.trustshield.android.core.normalize.HinglishNormalizer
+import ai.trustshield.android.R
+import ai.trustshield.android.data.preferences.AppLanguage
 import ai.trustshield.android.ui.theme.ToneCopy
 import ai.trustshield.android.ui.theme.TsTokens
 import ai.trustshield.android.ui.theme.TrustShieldTheme
@@ -68,6 +73,12 @@ import ai.trustshield.android.ui.theme.TrustShieldTheme
 
 /** Renders a bilingual pair for the current language. Hinglish is the default (`english == false`). */
 internal fun ToneCopy.text(english: Boolean): String = if (english) this.english else this.hinglish
+
+private fun ToneCopy.text(language: AppLanguage): String = when (language) {
+    AppLanguage.SYSTEM, AppLanguage.HINGLISH -> hinglish
+    AppLanguage.ENGLISH -> english
+    AppLanguage.HINDI -> hindi
+}
 
 /**
  * Every user-facing string on this screen, in both languages. Hinglish is the default (HEAD_ORDERS
@@ -473,6 +484,7 @@ data class ScanExamples(val entries: List<ScanExample> = DEFAULT_ENTRIES) {
 fun ScanScreen(
     state: ScanInputState,
     english: Boolean = false,
+    language: AppLanguage? = null,
     onEvent: (ScanInputEvent) -> Unit,
     onCheck: (String) -> Unit,
     onPickImage: () -> Unit,
@@ -480,7 +492,8 @@ fun ScanScreen(
     modifier: Modifier = Modifier,
     clipboardText: () -> String? = { null }
 ) {
-    val copy: (ToneCopy) -> String = { it.text(english) }
+    val selectedLanguage = language ?: if (english) AppLanguage.ENGLISH else AppLanguage.HINGLISH
+    val copy: (ToneCopy) -> String = { it.text(selectedLanguage) }
     val examples = ScanExamples().entries
 
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
@@ -492,6 +505,11 @@ fun ScanScreen(
                 .padding(horizontal = TsTokens.SpacingLg, vertical = TsTokens.SpacingLg),
             verticalArrangement = Arrangement.spacedBy(TsTokens.SpacingMd)
         ) {
+            Image(
+                painter = painterResource(R.drawable.trustshield_logo),
+                contentDescription = copy(ToneCopy("TrustShield AI", "TrustShield AI")),
+                modifier = Modifier.width(150.dp).heightIn(min = 36.dp)
+            )
             Text(
                 text = copy(ScanCopy.title),
                 style = MaterialTheme.typography.headlineSmall,
@@ -604,7 +622,7 @@ fun ScanScreen(
                 horizontalArrangement = Arrangement.spacedBy(TsTokens.SpacingSm)
             ) {
                 examples.forEach { example ->
-                    val label = example.label.text(english)
+                    val label = example.label.text(selectedLanguage)
                     AssistChip(
                         onClick = { onEvent(ScanInputEvent.ExampleSelected(example.text)) },
                         label = {

@@ -132,11 +132,11 @@ private fun ResultTopBar(
             TextButton(
                 onClick = onBack,
                 modifier = Modifier.heightIn(min = TsTokens.MinTouchTarget)
-            ) { Text("\u2039 " + if (language == UiLanguage.ENGLISH) "Back" else "Peeche") }
+            ) { Text("\u2039 " + ToneCopy("Peeche", "Back").pick(language)) }
             Spacer(Modifier.width(TsTokens.SpacingSm))
         }
         Text(
-            text = if (language == UiLanguage.ENGLISH) ResultCopy.TITLE_ENGLISH else ResultCopy.TITLE_HINGLISH,
+            text = ToneCopy(ResultCopy.TITLE_HINGLISH, ResultCopy.TITLE_ENGLISH).pick(language),
             style = MaterialTheme.typography.headlineSmall,
             // One announcement for the whole panel head: risk first, then confidence, then the score
             // in words. The score is *only* here -- it is never drawn as text (issue #115).
@@ -151,10 +151,10 @@ private fun ResultTopBar(
             }
         ) {
             Text(
-                if (language == UiLanguage.ENGLISH) {
-                    ResultCopy.LANGUAGE_TOGGLE_ENGLISH
-                } else {
-                    ResultCopy.LANGUAGE_TOGGLE_HINGLISH
+                when (language) {
+                    UiLanguage.ENGLISH -> ToneCopy("Hinglish", "Hinglish", "हिंग्लिश").pick(language)
+                    UiLanguage.HINGLISH -> ToneCopy("English", "English", "अंग्रेज़ी").pick(language)
+                    UiLanguage.HINDI -> ToneCopy("Hinglish", "Hinglish", "हिंग्लिश").pick(language)
                 }
             )
         }
@@ -196,7 +196,7 @@ private fun RiskHeader(risk: RiskBand, language: UiLanguage) {
             )
             risk.score?.let { score ->
                 Text(
-                    text = "Score: $score/100",
+                    text = ToneCopy("Score: $score/100", "Score: $score/100", "स्कोर: $score/100").pick(language),
                     style = MaterialTheme.typography.titleMedium,
                     color = risk.tone.onContainer()
                 )
@@ -351,7 +351,7 @@ private fun EvidenceCard(item: EvidenceItem, language: UiLanguage) {
                 )
                 Spacer(Modifier.weight(1f))
                 Text(
-                    text = item.module,
+                    text = ToneCopy(item.module, item.module).pick(language),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

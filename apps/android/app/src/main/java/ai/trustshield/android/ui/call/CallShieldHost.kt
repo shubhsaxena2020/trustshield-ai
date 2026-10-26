@@ -209,6 +209,12 @@ class CallShieldHost(
         state = CallShieldReducer.reduce(state, CallEvent.Tick(elapsedSeconds))
     }
 
+    /** Keeps the host-owned state aligned with the persisted app language across timer updates. */
+    fun onLanguageChanged(language: CallLanguage) {
+        if (cleared) return
+        state = CallShieldReducer.reduce(state, CallEvent.SetLanguage(language))
+    }
+
     // ------------------------------------------------------------------ lifecycle
 
     /**

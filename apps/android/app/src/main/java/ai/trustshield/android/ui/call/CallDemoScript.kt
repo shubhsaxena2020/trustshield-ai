@@ -208,48 +208,74 @@ object CallDemoScript {
 enum class DemoRiskPosition(
     val labelHinglish: String,
     val labelEnglish: String,
+    val labelHindi: String,
     val explanationHinglish: String,
     val explanationEnglish: String,
+    val explanationHindi: String,
 ) {
     LOW(
         labelHinglish = "Kam",
         labelEnglish = "Low",
+        labelHindi = "कम",
         explanationHinglish = "A05 ko abhi koi verified maang nahi mili aur koi strong signal " +
             "akele khatra nahi banata. Meter neeche hai, lekin yeh 'sab theek hai' ka " +
             "certificate nahi hai.",
         explanationEnglish = "A05 has no verified ask and no single strong signal. The meter sits " +
             "low, which is not a certificate that everything is fine.",
+        explanationHindi = "A05 को अभी कोई सत्यापित मांग नहीं मिली है। कोई एक मजबूत संकेत अकेले खतरा नहीं बनाता। " +
+            "मीटर नीचे है, लेकिन यह सब ठीक होने का प्रमाण नहीं है।",
     ),
     MEDIUM(
         labelHinglish = "Dhyan dein",
         labelEnglish = "Medium",
+        labelHindi = "सावधानी",
         explanationHinglish = "Pattern ke kai stage mil chuke hain, lekin paise ya code ki maang " +
             "abhi nahi aayi - isliye full alert hold hai.",
         explanationEnglish = "Several pattern stages have matched, but no request for money or a " +
             "code has been made yet, so the full alert is held.",
+        explanationHindi = "पैटर्न के कई चरण मिले हैं, लेकिन अभी पैसे या कोड की मांग नहीं हुई है, " +
+            "इसलिए पूरा अलर्ट जारी नहीं किया गया।",
     ),
     HIGH(
         labelHinglish = "Zyada khatra",
         labelEnglish = "High",
+        labelHindi = "ज़्यादा जोखिम",
         explanationHinglish = "Digital arrest ka poora pattern khada hai, sirf maang baaki hai. " +
             "Engine ko isi liye suspicious reading mili, release abhi nahi hua.",
         explanationEnglish = "The full digital-arrest pattern is in place and only the demand is " +
             "missing, so the engine reads suspicious without releasing.",
+        explanationHindi = "डिजिटल गिरफ़्तारी का पूरा पैटर्न मौजूद है, केवल मांग बाकी है। " +
+            "इसलिए इंजन इसे संदिग्ध मानता है, लेकिन अलर्ट अभी जारी नहीं करता।",
     ),
     CRITICAL(
         labelHinglish = "Turant rukein",
         labelEnglish = "Critical",
+        labelHindi = "तुरंत रुकें",
         explanationHinglish = "High-risk money ya credential maang, do ya zyada corroboration ke " +
             "saath - alert release hua. Call kaat kar official number se verify karein.",
         explanationEnglish = "A high-risk money or credential ask with two or more corroborations " +
             "- the alert is released. End the call and verify through an official number.",
+        explanationHindi = "पैसे या गोपनीय जानकारी की ज़्यादा जोखिम वाली मांग के साथ दो या अधिक पुष्ट संकेत मिले हैं। " +
+            "कॉल समाप्त करें और आधिकारिक नंबर से पुष्टि करें।",
     ),
     ;
 
     /** The engine-neutral caption for the requested UI language. */
+    fun label(language: CallLanguage): String = when (language) {
+        CallLanguage.HINGLISH -> labelHinglish
+        CallLanguage.ENGLISH -> labelEnglish
+        CallLanguage.HINDI -> labelHindi
+    }
+
     fun label(english: Boolean): String = if (english) labelEnglish else labelHinglish
 
     /** The engine-neutral explanation for the requested UI language. */
+    fun explanation(language: CallLanguage): String = when (language) {
+        CallLanguage.HINGLISH -> explanationHinglish
+        CallLanguage.ENGLISH -> explanationEnglish
+        CallLanguage.HINDI -> explanationHindi
+    }
+
     fun explanation(english: Boolean): String = if (english) explanationEnglish else explanationHinglish
 }
 
@@ -351,6 +377,7 @@ data class DemoStep(
     val haptics: Boolean = false,
 ) {
     /** The alert text for the requested language, or null when this step is not CRITICAL. */
+    fun alertText(language: CallLanguage): String? = alert?.forLanguage(language)
     fun alertText(english: Boolean): String? = alert?.let { if (english) it.english else it.hinglish }
 
     /** Redacted: verdicts and counts only, never the words and never a quote. */

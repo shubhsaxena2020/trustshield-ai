@@ -9,6 +9,8 @@ import ai.trustshield.android.data.preferences.SettingsKeys
 import ai.trustshield.android.data.preferences.SettingsStorage
 import ai.trustshield.android.data.preferences.ThemeMode
 import ai.trustshield.android.data.preferences.UserPreferences
+import ai.trustshield.android.data.preferences.resolveLanguage
+import ai.trustshield.android.ui.theme.ToneCopy
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
@@ -43,7 +45,7 @@ class SettingsTest {
 
     private fun preferences(
         themeMode: ThemeMode = ThemeMode.SYSTEM,
-        language: AppLanguage = AppLanguage.HINGLISH,
+        language: AppLanguage = AppLanguage.SYSTEM,
         sensitivity: Sensitivity = Sensitivity.BALANCED,
         haptics: Boolean = true,
         reducedMotion: Boolean = false
@@ -54,11 +56,20 @@ class SettingsTest {
     // ---------------------------------------------------------------------------------------
 
     @Test
-    fun defaultsAreHinglishBalancedAndSystemTheme() {
+    fun defaultsUseSystemLanguageBalancedSensitivityAndSystemTheme() {
         val d = UserPreferences.defaults()
-        assertEquals(AppLanguage.HINGLISH, d.language)
+        assertEquals(AppLanguage.SYSTEM, d.language)
         assertEquals(Sensitivity.BALANCED, d.sensitivity)
         assertEquals(ThemeMode.SYSTEM, d.themeMode)
+    }
+
+    @Test
+    fun systemLanguageResolvesHindiEnglishAndOtherLocalesToProductOptions() {
+        assertEquals(AppLanguage.HINDI, resolveLanguage(AppLanguage.SYSTEM, "hi-IN"))
+        assertEquals(AppLanguage.ENGLISH, resolveLanguage(AppLanguage.SYSTEM, "en-US"))
+        assertEquals(AppLanguage.HINGLISH, resolveLanguage(AppLanguage.SYSTEM, "fr-FR"))
+        assertEquals(AppLanguage.HINGLISH, resolveLanguage(AppLanguage.SYSTEM, null))
+        assertEquals(AppLanguage.HINGLISH, resolveLanguage(AppLanguage.HINGLISH, "en-US"))
     }
 
     @Test
@@ -96,7 +107,7 @@ class SettingsTest {
                 }
             }
         }
-        assertEquals(3 * 2 * 3 * 2 * 2, checked)
+        assertEquals(ThemeMode.entries.size * AppLanguage.entries.size * Sensitivity.entries.size * 2 * 2, checked)
     }
 
     @Test
@@ -121,7 +132,7 @@ class SettingsTest {
             .joinToString("|") { "${it.key}=${it.value}" }
         assertEquals(
             "settings.theme_mode=SYSTEM" +
-                "|settings.language=HINGLISH" +
+                "|settings.language=SYSTEM" +
                 "|settings.sensitivity=BALANCED" +
                 "|settings.haptics=true" +
                 "|settings.reduced_motion=false",
@@ -138,7 +149,7 @@ class SettingsTest {
         ).toMap()
         assertEquals(setOf("SYSTEM", "LIGHT", "DARK"), ThemeMode.values().map { it.name }.toSet())
         assertTrue(map[SettingsKeys.THEME_MODE] in setOf("SYSTEM", "LIGHT", "DARK"))
-        assertTrue(map[SettingsKeys.LANGUAGE] in setOf("HINGLISH", "ENGLISH"))
+        assertTrue(map[SettingsKeys.LANGUAGE] in setOf("SYSTEM", "HINGLISH", "ENGLISH", "HINDI"))
         assertTrue(map[SettingsKeys.SENSITIVITY] in setOf("LOW", "BALANCED", "HIGH"))
         assertTrue(map[SettingsKeys.HAPTICS] in setOf("true", "false"))
         assertTrue(map[SettingsKeys.REDUCED_MOTION] in setOf("true", "false"))
@@ -348,7 +359,7 @@ class SettingsTest {
         val afterReset = persistence.reset()
         assertEquals(UserPreferences.defaults(), afterReset)
         assertEquals(UserPreferences.defaults(), persistence.load())
-        assertEquals(AppLanguage.HINGLISH, persistence.load().language)
+        assertEquals(AppLanguage.SYSTEM, persistence.load().language)
         assertEquals(Sensitivity.BALANCED, persistence.load().sensitivity)
         assertEquals(ThemeMode.SYSTEM, persistence.load().themeMode)
     }
@@ -491,7 +502,7 @@ class SettingsTest {
 
         val theme = start.reduce(SettingsEvent.SelectTheme(ThemeMode.DARK))
         assertEquals(ThemeMode.DARK, theme.themeMode)
-        assertEquals(AppLanguage.HINGLISH, theme.language)
+        assertEquals(AppLanguage.SYSTEM, theme.language)
         assertEquals(Sensitivity.BALANCED, theme.sensitivity)
         assertTrue(theme.haptics)
 
@@ -557,7 +568,7 @@ class SettingsTest {
             .reduce(SettingsEvent.ConfirmReset)
 
         assertEquals(UserPreferences.defaults(), state.preferences)
-        assertEquals(AppLanguage.HINGLISH, state.language)
+        assertEquals(AppLanguage.SYSTEM, state.language)
         assertEquals(Sensitivity.BALANCED, state.sensitivity)
         assertEquals(ThemeMode.SYSTEM, state.themeMode)
         assertTrue(state.haptics)
@@ -598,19 +609,26 @@ class SettingsTest {
     // ---------------------------------------------------------------------------------------
 
     @Test
-    fun hinglishIsTheDefaultLanguageAndCopyResolvesBothWays() {
+    fun systemIsTheDefaultLanguageAndExplicitChoicesResolve() {
         val state = SettingsState()
-        assertEquals(AppLanguage.HINGLISH, state.language)
+        assertEquals(AppLanguage.SYSTEM, state.language)
         assertEquals(
-            SettingsCopy.screenTitle.hinglish,
+            SettingsCopy.screenTitle.forLanguage(
+                resolveLanguage(AppLanguage.SYSTEM, java.util.Locale.getDefault().toLanguageTag())
+            ),
             state.text(SettingsCopy.screenTitle)
         )
 
+        val hinglish = state.reduce(SettingsEvent.SelectLanguage(AppLanguage.HINGLISH))
+        assertEquals(SettingsCopy.screenTitle.hinglish, hinglish.text(SettingsCopy.screenTitle))
         val english = state.reduce(SettingsEvent.SelectLanguage(AppLanguage.ENGLISH))
         assertEquals(
             SettingsCopy.screenTitle.english,
             english.text(SettingsCopy.screenTitle)
         )
+        val hindi = state.reduce(SettingsEvent.SelectLanguage(AppLanguage.HINDI))
+        assertEquals("सेटिंग्स", hindi.text(SettingsCopy.screenTitle))
+        assertEquals("जानकारी", ToneCopy("Jaankari", "Information").forLanguage(AppLanguage.HINDI))
     }
 
     @Test

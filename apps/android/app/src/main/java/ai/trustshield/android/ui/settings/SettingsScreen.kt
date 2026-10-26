@@ -123,6 +123,12 @@ fun SettingsScreen(
         // ---- Language ------------------------------------------------------------------------
         SettingsSection(title = copy(SettingsCopy.languageSection)) {
             OptionRow(
+                label = copy(SettingsCopy.languageSystem),
+                detail = null,
+                selected = state.language == AppLanguage.SYSTEM,
+                onClick = { onEvent(SettingsEvent.SelectLanguage(AppLanguage.SYSTEM)) }
+            )
+            OptionRow(
                 label = copy(SettingsCopy.languageHinglish),
                 detail = null,
                 selected = state.language == AppLanguage.HINGLISH,
@@ -133,6 +139,12 @@ fun SettingsScreen(
                 detail = null,
                 selected = state.language == AppLanguage.ENGLISH,
                 onClick = { onEvent(SettingsEvent.SelectLanguage(AppLanguage.ENGLISH)) }
+            )
+            OptionRow(
+                label = copy(SettingsCopy.languageHindi),
+                detail = null,
+                selected = state.language == AppLanguage.HINDI,
+                onClick = { onEvent(SettingsEvent.SelectLanguage(AppLanguage.HINDI)) }
             )
             SupportingNote(copy(SettingsCopy.languageHint))
         }
@@ -204,11 +216,15 @@ fun SettingsScreen(
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+        SettingsSection(title = copy(SettingsCopy.aboutSection)) {
+            SupportingNote(copy(SettingsCopy.aboutBody))
+        }
 
         if (state.resetApplied) {
             Spacer(Modifier.height(TsTokens.SpacingMd))
             ResetAppliedBanner(
                 message = copy(SettingsCopy.resetApplied),
+                dismissLabel = copy(SettingsCopy.dismissOk),
                 onDismiss = { onEvent(SettingsEvent.DismissNotice) }
             )
         }
@@ -416,6 +432,7 @@ private fun SupportingNote(text: String) {
 @Composable
 private fun ResetAppliedBanner(
     message: String,
+    dismissLabel: String,
     onDismiss: () -> Unit
 ) {
     Surface(
@@ -437,7 +454,7 @@ private fun ResetAppliedBanner(
                 onClick = onDismiss,
                 modifier = Modifier.heightIn(min = TsTokens.MinTouchTarget)
             ) {
-                Text("OK")
+                Text(dismissLabel)
             }
         }
     }

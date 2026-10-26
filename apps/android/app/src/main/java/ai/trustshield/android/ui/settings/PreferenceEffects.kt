@@ -9,6 +9,7 @@ import ai.trustshield.android.data.preferences.SettingsStorage
 import ai.trustshield.android.data.preferences.SettingsKeys
 import ai.trustshield.android.data.preferences.ThemeMode
 import ai.trustshield.android.data.preferences.UserPreferences
+import ai.trustshield.android.data.preferences.resolveLanguage
 import ai.trustshield.android.ui.call.CallLanguage
 import ai.trustshield.android.ui.navigation.LocalUserPreferences
 import ai.trustshield.android.ui.qr.QrLanguage
@@ -115,6 +116,8 @@ data class PreferenceEffects(
         get() = when (language) {
             AppLanguage.HINGLISH -> QrLanguage.HINGLISH
             AppLanguage.ENGLISH -> QrLanguage.ENGLISH
+            AppLanguage.HINDI -> QrLanguage.HINDI
+            AppLanguage.SYSTEM -> QrLanguage.HINGLISH
         }
 
     /** Copy selector for Call Shield. */
@@ -122,6 +125,8 @@ data class PreferenceEffects(
         get() = when (language) {
             AppLanguage.HINGLISH -> CallLanguage.HINGLISH
             AppLanguage.ENGLISH -> CallLanguage.ENGLISH
+            AppLanguage.HINDI -> CallLanguage.HINDI
+            AppLanguage.SYSTEM -> CallLanguage.HINGLISH
         }
 
     /** Copy selector for the Result screen. */
@@ -129,6 +134,8 @@ data class PreferenceEffects(
         get() = when (language) {
             AppLanguage.HINGLISH -> UiLanguage.HINGLISH
             AppLanguage.ENGLISH -> UiLanguage.ENGLISH
+            AppLanguage.HINDI -> UiLanguage.HINDI
+            AppLanguage.SYSTEM -> UiLanguage.HINGLISH
         }
 }
 
@@ -155,7 +162,8 @@ data class PreferenceEffects(
 fun resolve(
     preferences: UserPreferences,
     systemInDarkTheme: Boolean,
-    systemAnimatorsEnabled: Boolean = true
+    systemAnimatorsEnabled: Boolean = true,
+    systemLanguageTag: String? = null
 ): PreferenceEffects = PreferenceEffects(
     darkTheme = when (preferences.themeMode) {
         // The phone's setting is only consulted here; LIGHT and DARK are explicit user intent.
@@ -164,10 +172,7 @@ fun resolve(
         ThemeMode.DARK -> true
     },
     // HINGLISH is C04's default, so an unreadable store can only ever produce the product default.
-    language = when (preferences.language) {
-        AppLanguage.HINGLISH -> AppLanguage.HINGLISH
-        AppLanguage.ENGLISH -> AppLanguage.ENGLISH
-    },
+    language = resolveLanguage(preferences.language, systemLanguageTag),
     hapticsEnabled = preferences.haptics,
     reducedMotion = preferences.reducedMotion || !systemAnimatorsEnabled
 )

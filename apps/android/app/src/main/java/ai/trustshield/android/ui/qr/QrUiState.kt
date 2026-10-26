@@ -35,19 +35,24 @@ import ai.trustshield.android.ui.theme.ToneCopy
 // ------------------------------------------------------------------------------------ language ----
 
 /** Default is Hinglish; English is the opt-in toggle (HEAD_ORDERS §2 rule 6). */
-enum class QrLanguage { HINGLISH, ENGLISH }
+enum class QrLanguage { HINGLISH, ENGLISH, HINDI }
 
 /** Picks the right half of a bilingual string. */
 fun ToneCopy.text(language: QrLanguage): String = when (language) {
     QrLanguage.HINGLISH -> hinglish
     QrLanguage.ENGLISH -> english
+    QrLanguage.HINDI -> hindi
 }
 
 /** Same as [text] but never blank: falls back to the other language so a panel can never be empty. */
 fun ToneCopy.textOrFallback(language: QrLanguage): String {
     val picked = text(language)
     if (picked.isNotBlank()) return picked
-    return if (language == QrLanguage.HINGLISH) english else hinglish
+    return when (language) {
+        QrLanguage.HINGLISH -> english
+        QrLanguage.ENGLISH -> hinglish
+        QrLanguage.HINDI -> english.ifBlank { hinglish }
+    }
 }
 
 // -------------------------------------------------------------------------------------- camera ----

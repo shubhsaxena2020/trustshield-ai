@@ -60,6 +60,12 @@ object CallShieldCopy {
     val timerLabel = ToneCopy("Samay", "Elapsed")
     val languageSwitch = ToneCopy("English", "Hinglish")
 
+    fun nextLanguageLabel(language: CallLanguage): ToneCopy = when (language) {
+        CallLanguage.HINGLISH -> ToneCopy("English", "English", "अंग्रेज़ी")
+        CallLanguage.ENGLISH -> ToneCopy("Hindi", "Hindi", "हिन्दी")
+        CallLanguage.HINDI -> ToneCopy("Hinglish", "Hinglish", "हिंग्लिश")
+    }
+
     // ---- consent --------------------------------------------------------------------------------
 
     val consentTitle = ToneCopy("Pehle anumati", "Permission first")
@@ -69,9 +75,12 @@ object CallShieldCopy {
             "rehta hai aur Stop par hata diya jata hai."
         val storageEn = "The app does not store audio recordings; recognized text stays in session memory only " +
             "and is cleared when you stop."
+        val storageHindi = "ऐप ऑडियो रिकॉर्डिंग सेव नहीं करता; पहचाना गया टेक्स्ट केवल इस सेशन की मेमोरी में रहता है " +
+            "और Stop करने पर मिटा दिया जाता है।"
         return ToneCopy(
             "Call Shield tabhi mic use karta hai jab aap shuru karein. ${path.hinglish} $storageHi",
-            "Call Shield uses the microphone only after you start it. ${path.english} $storageEn"
+            "Call Shield uses the microphone only after you start it. ${path.english} $storageEn",
+            "Call Shield माइक्रोफ़ोन का उपयोग केवल आपके शुरू करने पर करता है। ${path.hindi} $storageHindi"
         )
     }
     val consentAction = ToneCopy("Main samajh gaya, anumati deta hoon", "I understand, give permission")
