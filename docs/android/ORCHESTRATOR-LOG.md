@@ -267,3 +267,8 @@ PHASE 3 COMPLETE
 
 - Read the new owner directive `HEAD_DIRECTIVE_HERMES_SWARM.md` and inspected the agent1/agent2/agent3 profile `state.db` files read-only. Recorded `delegate_task` wave sizes: agent1 `[5,1,1,3,2,1,1,1]` (8 calls), agent2 `[8,3,2,1,4,5,4,2]` (8 calls), agent3 `[1,5,1,4,1,1,3]` (7 calls). No recorded call had a 9-task wave; the largest observed wave was 8.
 - The direct user instruction to keep the currently running Hermes sessions untouched remains in effect, so Codex did not relaunch or stop any session. Future Hermes launches must follow the new nine-task-wave directive. No open Phase 4 PR was listed; the shared emulator lock remains held by another lane.
+
+## 2026-10-26 22:44 IST — agent1 safe-boundary swarm relaunch
+
+- Agent1's fixture branch was clean at `3bdd125` (three committed fixture/rule changes). The lane had no active delegated child, the Gradle lock was free, and 20.64 GB physical memory was free. In accordance with the later owner swarm directive, stopped only the prior agent1 process (PID 22764) at that clean boundary and launched PID 31488 with a file-pointer prompt requiring one nine-task review wave; verify the actual `tasks` length in `state.db` before reporting wave compliance.
+- Agent2 and agent3 were not stopped or relaunched. The shared emulator lock remains held by another lane; Codex did not access the emulator or start a build. No physical phone work was performed; the phone hold remains active through 22:45 IST.
