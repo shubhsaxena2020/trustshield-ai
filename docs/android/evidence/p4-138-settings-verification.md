@@ -150,3 +150,14 @@ introduce it and cannot fix it without a cross-lane model change.
 
 The device was returned to the shipping defaults afterwards (`SYSTEM` theme, Hinglish, Balanced,
 haptics on, device night mode off) — `p4-138-settings-restored-defaults.png`.
+
+## Follow-up: English Result copy
+
+The Result-language gap above is fixed in the presentation adapter. English mode now receives
+translated evidence titles/details and local actions/limitations; the original Hinglish fields and
+verified quotes remain unchanged. See `p4-138-english-result-copy.md` for the focused RED/GREEN
+record. On the PR branch after the fix, `:app:testDebugUnitTest :app:lintDebug :app:assembleDebug`
+passed: **1,097 JVM tests, 0 failures**, including 3 adapter tests.
+
+This does not close the full settings item yet: a post-fix emulator screenshot/spot check, reduced
+motion behavior, and reset confirmation measurement remain open. No physical phone was used.
