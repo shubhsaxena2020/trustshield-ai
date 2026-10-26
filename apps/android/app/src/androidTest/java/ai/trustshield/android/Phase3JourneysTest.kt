@@ -6,6 +6,7 @@ import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
@@ -22,7 +23,6 @@ import ai.trustshield.android.ui.navigation.AppRoute
 import org.junit.After
 import org.junit.Assert.assertTrue
 import org.junit.Assume
-import org.junit.Ignore
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -180,11 +180,10 @@ class Phase3JourneysTest {
         // being live ASR; that label is part of the journey, not a detail of the test.
         tapText(CALL_DEMO_ENTRY)
         waitForText(CALL_DEMO_DISCLOSURE)
-        tapText("Next line")
-        compose.waitUntil(10_000) {
-            compose.onAllNodes(hasText("/100", substring = true)).fetchSemanticsNodes().isNotEmpty()
-        }
-        tapText("Next line")
+        tapExactText("Agli line")
+        waitForContentDescription("Kam risk, 10 out of 100")
+        tapExactText("Agli line")
+        waitForContentDescription("Dhyan dein risk, 44 out of 100")
         // The demo is deterministic: two steps in, the meter still reports a score out of 100 and
         // the honest-limits line stays on screen.
         assertNodeContains(CALL_HONEST_LIMIT_FRAGMENT)
@@ -201,10 +200,10 @@ class Phase3JourneysTest {
         launchRoute(AppRoute.QR_GUARD)
 
         // The simulate control is labelled as a simulation in whichever wording the host ships.
-        val hasSimulate = waitForAnyText(15_000, "Simulate", "Demo:")
+        val hasSimulate = waitForAnyText(15_000, "Simulate scan", "Demo:")
         assertTrue("no simulate-scan control on the QR screen", hasSimulate)
 
-        tapAnyText("Simulate", "Demo: sticker", "Demo: match")
+        tapText("Demo: sticker tamper")
 
         compose.waitUntil(15_000) {
             compose.onAllNodes(hasText(QR_STOP_PAYMENT, substring = true))
@@ -276,26 +275,20 @@ class Phase3JourneysTest {
      * deterministic version of that observation.
      */
     @Test
-    @Ignore(
-        "Known defect D1 (reproducible on emulator-5554 and head-api36): the Result screen loses " +
-            "its outcome when the activity is recreated, so it renders empty. See " +
-            "docs/android/evidence/device-run.md#defect-d1. Remove this @Ignore when the route host " +
-            "keeps the ScanOutcome across recreation."
-    )
     fun resultJourney_survivesActivityRecreation() {
         launch()
         waitForText(SCAN_FIELD_LABEL)
         typeMessage(SBI_KYC_SCAM)
         tapText("Check karein")
 
-        waitForText("Risk score")
+        waitForText("Bharosa", timeoutMs = 30_000)
         assertNodeContains("Bharosa")
 
         scenario?.recreate()
         compose.waitForIdle()
 
         // Same two facts must still be on screen after the rebuild.
-        waitForText("Risk score")
+        waitForText("Bharosa", timeoutMs = 30_000)
         assertNodeContains("Bharosa")
     }
 
@@ -329,6 +322,11 @@ class Phase3JourneysTest {
         compose.waitForIdle()
     }
 
+    private fun tapExactText(text: String) {
+        compose.onAllNodes(hasText(text)).onFirst().performClick()
+        compose.waitForIdle()
+    }
+
     /** Taps the first node matching any of [needles] — used where two host wordings are legal. */
     private fun tapAnyText(vararg needles: String) {
         for (needle in needles) {
@@ -344,6 +342,13 @@ class Phase3JourneysTest {
     private fun waitForText(text: String, timeoutMs: Long = 15_000) {
         compose.waitUntil(timeoutMs) {
             compose.onAllNodes(hasText(text, substring = true)).fetchSemanticsNodes().isNotEmpty()
+        }
+    }
+
+    private fun waitForContentDescription(text: String, timeoutMs: Long = 15_000) {
+        compose.waitUntil(timeoutMs) {
+            compose.onAllNodes(hasContentDescription(text, substring = true))
+                .fetchSemanticsNodes().isNotEmpty()
         }
     }
 
@@ -403,8 +408,8 @@ class Phase3JourneysTest {
         const val SUSPICIOUS_COPY = "Shak"
         const val CAUTION_COPY = "Dhyan"
 
-        const val CALL_DEMO_ENTRY = "Demo script mode"
-        const val CALL_DEMO_DISCLOSURE = "Scripted demo only"
+        const val CALL_DEMO_ENTRY = "Staged demo (live mic nahi)"
+        const val CALL_DEMO_DISCLOSURE = "Pehli line ke liye taiyaar"
         const val CALL_HONEST_LIMIT_FRAGMENT = "typed demo script"
 
         const val QR_STOP_PAYMENT = "payment mat karein"

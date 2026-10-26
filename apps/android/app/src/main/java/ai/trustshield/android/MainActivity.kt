@@ -9,6 +9,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -54,11 +55,16 @@ class MainActivity : ComponentActivity() {
     private var entrySequence by mutableIntStateOf(0)
     private var incomingText: String? by mutableStateOf(null)
     private var incomingImageUri: String? by mutableStateOf(null)
+    private var resultOutcome: ScanOutcome? by mutableStateOf(null)
+    private var visibleRoute: AppRoute by mutableStateOf(AppRoute.HOME)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
         entrySequence = savedInstanceState?.getInt(STATE_ENTRY_SEQUENCE) ?: 0
+        resultOutcome = lastCustomNonConfigurationInstance as? ScanOutcome
+        val restoredRoute = AppRoute.fromWire(savedInstanceState?.getString(STATE_VISIBLE_ROUTE))
+        val restoredWithoutOutcome = restoredRoute == AppRoute.RESULT && resultOutcome == null
         // Edge-to-edge from API 26 up: bar icon colours follow the system light/dark setting, so the
         // status bar is never light-on-light. Insets are consumed by AppNavHost (safeDrawingPadding).
         enableEdgeToEdge()
@@ -72,6 +78,15 @@ class MainActivity : ComponentActivity() {
             requestedEntry = AppRoute.HOME
             entrySequence++
         }
+        val explicitRoute = routeFromIntent(intent)
+        if (restoredWithoutOutcome && incomingText == null && incomingImageUri == null &&
+            (explicitRoute == null || explicitRoute == AppRoute.RESULT)
+        ) {
+            // A process-death restore cannot recover the in-memory verdict without persisting the
+            // scanned text. Return to Home instead of restoring an empty Result destination.
+            requestedEntry = AppRoute.HOME
+            entrySequence++
+        }
 
         // C04's store. It persists five setting values and nothing else; no analysed text, quote,
         // transcript, OTP, PIN, phone number or UPI id can reach it (see UserPreferences tests).
@@ -82,7 +97,6 @@ class MainActivity : ComponentActivity() {
             // wiring for C04's model). Read once on the main thread: a five-key file.
             var preferences: UserPreferences by remember { mutableStateOf(store.load()) }
             var scanState by remember { mutableStateOf(ScanInputState()) }
-            var resultOutcome by remember { mutableStateOf<ScanOutcome?>(null) }
 
             LaunchedEffect(entrySequence, incomingText) {
                 val shared = incomingText ?: return@LaunchedEffect
@@ -120,6 +134,7 @@ class MainActivity : ComponentActivity() {
                     // process recreation returns the user to the same screen; `requestedEntry` only
                     // matters when nothing was saved, or when a genuinely new intent arrives.
                     AppNavHost(entry = requestedEntry, entrySequence = entrySequence) { route ->
+                        SideEffect { visibleRoute = route }
                         TrustShieldRouteContent(
                             route = route,
                             english = preferences.language == AppLanguage.ENGLISH,
@@ -167,8 +182,12 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    /** Keep the in-memory result through configuration changes; it is never written to saved state. */
+    override fun onRetainCustomNonConfigurationInstance(): Any? = resultOutcome
+
     override fun onSaveInstanceState(outState: Bundle) {
         outState.putInt(STATE_ENTRY_SEQUENCE, entrySequence)
+        outState.putString(STATE_VISIBLE_ROUTE, visibleRoute.wireName)
         super.onSaveInstanceState(outState)
     }
 
@@ -201,5 +220,6 @@ class MainActivity : ComponentActivity() {
 
     private companion object {
         const val STATE_ENTRY_SEQUENCE = "trustshield.entry_sequence"
+        const val STATE_VISIBLE_ROUTE = "trustshield.visible_route"
     }
 }
