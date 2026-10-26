@@ -1,3 +1,10 @@
+## Current status (2026-10-26 21:10 IST)
+
+`android-finals` includes the release signing and ABI/universal packaging configuration. A local signed release build passed and all five APK signatures verified with the local certificate; no keystore/password files are tracked. Its exact measurements are in the orchestration log.
+
+- The current artifact is a baseline only: manifest label is `TrustShield AI`; final app label/icon/splash work in the active #139 lane is still pending. Rebuild and update `INSTALL.md` after review.
+- Hermes agent1/agent2/agent3 processes were re-confirmed alive. No open PRs were present at 21:10; no session has been stopped or relaunched.
+- The separate `head-api36` emulator remains untouched. No phone work has run.
 ## Current status (2026-10-26 21:03 IST)
 
 `android-finals` is at `c903a1cf793dca242e0d7c119c952541a3a312c6` after merging Phase 4 PRs #135, #134 and #136. The integrated fresh JVM/lint/build/Android-test gate passed; evidence and exact limits are in `evidence/p4-integrated-reverification.md`.

@@ -182,3 +182,11 @@ PHASE 3 COMPLETE
 - Screenshot verification of digital-arrest advisory fixture: 24/100 LOW. Full evidence is `evidence/p4-integrated-reverification.md`.
 - Stopped `trustshield-api36` and released our locks. `head-api36` / `emulator-5556` appeared online afterward; process command confirms it is the separate `head-api36` AVD, so it remains untouched. No physical phone used.
 - Next phone-free work: signed release APK, Device check/capability fallbacks, phone-kit validation, then review active Phase 4 lane PRs and close remaining items.
+
+## 2026-10-26 21:10 IST — signed release build baseline
+
+- Added local release signing config, ABI split plus universal APK output, and ignored `apps/android/keystore/`. Generated local RSA-4096 signing key and 64-hex passwords under that ignored path; no credential files are tracked.
+- `:app:assembleRelease` passed. APK Signature Scheme v2 verified for universal and all four splits; signer SHA-256 `4AF38D98D1C2724167F22709BB1E861EB6127248AC79C89674330AB89633E138`. Metadata: package `ai.trustshield.android`, minSdk 26, targetSdk 36, version 0.1.0.
+- Candidate sizes: arm64-v8a 24,929,198 bytes; armeabi-v7a 20,635,162; x86 25,435,994; x86_64 25,519,026; universal 55,158,722.
+- This is a signing/package baseline, not yet the final release handoff: manifest label still reports `TrustShield AI`, and the active agent3 #139 icon/splash work has not been merged. Rebuild and refresh INSTALL.md after reviewing that PR.
+- Current `head-api36` emulator remains owned by the separate lane and untouched. Phone hold remains in force.
