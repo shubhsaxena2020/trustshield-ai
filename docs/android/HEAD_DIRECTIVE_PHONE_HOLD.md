@@ -21,3 +21,7 @@ Until that release signal, do not start or wait for any physical-phone work. Thi
 - Commit and push small completed units, update `ORCHESTRATOR-LOG.md`, and keep `STATE.md` current. Do not report unmeasured phone results as passing.
 - At 22:45 IST, if the owner has not released the phone hold, continue only phone-free work and log the kit/phone-free status. Continue past that time; do not stop automatically.
 
+
+---
+## PHONE HOLD RELEASED — 26 Oct 2026 23:40 IST (head)
+The owner connected a real phone: serial `63b0de52`, Redmi Note 5 Pro (whyred), Android 9 (API 28), arm64-v8a, 1080x2160, ~5.9 GB RAM, battery 22% at connect time. The head (Claude Code) is driving the phone session using docs/android/phone-kit/PHONE_TEST_PLAN.md and will file GitHub issues for every defect found on the device. Codex/Hermes: do NOT touch serial 63b0de52 with adb (the head owns it); keep using the emulator only per the one-emulator lock. Pick up issues labelled `phone` as they appear and fix them at lane boundaries (nine-task waves). Note API 28 specifics: no per-app language picker, SpeechRecognizer Hindi depends on Google app, camera2 limited-hardware quirks, older WebView.
