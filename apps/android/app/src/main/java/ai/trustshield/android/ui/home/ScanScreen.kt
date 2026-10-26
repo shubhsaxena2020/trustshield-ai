@@ -233,11 +233,26 @@ data class ScanInputState(
     val error: ScanInputError? = null,
     val source: ScanInputSource = ScanInputSource.EMPTY,
     /** Length of the raw input that had to be cut, or `null` when nothing was dropped. */
-    val truncatedFromLength: Int? = null
+    val truncatedFromLength: Int? = null,
+    /**
+     * True once the user has pressed the primary action at least once.
+     *
+     * Issue #143: the empty-state line ("Check karne layak text nahi mila…") used to render on the
+     * first frame, before the user had done anything, so a fresh Home screen looked like it had
+     * already failed. It now waits for a real attempt. [ScanInputEvent.CheckRequested] is the only
+     * event that sets this, so nothing the user did not press can make the screen look like an error.
+     */
+    val attempted: Boolean = false
 ) {
 
     /** Characters currently in the field (UTF-16 units, the same units the limit counts). */
     val charCount: Int get() = text.length
+
+    /**
+     * True when the empty hint may be drawn: the user pressed Check and there is still no content.
+     * A silent first frame is the requirement; a hint that nobody asked for is a false alarm.
+     */
+    val emptyHintVisible: Boolean get() = attempted && text.isEmpty() && error == null
 
     /** True when the input exceeded the limit and was cut. Drives the truncation notice. */
     val isOverLimit: Boolean
