@@ -655,7 +655,9 @@ object CallDemoLayout {
     val backAction = ToneCopy("Peeche", "Back")
     val nextAction = ToneCopy("Agli line", "Next line")
     val resetAction = ToneCopy("Shuru se", "Reset")
-    val scriptFinished = ToneCopy("Script poora hua", "Script finished")
+    // Short on purpose: this label shares the three-way compact row (~104 dp per button at 360 dp
+    // width with 16 dp side padding and 8 dp gaps), so the longer "Script poora hua" would ellipsize.
+    val scriptFinished = ToneCopy("Script khatam", "Finished")
     val confidenceLabel = ToneCopy("Confidence (alag reading)", "Confidence (separate reading)")
     val preStartPosition = ToneCopy("Abhi koi reading nahi", "No reading yet")
     val preStartBody = ToneCopy(
