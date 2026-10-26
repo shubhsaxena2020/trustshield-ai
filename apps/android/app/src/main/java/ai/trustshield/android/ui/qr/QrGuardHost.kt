@@ -231,6 +231,34 @@ internal data class SetupCapture(
     override fun toString(): String = "SetupCapture(masked=$masked, hasName=${name != null})"
 }
 
+/**
+ * The merchant registration the shopkeeper has explicitly confirmed (issue #144).
+ *
+ * This is the *visible* half of a registration: the payee list the reducer owns, plus when it
+ * happened and how it was obtained. It exists so the screen has one renderable value that says
+ * "registered", instead of inferring it from a phase that is also used for "waiting for a scan".
+ *
+ * Privacy: [payees] holds the raw `pa` for comparison only — every renderer must use
+ * [RegisteredPayee.maskedHandle] (or [masked]), and [toString] is masked so a log line or a test
+ * failure message cannot leak a UPI id.
+ */
+internal data class QrRegistration(
+    /** The expected payees, in registration order. Compare with `key`; render `maskedHandle`. */
+    val payees: List<RegisteredPayee>,
+    /** Monotonic time the confirmation landed; drives "registered just now" copy and evidence. */
+    val confirmedAtMs: Long,
+    /** True when the payee came from a camera decode the shopkeeper confirmed (not manual entry). */
+    val fromCapture: Boolean
+) {
+    /** Masked ids, the only form the UI or a log may show. */
+    val masked: List<String> get() = payees.map { it.maskedHandle }
+
+    val isEmpty: Boolean get() = payees.isEmpty()
+
+    override fun toString(): String =
+        "QrRegistration(masked=${masked.joinToString(",")}, fromCapture=$fromCapture)"
+}
+
 /** The last valid decode, kept so the screen can show what it is looking at (masked on render). */
 private data class DecodedPayee(
     val vpa: String,
@@ -250,6 +278,12 @@ private data class DecodedPayee(
 internal data class QrGuardView(
     val state: QrUiState,
     val pendingSetup: SetupCapture? = null,
+    /**
+     * The visible registration (issue #144). Non-null as soon as a payee is registered — in SETUP
+     * (registered, waiting for the explicit Start watching) and afterwards — and null again once
+     * every payee is removed or a re-register is accepted.
+     */
+    val registration: QrRegistration? = null,
     val demoFlow: QrSimulationFlow? = null,
     /** B06's own (masked) closing line for the last demo run. */
     val demoMessage: String? = null,
@@ -263,7 +297,8 @@ internal data class QrGuardView(
 
     override fun toString(): String =
         "QrGuardView(phase=${state.phase}, camera=${state.camera}, signal=${state.signal}, " +
-            "demo=${demoFlow?.wire}, fault=$faultToken, hasPin=$hasPin)"
+            "registered=${registration?.masked?.size ?: 0}, demo=${demoFlow?.wire}, " +
+            "fault=$faultToken, hasPin=$hasPin)"
 }
 
 /**
@@ -374,6 +409,15 @@ internal class QrGuardSession(
     private var demoMessage: String? = null
     private var faultToken: String? = null
     private var lastDecoded: DecodedPayee? = null
+
+    /**
+     * The visible registration, derived on every [publish] from the reducer's payee list so the
+     * panel can never disagree with the state (a re-register that clears the list clears this too).
+     */
+    private var registration: QrRegistration? = null
+
+    /** True only while a SETUP confirmation is being folded in, so [QrRegistration.fromCapture] is honest. */
+    private var captureConfirmed: Boolean = false
     private var lastFrameUnreadable: Boolean = false
 
     // -- public API --------------------------------------------------------------------------------
@@ -409,6 +453,13 @@ internal class QrGuardSession(
             // A stopped session has no camera; SETUP captures a candidate instead of comparing.
             QrPhase.STOPPED -> return
             QrPhase.SETUP -> {
+                // Issue #144 idempotence: a decoded frame must only create the capture card while
+                // there is nothing to register yet. Once an expected payee exists (the shopkeeper
+                // confirmed it) or a candidate is already on screen, repeated frames — above all
+                // repeats of the very id just registered — are ignored instead of rebuilding the
+                // card. The session has already handed the payee to B06, so the next explicit action
+                // is Start watching, not another confirmation.
+                if (state.payees.isNotEmpty() || pendingSetup != null) return
                 captureSetup(payload)
                 return
             }
@@ -525,8 +576,18 @@ internal class QrGuardSession(
     /** The shopkeeper confirmed the QR that was just scanned during SETUP. */
     fun confirmSetupCapture() {
         val capture = pendingSetup ?: return
+        // Idempotent by construction: the card is gone after the first tap, so a double tap (or a
+        // second tap after a slow frame) cannot register the same payee twice or resurrect the card.
         pendingSetup = null
-        onUiEvent(QrEvent.RegisterPayee(capture.vpa, capture.name))
+        captureConfirmed = true
+        try {
+            onUiEvent(QrEvent.RegisterPayee(capture.vpa, capture.name))
+        } finally {
+            captureConfirmed = false
+        }
+        // The reducer accepted the payee: publish the registered view immediately, even though
+        // onUiEvent already published once (captureConfirmed was still set for that pass).
+        publish()
     }
 
     /** The scanned QR was not the merchant's: forget the candidate and keep scanning. */
@@ -648,8 +709,21 @@ internal class QrGuardSession(
     }
 
     private fun publish() {
+        val payees = published.state.payees
+        val previous = registration
+        registration = when {
+            payees.isEmpty() -> null
+            previous != null && previous.payees.map { it.key } == payees.map { it.key } ->
+                previous.copy(payees = payees)
+            else -> QrRegistration(
+                payees = payees,
+                confirmedAtMs = now(),
+                fromCapture = captureConfirmed
+            )
+        }
         published = published.copy(
             pendingSetup = pendingSetup,
+            registration = registration,
             demoFlow = demoFlow,
             demoMessage = demoMessage,
             faultToken = faultToken,
