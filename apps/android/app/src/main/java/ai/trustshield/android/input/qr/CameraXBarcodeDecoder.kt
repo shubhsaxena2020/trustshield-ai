@@ -725,16 +725,7 @@ class CameraXQrScanner(
             fail(target, FAULT_PERMISSION_REVOKED)
         } catch (failure: Throwable) {
             if (failure is VirtualMachineError) throw failure
-            val unavailable = generateSequence(failure as Throwable?) { it.cause }
-                .filterIsInstance<androidx.camera.core.CameraUnavailableException>()
-                .firstOrNull()
-            if (unavailable?.reason == androidx.camera.core.CameraUnavailableException.CAMERA_IN_USE ||
-                unavailable?.reason == androidx.camera.core.CameraUnavailableException.CAMERA_MAX_IN_USE
-            ) {
-                fail(target, FAULT_CAMERA_BUSY)
-            } else {
-                fail(target, FAULT_BIND_FAILED)
-            }
+            fail(target, CameraFaultMapper.token(failure))
         }
     }
 
@@ -892,6 +883,23 @@ class CameraXQrScanner(
                 ),
             )
             .build()
+    }
+}
+
+/** Pure CameraX exception mapping so a busy-camera path can be verified without opening a camera. */
+internal object CameraFaultMapper {
+    fun token(failure: Throwable): String {
+        val unavailable = generateSequence(failure as Throwable?) { it.cause }
+            .filterIsInstance<androidx.camera.core.CameraUnavailableException>()
+            .firstOrNull()
+        return if (
+            unavailable?.reason == androidx.camera.core.CameraUnavailableException.CAMERA_IN_USE ||
+            unavailable?.reason == androidx.camera.core.CameraUnavailableException.CAMERA_MAX_IN_USE
+        ) {
+            CameraXQrScanner.FAULT_CAMERA_BUSY
+        } else {
+            CameraXQrScanner.FAULT_BIND_FAILED
+        }
     }
 }
 

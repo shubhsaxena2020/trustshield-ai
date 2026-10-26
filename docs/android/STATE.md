@@ -9,6 +9,7 @@
 - The four-card synthetic QR PDF was rendered for visual inspection; layout and zero-amount/do-not-pay labels are clear. Real camera decode remains phone-only and unrun.
 - A follow-up honesty review changed failed/unavailable Hindi locale support callbacks to `Not checked` rather than asserting `Not supported`. Re-run phone-free gate passed: 1,086 JVM tests, `lintDebug`.
 - Added a connected UI test that revokes only the app's emulator mic permission, verifies the denial explanation and opens the staged Call Shield demo. It compiles with `assembleDebugAndroidTest`; execution waits until the currently locked emulator is available.
+- Extracted the CameraX bind-failure mapping into a pure mapper and added direct/wrapped `CAMERA_IN_USE` / `CAMERA_MAX_IN_USE` tests. Current JVM total is 1,088 passing; emulator UI execution still awaits the lane lock.
 - Next: review lane PRs; finish fixtures/settings/conversation/payment; rebuild and verify release after final icon/splash integration.
 
 ## Current status (2026-10-26 21:10 IST)
