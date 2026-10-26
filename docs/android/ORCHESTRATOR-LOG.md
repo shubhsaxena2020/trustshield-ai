@@ -234,3 +234,8 @@ PHASE 3 COMPLETE
 
 - Confirmed all three existing Phase 4 Hermes processes remain alive. No open lane PR was listed. Agent1 has uncommitted rule/fixture work, agent2's isolated worktree is clean, and agent3 has accessibility/UI/icon/splash changes in progress; no session was relaunched or stopped.
 - A separate Phase 4 lane currently holds the shared emulator lock on `trustshield-api36`. Codex did not interact with that device. The owner phone hold remains in effect; no physical device work was run.
+
+## 2026-10-26 21:40 IST — Device check assertion detail
+
+- Expanded the instrumentation test to verify the actual displayed API level, ABI, recognizer availability, Hindi locale support result, and camera/microphone permission values against the test device; this remains read-only and triggers no permissions.
+- `:app:testDebugUnitTest :app:assembleDebugAndroidTest` passed. The strengthened test is compiled; connected execution remains queued behind the separate Phase 4 lane's emulator lock.

@@ -1,4 +1,4 @@
-## Current status (2026-10-26 21:36 IST)
+## Current status (2026-10-26 21:40 IST)
 
 `android-finals` includes the Phase 4 crash/advisory fixes and local signed-release configuration. Codex added a collapsed Settings Device check with Android/API, ABI, recognizer service, `hi-IN` locale support, and camera/mic permission status; a camera-in-use fault now offers a QR Guard demo recovery. Missing mic/recognizer paths continue to expose typed/staged fallback.
 
@@ -15,6 +15,7 @@
 - `INSTALL.md` now includes release build/regeneration, adb install/reset, and unknown-source guidance without any secret values. Final APK measurements remain pending the final label/icon/splash merge and rebuild.
 - Phase 4 Hermes sessions agent1/agent2/agent3 remain alive and untouched. At this check no lane PR was open; agent1 has fixture/rule changes in progress, agent2's worktree is still clean, and agent3 has UI/accessibility/resource changes in progress.
 - A separate Phase 4 lane currently holds `phase4-emulator.lock` on `trustshield-api36`; Codex has not interacted with or stopped that emulator. No physical phone work has occurred.
+- Strengthened the Device check instrumentation assertion to compare displayed API, ABI, recognizer, and runtime permission values with the test device. `:app:testDebugUnitTest :app:assembleDebugAndroidTest` passed; this updated UI assertion is compiled but its connected run still waits on the separate lane's emulator lock.
 - A separate Phase 4 lane holds `phase4-emulator.lock` on `trustshield-api36`; Codex has not interacted with or stopped that emulator. No physical phone work has occurred.
 - Next: review lane PRs; finish fixtures/settings/conversation/payment; rebuild and verify release after final icon/splash integration.
 

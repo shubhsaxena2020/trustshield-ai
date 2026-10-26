@@ -1,6 +1,8 @@
 package ai.trustshield.android
 
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.ParcelFileDescriptor
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsOff
@@ -10,6 +12,7 @@ import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.core.content.ContextCompat
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -246,12 +249,25 @@ class Phase3JourneysTest {
         tapText("Device ki jaankari dekhein")
 
         waitForText("Android")
-        waitForText("ABI")
+        waitForText("API ${Build.VERSION.SDK_INT}")
+        waitForText(Build.SUPPORTED_ABIS.first())
         waitForText("Speech recognizer")
         waitForText("Hindi hi-IN")
         waitForText("Camera permission")
         waitForText("Microphone permission")
-        assertNodeContains("API")
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        waitForText(if (android.speech.SpeechRecognizer.isRecognitionAvailable(context)) "Mila" else "Nahi mila")
+        waitForText(
+            if (ContextCompat.checkSelfPermission(context, android.Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                "Mili"
+            } else "Nahi mili"
+        )
+        waitForText(
+            if (ContextCompat.checkSelfPermission(context, android.Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+                "Mili"
+            } else "Nahi mili"
+        )
+        waitForAnyText(5_000, "Support mila", "Support nahi mila", "Is Android par check nahi ho saka")
     }
 
     @Test
