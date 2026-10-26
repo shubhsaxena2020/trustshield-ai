@@ -1,4 +1,4 @@
-## Current status (2026-10-26 22:51 IST)
+## Current status (2026-10-26 23:04 IST)
 
 `android-finals` now includes the owner Hermes swarm directive in commit `ab26a9a`, pushed to origin. No Phase 4 completion claim is made yet.
 
@@ -11,6 +11,9 @@
 - PR #141 reports 46 fixture rows passing, 1,066 JVM tests, lint and debug assembly passing. It is open with no checks reported. Review found a count sentence that double-counts the probe/control subsets; also rebase on current `android-finals` before integration.
 - agent2's current Settings report shows light/dark/system persistence, sensitivity band change and Critical haptics suppression passing. English Result evidence titles/details remain Hinglish, so item 6 is still FAIL pending the presentation fix. The lane worktree is dirty and its process remains active.
 - agent3 is running the accessibility matrix on the single API 36 emulator under the shared lock. No phone was used. The owner has not released the phone hold, so physical-phone checks remain held.
+- PR #141 was rebased onto current `android-finals` @ `95fca50`, fixed for the false fixture-row subtotal and the Hindi delivery-OTP merge regression, and pushed at `592ab86`. The rebase gate passed: 1,093 JVM tests, 0 failures/errors/skips, 46/46 fixture rows PASS, `lintDebug`, and `assembleDebug`. Backend/frontend/security checks remain pending; emulator spot check is still open.
+- The new agent1 fallback session has not used `delegate_task` (zero calls, zero children at this checkpoint) and has started direct production edits. Its Gradle compile finished under the lock. This progress is recorded as a noncompliant wave; preserve the current work through its next commit boundary, then require and verify one exact nine-task wave before further delegated work.
+- No explicit owner phone-connection signal arrived. Physical-phone work remains held.
 
 ## Historical status (2026-10-26 21:40 IST)
 
