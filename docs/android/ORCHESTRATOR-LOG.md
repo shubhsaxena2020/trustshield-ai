@@ -203,3 +203,8 @@ PHASE 3 COMPLETE
 - Started only `trustshield-api36` (`emulator-5554`, API 36, x86_64) with 2 GB and no snapshot, ran `:app:connectedDebugAndroidTest`, then shut it down and released both locks.
 - Result: 55 instrumentation tests, 54 passed, 0 failed, 1 pre-existing airplane-mode precondition skip; `settingsDeviceCheck_reportsPlatformAndPermissionSnapshot` passed. Evidence: `evidence/p4-device-check-connected.md`.
 - Visually inspected the one-page A4 `phone-kit/demo_upi_qr_cards.pdf`: four large QR cards and synthetic-only/zero-amount warning are legible. Physical decode remains pending the owner's release of the phone hold.
+
+## 2026-10-26 21:24 IST — locale probe honesty correction
+
+- Device check now reports `hi-IN` as `Not checked` when the recognizer support callback cannot be created or returns an error. Only a completed support response with no `hi-IN` entry yields `Not supported`; no session is started and the microphone is never opened.
+- Verification after the correction: 1,086 JVM tests passed, `lintDebug` passed. No physical phone was used; the emulator remains stopped.

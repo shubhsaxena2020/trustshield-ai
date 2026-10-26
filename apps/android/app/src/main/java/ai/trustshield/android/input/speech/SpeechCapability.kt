@@ -519,7 +519,7 @@ object SpeechCapabilityProbe {
             null
         }
         if (recognizer == null) {
-            onResult(false)
+            onResult(null)
             return
         }
         var finished = false
@@ -546,11 +546,11 @@ object SpeechCapabilityProbe {
                         finish(supported)
                     }
 
-                    override fun onError(error: Int) = finish(false)
+                    override fun onError(error: Int) = finish(null)
                 },
             )
         } catch (_: RuntimeException) {
-            finish(false)
+            finish(null)
         }
     }
 

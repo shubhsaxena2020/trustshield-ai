@@ -1,4 +1,4 @@
-## Current status (2026-10-26 21:19 IST)
+## Current status (2026-10-26 21:24 IST)
 
 `android-finals` includes the Phase 4 crash/advisory fixes and local signed-release configuration. Codex added a collapsed Settings Device check with Android/API, ABI, recognizer service, `hi-IN` locale support, and camera/mic permission status; a camera-in-use fault now offers a QR Guard demo recovery. Missing mic/recognizer paths continue to expose typed/staged fallback.
 
@@ -7,6 +7,7 @@
 - Existing Hermes agent1/agent2/agent3 sessions remain alive, unchanged. No open Phase 4 lane PR was visible at this checkpoint. Unrelated untracked repository paths remain untouched.
 - Evidence: `evidence/p4-device-check-connected.md`. The single `trustshield-api36` emulator was stopped and its lock released after testing; no physical phone used.
 - The four-card synthetic QR PDF was rendered for visual inspection; layout and zero-amount/do-not-pay labels are clear. Real camera decode remains phone-only and unrun.
+- A follow-up honesty review changed failed/unavailable Hindi locale support callbacks to `Not checked` rather than asserting `Not supported`. Re-run phone-free gate passed: 1,086 JVM tests, `lintDebug`.
 - Next: review lane PRs; finish fixtures/settings/conversation/payment; rebuild and verify release after final icon/splash integration.
 
 ## Current status (2026-10-26 21:10 IST)
