@@ -190,3 +190,10 @@ PHASE 3 COMPLETE
 - Candidate sizes: arm64-v8a 24,929,198 bytes; armeabi-v7a 20,635,162; x86 25,435,994; x86_64 25,519,026; universal 55,158,722.
 - This is a signing/package baseline, not yet the final release handoff: manifest label still reports `TrustShield AI`, and the active agent3 #139 icon/splash work has not been merged. Rebuild and refresh INSTALL.md after reviewing that PR.
 - Current `head-api36` emulator remains owned by the separate lane and untouched. Phone hold remains in force.
+
+## 2026-10-26 21:16 IST — Device check and capability fallback
+
+- Added a Settings-hidden, collapsed Device check panel for Android/API, primary ABI, recognizer service, `hi-IN` locale support when the API can report it, and CAMERA/RECORD_AUDIO grant state. Locale support uses Android's recognition support callback and never starts listening; older Android reports that the locale could not be checked.
+- Added camera-in-use recovery copy when CameraX reports `CAMERA_IN_USE` or `CAMERA_MAX_IN_USE`; QR Guard retains the labelled simulation path. Existing Call Shield missing-mic/missing-recognizer state and typed/staged demo paths were confirmed in source and already have JVM coverage.
+- Added JVM coverage for Device check status copy and camera-busy recovery copy, plus an instrumentation assertion for the Device check screen. Phone-free gate passed: 1,086 JVM tests, `lintDebug`, and `assembleDebugAndroidTest`. Device check UI assertion is compiled only so far; emulator execution is still pending.
+- `adb devices` was empty and both shared locks were free at this checkpoint. The owner phone hold remains in force; no physical device work was performed. Existing Hermes sessions were left alive.

@@ -1,3 +1,12 @@
+## Current status (2026-10-26 21:16 IST)
+
+`android-finals` includes the Phase 4 crash/advisory fixes and local signed-release configuration. Codex added a collapsed Settings Device check with Android/API, ABI, recognizer service, `hi-IN` locale support, and camera/mic permission status; a camera-in-use fault now offers a QR Guard demo recovery. Missing mic/recognizer paths continue to expose typed/staged fallback.
+
+- Fresh phone-free gate: 1,086 JVM tests passed; `lintDebug` and `assembleDebugAndroidTest` passed. The new Device check UI assertion compiled but has not yet run on an emulator.
+- Camera-in-use maps CameraX `CAMERA_IN_USE` / `CAMERA_MAX_IN_USE` to explicit recovery copy. No physical phone was used.
+- Existing Hermes agent1/agent2/agent3 sessions remain alive, unchanged. No open Phase 4 lane PR was visible at this checkpoint. Unrelated untracked repository paths remain untouched.
+- Next: run the Settings/QR fallback instrumentation checks on one emulator under the shared locks; review lane PRs; finish fixtures/settings/conversation/payment; rebuild and verify release after final icon/splash integration.
+
 ## Current status (2026-10-26 21:10 IST)
 
 `android-finals` includes the release signing and ABI/universal packaging configuration. A local signed release build passed and all five APK signatures verified with the local certificate; no keystore/password files are tracked. Its exact measurements are in the orchestration log.
@@ -22,6 +31,15 @@ Branch `android-finals` is at `96d88977dc83ceae9e3001e09a2eeba5d113fce0`, equal 
 - Main checkout was already at the fetched origin head; unrelated pre-existing untracked paths remain untouched.
 - Remaining work is tracked in `HEAD_DIRECTIVE_PHONE_HOLD.md`; no Phase 4 completion claim is made.
 # Android program state
+
+## Current status (2026-10-26 21:16 IST)
+
+`android-finals` contains the Phase 4 crash/advisory fixes and local signed-release configuration. Codex added a collapsed Settings Device check with Android/API, ABI, recognizer service, `hi-IN` locale support, and camera/mic permission status; a camera-in-use fault now offers a QR Guard demo recovery. Missing mic/recognizer paths continue to expose typed/staged fallback.
+
+- Fresh phone-free gate on the current working tree: 1,086 JVM tests passed; `lintDebug` and `assembleDebugAndroidTest` passed. The new Device check UI assertion compiled but is not yet emulator-run.
+- Camera-in-use maps the CameraX `CAMERA_IN_USE` / `CAMERA_MAX_IN_USE` reasons to explicit recovery copy. No physical phone was used.
+- Existing Hermes agent1/agent2/agent3 sessions remain alive, unchanged. No open Phase 4 lane PR was visible at this checkpoint. Unrelated untracked repository paths remain untouched.
+- Next: run the selected instrumented Settings/QR fallback checks on one emulator under the shared locks; then review lane PRs, finish fixtures/settings/conversation/payment, and rebuild/verify the release package after final icon/splash integration.
 
 ## Current status (2026-10-26 07:08 IST)
 

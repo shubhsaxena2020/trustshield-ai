@@ -725,7 +725,16 @@ class CameraXQrScanner(
             fail(target, FAULT_PERMISSION_REVOKED)
         } catch (failure: Throwable) {
             if (failure is VirtualMachineError) throw failure
-            fail(target, FAULT_BIND_FAILED)
+            val unavailable = generateSequence(failure as Throwable?) { it.cause }
+                .filterIsInstance<androidx.camera.core.CameraUnavailableException>()
+                .firstOrNull()
+            if (unavailable?.reason == androidx.camera.core.CameraUnavailableException.CAMERA_IN_USE ||
+                unavailable?.reason == androidx.camera.core.CameraUnavailableException.CAMERA_MAX_IN_USE
+            ) {
+                fail(target, FAULT_CAMERA_BUSY)
+            } else {
+                fail(target, FAULT_BIND_FAILED)
+            }
         }
     }
 
@@ -864,6 +873,9 @@ class CameraXQrScanner(
 
         /** CameraX refused the use-case binding (no usable lens, configuration clash). */
         const val FAULT_BIND_FAILED: String = "camera-bind-failed"
+
+        /** Another app or camera session currently owns the camera. */
+        const val FAULT_CAMERA_BUSY: String = "camera-busy"
 
         /** The OS refused the camera even though the app believed permission was granted. */
         const val FAULT_PERMISSION_REVOKED: String = "camera-permission-revoked"

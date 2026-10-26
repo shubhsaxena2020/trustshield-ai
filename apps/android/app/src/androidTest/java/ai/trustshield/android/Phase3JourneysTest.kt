@@ -238,6 +238,21 @@ class Phase3JourneysTest {
         compose.onAllNodes(isToggleable()).onFirst().performScrollTo().assertIsOff()
     }
 
+    @Test
+    fun settingsDeviceCheck_reportsPlatformAndPermissionSnapshot() {
+        launchRoute(AppRoute.SETTINGS)
+        waitForText(SETTINGS_HINGLISH_LIGHT)
+        tapText("Device ki jaankari dekhein")
+
+        waitForText("Android")
+        waitForText("ABI")
+        waitForText("Speech recognizer")
+        waitForText("Hindi hi-IN")
+        waitForText("Camera permission")
+        waitForText("Microphone permission")
+        assertNodeContains("API")
+    }
+
     /**
      * Offline journey: with the radio off, the deterministic local pipeline still returns a verdict
      * and the scanner keeps saying that online checks are unavailable (no silent network claim).

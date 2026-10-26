@@ -498,6 +498,62 @@ object SpeechCapabilityProbe {
         }
     }
 
+    /**
+     * Reports whether the installed default recogniser advertises hi-IN. This is a capability
+     * probe only: it does not start recognition or open the microphone. Android only exposes the
+     * support callback from API 33; older versions return `null` (not checked).
+     */
+    fun probeHindiLocaleSupport(context: Context, executor: Executor, onResult: (Boolean?) -> Unit) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            onResult(null)
+            return
+        }
+        val app = context.applicationContext ?: context
+        if (!runCatching { SpeechRecognizer.isRecognitionAvailable(app) }.getOrDefault(false)) {
+            onResult(false)
+            return
+        }
+        val recognizer = try {
+            SpeechRecognizer.createSpeechRecognizer(app)
+        } catch (_: RuntimeException) {
+            null
+        }
+        if (recognizer == null) {
+            onResult(false)
+            return
+        }
+        var finished = false
+        fun finish(supported: Boolean?) {
+            if (finished) return
+            finished = true
+            runCatching { recognizer.destroy() }
+            runCatching { onResult(supported) }
+        }
+        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE, SpeechLanguage.HI_IN)
+        }
+        try {
+            recognizer.checkRecognitionSupport(
+                intent,
+                executor,
+                object : RecognitionSupportCallback {
+                    override fun onSupportResult(support: RecognitionSupport) {
+                        val supported = runCatching {
+                            (support.onlineLanguages + support.supportedOnDeviceLanguages).any {
+                                it.equals(SpeechLanguage.HI_IN, ignoreCase = true)
+                            }
+                        }.getOrDefault(false)
+                        finish(supported)
+                    }
+
+                    override fun onError(error: Int) = finish(false)
+                },
+            )
+        } catch (_: RuntimeException) {
+            finish(false)
+        }
+    }
+
     private fun resolveMic(context: Context, hint: MicPermission): MicPermission = when {
         hint != MicPermission.Unknown -> hint
         hasRecordAudio(context) -> MicPermission.Granted

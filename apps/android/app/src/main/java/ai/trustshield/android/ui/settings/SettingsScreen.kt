@@ -25,13 +25,20 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import ai.trustshield.android.data.preferences.AppLanguage
 import ai.trustshield.android.data.preferences.Sensitivity
 import ai.trustshield.android.data.preferences.ThemeMode
@@ -173,6 +180,8 @@ fun SettingsScreen(
             )
         }
 
+        DeviceCheckPanel(english = state.preferences.language == AppLanguage.ENGLISH)
+
         Spacer(Modifier.height(TsTokens.SpacingLg))
 
         OutlinedButton(
@@ -227,6 +236,56 @@ fun SettingsScreen(
                 }
             }
         )
+    }
+}
+
+@Composable
+private fun DeviceCheckPanel(english: Boolean) {
+    val context = LocalContext.current
+    var expanded by remember { mutableStateOf(false) }
+    var hindiLocale by remember { mutableStateOf(DeviceCheckLocale.NOT_CHECKED) }
+    val current = DeviceCheckProbe.snapshot(context, hindiLocale)
+
+    SettingsSection(title = if (english) "Device check" else "Device check") {
+        TextButton(
+            onClick = { expanded = !expanded },
+            modifier = Modifier.fillMaxWidth().heightIn(min = TsTokens.MinTouchTarget),
+        ) {
+            Text(if (expanded) {
+                if (english) "Hide device details" else "Device ki jaankari chhupayein"
+            } else {
+                if (english) "Show device details" else "Device ki jaankari dekhein"
+            })
+        }
+        if (expanded) {
+            LaunchedEffect(Unit) {
+                DeviceCheckProbe.checkHindiLocale(
+                    context = context,
+                    executor = ContextCompat.getMainExecutor(context),
+                    onResult = { hindiLocale = it },
+                )
+            }
+            val locale = DeviceCheckCopy.localeStatus(current.hindiLocale, english)
+            Column(verticalArrangement = Arrangement.spacedBy(TsTokens.SpacingXs)) {
+                DeviceCheckLine(if (english) "Android" else "Android", "${current.androidVersion} (API ${current.apiLevel})")
+                DeviceCheckLine("ABI", current.abi)
+                DeviceCheckLine("Speech recognizer", DeviceCheckCopy.availability(current.recognizerAvailable, english))
+                DeviceCheckLine(if (english) "Hindi hi-IN" else "Hindi hi-IN", locale)
+                DeviceCheckLine("Camera permission", DeviceCheckCopy.permission(current.cameraPermission, english))
+                DeviceCheckLine("Microphone permission", DeviceCheckCopy.permission(current.microphonePermission, english))
+            }
+        }
+    }
+}
+
+@Composable
+private fun DeviceCheckLine(label: String, value: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth().heightIn(min = TsTokens.MinTouchTarget),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(label, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
+        Text(value, style = MaterialTheme.typography.bodyMedium)
     }
 }
 

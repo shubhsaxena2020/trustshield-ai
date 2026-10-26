@@ -876,6 +876,10 @@ internal object QrHostCopy {
         "Camera is phone par shuru nahi ho paya. Demo se QR Guard chal kar dekh sakte hain.",
         "The camera could not start on this phone. You can still run QR Guard from the demo."
     )
+    val faultCameraBusy = ToneCopy(
+        "Camera kisi aur app mein chal raha hai. Use band karke dobara try karein, ya QR Guard ka demo chalayein.",
+        "Another app is using the camera. Close it and try again, or run the QR Guard demo."
+    )
     val faultFrame = ToneCopy(
         "Camera ka frame padha nahi ja raha. QR saaf karein ya phone ko hila kar dobara try karein.",
         "The camera frames cannot be read. Clean the QR or move the phone and try again."
@@ -916,6 +920,7 @@ internal object QrHostCopy {
 
     /** User copy for a stable CameraX fault token. Never echoes the token itself. */
     fun faultText(token: String): ToneCopy = when (token) {
+        CameraXQrScanner.FAULT_CAMERA_BUSY -> faultCameraBusy
         CameraXQrScanner.FAULT_FRAME_PIPELINE -> faultFrame
         CameraXQrScanner.FAULT_EMULATOR_CAMERA_DISABLED -> faultEmulator
         else -> faultGeneric
