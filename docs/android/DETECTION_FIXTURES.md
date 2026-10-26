@@ -46,9 +46,9 @@ Engine path exercised, unmodified and unstubbed: `LocalScanPipeline.analyzeText`
 row is also asserted to have **zero** evidence quotes that do not verify against the analysed text
 (`AnalysisResult.unverifiableEvidence` empty).
 
-## Result: 46 rows, 46 PASS, 0 MISS
+## Result: 47 rows, 47 PASS, 0 MISS
 
-46 rows total: 28 scam rows and 18 legitimate rows. Those totals already include the 3 exact probes from PHASE4 item 5 and the 4 band-ladder controls; the probes and controls are subsets, not additional rows.
+47 rows total: 28 scam rows and 19 legitimate rows. Those totals already include the 3 exact probes from PHASE4 item 5 and the 4 band-ladder controls; the probes and controls are subsets, not additional rows.
 
 Each `expected` band is the one the behaviour spec mandates for that shape, written down **before** the
 row was measured:
@@ -104,6 +104,7 @@ row was measured:
 | F37 | Legit guard: Devanagari anti-APK advisory | Hindi (Devanagari) | LEGIT | LOW_RISK | LOW_RISK | 0 | (none) | PASS |
 | F38 | Legit guard: delivery SMS with the agent's mobile | English | LEGIT | LOW_RISK | LOW_RISK | 0 | (none) | PASS |
 | F39 | Legit guard: Hindi delivery OTP at the door | Hindi (Devanagari) | LEGIT | LOW_RISK | LOW_RISK | 0 | (none) | PASS |
+| F40 | Legit guard: routine electricity bill support number | English | LEGIT | LOW_RISK | LOW_RISK | 0 | (none) | PASS |
 | P01 | Probe: Devanagari OTP notice | Hindi (Devanagari) | LEGIT | LOW_RISK | LOW_RISK | 0 | (none) | PASS |
 | P02 | Probe: mixed-script SBI account block | Mixed (Roman + Devanagari) | LEGIT | LOW_RISK | LOW_RISK | 22 | THREAT_OR_REWARD | PASS |
 | P03 | Probe: Devanagari Aadhaar/digital-arrest | Hindi (Devanagari) | SCAM | SUSPICIOUS | SUSPICIOUS | 52 | AUTHORITY, THREAT_OR_REWARD, SECRECY | PASS |
@@ -161,6 +162,7 @@ row was measured:
 37. **F37** (Legit guard: Devanagari anti-APK advisory, Hindi (Devanagari), legitimate) - `सावधान: किसी भी अनजान APK फाइल को डाउनलोड करने से बचें।`
 38. **F38** (Legit guard: delivery SMS with the agent's mobile, English, legitimate) - `Your parcel is out for delivery today between 2-5 pm. Call 9876543210 if the address is wrong.`
 39. **F39** (Legit guard: Hindi delivery OTP at the door, Hindi (Devanagari), legitimate) - `डिलीवरी ओटीपी 4521, दरवाज़े पर एजेंट को बताएं।`
+40. **F40** (Legit guard: routine electricity bill support number, English, legitimate) - `Your electricity bill is due tomorrow. Call 9876543210 if you have questions.`
 40. **P01** (Probe: Devanagari OTP notice, Hindi (Devanagari), legitimate) - `आपका ओटीपी ४५६७ है`
 41. **P02** (Probe: mixed-script SBI account block, Mixed (Roman + Devanagari), legitimate) - `Aapka SBI खाता block हो गया hai`
 42. **P03** (Probe: Devanagari Aadhaar/digital-arrest, Hindi (Devanagari), scam) - `आपका आधार गिरफ़्तारी के लिए इस्तेमाल हुआ है, सुप्रीम कोर्ट का आदेश है। किसी को मत बताना, कमरे में अकेले रहो।`
@@ -188,6 +190,7 @@ row was measured:
 | F37 | Legit guard: Devanagari anti-APK advisory (Hindi (Devanagari)) | 0 | LOW_RISK | no |
 | F38 | Legit guard: delivery SMS with the agent's mobile (English) | 0 | LOW_RISK | no |
 | F39 | Legit guard: Hindi delivery OTP at the door (Hindi (Devanagari)) | 0 | LOW_RISK | no |
+| F40 | Legit guard: routine electricity bill support number (English) | 0 | LOW_RISK | no |
 | P01 | Probe: Devanagari OTP notice (Hindi (Devanagari)) | 0 | LOW_RISK | no |
 | P02 | Probe: mixed-script SBI account block (Mixed (Roman + Devanagari)) | 22 | LOW_RISK | no |
 | C04 | Control: OTP warning (report §3.4 row 1) (English) | 0 | LOW_RISK | no |
@@ -195,12 +198,13 @@ row was measured:
 Every one of these stays `LOW_RISK` at `<= 24` with **no verified ask**. Two of them (`F37`, `F38`,
 `F39`) were added after an independent review of this lane's own rule changes, because the new
 Devanagari ask verbs and the new English callback rule are exactly the kind of change that starts
-accusing advice and logistics:
+accusing advice and logistics. `F40` was added after review found that routine bill support could be
+mistaken for a high-stakes callback ask:
 
 * `F37` - a cyber advisory that says *do not* download an unknown APK. Without the anti-download skip it
   measured `CAUTION 30` (the advisory names `download` + `APK`, the same two tokens a scam names).
 * `F38` - an ordinary delivery SMS that carries the delivery agent's own mobile. Without the
-  `ACCOUNT_OR_SERVICE_STAKES` requirement it measured `CAUTION 30`; a courier SMS with an agent's number
+  `HIGH_STAKES_CALLBACK_CONTEXT` requirement it measured `CAUTION 30`; a courier SMS with an agent's number
   is the most common Indian SMS and must stay in the watch band.
 * `F39` - the Hindi form of "share the OTP only with the agent at your door". Without extending the
   delivery-agent skip to Devanagari it measured `CAUTION 30`, i.e. the report §3.4 row-5 legit twin was
@@ -222,12 +226,13 @@ stage or a newly verified ask.
 | R5 | `StageRules.kt` reward | `मुनाफा / मुनाफ़ा / रिटर्न / प्रॉफिट` in the `N% return` pattern | `F32` `40% मुनाफा पक्का है` measured `CAUTION 36` with no reward stage |
 | R6 | `StageRules.kt` threat (new rule) | "Ghar baithe kamai ka laalach": work-from-home/job/salary/daily-income promises, `LOW`/`WEAK` | `F10` `Congratulations! ... work from home job ... salary Rs 25,000` and `F11` `रोज ₹2000 कमाओ` produced no stage 2 at all |
 | R7 | `StageRules.kt` threat (new rule) | "Warna police/case ki dhamki": `warna / nahi to / वरना` + `police / complaint / FIR / case / legal action`, `LOW`/`WEAK` | `F28` `wapas bhej do ... warna police complaint kar dunga` was read as an ask with no intimidation stage |
-| R8 | `UtilityServiceRules.kt` (new rule) | English imperative callback (`Call 8899776655 ...`) against a personal mobile, `HIGH`/`STRONG`, guarded, requiring `ACCOUNT_OR_SERVICE_STAKES` and skipping official-number context | `F08` `Call 8899776655 now to verify your number` measured `LOW_RISK 24`: the only item that fired was the `MODERATE` "personal mobile next to a brand" corroboration, which can never lift a band. `F38` keeps the requirement honest |
+| R8 | `UtilityServiceRules.kt` (new rule) | English imperative callback (`Call 8899776655 ...`) against a personal mobile, `HIGH`/`STRONG`, guarded, requiring `HIGH_STAKES_CALLBACK_CONTEXT` and skipping official-number context | `F08` `Call 8899776655 now to verify your number` measured `LOW_RISK 24`: the only item that fired was the `MODERATE` "personal mobile next to a brand" corroboration, which can never lift a band. `F38` keeps the requirement honest |
 | R9 | `UtilityServiceRules.kt` KYC-link rule | third ordering: `update verb -> KYC noun -> unofficial link` | `F02` `Complete KYC verification at http://sbi-kyc-verify.xyz/update` measured `LOW_RISK 24` - English puts the verb first, the two existing patterns only had noun-first and link-first |
 | R10 | `StageRules.kt` negation | add post-positional `न`, and add combining marks (`\p{M}`) to every negation word boundary | found while fixing `F35`: `न` inside `नंबर` was a standalone "negation" token (a mark is neither a letter nor a number), so `आधार नंबर ... भेजें` was read as *negated* and the ask vanished. The mark-aware boundary is the root fix; the extra `न` is what keeps `ओटीपी किसी को न बताएं` protective (pinned by `SecrecyScopingTest`) |
 | R11 | `StageRules.kt` APK rule | `skip = SKIP_ANTI_DOWNLOAD_ADVICE` (`बचें / avoid / beware / do not download ...`) | stops the APK ask accusing an anti-APK advisory (`F37`). Deliberately **not** triggered by a bare "alert"/"warning", because "Warning: account band ho jayega, yeh APK install karo" is a real scam shape |
 | R12 | `StageRules.kt` delivery skip | extend the door/agent skip to `दरवाज़े / दरवाजे ... एजेंट` | `F39`: report §3.4 row 5's legit twin was only protected in English |
 | R13 | `UtilityServiceRules.kt` | `appointment` added to the official-channel skip | a "call 9876543210 to book an appointment" KYC reminder is an official-channel act, not a callback ask |
+| R14 | `UtilityServiceRules.kt` callback ask | Requires an account, credential, verification, suspension, disconnection, or payment stake; bill/due-date wording alone is insufficient | `F40` is the legitimate routine electricity-bill support twin; the existing Hindi cutoff scam remains asserted |
 
 Two expectations were corrected rather than "made green" by a rule, and both corrections are recorded in
 the fixture source:
@@ -285,7 +290,7 @@ drove the fixes above; keeping it visible is the point of an honest fixture tabl
 5. **Legit twins have no headroom in two rows.** `F06` (RBI advisory that this app's rules read as
    authority + threat) sits at exactly `24`, the `LOW_RISK` ceiling. Any future relaxation of
    `NO_ASK_CEILING`, or one more marker in that sentence, moves it.
-6. **This is rule coverage, not accuracy.** 46 synthetic rows with hand-written expectations cannot
+6. **This is rule coverage, not accuracy.** 47 synthetic rows with hand-written expectations cannot
    estimate a false-positive rate on real traffic. A real 300-message holdout is not possible in this
    window (HEAD_ORDERS_ANDROID section 2.7); the honest reporting stays "rule/normaliser tests".
 7. **No emulator spot check was run in this lane.** All rows were measured on the JVM, which is the same

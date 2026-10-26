@@ -182,20 +182,25 @@ internal val SERVICE_OR_BANK_BRAND: Regex = rx(
 )
 
 /**
- * Stakes that turn an English `"Call <personal mobile>"` into an **ask** rather than ordinary logistics.
+ * High-stakes context required for a personal-number callback to count as an **ask**.
  *
- * The STRONG imperative-callback rule needs a stake in the same message, not just an institutional
+ * The STRONG imperative-callback rule needs high-stakes context in the same message, not just an institutional
  * noun: a courier or LPG message that merely gives the delivery agent's own mobile ("call 9876543210 if
  * the address is wrong") is the single most common Indian SMS and must stay in the watch band, while
  * `"Call 8899776655 now to verify your number or it will be blocked"` carries `verify`, `number` and
  * `blocked`. A plumber's "call 9876543210 for AC service" carries none of these and keeps only the
  * MODERATE corroboration item, which can never lift a band.
  */
-internal val ACCOUNT_OR_SERVICE_STAKES: Regex = rx(
+internal val HIGH_STAKES_CALLBACK_CONTEXT: Regex = rx(
     """(?:\baccount\b|a/c|khata|खाता|\bkyc\b|केवायसी|\botp\b|ओटीपी|\bpin\b|password|\bblock\w*|""" +
-        """suspend\w*|deactivat\w*|disconnect\w*|band\b|बंद|\bbill\b|\bdues?\b|penalty|challan|\bemi\b|""" +
+        """suspend\w*|deactivat\w*|disconnect\w*|band\b|बंद|\bpay\w*|payment|settle|clear|kat\w*|penalty|challan|\bemi\b|""" +
         """\bloan\b|policy|debit card|credit card|\bsim\b|सिम|aadhaar|आधार|\btrai\b|verif\w*|""" +
         """refund|cashback|prize|lottery|beneficiary)""",
+)
+
+/** A bank-branded callback or a callback carrying explicit high-stakes context. */
+internal val HIGH_STAKES_OR_BANK_CALLBACK_CONTEXT: Regex = rx(
+    """(?:${BANK_OR_CARD_BRAND.pattern}|${HIGH_STAKES_CALLBACK_CONTEXT.pattern})""",
 )
 
 /** [INDIAN_PERSONAL_MOBILE] compiled once for the corroboration rule. */
@@ -266,7 +271,7 @@ internal val UTILITY_SERVICE_ASK_RULES: List<Rule> = listOf(
         askType = AskType.CALLBACK,
         guarded = true,
         skip = SKIP_OFFICIAL_NUMBER,
-        requires = SERVICE_OR_BANK_BRAND,
+        requires = HIGH_STAKES_OR_BANK_CALLBACK_CONTEXT,
     ),
     Rule(
         titleHinglish = "Bank/service ke naam par personal number par call karne ko kaha",
@@ -287,7 +292,7 @@ internal val UTILITY_SERVICE_ASK_RULES: List<Rule> = listOf(
         askType = AskType.CALLBACK,
         guarded = true,
         skip = SKIP_OFFICIAL_NUMBER,
-        requires = ACCOUNT_OR_SERVICE_STAKES,
+        requires = HIGH_STAKES_CALLBACK_CONTEXT,
     ),
     Rule(
         titleHinglish = "Unofficial link par KYC/detail update karne ko kaha",

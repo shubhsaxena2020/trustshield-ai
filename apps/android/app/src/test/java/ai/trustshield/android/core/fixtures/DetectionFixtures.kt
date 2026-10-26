@@ -109,7 +109,7 @@ object DetectionFixtures {
         text: String,
     ) = Fixture(id, family, language, FixtureKind.LEGITIMATE, RiskLabel.LOW_RISK, LEGIT_TWIN, text)
 
-    /** Every row, in family order. 46 rows: 24 scam, 18 legitimate twins and guards, 3 probes, 4 band controls. */
+    /** Every row, in family order. 47 total: 28 scam and 19 legitimate, including probes and controls. */
     val rows: List<Fixture> = listOf(
 
         // ---------------------------------------------------------------------------------------
@@ -482,6 +482,12 @@ object DetectionFixtures {
             family = "Legit guard: Hindi delivery OTP at the door",
             language = "Hindi (Devanagari)",
             text = "डिलीवरी ओटीपी 4521, दरवाज़े पर एजेंट को बताएं।",
+        ),
+        legit(
+            id = "F40",
+            family = "Legit guard: routine electricity bill support number",
+            language = "English",
+            text = "Your electricity bill is due tomorrow. Call 9876543210 if you have questions.",
         ),
 
         // ---------------------------------------------------------------------------------------
