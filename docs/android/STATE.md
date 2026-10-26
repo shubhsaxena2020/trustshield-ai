@@ -386,3 +386,10 @@ Branch: `android-finals`. Phase: **3 active; Codex foundation pushed, 18 new P0 
 - RAM available was 18.55 GB. Agent2 retains `emulator-5554`; no Gradle command was active at this check.
 - Prepared next-wave workfiles now each specify exactly 9 disjoint tasks, one `delegate_task` call per wave, wait/review/integration, and state.db verification. One-line `launch-hermes.ps1` pointer prompts are ready but no lane was relaunched.
 - Main tracked files were synced at `fb85ad8`; unrelated untracked files remain. Phase 4 remains incomplete.
+
+### 2026-10-27 00:38 IST checkpoint
+- After the duplicate fresh startups exited without any delegate_task wave, one active Hermes process per profile is now running from the nine-task lane prompts: agent1 PID 18328 (#148 + #146), agent2 PID 28152 (#144), agent3 PID 26344 (#143 + #147). These are launch confirmations only; state.db currently shows zero new delegate_task calls for the roots created at 00:38, so no wave is counted compliant yet.
+- The prior legacy lanes were committed/parked on pushed WIP branches by the other active orchestrator: `android/P4-fallbacks` at `a0cc44e`; fresh P0 branches are clean at `1ee858b` (`android/P0-148-146`, `android/P0-144-forced-20261027`, `android/P0-143-147-forced-20261027`). Dedicated clean worktrees exist for #144 and #143/#147. Do not discard the fallback WIP branch.
+- Shared emulator lock is absent and no emulator process is running. Free RAM 22.9 GB. No Gradle build is active; only an idle Gradle daemon remains. No adb was run against any device, and serial `63b0de52` remains head-owned.
+- Next verification: inspect each new root's `state.db` for one `delegate_task` call with exactly 9 tasks; log actual widths, then allow the single lane lead to take the shared emulator/Gradle lock for its required UI verification. Current `HEAD_DIRECTIVE_HERMES_SWARM.md` now contains an 18-wide addendum, but this turn's explicit user instruction requires nine tasks and is controlling for these launches.
+- P1/P4 leftovers remain parked behind the P0 merges. No P0 code is merged and no APK is marked READY FOR PHONE RETEST.
