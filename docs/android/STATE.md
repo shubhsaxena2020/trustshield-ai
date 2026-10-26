@@ -1,4 +1,4 @@
-## Current status (2026-10-26 21:32 IST)
+## Current status (2026-10-26 21:34 IST)
 
 `android-finals` includes the Phase 4 crash/advisory fixes and local signed-release configuration. Codex added a collapsed Settings Device check with Android/API, ABI, recognizer service, `hi-IN` locale support, and camera/mic permission status; a camera-in-use fault now offers a QR Guard demo recovery. Missing mic/recognizer paths continue to expose typed/staged fallback.
 
@@ -12,6 +12,7 @@
 - Extracted the CameraX bind-failure mapping into a pure mapper and added direct/wrapped `CAMERA_IN_USE` / `CAMERA_MAX_IN_USE` tests. Current JVM total is 1,088 passing; emulator UI execution still awaits the lane lock.
 - Tightened the phone checklist with explicit route-launch adb commands, TalkBack state query, and relaunch steps. The log collector now measures installed base/split APK byte totals using adb `pm path` + `stat`; PowerShell parsers pass. It was not run against a physical device.
 - Sanitized both adb log collectors: if crash/ANR patterns are found, reports now contain fixed marker labels only, never raw logcat lines. All four helper scripts pass PowerShell parse validation.
+- `INSTALL.md` now includes release build/regeneration, adb install/reset, and unknown-source guidance without any secret values. Final APK measurements remain pending the final label/icon/splash merge and rebuild.
 - Next: review lane PRs; finish fixtures/settings/conversation/payment; rebuild and verify release after final icon/splash integration.
 
 ## Current status (2026-10-26 21:10 IST)
