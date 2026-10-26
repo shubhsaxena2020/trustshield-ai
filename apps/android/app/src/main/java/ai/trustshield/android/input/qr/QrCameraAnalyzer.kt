@@ -3,19 +3,13 @@ package ai.trustshield.android.input.qr
 /**
  * Decodes one frame that was already captured by the camera.
  *
- * The intended production binding (Gradle-gated integration owned by Codex, deliberately **not**
- * referenced from this file because `androidx.camera.*` and `com.google.mlkit.*` are absent from
- * the module classpath): AndroidX CameraX `ImageAnalysis` on a single-thread executor feeding a
- * **bundled** Google ML Kit `com.google.mlkit:barcode-scanning` `BarcodeScanner`. The bundled model
- * ships inside the APK (~2.4 MB) so the first scan works with no network and no model download; the
- * unbundled `play-services-mlkit-barcode-scanning` variant needs a Play-services model fetch and is
- * rejected because the app must stay offline-first.
+ * Production binding: AndroidX CameraX `ImageAnalysis` on a single-thread executor feeding ZXing's
+ * pure-JVM QR decoder. No native barcode model or network model download is required.
  *
- * Because a vendor decoder needs the pixels and this seam deliberately carries no image type, the
- * adapter keeps the in-flight `ImageProxy` / `InputImage` in a slot keyed by `frameId`, decodes
- * exactly one frame at a time (ML Kit's `Task` completes on the adapter's executor) and closes the
- * proxy in `addOnCompleteListener`. Only the decoded `rawValue` string crosses this seam; pixels
- * never reach this package and are never retained, written or logged.
+ * Because a decoder needs the pixels and this seam deliberately carries no image type, the
+ * adapter keeps the in-flight `ImageProxy` in a slot keyed by `frameId`, decodes exactly one frame
+ * at a time and closes the proxy in `addOnCompleteListener`. Only the decoded payload string crosses
+ * this seam; pixels never reach this package and are never retained, written or logged.
  */
 fun interface BarcodeDecoder {
     /**
@@ -111,8 +105,8 @@ sealed interface StartResult {
  * - **[close] is idempotent**; nothing is emitted afterwards and later frames are ignored/counted.
  *
  * Threading: [submitFrame], [start] and [close] are safe from any thread, including from inside
- * [BarcodeDecoder.decode] (the real adapter's CameraX analyzer and its ML Kit callback run on
- * different threads, and closing from the callback is the normal teardown path). Events are returned
+ * [BarcodeDecoder.decode] (the CameraX analysis executor performs decoding, while shutdown may run
+ * from the main thread). Events are returned
  * to the caller; the adapter dispatches them to the UI, this class never touches a callback or a view.
  */
 class QrCameraAnalyzer(
@@ -291,7 +285,7 @@ class QrCameraAnalyzer(
                 if (currentState != State.Running || work.permissionGeneration != permissionGeneration) {
                     emptyList()
                 } else if (frame.meanLuma0to1 < lowLightThreshold) {
-                    // Dark or covered lens: skip the vendor decode entirely, report it as low light.
+                    // Dark or covered lens: skip the decode entirely, report it as low light.
                     skippedDarkFrameCount++
                     applyNoDecode(frame)
                 } else {
