@@ -160,6 +160,88 @@ class LegitScamPairsTest {
         }
     }
 
+    // ---------------------------------------------------------------------------------------
+    // Report §3.4 row 5, both natural phrasings (issue #118 review follow-up)
+    // ---------------------------------------------------------------------------------------
+
+    /**
+     * Row 5 in the words people actually type. Telling the customer to hand the delivery OTP to the
+     * courier **at the door** is the correct behaviour, so it is not an ask; every way of moving the
+     * same OTP away from the door is. Bands are inclusive and the label is derived from the band, so
+     * a row that improves past its band (45 -> 50, say) does not turn the suite red.
+     */
+    private data class Band(val name: String, val text: String, val min: Int, val max: Int, val ask: Boolean)
+
+    private val deliveryDoorRows = listOf(
+        Band(
+            name = "5l delivery OTP handed to the agent at the door",
+            text = "Your parcel will arrive today. Share the delivery OTP with the agent at your door.",
+            min = 0,
+            max = 24,
+            ask = false,
+        ),
+        Band(
+            name = "5s courier asks for the OTP on the phone",
+            text = "Courier se bol rahe hain, parcel cancel hoga, OTP phone pe bata do",
+            min = 25,
+            max = 100,
+            ask = true,
+        ),
+        Band(
+            name = "5s redirect: phone par bata do, agent ko mat dena",
+            text = "OTP phone par bata do, delivery agent ko mat dena",
+            min = 25,
+            max = 100,
+            ask = true,
+        ),
+        Band(
+            name = "5s bare 'jo OTP aaya hai woh batayein'",
+            text = "Jo OTP aaya hai woh batayein",
+            min = 25,
+            max = 100,
+            ask = true,
+        ),
+        Band(
+            name = "5s SBI KYC 24 ghante + OTP batao stays high",
+            text = "SBI KYC 24 ghante main band ho jaayega Link par KYC update karo aur OTP batao",
+            min = 70,
+            max = 100,
+            ask = true,
+        ),
+    )
+
+    @Test
+    fun `delivery OTP rows land in their measured bands with the right ask`() {
+        for (row in deliveryDoorRows) {
+            val scored = scorer.analyzeScored(row.text)
+            val where = "${row.name}: score=${scored.result.risk.score} " +
+                "label=${scored.result.risk.label} stages=${scored.result.stages}"
+
+            assertTrue("$where - expected ${row.min}..${row.max}", scored.result.risk.score in row.min..row.max)
+            assertEquals("$where - ask evidence", row.ask, scored.verifiedAsk)
+            when {
+                row.max <= 24 -> assertEquals("$where - must be LOW_RISK", RiskLabel.LOW_RISK, scored.result.risk.label)
+                row.min >= 70 -> assertEquals("$where - must be HIGH_RISK", RiskLabel.HIGH_RISK, scored.result.risk.label)
+                else -> assertTrue(
+                    "$where - a scam row must not be LOW_RISK",
+                    scored.result.risk.label != RiskLabel.LOW_RISK,
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `delivery OTP rows quote only text they contain`() {
+        for (row in deliveryDoorRows) {
+            val scored = scorer.analyzeScored(row.text)
+            val unverified = scored.result.unverifiableEvidence(scored.analyzedText)
+            assertTrue(
+                "${row.name}: unverifiable quotes ${unverified.map { it.quote }}",
+                unverified.isEmpty(),
+            )
+        }
+    }
+
     private companion object {
         const val FLAGSHIP = "Dear customer, aapka bijli connection aaj raat 9:30 baje kat jayega. " +
             "Turant is number par call karein 9876543210"
