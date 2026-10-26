@@ -193,6 +193,19 @@ object CallShieldCopy {
             "Do not give anyone an OTP, PIN or remote access."
     )
 
+    /**
+     * The demo's full-screen alert — report §6's "Alert ka text", reproduced as the report writes it
+     * (its longer middle clause is kept in [warningCritical] above, which the live screen already
+     * uses). Issue #119 asks for this exact text at CRITICAL, so the demo quotes it verbatim instead
+     * of paraphrasing; it never accuses a person, names the pattern and the safe next step.
+     */
+    val digitalArrestAlert = ToneCopy(
+        hinglish = "Yeh digital arrest scam ka pattern hai. Koi bhi police ya CBI video call pe " +
+            "arrest nahi karti. Call kaat dijiye aur 1930 pe call karein.",
+        english = "This is a digital-arrest scam pattern. No police or CBI officer arrests anyone " +
+            "over a video call. End the call and call 1930."
+    )
+
     /** The alert never accuses; it only describes the pattern and the safe next step. */
     val noAccusation = ToneCopy(
         "Yeh alert sirf baaton ke pattern par hai. Yeh kisi vyakti par ilzaam nahi lagata.",

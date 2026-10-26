@@ -15,6 +15,7 @@ import ai.trustshield.android.core.model.Strength
 import ai.trustshield.android.core.model.TextNormalizer
 import ai.trustshield.android.core.normalize.HinglishNormalizer
 import ai.trustshield.android.core.rules.AskType
+import ai.trustshield.android.core.rules.DigitalArrestSignals
 import ai.trustshield.android.core.rules.LegitAssessment
 import ai.trustshield.android.core.rules.LegitimateIndicators
 import ai.trustshield.android.core.rules.StageDetection
@@ -86,10 +87,21 @@ data class ScoredResult(
  *    `[askPlusOneFloor, askPlusOneCeiling]` (numbers per preset, see [Sensitivity]). A verified ask is
  *    therefore never rendered as safe and never accused on its own — it may be a friend or a hacked
  *    account.
- * 6. **No verified ask => watch, not alarm.** `score <= 24` (`LOW_RISK`). BEHAVIOR_SPEC: an authority
- *    or reward claim with no ask stays low/watch. A03's severity discipline emits no `STRONG`
- *    non-ask evidence, so the "separate strong deterministic signal" escape hatch is intentionally
- *    not implemented here — when such a rule is added it must also raise this ceiling in one place.
+ * 6. **No verified ask => the band ladder, not a blanket alarm.** With no verified ask the score
+ *    starts from the same noisy-OR and then lands in exactly one of three documented bands:
+ *     * no separate strong signal, or fewer than [STRONG_SIGNAL_CAUTION_STAGES] other stages =>
+ *       `score <= 24` (`LOW_RISK`). BEHAVIOR_SPEC: an authority or reward claim with no ask stays
+ *       low/watch.
+ *     * a separate **strong** deterministic signal ([DigitalArrestSignals], report §6's digital-arrest
+ *       markers) plus `>= 2` other independent stages => `25..49` (`CAUTION`).
+ *     * the same strong signal plus `>= 3` other independent stages => `50..69` (`SUSPICIOUS`).
+ *
+ *    The strong signal adds [WEIGHT_STRONG_SIGNAL] to the noisy-OR for exactly this calculation: one
+ *    marker phrase alone never accuses anybody, and the band ceilings keep a no-ask call out of
+ *    `HIGH_RISK` (`>= 70`) — only a verified directional ask can reach that floor and the
+ *    escalation. The ladder's floor is re-asserted after A04's bounded reduction, exactly as the ask
+ *    floor is, so protective wording cannot erase a validated strong signal. This is the one place
+ *    the ceiling is raised.
  * 7. **Bounded legitimate reduction.** `legit.reduce(score, hasIndependentStrongAsk = verifiedAsk)`
  *    is applied last: A04's multiplier is `0.65..1.0`, so protective advice lowers risk but can never
  *    erase an independent verified ask (A04 returns the score untouched in that case). The ask floor
@@ -267,6 +279,16 @@ class LocalScorer(
         }
         if (evidence.any { it in detection.injection }) weights.add(WEIGHT_INJECTION)
 
+        // A separate STRONG deterministic signal (report §6 digital-arrest markers, BEHAVIOR_SPEC
+        // "unless a separate strong deterministic signal applies"). It is not a playbook stage: it is
+        // fused here, its evidence joins the result, and it only lifts the no-ask band ladder below.
+        // A phrase the sender was *quoting* is suppressed by A04, exactly like an injection item.
+        val strongSignal: List<Evidence> = DigitalArrestSignals.detect(analyzed).filter { item ->
+            val span = item.span
+            span != null && !assessment.isQuoted(span)
+        }
+        if (strongSignal.isNotEmpty()) evidence.addAll(strongSignal)
+
         var score = noisyOr(weights)
         val others = present.count { it != StageId.ASK }
         val bar = sensitivity.corroborationMin
@@ -277,11 +299,22 @@ class LocalScorer(
                 else -> score.coerceIn(sensitivity.askAloneFloor, sensitivity.askAloneCeiling)
             }
         } else {
-            score = minOf(score, NO_ASK_CEILING)
+            // One documented ladder for every no-ask transcript; see [noAskBand].
+            score = noAskBand(
+                base = noisyOr(weights + if (strongSignal.isEmpty()) 0 else WEIGHT_STRONG_SIGNAL),
+                otherStages = others,
+                hasStrongSignal = strongSignal.isNotEmpty(),
+            )
         }
         // A04's bounded reduction; a no-op when an independent verified ask exists.
         score = legit.reduce(score, verifiedAsk, assessment)
-        if (verifiedAsk) score = maxOf(score, sensitivity.askAloneFloor)
+        if (verifiedAsk) {
+            score = maxOf(score, sensitivity.askAloneFloor)
+        } else {
+            // Same discipline as the ask floor: protective wording may lower the score inside the
+            // no-ask band, never out of it.
+            score = maxOf(score, noAskBandFloor(others, strongSignal.isNotEmpty()))
+        }
 
         val confidence = confidenceFor(
             analyzed = analyzed,
@@ -491,6 +524,43 @@ class LocalScorer(
     private fun ordered(stages: Set<StageId>): List<StageId> =
         StageId.playbookOrder.filter { it in stages }
 
+    /**
+     * The one documented **no-ask band ladder** (BEHAVIOR_SPEC: "authority or reward with no ask
+     * stays low/watch **unless a separate strong deterministic signal applies**").
+     *
+     * A call with no verified ask can never be accused on the strength of its stage count alone, so
+     * every rung here needs [hasStrongSignal] — a validated [DigitalArrestSignals] item, i.e. one of
+     * the report §6 phrase markers with an exact quote that survives verification:
+     *
+     * | condition | band | label |
+     * |---|---|---|
+     * | no strong signal, or fewer than 2 other stages | `0..24` | `LOW_RISK` (watch) |
+     * | strong signal + `>= 2` other independent stages | `25..49` | `CAUTION` |
+     * | strong signal + `>= 3` other independent stages | `50..69` | `SUSPICIOUS` |
+     *
+     * The ceilings are the point: a no-ask transcript never reaches `HIGH_RISK` (70) and never sets
+     * `escalateCritical`, so the full-screen release still requires the verified directional ask of
+     * rule 4/8. The base score is the same noisy-OR as every other path, with
+     * [WEIGHT_STRONG_SIGNAL] added for the signal, so the number inside a band is earned rather than
+     * dialled; the band only bounds it.
+     */
+    private fun noAskBand(base: Int, otherStages: Int, hasStrongSignal: Boolean): Int = when {
+        hasStrongSignal && otherStages >= STRONG_SIGNAL_HIGH_STAGES ->
+            base.coerceIn(STRONG_SIGNAL_HIGH_FLOOR, STRONG_SIGNAL_HIGH_CEILING)
+
+        hasStrongSignal && otherStages >= STRONG_SIGNAL_CAUTION_STAGES ->
+            base.coerceIn(STRONG_SIGNAL_CAUTION_FLOOR, STRONG_SIGNAL_CAUTION_CEILING)
+
+        else -> minOf(base, NO_ASK_CEILING)
+    }
+
+    /** The floor of the band [noAskBand] would place this transcript in; `0` when it has none. */
+    private fun noAskBandFloor(otherStages: Int, hasStrongSignal: Boolean): Int = when {
+        hasStrongSignal && otherStages >= STRONG_SIGNAL_HIGH_STAGES -> STRONG_SIGNAL_HIGH_FLOOR
+        hasStrongSignal && otherStages >= STRONG_SIGNAL_CAUTION_STAGES -> STRONG_SIGNAL_CAUTION_FLOOR
+        else -> 0
+    }
+
     private fun actionsFor(
         label: RiskLabel,
         verifiedAsk: Boolean,
@@ -502,6 +572,10 @@ class LocalScorer(
             if (AskType.MONEY_TRANSFER in askTypes) add(ACTION_HIGH_REPORT_MONEY)
         }
         label == RiskLabel.SUSPICIOUS && verifiedAsk -> listOf(ACTION_CAUTION_ASK, ACTION_HIGH_VERIFY)
+        // A no-ask transcript only reaches SUSPICIOUS through the documented strong-signal ladder.
+        // Nothing has been demanded yet, so the advice is "verify by calling back" - and never the
+        // "this alone shows no danger" line, which would contradict the score the user is looking at.
+        label == RiskLabel.SUSPICIOUS -> listOf(ACTION_HIGH_VERIFY, ACTION_LOW_WATCH)
         label == RiskLabel.CAUTION && verifiedAsk -> listOf(ACTION_CAUTION_ASK, ACTION_HIGH_VERIFY)
         else -> listOf(ACTION_LOW_WATCH)
     }
@@ -596,6 +670,22 @@ class LocalScorer(
         private const val ESCALATION_STEP = 5
         private const val CRITICAL_CORROBORATIONS = 2
         private const val MAX_URL_EVIDENCE = 2
+
+        /**
+         * Weight of the separate strong signal ([DigitalArrestSignals]) inside the **no-ask** noisy-OR.
+         * It is never added when a verified ask exists: the ask path keeps its documented weights.
+         */
+        private const val WEIGHT_STRONG_SIGNAL = 20
+
+        /** Other independent stages needed for each rung of the no-ask ladder ([noAskBand]). */
+        private const val STRONG_SIGNAL_CAUTION_STAGES = 2
+        private const val STRONG_SIGNAL_HIGH_STAGES = 3
+
+        /** No-ask ladder bands: caution `25..49`, suspicious `50..69`. Never a HIGH_RISK band. */
+        private const val STRONG_SIGNAL_CAUTION_FLOOR = 25
+        private const val STRONG_SIGNAL_CAUTION_CEILING = 49
+        private const val STRONG_SIGNAL_HIGH_FLOOR = 50
+        private const val STRONG_SIGNAL_HIGH_CEILING = 69
 
         /** Stage weights, documented in the class KDoc. */
         private val WEIGHT: Map<StageId, Int> = mapOf(

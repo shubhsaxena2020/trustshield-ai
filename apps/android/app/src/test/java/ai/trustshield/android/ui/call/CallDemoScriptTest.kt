@@ -38,9 +38,11 @@ class CallDemoScriptTest {
     fun `script carries the report section 6 lines in order`() {
         assertEquals(CallDemoScript.lines.size, CallDemoScript.size)
 
+        // Lines 1, 3 and 4 are report §6's lines verbatim; line 2 keeps the drugs-parcel threat and
+        // appends the report's own digital-arrest voice-rule marker (the file KDoc states why).
         val reportLines = listOf(
             "Hello, main Mumbai Cyber Crime se Inspector Rathore bol raha hoon.",
-            "Aapke Aadhaar se bheje gaye parcel mein drugs mile hain.",
+            "Aapke Aadhaar se bheje gaye parcel mein drugs mile hain. Aap digital arrest mein hain.",
             "Yeh confidential case hai, kisi ko mat batana, video call cut mat karna.",
             "Case clear karne ke liye ₹50,000 RBI verification account mein bhejo.",
         )
@@ -86,6 +88,8 @@ class CallDemoScriptTest {
             }
             add(DemoStep.HELD_ASK_NOTE)
             add(DemoStep.TYPED_LINE_NOTE)
+            add(CallShieldCopy.digitalArrestAlert.hinglish)
+            add(CallShieldCopy.digitalArrestAlert.english)
         }
         for (entry in copy) {
             val lower = entry.lowercase()
@@ -151,20 +155,21 @@ class CallDemoScriptTest {
     }
 
     @Test
-    fun `ladder visits low, medium and critical as the engine measures it`() {
+    fun `ladder climbs low, medium, high and critical in order`() {
         val runner = CallDemoRunner()
         repeat(CallDemoScript.size) { runner.advance() }
         val positions = runner.progress().steps.map { it.position }
 
-        assertEquals(DemoRiskPosition.LOW, positions.first())
-        assertTrue("expected a MEDIUM rung, was $positions", positions.contains(DemoRiskPosition.MEDIUM))
-        assertEquals(DemoRiskPosition.CRITICAL, positions.last())
-
-        // Measured on this base commit with STANDARD sensitivity and typed (asrConfidence = 1.0)
-        // input. This ladder cannot produce SUSPICIOUS (50-69) or a non-escalated HIGH_RISK, so HIGH
-        // is not on it; see positionFor()'s KDoc for the measured numbers and for the one path that
-        // does reach HIGH.
-        assertFalse("HIGH must not be fabricated: $positions", positions.contains(DemoRiskPosition.HIGH))
+        // Issue #119 defect A: exactly four rungs, one per report line, strictly climbing.
+        assertEquals(
+            listOf(
+                DemoRiskPosition.LOW,
+                DemoRiskPosition.MEDIUM,
+                DemoRiskPosition.HIGH,
+                DemoRiskPosition.CRITICAL,
+            ),
+            positions,
+        )
     }
 
     @Test
@@ -189,15 +194,14 @@ class CallDemoScriptTest {
         repeat(CallDemoScript.size) { runner.advance() }
         val steps = runner.progress().steps
 
-        assertEquals(listOf(10, 10, 37, 70, 75, 80, 80), steps.map { it.score })
+        // Measured on android-finals + #119, STANDARD sensitivity, typed input (asrConfidence = 1.0).
+        // Re-measure and update the file KDoc table together with this list if a rule changes.
+        assertEquals(listOf(10, 44, 52, 75), steps.map { it.score })
         assertEquals(
             listOf(
                 RiskLabel.LOW_RISK,
-                RiskLabel.LOW_RISK,
                 RiskLabel.CAUTION,
-                RiskLabel.HIGH_RISK,
-                RiskLabel.HIGH_RISK,
-                RiskLabel.HIGH_RISK,
+                RiskLabel.SUSPICIOUS,
                 RiskLabel.HIGH_RISK,
             ),
             steps.map { it.label },
@@ -205,16 +209,13 @@ class CallDemoScriptTest {
         assertEquals(
             listOf(
                 DemoRiskPosition.LOW,
-                DemoRiskPosition.LOW,
                 DemoRiskPosition.MEDIUM,
-                DemoRiskPosition.CRITICAL,
-                DemoRiskPosition.CRITICAL,
-                DemoRiskPosition.CRITICAL,
+                DemoRiskPosition.HIGH,
                 DemoRiskPosition.CRITICAL,
             ),
             steps.map { it.position },
         )
-        assertEquals(steps.map { it.escalated }, listOf(false, false, false, true, true, true, true))
+        assertEquals(listOf(false, false, false, true), steps.map { it.escalated })
     }
 
     @Test
@@ -244,6 +245,112 @@ class CallDemoScriptTest {
         assertEquals(before.steps.last().score, repeated.score)
         assertEquals(before.steps.last().stages, repeated.stages)
         assertEquals(before.steps.last().quotes, repeated.quotes)
+    }
+
+    // ---------------------------------------------------------------------------------------------
+    // Data path for the UI lane (issue #119 defect A)
+    // ---------------------------------------------------------------------------------------------
+
+    @Test
+    fun `every step carries exactly five chips and only lit chips carry quotes`() {
+        val runner = CallDemoRunner()
+        repeat(CallDemoScript.size) {
+            val progress = runner.advance()
+            val step = progress.steps.last()
+            val transcript = runner.transcript()
+
+            assertEquals(CallStage.ordered, step.chips.map { it.stage })
+            for (chip in step.chips) {
+                if (!chip.lit) {
+                    assertTrue("unlit chip ${chip.stage} must not carry a quote", chip.quotes.isEmpty())
+                    continue
+                }
+                assertTrue("lit chip ${chip.stage} needs a quote", chip.quotes.isNotEmpty())
+                for (quote in chip.quotes) {
+                    assertTrue(
+                        "chip quote is not in the transcript at ${step.index}: $quote",
+                        transcript.contains(quote),
+                    )
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `chips light in report order and the ask chip waits for the demand`() {
+        val runner = CallDemoRunner()
+        repeat(CallDemoScript.size) { runner.advance() }
+        val steps = runner.progress().steps
+        fun lit(index: Int) = steps[index].chips.filter { it.lit }.map { it.stage }
+
+        assertEquals(listOf(CallStage.AUTHORITY), lit(0))
+        assertEquals(listOf(CallStage.AUTHORITY, CallStage.THREAT_REWARD), lit(1))
+        assertEquals(
+            listOf(CallStage.AUTHORITY, CallStage.THREAT_REWARD, CallStage.SECRECY_ISOLATION),
+            lit(2),
+        )
+        assertEquals(
+            listOf(
+                CallStage.AUTHORITY,
+                CallStage.THREAT_REWARD,
+                CallStage.SECRECY_ISOLATION,
+                CallStage.ASK,
+            ),
+            lit(3),
+        )
+    }
+
+    @Test
+    fun `the report alert text is exposed only at critical`() {
+        val runner = CallDemoRunner()
+        repeat(CallDemoScript.size) { runner.advance() }
+        val steps = runner.progress().steps
+
+        for (step in steps.take(3)) {
+            assertNull("alert must be null at ${step.position}", step.alert)
+            assertNull(step.alertText(english = false))
+        }
+
+        val critical = steps.last()
+        val alert = critical.alert
+        assertNotNull("CRITICAL must expose the report alert", alert)
+        assertEquals(
+            "Yeh digital arrest scam ka pattern hai. Koi bhi police ya CBI video call pe arrest " +
+                "nahi karti. Call kaat dijiye aur 1930 pe call karein.",
+            alert!!.hinglish,
+        )
+        assertEquals(alert.hinglish, critical.alertText(english = false))
+        assertEquals(alert.english, critical.alertText(english = true))
+        assertTrue("the English toggle must stay functional", alert.english.isNotBlank())
+    }
+
+    @Test
+    fun `haptics fire once on the transition into critical`() {
+        val runner = CallDemoRunner()
+        repeat(CallDemoScript.size) { runner.advance() }
+        val progress = runner.progress()
+
+        assertEquals(listOf(false, false, false, true), progress.steps.map { it.haptics })
+
+        // A further CRITICAL step is not a new escalation, so it must not pulse again.
+        val again = runner.type(CallDemoScript.LINE_4_ASK)
+        assertEquals(false, again.steps.last().haptics)
+        assertEquals(DemoRiskPosition.CRITICAL, again.position)
+    }
+
+    @Test
+    fun `reset returns the meter to low and takes the alert with it`() {
+        val runner = CallDemoRunner()
+        repeat(CallDemoScript.size) { runner.advance() }
+        assertNotNull(runner.progress().current?.alert)
+
+        val reset = runner.reset()
+
+        assertEquals(DemoRiskPosition.LOW, reset.position)
+        assertTrue(reset.steps.isEmpty())
+        assertNull(reset.current)
+        assertNull(reset.steps.lastOrNull()?.alert)
+        assertEquals("", runner.transcript())
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -279,13 +386,31 @@ class CallDemoScriptTest {
     }
 
     @Test
-    fun `the medium step carries the ask-hold note because corroboration is short`() {
+    fun `the medium step is the no-ask strong-signal rung and holds no ask`() {
         val runner = CallDemoRunner()
         repeat(CallDemoScript.size) { runner.advance() }
         val medium = runner.progress().steps.first { it.position == DemoRiskPosition.MEDIUM }
 
-        assertEquals(DemoStep.HELD_ASK_NOTE, medium.heldNote)
-        assertFalse("a held ask must not escalate", medium.escalated)
+        // Issue #119: MEDIUM is reached by two independent stages plus the report's strong
+        // digital-arrest marker, not by an ask, so nothing is "held" and nothing escalates.
+        assertNull(medium.heldNote)
+        assertFalse("a no-ask rung must not escalate", medium.escalated)
+        assertFalse("no ask has been made at the MEDIUM rung", medium.stages.contains(StageId.ASK))
+        assertEquals(RiskLabel.CAUTION, medium.label)
+        assertTrue(
+            "the strong signal must be visible as evidence",
+            medium.chips.any { it.stage == CallStage.THREAT_REWARD && it.lit },
+        )
+    }
+
+    @Test
+    fun `a lone verified ask still shows the held-ask note`() {
+        val runner = CallDemoRunner()
+        val step = runner.type(CallDemoScript.LINE_4_ASK).steps.single()
+
+        assertEquals(DemoRiskPosition.MEDIUM, step.position)
+        assertEquals(DemoStep.HELD_ASK_NOTE, step.heldNote)
+        assertFalse("a held ask must not escalate", step.escalated)
     }
 
     // ---------------------------------------------------------------------------------------------

@@ -2,14 +2,23 @@ package ai.trustshield.android.ui.navigation
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.Button
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -22,6 +31,10 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import android.net.Uri
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -67,7 +80,11 @@ import ai.trustshield.android.ui.call.CallUiState
 import ai.trustshield.android.ui.call.CallDemoRunner
 import ai.trustshield.android.ui.call.CallDemoScript
 import ai.trustshield.android.ui.call.DemoProgress
+import ai.trustshield.android.ui.call.DemoRiskPosition
 import ai.trustshield.android.ui.call.CallShieldHost
+import ai.trustshield.android.ui.call.CallShieldCopy
+import ai.trustshield.android.ui.call.CallStage
+import ai.trustshield.android.ui.call.forLanguage
 import ai.trustshield.android.input.speech.CallSpeechSession
 import ai.trustshield.android.input.speech.SpeechSessionCoordinator
 import ai.trustshield.android.input.speech.SpeechCapabilityProbe
@@ -95,6 +112,9 @@ import ai.trustshield.android.ui.result.ResultScreen
 import ai.trustshield.android.ui.result.UiLanguage
 import ai.trustshield.android.ui.theme.RiskTone
 import ai.trustshield.android.ui.theme.ToneCopy
+import ai.trustshield.android.ui.theme.container
+import ai.trustshield.android.ui.theme.onContainer
+import ai.trustshield.android.ui.theme.accent
 import ai.trustshield.android.ui.settings.SettingsScreen
 import ai.trustshield.android.ui.settings.SettingsState
 import ai.trustshield.android.ui.settings.reduce
@@ -370,13 +390,28 @@ fun CallShieldRouteHost() {
         Sensitivity.HIGH -> LocalScorer.Sensitivity.HIGH
     }
     val demoRunner = remember(demoSensitivity) { CallDemoRunner(sensitivity = demoSensitivity) }
-    var demoProgress by remember { mutableStateOf(demoRunner.progress()) }
+    var demoProgress by remember(demoRunner) { mutableStateOf(demoRunner.progress()) }
     var demoOpen by remember { mutableStateOf(false) }
+    var demoStarted by remember { mutableStateOf(false) }
     val permissionRequest = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         micGranted = granted
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    if (demoOpen) {
+        CallDemoExperience(
+            progress = demoProgress,
+            english = prefs.language == AppLanguage.ENGLISH,
+            onToggleLanguage = {
+                sink(prefs.copy(language = if (prefs.language == AppLanguage.ENGLISH) AppLanguage.HINGLISH else AppLanguage.ENGLISH))
+            },
+            onClose = { demoOpen = false },
+            onAdvance = { demoStarted = true; demoProgress = demoRunner.advance() },
+            onBack = { demoProgress = demoRunner.back() },
+            onReset = { demoStarted = true; demoProgress = demoRunner.reset() },
+            showResetLow = demoStarted && demoProgress.steps.isEmpty()
+        )
+    } else {
+        Column(modifier = Modifier.fillMaxSize()) {
     CallShieldScreen(
         state = state,
         modifier = Modifier.weight(1f),
@@ -414,16 +449,15 @@ fun CallShieldRouteHost() {
         onTypeTranscript = null
     )
     OutlinedButton(
-        onClick = { demoOpen = !demoOpen },
+        onClick = { demoOpen = true },
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp).heightIn(min = 48.dp)
-    ) { Text(if (demoOpen) "Close demo script" else "Demo script mode") }
-    if (demoOpen) {
-        CallDemoScriptPanel(
-            progress = demoProgress,
-            onAdvance = { demoProgress = demoRunner.advance() },
-            onBack = { demoProgress = demoRunner.back() },
-            onReset = { demoProgress = demoRunner.reset() }
+    ) {
+        Text(
+            CallShieldCopy.stagedDemo.forLanguage(
+                if (prefs.language == AppLanguage.ENGLISH) CallLanguage.ENGLISH else CallLanguage.HINGLISH
+            )
         )
+    }
     }
     LaunchedEffect(consent, micGranted) {
         val mic = if (micGranted) SpeechMicPermission.Granted else SpeechMicPermission.Denied
@@ -468,26 +502,170 @@ fun CallShieldRouteHost() {
 }
 
 @Composable
-private fun CallDemoScriptPanel(
+private fun CallDemoExperience(
     progress: DemoProgress,
+    english: Boolean,
+    onToggleLanguage: () -> Unit,
+    onClose: () -> Unit,
     onAdvance: () -> Unit,
     onBack: () -> Unit,
-    onReset: () -> Unit
+    onReset: () -> Unit,
+    showResetLow: Boolean
 ) {
+    val view = LocalView.current
     val step = progress.steps.lastOrNull()
-    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp)) {
-        Text("Scripted demo only. No microphone or call recording.", style = MaterialTheme.typography.bodySmall)
-        if (step != null) {
-            Text("${step.position.labelHinglish} · ${step.score}/100 · ${step.confidence}", style = MaterialTheme.typography.titleMedium)
-            Text(step.line.text, style = MaterialTheme.typography.bodyMedium)
-        } else {
-            Text("Tap through the sample lines; each step is scored locally.", style = MaterialTheme.typography.bodyMedium)
+    val tone = when (step?.position ?: DemoRiskPosition.LOW) {
+        DemoRiskPosition.LOW -> RiskTone.GREEN
+        DemoRiskPosition.MEDIUM -> RiskTone.AMBER
+        DemoRiskPosition.HIGH, DemoRiskPosition.CRITICAL -> RiskTone.RED
+    }
+
+    LaunchedEffect(step?.haptics) {
+        if (step?.haptics == true) view.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS)
+    }
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 2.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            TextButton(onClick = onClose, modifier = Modifier.heightIn(min = 48.dp)) {
+                Text(if (english) "Close demo" else "Demo band karein")
+            }
+            TextButton(onClick = onToggleLanguage, modifier = Modifier.heightIn(min = 48.dp)) {
+                Text(if (english) "Hinglish" else "English")
+            }
         }
-        Text(CallDemoScript.honestLimits.take(3).joinToString(" "), style = MaterialTheme.typography.bodySmall)
-        androidx.compose.foundation.layout.Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedButton(onClick = onBack, enabled = progress.steps.isNotEmpty()) { Text("Back") }
-            Button(onClick = onAdvance, enabled = !progress.finished) { Text(if (progress.finished) "Finished" else "Next line") }
-            OutlinedButton(onClick = onReset) { Text("Reset") }
+
+        Column(
+            modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Surface(
+                modifier = Modifier.fillMaxWidth().semantics {
+                    contentDescription = step?.let { "${it.position.label(english)} risk, ${it.score} out of 100" }
+                        ?: if (showResetLow) "Low risk, transcript cleared" else if (english) "Demo ready" else "Demo taiyaar hai"
+                },
+                color = tone.container(),
+                contentColor = tone.onContainer(),
+                shape = RoundedCornerShape(20.dp)
+            ) {
+                Column(Modifier.padding(16.dp)) {
+                    Text(
+                        if (english) "Call Shield · Demo · ${step?.let { "Step ${it.index + 1} of ${CallDemoScript.size}" } ?: "Ready"}"
+                        else "Call Shield · Script demo · ${step?.let { "${it.index + 1} / ${CallDemoScript.size}" } ?: "Taiyaar"}",
+                        style = MaterialTheme.typography.titleSmall
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        step?.position?.label(english)
+                            ?: if (showResetLow) DemoRiskPosition.LOW.label(english)
+                            else if (english) "Ready for line 1" else "Pehli line ke liye taiyaar",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    if (step != null) {
+                        val confidence = when (step.confidence) {
+                            ai.trustshield.android.core.model.Confidence.HIGH -> if (english) "High" else "Zyada"
+                            ai.trustshield.android.core.model.Confidence.MEDIUM -> if (english) "Medium" else "Theek-thaak"
+                            ai.trustshield.android.core.model.Confidence.LOW -> if (english) "Low" else "Kam"
+                        }
+                        Text(
+                            "${step.score}/100 · ${if (english) "Confidence" else "Samajh"}: $confidence",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Text(step.position.explanation(english), style = MaterialTheme.typography.bodySmall)
+                    }
+                }
+            }
+
+            step?.alertText(english)?.let { alert ->
+                Surface(
+                    modifier = Modifier.fillMaxWidth().semantics { contentDescription = alert },
+                    color = RiskTone.RED.container(),
+                    contentColor = RiskTone.RED.onContainer(),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Text(alert, modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                }
+            }
+
+            if (step == null) {
+                Text(
+                    if (showResetLow) {
+                        if (english) "Reset · LOW. The in-memory transcript was cleared." else "Reset · KAM. Memory wala transcript saaf ho gaya."
+                    } else if (english) {
+                        "Tap Next line to run the deterministic A05 script."
+                    } else {
+                        "A05 script chalane ke liye Agli line dabayein."
+                    },
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            } else {
+                Text(if (english) "Why this step" else "Yeh sanket kyun", style = MaterialTheme.typography.titleSmall)
+                step.chips.forEach { chip ->
+                    val chipTone = if (chip.lit) RiskTone.AMBER else RiskTone.NEUTRAL
+                    val stageLabel = CallShieldCopy.stageLabel(chip.stage).forLanguage(
+                        if (english) CallLanguage.ENGLISH else CallLanguage.HINGLISH
+                    )
+                    Surface(
+                        modifier = Modifier.fillMaxWidth().semantics {
+                            contentDescription = buildString {
+                                append(stageLabel)
+                                append(
+                                    if (english) {
+                                        if (chip.lit) ", found" else ", not found"
+                                    } else {
+                                        if (chip.lit) ", mila" else ", nahi mila"
+                                    }
+                                )
+                                chip.quotes.forEach { append(" $it") }
+                            }
+                        },
+                        color = chipTone.container(),
+                        contentColor = chipTone.onContainer(),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Column(Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
+                            Text(
+                                stageLabel + if (chip.lit) " · ${if (english) "Found" else "Mila"}" else " · ${if (english) "Not found" else "Nahi mila"}",
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            chip.quotes.forEach { quote ->
+                                Text("“$quote”", style = MaterialTheme.typography.bodySmall)
+                            }
+                        }
+                    }
+                }
+                Text("“${step.line.text}”", style = MaterialTheme.typography.bodyMedium)
+            }
+
+            Text(
+                if (english) {
+                    "This typed demo is not a real call recording. The meter follows deterministic local rules. Deepfake voices are not checked."
+                } else {
+                    CallDemoScript.honestLimits.take(3).joinToString(" ")
+                },
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(Modifier.height(4.dp))
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            OutlinedButton(onClick = onBack, enabled = progress.steps.isNotEmpty(), modifier = Modifier.weight(1f).heightIn(min = 48.dp)) {
+                Text(if (english) "Back" else "Peeche")
+            }
+            Button(onClick = onAdvance, enabled = !progress.finished, modifier = Modifier.weight(1.25f).heightIn(min = 48.dp)) {
+                Text(if (english) "Next line" else "Agli line")
+            }
+            OutlinedButton(onClick = onReset, modifier = Modifier.weight(1f).heightIn(min = 48.dp)) {
+                Text(if (english) "Reset" else "Phir se")
+            }
         }
     }
 }
