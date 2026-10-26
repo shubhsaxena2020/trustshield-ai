@@ -358,6 +358,10 @@ Branch: `android-finals`. Phase: **3 active; Codex foundation pushed, 18 new P0 
 - Live wave widths: agent1 `[9]` with 3 active children, agent2 `[9]` with 9 active children, agent3 `[3]` legacy with all children complete. Stored call args omit max_concurrent_children, although nine children were created for agent2. Emulator lock belongs to agent2; 17.4 GB free RAM.
 - No physical serial access, no new build, and no emulator action by Codex. Phone acceptance remains owner-only.
 
+### 2026-10-27 00:12 IST checkpoint
+- Incorporated the owner ASR addendum: one first-wave child performs a <=2-hour emulator bake-off (Vosk small/full vs sherpa-onnx Whisper tiny/base), using synthetic and publicly licensed recordings, then writes `docs/android/ASR_BAKEOFF.md`. Only that child may use the locked emulator; no phone access. Prepared P5 prompt updated accordingly.
+- Existing live roots remain agent1 `[9]` (3 active), agent2 `[9]` (9 active), agent3 `[3]` (children complete; root waiting). The emulator lock belongs to agent2. RAM 19.9 GB. The owner directive edit remains unstaged.
+
 ### 2026-10-27 00:07 IST checkpoint
 - Fast-forward verification: main `android-finals` was already equal to freshly fetched `origin/android-finals`. Committed and pushed the owner's released-phone directive and offline Hindi ASR directive as `dfd3483`; no other main-checkout artifacts were staged.
 - Physical-device boundary: the owner owns Redmi serial `63b0de52`; Codex/Hermes must never run adb against it. No adb commands were run.
