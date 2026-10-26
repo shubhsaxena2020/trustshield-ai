@@ -331,9 +331,14 @@ PHASE 3 COMPLETE
 - PR #141 remains open; no emulator spot check yet. GitHub security check failed on the tracked dependency audit; frontend/backend checks are still running at this snapshot. The API 36 emulator lock remains held by agent3, and the Gradle lock is currently held by a Phase 4 lane. Codex started neither. No physical phone used; no owner release received.
 - PR #142 remains open and explicitly incomplete for #138 because Result evidence still mixes Hinglish in English mode; its P1 work is deferred until P0 acceptance is complete.
 
-## 2026-10-26 23:28 IST — #141 callback review finding fixed
+## 2026-10-26 23:18 IST — #141 callback review finding fixed
 
 - Codex reproduced the callback review false positive with a failing regression: `Your electricity bill is due tomorrow. Call 9876543210 if you have questions.` The fix removes routine bill/due-date terms as standalone callback stakes. Utility callbacks now require high-stakes context; generic callback requests still retain bank/card context. Existing SBI/HDFC callback, utility-cutoff, and delivery-agent behavior remains covered.
 - Added legitimate fixture F40 and updated `DETECTION_FIXTURES.md`: 47 total rows, 28 scam / 19 legitimate, 47/47 PASS, including zero verified ask and score 0 for the bill-support twin.
 - Full local current-source gate passed in the PR worktree after the final detector adjustment: 1,094 JVM tests, `:app:lintDebug`, and `:app:assembleDebug`. The gate was run under the shared Gradle lock; no emulator used. The post-gate base refresh was docs-only.
 - PR #141 is updated at head `280ef50` and rebased on `android-finals` @ `9e5b77f`. GitHub checks have restarted; latest snapshot shows security failed and backend/frontend pending. No merge yet; wait for all checks and the fixture emulator spot check when the shared emulator lock is free. The phone hold remains active with no explicit owner release.
+
+## 2026-10-26 23:19 IST — agent2 safe-boundary swarm relaunch
+
+- Agent2's previous Hermes process ended naturally (`state.db` end_reason `agent_close`) with worktree `wt-138` clean at commit `9ab7b42`; PR #142 remains open and its P0 English Result evidence defect remains explicitly in scope. Relaunched profile agent2 as Hermes PID 31052 via `launch-hermes.ps1`, using the one-line pointer prompt `read the file C:\Users\shubh\AppData\Local\Temp\android\agent2.phase4.swarm.work.txt and execute it`. The file requires one exact nine-task wave, wait/review/integrate, and repeat. At launch, the new session/wave has not yet been recorded in the profile state.db; no compliant wave is claimed until state.db confirms `tasks` length 9.
+- agent1 is still active with uncommitted fallback edits and no delegation wave in its current session; do not interrupt before a safe commit boundary. agent3 is active on accessibility verification with dirty report/harness files and holds the single emulator lock. RAM is 19.82 GB; Gradle lock is free. No physical phone work; owner release not received.

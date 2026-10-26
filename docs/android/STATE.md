@@ -289,7 +289,12 @@ Branch: `android-finals`. Phase: **3 active; Codex foundation pushed, 18 new P0 
 - PR #141 remains open; no emulator spot check yet. GitHub security check failed on the tracked dependency audit; frontend/backend checks are still running at this snapshot. The API 36 emulator lock remains held by agent3, and the Gradle lock is currently held by a Phase 4 lane. Codex started neither. No physical phone used; no owner release received.
 - PR #142 remains open and explicitly incomplete for #138 because Result evidence still mixes Hinglish in English mode; its P1 work is deferred until P0 acceptance is complete.
 
-### 2026-10-26 23:28 IST checkpoint
+### 2026-10-26 23:18 IST checkpoint
 - PR #141 review false positive is fixed in head `280ef50`: F40 is the routine electricity-bill support callback, and the high-stakes callback gate no longer treats bill/due-date words alone as scam context. Full local gate: 1,094 JVM tests, lintDebug, assembleDebug pass; fixture set 47/47.
 - PR #141 rebased on current `android-finals` @ `9e5b77f`, open and awaiting restarted CI plus an emulator spot check. GitHub snapshot: security failed; backend/frontend pending.
 - No emulator or physical phone used by Codex. Physical phone hold remains until an explicit owner release.
+
+### 2026-10-26 23:19 IST checkpoint
+- Agent2 previous session ended naturally at a clean boundary (`9ab7b42`); relaunched PID 31052 through `launch-hermes.ps1` with the #138 work file pointer. `state.db` must confirm its exact task width before any wave counts as compliant; no call recorded yet at launch.
+- Agent1 fallback and agent3 accessibility worktrees remain dirty and active. Agent3 owns the one emulator. Free RAM 19.82 GB; Gradle lock free. The phone hold has no owner release signal.
+- Corrected the previous 23:28 heading to 23:18 IST to match the `4f2a05a` commit time.
