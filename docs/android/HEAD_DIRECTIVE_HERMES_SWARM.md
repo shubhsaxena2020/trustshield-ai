@@ -16,3 +16,7 @@ Across ~2,500 to ~4,000 messages per profile, each Hermes session made only 7-8 
 
 ## Phone hold still applies
 No work that needs the real USB phone before ~22:45 IST (see HEAD_DIRECTIVE_PHONE_HOLD.md).
+
+---
+## UPDATE 27 Oct 2026 00:50 IST - owner: 3 sessions x 18 parallel subagents (time is short)
+The owner raised the width: every Hermes session now runs 18 parallel subagents per wave (3 lanes x 18 = 54 concurrent). `max_concurrent_children` is set to 18 in the default config and in profiles agent1/agent2/agent3 (backups `config.yaml.bak-pre18-*`); it takes effect on each lane's NEXT launch, so relaunch every lane at its next safe commit boundary. Rules change as follows: one `delegate_task` call with `tasks` of length 18 per wave (never narrower than 14 without a logged reason); pad with adversarial test writers, fixture authors, reviewers of the other subagents' diffs, and accessibility/localisation checkers; disjoint file ownership is mandatory (18 writers on one worktree is a merge hazard: give each subagent an exclusive file list, and the lane lead alone runs Gradle and commits). Watch 9Router rate limits and free RAM (alarm below 8 GB): if 9Router returns 429/503, drop that lane to 12 for the wave and log it. Verification: Codex checks `delegate_task` tasks length in each profile state.db and logs wave sizes.

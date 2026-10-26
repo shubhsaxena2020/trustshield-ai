@@ -14,3 +14,6 @@ With airplane mode on, Call Shield live mic fails. Google recognizer log on the 
 6. CPU and battery: single decoding thread, release the model on Stop. The head measures on the phone.
 
 Acceptance: airplane mode on, the three digital-arrest sentences spoken in Hindi/Hinglish produce a transcript and the meter reaches "Dhyan dein" or higher; a 3-minute session with silences stays alive.
+
+## Addendum 27 Oct 00:40 IST - owner rule: use existing open-source ASR, never write one from scratch
+Do not train or hand-build any recognizer. Integrate a maintained open-source engine behind the existing speech interface. Primary choice stays Vosk Android (Apache-2.0, ready AAR, official Hindi models). Run a short, time-boxed bake-off (one subagent in the first wave, max 2 hours, on the emulator with synthetic and recorded Hindi/Hinglish WAVs, then on the real phone by the head): Vosk small Hindi vs Vosk full Hindi vs sherpa-onnx (Apache-2.0) with a multilingual Whisper-tiny/base export in chunked mode. Judge on: Hindi/Hinglish digital-arrest phrase recall, latency per chunk on arm64 (target under 1.5 s), APK size, RAM, license. Pick one, record the numbers in docs/android/ASR_BAKEOFF.md, wire only the winner. No network at runtime in any case.
