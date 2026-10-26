@@ -14,7 +14,7 @@ The generator uses local Python packages `qrcode[pil]`; it makes four `upi://pay
 
 ## Device helpers
 
-All PowerShell helpers require an explicit `-Serial`, verify that the serial is connected and authorized, and do not use network or modify device settings beyond the named action. Logs are written under `scripts/logs/`; review before sharing. The collector stores package-specific metadata, memory/frame summaries, and crash/ANR markers only; it does not export general logcat or app data.
+All PowerShell helpers require an explicit `-Serial`, verify that the serial is connected and authorized, and do not use network or modify device settings beyond the named action. Logs default to `docs/android/phone-kit/scripts/logs/`, relative to each helper; review before sharing. The collector stores package-specific metadata, memory/frame summaries, and crash/ANR markers only; it does not export general logcat or app data.
 
 ```powershell
 pwsh -File docs/android/phone-kit/scripts/phone_install.ps1 -Serial <SERIAL>

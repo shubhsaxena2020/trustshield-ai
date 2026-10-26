@@ -298,3 +298,8 @@ Branch: `android-finals`. Phase: **3 active; Codex foundation pushed, 18 new P0 
 - Agent2 previous session ended naturally at a clean boundary (`9ab7b42`); relaunched PID 31052 through `launch-hermes.ps1` with the #138 work file pointer. `state.db` must confirm its exact task width before any wave counts as compliant; no call recorded yet at launch.
 - Agent1 fallback and agent3 accessibility worktrees remain dirty and active. Agent3 owns the one emulator. Free RAM 19.82 GB; Gradle lock free. The phone hold has no owner release signal.
 - Corrected the previous 23:28 heading to 23:18 IST to match the `4f2a05a` commit time.
+
+### 2026-10-26 23:25 IST checkpoint
+- Phone kit statically reviewed; all four synthetic QR cards in the one-page A4 PDF decode through ZXing with zero amount. Helper scripts were not executed during the phone hold. README now identifies the correct default helper log path.
+- Current Hermes wave widths remain agent1 `[]`, agent2 `[]`, agent3 `[3]`; no compliant nine-task wave. Provider is returning 503 for the recommended fallback probe; no model switch.
+- Free RAM 19.55 GB. Shared emulator and Gradle locks are held; Codex started neither. `adb devices` shows emulator-5554 only, and the owner has not explicitly released physical-phone work.
