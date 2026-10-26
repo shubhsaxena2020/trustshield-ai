@@ -462,3 +462,10 @@ PHASE 3 COMPLETE
 - Re-audited the three active Hermes roots in profile state.db: agent1 `[9]` with 2/9 children active; agent2 `[9]` with 9/9 active; agent3 legacy `[3]` with no active children. No lane has reached a clean/committed boundary, so no relaunch occurred. Next packages remain A #148/#146 at width 18, B #144 at width 18, and C #143/#147 at width 12 because its recorded 9Router errors include 429/503.
 - Agent3 now has one `./gradlew :app:testDebugUnitTest :app:lintDebug :app:assembleDebug` process from `trustshield-android-p4/agent3`; no other Gradle command was visible. The emulator lock is still held by agent2 P4-138 on `emulator-5554`. No emulator or phone command was run by Codex; serial `63b0de52` remains head-only.
 - Free RAM is about 19.5 GB. Main checkout is synced at `1417219`; unrelated pre-existing untracked workspace files remain untouched.
+
+## 2026-10-27 00:21 IST - emulator lock conflict interrupted lane-C evidence run
+
+- Read agent3's active terminal call from its state.db: it had installed the debug APK on `emulator-5554` and then started `docs/android/evidence/run_a11y_matrix.py`. The shared lock marker still assigned that emulator to agent2 P4-138. The install had completed when observed; the accessibility matrix had not completed and is not valid evidence.
+- Stopped only the two `run_a11y_matrix.py` Python processes (PIDs 15428 and 6096) to prevent continued use of agent2's locked emulator. Did not stop Hermes agent3, the emulator, or any other lane. No adb command was run by Codex and no physical-device serial `63b0de52` was accessed.
+- Current process check: agent1, agent2, and agent3 Hermes roots remain alive; `emulator.exe` remains agent2's API36 emulator; no accessibility matrix runner remains. Leave agent2's lock intact. Agent3 must reach a clean commit boundary before relaunch; its accessibility evidence remains incomplete and must be rerun only after lock release.
+- Main checkout was clean for tracked files at `4ebfbf4`, equal to freshly fetched `origin/android-finals`; unrelated pre-existing untracked files were left untouched. Free RAM was not re-measured in this checkpoint.

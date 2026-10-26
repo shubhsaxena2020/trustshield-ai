@@ -374,3 +374,8 @@ Branch: `android-finals`. Phase: **3 active; Codex foundation pushed, 18 new P0 
 - Resource ownership is rechecked from the lock marker: `phase4-emulator.lock/owner.txt` says agent2 P4-138, device emulator-5554. No emulator process is currently visible. Leave this lock for agent2 to release; do not reclaim it. RAM is 17.6 GB free. A Gradle daemon remains resident; do not start a build without the shared Gradle lock.
 - P0 lane relaunches are queued behind safe boundaries: A = #148 + #146, B = #144, C = #143 + #147. No lane was killed or relaunched in this checkpoint. Existing agent1/agent2 waves each match task width 9, but omitted explicit max_concurrent_children=9; require it on relaunch. Lane C's next swarm must use exact width 9 and wait for agent2 to release the emulator lock before any device work.
 - Do not begin conversation mode, payment advisory, or accessibility follow-up until #148/#146 and #144 merge. No APK-ready claim yet.
+
+### 2026-10-27 00:21 IST checkpoint
+- Agent3's state.db terminal call showed a debug APK install to `emulator-5554` followed by the accessibility matrix runner. The lock marker named agent2 P4-138 as the sole emulator owner. The install completed before observation; matrix results are incomplete and not acceptable as evidence.
+- Stopped only matrix subprocesses 15428 and 6096. Left Hermes agent3, agent1/agent2, and emulator.exe running. The active emulator remains agent2's; no adb command by Codex, no use of phone serial `63b0de52`. Do not let agent3 rerun emulator work until the lock is released; rerun acceptance after safe boundary.
+- Main checkout's tracked files were clean and synced at `4ebfbf4`; unrelated untracked files remain. No Phase 4 completion claim.
