@@ -386,3 +386,15 @@ Branch: `android-finals`. Phase: **3 active; Codex foundation pushed, 18 new P0 
 - RAM available was 18.55 GB. Agent2 retains `emulator-5554`; no Gradle command was active at this check.
 - Prepared next-wave workfiles now each specify exactly 9 disjoint tasks, one `delegate_task` call per wave, wait/review/integration, and state.db verification. One-line `launch-hermes.ps1` pointer prompts are ready but no lane was relaunched.
 - Main tracked files were synced at `fb85ad8`; unrelated untracked files remain. Phase 4 remains incomplete.
+
+
+### 2026-10-27 00:38 IST checkpoint
+- Relaunched one Hermes lane per profile for the binding P0 order: agent1 PID 18328 owns #148 + #146, agent2 PID 28152 owns #144, and agent3 PID 26344 owns #143 + #147. State.db roots: `20261027_003830_f0cb6a`, `20261027_003841_271549`, and `20261027_003844_e5a822`. At launch each had no delegate_task call; verify task widths before counting a wave.
+- The prior fallback WIP remains preserved on pushed branch `android/P4-fallbacks` at `a0cc44e`. P0 worktrees are clean at base `1ee858b`.
+- Emulator lock is absent and no emulator is running. Free RAM 22.9 GB. No phone ADB command was run; serial `63b0de52` remains head-owned.
+- P1 leftovers remain parked until P0 merges. No P0 code is merged; no APK path is ready for phone retest.
+
+### 2026-10-27 00:40 IST checkpoint
+- A duplicate startup was observed: six startup sessions briefly existed (two per profile). The extra roots had no delegate_task calls, no child tasks, and exited before modifying lane work. One active root per profile remains.
+- The three active new roots have not yet recorded a delegate_task call. Do not report a compliant wave until `tasks` length equals exactly 9 in each profile state.db.
+- There is no active emulator lock or emulator process. No phone serial `63b0de52` was accessed.

@@ -477,3 +477,22 @@ PHASE 3 COMPLETE
 - Free RAM was 18.55 GB, above the 8 GB alarm. The only visible emulator remains agent2's `emulator-5554`; no active Gradle command was visible. No physical-device serial `63b0de52` was accessed.
 - Rewrote the three queued workfiles under `%LOCALAPPDATA%\Temp\android` so every next wave has exactly 9 disjoint tasks, one `delegate_task` call, full wait/review/integration, and state.db width logging. This follows the current user instruction and supersedes the older width-18 addendum for future launches. Added one-line pointer prompt files for `launch-hermes.ps1`; none was launched because all lanes remain mid-package.
 - Main tracked files were synced at `fb85ad8`; unrelated pre-existing untracked files remain untouched. No Phase 4 completion claim.
+
+## 2026-10-27 00:40 IST - lane prompt execution check
+- Current launcher trees are agent1 PID 27152 / Hermes 18328, agent2 PID 25928 / Hermes 28152, agent3 PID 30664 / Hermes 26344. These read the P0 pointer prompts and are the only active lane Hermes roots at this check.
+- Fresh audited sessions: agent1 20261027_003830_f0cb6a (00:38:34), agent2 20261027_003841_271549 (00:38:46), agent3 20261027_003844_e5a822 (00:38:48). They are reading required docs and source. No delegate_task call yet; deadline for the 10-minute width check is 00:48:34/46/48 respectively. No Gradle build or emulator lock is active.
+
+
+## 2026-10-27 00:38 IST - P0 lane relaunches started
+
+- Active Hermes roots: agent1 PID 18328 (#148 + #146), agent2 PID 28152 (#144), agent3 PID 26344 (#143 + #147). New state.db sessions are `20261027_003830_f0cb6a`, `20261027_003841_271549`, and `20261027_003844_e5a822`. Each has zero delegate_task calls at launch; no wave is compliant until the tasks array is checked.
+- Preserved pushed WIP fallback branch `android/P4-fallbacks` at `a0cc44e`; no files from that branch were discarded. P0 worktrees are clean at `1ee858b`.
+- The shared emulator lock is absent, no emulator process is running, and free RAM is 22.9 GB. No Gradle build or phone ADB command was started by Codex. Serial `63b0de52` remains head-owned.
+- The repo swarm directive also contains a later 18-wide addendum, but the direct user instruction for this run requires 9 tasks per lane wave. The three active prompts specify exactly 9; verify the actual state.db calls before counting compliance.
+- P1 leftovers remain parked. No P0 code has merged and no APK is marked READY FOR PHONE RETEST.
+
+## 2026-10-27 00:40 IST - duplicate startup audit
+
+- Two extra root sessions per profile were observed from overlapping coordinators; all had zero delegate_task calls and zero child sessions. They exited before doing lane work. The only Hermes processes currently active are the three roots listed above; no duplicate lane is running.
+- The active roots have not yet created their waves. Agent1 is receiving a provider response, agent2 is waiting for a provider response, and agent3 is receiving a provider response. No worktree has changed since launch.
+- Emulator lock and emulator process remain absent; free RAM was 22.9 GB at the last check. Do not run a build or emulator task without taking the shared lock first. No ADB was run against `63b0de52`.
