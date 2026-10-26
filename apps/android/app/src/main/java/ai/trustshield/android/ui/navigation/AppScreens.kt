@@ -22,6 +22,8 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import android.net.Uri
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -113,48 +115,133 @@ val LocalPreferencesSink: ProvidableCompositionLocal<(UserPreferences) -> Unit> 
     staticCompositionLocalOf { {} }
 
 /**
+ * What the Result destination can render.
+ *
+ * The decision is a pure function ([resultRouteView]) rather than an early `return` inside the
+ * composable, so "is there anything to show?" is testable on a plain JVM and the empty case cannot
+ * silently degrade into a blank screen (issue #85, defect B).
+ */
+sealed interface ResultRouteView {
+
+    /** No scan outcome in memory: the route was restored or opened without a scan. */
+    data object Empty : ResultRouteView
+
+    /** The last analysed outcome, straight from the local engine. */
+    data class Loaded(val outcome: ScanOutcome) : ResultRouteView
+}
+
+/** The single place that decides whether the Result route has something honest to say. */
+fun resultRouteView(outcome: ScanOutcome?): ResultRouteView =
+    if (outcome == null) ResultRouteView.Empty else ResultRouteView.Loaded(outcome)
+
+/**
+ * Copy for the empty Result state (UI_SPEC "Copy and states": say what is missing and the safest
+ * next step). Hinglish is the default; English is the toggle. No absolute-safety claim, ever.
+ */
+object ResultEmptyCopy {
+
+    const val HINGLISH: String = "Koi scan nahi mila. Home se message dobara check karein."
+
+    const val ENGLISH: String = "No scan to show. Check a message again from Home."
+
+    const val ACTION_HINGLISH: String = "Home par jayein"
+
+    const val ACTION_ENGLISH: String = "Go to Home"
+
+    fun text(english: Boolean): String = if (english) ENGLISH else HINGLISH
+
+    fun action(english: Boolean): String = if (english) ACTION_ENGLISH else ACTION_HINGLISH
+}
+
+/**
  * Result destination host.
  *
  * The state comes from the in-memory local analysis result; no sample fixture is used in the app.
+ * With no outcome in memory (process death, or a Result route opened directly) the screen says so
+ * and offers a real way back to Home instead of rendering nothing.
  */
 @Composable
 fun ResultRouteHost(english: Boolean, outcome: ScanOutcome?) {
     val nav = LocalNavActions.current
     val prefs = LocalUserPreferences.current
     val sink = LocalPreferencesSink.current
-    val state = remember(outcome) { outcome?.let(AnalysisToResult::build) }
-    var language by remember(english) { mutableStateOf(UiLanguage.of(english)) }
 
-    if (state == null || outcome == null) return
+    when (val view = resultRouteView(outcome)) {
+        ResultRouteView.Empty -> EmptyResultState(english = english, onHome = { nav.back() })
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        Text(
-            text = if (outcome.result.risk.label == RiskLabel.UNABLE_TO_VERIFY) {
-                "Risk score: Unable to Verify"
-            } else {
-                (if (english) "Risk score: " else "Risk score: ") + "${outcome.risk.score}/100"
-            },
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp)
-        )
-    ResultScreen(
-        state = state,
-        language = language,
-        onToggleLanguage = {
-            language =
-                if (language == UiLanguage.ENGLISH) UiLanguage.HINGLISH else UiLanguage.ENGLISH
-            sink(
-                prefs.copy(
-                    language = if (language == UiLanguage.ENGLISH) AppLanguage.ENGLISH else AppLanguage.HINGLISH
+        is ResultRouteView.Loaded -> {
+            val outcome = view.outcome
+            val state = remember(outcome) { AnalysisToResult.build(outcome) }
+            var language by remember(english) { mutableStateOf(UiLanguage.of(english)) }
+
+            Column(modifier = Modifier.fillMaxSize()) {
+                Text(
+                    text = if (outcome.result.risk.label == RiskLabel.UNABLE_TO_VERIFY) {
+                        "Risk score: Unable to Verify"
+                    } else {
+                        (if (english) "Risk score: " else "Risk score: ") + "${outcome.risk.score}/100"
+                    },
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp)
                 )
-            )
-        },
-        // SEAM: no external actions exist yet (no dialer, no browser -- analysed content is never
-        // opened). Actions are rendered and inert until a package owns them.
-        onAction = {},
-        onBack = { nav.back() },
-        modifier = Modifier.weight(1f)
-    )
+                ResultScreen(
+                    state = state,
+                    language = language,
+                    onToggleLanguage = {
+                        language =
+                            if (language == UiLanguage.ENGLISH) UiLanguage.HINGLISH else UiLanguage.ENGLISH
+                        sink(
+                            prefs.copy(
+                                language = if (language == UiLanguage.ENGLISH) AppLanguage.ENGLISH else AppLanguage.HINGLISH
+                            )
+                        )
+                    },
+                    // SEAM: no external actions exist yet (no dialer, no browser -- analysed content is
+                    // never opened). Actions are rendered and inert until a package owns them.
+                    onAction = {},
+                    onBack = { nav.back() },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Honest empty Result state: what is missing, in the user's language, plus a >=48 dp control back
+ * to Home. Both the text and the button carry a `contentDescription` so TalkBack announces them.
+ */
+@Composable
+private fun EmptyResultState(english: Boolean, onHome: () -> Unit) {
+    val message = ResultEmptyCopy.text(english)
+    val action = ResultEmptyCopy.action(english)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 20.dp, vertical = 24.dp),
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = "Result",
+            style = MaterialTheme.typography.titleLarge
+        )
+        Text(
+            text = message,
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier
+                .padding(top = 8.dp)
+                .semantics { contentDescription = message }
+        )
+        Button(
+            onClick = onHome,
+            modifier = Modifier
+                .padding(top = 16.dp)
+                .fillMaxWidth()
+                .heightIn(min = 48.dp)
+                .semantics { contentDescription = action }
+        ) {
+            Text(action)
+        }
     }
 }
 

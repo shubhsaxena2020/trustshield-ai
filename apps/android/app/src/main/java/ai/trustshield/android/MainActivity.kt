@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.CompositionLocalProvider
@@ -14,6 +15,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.ViewModel
 import ai.trustshield.android.data.preferences.AppLanguage
 import ai.trustshield.android.data.preferences.SharedPreferencesUserPreferencesStore
 import ai.trustshield.android.data.preferences.ThemeMode
@@ -39,11 +41,45 @@ import ai.trustshield.android.ui.navigation.TrustShieldRouteContent
 import ai.trustshield.android.ui.theme.TrustShieldTheme
 
 /**
+ * Activity-scoped carrier for the last analysed result (issue #85, defect A).
+ *
+ * A `remember` inside `setContent` dies on a configuration change while [AppNavHost]'s back stack
+ * survives it (`rememberSaveable`), so rotation on the Result screen used to restore the route and
+ * lose the outcome. A `ViewModel` is retained across configuration changes by the activity's
+ * `ViewModelStore` and destroyed with the process, so:
+ *
+ *  * rotating, resizing, switching theme or language keeps the verdict on screen;
+ *  * process death intentionally loses it — nothing is written to disk, preferences, a
+ *    `SavedStateHandle` or any `Bundle`, so a pasted message can never be resurrected from storage.
+ *    The Result route then shows the honest empty state from `ResultRouteHost`.
+ *
+ * One slot only: a new scan replaces the previous outcome, so no scan history accumulates.
+ * [ScanOutcome.analyzedText] is the only copy of the input and it lives in RAM; no `toString` is
+ * overridden here, so nothing prints the message.
+ */
+class ResultOutcomeHolder : ViewModel() {
+
+    /** The last scan of this activity instance, or `null` when nothing was analysed. */
+    var outcome: ScanOutcome? by mutableStateOf(null)
+
+    /** Drops the last result, e.g. when an intake produced no analysable outcome. */
+    fun clear() {
+        outcome = null
+    }
+}
+
+/**
  * The single activity. It owns nothing but the theme and the navigation host: no scoring, no network,
  * no persistence. Everything visible is a `ui/navigation` or `ui/<Area>Screen` composable, which is what
  * keeps the deterministic engine testable on a plain JVM.
  */
 class MainActivity : ComponentActivity() {
+
+    /**
+     * The last scan, held in RAM for the lifetime of this activity across configuration changes.
+     * Never persisted: no `SavedStateHandle`, no bundle key, no file.
+     */
+    private val resultHolder: ResultOutcomeHolder by viewModels()
 
     /**
      * Destination requested by the intent that launched (or re-entered) this activity — a share
@@ -82,7 +118,7 @@ class MainActivity : ComponentActivity() {
             // wiring for C04's model). Read once on the main thread: a five-key file.
             var preferences: UserPreferences by remember { mutableStateOf(store.load()) }
             var scanState by remember { mutableStateOf(ScanInputState()) }
-            var resultOutcome by remember { mutableStateOf<ScanOutcome?>(null) }
+            val resultOutcome: ScanOutcome? = resultHolder.outcome
 
             LaunchedEffect(entrySequence, incomingText) {
                 val shared = incomingText ?: return@LaunchedEffect
@@ -92,11 +128,11 @@ class MainActivity : ComponentActivity() {
                     ai.trustshield.android.data.preferences.Sensitivity.BALANCED -> LocalScorer.Sensitivity.STANDARD
                     ai.trustshield.android.data.preferences.Sensitivity.HIGH -> LocalScorer.Sensitivity.HIGH
                 }
-                resultOutcome = when (val share = ShareIngestCoordinator(
+                when (val share = ShareIngestCoordinator(
                     pipeline = LocalScanPipeline(sensitivity = sensitivity)
                 ).ingest(ShareIngestRequest.Text(shared))) {
-                    is ShareIngestOutcome.Analysed -> share.outcome
-                    else -> null
+                    is ShareIngestOutcome.Analysed -> resultHolder.outcome = share.outcome
+                    else -> resultHolder.clear()
                 }
                 incomingText = null
                 requestedEntry = AppRoute.RESULT
@@ -127,7 +163,7 @@ class MainActivity : ComponentActivity() {
                             resultOutcome = resultOutcome,
                             sharedImageUri = incomingImageUri,
                             onSharedImageConsumed = { incomingImageUri = null },
-                            onImageResult = { resultOutcome = it },
+                            onImageResult = { resultHolder.outcome = it },
                             onScanEvent = { event -> scanState = reduce(scanState, event) },
                             onCheck = { text ->
                                 val sensitivity = when (preferences.sensitivity) {
@@ -135,7 +171,7 @@ class MainActivity : ComponentActivity() {
                                     ai.trustshield.android.data.preferences.Sensitivity.BALANCED -> LocalScorer.Sensitivity.STANDARD
                                     ai.trustshield.android.data.preferences.Sensitivity.HIGH -> LocalScorer.Sensitivity.HIGH
                                 }
-                                resultOutcome = LocalScanPipeline(sensitivity = sensitivity).analyzeText(text)
+                                resultHolder.outcome = LocalScanPipeline(sensitivity = sensitivity).analyzeText(text)
                             }
                         )
                     }
