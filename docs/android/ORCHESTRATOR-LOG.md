@@ -227,4 +227,5 @@ PHASE 3 COMPLETE
 
 - Extended `INSTALL.md` with the release build command, local ignored key regeneration flow (interactive, no values shown), arm64 adb install, optional file-manager unknown-source guidance, data reset, and uninstall steps.
 - The document marks the earlier APK as a baseline and holds final ABI size/SHA-256/signature measurements until the TrustShield label/icon/splash merge and rebuild. No signing secret was written to documentation.
+- Renamed the older Phase 3 debug APK heading to distinguish it from the Phase 4 signed release handoff.
 - Clarified the printed QR sequence: register with the local change PIN, then use three distinct mismatch cards; the camera analyzer debounces repeats of one identical payload for 1.5 seconds, so each card must be briefly removed before the next.

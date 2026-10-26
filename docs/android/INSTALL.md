@@ -22,7 +22,7 @@ adb -s emulator-5554 install -r apps/android/app/build/outputs/apk/debug/app-x86
 adb -s emulator-5554 shell monkey -p ai.trustshield.android 1
 ```
 
-## Final x86_64 artifact
+## Phase 3 final x86_64 debug artifact
 
 Built from `android-finals` at `f23a8700ab709e5f8be7e542b2a4915bcf562d9a` after PRs #127-#130, #122, and #125 were merged:
 
