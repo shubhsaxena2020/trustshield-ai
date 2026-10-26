@@ -245,3 +245,9 @@ PHASE 3 COMPLETE
 - The three original Phase 4 Hermes processes remain alive (agent1 fixtures, agent2 settings then P1 conversation/payment, agent3 release UI/accessibility). They were neither relaunched nor stopped. Agent1 has uncommitted rule/fixture files; agent2's worktree is clean; agent3 has two commits on a stale-base branch. Agent3's current diff passes `git diff --check`; normal PR review and integrated testing remain pending.
 - The shared `phase4-emulator.lock` is present for another lane's `trustshield-api36`; Codex did not access it. The owner phone hold remains active; no physical-device work was performed.
 - Continuing with phone-free review and deliverables. At 22:45 IST, if the owner has not said the phone is connected, keep the phone held and log status without waiting for it.
+
+## 2026-10-26 22:28 IST — phone kit timing and icon preview
+
+- Adjusted the 30-minute phone plan's real-device monkey row to one 2,000-event run (seed 4242). The required three 2,000-event seeds remain covered by the already recorded emulator proof; a three-seed phone run would consume the full four-minute checklist slot at the configured throttle. Change pushed as `24d50ae`.
+- Offline-reviewed agent3's uncommitted icon-check script and vector artwork from its isolated branch. It reports maximum artwork radius 29.71 dp against the 33 dp safe circle. Rendered and visually inspected the 48 px launcher and light splash preview; both are legible. Temporary preview files are outside the repo. Agent3 has not opened a PR; its worktree remains unmodified by Codex.
+- All three requested Phase 4 Hermes sessions remain alive and untouched. No open Phase 4 PR was listed. The shared API 36 emulator lock is still held by another lane. No physical phone work was performed.
