@@ -251,3 +251,7 @@ PHASE 3 COMPLETE
 - Adjusted the 30-minute phone plan's real-device monkey row to one 2,000-event run (seed 4242). The required three 2,000-event seeds remain covered by the already recorded emulator proof; a three-seed phone run would consume the full four-minute checklist slot at the configured throttle. Change pushed as `24d50ae`.
 - Offline-reviewed agent3's uncommitted icon-check script and vector artwork from its isolated branch. It reports maximum artwork radius 29.71 dp against the 33 dp safe circle. Rendered and visually inspected the 48 px launcher and light splash preview; both are legible. Temporary preview files are outside the repo. Agent3 has not opened a PR; its worktree remains unmodified by Codex.
 - All three requested Phase 4 Hermes sessions remain alive and untouched. No open Phase 4 PR was listed. The shared API 36 emulator lock is still held by another lane. No physical phone work was performed.
+
+## 2026-10-26 22:14 IST — timestamp correction
+
+- Correction: the preceding `22:28 IST` heading should read `21:58 IST` (UTC is IST minus 5 hours 30 minutes). The 22:45 phone hold is still active; no physical phone work occurred.
