@@ -463,7 +463,7 @@ private val URGENCY_RULES: List<Rule> = listOf(
         patterns = listOf(
             rx(
                 """\b(?:abhi|abhi hi|abhee|turant|तुरंत|foran|फौरन|jaldi|जल्दी|aaj raat|आज रात|""" +
-                    """aaj hi|आज ही|last chance|aakhri mauka|अंतिम मौका|before midnight|midnight se pehle|""" +
+                    """aaj hi|last date(?: hai)? aaj|aaj last date|आज ही|last chance|aakhri mauka|अंतिम मौका|before midnight|midnight se pehle|""" +
                     """final warning|turant karo|abhi karo)\b""",
             ),
             rx(
@@ -559,7 +559,7 @@ private val SKIP_CREDENTIAL_SHARE_ADVICE = rx(
         "(?:mat|na|nahi|nahin|मत|न)\\b" +
         "|" +
         "(?:do\\s+not|don'?t|never)\\s+(?:share|disclose|reveal|forward)\\b[^.!?;\\n|]{0,24}?" +
-        "with\\s+(?:anyone|anybody|any\\s*one|no\\s*one|others)" +
+        "(?:with\\s+(?:anyone|anybody|any\\s*one|no\\s*one|others)|\\b$OTP_WORD\\b)" +
         ")" +
         "(?![^.!?;\\n|]{0,30}?$SECRECY_TRAILING_ASK)",
 )

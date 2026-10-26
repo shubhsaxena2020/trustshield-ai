@@ -138,6 +138,30 @@ class LegitScamPairsTest {
     }
 
     @Test
+    fun `electricity disconnection and bill update fixtures reach high risk with exact evidence`() {
+        val fixtures = listOf(
+            "Aapka bijli connection aaj raat 9:30 baje kaat diya jayega. Turant is number par call karein 9876543210 aur bill update karein.",
+            "Aapka bijli connection aaj raat katega. Turant 9876543210 par call karein aur bill update kar dein.",
+            "Aaj raat aapka bijli connection band kar diya jayega. Bill update karne ke liye call karein 9876543210.",
+            "Aapka electricity connection aaj raat cut ho jayega. Bill update karein aur 9876543210 par call karein.",
+            "Bijli bill ki last date aaj hai, warna connection kaat diya jayega. Bill update karne ko call karein 9876543210.",
+            "Aaj last date hai: aapka power connection cut ho jayega. Bill update karein, call karein 9876543210.",
+        )
+        for ((index, text) in fixtures.withIndex()) {
+            val scored = scorer.analyzeScored(text)
+            val quotes = scored.result.evidence.mapNotNull { it.quote }
+            assertTrue("fixture $index score=${scored.result.risk.score}", scored.result.risk.score >= 60)
+            assertTrue("fixture $index has threat stage", scored.result.stages.contains(StageId.THREAT_OR_REWARD))
+            assertTrue("fixture $index has callback ask", scored.verifiedAsk)
+            assertTrue("fixture $index quotes the disconnect wording: $quotes", quotes.any { it.contains("kaat", true) || it.contains("band", true) || it.contains("cut", true) || it.contains("katega", true) })
+            assertTrue("fixture $index quotes bill update: $quotes", quotes.any { it.contains("bill update", true) })
+            assertTrue("fixture $index has no fabricated evidence", scored.result.unverifiableEvidence(text).isEmpty())
+        }
+        val bankAlert = scorer.analyzeScored("HDFC: Rs 5,000 credited to A/c XX1234. Avl bal Rs 12,340. Never share OTP.")
+        assertEquals("stages=${bankAlert.result.stages} evidence=${bankAlert.result.evidence}", 0, bankAlert.result.risk.score)
+    }
+
+    @Test
     fun `issue 114 legit credit message gains no ask evidence`() {
         val scored = scorer.analyzeScored(ISSUE_114_LEGIT)
 
