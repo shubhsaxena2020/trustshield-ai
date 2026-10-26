@@ -495,6 +495,7 @@ fun ScanScreen(
             Text(
                 text = copy(ScanCopy.title),
                 style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.semantics { heading() }
             )
             Text(
@@ -568,7 +569,7 @@ fun ScanScreen(
             }
 
             // ---- Empty / error states ---------------------------------------------------
-            if (state.charCount == 0 && state.error == null) {
+            if (state.error == ScanInputError.EMPTY_INPUT) {
                 Text(
                     text = copy(ScanCopy.emptyHint),
                     style = MaterialTheme.typography.bodyMedium,
@@ -576,7 +577,7 @@ fun ScanScreen(
                 )
             }
 
-            state.error?.let { error ->
+            state.error?.takeIf { it != ScanInputError.EMPTY_INPUT }?.let { error ->
                 ErrorBanner(
                     label = copy(ScanCopy.errorLabel),
                     message = copy(error.copy),
@@ -588,6 +589,7 @@ fun ScanScreen(
             Text(
                 text = copy(ScanCopy.examplesHeading),
                 style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier
                     .padding(top = TsTokens.SpacingSm)
                     .semantics { heading() }
@@ -643,13 +645,6 @@ fun ScanScreen(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                state.checkBlockedReason?.let { blocked ->
-                    Text(
-                        text = copy(blocked.copy),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
             }
 
             // ---- Secondary: image (OCR) -------------------------------------------------

@@ -138,6 +138,7 @@ private fun ResultTopBar(
         Text(
             text = if (language == UiLanguage.ENGLISH) ResultCopy.TITLE_ENGLISH else ResultCopy.TITLE_HINGLISH,
             style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onSurface,
             // One announcement for the whole panel head: risk first, then confidence, then the score
             // in words. The score is *only* here -- it is never drawn as text (issue #115).
             modifier = Modifier

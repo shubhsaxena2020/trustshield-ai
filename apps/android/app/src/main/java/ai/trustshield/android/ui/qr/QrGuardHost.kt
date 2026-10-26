@@ -18,7 +18,9 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -26,11 +28,15 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -989,53 +995,70 @@ internal fun QrGuardHostContent(
         if (event is QrEvent.SetLanguage) onLanguageChanged(event.language)
     }
 
-    Column(modifier = modifier.fillMaxSize()) {
-        CameraPanel(
-            permission = permission,
-            showPreview = showPreview && permission.canUseCamera,
-            dark = dark,
-            lang = lang,
-            emulatorCameraOff = emulatorCameraOff,
-            onPreviewCreated = onPreviewCreated,
-            onRequestPermission = onRequestPermission,
-            onOpenSettings = onOpenSettings
-        )
-
-        // C06's renderer, given the rest of the height; it owns its own vertical scroll so nothing
-        // here can nest a second scrollable (which Compose refuses to measure).
-        QrGuardScreen(
-            state = view.state,
-            onEvent = dispatch,
-            emulatorCameraOff = emulatorCameraOff,
+    Box(modifier = modifier.fillMaxSize()) {
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f, fill = false)
-        )
+                .fillMaxSize()
+                .padding(bottom = 160.dp)
+                .verticalScroll(rememberScrollState())
+        ) {
+            CameraPanel(
+                permission = permission,
+                showPreview = showPreview && permission.canUseCamera,
+                dark = dark,
+                lang = lang,
+                emulatorCameraOff = emulatorCameraOff,
+                onPreviewCreated = onPreviewCreated,
+                onRequestPermission = onRequestPermission,
+                onOpenSettings = onOpenSettings
+            )
 
-        view.faultToken?.let { token ->
-            HostPanel(tone = RiskTone.AMBER, dark = dark) {
-                Text(
-                    text = QrHostCopy.faultText(token).text(lang),
-                    style = MaterialTheme.typography.bodyMedium
+            QrGuardScreen(
+                state = view.state,
+                onEvent = dispatch,
+                emulatorCameraOff = emulatorCameraOff,
+                modifier = Modifier.fillMaxWidth(),
+                scrollable = false,
+                includeActionRow = false
+            )
+
+            view.faultToken?.let { token ->
+                HostPanel(tone = RiskTone.AMBER, dark = dark) {
+                    Text(
+                        text = QrHostCopy.faultText(token).text(lang),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+
+            if (view.state.phase == QrPhase.SETUP) {
+                SetupCapturePanel(
+                    session = session,
+                    state = view.state,
+                    capture = view.pendingSetup,
+                    dark = dark,
+                    lang = lang
                 )
             }
-        }
 
-        if (view.state.phase == QrPhase.SETUP) {
-            SetupCapturePanel(
-                session = session,
+            if (view.state.phase == QrPhase.RE_REGISTER && !view.hasPin) {
+                PinSetupPanel(session = session, dark = dark, lang = lang)
+            }
+
+            SimulatePanel(session = session, view = view, dark = dark, lang = lang)
+        }
+        Surface(
+            modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth().imePadding(),
+            color = MaterialTheme.colorScheme.surface,
+            tonalElevation = 3.dp
+        ) {
+            ActionRow(
                 state = view.state,
-                capture = view.pendingSetup,
-                dark = dark,
-                lang = lang
+                lang = lang,
+                onEvent = dispatch,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
             )
         }
-
-        if (view.state.phase == QrPhase.RE_REGISTER && !view.hasPin) {
-            PinSetupPanel(session = session, dark = dark, lang = lang)
-        }
-
-        SimulatePanel(session = session, view = view, dark = dark, lang = lang)
     }
 }
 
@@ -1097,24 +1120,24 @@ private fun CameraPanel(
         }
 
         if (showPreview) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    // Bounded, not aspect-locked: on a 5-inch phone a 4:3 preview would push the
-                    // mismatch counter and the demo controls off the screen. 120-200 dp keeps the
-                    // preview legible and leaves the rest of the column for the state.
-                    .heightIn(min = 120.dp, max = 200.dp)
-                    .background(Color.Black, RoundedCornerShape(TsTokens.CornerSmall))
-            ) {
-                AndroidView(
-                    factory = { context ->
-                        PreviewView(context).also { view ->
-                            view.scaleType = PreviewView.ScaleType.FILL_CENTER
-                            onPreviewCreated(view)
-                        }
-                    },
-                    modifier = Modifier.fillMaxSize()
-                )
+            BoxWithConstraints(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                val previewWidth = minOf(maxWidth, 200.dp * (16f / 9f))
+                Box(
+                    modifier = Modifier
+                        .width(previewWidth)
+                        .aspectRatio(16f / 9f)
+                        .background(Color.Black, RoundedCornerShape(TsTokens.CornerSmall))
+                ) {
+                    AndroidView(
+                        factory = { context ->
+                            PreviewView(context).also { view ->
+                                view.scaleType = PreviewView.ScaleType.FILL_CENTER
+                                onPreviewCreated(view)
+                            }
+                        },
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
             }
             Text(
                 text = QrHostCopy.cameraHint.text(lang),

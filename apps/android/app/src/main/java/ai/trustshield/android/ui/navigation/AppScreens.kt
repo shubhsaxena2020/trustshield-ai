@@ -51,6 +51,8 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import ai.trustshield.android.core.analysis.ScanOutcome
 import ai.trustshield.android.core.model.Confidence
 import ai.trustshield.android.core.model.RiskLabel
@@ -95,6 +97,8 @@ import ai.trustshield.android.input.speech.SpeechCapabilityRules
 import ai.trustshield.android.input.speech.SpeechLanguage
 import ai.trustshield.android.input.speech.SpeechConsent
 import ai.trustshield.android.input.speech.SpeechCapabilityReport
+import ai.trustshield.android.input.speech.SpeechStatus
+import ai.trustshield.android.input.speech.CapabilityReason
 import ai.trustshield.android.input.speech.MicPermission as SpeechMicPermission
 import ai.trustshield.android.input.speech.UtteranceSink
 import ai.trustshield.android.input.speech.AndroidSpeechRecognizerHandle
@@ -298,12 +302,14 @@ private fun HomeRouteHost(
         Sensitivity.BALANCED -> LocalScorer.Sensitivity.STANDARD
         Sensitivity.HIGH -> LocalScorer.Sensitivity.HIGH
     }
-    val recognizer = remember { MlKitTextRecognizer() }
-    DisposableEffect(recognizer) { onDispose { recognizer.close() } }
+    val recognizer = remember { lazy(LazyThreadSafetyMode.NONE) { MlKitTextRecognizer() } }
+    DisposableEffect(recognizer) {
+        onDispose { if (recognizer.isInitialized()) recognizer.value.close() }
+    }
     val controller = remember(recognizer, sensitivity) {
         ImageScanController(
             pipeline = ai.trustshield.android.core.analysis.LocalScanPipeline(sensitivity = sensitivity),
-            recognizer = OcrRecognizer { bytes, mime -> recognizer.recognize(bytes, mime) },
+            recognizer = OcrRecognizer { bytes, mime -> recognizer.value.recognize(bytes, mime) },
             readBytes = { raw ->
                 if (isContentUri(raw)) ContentResolverByteSource(context.contentResolver, Uri.parse(raw)) else null
             }
@@ -358,7 +364,16 @@ fun CallShieldRouteHost() {
     val lifecycleOwner = LocalLifecycleOwner.current
     val session = remember { CallSpeechSession(consentGranted = true) }
     var capability by remember {
-        mutableStateOf(SpeechCapabilityRules.evaluate(SpeechCapabilityProbe.probe(context), SpeechLanguage.DEFAULT))
+        mutableStateOf(
+            SpeechCapabilityReport(
+                status = SpeechStatus.Unavailable,
+                languageTag = SpeechLanguage.DEFAULT,
+                offlineCapable = false,
+                cloudMayBeUsed = false,
+                degraded = true,
+                reasons = listOf(CapabilityReason.OnDeviceNotMeasured)
+            )
+        )
     }
     val coordinator = remember(session) {
         SpeechSessionCoordinator(session) { _ ->
@@ -465,7 +480,8 @@ fun CallShieldRouteHost() {
     }
     LaunchedEffect(consent, micGranted) {
         val mic = if (micGranted) SpeechMicPermission.Granted else SpeechMicPermission.Denied
-        capability = SpeechCapabilityRules.evaluate(SpeechCapabilityProbe.probe(context, mic), SpeechLanguage.DEFAULT)
+        val environment = withContext(Dispatchers.IO) { SpeechCapabilityProbe.probe(context, mic) }
+        capability = SpeechCapabilityRules.evaluate(environment, SpeechLanguage.DEFAULT)
         host.onCapability(consent, capability, if (micGranted) ai.trustshield.android.ui.call.MicPermission.GRANTED else ai.trustshield.android.ui.call.MicPermission.DENIED)
         state = host.state.copy(
             language = if (prefs.language == AppLanguage.ENGLISH) CallLanguage.ENGLISH else CallLanguage.HINGLISH,
