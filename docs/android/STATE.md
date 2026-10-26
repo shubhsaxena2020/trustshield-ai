@@ -5,7 +5,7 @@
 - Fresh phone-free gate: 1,086 JVM tests passed; `lintDebug` and `assembleDebugAndroidTest` passed. Connected API 36 instrumentation: 55 tests, 54 passed, 0 failed, 1 existing airplane-mode precondition skip. The Settings Device check assertion passed.
 - Camera-in-use maps CameraX `CAMERA_IN_USE` / `CAMERA_MAX_IN_USE` to explicit recovery copy. No physical phone was used.
 - Existing Hermes agent1/agent2/agent3 sessions remain alive, unchanged. No open Phase 4 lane PR was visible at this checkpoint. Unrelated untracked repository paths remain untouched.
-- Evidence: `evidence/p4-device-check-connected.md`. The single `trustshield-api36` emulator was stopped and its lock released after testing; no physical phone used.
+- Evidence: `evidence/p4-device-check-connected.md`. Codex stopped its `trustshield-api36` emulator and released its lock after testing; a separate lane subsequently started the same AVD. No physical phone used.
 - The four-card synthetic QR PDF was rendered for visual inspection; layout and zero-amount/do-not-pay labels are clear. Real camera decode remains phone-only and unrun.
 - A follow-up honesty review changed failed/unavailable Hindi locale support callbacks to `Not checked` rather than asserting `Not supported`. Re-run phone-free gate passed: 1,086 JVM tests, `lintDebug`.
 - Added a connected UI test that revokes only the app's emulator mic permission, verifies the denial explanation and opens the staged Call Shield demo. It compiles with `assembleDebugAndroidTest`; execution waits until the currently locked emulator is available.
