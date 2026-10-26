@@ -288,3 +288,8 @@ Branch: `android-finals`. Phase: **3 active; Codex foundation pushed, 18 new P0 
 - Pushed commit `d2ee5b6` onto PR #141. Updated the fixtures table and PR body to 47 rows (28 scam, 19 legitimate; probes/controls included in those totals). Full gate on the PR branch: 1,093 JVM tests, 0 failures/errors/skips; `lintDebug` and `assembleDebug` passed. `git diff --check` passed.
 - PR #141 remains open; no emulator spot check yet. GitHub security check failed on the tracked dependency audit; frontend/backend checks are still running at this snapshot. The API 36 emulator lock remains held by agent3, and the Gradle lock is currently held by a Phase 4 lane. Codex started neither. No physical phone used; no owner release received.
 - PR #142 remains open and explicitly incomplete for #138 because Result evidence still mixes Hinglish in English mode; its P1 work is deferred until P0 acceptance is complete.
+
+### 2026-10-26 23:28 IST checkpoint
+- PR #141 review false positive is fixed in head `280ef50`: F40 is the routine electricity-bill support callback, and the high-stakes callback gate no longer treats bill/due-date words alone as scam context. Full local gate: 1,094 JVM tests, lintDebug, assembleDebug pass; fixture set 47/47.
+- PR #141 rebased on current `android-finals` @ `9e5b77f`, open and awaiting restarted CI plus an emulator spot check. GitHub snapshot: security failed; backend/frontend pending.
+- No emulator or physical phone used by Codex. Physical phone hold remains until an explicit owner release.
