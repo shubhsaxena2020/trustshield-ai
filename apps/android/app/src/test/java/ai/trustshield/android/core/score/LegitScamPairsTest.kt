@@ -119,7 +119,11 @@ class LegitScamPairsTest {
                 listOf(StageId.THREAT_OR_REWARD, StageId.URGENCY, StageId.ASK),
             ),
         )
-        assertTrue("two corroborations + a strong ask is the documented escalation", scored.escalateCritical)
+        // Hardening follow-up: the flagship's ask is a CALLBACK (a number to ring), which is stage 5 and
+        // earns the HIGH floor, but the full-screen release is reserved for a value ask (credential,
+        // money, remote access, APK, identity data) - a real outage notice also prints a mobile number.
+        // The threat + urgency + callback ask therefore stops at HIGH_RISK without escalating.
+        assertFalse("a callback-only ask must not release the full-screen alert", scored.escalateCritical)
     }
 
     @Test

@@ -90,6 +90,17 @@ object DigitalArrestSignals {
                 val start = match.range.first
                 val end = match.range.last + 1
                 if (end <= start) continue
+                // Scope guards, both deterministic and both narrowings only:
+                //  1. a marker inside a sentence that WARNS ABOUT the scam is the sender helping the
+                //     reader ("Cyber Crime police ki salah: digital arrest scam se bachein",
+                //     "Beware of digital arrest fraud ... never pay", a news line "... giraftar kiya").
+                //     Such a message is advisory, not a demand, so the marker is dropped.
+                //  2. a bare mention of "digital arrest" is only the scam's marker when it is aimed at
+                //     the reader ("aap digital arrest mein hain"). A police advisory, a news headline or
+                //     a company circular names the phrase in the third person.
+                val sentence = sentenceAround(raw, start, end)
+                if (ADVISORY_CUE.containsMatchIn(sentence)) continue
+                if (marker.requiresSecondPerson && !SECOND_PERSON.containsMatchIn(sentence)) continue
                 val quote = raw.substring(start, end)
                 if (quote.isBlank()) continue
                 if (!seen.add(normalizeKey(quote))) continue
@@ -113,6 +124,30 @@ object DigitalArrestSignals {
 
     /** True when [raw] names at least one of the report's digital-arrest markers. */
     fun matches(raw: String): Boolean = detect(raw).isNotEmpty()
+
+    /**
+     * The sentence (or line) that contains `[start, end)`.
+     *
+     * Used only for the two scope guards below, so it stays deliberately crude and deterministic:
+     * a sentence ends at `.`, `!`, `?`, `;` or a line break. No NLP, no locale rules, no clock.
+     */
+    private fun sentenceAround(raw: String, start: Int, end: Int): String {
+        var from = start
+        while (from > 0) {
+            if (isSentenceBreak(raw[from - 1])) break
+            from--
+        }
+        var to = end
+        while (to < raw.length) {
+            if (isSentenceBreak(raw[to])) break
+            to++
+        }
+        return raw.substring(from, to)
+    }
+
+    /** `.` `!` `?` `;` or a line break — the only sentence boundaries this guard uses. */
+    private fun isSentenceBreak(ch: Char): Boolean =
+        ch == '.' || ch == '!' || ch == '?' || ch == ';' || ch.code == 10 || ch.code == 13
 
     /** Repeated identical phrases collapse to one key so they cannot inflate the signal. */
     private fun normalizeKey(quote: String): String {
@@ -139,6 +174,8 @@ object DigitalArrestSignals {
         val titleHinglish: String,
         val detail: String,
         val patterns: List<Regex>,
+        /** True when the marker only counts if the sentence addresses the reader (see SECOND_PERSON). */
+        val requiresSecondPerson: Boolean = false,
     )
 
     /**
@@ -155,6 +192,7 @@ object DigitalArrestSignals {
                 rx("""\bdigital[\s.-]*arrest\b"""),
                 rx("""\bडिजिटल\s*अरेस्ट\b"""),
             ),
+            requiresSecondPerson = true,
         ),
         Marker(
             titleHinglish = "Video call par bane rehne ko kaha",
@@ -226,6 +264,35 @@ object DigitalArrestSignals {
                 ),
             ),
         ),
+    )
+
+    // ---------------------------------------------------------------------------------------------
+    // Scope guards (see detect())
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Protective / advisory framing. When one of these appears in the same sentence as a marker, the
+     * sender is warning *about* the scam (police advisory, bank awareness SMS, news report), so the
+     * marker is not the scammer's demand and is dropped.
+     *
+     * Deliberately excludes the bare word "salah" and "paisa mat bhejein" alone: both occur in real
+     * isolation demands ("kisi se salah mat lena", "paise mat bhejo, pehle verify karo"). Only
+     * unambiguous *warning-about-the-scam* phrasing is listed.
+     */
+    private val ADVISORY_CUE: Regex = rx(
+        """\b(?:se\s*bachein|se\s*bachaye|se\s*bachao|se\s*bachne|se\s*bachayen|bach\s*karein|""" +
+            """beware|advisory|awareness|\bmyth\b|myths|\bnews\b|giraftar\s+kiya|arrested|""" +
+            """ke\s*baare\s*mein|ke\s*bare\s*mein|ke\s*baare\s*main|\babout\b|""" +
+            """1930\s*(?:par|pe|पर)\s*call|report\s+(?:it|this)\s+to)\b""",
+    )
+
+    /**
+     * Second person. A bare "digital arrest" mention is the scam's marker only when it is aimed at the
+     * reader ("aap digital arrest mein hain"); a third-person mention (news, advisory, notice) is not.
+     */
+    private val SECOND_PERSON: Regex = rx(
+        """\b(?:aap|aapko|aapka|aapki|aapke|aap\s+par|aap\s+pe|tum|tumhe|tumhara|""" +
+            """you|you're|you\s+are|your)\b""",
     )
 
     // ---------------------------------------------------------------------------------------------

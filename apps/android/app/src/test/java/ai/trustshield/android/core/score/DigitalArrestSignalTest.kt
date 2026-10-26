@@ -79,8 +79,17 @@ class DigitalArrestSignalTest {
 
     @Test
     fun `repeated markers collapse and the list length is capped`() {
-        val text = "Digital arrest. Digital arrest. Digital arrest. Digital arrest."
+        // Hardening follow-up: a bare third-person mention no longer counts (it is how an advisory or a
+        // news line reads), so the collapse property is pinned on the second-person scam phrasing.
+        val text = "Aap digital arrest mein hain. Aap digital arrest mein hain. " +
+            "Aap digital arrest mein hain."
         assertEquals(1, DigitalArrestSignals.detect(text).size)
+
+        // A bare mention with no addressee is advisory-shaped and must be silent.
+        assertEquals(
+            0,
+            DigitalArrestSignals.detect("Digital arrest. Digital arrest. Digital arrest.").size,
+        )
 
         val many = "Aap digital arrest mein hain. Camera band mat karna. Kamre mein akele raho. " +
             "Ghar walon ko mat batana. Aapka arrest warrant hai."

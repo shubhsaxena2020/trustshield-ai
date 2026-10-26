@@ -79,13 +79,38 @@ internal const val SERVICE_DISCONNECT =
         "|kat(?:ega|egi|enge|engi)" +
         "|band (?:ho )?(?:ja(?:yega|yegi|yenge|ega|egi|enge)|gaya|gayi)" +
         "|band kar (?:diya jayega|diya jaega|denge|diya gaya)" +
-        "|block ho (?:ja(?:yega|yegi|ega|egi)|gaya|gayi)" +
-        "|suspend(?:ed)? (?:ho )?(?:ja(?:yega|yegi|ega|egi)|gaya|gayi)" +
+        "|block ho (?:ja(?:yega|yegi|ega|egi))" +
+        "|suspend(?:ed)? (?:ho )?(?:ja(?:yega|yegi|ega|egi))" +
         "|suspend kar (?:diya|denge)" +
-        "|disconnect(?:ed)? (?:ho )?(?:ja(?:yega|yegi|ega|egi)|gaya|gayi|kar diya|karna|kar denge)" +
-        "|cut ho (?:ja(?:yega|yegi|ega|egi)|gaya|gayi)" +
-        "|कट (?:जाएगा|जाएगी|गया|गई)|बंद (?:हो जाएगा|हो जाएगी|हो गया|हो गई)|रुक (?:जाएगा|जाएगी)" +
+        "|disconnect(?:ed)? (?:ho )?(?:ja(?:yega|yegi|ega|egi)|kar diya|karna|kar denge)" +
+        "|cut ho (?:ja(?:yega|yegi|ega|egi))" +
+        "|कट (?:जाएगा|जाएगी)|बंद (?:हो जाएगा|हो जाएगी)|रुक (?:जाएगा|जाएगी)" +
         ")"
+
+/**
+ * The **completed**-loss twins of [SERVICE_DISCONNECT]: "kat gaya", "band ho gaya", "suspend ho gaya".
+ *
+ * Kept separate because a finished outage is also how an ordinary local notice reads ("Power cut ho
+ * gaya hai, turant bijli office 9812345678 par call karein"). The threat rule only accepts a
+ * completed form when the same sentence carries a reader possessive ("aapka connection kat gaya"), so
+ * the loss is about *this* reader's service rather than a locality outage. The disconnection-scam
+ * shape ("aapka connection kat gaya hai, reactivate karne ke liye call karein") therefore stays
+ * caught, and the outage notice no longer becomes a red accusation.
+ */
+internal const val SERVICE_DISCONNECT_PAST =
+    "(?:" +
+        "kat(?:a|na|ne)? (?:gaya|gayi)" +
+        "|band (?:ho )?(?:gaya|gayi)" +
+        "|block ho (?:gaya|gayi)" +
+        "|suspend(?:ed)? (?:ho )?(?:gaya|gayi)" +
+        "|disconnect(?:ed)? (?:ho )?(?:gaya|gayi)" +
+        "|cut ho (?:gaya|gayi)" +
+        "|कट (?:गया|गई)|बंद (?:हो गया|हो गई)" +
+        ")"
+
+/** "aapka / apni / your / mera" - the reader's own service, not a locality-wide outage. */
+internal const val READER_POSSESSIVE =
+    "(?:aapka|aapki|aapke|apna|apni|apne|your|mera|meri|mere)"
 
 /**
  * A 10-digit Indian personal mobile: 6-9 prefix, optional `+91`/`91` country code, never part of a
@@ -123,12 +148,29 @@ internal const val UNOFFICIAL_LINK =
         "buzz|website|store|cfd|sbs|cyou)(?:/[\\p{L}\\p{N}_-]{0,40})?)"
 
 /**
- * Toll-free / short-code / official-channel context. A number in this window is what a real bank or
- * department publishes, not a personal callback (§3.4 row 3: "branch or net banking").
+ * Toll-free / short-code context: the numbers a real bank or department publishes.
+ *
+ * Deliberately *numbers only*. The advice words "branch", "net banking" and "official app" used to be
+ * in here (report §3.4 row 3), but naming a branch is cheap for a scammer: "Aapka account block ho
+ * jayega. Apni branch mein ya 9876543210 par call karein" was skipped down to LOW because of the word
+ * "branch". A personal 10-digit mobile is never rescued by the sender mentioning a branch.
  */
 internal val SKIP_OFFICIAL_NUMBER: Regex = rx(
-    """(?:toll ?free|helpline|short ?code|\b(?:1800|1860|1912|1930|1947|14416)\b|\b1[89]\p{Nd}{2}\b|""" +
-        """net ?banking|official app|(?:visit|apni|your) (?:branch|shakha)|branch (?:par|pe|mein|me)\b)""",
+    """(?:toll ?free|helpline|short ?code|\b(?:1800|1860|1912|1930|1947|14416)\b|\b1[89]\p{Nd}{2}\b)""",
+)
+
+/**
+ * A **bank / card / KYC** brand only - the shape report §3.3 actually calls out ("Personal number se
+ * bank banna - Moderate").
+ *
+ * The utility nouns are deliberately absent: a locality notice from a bijli/paani/LPG office that
+ * prints a mobile number is ordinary, and turning it into an amber evidence card is the same
+ * contradiction issue #114 was filed for.
+ */
+internal val BANK_OR_CARD_BRAND: Regex = rx(
+    """(?:\bbank\b|बैंक|sbi|hdfc|icici|axis|kotak|pnb|bank of baroda|canara|union bank|yes bank|idfc|""" +
+        """credit card|debit card|account|a/c|khata|खाता|kyc|केवायसी|loan|emi|insurance|policy|""" +
+        """trai|telecom|bsnl|airtel|jio|vodafone|department|vibhag|विभाग|nigam|board)""",
 )
 
 /** A bank or a utility/service brand: the channel a personal mobile number is *not*. */
@@ -158,6 +200,10 @@ internal val UTILITY_DISCONNECT_RULES: List<Rule> = listOf(
         patterns = listOf(
             rx("""\b$UTILITY_SERVICE_NOUN\b[^.!?\n]{0,48}?\b(?:$SERVICE_DISCONNECT)\b"""),
             rx("""\b(?:$SERVICE_DISCONNECT)\b[^.!?\n]{0,40}?\b$UTILITY_SERVICE_NOUN\b"""),
+            // A completed loss only counts when it is about the reader's own service (see
+            // SERVICE_DISCONNECT_PAST): a locality-wide "power cut ho gaya" notice is not a threat.
+            rx("""\b$READER_POSSESSIVE\b[^.!?\n]{0,50}?\b(?:$SERVICE_DISCONNECT_PAST)\b"""),
+            rx("""\b(?:$SERVICE_DISCONNECT_PAST)\b[^.!?\n]{0,40}?$READER_POSSESSIVE\b"""),
         ),
     ),
 )
@@ -237,6 +283,6 @@ internal val UTILITY_SERVICE_ASK_RULES: List<Rule> = listOf(
         patterns = listOf(INDIAN_PERSONAL_MOBILE_RX),
         guarded = true,
         skip = SKIP_OFFICIAL_NUMBER,
-        requires = SERVICE_OR_BANK_BRAND,
+        requires = BANK_OR_CARD_BRAND,
     ),
 )

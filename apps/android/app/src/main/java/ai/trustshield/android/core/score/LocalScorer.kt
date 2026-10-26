@@ -325,11 +325,16 @@ class LocalScorer(
         )
         val label = RiskAssessment.labelFor(score)
 
+        // The full-screen release is reserved for a *value* ask (credential, money, remote access, APK,
+        // identity data). A callback-only ask ("call this personal number") is stage 5 and earns the
+        // HIGH floor, but on its own it is not evidence that anything is being taken from the user yet -
+        // a genuine local outage notice prints a mobile number too. Escalating on it turned "Power cut
+        // ho gaya hai, turant bijli office 9812345678 par call karein" into a red full-screen alert.
         val escalate = verifiedAsk &&
             others >= CRITICAL_CORROBORATIONS &&
             score >= HIGH_FLOOR &&
             confidence != Confidence.LOW &&
-            askTypes.isNotEmpty()
+            askTypes.any { it in ESCALATING_ASKS }
 
         val limitations = ArrayList<String>(3)
         if (truncated) limitations.add(LIMIT_TRUNCATED)
@@ -575,8 +580,9 @@ class LocalScorer(
         // A no-ask transcript only reaches SUSPICIOUS through the documented strong-signal ladder.
         // Nothing has been demanded yet, so the advice is "verify by calling back" - and never the
         // "this alone shows no danger" line, which would contradict the score the user is looking at.
-        label == RiskLabel.SUSPICIOUS -> listOf(ACTION_HIGH_VERIFY, ACTION_LOW_WATCH)
+        label == RiskLabel.SUSPICIOUS -> listOf(ACTION_HIGH_VERIFY, ACTION_CAUTION_WATCH)
         label == RiskLabel.CAUTION && verifiedAsk -> listOf(ACTION_CAUTION_ASK, ACTION_HIGH_VERIFY)
+        label == RiskLabel.CAUTION -> listOf(ACTION_HIGH_VERIFY, ACTION_CAUTION_WATCH)
         else -> listOf(ACTION_LOW_WATCH)
     }
 
@@ -669,6 +675,20 @@ class LocalScorer(
         private const val NO_ASK_CEILING = 24
         private const val ESCALATION_STEP = 5
         private const val CRITICAL_CORROBORATIONS = 2
+
+        /**
+         * Ask types that can release the full-screen escalation. A [AskType.CALLBACK] ask is
+         * deliberately absent: it is stage 5 and earns the HIGH floor, but "call this number" is also
+         * how a real local outage/LPG/department notice reads, so on its own it must not produce a red
+         * accusation. It still counts for the floor, the score and the caution advice.
+         */
+        private val ESCALATING_ASKS: Set<AskType> = setOf(
+            AskType.OTP_PIN,
+            AskType.MONEY_TRANSFER,
+            AskType.REMOTE_APP,
+            AskType.APK_INSTALL,
+            AskType.PERSONAL_INFO,
+        )
         private const val MAX_URL_EVIDENCE = 2
 
         /**
@@ -717,6 +737,17 @@ class LocalScorer(
             "Is message mein code ya paise maange gaye hain. Kisi ko OTP, PIN ya paise na dein."
         const val ACTION_LOW_WATCH: String =
             "Yeh message akele khatra nahi dikhata. Anjaan link par OTP ya paise phir bhi na dein."
+
+        /**
+         * Caution-tier advice for a reading the engine placed in a WATCH band *above* LOW without a
+         * verified ask (the documented strong-signal ladder). [ACTION_LOW_WATCH] would contradict the
+         * score on screen ("this alone shows no danger" printed under a 52/red reading), so a no-ask
+         * CAUTION/SUSPICIOUS reading gets its own line: do not act on the pressure, verify through the
+         * official channel, never hand over a credential.
+         */
+        const val ACTION_CAUTION_WATCH: String =
+            "Message dabav ya dhamki bana raha hai. Turant kuch na karein: bank ya department ke " +
+                "official number/app se khud verify karein, aur OTP, PIN ya paise kisi ko na dein."
         const val ACTION_UNABLE_HOLD: String =
             "Hum ise poora check nahi kar sake. OTP, PIN ya paise kisi ko na dein."
         const val ACTION_UNABLE_RETRY: String =
