@@ -20,6 +20,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import ai.trustshield.android.data.preferences.SharedPreferencesUserPreferencesStore
 import ai.trustshield.android.ui.navigation.AppRoute
+import ai.trustshield.android.ui.call.CallShieldCopy
 import org.junit.After
 import org.junit.Assert.assertTrue
 import org.junit.Assume
@@ -251,6 +252,17 @@ class Phase3JourneysTest {
         waitForText("Camera permission")
         waitForText("Microphone permission")
         assertNodeContains("API")
+    }
+
+    @Test
+    fun callShieldWithoutMicrophonePermissionOffersStagedDemo() {
+        shell("pm revoke ai.trustshield.android android.permission.RECORD_AUDIO")
+        launchRoute(AppRoute.CALL_SHIELD)
+
+        waitForText(CallShieldCopy.permissionDeniedTitle.hinglish)
+        waitForText(CallShieldCopy.stagedDemo.hinglish)
+        tapText(CallShieldCopy.stagedDemo.hinglish)
+        waitForText("Pehli line ke liye taiyaar")
     }
 
     /**

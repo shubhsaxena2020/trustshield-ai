@@ -208,3 +208,8 @@ PHASE 3 COMPLETE
 
 - Device check now reports `hi-IN` as `Not checked` when the recognizer support callback cannot be created or returns an error. Only a completed support response with no `hi-IN` entry yields `Not supported`; no session is started and the microphone is never opened.
 - Verification after the correction: 1,086 JVM tests passed, `lintDebug` passed. No physical phone was used; the emulator remains stopped.
+
+## 2026-10-26 21:27 IST — microphone fallback UI test
+
+- Added `callShieldWithoutMicrophonePermissionOffersStagedDemo`: it revokes only `ai.trustshield.android`'s RECORD_AUDIO grant on the test emulator, asserts the permission-block explanation and staged-demo action, then opens the scripted demo. This covers the UI recovery path without starting microphone capture.
+- `:app:testDebugUnitTest :app:assembleDebugAndroidTest` passed; the updated instrumentation APK compiles. The currently held emulator belongs to another Phase 4 lane, so this new test has not yet run.
