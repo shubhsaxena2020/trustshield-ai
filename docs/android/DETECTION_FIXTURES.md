@@ -48,9 +48,7 @@ row is also asserted to have **zero** evidence quotes that do not verify against
 
 ## Result: 46 rows, 46 PASS, 0 MISS
 
-46 rows = 28 scam rows (every named family, more than one language shape for most),
-18 legitimate twins and guards (one per family plus the report §3.4 sentences verbatim),
-3 exact probes from PHASE4 item 5, and 4 band-ladder controls that pin the rule gates themselves.
+46 rows total: 28 scam rows and 18 legitimate rows. Those totals already include the 3 exact probes from PHASE4 item 5 and the 4 band-ladder controls; the probes and controls are subsets, not additional rows.
 
 Each `expected` band is the one the behaviour spec mandates for that shape, written down **before** the
 row was measured:
