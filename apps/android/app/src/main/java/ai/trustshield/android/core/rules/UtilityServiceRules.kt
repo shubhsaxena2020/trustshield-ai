@@ -181,6 +181,23 @@ internal val SERVICE_OR_BANK_BRAND: Regex = rx(
         """$UTILITY_SERVICE_NOUN)""",
 )
 
+/**
+ * Stakes that turn an English `"Call <personal mobile>"` into an **ask** rather than ordinary logistics.
+ *
+ * The STRONG imperative-callback rule needs a stake in the same message, not just an institutional
+ * noun: a courier or LPG message that merely gives the delivery agent's own mobile ("call 9876543210 if
+ * the address is wrong") is the single most common Indian SMS and must stay in the watch band, while
+ * `"Call 8899776655 now to verify your number or it will be blocked"` carries `verify`, `number` and
+ * `blocked`. A plumber's "call 9876543210 for AC service" carries none of these and keeps only the
+ * MODERATE corroboration item, which can never lift a band.
+ */
+internal val ACCOUNT_OR_SERVICE_STAKES: Regex = rx(
+    """(?:\baccount\b|a/c|khata|खाता|\bkyc\b|केवायसी|\botp\b|ओटीपी|\bpin\b|password|\bblock\w*|""" +
+        """suspend\w*|deactivat\w*|disconnect\w*|band\b|बंद|\bbill\b|\bdues?\b|penalty|challan|\bemi\b|""" +
+        """\bloan\b|policy|debit card|credit card|\bsim\b|सिम|aadhaar|आधार|\btrai\b|verif\w*|""" +
+        """refund|cashback|prize|lottery|beneficiary)""",
+)
+
 /** [INDIAN_PERSONAL_MOBILE] compiled once for the corroboration rule. */
 private val INDIAN_PERSONAL_MOBILE_RX: Regex = rx(INDIAN_PERSONAL_MOBILE)
 
@@ -252,6 +269,27 @@ internal val UTILITY_SERVICE_ASK_RULES: List<Rule> = listOf(
         requires = SERVICE_OR_BANK_BRAND,
     ),
     Rule(
+        titleHinglish = "Bank/service ke naam par personal number par call karne ko kaha",
+        detail = "Message bank, TRAI, bijli ya kisi department ka naam lekar ek personal mobile " +
+            "number par call karne ko keh raha hai. Asli sanstha toll-free number ya short code " +
+            "se hi call karwati hai; personal number par hi OTP ya paise maange jaate hain.",
+        severity = Severity.HIGH,
+        strength = Strength.STRONG,
+        patterns = listOf(
+            // "Call 8899776655 now to verify your number"
+            rx("""\b(?:call|phone|dial|contact)\s+(?:on\s+|at\s+|to\s+|this\s+|the\s+)?$INDIAN_PERSONAL_MOBILE"""),
+            // "call now on 8899 776655" / "dial immediately 8899776655"
+            rx(
+                """\b(?:call|phone|dial|contact)\b[^.!?\n]{0,14}?\b(?:now|today|immediately|urgently)\b""" +
+                    """[^.!?\n]{0,12}?$INDIAN_PERSONAL_MOBILE""",
+            ),
+        ),
+        askType = AskType.CALLBACK,
+        guarded = true,
+        skip = SKIP_OFFICIAL_NUMBER,
+        requires = ACCOUNT_OR_SERVICE_STAKES,
+    ),
+    Rule(
         titleHinglish = "Unofficial link par KYC/detail update karne ko kaha",
         detail = "Message KYC ya personal detail ek short link ya anjaan website par update/verify " +
             "karne ko keh raha hai. Asli bank aapko apni app, branch ya net banking par bhejta " +
@@ -267,6 +305,11 @@ internal val UTILITY_SERVICE_ASK_RULES: List<Rule> = listOf(
             rx(
                 """$UNOFFICIAL_LINK[^.!?\n]{0,40}?\b$KYC_UPDATE_VERB\w*\b[^.!?\n]{0,20}?""" +
                     """\b$KYC_DETAIL_NOUN\b""",
+            ),
+            // Verb first: "Complete KYC verification at http://sbi-kyc-verify.xyz/update".
+            rx(
+                """\b$KYC_UPDATE_VERB\w*\b[^.!?\n]{0,30}?\b$KYC_DETAIL_NOUN\b[^.!?\n]{0,40}?""" +
+                    """$UNOFFICIAL_LINK""",
             ),
         ),
         askType = AskType.PERSONAL_INFO,
