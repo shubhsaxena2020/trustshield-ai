@@ -1,0 +1,30 @@
+# TrustShield Android UI directions
+
+These are six distinct concept directions prepared for owner selection. They are interactive HTML boards, not Compose implementation and not a selected direction. Each board contains the same six screen concepts—Home/Scan, Result, Call Shield, QR Guard, Settings and onboarding—with language selectors for English, Hinglish and Hindi (Devanagari), plus light/dark and reduced-motion controls.
+
+Open any board locally in a browser. Shared presentation code is in `design-boards/board.css` and `design-boards/board.js`.
+
+| Direction | Board | Visual idea | Palette and type | Motion | Strongest fit / tradeoff |
+|---|---|---|---|---|---|
+| Signal Grid | [Open board](design-boards/01-signal-grid.html) | Instrument-panel grid; risk is framed as a signal with a clear evidence rail. | Signal blue `#3867F4`, midnight `#16213A`, cloud `#EEF2FA`, green `#197653`, amber `#A65B00`, red `#B52F3D`. Space Grotesk-style display, DM Sans-style body, monospace utility labels; device system fallback for Devanagari. | 200 ms state fade and evidence disclosure; no score count-up or alert pulse. | Balanced starting point for Scan and Result. The instrumentation treatment could feel technical if applied to every screen. |
+| Civic Clarity | [Open board](design-boards/02-civic-clarity.html) | Public-service layout with rectangular verdict stamp and ordered next actions. | Civic navy `#124E91`, slate `#172B3C`, mist `#EDF3F7`, green `#197653`, amber `#A65B00`, red `#B52F3D`. Manrope-like sans for clear labels and body; native Devanagari sans fallback. | 160 ms crossfade only; stage changes are communicated with labels and color. | Strongest first-use comprehension and accessibility. Less expressive than the other directions. |
+| Human Ledger | [Open board](design-boards/03-human-ledger.html) | Field-notebook record separates quoted words from interpretation and advice. | Teal `#06735F`, forest `#1E302E`, leaf paper `#F1F4EB`, green `#16845B`, ochre `#94611A`, red `#B63243`. Fraunces-style display only for section headings; DM Sans body; system sans for Hindi. | 220 ms evidence expansion and soft screen fade; warnings remain still. | Best for evidence transparency and limitations. Serif headings need careful Devanagari fallback. |
+| Night Watch | [Open board](design-boards/04-night-watch.html) | Dark-first live-session console with a steady telemetry dial, visible timer and Stop action. | Deep field `#07171E`, panel `#102831`, cyan `#33C6DF`, mint `#51D3A0`, amber `#F0B551`, coral `#FF596A`. Space Grotesk-like display, system sans body, monospace timer; Devanagari system fallback. | 180 ms meter/stage changes on state transitions only. Warning stays static; system reduced-motion removes optional movement. | Best fit for Call Shield. Dark-first styling may be tiring for daytime or extended Result reading. |
+| Field Manual | [Open board](design-boards/05-field-manual.html) | Compact practical guide with orange evidence annotations, plain labels and next-step checklist. | Orange `#DE5728`, graphite `#242825`, paper gray `#E9ECE7`, green `#197653`, ochre `#8B6410`, red `#B23733`. DM Mono-style short labels and Manrope-style body; native Hindi sans fallback. | 180 ms disclosure only; no parallax, bounce or score movement. | Strongest directness about limitations and actions. Monospace must stay out of long copy and Devanagari headings. |
+| Soft Signal | [Open board](design-boards/06-soft-signal.html) | Welcoming rounded surfaces and a broad meter with text labels beside it. | Indigo `#5445CB`, ink `#25243B`, lavender `#F3F0FF`, green `#168461`, amber `#97600A`, berry `#B63255`. Manrope-like display/body and system Devanagari sans. | 240 ms soft surface fade; critical text swaps immediately, no bounce/pulse; optional motion respects system preference. | Strongest low-friction onboarding and thumb-friendly targets. Softness must not weaken warning contrast or language. |
+
+## Shared screen content and product constraints
+
+- **Home/Scan:** message input, clear check action, local-processing statement and no saved raw-message content.
+- **Result:** text verdict, visual risk meter, separate confidence badge, exact quoted evidence, and a direct practical action. The sample indicates a multi-signal high-risk case; it does not claim certainty about a person.
+- **Call Shield:** explicitly user-started listening, microphone/on-device availability status, elapsed timer, five stage labels, static warning and large Stop control.
+- **QR Guard:** camera framing, expected payee and decoded payee shown separately, with mismatch language and a check-before-paying action. A decoding failure is not represented as tampering.
+- **Settings:** language, theme, haptics, offline-check status and privacy statement. No “turn off all warnings” setting.
+- **Onboarding:** local check explanation, exact-evidence explanation and the limitation that a warning is advice to verify, not proof about a person.
+- All sample text is presented as mockup content. Production copy must use the existing ToneCopy/string layer. Risk and confidence remain distinct. Hindi text and mixed Hinglish are included to expose wrapping and hierarchy differences; validate at 320 dp and 200% font scale before implementation.
+
+## Research basis and boundaries
+
+Directions draw from the Phase 6 source catalogue in [UI_RESEARCH.md](UI_RESEARCH.md), especially Android Compose samples, Now in Android, Material 3 patterns, Compose animation references, Lottie/Rive runtime examples and onboarding samples. The boards use original HTML/CSS sketches and no copied third-party code or assets. No animation/runtime dependency is recommended here; any product dependency requires maintenance/accessibility review and measured APK delta.
+
+The friend's GitHub collection URL for 3D/website references remains pending from the owner. It was not guessed. These boards intentionally avoid implying production implementation, final color contrast certification, selected direction or device-tested behavior.

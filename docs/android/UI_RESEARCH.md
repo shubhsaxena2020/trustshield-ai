@@ -84,7 +84,7 @@ Cloned with shallow history to `C:\Users\shubh\ui-research` for study only:
 - `compose-samples` — official, broad Compose patterns; Apache-2.0.
 - `compose-animations` — focused animation examples; Apache-2.0.
 - `lottie-android` — runtime/API and integration details; Apache-2.0.
-- `nowinandroid` — production-scale Compose app structure; Apache-2.0. (Clone attempted; check local path before relying on it.)
+- `nowinandroid` — production-scale Compose app structure; Apache-2.0.
 
 No third-party source, assets or license files were added to this repo. Any later adaptation must bring along the upstream license text and preserve required notices. No dependency/APK delta was measured because no dependency was proposed or added.
 
