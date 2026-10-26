@@ -68,12 +68,8 @@ import ai.trustshield.android.ui.home.rememberImageScanLauncher
 import ai.trustshield.android.ui.home.isContentUri
 import ai.trustshield.android.input.share.ContentResolverByteSource
 import ai.trustshield.android.input.share.MlKitTextRecognizer
-import ai.trustshield.android.ui.result.ActionPriority
 import ai.trustshield.android.ui.result.ConfidenceLevel
-import ai.trustshield.android.ui.result.EvidenceSeverity
 import ai.trustshield.android.ui.result.InputCoverage
-import ai.trustshield.android.ui.result.ResultActionInput
-import ai.trustshield.android.ui.result.ResultEvidenceInput
 import ai.trustshield.android.ui.result.ResultInput
 import ai.trustshield.android.ui.call.CallLanguage
 import ai.trustshield.android.ui.call.RecognizerStatus
@@ -204,38 +200,11 @@ object AnalysisToResult {
                 Confidence.MEDIUM -> ConfidenceLevel.MEDIUM
                 Confidence.HIGH -> ConfidenceLevel.HIGH
             },
-            evidence = outcome.result.evidence.map { item ->
-                ResultEvidenceInput(
-                    id = item.id,
-                    module = when (item.module) {
-                        "stage_rules" -> "Pattern check"
-                        "legit_indicators" -> "Legitimate signal"
-                        "local_fusion" -> "Local analysis"
-                        else -> "Local check"
-                    },
-                    titleHinglish = item.titleHinglish,
-                    titleEnglish = item.titleHinglish,
-                    detailHinglish = item.detail,
-                    detailEnglish = item.detail,
-                    severity = when (item.strength) {
-                        ai.trustshield.android.core.model.Strength.WEAK -> EvidenceSeverity.INFO
-                        ai.trustshield.android.core.model.Strength.MODERATE -> EvidenceSeverity.WATCH
-                        ai.trustshield.android.core.model.Strength.STRONG -> EvidenceSeverity.STRONG
-                    },
-                    quote = item.quote.orEmpty()
-                )
-            },
+            evidence = outcome.result.evidence.map(LocalEvidenceAdapter::evidence),
             actions = outcome.result.actions.mapIndexed { index, line ->
-                ResultActionInput(
-                    id = "local-action-$index",
-                    labelHinglish = line,
-                    labelEnglish = line,
-                    detailHinglish = "Yeh agla kadam aapke faisle ke liye hai.",
-                    detailEnglish = "This next step is for you to consider.",
-                    priority = if (index == 0) ActionPriority.PRIMARY else ActionPriority.SECONDARY
-                )
+                LocalEvidenceAdapter.action(line, index)
             },
-            limitations = outcome.result.limitations.map { ToneCopy(it, it) },
+            limitations = outcome.result.limitations.map { ToneCopy(it, LocalEvidenceAdapter.limitation(it)) },
             backendAvailable = false,
             riskScore = outcome.risk.score.takeUnless {
                 outcome.result.risk.label == RiskLabel.UNABLE_TO_VERIFY
