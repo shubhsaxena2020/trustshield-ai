@@ -97,7 +97,7 @@ def _publish(request: Request, response: Response, result: AnalysisResult, *, re
     return result
 
 
-def _record_history(request: Request, user: CurrentUser | None, result: AnalysisResult, raw_text: str) -> None:
+def _record_history(request: Request, user: CurrentUser | None, result: AnalysisResult) -> None:
     if user is None:
         return
     settings = _state(request).settings
@@ -107,9 +107,10 @@ def _record_history(request: Request, user: CurrentUser | None, result: Analysis
         history_store.save(
             settings.supabase_url, settings.supabase_service_role_key,
             user_id=user.id, input_type=result.input_type,
-            input_summary=history_store.summarize(raw_text),
+            input_summary=f"{result.input_type.capitalize()} scan",
             risk_score=result.risk.score, risk_label=result.risk.label,
-            result_json=result.model_dump(mode="json"),
+            result_json={"input_type": result.input_type, "risk_score": result.risk.score,
+                         "risk_label": result.risk.label},
         )
     except Exception as exc:  # best-effort: a history-store outage must never change an analysis response
         _log.warning(json.dumps({"event": "history_write_failed", "error_type": type(exc).__name__}))
@@ -180,7 +181,7 @@ def analyze_text_endpoint(body: TextIn, request: Request, response: Response,
         result = _publish(request, response, analyze_text(body.text))
     except InvalidInput as e:
         raise HTTPException(422, str(e))
-    _record_history(request, user, result, body.text)
+    _record_history(request, user, result)
     return result
 
 
@@ -188,7 +189,7 @@ def analyze_text_endpoint(body: TextIn, request: Request, response: Response,
 def analyze_url_endpoint(body: UrlIn, request: Request, response: Response,
                           user: CurrentUser | None = Depends(get_current_user)):
     result = _publish(request, response, analyze_url(body.url))
-    _record_history(request, user, result, body.url)
+    _record_history(request, user, result)
     return result
 
 
@@ -201,11 +202,11 @@ def _document_error(exc: DocumentRejected) -> HTTPException:
 
 
 async def _upload_endpoint(request: Request, response: Response, file: UploadFile, func,
-                            user: CurrentUser | None, label: str) -> AnalysisResult:
+                            user: CurrentUser | None) -> AnalysisResult:
     try:
         data = await file.read(max_upload_size() + 1)  # the extra byte detects oversize input without unbounded reads
         result = _publish(request, response, await run_heavy(request, func, data, file.content_type, file.filename))
-        _record_history(request, user, result, f"{label} ({result.risk.label})")
+        _record_history(request, user, result)
         return result
     except ImageRejected as exc:
         raise _image_error(exc)
@@ -220,13 +221,13 @@ async def _upload_endpoint(request: Request, response: Response, file: UploadFil
 @router.post("/api/v1/analyze/image", response_model=AnalysisResult, dependencies=[Depends(limit_heavy)])
 async def analyze_image_endpoint(request: Request, response: Response, file: UploadFile = File(...),
                                   user: CurrentUser | None = Depends(get_current_user)):
-    return await _upload_endpoint(request, response, file, analyze_image, user, "Screenshot scan")
+    return await _upload_endpoint(request, response, file, analyze_image, user)
 
 
 @router.post("/api/v1/analyze/qr", response_model=AnalysisResult, dependencies=[Depends(limit_heavy)])
 async def analyze_qr_endpoint(request: Request, response: Response, file: UploadFile = File(...),
                                user: CurrentUser | None = Depends(get_current_user)):
-    return await _upload_endpoint(request, response, file, analyze_qr, user, "QR code scan")
+    return await _upload_endpoint(request, response, file, analyze_qr, user)
 
 @router.post("/api/v1/analyze/document", response_model=AnalysisResult, dependencies=[Depends(limit_heavy)])
 async def analyze_document_endpoint(request: Request, response: Response, file: UploadFile = File(...),
@@ -234,7 +235,7 @@ async def analyze_document_endpoint(request: Request, response: Response, file: 
     try:
         data = await file.read(max_document_bytes_fn() + 1)
         result = _publish(request, response, await run_heavy(request, analysis_pipeline.analyze_document, data, file.content_type, file.filename))
-        _record_history(request, user, result, f"Document scan ({result.risk.label})")
+        _record_history(request, user, result)
         return result
     except DocumentRejected as exc:
         raise _document_error(exc)
