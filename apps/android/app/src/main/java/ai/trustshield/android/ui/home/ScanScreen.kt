@@ -259,6 +259,10 @@ data class ScanInputState(
     /** Why the primary action is unavailable, or `null` when it can run. */
     val checkBlockedReason: ScanInputError? get() = ScanInputRules.checkBlockingError(this)
 
+    /** Keep initial empty-state validation quiet until a check is explicitly refused. */
+    val visibleCheckBlockedReason: ScanInputError?
+        get() = checkBlockedReason.takeIf { charCount > 0 && error == null }
+
     /**
      * The exact text the host should analyse for a Check press, or `null` when no check may run.
      * Always sanitized (trimmed, bounded) — the host never has to clean it up.
@@ -568,14 +572,6 @@ fun ScanScreen(
             }
 
             // ---- Empty / error states ---------------------------------------------------
-            if (state.charCount == 0 && state.error == null) {
-                Text(
-                    text = copy(ScanCopy.emptyHint),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
             state.error?.let { error ->
                 ErrorBanner(
                     label = copy(ScanCopy.errorLabel),
@@ -643,7 +639,7 @@ fun ScanScreen(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                state.checkBlockedReason?.let { blocked ->
+                state.visibleCheckBlockedReason?.let { blocked ->
                     Text(
                         text = copy(blocked.copy),
                         style = MaterialTheme.typography.bodySmall,

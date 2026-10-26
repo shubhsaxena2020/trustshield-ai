@@ -402,3 +402,9 @@ PHASE 3 COMPLETE
 - The owner filed issue #143 (label `phone`) with four observations: Home/Result titles are black on a dark background; splash status icons are white on a light background; phone debug cold start reported +7.485s and a release measurement is requested; and the initial Home screen exposes the empty-text validation line before user action.
 - Codex did not run adb, inspect the phone, or access its screenshot. Read-only source triage found title/splash overlap with agent3's active #139/#97 branch; the empty-state observation is in the `ScanScreen` renderer. Wait for that lane's safe boundary before editing overlapping UI/theme files. Acceptance will need dark/light title contrast, API 28 splash icon contrast, and a regression for initial empty-state copy. Owner/head retains all phone measurements.
 - No other `phone` issues are open at this snapshot. The shared emulator remains locked by agent3; Gradle lock is free. Existing Hermes sessions remain untouched.
+
+## 2026-10-26 23:54 IST - #143 initial Home validation copy hidden
+
+- In isolated branch `android/P4-phone-143-empty`, removed the initial Home empty-state prompt and kept the explicit empty-check refusal in the existing error banner. Nonempty invalid input still gets its blocker guidance.
+- Added JVM assertions for quiet initial state and retained empty-input error state. `:app:testDebugUnitTest --tests ai.trustshield.android.ui.home.ScanScreenTest --no-daemon --console=plain` passed. Test-first compile failed before implementation on the expected missing derived property.
+- No emulator or physical device was used. Agent3 owns the emulator; phone serial `63b0de52` remains head-only. #143 dark-theme title and API 28 splash contrast plus release cold-start measurement remain open for a safe lane boundary/owner measurement.

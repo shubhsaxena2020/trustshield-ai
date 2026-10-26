@@ -45,6 +45,7 @@ class ScanScreenTest {
         assertFalse("no truncation happened", state.truncationNoticeVisible)
         assertFalse("clear is pointless on an empty field", state.canClear)
         assertEquals("0 / 20,000", state.counterLabel)
+        assertNull("do not show validation before a check is attempted", state.visibleCheckBlockedReason)
 
         // The empty state has real copy, in both languages — not a blank screen.
         assertTrue(ScanCopy.emptyHint.text(false).isNotBlank())
@@ -254,6 +255,7 @@ class ScanScreenTest {
         val next = reduce(ScanInputState(), ScanInputEvent.CheckRequested)
 
         assertEquals(ScanInputError.EMPTY_INPUT, next.error)
+        assertNull("the error banner owns explicit empty-check feedback", next.visibleCheckBlockedReason)
         assertEquals("", next.text)
         assertNull("no analysable text is handed to the host", next.checkText())
     }
