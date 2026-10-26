@@ -214,3 +214,9 @@ PHASE 3 COMPLETE
 - Added `callShieldWithoutMicrophonePermissionOffersStagedDemo`: it revokes only `ai.trustshield.android`'s RECORD_AUDIO grant on the test emulator, asserts the permission-block explanation and staged-demo action, then opens the scripted demo. This covers the UI recovery path without starting microphone capture.
 - `:app:testDebugUnitTest :app:assembleDebugAndroidTest` passed; the updated instrumentation APK compiles. The currently held emulator belongs to another Phase 4 lane, so this new test has not yet run.
 - Extracted CameraX bind-error mapping into a pure `CameraFaultMapper`; JVM tests now verify direct and wrapped in-use/max-in-use exceptions become the recoverable busy token, while unrelated failures remain bind errors. `:app:testDebugUnitTest` passed with 1,088 tests, 0 failures/errors/skips.
+
+## 2026-10-26 21:29 IST — phone kit command and size audit
+
+- Added exact adb route-launch commands for Settings, QR Guard, Call Shield, and Home in the 30-minute phone plan; added the TalkBack service-state query and app relaunch commands for 1.3x font scale.
+- `phone_collect_logs.ps1` now sums installed base/split APK byte sizes via adb `pm path` plus `stat`. The script was statically parsed alongside the three other PowerShell helpers; all parse checks passed. No phone commands were run.
+- A4 synthetic QR cards remain visually inspected as recorded at 21:19; card generation and physical QR scanning remain separate activities, with only the latter held for owner phone connection.

@@ -22,6 +22,22 @@ $report.Add("Android: $((& adb -s $Serial shell getprop ro.build.version.release
 $report.Add('')
 $report.Add('Package path and version:')
 $report.AddRange([string[]](& adb -s $Serial shell dumpsys package $PackageName | Select-String 'versionName=|versionCode=|codePath=|primaryCpuAbi=|pkgFlags=' | ForEach-Object { $_.Line }))
+$apkPaths = & adb -s $Serial shell pm path $PackageName
+$installedBytes = 0L
+foreach ($entry in $apkPaths) {
+    if ($entry -match '^package:(.+)$') {
+        $remotePath = $Matches[1].Trim()
+        $sizeText = (& adb -s $Serial shell stat -c %s $remotePath 2>$null | Out-String).Trim()
+        if ($LASTEXITCODE -eq 0 -and $sizeText -match '^\d+$') {
+            $size = [long]$sizeText
+            $installedBytes += $size
+            $report.Add("APK split bytes: $sizeText")
+        } else {
+            $report.Add('APK split bytes: unavailable on this Android build')
+        }
+    }
+}
+if ($installedBytes -gt 0) { $report.Add("Installed APK bytes total: $installedBytes") }
 $report.Add('')
 $report.Add('App memory:')
 $report.AddRange([string[]](& adb -s $Serial shell dumpsys meminfo $PackageName | Select-String 'Native Heap|Dalvik Heap|TOTAL PSS|TOTAL RSS|TOTAL:' | ForEach-Object { $_.Line }))
