@@ -17,7 +17,7 @@ Prerequisites: Android 8.0+ (API 26+), USB debugging authorized, one device in `
 | 18:00–21:00 | Cold start, package size, battery: `adb -s <SERIAL> shell am force-stop ai.trustshield.android`; `adb -s <SERIAL> shell am start -W -n ai.trustshield.android/.MainActivity`; record `TotalTime`. Reset battery with `adb -s <SERIAL> shell dumpsys batterystats --reset`; use the app for 60 seconds; query `adb -s <SERIAL> shell dumpsys batterystats ai.trustshield.android`; then run `pwsh -File docs/android/phone-kit/scripts/phone_collect_logs.ps1 -Serial <SERIAL>`. Record installed APK byte total from the report, cold-start ms, and battery delta if exposed. | PASS / FAIL: __________ |
 | 21:00–23:00 | TalkBack quick pass: enable via the phone's Accessibility settings; run `adb -s <SERIAL> shell settings get secure enabled_accessibility_services` to confirm the active service. Swipe through Home, Result, QR Guard, Call Shield, Settings. Confirm useful spoken labels, sensible order, and risk text as well as color. Disable TalkBack in Accessibility settings. | PASS / FAIL: __________ |
 | 23:00–25:00 | Font scale 1.3x: run `adb -s <SERIAL> shell settings put system font_scale 1.3`, then `adb -s <SERIAL> shell am force-stop ai.trustshield.android` and relaunch with `adb -s <SERIAL> shell am start -n ai.trustshield.android/.MainActivity`. Inspect Home, Result, QR Guard, Call Shield and Settings for clipped actions/cards. Restore with `adb -s <SERIAL> shell settings put system font_scale 1.0`. | PASS / FAIL: __________ |
-| 25:00–29:00 | Stability: `pwsh -File docs/android/phone-kit/scripts/phone_monkey.ps1 -Serial <SERIAL> -Events 2000 -Seeds 4242,7,99`. Script saves per-seed logs and checks app crashes/ANRs; do not interact with the screen during the run. | PASS / FAIL: __________ |
+| 25:00–29:00 | Stability: `pwsh -File docs/android/phone-kit/scripts/phone_monkey.ps1 -Serial <SERIAL> -Events 2000 -Seeds 4242`. This is one 2,000-event device run; the emulator proof separately covers seeds 4242, 7, and 99 at 2,000 each. The script saves the log and checks app crashes/ANRs; do not interact with the screen during the run. | PASS / FAIL: __________ |
 | 29:00–30:00 | Collect a privacy-filtered report: `pwsh -File docs/android/phone-kit/scripts/phone_collect_logs.ps1 -Serial <SERIAL>`. Record final verdict and any log path. | PASS / FAIL: __________ |
 
 ## Run record
@@ -25,7 +25,7 @@ Prerequisites: Android 8.0+ (API 26+), USB debugging authorized, one device in `
 - Date/time: __________  Device/model: __________  Android: __________  ABI: __________
 - Recognizer service: __________  Hindi `hi-IN`: PASS / FAIL / NOT AVAILABLE
 - Install/version: __________  APK bytes: __________  Cold start ms: __________  Battery delta: __________
-- Monkey: 4242 PASS/FAIL ____  7 PASS/FAIL ____  99 PASS/FAIL ____
+- Phone monkey (2,000 events, seed 4242): PASS / FAIL ____
 - QR match: ____  mismatch 1: ____  mismatch 2: ____  mismatch 3 / tamper alert: ____
 - TalkBack: ____  1.3x font: ____  airplane mode: ____  Call Shield: ____
 - Owner: __________  Head reviewer: __________  Follow-up issue(s): __________
