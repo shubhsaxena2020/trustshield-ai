@@ -252,7 +252,10 @@ class ResultScreenStrayTextTest {
         )
         // The score still reaches the panel, but as the TalkBack-only parameter.
         assertTrue("host must pass the engine score for the announcement", body.contains("riskScore ="))
-        assertTrue("the panel is the only child now", !body.contains("Column("))
+        assertTrue(
+            "the host mounts exactly one result panel",
+            body.split("ResultScreen(").size == 2
+        )
     }
 
     // ------------------------------------------------- 4. no absolute-safety copy sneaks back in
