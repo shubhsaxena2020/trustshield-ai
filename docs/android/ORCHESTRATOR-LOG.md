@@ -256,6 +256,13 @@ PHASE 3 COMPLETE
 
 - Correction: the preceding `22:28 IST` heading should read `21:58 IST` (UTC is IST minus 5 hours 30 minutes). The 22:45 phone hold is still active; no physical phone work occurred.
 
+## 2026-10-26 22:30 IST — Hermes swarm directive and lane audit
+
+- Fast-forward check: `android-finals` already matched fetched `origin/android-finals`. Committed and pushed the previously untracked owner directive `HEAD_DIRECTIVE_HERMES_SWARM.md` as `ab26a9a`; other untracked paths remain untouched.
+- Read Phase 4 orders, phone hold, Hermes swarm directive, current STATE and orchestration log. Phone hold remains in force; no physical-phone work started. Free physical memory was 20.51 GB. Existing emulator lock was present, so no emulator or Gradle work was started.
+- Queried the active Hermes profile `state.db` files before changing any lane process. Current Phase 4 session evidence: agent1 has one `delegate_task` call with `tasks` length 1; agent2 has zero calls; agent3 has one call with `tasks` length 3. Observed peak delegated width was 3, not the required 9. These are in-flight legacy prompts and are not counted as compliant waves.
+- All three lane processes remain alive. agent1 has uncommitted detection/fixture edits, agent2 has uncommitted conversation work and a running Gradle command, and agent3 is running its verification command with three commits already at its current branch boundary. No process was killed or relaunched; relaunch is deferred until each lane reaches a safe commit boundary or finishes. Every relaunch will use a file-pointer prompt requiring exactly nine disjoint tasks per wave, one `delegate_task` call, full wait/review/integration, and lane-lead-only Gradle.
+
 ## 2026-10-26 22:29 IST — Hermes wave-size audit
 
 - Read the new owner directive `HEAD_DIRECTIVE_HERMES_SWARM.md` and inspected the agent1/agent2/agent3 profile `state.db` files read-only. Recorded `delegate_task` wave sizes: agent1 `[5,1,1,3,2,1,1,1]` (8 calls), agent2 `[8,3,2,1,4,5,4,2]` (8 calls), agent3 `[1,5,1,4,1,1,3]` (7 calls). No recorded call had a 9-task wave; the largest observed wave was 8.

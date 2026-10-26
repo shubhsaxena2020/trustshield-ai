@@ -1,4 +1,13 @@
-## Current status (2026-10-26 21:40 IST)
+## Current status (2026-10-26 22:30 IST)
+
+`android-finals` now includes the owner Hermes swarm directive in commit `ab26a9a`, pushed to origin. No Phase 4 completion claim is made yet.
+
+- Since the 20:23 Phase 4 lane launches, profile `state.db` shows agent1 has one `delegate_task` call with `tasks` length 1, agent2 has no call, and agent3 has one call with `tasks` length 3. The earlier 22:29 profile-wide audit below remains the baseline history; none of these new in-flight sessions has produced a compliant nine-task wave.
+- No lane was killed or relaunched. agent1 has uncommitted detection/fixture edits, agent2 has uncommitted conversation work and an active command, and agent3 is in verification with three commits at its branch boundary. Relaunch only after a safe commit boundary or finish, using a one-line file-pointer prompt requiring 9 disjoint tasks per wave, one `delegate_task` call, full wait/review/integration, and lane-lead-only Gradle.
+- Main checkout has no tracked source edits. Other pre-existing untracked workspace paths remain untouched. Free physical memory measured 20.51 GB. The Phase 4 emulator lock is occupied; no emulator or build was started from the main checkout.
+- Phone hold remains binding until the owner reports the real phone connected or 22:45 IST; no physical-phone work occurred.
+
+## Historical status (2026-10-26 21:40 IST)
 
 `android-finals` includes the Phase 4 crash/advisory fixes and local signed-release configuration. Codex added a collapsed Settings Device check with Android/API, ABI, recognizer service, `hi-IN` locale support, and camera/mic permission status; a camera-in-use fault now offers a QR Guard demo recovery. Missing mic/recognizer paths continue to expose typed/staged fallback.
 
