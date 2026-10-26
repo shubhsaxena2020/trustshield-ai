@@ -1,0 +1,1 @@
+﻿No SIGSEGV, FATAL EXCEPTION, app ANR, or libbarhopper marker in 20,000 logcat lines for seed 4242.
