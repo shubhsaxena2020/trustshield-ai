@@ -493,6 +493,6 @@ PHASE 3 COMPLETE
 
 ## 2026-10-27 00:40 IST - duplicate startup audit
 
-- Two extra root sessions per profile were observed from overlapping coordinators; all had zero delegate_task calls and zero child sessions. They exited before doing lane work. The only Hermes processes currently active are the three roots listed above; no duplicate lane is running.
+- Two extra root sessions per profile were observed from overlapping coordinators; all had zero delegate_task calls and zero child sessions. No Hermes process or child session for those extra roots was visible at the check; their state.db rows had no end timestamp, so a clean shutdown is not claimed. The only Hermes processes currently active are the three roots listed above; no duplicate lane is running.
 - The active roots have not yet created their waves. Agent1 is receiving a provider response, agent2 is waiting for a provider response, and agent3 is receiving a provider response. No worktree has changed since launch.
 - Emulator lock and emulator process remain absent; free RAM was 22.9 GB at the last check. Do not run a build or emulator task without taking the shared lock first. No ADB was run against `63b0de52`.
