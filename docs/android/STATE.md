@@ -307,3 +307,9 @@ Branch: `android-finals`. Phase: **3 active; Codex foundation pushed, 18 new P0 
 ### 2026-10-26 23:27 IST correction
 - Corrected the earlier wave-width snapshots: agent1's actual `oneshot` parent session `20261026_224554_363105` made one `delegate_task` call at 23:08:28 with 9 tasks, and state.db contains nine active child sessions with distinct owned files. This is a compliant width-9 wave; the children remain in provider retry/backoff and have not returned results. The call omitted explicit `max_concurrent_children`, although all nine children were dispatched; require it explicitly on the next wave where supported.
 - Agent2 new session has zero calls/children. Agent3's active lane has only the earlier legacy width-3 call, whose three children have completed. Do not interrupt dirty lane work.
+
+### 2026-10-26 23:30 IST checkpoint
+- `android-finals` is at `a1f3369`, equal to fetched origin; tracked files clean. No unrelated untracked paths changed.
+- PR #141: head `280ef50`, 47 fixtures, 47/47 local fixture pass, 1,094 JVM tests, lint and debug assembly pass. Frontend CI passed; backend/security failed on unrelated repository-wide checks. Emulator spot check remains open because agent3 owns the sole API 36 emulator.
+- PR #142: English Result copy fix `c8e6e71` and evidence update `507952e` pushed. The adapter translates evidence titles/details, local actions and limitations without changing Hinglish output, score, or quote. Full local gate: 1,097 tests, 0 failures; lintDebug and assembleDebug passed, including 3 new adapter tests. #138 remains incomplete pending a post-fix emulator Result spot check plus reduced-motion/reset measurements. CI is running on the pushed head.
+- Gradle lock is released. Emulator lock remains occupied by agent3. No phone install, camera/speech, battery, performance, or TalkBack action occurred; no owner release received. P1 conversation/payment work remains gated until P0 closes.
