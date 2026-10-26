@@ -8,6 +8,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.SystemClock
+import android.os.Build
 import android.provider.Settings
 import android.view.HapticFeedbackConstants
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -94,7 +95,7 @@ import ai.trustshield.android.ui.theme.onContainer
 // QR Guard host — work package P3-14, issue #93.
 //
 // Phase 2 shipped the parts: B02 (UPI parser), B03 (camera-frame policy), B06 (tamper watcher),
-// P3-13 (CameraX + bundled ML Kit adapter), P3-15 (deterministic demo fixtures) and C06 (pure QR
+// P3-13 (CameraX + pure-JVM ZXing adapter), P3-15 (deterministic demo fixtures) and C06 (pure QR
 // screen state + renderer). What was missing is the *wire* between them, and that is exactly what
 // this file is: the only place in the app that owns a camera, a permission request and the mapping
 // from a decoded frame to what the shopkeeper sees.
@@ -810,6 +811,9 @@ internal object QrHostCopy {
 
     val cameraHeading = ToneCopy("Camera", "Camera")
     val cameraGranted = ToneCopy("Camera chalu hai", "Camera is on")
+    val cameraEmulatorOff = ToneCopy(
+        "Emulator par live camera band hai", "Live camera scanning is off on this emulator"
+    )
     val cameraHint = ToneCopy(
         "QR ko frame ke beech mein rakhein. Camera sirf QR padhta hai — photo save nahi hoti.",
         "Keep the QR inside the frame. The camera only reads the QR — no photo is saved."
@@ -876,12 +880,23 @@ internal object QrHostCopy {
         "Camera ka frame padha nahi ja raha. QR saaf karein ya phone ko hila kar dobara try karein.",
         "The camera frames cannot be read. Clean the QR or move the phone and try again."
     )
+    val faultEmulator = ToneCopy(
+        "Emulator par camera default se band hai. QR Guard ko Simulate scan se try karein.",
+        "Camera is off by default on emulators. Try QR Guard with Simulate scan."
+    )
 
     /** TalkBack label for the camera panel; includes the state so colour is never the only channel. */
     fun cameraPanelDescription(
         state: QrPermissionState,
-        language: QrLanguage = QrLanguage.HINGLISH
+        language: QrLanguage = QrLanguage.HINGLISH,
+        emulatorCameraOff: Boolean = false,
     ): String {
+        if (emulatorCameraOff && state == QrPermissionState.GRANTED) {
+            return ToneCopy(
+                "Camera permission mili hai, emulator par live scan band hai",
+                "Camera permission is granted, live scan is off on this emulator"
+            ).text(language)
+        }
         val label = when (state) {
             QrPermissionState.GRANTED -> ToneCopy("camera chalu hai", "camera is on")
             QrPermissionState.CAN_ASK -> ToneCopy("camera ki permission chahiye", "camera permission is needed")
@@ -902,6 +917,7 @@ internal object QrHostCopy {
     /** User copy for a stable CameraX fault token. Never echoes the token itself. */
     fun faultText(token: String): ToneCopy = when (token) {
         CameraXQrScanner.FAULT_FRAME_PIPELINE -> faultFrame
+        CameraXQrScanner.FAULT_EMULATOR_CAMERA_DISABLED -> faultEmulator
         else -> faultGeneric
     }
 }
@@ -922,6 +938,7 @@ internal fun QrGuardHostContent(
     session: QrGuardSession,
     permission: QrPermissionUi,
     showPreview: Boolean,
+    emulatorCameraOff: Boolean = false,
     hapticsEnabled: Boolean,
     onRequestPermission: () -> Unit,
     onOpenSettings: () -> Unit,
@@ -966,6 +983,7 @@ internal fun QrGuardHostContent(
             showPreview = showPreview && permission.canUseCamera,
             dark = dark,
             lang = lang,
+            emulatorCameraOff = emulatorCameraOff,
             onPreviewCreated = onPreviewCreated,
             onRequestPermission = onRequestPermission,
             onOpenSettings = onOpenSettings
@@ -976,6 +994,7 @@ internal fun QrGuardHostContent(
         QrGuardScreen(
             state = view.state,
             onEvent = dispatch,
+            emulatorCameraOff = emulatorCameraOff,
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f, fill = false)
@@ -1014,24 +1033,25 @@ private fun CameraPanel(
     showPreview: Boolean,
     dark: Boolean,
     lang: QrLanguage,
+    emulatorCameraOff: Boolean,
     onPreviewCreated: (PreviewView) -> Unit,
     onRequestPermission: () -> Unit,
     onOpenSettings: () -> Unit
 ) {
     val tone = when (permission.state) {
-        QrPermissionState.GRANTED -> RiskTone.GREEN
+        QrPermissionState.GRANTED -> if (emulatorCameraOff) RiskTone.AMBER else RiskTone.GREEN
         QrPermissionState.NO_CAMERA -> RiskTone.AMBER
         QrPermissionState.CAN_ASK, QrPermissionState.PERMANENTLY_DENIED -> RiskTone.AMBER
     }
     val statusLabel = when (permission.state) {
-        QrPermissionState.GRANTED -> QrHostCopy.cameraGranted
+        QrPermissionState.GRANTED -> if (emulatorCameraOff) QrHostCopy.cameraEmulatorOff else QrHostCopy.cameraGranted
         QrPermissionState.CAN_ASK -> ToneCopy("Camera ki permission chahiye", "Camera permission is needed")
         QrPermissionState.PERMANENTLY_DENIED ->
             ToneCopy("Camera permission band hai", "Camera permission is blocked")
         QrPermissionState.NO_CAMERA -> QrStrings.cameraNone
     }
     val glyph = when (permission.state) {
-        QrPermissionState.GRANTED -> "\u25CF"
+        QrPermissionState.GRANTED -> if (emulatorCameraOff) "\u2298" else "\u25CF"
         QrPermissionState.NO_CAMERA -> "\u2715"
         else -> "\u2715"
     }
@@ -1040,7 +1060,7 @@ private fun CameraPanel(
         tone = tone,
         dark = dark,
         modifier = Modifier.semantics {
-            contentDescription = QrHostCopy.cameraPanelDescription(permission.state, lang)
+            contentDescription = QrHostCopy.cameraPanelDescription(permission.state, lang, emulatorCameraOff)
         }
     ) {
         Row(
@@ -1402,6 +1422,7 @@ fun QrGuardHost(modifier: Modifier = Modifier) {
     val hasCamera = remember(context) {
         context.packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)
     }
+    val emulatorBuild = remember { isEmulatorBuild() }
     var hasAsked by rememberSaveable { mutableStateOf(false) }
 
     fun probe(): QrPermissionUi = QrPermissionPolicy.decide(
@@ -1414,6 +1435,10 @@ fun QrGuardHost(modifier: Modifier = Modifier) {
     )
 
     var permission by remember { mutableStateOf(probe()) }
+
+    LaunchedEffect(emulatorBuild) {
+        if (emulatorBuild) session.onCameraFault(CameraXQrScanner.FAULT_EMULATOR_CAMERA_DISABLED)
+    }
 
     val launcher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -1450,13 +1475,13 @@ fun QrGuardHost(modifier: Modifier = Modifier) {
         )
     }
 
-    // The scanner owns a single-thread executor and a vendor client: release both when the screen
+    // The scanner owns a single-thread executor and decoder: release both when the screen
     // leaves the composition, whatever the reason.
     DisposableEffect(scanner) { onDispose { scanner.stop() } }
 
     val granted = permission.canUseCamera
     val phase = session.view.state.phase
-    val cameraShouldRun = granted && phase != QrPhase.STOPPED
+    val cameraShouldRun = granted && phase != QrPhase.STOPPED && !emulatorBuild
 
     DisposableEffect(lifecycleOwner, previewView, cameraShouldRun) {
         val surface = previewView
@@ -1492,7 +1517,8 @@ fun QrGuardHost(modifier: Modifier = Modifier) {
     QrGuardHostContent(
         session = session,
         permission = permission,
-        showPreview = granted,
+        showPreview = granted && !emulatorBuild,
+        emulatorCameraOff = emulatorBuild,
         hapticsEnabled = preferences.haptics,
         onRequestPermission = { launcher.launch(Manifest.permission.CAMERA) },
         onOpenSettings = { context.openAppSettings() },
@@ -1525,6 +1551,16 @@ private fun Context.findActivity(): Activity? {
     }
     return null
 }
+
+private fun isEmulatorBuild(): Boolean =
+    Build.FINGERPRINT.startsWith("generic", ignoreCase = true) ||
+        Build.FINGERPRINT.contains("emulator", ignoreCase = true) ||
+        Build.MODEL.contains("Emulator", ignoreCase = true) ||
+        Build.MODEL.contains("Android SDK built for", ignoreCase = true) ||
+        Build.HARDWARE.equals("goldfish", ignoreCase = true) ||
+        Build.HARDWARE.equals("ranchu", ignoreCase = true) ||
+        Build.HARDWARE.equals("qemu", ignoreCase = true) ||
+        Build.PRODUCT.contains("sdk_gphone", ignoreCase = true)
 
 /**
  * Opens this app's own system settings page so a permanently denied camera can be re-enabled.

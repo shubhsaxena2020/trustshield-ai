@@ -1,6 +1,5 @@
 package ai.trustshield.android.input.qr
 
-import android.graphics.Bitmap
 import android.graphics.ImageFormat
 import android.graphics.Rect
 import android.media.Image
@@ -16,10 +15,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.android.gms.tasks.Tasks
-import com.google.mlkit.vision.barcode.BarcodeScannerOptions
-import com.google.mlkit.vision.barcode.BarcodeScanning
-import com.google.mlkit.vision.barcode.common.Barcode
-import com.google.mlkit.vision.common.InputImage
+import com.google.zxing.BarcodeFormat
+import com.google.zxing.EncodeHintType
+import com.google.zxing.qrcode.QRCodeWriter
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -35,18 +33,17 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 
 /**
- * Instrumented tests for the CameraX + bundled-ML-Kit QR adapter (P3-13, issue #92).
+ * Instrumented tests for the CameraX + pure-JVM QR adapter (Phase 4, issue #133).
  *
  * What these tests prove:
  * - the frame-booking invariant of [CameraXBarcodeDecoder]: exactly one close per frame, on a
- *   successful decode, on a failed `Task`, on an `InputImage` that cannot be built, and on shutdown;
+ *   successful decode, on a failed `Task`, on a malformed frame, and on shutdown;
  * - single-slot behaviour: a second frame is refused while one decode is outstanding, so the vendor
  *   decoder never holds two images at once;
  * - permission and low-light refusals happen *before* the vendor decoder is touched;
  * - the payload that crosses the seam is exactly the string the deterministic parser
  *   ([UpiQrParser]) expects, and no fixture payload appears in any string this package renders;
- * - the **bundled** barcode client (`com.google.mlkit:barcode-scanning`, model inside the APK)
- *   answers on a synthetic `YUV_420_888` frame without a Play-services model download.
+ * - ZXing reports no code for a synthetic blank frame without invoking native barcode code.
  *
  * What these tests cannot prove (reported as a gap in the PR): that a real printed QR decodes on real
  * hardware — that needs a physical camera, a printed code and a person aiming it.
@@ -68,16 +65,18 @@ class CameraXBarcodeDecoderTest {
         override val heightPx: Int = 480,
         override val rotationDegrees: Int = 90,
         private val luma: Double = 0.55,
-        private val imageFactory: () -> InputImage = ::blankInputImage,
+        private val luminanceFactory: () -> QrLuminanceFrame? = { null },
     ) : FrameSource {
         val closeCount = AtomicInteger(0)
-        val imageRequests = AtomicInteger(0)
+        val luminanceRequests = AtomicInteger(0)
 
         override fun meanLuma0to1(): Double = luma
 
-        override fun toInputImage(): InputImage {
-            imageRequests.incrementAndGet()
-            return imageFactory()
+        override fun toQrLuminanceFrame(): QrLuminanceFrame {
+            luminanceRequests.incrementAndGet()
+            luminanceFactory()?.let { return it }
+            val byte = (luma * 255.0).toInt().toByte()
+            return QrLuminanceFrame(widthPx, heightPx, ByteArray(widthPx * heightPx) { byte }, rotationDegrees)
         }
 
         override fun close() {
@@ -89,7 +88,7 @@ class CameraXBarcodeDecoderTest {
     private class FakeReader(private val task: () -> Task<String?>) : BarcodeReader {
         val reads = AtomicInteger(0)
 
-        override fun read(image: InputImage): Task<String?> {
+        override fun read(frame: QrLuminanceFrame): Task<String?> {
             reads.incrementAndGet()
             return task()
         }
@@ -175,15 +174,15 @@ class CameraXBarcodeDecoderTest {
     }
 
     @Test
-    fun unbuildableInputImageClosesTheFrameOnceAndThrowsASanitisedFailure() {
-        val frame = FakeFrame(imageFactory = { throw IllegalStateException("closed $FIXTURE_PAYLOAD") })
+    fun invalidLuminanceFrameClosesOnceAndThrowsASanitisedFailure() {
+        val frame = FakeFrame(luminanceFactory = { throw IllegalStateException("invalid frame") })
         val reader = FakeReader { Tasks.forResult(FIXTURE_PAYLOAD) }
         val decoder = decoder(reader)
 
         assertTrue(decoder.offer(3L, frame))
         try {
             decoder.decode(3L)
-            fail("an InputImage that cannot be built must not look like a successful decode")
+            fail("an invalid frame must not look like a successful decode")
         } catch (expected: BarcodeDecodeException) {
             assertNull("failure message must stay empty", expected.message)
         }
@@ -236,7 +235,7 @@ class CameraXBarcodeDecoderTest {
         assertFalse("single slot: a second frame must be refused", decoder.offer(11L, second))
         assertNull("a refused frame is never decoded", decoder.decode(11L))
         assertEquals("refused frame stays open for the caller", 0, second.closeCount.get())
-        assertEquals("refused frame never builds an InputImage", 0, second.imageRequests.get())
+        assertEquals("refused frame never copies pixels", 0, second.luminanceRequests.get())
         second.close()
         assertEquals("caller closes the refused frame", 1, second.closeCount.get())
         assertEquals("offer rejections", 1, decoder.offerRejections)
@@ -255,7 +254,7 @@ class CameraXBarcodeDecoderTest {
         val frame = FakeFrame()
         assertFalse("a closed decoder accepts no frame", decoder.offer(20L, frame))
         assertNull("a closed decoder never decodes", decoder.decode(20L))
-        assertEquals("closed decoder stays out of image building", 0, frame.imageRequests.get())
+        assertEquals("closed decoder stays out of pixel copying", 0, frame.luminanceRequests.get())
     }
 
     @Test
@@ -399,40 +398,47 @@ class CameraXBarcodeDecoderTest {
     }
 
     @Test
-    fun bundledBarcodeClientAnswersOnASyntheticBlackFrameWithoutAQRCode() {
-        withSyntheticFrame(luma = 0) { image ->
-            val input = InputImage.fromMediaImage(image, 0)
-            assertNotNull("InputImage must wrap a MediaImage", input)
-            val scanner = BarcodeScanning.getClient(
-                BarcodeScannerOptions.Builder()
-                    .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
-                    .build(),
-            )
-            try {
-                // Awaited, not observed: if the bundled model were missing this throws here.
-                val result = Tasks.await(scanner.process(input), 60, TimeUnit.SECONDS)
-                assertEquals("a black frame holds no barcode", 0, result.size)
-            } finally {
-                scanner.close()
-            }
-        }
+    fun pureJvmQrReaderThroughTheDecoderYieldsNoCodeAndClosesTheFrame() {
+        val frame = FakeFrame(widthPx = 480, heightPx = 480, luma = 0.0)
+        val decoder = CameraXBarcodeDecoder(ZxingQrBarcodeReader(), DirectExecutor, 60_000L)
+        assertTrue(decoder.offer(40L, frame))
+        assertNull("a black frame decodes to nothing", decoder.decode(40L))
+        assertEquals("frame closes", 1, frame.closeCount.get())
+        assertEquals("frames without code", 1, decoder.framesWithoutCode)
+        assertEquals("frames failed", 0, decoder.framesFailed)
+        decoder.close()
     }
 
     @Test
-    fun realBundledScannerThroughTheDecoderYieldsNoCodeAndClosesTheFrame() {
-        withSyntheticFrame(luma = 0) { image ->
-            val input = InputImage.fromMediaImage(image, 0)
-            val frame = FakeFrame(imageFactory = { input })
-            val decoder = CameraXBarcodeDecoder(MlKitBarcodeReader(), DirectExecutor, 60_000L)
-
-            assertTrue(decoder.offer(40L, frame))
-            assertNull("a black frame decodes to nothing", decoder.decode(40L))
-
-            assertEquals("frame closes", 1, frame.closeCount.get())
-            assertEquals("frames without code", 1, decoder.framesWithoutCode)
-            assertEquals("frames failed", 0, decoder.framesFailed)
-            decoder.close()
+    fun pureJvmQrReaderDecodesSyntheticQrAndClosesTheFrame() {
+        val expected = "upi://pay?pa=demo@okaxis&pn=Test"
+        val matrix = QRCodeWriter().encode(
+            expected,
+            BarcodeFormat.QR_CODE,
+            256,
+            256,
+            mapOf(EncodeHintType.MARGIN to 2),
+        )
+        val pixels = ByteArray(matrix.width * matrix.height) { index ->
+            val x = index % matrix.width
+            val y = index / matrix.width
+            if (matrix[x, y]) 0 else 0xFF.toByte()
         }
+        val frame = FakeFrame(
+            widthPx = matrix.width,
+            heightPx = matrix.height,
+            rotationDegrees = 0,
+            luminanceFactory = {
+                QrLuminanceFrame(matrix.width, matrix.height, pixels, 0)
+            },
+        )
+        val decoder = CameraXBarcodeDecoder(ZxingQrBarcodeReader(), DirectExecutor, 60_000L)
+
+        assertTrue(decoder.offer(41L, frame))
+        assertSamePayload("synthetic QR", expected, decoder.decode(41L))
+        assertEquals("frame closes", 1, frame.closeCount.get())
+        assertEquals("frames failed", 0, decoder.framesFailed)
+        decoder.close()
     }
 
     // ---------------------------------------------------------------- helpers
@@ -554,7 +560,5 @@ class CameraXBarcodeDecoderTest {
         const val FIXTURE_PAYLOAD = "upi://pay?pa=shop.demo@okaxis&pn=Demo%20Store&am=120.00&cu=INR"
         const val FIXTURE_VPA = "shop.demo@okaxis"
 
-        fun blankInputImage(): InputImage =
-            InputImage.fromBitmap(Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888), 0)
     }
 }

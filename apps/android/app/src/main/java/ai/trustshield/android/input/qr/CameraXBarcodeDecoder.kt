@@ -4,9 +4,7 @@ import android.content.Context
 import android.os.Looper
 import android.os.SystemClock
 import android.util.Size
-import androidx.annotation.OptIn
 import androidx.camera.core.CameraSelector
-import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
@@ -16,11 +14,13 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import com.google.android.gms.tasks.Task
-import com.google.mlkit.vision.barcode.BarcodeScanner
-import com.google.mlkit.vision.barcode.BarcodeScannerOptions
-import com.google.mlkit.vision.barcode.BarcodeScanning
-import com.google.mlkit.vision.barcode.common.Barcode
-import com.google.mlkit.vision.common.InputImage
+import com.google.android.gms.tasks.Tasks
+import com.google.zxing.BarcodeFormat
+import com.google.zxing.BinaryBitmap
+import com.google.zxing.DecodeHintType
+import com.google.zxing.MultiFormatReader
+import com.google.zxing.NotFoundException
+import com.google.zxing.common.HybridBinarizer
 import java.nio.ByteBuffer
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executor
@@ -60,8 +60,8 @@ internal interface FrameSource {
      */
     fun meanLuma0to1(): Double
 
-    /** Wraps the frame for ML Kit. May throw if the underlying buffer is already gone. */
-    fun toInputImage(): InputImage
+    /** Copies grayscale QR pixels into a bounded, contiguous JVM byte array. */
+    fun toQrLuminanceFrame(): QrLuminanceFrame
 
     /**
      * Releases the underlying buffer. Implementations are idempotent and safe from any thread; the
@@ -101,21 +101,25 @@ internal class ImageProxyFrame(private val proxy: ImageProxy) : FrameSource {
         )
     }
 
-    /**
-     * ML Kit rotates the buffer itself from [rotationDegrees], so the analysis use case is left at
-     * its natural target rotation: the preview owns orientation, the decoder owns readability.
-     *
-     * A detached `Image` (already released by CameraX) is reported as a plain failure token; the
-     * message can never carry frame content.
-     *
-     * `getImage()` is still marked experimental by CameraX even though every `ImageAnalysis` frame is
-     * a real `MediaImage` in practice; the opt-in is scoped to this one function rather than the
-     * module so the rest of the file keeps compile-time protection.
-     */
-    @OptIn(ExperimentalGetImage::class)
-    override fun toInputImage(): InputImage {
-        val mediaImage = proxy.getImage() ?: throw IllegalStateException("frame-detached")
-        return InputImage.fromMediaImage(mediaImage, rotationDegrees)
+    override fun toQrLuminanceFrame(): QrLuminanceFrame {
+        val planes = proxy.getPlanes()
+        if (planes.isEmpty()) throw IllegalStateException("frame-without-luma")
+        val plane = planes[0]
+        val width = widthPx
+        val height = heightPx
+        require(width > 0 && height > 0 && width.toLong() * height <= QrLuminanceFrame.MAX_PIXELS)
+        val source = plane.getBuffer().duplicate()
+        val bytes = ByteArray(width * height)
+        val rowStride = plane.getRowStride()
+        val pixelStride = plane.getPixelStride()
+        for (y in 0 until height) {
+            val sourceRow = y * rowStride
+            val destRow = y * width
+            for (x in 0 until width) {
+                bytes[destRow + x] = source.get(sourceRow + x * pixelStride)
+            }
+        }
+        return QrLuminanceFrame(width, height, bytes, rotationDegrees)
     }
 
     override fun close() {
@@ -175,49 +179,47 @@ internal object YPlaneLuma {
 }
 
 /**
- * Vendor reading seam: one ML Kit call for one wrapped frame.
+ * QR reading seam: one pure-JVM decode of one copied luminance frame.
  *
  * Kept as a one-method interface so the booking rules can be tested with a `Task` that succeeds,
- * fails, or never completes, and so the bundled-ML-Kit choice is one visible line
- * ([MlKitBarcodeReader]) instead of a dependency scattered through the decoder.
+ * fails, or never completes, while the production decoder remains a single visible implementation.
  */
 internal interface BarcodeReader {
     /**
-     * Starts a read. The returned `Task` completes with the first barcode's `rawValue`, or with
-     * `null` when the frame holds no readable code. The implementation must not retain [image] after
-     * the task completes; the frame owner closes it.
+     * Starts a read. The returned `Task` completes with the QR payload, or with `null` when the
+     * frame holds no readable code. Implementations must not retain [frame].
      */
-    fun read(image: InputImage): Task<String?>
+    fun read(frame: QrLuminanceFrame): Task<String?>
 
     /** Releases vendor resources. Idempotent. */
     fun close() = Unit
 }
 
 /**
- * The bundled ML Kit barcode client.
- *
- * `com.google.mlkit:barcode-scanning` ships the model and `libbarhopper` inside the APK, so the first
- * scan needs no Play-services model download and works offline - the app's offline-first rule. The
- * formats are pinned to QR: a merchant QR Guard never needs EAN/PDF417, and a narrower format set
- * keeps the per-frame cost down.
+ * QR-only ZXing decoder. It runs on CameraX's analysis executor and has no native barcode library,
+ * so malformed or synthetic frames cannot crash the process inside `libbarhopper`.
  */
-internal class MlKitBarcodeReader(
-    private val scanner: BarcodeScanner = BarcodeScanning.getClient(
-        BarcodeScannerOptions.Builder()
-            .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
-            .build(),
-    ),
-) : BarcodeReader {
+internal class ZxingQrBarcodeReader : BarcodeReader {
+    private val reader = MultiFormatReader().apply {
+        setHints(mapOf(
+            DecodeHintType.POSSIBLE_FORMATS to listOf(BarcodeFormat.QR_CODE),
+            DecodeHintType.TRY_HARDER to true,
+        ))
+    }
 
-    override fun read(image: InputImage): Task<String?> =
-        scanner.process(image).continueWith(DirectExecutor) { finished ->
-            // A failed upstream task fails this derived one; the decoder turns that into a token.
-            finished.result.firstOrNull { !it.rawValue.isNullOrBlank() }?.rawValue
+    override fun read(frame: QrLuminanceFrame): Task<String?> = try {
+        val bitmap = BinaryBitmap(HybridBinarizer(frame.toUprightSource()))
+        val payload = try {
+            reader.decodeWithState(bitmap).text
+        } catch (_: NotFoundException) {
+            null
+        } finally {
+            reader.reset()
         }
-
-    override fun close() {
-        // Closing a detector that is mid-process is allowed and cancels the pending work.
-        runCatching { scanner.close() }
+        Tasks.forResult(payload)
+    } catch (failure: Throwable) {
+        if (failure is VirtualMachineError) throw failure
+        Tasks.forException(BarcodeDecodeException())
     }
 }
 
@@ -232,11 +234,11 @@ internal class MlKitBarcodeReader(
 class BarcodeDecodeException internal constructor() : Exception()
 
 /**
- * [BarcodeDecoder] for B03 backed by the bundled ML Kit QR scanner (P3-13, issue #92).
+ * [BarcodeDecoder] for B03 backed by pure-JVM QR decoding (Phase 4, issue #133).
  *
  * ## Why this class looks the way it does
  * B03's seam is synchronous: `decode(frameId)` must return "the payload in this frame" or `null`.
- * ML Kit is asynchronous. The bridge is deliberately narrow:
+ * ZXing is synchronous; this bridge keeps the existing bounded booking and release contract:
  *
  * 1. the CameraX analyzer thread owns the `ImageProxy` and hands it in as a [FrameSource] via
  *    [offer];
@@ -275,8 +277,8 @@ internal class CameraXBarcodeDecoder internal constructor(
     private val decodeTimeoutMs: Long,
 ) : BarcodeDecoder, AutoCloseable {
 
-    /** Production decoder: bundled ML Kit, direct-executor completion callback, default timeout. */
-    constructor() : this(MlKitBarcodeReader(), DirectExecutor, DEFAULT_DECODE_TIMEOUT_MS)
+    /** Production decoder: pure-JVM QR decode, direct-executor completion callback. */
+    constructor() : this(ZxingQrBarcodeReader(), DirectExecutor, DEFAULT_DECODE_TIMEOUT_MS)
 
     private val lock = Any()
 
@@ -445,7 +447,7 @@ internal class CameraXBarcodeDecoder internal constructor(
 
     private fun decodeClaimed(target: InFlight): String? {
         val image = try {
-            target.source.toInputImage()
+            target.source.toQrLuminanceFrame()
         } catch (failure: Throwable) {
             if (failure is VirtualMachineError) throw failure
             failDecode(target)
@@ -868,6 +870,7 @@ class CameraXQrScanner(
 
         /** The frame pipeline threw outside the decoder (dropped frame, never a verdict). */
         const val FAULT_FRAME_PIPELINE: String = "camera-frame-pipeline-failed"
+        const val FAULT_EMULATOR_CAMERA_DISABLED: String = "camera-disabled-emulator"
 
         private val ANALYSIS_RESOLUTION: ResolutionSelector = ResolutionSelector.Builder()
             .setResolutionStrategy(

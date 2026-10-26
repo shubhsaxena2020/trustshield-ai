@@ -87,7 +87,8 @@ import ai.trustshield.android.ui.theme.onSurface
 fun QrGuardScreen(
     state: QrUiState,
     onEvent: (QrEvent) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    emulatorCameraOff: Boolean = false,
 ) {
     val dark = isSystemInDarkTheme()
     val lang = state.language
@@ -116,7 +117,7 @@ fun QrGuardScreen(
 
             LanguageToggle(language = lang, onEvent = onEvent)
 
-            CameraStatusPanel(state = state, dark = dark, lang = lang)
+            CameraStatusPanel(state = state, dark = dark, lang = lang, emulatorCameraOff = emulatorCameraOff)
 
             SignalBanner(signal = signal, presentation = signalCopy, state = state, dark = dark, lang = lang)
 
@@ -221,20 +222,25 @@ private fun LanguageChip(label: ToneCopy, selected: Boolean, onClick: () -> Unit
 }
 
 @Composable
-private fun CameraStatusPanel(state: QrUiState, dark: Boolean, lang: QrLanguage) {
+private fun CameraStatusPanel(
+    state: QrUiState,
+    dark: Boolean,
+    lang: QrLanguage,
+    emulatorCameraOff: Boolean,
+) {
     val tone = when (state.camera) {
-        CameraUiStatus.ACTIVE -> RiskTone.GREEN
+        CameraUiStatus.ACTIVE -> if (emulatorCameraOff) RiskTone.AMBER else RiskTone.GREEN
         CameraUiStatus.PERMISSION_DENIED, CameraUiStatus.NO_CAMERA -> RiskTone.AMBER
         CameraUiStatus.UNKNOWN -> RiskTone.NEUTRAL
     }
     val label = when (state.camera) {
-        CameraUiStatus.ACTIVE -> QrStrings.cameraActive
+        CameraUiStatus.ACTIVE -> if (emulatorCameraOff) QrStrings.cameraEmulatorOff else QrStrings.cameraActive
         CameraUiStatus.PERMISSION_DENIED -> QrStrings.cameraDenied
         CameraUiStatus.NO_CAMERA -> QrStrings.cameraNone
         CameraUiStatus.UNKNOWN -> QrStrings.cameraUnknown
     }
     val glyph = when (state.camera) {
-        CameraUiStatus.ACTIVE -> "\u25CF"
+        CameraUiStatus.ACTIVE -> if (emulatorCameraOff) "\u2298" else "\u25CF"
         CameraUiStatus.PERMISSION_DENIED -> "\u2715"
         CameraUiStatus.NO_CAMERA -> "\u2715"
         CameraUiStatus.UNKNOWN -> "\u2026"

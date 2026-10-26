@@ -729,6 +729,10 @@ object QrStrings {
         "Camera chalu hai — QR ko frame ke beech mein rakhein",
         "Camera is on — keep the QR inside the frame"
     )
+    val cameraEmulatorOff = ToneCopy(
+        "Emulator par live camera band hai",
+        "Live camera scanning is off on this emulator"
+    )
     val cameraDenied = ToneCopy("Camera ki permission nahi mili", "Camera permission was denied")
     val cameraDeniedHelp = ToneCopy(
         "Phone ki Settings mein camera permission dein, phir yahan wapas aayein. Permission ke bina QR Guard kaam nahi karta.",
