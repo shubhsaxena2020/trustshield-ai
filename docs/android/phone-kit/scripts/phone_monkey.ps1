@@ -26,7 +26,19 @@ foreach ($seed in $Seeds) {
     $crashLines = & adb -s $Serial logcat -d -t 10000 -s AndroidRuntime:E ActivityManager:E 2>&1 |
         Select-String -Pattern 'FATAL EXCEPTION|ANR in ai\.trustshield\.android|Process: ai\.trustshield\.android|am_crash|am_anr'
     if ($crashLines) {
-        $crashLines | Set-Content -LiteralPath $crashPath -Encoding utf8
+        $markerLabels = [ordered]@{
+            'FATAL EXCEPTION' = 'Java fatal exception'
+            'ANR in ai\.trustshield\.android' = 'App ANR'
+            'Process: ai\.trustshield\.android' = 'App process crash'
+            'am_crash' = 'Android crash event'
+            'am_anr' = 'Android ANR event'
+        }
+        $safeMarkers = foreach ($line in $crashLines) {
+            foreach ($pattern in $markerLabels.Keys) {
+                if ($line.Line -match $pattern) { $markerLabels[$pattern]; break }
+            }
+        }
+        $safeMarkers | Set-Content -LiteralPath $crashPath -Encoding utf8
         throw "FAIL seed ${seed}: crash/ANR markers found; see $crashPath."
     }
     "PASS seed $seed / $Events events / no app crash or ANR marker" | Tee-Object -FilePath $logPath -Append

@@ -49,7 +49,18 @@ $report.Add('App crash/ANR markers only (logcat message text is not copied):')
 $markers = & adb -s $Serial logcat -d -t 10000 -s AndroidRuntime:E ActivityManager:E 2>&1 |
     Select-String -Pattern 'FATAL EXCEPTION|ANR in ai\.trustshield\.android|Process: ai\.trustshield\.android|am_crash|am_anr'
 if ($markers) {
-    foreach ($marker in $markers) { $report.Add($marker.Line) }
+    $markerLabels = [ordered]@{
+        'FATAL EXCEPTION' = 'Java fatal exception'
+        'ANR in ai\.trustshield\.android' = 'App ANR'
+        'Process: ai\.trustshield\.android' = 'App process crash'
+        'am_crash' = 'Android crash event'
+        'am_anr' = 'Android ANR event'
+    }
+    foreach ($marker in $markers) {
+        foreach ($pattern in $markerLabels.Keys) {
+            if ($marker.Line -match $pattern) { $report.Add($markerLabels[$pattern]); break }
+        }
+    }
 } else {
     $report.Add('None found in captured buffer.')
 }

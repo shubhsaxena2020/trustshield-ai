@@ -220,4 +220,5 @@ PHASE 3 COMPLETE
 - Added exact adb route-launch commands for Settings, QR Guard, Call Shield, and Home in the 30-minute phone plan; added the TalkBack service-state query and app relaunch commands for 1.3x font scale.
 - Kept the post-use `dumpsys batterystats ai.trustshield.android` command explicit so the owner can record a battery delta where Android exposes it.
 - `phone_collect_logs.ps1` now sums installed base/split APK byte sizes via adb `pm path` plus `stat`. The script was statically parsed alongside the three other PowerShell helpers; all parse checks passed. No phone commands were run.
+- Corrected both log collectors to write only fixed crash/ANR labels, not original logcat lines; this keeps speech/message content out of the owner report even when a crash occurs. Re-parsed all four helpers successfully.
 - A4 synthetic QR cards remain visually inspected as recorded at 21:19; card generation and physical QR scanning remain separate activities, with only the latter held for owner phone connection.
