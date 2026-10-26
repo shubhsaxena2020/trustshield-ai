@@ -26,3 +26,4 @@ release-artifacts/*
 !.env.example
 .vercel
 .env*
+apps/android/app/src/main/assets/model-hi/

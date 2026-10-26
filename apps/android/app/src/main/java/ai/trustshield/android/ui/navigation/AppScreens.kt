@@ -39,6 +39,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import android.net.Uri
+import android.content.Context
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.camera.view.PreviewView
@@ -98,6 +99,9 @@ import ai.trustshield.android.input.speech.SpeechCapabilityReport
 import ai.trustshield.android.input.speech.MicPermission as SpeechMicPermission
 import ai.trustshield.android.input.speech.UtteranceSink
 import ai.trustshield.android.input.speech.AndroidSpeechRecognizerHandle
+import ai.trustshield.android.input.speech.OfflineSpeechPolicy
+import ai.trustshield.android.input.speech.VoskSpeechRecognizerHandle
+import ai.trustshield.android.input.speech.RecognizerErrorCode
 import ai.trustshield.android.ui.qr.QrGuardScreen
 import ai.trustshield.android.ui.qr.QrGuardHost
 import ai.trustshield.android.ui.qr.QrEvent
@@ -357,6 +361,9 @@ fun CallShieldRouteHost() {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val session = remember { CallSpeechSession(consentGranted = true) }
+    var offlineMode by remember { mutableStateOf(false) }
+    val speechRoute = remember { OfflineSpeechPolicy(networkReachable = networkIsValidated(context)) }
+    var offlineFailureAction by remember { mutableStateOf<(() -> Unit)?>(null) }
     var capability by remember {
         mutableStateOf(SpeechCapabilityRules.evaluate(SpeechCapabilityProbe.probe(context), SpeechLanguage.DEFAULT))
     }
@@ -364,8 +371,20 @@ fun CallShieldRouteHost() {
         lateinit var created: SpeechSessionCoordinator
         val handler = android.os.Handler(android.os.Looper.getMainLooper())
         created = SpeechSessionCoordinator(session, { delay, action -> handler.postDelayed(action, delay) }) { _ ->
-            AndroidSpeechRecognizerHandle(context, session, capability, SpeechLanguage.DEFAULT) { code ->
-                created.onError(code)
+            if (speechRoute.useOffline) {
+                VoskSpeechRecognizerHandle(
+                    context = context,
+                    onPartial = { text -> handler.post { created.onPartialUtterance(text) } },
+                    onFinal = { text -> handler.post { created.onUtterance(text) } },
+                    onFailure = { handler.post { offlineFailureAction?.invoke() ?: created.stop() } },
+                    onReady = { handler.post { session.onReadyForSpeech() } },
+                ).also { offlineMode = true }
+            } else {
+                AndroidSpeechRecognizerHandle(context, session, capability, SpeechLanguage.DEFAULT) { code ->
+                    speechRoute.platformError(code)
+                    offlineMode = speechRoute.useOffline
+                    created.onError(code)
+                }
             }
         }
         created
@@ -421,6 +440,15 @@ fun CallShieldRouteHost() {
         )
     } else {
         Column(modifier = Modifier.fillMaxSize()) {
+    if (offlineMode && state.isListening) {
+        Text(
+            ToneCopy("Offline mode: phone par hi speech pehchaan", "Offline mode: on-device recognizer")
+                .let { if (prefs.language == AppLanguage.ENGLISH) it.english else it.hinglish },
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+            style = MaterialTheme.typography.bodySmall,
+        )
+    }
+    offlineFailureAction = { host.onStop(); offlineMode = false; state = host.state }
     CallShieldScreen(
         state = state,
         modifier = Modifier.weight(1f),
@@ -467,6 +495,20 @@ fun CallShieldRouteHost() {
             )
         )
     }
+    if (!state.isListening) {
+        TextButton(
+            onClick = {
+                speechRoute.selectOffline(!speechRoute.useOffline)
+                offlineMode = speechRoute.useOffline
+            },
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text(
+                if (speechRoute.useOffline) "Offline mode selected · Tap to use system recognizer"
+                else "Use offline mode · Vosk Hindi recognizer",
+            )
+        }
+    }
     }
     LaunchedEffect(consent, micGranted) {
         val mic = if (micGranted) SpeechMicPermission.Granted else SpeechMicPermission.Denied
@@ -480,6 +522,7 @@ fun CallShieldRouteHost() {
     }
     remember(host) {
         session.setUtteranceSink(UtteranceSink { utterance ->
+            speechRoute.platformSuccess()
             if (utterance.isFinal) host.onUtterance(utterance.text, utterance.confidence, utterance.tsMs)
             state = host.state
         })
@@ -508,6 +551,15 @@ fun CallShieldRouteHost() {
         }
     }
     }
+}
+
+private fun networkIsValidated(context: Context): Boolean {
+    val manager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? android.net.ConnectivityManager
+        ?: return false
+    val network = manager.activeNetwork ?: return false
+    val capabilities = manager.getNetworkCapabilities(network) ?: return false
+    return capabilities.hasCapability(android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
+        capabilities.hasCapability(android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED)
 }
 
 @Composable

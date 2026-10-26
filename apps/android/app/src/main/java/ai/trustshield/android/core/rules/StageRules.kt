@@ -239,7 +239,7 @@ class StageRules(private val normalizer: TextNormalizer) {
     private companion object {
         const val MODULE = "stage_rules"
         const val SKIP_WINDOW = 24
-        val CLAUSE_BREAKS = charArrayOf('.', ',', '!', '?', ';', '\n', '\r', '|')
+        val CLAUSE_BREAKS = charArrayOf('.', ',', '!', '?', ';', '\n', '\r', '|', '\u0964')
 
         val NEGATION_BEFORE =
             rx("""(?<![\p{L}\p{N}])(?:mat|na|nahi|nahin|naa|nhi|not|never|dont|don't|do not|मत|नहीं|न)(?![\p{L}\p{N}])""")
