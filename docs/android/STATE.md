@@ -332,3 +332,8 @@ Branch: `android-finals`. Phase: **3 active; Codex foundation pushed, 18 new P0 
 - Owner filed phone-labelled issue #143 after the handoff. It requests theme-safe Home/Result titles, contrasting splash status icons, hiding the empty hint until a scan attempt, and release cold-start timing. The owner remains the sole operator of phone serial `63b0de52`; no phone access was made.
 - A nine-task swarm prompt for agent3's next safe-boundary package is prepared under `%LOCALAPPDATA%\Temp\android\agent3.phase4.phone143.swarm.work.txt`; it is not launched yet because agent3 still has dirty current-package work and retains the emulator lock.
 - Current exact Hermes root wave sizes: agent1 `[9]` (8 children active), agent2 `[]`, agent3 `[3]` (legacy children complete). RAM 18.4 GB. Main HEAD before this checkpoint was synced to origin; the owner's phone-directive edit remains unstaged and must not be included in Codex commits.
+
+### 2026-10-26 23:47 IST checkpoint
+- Triage: new issue #143 (phone) reports dark-theme Home/Result title contrast, light-splash status-bar icon contrast, a +7.485s debug cold start (release measurement requested), and an empty-input validation line shown on initial Home.
+- The issue overlaps agent3's active Result/splash #139/#97 files and the Home scan renderer. No code or device action was taken; wait for the current lane's safe boundary. The head owns phone screenshots, measurements and serial.
+- No further `phone`-labelled issues are open. Emulator lock held by agent3; Gradle lock free.
