@@ -1,0 +1,23 @@
+﻿[
+    {
+        "seed":  4242,
+        "exitCode":  0,
+        "injected2000":  true,
+        "fatalLines":  0,
+        "hitLines":  ""
+    },
+    {
+        "seed":  7,
+        "exitCode":  0,
+        "injected2000":  true,
+        "fatalLines":  0,
+        "hitLines":  ""
+    },
+    {
+        "seed":  99,
+        "exitCode":  0,
+        "injected2000":  true,
+        "fatalLines":  0,
+        "hitLines":  ""
+    }
+]
