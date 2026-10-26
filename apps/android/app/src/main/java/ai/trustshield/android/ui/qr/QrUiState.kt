@@ -770,6 +770,11 @@ object QrStrings {
         "Camera ke bina nazar shuru nahi hoti.",
         "Watching cannot start without the camera."
     )
+    val registeredPayee = ToneCopy("Register ho gaya: {id}", "Registered: {id}")
+    val registeredNextQr = ToneCopy(
+        "Ek aur QR scan karein ya nazar shuru karein.",
+        "Scan another QR or start watching."
+    )
 
     val startWatch = ToneCopy("Nazar shuru karein", "Start watching")
     val stopWatch = ToneCopy("Band karein", "Stop")
