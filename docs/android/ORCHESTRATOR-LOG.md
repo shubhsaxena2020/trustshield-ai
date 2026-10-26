@@ -229,3 +229,8 @@ PHASE 3 COMPLETE
 - The document marks the earlier APK as a baseline and holds final ABI size/SHA-256/signature measurements until the TrustShield label/icon/splash merge and rebuild. No signing secret was written to documentation.
 - Renamed the older Phase 3 debug APK heading to distinguish it from the Phase 4 signed release handoff.
 - Clarified the printed QR sequence: register with the local change PIN, then use three distinct mismatch cards; the camera analyzer debounces repeats of one identical payload for 1.5 seconds, so each card must be briefly removed before the next.
+
+## 2026-10-26 21:36 IST — lane status
+
+- Confirmed all three existing Phase 4 Hermes processes remain alive. No open lane PR was listed. Agent1 has uncommitted rule/fixture work, agent2's isolated worktree is clean, and agent3 has accessibility/UI/icon/splash changes in progress; no session was relaunched or stopped.
+- A separate Phase 4 lane currently holds the shared emulator lock on `trustshield-api36`. Codex did not interact with that device. The owner phone hold remains in effect; no physical device work was run.
