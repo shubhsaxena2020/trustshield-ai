@@ -1,5 +1,6 @@
 package ai.trustshield.android.ui.navigation
 
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -36,6 +37,8 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import android.net.Uri
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.camera.view.PreviewView
@@ -653,18 +656,66 @@ private fun CallDemoExperience(
             Spacer(Modifier.height(4.dp))
         }
 
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        BoxWithConstraints(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp)
         ) {
-            OutlinedButton(onClick = onBack, enabled = progress.steps.isNotEmpty(), modifier = Modifier.weight(1f).heightIn(min = 48.dp)) {
-                Text(if (english) "Back" else "Peeche")
-            }
-            Button(onClick = onAdvance, enabled = !progress.finished, modifier = Modifier.weight(1.25f).heightIn(min = 48.dp)) {
-                Text(if (english) "Next line" else "Agli line")
-            }
-            OutlinedButton(onClick = onReset, modifier = Modifier.weight(1f).heightIn(min = 48.dp)) {
-                Text(if (english) "Reset" else "Phir se")
+            // Three weighted buttons leave roughly 86 dp each on a 320 dp screen. At 200 % font scale
+            // that clips the labels mid-word ("Peeche" rendered as just "he") -- measured on
+            // emulator-5554 in the #97 pass, evidence/accessibility.md. Below the breakpoint the
+            // primary action takes the full width and the two secondary actions share a row.
+            val stacked = maxWidth < 320.dp || LocalDensity.current.fontScale >= 1.8f
+            if (stacked) {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Button(
+                        onClick = onAdvance,
+                        enabled = !progress.finished,
+                        modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
+                    ) {
+                        Text(
+                            if (english) "Next line" else "Agli line",
+                            textAlign = TextAlign.Center,
+                            maxLines = 2
+                        )
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        OutlinedButton(
+                            onClick = onBack,
+                            enabled = progress.steps.isNotEmpty(),
+                            modifier = Modifier.weight(1f).heightIn(min = 48.dp)
+                        ) {
+                            Text(
+                                if (english) "Back" else "Peeche",
+                                textAlign = TextAlign.Center,
+                                maxLines = 2
+                            )
+                        }
+                        OutlinedButton(
+                            onClick = onReset,
+                            modifier = Modifier.weight(1f).heightIn(min = 48.dp)
+                        ) {
+                            Text(
+                                if (english) "Reset" else "Phir se",
+                                textAlign = TextAlign.Center,
+                                maxLines = 2
+                            )
+                        }
+                    }
+                }
+            } else {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OutlinedButton(onClick = onBack, enabled = progress.steps.isNotEmpty(), modifier = Modifier.weight(1f).heightIn(min = 48.dp)) {
+                        Text(if (english) "Back" else "Peeche")
+                    }
+                    Button(onClick = onAdvance, enabled = !progress.finished, modifier = Modifier.weight(1.25f).heightIn(min = 48.dp)) {
+                        Text(if (english) "Next line" else "Agli line")
+                    }
+                    OutlinedButton(onClick = onReset, modifier = Modifier.weight(1f).heightIn(min = 48.dp)) {
+                        Text(if (english) "Reset" else "Phir se")
+                    }
+                }
             }
         }
     }

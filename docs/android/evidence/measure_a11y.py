@@ -35,10 +35,23 @@ NAME = re.compile(r"^(?P<phase>[^_]+(?:_[^_]+)*?)__(?P<screen>[a-z_]+)__(?P<scal
 
 
 def parse_dump(path: Path, density: int):
-    """Return (row, undersized, unlabelled) for one dump."""
+    """Return (row, undersized, unlabelled) for one dump.
+
+    Compose exposes a clickable *container* node with no text of its own whose visible label is a
+    child TextView, so a clickable node counts as labelled when it or any descendant carries text or
+    a content description. Reporting the container as "unlabelled" would be a false positive.
+    """
     root = ET.parse(path).getroot()
     px_per_dp = density / 160.0
     nodes = list(root.iter("node"))
+
+    def own_label(node) -> str:
+        return ((node.get("text") or "") + " " + (node.get("content-desc") or "")).strip()
+
+    def subtree_label(node) -> str:
+        parts = [own_label(node)]
+        parts.extend(own_label(child) for child in node.iter("node") if child is not node)
+        return " ".join(p for p in parts if p).strip()
 
     # Screen box from the root node (the dump's own bounds), which is the real display size.
     root_bounds = BOUNDS.search(nodes[0].get("bounds", "") or "")
@@ -61,7 +74,7 @@ def parse_dump(path: Path, density: int):
         x1, y1, x2, y2 = (int(g) for g in bounds.groups())
         w_px, h_px = x2 - x1, y2 - y1
         w_dp, h_dp = w_px / px_per_dp, h_px / px_per_dp
-        label = text or desc
+        label = subtree_label(node)
 
         if text:
             text_nodes += 1

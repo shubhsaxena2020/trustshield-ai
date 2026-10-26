@@ -46,9 +46,25 @@ def adb(*args: str, timeout: int = 60) -> str:
     return adb_bytes(*args, timeout=timeout).decode("utf-8", "replace").strip()
 
 
+def wait_for_focus(marker: str = PKG, timeout_s: int = 25) -> bool:
+    """Wait until the app window is actually focused. Cold start here measured ~5.4 s, so a fixed
+    sleep is not enough: uiautomator returns 'null root node' while the window is still coming up,
+    and the previous /sdcard/a11y.xml then survives and gets recorded as fresh evidence."""
+    deadline = time.time() + timeout_s
+    while time.time() < deadline:
+        focus = adb("shell", "dumpsys", "window")
+        line = next((l for l in focus.splitlines() if "mCurrentFocus" in l), "")
+        if marker in line:
+            time.sleep(0.8)
+            return True
+        time.sleep(0.5)
+    print(f"      WARNING: {marker} never took focus within {timeout_s}s")
+    return False
+
+
 def launch(screen: str) -> None:
     adb("shell", "am", "force-stop", PKG)
-    time.sleep(0.4)
+    time.sleep(0.5)
     if screen == "home":
         adb("shell", "am", "start", "-n", ACTIVITY)
     elif screen in ("call", "qr", "settings"):
@@ -59,36 +75,58 @@ def launch(screen: str) -> None:
             "-t", "text/plain", "--es", "android.intent.extra.TEXT", f"'{SCAM}'")
     else:
         raise SystemExit(f"unknown screen {screen!r}")
-    time.sleep(2.5)
+    wait_for_focus()
 
 
-def dump_xml(retries: int = 3) -> ET.Element | None:
+def dump_xml(retries: int = 4) -> ET.Element | None:
     for _ in range(retries):
-        adb("shell", "uiautomator", "dump", "/sdcard/a11y.xml")
+        adb("shell", "rm", "-f", "/sdcard/a11y.xml")
+        out = adb("shell", "uiautomator", "dump", "/sdcard/a11y.xml")
+        if "dumped" not in out.lower():
+            time.sleep(1.5)
+            continue
         raw = adb("exec-out", "cat", "/sdcard/a11y.xml")
-        if "<hierarchy" in raw:
-            try:
-                return ET.fromstring(raw)
-            except ET.ParseError:
-                pass
-        time.sleep(1)
+        if "<hierarchy" not in raw:
+            time.sleep(1.5)
+            continue
+        try:
+            tree = ET.fromstring(raw)
+        except ET.ParseError:
+            time.sleep(1.5)
+            continue
+        root = next(tree.iter("node"), None)
+        if root is None or root.get("package") != PKG:
+            time.sleep(1.5)
+            continue
+        return tree
     return None
 
 
-def tap_label(wanted: str, timeout_s: int = 6) -> bool:
-    """Tap the first node whose visible text or content description contains `wanted`."""
+def tap_label(wanted: str, timeout_s: int = 8) -> bool:
+    """Tap the node whose label matches `wanted`, preferring an exact match.
+
+    The demo screen contains the hint sentence "A05 script chalane ke liye Agli line dabayein." next
+    to the real "Agli line" button, so a plain substring search taps the hint and nothing happens.
+    """
     needle = wanted.lower()
+
+    def label(node) -> str:
+        return ((node.get("text") or "") + " " + (node.get("content-desc") or "")).strip().lower()
+
     deadline = time.time() + timeout_s
     while time.time() < deadline:
         tree = dump_xml(retries=1)
         if tree is not None:
-            for node in tree.iter("node"):
-                label = ((node.get("text") or "") + " " + (node.get("content-desc") or "")).lower()
-                if needle in label and node.get("bounds"):
-                    x1, y1, x2, y2 = (int(g) for g in BOUNDS.search(node.get("bounds")).groups())
-                    adb("shell", "input", "tap", str((x1 + x2) // 2), str((y1 + y2) // 2))
-                    time.sleep(1.5)
-                    return True
+            nodes = [n for n in tree.iter("node") if n.get("bounds")]
+            for match in (lambda l: l == needle, lambda l: l.startswith(needle),
+                          lambda l: needle in l):
+                for node in nodes:
+                    text = label(node)
+                    if text and match(text):
+                        x1, y1, x2, y2 = (int(g) for g in BOUNDS.search(node.get("bounds")).groups())
+                        adb("shell", "input", "tap", str((x1 + x2) // 2), str((y1 + y2) // 2))
+                        time.sleep(1.4)
+                        return True
         time.sleep(0.8)
     return False
 
@@ -97,13 +135,16 @@ def prepare(screen: str) -> None:
     """Put the screen into the state whose semantics we want to record."""
     if screen != "call":
         return
-    if tap_label("staged demo") or tap_label("demo"):
-        print("      tapped the staged demo path")
-        for _ in range(2):
-            if tap_label("agli line") or tap_label("next line"):
-                print("      advanced one demo line")
-    else:
+    if not (tap_label("staged demo") or tap_label("demo")):
         print("      WARNING: staged demo control not found; call shield stays on its intro state")
+        return
+    print("      opened the staged demo path")
+    for _ in range(3):
+        if tap_label("agli line") or tap_label("next line"):
+            print("      advanced one demo line")
+        else:
+            print("      no further demo line control")
+            break
 
 
 def capture(screen: str, cfg: str, out_dir: Path, phase: str, shot: bool) -> bool:

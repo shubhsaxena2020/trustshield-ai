@@ -4,7 +4,7 @@ Use synthetic text only. The app analyzes locally; it does not contact a bank, o
 
 ## 0:00â€“0:25 â€” Set the scope
 
-Open TrustShield AI and say: â€œIâ€™ll paste sample messages into the on-device checker. The risk score and confidence are different things; the quotes show which exact parts of the message triggered the result.â€
+Open TrustShield and say: â€œIâ€™ll paste sample messages into the on-device checker. The risk score and confidence are different things; the quotes show which exact parts of the message triggered the result.â€
 
 ## 0:25â€“1:05 â€” Show a scam-shaped message
 
