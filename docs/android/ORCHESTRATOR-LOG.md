@@ -173,3 +173,12 @@ PHASE 3 COMPLETE
 - Owner directive: no physical-phone work or waiting before the owner confirms USB debugging and releases the hold (no later than 22:45 IST unless explicitly extended). Emulator/JVM work remains allowed. Directive recorded in `HEAD_DIRECTIVE_PHONE_HOLD.md`.
 - Prepared `phone-kit/PHONE_TEST_PLAN.md`, adb-only PowerShell helpers, a local synthetic-only QR-card generator, and generated `phone-kit/demo_upi_qr_cards.pdf`. Phone work has not been run.
 - Next: complete emulator/JVM fixes and evidence, release artifact, capability fallbacks and Device check, fixtures/settings/P1 reviews; use shared Gradle/emulator locks and append exact verification results as completed.
+
+## 2026-10-26 21:03 IST — P0 PR merges and integrated proof
+
+- PR #135 (native barcode crash/#133) merged as `9624c54`; PR #134 hardening merged as `de300b5`; PR #136 Call Shield demo/haptics merged as `c903a1c`.
+- Fresh integrated gate: 1,083 JVM tests passed; lint, debug APK assembly and Android-test compile passed; connected API 36 suite passed 54 tests with 1 existing offline-journey skip.
+- Integrated API 36 monkey seeds 4242/7/99 each completed 2,000 events with exit 0 and no app crash/ANR/SIGSEGV/libbarhopper markers. Emulator flip events still report `/dev/input/event0` EACCES; retained in logs.
+- Screenshot verification of digital-arrest advisory fixture: 24/100 LOW. Full evidence is `evidence/p4-integrated-reverification.md`.
+- Stopped `trustshield-api36` and released our locks. `head-api36` / `emulator-5556` appeared online afterward; process command confirms it is the separate `head-api36` AVD, so it remains untouched. No physical phone used.
+- Next phone-free work: signed release APK, Device check/capability fallbacks, phone-kit validation, then review active Phase 4 lane PRs and close remaining items.
