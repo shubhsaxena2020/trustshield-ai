@@ -4,11 +4,14 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTouchInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.compose.ui.graphics.toPixelMap
 import ai.trustshield.android.input.qr.QrGuardState
 import ai.trustshield.android.input.qr.QrSimulationFlow
 import ai.trustshield.android.input.qr.SimulatedQrFixtures
@@ -92,6 +95,7 @@ class QrGuardHostTest {
                 )
             }
         }
+        compose.waitForIdle()
         return session
     }
 
@@ -108,8 +112,11 @@ class QrGuardHostTest {
         assertTrue("text must not be rendered: $text $because", nodesWith(text).isEmpty())
     }
 
-    private fun click(label: String) {
-        compose.onNodeWithText(label).performClick()
+    private fun click(label: String, scrollTo: Boolean = true) {
+        val node = compose.onNodeWithText(label)
+        if (scrollTo) node.performScrollTo()
+        node.assertIsDisplayed()
+        node.performClick()
         compose.waitForIdle()
     }
 
@@ -142,7 +149,7 @@ class QrGuardHostTest {
 
         assertEquals(1, session.snapshot().state.payees.size)
         assertVisible("Registered: dem***@upi", "(confirmed payee is visibly registered)")
-        assertVisible(QrStrings.startWatch.english, "(primary start action)")
+        compose.onNodeWithText(QrStrings.startWatch.english).assertIsDisplayed()
         assertVisible(QrStrings.addPayeeHint.english, "(another QR can be added)")
         assertVisible(QrStrings.registeredNextQr.english, "(another QR can be scanned)")
         assertAbsent("demo-recipient@upi", "(full UPI ID must stay hidden)")
@@ -152,6 +159,63 @@ class QrGuardHostTest {
         assertEquals(1, session.snapshot().state.payees.size)
         assertEquals(null, session.snapshot().pendingSetup)
         assertAbsent(QrHostCopy.setupCaptureConfirm.english, "(registered QR cannot reopen setup confirmation)")
+    }
+
+    @Test
+    fun registeredPayeeHasVisibleStartActionAndWatchingFlagsMatchThenThreeMismatches() {
+        val session = render()
+        val merchantQr = "upi://pay?pa=demo-recipient@upi&pn=TRUSTSHIELD%20DEMO%20ONLY&am=0.00&cu=INR"
+        val differentQr = "upi://pay?pa=demo-other@upi&pn=Other&am=0.00&cu=INR"
+
+        session.onDecoded(merchantQr)
+        compose.waitForIdle()
+        click(QrHostCopy.setupCaptureConfirm.hinglish)
+        assertEquals(1, session.snapshot().state.payees.size)
+        assertTrue(session.snapshot().state.canStartWatch)
+        compose.onNodeWithText(QrStrings.startWatch.hinglish).assertIsDisplayed()
+        click(QrStrings.startWatch.hinglish, scrollTo = false)
+        assertEquals(QrPhase.WATCH, session.snapshot().state.phase)
+
+        session.onDecoded(merchantQr)
+        compose.waitForIdle()
+        assertEquals(QrSignal.MATCH, session.snapshot().state.signal)
+        assertVisible(QrSignalCopy.of(QrSignal.MATCH).label.hinglish)
+
+        repeat(3) { session.onDecoded(differentQr) }
+        compose.waitForIdle()
+        assertEquals(3, session.snapshot().state.consecutiveMismatches)
+        assertTrue(session.snapshot().state.isTamperEvidence)
+        assertVisible(QrStrings.stopPaymentNow.hinglish)
+        compose.onNodeWithText(QrStrings.stopWatch.hinglish).assertIsDisplayed()
+        click(QrStrings.stopWatch.hinglish, scrollTo = false)
+        assertEquals(QrPhase.STOPPED, session.snapshot().state.phase)
+    }
+
+    @Test
+    fun darkThemeQrGuardTitleHasReadableRenderedPixels() {
+        compose.setContent {
+            TrustShieldTheme(darkTheme = true) {
+                QrGuardScreen(
+                    state = ai.trustshield.android.ui.qr.QrUiState(),
+                    onEvent = {}
+                )
+            }
+        }
+
+        val pixels = compose.onNodeWithText(QrStrings.title.hinglish)
+            .captureToImage()
+            .toPixelMap()
+        var brightest = 0.0f
+        for (y in 0 until pixels.height) {
+            for (x in 0 until pixels.width) {
+                val pixel = pixels[x, y]
+                if (pixel.alpha > 0.5f) {
+                    val luminance = 0.2126f * pixel.red + 0.7152f * pixel.green + 0.0722f * pixel.blue
+                    if (luminance > brightest) brightest = luminance
+                }
+            }
+        }
+        assertTrue("dark-theme title pixels must be light enough to read", brightest > 0.9f)
     }
 
     // ------------------------------------------------------------ 2. simulate: matching flow ----
@@ -266,7 +330,7 @@ class QrGuardHostTest {
         val holdDescription = QrStrings.reRegister.text(QrLanguage.HINGLISH) + ". " +
             QrStrings.reRegisterHold.text(QrLanguage.HINGLISH)
         compose.onNodeWithContentDescription(holdDescription)
-            .performScrollTo()
+            .assertIsDisplayed()
             .performTouchInput { click() }
         compose.waitForIdle()
 

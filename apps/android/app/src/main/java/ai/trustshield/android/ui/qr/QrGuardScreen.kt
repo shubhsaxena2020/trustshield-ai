@@ -89,6 +89,8 @@ fun QrGuardScreen(
     onEvent: (QrEvent) -> Unit,
     modifier: Modifier = Modifier,
     emulatorCameraOff: Boolean = false,
+    scrollable: Boolean = true,
+    includeActionRow: Boolean = true,
 ) {
     val dark = isSystemInDarkTheme()
     val lang = state.language
@@ -100,13 +102,14 @@ fun QrGuardScreen(
             modifier = Modifier
                 .widthIn(max = 480.dp)
                 .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
+                .then(if (scrollable) Modifier.verticalScroll(rememberScrollState()) else Modifier)
                 .padding(TsTokens.SpacingLg),
             verticalArrangement = Arrangement.spacedBy(TsTokens.SpacingMd)
         ) {
             Text(
                 text = QrStrings.title.text(lang),
                 style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.semantics { heading() }
             )
             Text(
@@ -127,7 +130,7 @@ fun QrGuardScreen(
 
             ExpectedMerchantPanel(state = state, dark = dark, lang = lang, onEvent = onEvent)
 
-            ActionRow(state = state, lang = lang, onEvent = onEvent)
+            if (includeActionRow) ActionRow(state = state, lang = lang, onEvent = onEvent)
 
             if (state.phase == QrPhase.RE_REGISTER) {
                 ReRegisterPanel(state = state, lang = lang, dark = dark, onEvent = onEvent)
@@ -424,8 +427,13 @@ private fun ExpectedMerchantPanel(
 }
 
 @Composable
-private fun ActionRow(state: QrUiState, lang: QrLanguage, onEvent: (QrEvent) -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(TsTokens.SpacingSm)) {
+internal fun ActionRow(
+    state: QrUiState,
+    lang: QrLanguage,
+    onEvent: (QrEvent) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(TsTokens.SpacingSm)) {
         when (state.phase) {
             QrPhase.SETUP, QrPhase.STOPPED -> {
                 Button(
