@@ -228,3 +228,4 @@ Branch: `android-finals`. Phase: **3 active; Codex foundation pushed, 18 new P0 
 - The shared API 36 emulator lock is held by another lane. No emulator was accessed in this checkpoint. No physical phone was used; owner hold through 22:45 IST remains in force.
 - The phone checklist fits its 30-minute cap with one 2,000-event device monkey run; emulator proof retains seeds 4242/7/99. Agent3's local icon preview measured 29.71 dp maximum radius within the 33 dp safe circle and was visually inspected; final PR review and release APK rebuild remain pending.
 - Clock note: an orchestrator log heading previously labelled 22:28 IST was corrected to 21:58 IST; the owner phone hold through 22:45 IST is still active.
+- Hermes state.db audit found no nine-task delegation wave in the existing profiles (agent1 max 5, agent2 max 8, agent3 max 5). The existing processes remain untouched under the direct no-relaunch instruction; the new swarm rule applies to future launches.

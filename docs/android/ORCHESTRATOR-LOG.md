@@ -255,3 +255,8 @@ PHASE 3 COMPLETE
 ## 2026-10-26 22:14 IST — timestamp correction
 
 - Correction: the preceding `22:28 IST` heading should read `21:58 IST` (UTC is IST minus 5 hours 30 minutes). The 22:45 phone hold is still active; no physical phone work occurred.
+
+## 2026-10-26 22:29 IST — Hermes wave-size audit
+
+- Read the new owner directive `HEAD_DIRECTIVE_HERMES_SWARM.md` and inspected the agent1/agent2/agent3 profile `state.db` files read-only. Recorded `delegate_task` wave sizes: agent1 `[5,1,1,3,2,1,1,1]` (8 calls), agent2 `[8,3,2,1,4,5,4,2]` (8 calls), agent3 `[1,5,1,4,1,1,3]` (7 calls). No recorded call had a 9-task wave; the largest observed wave was 8.
+- The direct user instruction to keep the currently running Hermes sessions untouched remains in effect, so Codex did not relaunch or stop any session. Future Hermes launches must follow the new nine-task-wave directive. No open Phase 4 PR was listed; the shared emulator lock remains held by another lane.
