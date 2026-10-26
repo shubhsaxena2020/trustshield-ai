@@ -1,11 +1,16 @@
-## Current status (2026-10-26 22:30 IST)
+## Current status (2026-10-26 22:51 IST)
 
 `android-finals` now includes the owner Hermes swarm directive in commit `ab26a9a`, pushed to origin. No Phase 4 completion claim is made yet.
 
 - Since the 20:23 Phase 4 lane launches, profile `state.db` shows agent1 has one `delegate_task` call with `tasks` length 1, agent2 has no call, and agent3 has one call with `tasks` length 3. The earlier 22:29 profile-wide audit below remains the baseline history; none of these new in-flight sessions has produced a compliant nine-task wave.
 - No lane was killed or relaunched. agent1 has uncommitted detection/fixture edits, agent2 has uncommitted conversation work and an active command, and agent3 is in verification with three commits at its branch boundary. Relaunch only after a safe commit boundary or finish, using a one-line file-pointer prompt requiring 9 disjoint tasks per wave, one `delegate_task` call, full wait/review/integration, and lane-lead-only Gradle.
 - Main checkout has no tracked source edits. Other pre-existing untracked workspace paths remain untouched. Free physical memory measured 20.51 GB. The Phase 4 emulator lock is occupied; no emulator or build was started from the main checkout.
-- Phone hold remains binding until the owner reports the real phone connected or 22:45 IST; no physical-phone work occurred.
+- Phone hold remains binding because the owner has not explicitly reported the real phone connected; no physical-phone work occurred.
+
+- agent1's old process exited naturally after pushing fixture commits and opening PR #141. New agent1 session started at 22:45:44 through `launch-hermes.ps1` with the nine-task directive and an isolated `android/P4-fallbacks` worktree. At 22:51 the session had not yet called `delegate_task`; the first wave remains unverified and uncounted.
+- PR #141 reports 46 fixture rows passing, 1,066 JVM tests, lint and debug assembly passing. It is open with no checks reported. Review found a count sentence that double-counts the probe/control subsets; also rebase on current `android-finals` before integration.
+- agent2's current Settings report shows light/dark/system persistence, sensitivity band change and Critical haptics suppression passing. English Result evidence titles/details remain Hinglish, so item 6 is still FAIL pending the presentation fix. The lane worktree is dirty and its process remains active.
+- agent3 is running the accessibility matrix on the single API 36 emulator under the shared lock. No phone was used. The owner has not released the phone hold, so physical-phone checks remain held.
 
 ## Historical status (2026-10-26 21:40 IST)
 
