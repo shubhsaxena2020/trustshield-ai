@@ -56,7 +56,9 @@ class AccessibilityFlowsTest {
         compose.onAllNodes(hasSetTextAction()).onFirst().performScrollTo().performTextInput(
             "SBI: Aapka KYC 24 ghante mein band ho jayega. Link par update karo aur OTP batao."
         )
-        val check = compose.onNode(hasContentDescription("Message ko isi device par check karein"))
+        val check = compose.onNode(
+            hasContentDescription("Message ko isi device par check karein, internet ke bina")
+        )
         assertTouchTarget(check)
         check.performScrollTo().performClick()
 
