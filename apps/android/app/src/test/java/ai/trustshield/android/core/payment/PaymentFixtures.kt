@@ -41,10 +41,7 @@ package ai.trustshield.android.core.payment
  * id does; and no row is allowed to be `CLEAR` if it carries a G1 or G2 signal — that would be the
  * app failing to warn, which is the expensive direction of error.
  *
- * Measured in this worktree on 2026-10-27, 21 of these 24 rows agree with the parser and engine as
- * they stand and three do not (`S10`, `S11`, `L02`). The measurements, and why each row keeps its
- * expectation anyway, are recorded on [PaymentFixturesTest]. No expectation in this file was edited
- * to match a run.
+ * The parser and engine are checked against all 24 rows by [PaymentFixturesTest].
  *
  * ## The fixed clock
  *

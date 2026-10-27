@@ -87,22 +87,13 @@ package ai.trustshield.android.core.payment
  * | 1 | `STOP` | `PAYEE_NOT_REGISTERED` present **and** (`AMOUNT_LARGE` or `AMOUNT_ROUND_LARGE` or `URGENCY_PRESSURE` present) |
  * | 2 | `STOP` | `STATUS_FAILED` present **and** `URGENCY_PRESSURE` present |
  * | 3 | `STOP` | `PAYEE_NOT_REGISTERED` present **and** `STATUS_PENDING` present |
- * | 4 | `CHECK` | at least one `WARNING` hint is present (`URGENCY_PRESSURE` is itself a `WARNING`, so "urgency alone" is covered by this row) |
- * | 5 | `CHECK` | at least two `CAUTION` hints are present |
- * | 6 | `CLEAR` | otherwise — including a single `CAUTION` on its own, which is shown as a hint but does not lift the verdict |
+ * | 4 | `CHECK` | any `WARNING`, or one G1 signal: `AMOUNT_LARGE`, `STATUS_PENDING`, `STATUS_UNKNOWN`, `UTR_MISSING`, or `SCREENSHOT_ONLY` |
+ * | 5 | `CHECK` | at least two other `CAUTION` hints are present |
+ * | 6 | `CLEAR` | otherwise — including a single non-G1 `CAUTION`, which is shown as a hint but does not lift the verdict |
  *
- * `isPaymentScreenshot` is `false` only in row 0; every other row returns `true`, because rows 1-6
- * are only reachable for a receipt-shaped field set or an OCR-derived view.
- *
- * ### Known disagreement with the payment fixture table
- *
- * `app/src/test/java/ai/trustshield/android/core/payment/PaymentFixtures.kt` (a pre-existing, separate
- * artifact) gates `CHECK` on *any* single payment-specific signal, so exactly two of its rows expect
- * `CHECK` where row 6 above returns `CLEAR`: `S11` (a registered payee, "Successful", no UTR -> only
- * `UTR_MISSING`) and `L02` (a registered payee, a large amount -> only `AMOUNT_LARGE`). This engine
- * follows the two-caution rule in the advisory spec; those two rows therefore remain `CLEAR` unless
- * another independent caution is emitted. The single-caution -> `CLEAR` case is asserted on purpose in this engine's own
- * test, so the choice cannot drift silently.
+ * A UPI payee with a known status also counts as a payment view when the amount is unreadable. This
+ * lets a pending unregistered payee reach the STOP rule without guessing an amount.
+ * `isPaymentScreenshot` is `false` only in row 0; every other row returns `true`.
  *
  * ## Hint order
  *
@@ -136,7 +127,9 @@ class PaymentAdvisoryEngine(
      */
     fun evaluate(input: PaymentAdvisoryInput): PaymentAdvisory {
         val fields: PaymentFields = input.fields
-        if (!fields.looksLikeReceipt && !input.ocrUsed) {
+        val hasPaymentView = fields.looksLikeReceipt ||
+            (fields.hasPayeeUpi && fields.status != PaymentStatus.UNKNOWN)
+        if (!hasPaymentView && !input.ocrUsed) {
             return PaymentAdvisory(
                 isPaymentScreenshot = false,
                 fields = fields,
@@ -298,9 +291,7 @@ class PaymentAdvisoryEngine(
                 hints,
                 PaymentHint(
                     kind = PaymentHintKind.TIME_RECENT,
-                    // INFO, not CAUTION: paying right now is normal; the hint exists so the user
-                    // checks the time, not so a fresh legitimate receipt is escalated.
-                    severity = PaymentHintSeverity.INFO,
+                    severity = PaymentHintSeverity.CAUTION,
                 ),
             )
         }
@@ -357,7 +348,7 @@ class PaymentAdvisoryEngine(
             unregisteredPayee && kinds.contains(PaymentHintKind.STATUS_PENDING) ->
                 PaymentAdvisoryVerdict.STOP
 
-            warningCount > 0 -> PaymentAdvisoryVerdict.CHECK
+            warningCount > 0 || kinds.any { kind -> kind in G1_CHECK_SIGNALS } -> PaymentAdvisoryVerdict.CHECK
             cautionCount >= CHECK_CAUTION_THRESHOLD -> PaymentAdvisoryVerdict.CHECK
             else -> PaymentAdvisoryVerdict.CLEAR
         }
@@ -442,6 +433,14 @@ class PaymentAdvisoryEngine(
 
         /** Two independent cautions are the minimum for `CHECK` (see the verdict table). */
         const val CHECK_CAUTION_THRESHOLD: Int = 2
+
+        val G1_CHECK_SIGNALS: Set<PaymentHintKind> = setOf(
+            PaymentHintKind.AMOUNT_LARGE,
+            PaymentHintKind.STATUS_PENDING,
+            PaymentHintKind.STATUS_UNKNOWN,
+            PaymentHintKind.UTR_MISSING,
+            PaymentHintKind.SCREENSHOT_ONLY,
+        )
 
         /** Speed cues are only read from this many characters of `sourceText`. */
         const val MAX_SCANNED_CHARS: Int = 4_000

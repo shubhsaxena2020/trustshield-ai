@@ -431,8 +431,7 @@ class PaymentFieldsParserTest {
 
     @Test
     fun `currency followed by oversized number is skipped for later plausible amount`() {
-        val fields = parse("₹12345678901234567890
-Total ₹75")
+        val fields = parse("₹12345678901234567890\nTotal ₹75")
 
         assertEquals(7500L, fields.amountMinor)
         assertEquals("₹75", fields.amountRaw)

@@ -496,7 +496,7 @@ class RegisteredPayeeStoreTest {
         val odd = "shop@ok%2Caxis"
 
         newStore(fake).register(odd)
-        assertEquals("sho***@ok%252Caxis", fake.values[RegisteredPayeeStoreKeys.MASKED])
+        assertEquals("sho***@ok%252caxis", fake.values[RegisteredPayeeStoreKeys.MASKED])
         val reloaded = newStore(fake)
         assertTrue(reloaded.matches(odd))
         assertEquals(listOf("sho***@ok%2caxis"), reloaded.maskedList())

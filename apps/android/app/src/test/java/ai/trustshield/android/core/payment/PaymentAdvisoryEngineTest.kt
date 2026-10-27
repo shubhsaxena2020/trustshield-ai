@@ -169,8 +169,8 @@ class PaymentAdvisoryEngineTest {
         assertTrue(has(advisory, PaymentHintKind.PAYEE_MATCHES_REGISTERED))
         assertTrue(has(advisory, PaymentHintKind.AMOUNT_LARGE))
         assertFalse(has(advisory, PaymentHintKind.AMOUNT_ROUND_LARGE))
-        // One caution only, so the verdict does not lift.
-        assertEquals(PaymentAdvisoryVerdict.CLEAR, advisory.verdict)
+        // A large amount is a G1 signal even when its payee is registered.
+        assertEquals(PaymentAdvisoryVerdict.CHECK, advisory.verdict)
     }
 
     @Test
@@ -751,18 +751,18 @@ class PaymentAdvisoryEngineTest {
     }
 
     @Test
-    fun `DOCUMENTED a single caution stays clear`() {
-        // Large but not round (550_000 % 100_000 != 0), payee registered: exactly one caution.
+    fun `a single non G1 caution stays clear`() {
+        // A printed name is a soft caution; unlike a large amount it is not a standalone G1 signal.
         val advisory: PaymentAdvisory = engine.evaluate(
             input(
-                fields = fields(amountMinor = 550_000L, utr = "123456789012"),
+                fields = fields(payeeName = "Sharma Store", utr = "123456789012", timestampEpochMs = null),
                 registeredPayeeCount = 1,
                 payeeMatchesRegistered = true
             )
         )
 
         assertEquals(1, advisory.cautions.size)
-        assertTrue(has(advisory, PaymentHintKind.AMOUNT_LARGE))
+        assertTrue(has(advisory, PaymentHintKind.PAYEE_NAME_SPOOFABLE))
         assertEquals(PaymentAdvisoryVerdict.CLEAR, advisory.verdict)
     }
 

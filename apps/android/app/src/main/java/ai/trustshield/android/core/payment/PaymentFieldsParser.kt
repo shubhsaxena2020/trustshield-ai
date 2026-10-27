@@ -77,7 +77,7 @@ object PaymentFieldsParser {
      */
     private const val AMOUNT_NUMBER = """[0-9](?:[0-9]|,(?=[0-9]))*(?:\.[0-9]{1,2})?"""
 
-    private val AMOUNT_PATTERN = Regex("""(?i)$CURRENCY_MARKER[ \t\u00A0]*($AMOUNT_NUMBER)""")
+    private val AMOUNT_PATTERN = Regex("""(?i)$CURRENCY_MARKER[ \t\u00A0]*($AMOUNT_NUMBER)(?![0-9,])""")
 
     // ---- payee UPI ------------------------------------------------------------------------
     //
@@ -90,7 +90,7 @@ object PaymentFieldsParser {
     // id is not picked up as a bogus payee either.
 
     private val UPI_PATTERN = Regex(
-        """(?<![A-Za-z0-9._*-])[A-Za-z0-9._-]{2,}@[A-Za-z][A-Za-z0-9.-]{1,}(?![A-Za-z0-9._*-])"""
+        """(?<![A-Za-z0-9._*-])[A-Za-z0-9._-]{2,}@[A-Za-z][A-Za-z0-9.-]*[A-Za-z0-9](?=$|[\s.,!?;:&?#])"""
     )
 
     private val UPI_LIKE = Regex("""[A-Za-z0-9.*_-]+@[A-Za-z0-9.*_-]+""")
@@ -322,6 +322,8 @@ object PaymentFieldsParser {
      * the "Paid to" line), and falls back to the first valid id in the text.
      */
     private fun chooseUpi(scan: String, hits: List<UpiHit>): UpiHit? {
+        // A masked recipient beside a footer address is ambiguous; do not promote the footer to payee.
+        if (UPI_LIKE.findAll(scan).any { it.value.contains('*') }) return null
         if (hits.isEmpty()) return null
         for (cue in PAYEE_CUES) {
             val hit = firstUpiAfterCue(scan, hits, cue)
@@ -358,7 +360,10 @@ object PaymentFieldsParser {
             val cleaned = cleanPayeeName(line)
             if (cleaned.isNotEmpty()) return cleaned
         }
-        return ""
+        if (PAYEE_NAME_CUES.any { it.containsMatchIn(scan) } ||
+            !AMOUNT_PATTERN.containsMatchIn(scan) || findUpis(scan).isEmpty()
+        ) return ""
+        return cleanPayeeName(scan.substringBefore('\n').substringBefore('\r'))
     }
 
     private fun firstNonBlankLine(remainder: String, stopAtAmpersand: Boolean): String {

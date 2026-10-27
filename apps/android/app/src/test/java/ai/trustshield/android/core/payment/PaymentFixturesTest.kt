@@ -34,31 +34,6 @@ import org.junit.Test
  * remarks about an unreadable field, and forbidding them on a QR text would be asserting that the
  * parser must invent a status line the text does not contain.
  *
- * ## Known disagreements, measured 2026-10-27 and left red on purpose
- *
- * Run against the parser and engine as they stood in this worktree: 24 tests, 5 failures, 3 rows out
- * of 24. No expectation below was widened to clear them - the fix for each belongs to
- * `PaymentFieldsParser` / `PaymentAdvisoryEngine`, not to this table.
- *
- *  * **S11** (success with no reference, registered payee) - expected `CHECK`, measured `CLEAR` with
- *    hints `[UTR_MISSING, PAYEE_MATCHES_REGISTERED]`. The contract defines `CLEAR` as *no
- *    payment-specific warning signal found*, and a caution about a missing reference is such a
- *    signal, so what the lead has to settle is the engine's `CHECK` threshold (any `WARNING`, or two
- *    `CAUTION`s). Until it is settled, a claimed success that nobody can verify reads as `CLEAR`.
- *  * **L02** (registered payee, large amount) - expected `CHECK`, measured `CLEAR` with hints
- *    `[AMOUNT_LARGE, PAYEE_MATCHES_REGISTERED, UTR_PRESENT]`. Same threshold, benign direction: the
- *    same contradiction, on the user's own registered shop.
- *  * **S10** (QR stand: printed name, wrong UPI) - expected `CHECK`, measured `CHECK`, but
- *    `PAYEE_NAME_SPOOFABLE` never appears; the hints were
- *    `[PAYEE_NOT_REGISTERED, STATUS_UNKNOWN, TIME_MISSING]`. The parser only reads a printed payee
- *    name after a cue (`paid to`, `pn=`, `to:`), while a stand prints the shop name as a bare first
- *    line - the most common layout on a real counter. The engine has the rule; the parser never
- *    feeds it.
- *
- * The three rows are also why the summary gates fail: `no suspicious row comes out clear` names S11,
- * and the table test names S10. Deleting a row or relaxing a note would hide the finding, so neither
- * is done here.
- *
  * Plain JVM only: no Android framework object, no device, no network, no storage. If the advisory
  * ever needed one of those, this class could not run.
  */
