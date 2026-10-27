@@ -64,7 +64,7 @@ class AccessibilityFlowsTest {
 
         waitForText("Evidence")
         val risk = compose.onNode(hasContentDescription("Zyada khatra", substring = true))
-        val confidence = compose.onNode(hasText("Bharosa", substring = true)).onFirst()
+        val confidence = compose.onAllNodes(hasText("Bharosa", substring = true)).onFirst()
         val evidence = compose.onNode(hasText("Evidence"))
         val riskTop = risk.fetchSemanticsNode().boundsInRoot.top
         val confidenceTop = confidence.fetchSemanticsNode().boundsInRoot.top
