@@ -7,6 +7,7 @@ import ai.trustshield.android.ui.navigation.LocalEvidenceAdapter
 import ai.trustshield.android.core.model.Evidence
 import ai.trustshield.android.core.model.Severity
 import ai.trustshield.android.core.model.Strength
+import ai.trustshield.android.core.score.LocalScorer
 import java.io.File
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
@@ -39,6 +40,36 @@ class ResultHindiCopyTest {
             assertNotEquals("Generic result title for rule: $title", "Signal detected", result.titleEnglish)
             assertHindiTranslation(title, result.titleEnglish)
             assertHindiTranslation(title, result.detailEnglish)
+        }
+    }
+
+    @Test
+    fun presenterActionsAndLimitationsHaveHindiCopy() {
+        listOf(
+            LocalScorer.ACTION_HIGH_STOP,
+            LocalScorer.ACTION_HIGH_VERIFY,
+            LocalScorer.ACTION_HIGH_REPORT_MONEY,
+            LocalScorer.ACTION_CAUTION_ASK,
+            LocalScorer.ACTION_LOW_WATCH,
+            LocalScorer.ACTION_CAUTION_WATCH,
+            LocalScorer.ACTION_UNABLE_HOLD,
+            LocalScorer.ACTION_UNABLE_RETRY,
+        ).forEachIndexed { index, line ->
+            val action = LocalEvidenceAdapter.action(line, index)
+            assertHindiTranslation("action $line", action.labelEnglish)
+            assertHindiTranslation("action detail $line", action.detailEnglish)
+        }
+
+        listOf(
+            LocalScorer.LIMIT_UNSUPPORTED_SCRIPT_PREFIX + "Tamil",
+            LocalScorer.LIMIT_TRUNCATED,
+            LocalScorer.LIMIT_NO_TEXT,
+            LocalScorer.LIMIT_TOO_LITTLE,
+            LocalScorer.LIMIT_LOW_ASR,
+            LocalScorer.LIMIT_NO_EVIDENCE,
+            LocalScorer.LIMIT_WINDOW_DROPPED,
+        ).forEach { limitation ->
+            assertHindiTranslation(limitation, LocalEvidenceAdapter.limitation(limitation))
         }
     }
 
