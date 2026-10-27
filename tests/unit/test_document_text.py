@@ -10,10 +10,11 @@ FIX = Path("tests/fixtures/uploads")
 
 
 def test_txt_accepted():
-    r = extract_txt((FIX / "clean.txt").read_bytes())
+    payload = (FIX / "clean.txt").read_bytes()
+    r = extract_txt(payload)
     assert r.format == "txt"
     assert "SBI account" in r.text
-    assert r.metadata["size_bytes"] == 85
+    assert r.metadata["size_bytes"] == len(payload)
 
 
 def test_txt_empty_rejected():

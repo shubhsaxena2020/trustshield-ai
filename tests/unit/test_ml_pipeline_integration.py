@@ -117,7 +117,12 @@ def test_confidence_cap_is_single_documented_high_cap(monkeypatch):
 
 def test_health_reports_ml_shape():
     body = TestClient(app).get("/api/v1/health").json()
-    assert set(body["modules"]["ml"]) == {"available", "model_name", "model_version"}
+    ml = body["modules"]["ml"]
+    assert {"available", "model_name", "model_version"} <= set(ml)
+    if ml["available"]:
+        assert "reason" not in ml
+    else:
+        assert isinstance(ml.get("reason"), str) and ml["reason"]
 
 
 def test_health_honors_ml_off_without_loading_classifier(monkeypatch):
