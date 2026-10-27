@@ -391,7 +391,7 @@ private val AUTHORITY_RULES: List<Rule> = listOf(
         ),
         skip = SKIP_POLICE_AFTER,
     ),
-)
+) + EXTENDED_AUTHORITY_RULES
 
 // ---------------------------------------------------------------------------------------------
 // Stage 2 — THREAT_OR_REWARD. Alone: LOW/WEAK. Severity discipline lives here, not in fusion.
@@ -449,7 +449,7 @@ private val THREAT_RULES: List<Rule> = listOf(
             rx("""\b(?:selected|select ho gaye|congratulations|badhai ho)\b[^.!?\n]{0,30}?\b(?:job|prize|reward|offer)\b"""),
         ),
     ),
-) + UTILITY_DISCONNECT_RULES
+) + UTILITY_DISCONNECT_RULES + EXTENDED_THREAT_RULES
 // ---------------------------------------------------------------------------------------------
 // Stage 3 — URGENCY. Alone: LOW/WEAK ("Akele: weak").
 // ---------------------------------------------------------------------------------------------
@@ -474,7 +474,7 @@ private val URGENCY_RULES: List<Rule> = listOf(
             ),
         ),
     ),
-)
+) + EXTENDED_URGENCY_RULES
 
 // ---------------------------------------------------------------------------------------------
 // Stage 4 — SECRECY / isolation. Alone: MEDIUM/MODERATE ("moderate with a claim/threat").
@@ -640,7 +640,7 @@ private val SECRECY_RULES: List<Rule> = listOf(
             rx("""\b(?:akele|akela|alone|अकेले)\b[^.!?\n]{0,20}?\b(?:raho|rahiye|rehna|stay|rakho)\b"""),
         ),
     ),
-)
+) + EXTENDED_SECRECY_RULES
 // ---------------------------------------------------------------------------------------------
 // Stage 5 — ASK, with direction. Non-negated: HIGH/STRONG. Every rule here is negation-guarded, so
 // "OTP kisi ke saath share na karein" stays a warning instead of becoming an ask.
@@ -744,7 +744,7 @@ private val ASK_RULES: List<Rule> = listOf(
         askType = AskType.PERSONAL_INFO,
         guarded = true,
     ),
-) + UTILITY_SERVICE_ASK_RULES
+) + UTILITY_SERVICE_ASK_RULES + EXTENDED_ASK_RULES
 
 // ---------------------------------------------------------------------------------------------
 // Analyzer-directed manipulation ("prompt injection") is DATA, never an instruction. It becomes

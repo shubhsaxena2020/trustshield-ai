@@ -41,13 +41,23 @@ data class ScriptProfile(
  *  7. canonicalizes common Roman-Hindi spelling variants ([CANONICAL_WORDS] and [CANONICAL_PAIRS])
  *     so downstream rules match exactly one form: `btao`/`bataiye`/`bata do`/`bolo` -> `batao`,
  *     `bhej do`/`bhejna` -> `bhejo`, `paisa`/`pese`/`rupaye` -> `paise`. Negation words
- *     (`mat`, `na`) are never deleted, only left alone.
+ *     (`mat`, `na`) are never deleted, only left alone;
+ *  8. folds two *whitelisted* obfuscation shapes and nothing else. A digit-substituted word
+ *     (`5bi`, `b1jli`, `bl0ck`, `4ccount`) is folded back to its plain spelling only when the
+ *     mapped result is one of [LEET_SPELLINGS]; a token spelled out one letter per segment
+ *     (`k y c`, `s b i`, `a a d h a a r`, `k.y.c`, `k🔥y🔥c`) is joined only when the joined
+ *     letters are one of [SPACED_SPELLINGS] and at least three letters took part. Numbers, dates,
+ *     `a b c` and two-letter runs are left exactly as written, because outside those two
+ *     whitelists this stage is a no-op.
  *
  * The critical invariant: **every** normalized character carries the raw range it came from, so
  * `NormalizedText.rawStart(i)`/`rawEnd(i)`/`spanOf()`/`rawQuoteOf()` always return text that is an
  * exact substring of the input the user actually saw. A substitution emits every replacement
  * character with the raw range of the whole source group (`0TP` -> three characters all pointing at
- * raw `[4, 7)`). No character is ever emitted without a raw origin.
+ * raw `[4, 7)`). A leetspeak fold is length-preserving, so it maps each emitted character to the
+ * single raw glyph it replaced (`b1jli` -> `bijli`, where the `i` quotes raw `1`); a letter-spacing
+ * fold maps the whole joined token to the raw run it spans (`k y c` -> `kyc`, where every character
+ * quotes raw `k y c`). No character is ever emitted without a raw origin.
  *
  * Determinism: pure function of the input, no state, no I/O, no `android.*` imports, no clock, so it
  * is safe to call from any thread.
@@ -81,6 +91,17 @@ class HinglishNormalizer : TextNormalizer {
                     k += pin.size
                     continue
                 }
+                val leet = matchLeet(seg)
+                if (leet != null) {
+                    // Length-preserving fold: each character keeps the raw glyph it replaced, so the
+                    // token quotes `b1jli` while its second letter still quotes raw `1`.
+                    for (i in leet.indices) {
+                        val glyph = seg.glyphs[i]
+                        out.emitChar(leet[i], glyph.start, glyph.end)
+                    }
+                    k++
+                    continue
+                }
                 val pair = matchPair(kept, k)
                 if (pair != null) {
                     out.emit(pair.second, seg.start, pair.first.last().end)
@@ -91,6 +112,12 @@ class HinglishNormalizer : TextNormalizer {
                 if (canonical != null && canonical != seg.text) {
                     out.emit(canonical, seg.start, seg.end)
                     k++
+                    continue
+                }
+                val spaced = matchSpacedToken(kept, k)
+                if (spaced != null) {
+                    out.emit(spaced.token, seg.start, spaced.end)
+                    k += spaced.consumed
                     continue
                 }
             }
@@ -336,6 +363,108 @@ class HinglishNormalizer : TextNormalizer {
         return listOf(head, gap, tail) to replacement
     }
 
+    // ---- stage 3b: whitelist-gated obfuscation folds ----------------------------------------
+
+    /**
+     * Folds a digit-substituted *word* back to its plain spelling, or returns `null`.
+     *
+     * Leetspeak (`5bi`, `b1jli`, `bl0ck`, `4ccount`, `p1n`) is the cheapest way to slip a token past
+     * a word matcher, but a blanket digit map would shred ordinary text, so this fold is gated
+     * twice: the segment must have the length of a whitelisted token, and the mapped result must
+     * *be* one of [LEET_SPELLINGS]. Everything else is emitted exactly as it arrived, which is why
+     * `4567`, `Rs 5000`, `1c1c1` (folded text `icici` is whitelisted but no fixture relies on it)
+     * and `optional` are unaffected. `1` is ambiguous (`i` or `l`); both readings are tried in a
+     * fixed order so `b1jli` and `b1ock` fold while the result never depends on iteration order.
+     *
+     * The fold is length-preserving, so the caller emits each character with the raw glyph it
+     * replaced: no span is invented and a quote for the whole token is still the raw spelling.
+     */
+    private fun matchLeet(seg: Segment): String? {
+        val text = seg.text
+        if (text.length < MIN_LEET_TOKEN_LENGTH || text.length > MAX_LEET_TOKEN_LENGTH) return null
+        // A glyph that expanded under NFKC (one raw code point, several characters) has no 1:1
+        // source per emitted character, so that segment is left alone rather than approximated.
+        if (seg.glyphs.size != text.length) return null
+        val primary = leetFold(text, LEET_PRIMARY_READING)
+        // Nothing was substituted (or the token is already plain): the normal path emits it as is.
+        if (primary == text) return null
+        if (LEET_SPELLINGS.contains(primary)) return primary
+        if (text.indexOf(AMBIGUOUS_ONE) < 0) return null
+        val secondary = leetFold(text, LEET_SECONDARY_READING)
+        return if (LEET_SPELLINGS.contains(secondary)) secondary else null
+    }
+
+    /** Applies [LEET_SUBSTITUTIONS], with [oneReading] standing in for the ambiguous `1`. */
+    private fun leetFold(text: String, oneReading: Char): String {
+        val out = StringBuilder(text.length)
+        for (c in text) {
+            val mapped = when {
+                c == AMBIGUOUS_ONE -> oneReading
+                else -> LEET_SUBSTITUTIONS[c] ?: c
+            }
+            out.append(mapped)
+        }
+        return out.toString()
+    }
+
+    /**
+     * Joins `k y c`, `s b i`, `a a d h a a r`, `k.y.c` or `k🔥y🔥c` into one token, or returns
+     * `null`.
+     *
+     * A unit is exactly one ASCII letter; a separator is exactly one space or a short symbol/emoji
+     * gap, and a newline never joins. At least [MIN_SPACED_LETTERS] letters must join into one of
+     * [SPACED_SPELLINGS], so `a b c`, `x y z`, `i am fine` and every two-letter run are left as
+     * written. Only the *maximal* run is folded: a capped run that continues (`a a d h a a r s`)
+     * is rejected rather than folded from its prefix, which keeps the cost per position constant.
+     *
+     * The caller emits the token as one chunk over the whole raw range, so its quote is the
+     * original spelling with the separators still in it (`k y c`, `k🔥y🔥c`).
+     */
+    private fun matchSpacedToken(segments: List<Segment>, k: Int): Fold? {
+        if (!isSingleAsciiLetter(segments[k])) return null
+        val joined = StringBuilder(MAX_SPACED_LETTERS)
+        joined.append(segments[k].text)
+        var lastEnd = segments[k].end
+        var i = k + 1
+        while (i < segments.size && joined.length < MAX_SPACED_LETTERS) {
+            if (!isSpacedGap(segments[i])) break
+            if (i + 1 >= segments.size) break
+            val next = segments[i + 1]
+            if (!isSingleAsciiLetter(next)) break
+            joined.append(next.text)
+            lastEnd = next.end
+            i += 2
+        }
+        if (joined.length < MIN_SPACED_LETTERS) return null
+        val capped = joined.length >= MAX_SPACED_LETTERS
+        if (capped && i + 1 < segments.size &&
+            isSpacedGap(segments[i]) && isSingleAsciiLetter(segments[i + 1])
+        ) {
+            return null
+        }
+        val token = joined.toString()
+        if (!SPACED_SPELLINGS.contains(token)) return null
+        return Fold(token, i - k, lastEnd)
+    }
+
+    /** A folded token, the number of segments it consumed, and the raw end it reaches. */
+    private class Fold(val token: String, val consumed: Int, val end: Int)
+
+    /** `a`-`z` only; segmentation already lower-cased, so a one-character word segment is a letter. */
+    private fun isSingleAsciiLetter(seg: Segment): Boolean {
+        if (seg.kind != SegKind.WORD) return false
+        val text = seg.text
+        if (text.length != 1) return false
+        return text[0] in 'a'..'z'
+    }
+
+    /** Exactly one space, or a short symbol/emoji gap. Tabs and newlines never join. */
+    private fun isSpacedGap(seg: Segment): Boolean = when (seg.kind) {
+        SegKind.SPACE -> seg.text == " "
+        SegKind.OTHER -> seg.text.length <= MAX_UNIT_GAP
+        else -> false
+    }
+
     // ---- stage 4: emit with the raw span map -------------------------------------------------
 
     private class Emission(rawLength: Int) {
@@ -356,6 +485,12 @@ class HinglishNormalizer : TextNormalizer {
                 SegKind.SPACE -> emit(" ", seg.start, seg.end)
                 else -> seg.glyphs.forEach { emit(it.text, it.start, it.end) }
             }
+        }
+
+        /** Emits one character that came from exactly one raw glyph (a length-preserving fold). */
+        fun emitChar(c: Char, start: Int, end: Int) {
+            text.append(c)
+            push(start, end)
         }
 
         private fun push(start: Int, end: Int) {
@@ -394,6 +529,60 @@ class HinglishNormalizer : TextNormalizer {
 
         private const val UNIT_COUNT = 3
         private const val MAX_UNIT_GAP = 3
+
+        /**
+         * The only words a digit-substituted segment may fold back to.
+         *
+         * This set *is* the fold's safety margin: a mapped token outside it is emitted unchanged, so
+         * adding a word here widens what the normalizer rewrites and needs the same review as a rule.
+         */
+        private val LEET_SPELLINGS: Set<String> = setOf(
+            "otp", "pin", "kyc", "upi", "apk", "cvv", "sbi", "hdfc", "icici",
+            "anydesk", "teamviewer", "bijli", "bank", "account", "block",
+        )
+
+        private val MIN_LEET_TOKEN_LENGTH: Int = LEET_SPELLINGS.minOf { it.length }
+        private val MAX_LEET_TOKEN_LENGTH: Int = LEET_SPELLINGS.maxOf { it.length }
+
+        /**
+         * One-way digit map for [matchLeet]. `1` is ambiguous and handled per reading, not here.
+         *
+         * `@` and `$` are listed because the spec names them, but they segment as `OTHER`, never as
+         * part of a `WORD`, so they cannot currently reach this map.
+         */
+        private val LEET_SUBSTITUTIONS: Map<Char, Char> = mapOf(
+            '0' to 'o',
+            '3' to 'e',
+            '4' to 'a',
+            '5' to 's',
+            '7' to 't',
+            '8' to 'b',
+            '9' to 'g',
+            '@' to 'a',
+            '$' to 's',
+        )
+
+        private const val AMBIGUOUS_ONE: Char = '1'
+
+        /** `1` is read as `i` first, then as `l`; a fixed order keeps the fold deterministic. */
+        private const val LEET_PRIMARY_READING: Char = 'i'
+        private const val LEET_SECONDARY_READING: Char = 'l'
+
+        /**
+         * The only tokens a run of single letters may join into.
+         *
+         * `ed` is listed for parity with the spec but is unreachable: it is shorter than
+         * [MIN_SPACED_LETTERS], and two-letter runs are deliberately never joined.
+         */
+        private val SPACED_SPELLINGS: Set<String> = setOf(
+            "otp", "pin", "kyc", "upi", "apk", "cvv", "sbi", "cbi", "ed", "dob", "aadhaar",
+            "bank",
+        )
+
+        /** Shorter runs are ordinary text (`a b`, `e d`, `i.e.`), never an obfuscated token. */
+        private const val MIN_SPACED_LETTERS = 3
+
+        private val MAX_SPACED_LETTERS: Int = SPACED_SPELLINGS.maxOf { it.length }
 
         private val DEVANAGARI_BLOCK = 0x0900..0x097F
 
