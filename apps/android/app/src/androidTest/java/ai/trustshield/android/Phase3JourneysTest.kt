@@ -78,6 +78,7 @@ class Phase3JourneysTest {
      */
     @Before
     fun resetPersistedSettings() {
+        markOnboardingCompleteForTest()
         val store = SharedPreferencesUserPreferencesStore
             .open(InstrumentationRegistry.getInstrumentation().targetContext)
         store.save(store.reset().copy(language = AppLanguage.HINGLISH))

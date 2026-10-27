@@ -4,13 +4,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.test.assertDoesNotExist
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import ai.trustshield.android.data.preferences.AppLanguage
 import ai.trustshield.android.ui.theme.TrustShieldTheme
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
@@ -35,6 +36,8 @@ class OnboardingUiTest {
         compose.onNodeWithText("Check before you trust").assertIsDisplayed()
         compose.onNodeWithText("Skip").performClick()
         compose.onNodeWithText("home").assertIsDisplayed()
-        compose.onNodeWithText("Check before you trust").assertDoesNotExist()
+        assertTrue(
+            compose.onAllNodes(hasText("Check before you trust")).fetchSemanticsNodes().isEmpty(),
+        )
     }
 }
