@@ -532,3 +532,18 @@ PHASE 3 COMPLETE
 - `docs/android/I18N_AUDIT.md` retains the full source snapshot inventory (257 copy constructor sites and 51 direct/dynamic literal lines) and records the static Hindi catalogue count (265 entries). Exact quotes and user-entered text remain source data.
 
 - U1 delivery: commit 4b59e6b pushed on ndroid/P6-U1-language; PR #160: https://github.com/shubhsaxena2020/trustshield-ai/pull/160. Build, unit tests, lint, and disposable-emulator UI verification passed as recorded above.
+
+## 2026-10-27 19:34 IST — web Phase 6 resumed
+
+- Resumed the existing `C:\Users\shubh\trustshield-android-wt\head-e` worktree on `web/P6-landing-v2-backend`; preserved its dirty work and pushed checkpoint `db1035c` before further edits. Main checkout untouched.
+- Backend issue #152 now rejects blank/whitespace text and URLs with a Hinglish/English 422 detail and no analysis ID. Issue #153's metadata-only history fix remains from merged PR #155. Added endpoint regression cases and model-artifact skip markers; the full suite is still running for final counts and failure review.
+- Vercel CLI remains authenticated and project binding confirms the existing separate `trustshield-ai-landing-p6` preview project. Preview deployment is READY: https://trustshield-ai-landing-p6-qyl769crq-shubh-saxena-s-projects.vercel.app. No production deployment or production project changes.
+- Landing `npm run lint`, `npm run typecheck`, and `npm run build` pass. Production-mode Lighthouse mobile report at `docs/android/evidence/landing/lighthouse-mobile.json`: performance 98/100, accessibility 96/100, best practices 100/100, SEO 100/100; LCP 2.4 s, TBT 40 ms, CLS 0. Desktop and mobile screenshots are saved under `docs/android/evidence/landing/`.
+
+### Resumed web lane verification results
+
+- Full `python -m pytest -q`: 1,257 passed, 41 skipped, 0 failed, 5 warnings. No model or dataset was downloaded or changed. Focused model-gate/API-assistant run: 200 passed, 26 skipped, 0 failed.
+- The eight earlier local-model failures are now conditional skips with the `MODEL_ARTIFACT_MISSING` marker: four parameter cases of `test_prompt_injection_in_analysed_message`, `test_deterministic_fallback_keeps_analysis_working_when_llm_unavailable`, `test_prompt_injection_is_data_not_instruction`, `test_liveness_and_readiness`, and `test_probe_paths_exist_under_api_prefix`. All require `models/trained/trustshield_text_v3.joblib` for model-based risk or healthy-readiness assertions; that ignored artifact is absent. The rollback selection tests separately skip if `trustshield_text_v1.joblib` is absent.
+- The suite exercised auth/history isolation and metadata-only writes, request logging/error redaction, CORS, limits/timeouts, input validation, remote provider transport/grounding fallbacks, and `ProviderChain` primary/secondary/deterministic fallback paths with local mocks. Hinglish and Devanagari text probes passed. No live 9Router call was made.
+- Landing checks: `npm run lint`, `npm run typecheck`, `npm run build` pass. Production Lighthouse mobile performance is 98/100. Vercel preview is READY; deployment protection remains enabled on the separate preview project.
+- Opened review PR #162 to `android-finals`: https://github.com/shubhsaxena2020/trustshield-ai/pull/162. No merge performed. Issues #152 and #153 remain open pending their tracking workflow; #153's privacy fix is already in merged PR #155.

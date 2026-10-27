@@ -6,6 +6,8 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.content.ContextCompat
 import ai.trustshield.android.input.speech.SpeechCapabilityProbe
+import ai.trustshield.android.data.preferences.AppLanguage
+import ai.trustshield.android.ui.theme.ToneCopy
 import java.util.concurrent.Executor
 
 internal enum class DeviceCheckLocale { SUPPORTED, UNSUPPORTED, NOT_CHECKED }
@@ -21,6 +23,22 @@ internal data class DeviceCheckSnapshot(
 )
 
 internal object DeviceCheckCopy {
+    fun localeStatus(locale: DeviceCheckLocale, language: AppLanguage): String = when (locale) {
+        DeviceCheckLocale.SUPPORTED -> ToneCopy("Support mila", "Supported").forLanguage(language)
+        DeviceCheckLocale.UNSUPPORTED -> ToneCopy("Support nahi mila", "Not supported").forLanguage(language)
+        DeviceCheckLocale.NOT_CHECKED -> ToneCopy("Is Android par check nahi ho saka", "Not checked on this Android version").forLanguage(language)
+    }
+
+    fun availability(available: Boolean, language: AppLanguage): String = when {
+        available -> ToneCopy("Mila", "Available").forLanguage(language)
+        else -> ToneCopy("Nahi mila", "Unavailable").forLanguage(language)
+    }
+
+    fun permission(granted: Boolean, language: AppLanguage): String = when {
+        granted -> ToneCopy("Mili", "Granted").forLanguage(language)
+        else -> ToneCopy("Nahi mili", "Not granted").forLanguage(language)
+    }
+
     fun localeStatus(locale: DeviceCheckLocale, english: Boolean): String = when (locale) {
         DeviceCheckLocale.SUPPORTED -> if (english) "Supported" else "Support mila"
         DeviceCheckLocale.UNSUPPORTED -> if (english) "Not supported" else "Support nahi mila"

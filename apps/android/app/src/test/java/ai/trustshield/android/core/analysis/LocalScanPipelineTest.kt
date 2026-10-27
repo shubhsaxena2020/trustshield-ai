@@ -72,6 +72,32 @@ class LocalScanPipelineTest {
         }
     }
 
+    @Test
+    fun `Devanagari digital arrest and 1930 phrases keep exact five stage evidence`() {
+        val shortAsk = pipeline.analyzeText("ओटीपी बताओ")
+        assertTrue("Devanagari short ask stages: ${shortAsk.result.stages}", shortAsk.result.stages.contains(StageId.ASK))
+        val outcome = pipeline.analyzeText(DEVANAGARI_DIGITAL_ARREST)
+
+        assertEquals(
+            "normalized transcript: ${outcome.analyzedText}",
+            listOf(StageId.AUTHORITY, StageId.THREAT_OR_REWARD, StageId.URGENCY, StageId.SECRECY, StageId.ASK),
+            outcome.result.stages,
+        )
+        assertTrue(outcome.verifiedAsk)
+        assertEquals(outcome.result.evidence, outcome.result.verifiableEvidence(outcome.analyzedText))
+        assertTrue(outcome.result.evidence.any { it.quote == "ओटीपी बताओ" })
+        assertTrue(outcome.analyzedText.contains("1930"))
+    }
+
+    @Test
+    fun `Devanagari cybercrime helpline advice stays legitimate`() {
+        val outcome = pipeline.analyzeText(DEVANAGARI_LEGIT_1930)
+
+        assertEquals(RiskLabel.LOW_RISK, outcome.risk.label)
+        assertFalse(outcome.verifiedAsk)
+        assertFalse(outcome.result.stages.contains(StageId.ASK))
+    }
+
     // ---------------------------------------------------------------------------------------
     // Legitimate path: protective OTP notice
     // ---------------------------------------------------------------------------------------
@@ -390,6 +416,10 @@ class LocalScanPipelineTest {
         /** BEHAVIOR_SPEC §"Negation and legitimate pairs" protective twin. */
         const val LEGIT_OTP = "123456 is your OTP for your SBI account. " +
             "Do not share it with anyone. -SBI"
+
+        const val DEVANAGARI_DIGITAL_ARREST = "मैं सीबीआई पुलिस से बोल रहा हूं। आपके खिलाफ गिरफ्तारी वारंट है। " +
+            "आज ही कार्रवाई होगी। किसी को मत बताना। ओटीपी बताओ। साइबर ठगी पर 1930 पर कॉल करें।"
+        const val DEVANAGARI_LEGIT_1930 = "साइबर ठगी की शिकायत के लिए 1930 पर कॉल करें। अपना ओटीपी किसी को न बताएं।"
 
         /** Unsupported script: the local rules can read Roman and Devanagari only. */
         const val TAMIL_ONLY = "உங்கள் கணக்கு முடக்கப்படும், விவரங்களை அனுப்புங்கள்"

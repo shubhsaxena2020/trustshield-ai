@@ -1,6 +1,8 @@
 package ai.trustshield.android.ui.theme
 
 import ai.trustshield.android.data.preferences.AppLanguage
+import ai.trustshield.android.data.preferences.resolveLanguage
+import java.util.Locale
 
 /**
  * A short label in Hinglish, English, and Hindi. Missing Hindi entries use the reviewed static
@@ -11,7 +13,7 @@ data class ToneCopy(
     val english: String,
     val hindi: String = HindiCopy.forEnglish(english)
 ) {
-    fun forLanguage(language: AppLanguage): String = when (language) {
+    fun forLanguage(language: AppLanguage): String = when (resolveLanguage(language, Locale.getDefault().toLanguageTag())) {
         AppLanguage.SYSTEM, AppLanguage.HINGLISH -> hinglish
         AppLanguage.ENGLISH -> english
         AppLanguage.HINDI -> hindi

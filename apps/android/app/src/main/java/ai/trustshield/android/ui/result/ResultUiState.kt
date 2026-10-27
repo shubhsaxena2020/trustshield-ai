@@ -4,6 +4,9 @@ import ai.trustshield.android.core.payment.PaymentAdvisory
 import ai.trustshield.android.ui.theme.RiskTone
 import ai.trustshield.android.ui.theme.RiskToneCopy
 import ai.trustshield.android.ui.theme.ToneCopy
+import ai.trustshield.android.data.preferences.AppLanguage
+import ai.trustshield.android.data.preferences.resolveLanguage
+import java.util.Locale
 
 /**
  * C03 — Result / evidence screen: **pure** state, copy and presenter.
@@ -51,11 +54,14 @@ enum class UiLanguage {
         val Default: UiLanguage = HINGLISH
 
         fun of(english: Boolean): UiLanguage = if (english) ENGLISH else HINGLISH
-        fun of(language: ai.trustshield.android.data.preferences.AppLanguage): UiLanguage = when (language) {
-            ai.trustshield.android.data.preferences.AppLanguage.SYSTEM,
-            ai.trustshield.android.data.preferences.AppLanguage.HINGLISH -> HINGLISH
-            ai.trustshield.android.data.preferences.AppLanguage.ENGLISH -> ENGLISH
-            ai.trustshield.android.data.preferences.AppLanguage.HINDI -> HINDI
+        fun of(language: AppLanguage): UiLanguage = of(language, Locale.getDefault().toLanguageTag())
+
+        fun of(language: AppLanguage, systemLanguageTag: String?): UiLanguage = when (
+            resolveLanguage(language, systemLanguageTag)
+        ) {
+            AppLanguage.SYSTEM, AppLanguage.HINGLISH -> HINGLISH
+            AppLanguage.ENGLISH -> ENGLISH
+            AppLanguage.HINDI -> HINDI
         }
     }
 }

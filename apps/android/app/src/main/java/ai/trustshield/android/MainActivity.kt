@@ -41,6 +41,8 @@ import ai.trustshield.android.ui.navigation.LocalUserPreferences
 import ai.trustshield.android.ui.navigation.TrustShieldRouteContent
 import ai.trustshield.android.ui.theme.TrustShieldTheme
 import java.util.Locale
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /**
  * The single activity. It owns nothing but the theme and the navigation host: no scoring, no network,
@@ -93,12 +95,21 @@ class MainActivity : ComponentActivity() {
 
         // C04's store. It persists five setting values and nothing else; no analysed text, quote,
         // transcript, OTP, PIN, phone number or UPI id can reach it (see UserPreferences tests).
-        val store = SharedPreferencesUserPreferencesStore.open(applicationContext)
-
         setContent {
-            // Hoisted so the theme at the root and every screen read the same preferences (C01
-            // wiring for C04's model). Read once on the main thread: a five-key file.
-            var preferences: UserPreferences by remember { mutableStateOf(store.load()) }
+            // Start composition immediately; even opening SharedPreferences can hit disk on a cold
+            // process, so load the five presentation choices off the main thread.
+            var preferenceStore by remember { mutableStateOf<SharedPreferencesUserPreferencesStore?>(null) }
+            var pendingPreferences by remember { mutableStateOf<UserPreferences?>(null) }
+            var preferences: UserPreferences by remember { mutableStateOf(UserPreferences()) }
+            LaunchedEffect(Unit) {
+                val (loadedStore, loadedPreferences) = withContext(Dispatchers.IO) {
+                    SharedPreferencesUserPreferencesStore.open(applicationContext).let { it to it.load() }
+                }
+                preferenceStore = loadedStore
+                val pending = pendingPreferences
+                if (pending == null) preferences = loadedPreferences
+                else withContext(Dispatchers.IO) { loadedStore.save(pending) }
+            }
             var scanState by remember { mutableStateOf(ScanInputState()) }
 
             LaunchedEffect(entrySequence, incomingText) {
@@ -136,7 +147,10 @@ class MainActivity : ComponentActivity() {
                 CompositionLocalProvider(
                     LocalUserPreferences provides preferences,
                     LocalPreferencesSink provides { updated: UserPreferences ->
-                        preferences = store.save(updated)
+                        preferences = updated
+                        val activeStore = preferenceStore
+                        if (activeStore == null) pendingPreferences = updated
+                        else activeStore.save(updated)
                     }
                 ) {
                     // The back stack itself is restored by AppNavHost via rememberSaveable, so

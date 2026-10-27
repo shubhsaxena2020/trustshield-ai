@@ -102,6 +102,18 @@ class HardeningRegressionTest {
         assertTrue(scored.result.actions.contains(LocalScorer.ACTION_LOW_WATCH))
     }
 
+    @Test
+    fun `routine bill support callback is not a verified ask`() {
+        val scored = score(
+            "Your electricity bill is due tomorrow. Call 9876543210 if you have questions.",
+        )
+        assertTrue(
+            "routine bill support must stay LOW_RISK, got ${scored.result.risk.score}/${scored.result.risk.label}",
+            scored.result.risk.score <= 24,
+        )
+        assertFalse("routine bill support must not become a verified callback ask", scored.verifiedAsk)
+    }
+
     // ---------------------------------------------------------------------------------------
     // 3. Utility notices: a locality outage / an LPG delivery must not become an accusation
     // ---------------------------------------------------------------------------------------

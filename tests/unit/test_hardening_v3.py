@@ -1,7 +1,14 @@
 import inspect
 import json
+from pathlib import Path
 
 import pytest
+
+V3_ARTIFACT = Path(__file__).resolve().parents[2] / "models" / "trained" / "trustshield_text_v3.joblib"
+MODEL_REQUIRED = pytest.mark.skipif(
+    not V3_ARTIFACT.is_file(),
+    reason="MODEL_ARTIFACT_MISSING: trustshield_text_v3.joblib is required; no model was downloaded.",
+)
 
 
 def test_message_likeness_filter_only_targets_news_like_legitimate_rows():
@@ -125,6 +132,7 @@ def test_v3_hf_filter_drops_mailing_list_and_corporate_email_and_scrubs_spaced_p
     assert SPACED_PHONE_RE.sub("<PHONE>", "call 713 - 853 - 5426 now") == "call <PHONE> now"
 
 
+@MODEL_REQUIRED
 def test_v3_model_loads_in_current_runtime():
     from services.analysis.ml.classifier import TextClassifier
 

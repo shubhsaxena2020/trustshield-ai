@@ -24,6 +24,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
@@ -75,10 +79,12 @@ fun ResultScreen(
      */
     riskScore: Int? = null,
     onToggleLanguage: () -> Unit = {},
+    onSpeakResult: (() -> Boolean)? = null,
     onAction: (String) -> Unit = {},
     onBack: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
+    var speechUnavailable by remember(language) { mutableStateOf(false) }
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -116,6 +122,26 @@ fun ResultScreen(
 
         BackendNote(backend = state.backend, language = language)
 
+        if (onSpeakResult != null) {
+            OutlinedButton(
+                onClick = { speechUnavailable = !onSpeakResult() },
+                modifier = Modifier.fillMaxWidth().heightIn(min = TsTokens.MinTouchTarget),
+            ) {
+                Text(ToneCopy("Natija sunen", "Read result aloud", "\u0928\u0924\u0940\u091c\u093e \u0938\u0941\u0928\u0947\u0902").pick(language))
+            }
+            if (speechUnavailable) {
+                Text(
+                    ToneCopy(
+                        "Is device par padhne wali awaaz nahi mili. Natija text mein dekhein.",
+                        "No offline voice is available. Read the result on screen.",
+                        "\u0907\u0938 \u0921\u093f\u0935\u093e\u0907\u0938 \u092a\u0930 \u0905\u092b\u093c\u0932\u093e\u0907\u0928 \u0906\u0935\u093e\u091c\u093c \u0928\u0939\u0940\u0902 \u092e\u093f\u0932\u0940\u0964 \u0928\u0924\u0940\u091c\u093e \u0938\u094d\u0915\u094d\u0930\u0940\u0928 \u092a\u0930 \u092a\u0922\u093c\u0947\u0902\u0964",
+                    ).pick(language),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+
         FooterNotes(state = state, language = language)
     }
 }
@@ -136,7 +162,7 @@ private fun ResultTopBar(
             TextButton(
                 onClick = onBack,
                 modifier = Modifier.heightIn(min = TsTokens.MinTouchTarget)
-            ) { Text("\u2039 " + ToneCopy("Peeche", "Back").pick(language)) }
+            ) { Text(ToneCopy("\u2039 Peeche", "\u2039 Back", "\u2039 \u0935\u093e\u092a\u0938").pick(language)) }
             Spacer(Modifier.width(TsTokens.SpacingSm))
         }
         Text(

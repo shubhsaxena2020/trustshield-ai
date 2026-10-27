@@ -366,8 +366,8 @@ class SpeechSessionCoordinator(
             if (activePlan != null) session.replaceRecognizer(handleFactory(activePlan.recognitionMode))
         } else if (event is SpeechEvent.Failed) {
             synchronized(lock) { error = SpeechSessionState.Error(event.reason, event.retryable, event.code) }
-            if (event.code == RecognizerErrorCode.CLIENT || event.reason == ErrorReason.BUSY || event.reason == ErrorReason.NETWORK) {
-                val delay = if (event.code == RecognizerErrorCode.CLIENT) 0L else synchronized(lock) {
+            if (event.retryable) {
+                val delay = if (event.reason != ErrorReason.BUSY && event.reason != ErrorReason.NETWORK) 0L else synchronized(lock) {
                     val backoff = (500L shl retryAttempt.coerceAtMost(3)).coerceAtMost(4_000L)
                     retryAttempt = (retryAttempt + 1).coerceAtMost(3)
                     backoff
