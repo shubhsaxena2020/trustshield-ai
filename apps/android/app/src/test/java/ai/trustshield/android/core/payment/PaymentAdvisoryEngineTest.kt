@@ -863,6 +863,87 @@ class PaymentAdvisoryEngineTest {
         assertEquals(PaymentAdvisoryVerdict.STOP, advisory.verdict)
     }
 
+    @Test
+    fun `failed plus urgency stops even when payee matches`() {
+        val advisory: PaymentAdvisory = engine.evaluate(
+            input(
+                text = "jaldi dobara bhejo",
+                fields = fields(status = PaymentStatus.FAILED, utr = "123456789012"),
+                registeredPayeeCount = 1,
+                payeeMatchesRegistered = true
+            )
+        )
+
+        assertTrue(has(advisory, PaymentHintKind.STATUS_FAILED))
+        assertTrue(has(advisory, PaymentHintKind.URGENCY_PRESSURE))
+        assertFalse(has(advisory, PaymentHintKind.PAYEE_NOT_REGISTERED))
+        assertEquals(PaymentAdvisoryVerdict.STOP, advisory.verdict)
+    }
+
+    @Test
+    fun `pending and unregistered payee stops without amount or urgency`() {
+        val advisory: PaymentAdvisory = engine.evaluate(
+            input(fields = fields(amountMinor = null, status = PaymentStatus.PENDING), registeredPayeeCount = 1)
+        )
+
+        assertTrue(has(advisory, PaymentHintKind.PAYEE_NOT_REGISTERED))
+        assertTrue(has(advisory, PaymentHintKind.STATUS_PENDING))
+        assertFalse(has(advisory, PaymentHintKind.AMOUNT_LARGE))
+        assertFalse(has(advisory, PaymentHintKind.URGENCY_PRESSURE))
+        assertEquals(PaymentAdvisoryVerdict.STOP, advisory.verdict)
+    }
+
+    @Test
+    fun `unregistered payee and a failed status without urgency is check`() {
+        val advisory: PaymentAdvisory = engine.evaluate(
+            input(
+                fields = fields(status = PaymentStatus.FAILED, utr = "123456789012"),
+                registeredPayeeCount = 1,
+                payeeMatchesRegistered = false
+            )
+        )
+
+        assertFalse(has(advisory, PaymentHintKind.URGENCY_PRESSURE))
+        assertEquals(PaymentAdvisoryVerdict.CHECK, advisory.verdict)
+    }
+
+    @Test
+    fun `round amount floor is inclusive and one paisa below is not round-large`() {
+        val atFloor: PaymentAdvisory = engine.evaluate(
+            input(fields = fields(amountMinor = 200_000L), registeredPayeeCount = 1)
+        )
+        val belowFloor: PaymentAdvisory = engine.evaluate(
+            input(fields = fields(amountMinor = 199_999L), registeredPayeeCount = 1)
+        )
+
+        assertTrue(has(atFloor, PaymentHintKind.AMOUNT_ROUND_LARGE))
+        assertFalse(has(belowFloor, PaymentHintKind.AMOUNT_ROUND_LARGE))
+    }
+
+    @Test
+    fun `nonpositive amounts do not trigger amount flags`() {
+        for (amount: Long in listOf(0L, -1L, Long.MIN_VALUE)) {
+            val advisory: PaymentAdvisory = engine.evaluate(
+                input(fields = fields(amountMinor = amount), registeredPayeeCount = 1)
+            )
+            assertFalse(has(advisory, PaymentHintKind.AMOUNT_LARGE))
+            assertFalse(has(advisory, PaymentHintKind.AMOUNT_ROUND_LARGE))
+        }
+    }
+
+    @Test
+    fun `clear verdict is not represented as a success or safety claim`() {
+        val advisory: PaymentAdvisory = engine.evaluate(
+            input(fields = fields(utr = "123456789012"), registeredPayeeCount = 1, payeeMatchesRegistered = true)
+        )
+
+        assertEquals(PaymentAdvisoryVerdict.CLEAR, advisory.verdict)
+        assertTrue(advisory.confirmationRequired)
+        assertFalse(advisory.toString().contains("safe", ignoreCase = true))
+        assertFalse(advisory.toString().contains("success", ignoreCase = true))
+        assertFalse(advisory.toString().contains("fraud", ignoreCase = true))
+    }
+
     // ---- hardening --------------------------------------------------------------------------
 
     @Test

@@ -67,8 +67,14 @@ fun PaymentAdvisoryCard(
     // Verdict first, then the hints in engine order, then the mandatory line last. The join order is
     // the reading order, so a single TalkBack statement ends on the confirmation.
     val spokenDescription = buildString {
+        append(sectionTitle)
+        append(". ")
         append(headline)
+        append(". ")
+        append(advice)
         hintRows.forEach { row ->
+            append(". ")
+            append(row.first)
             append(". ")
             append(row.second)
         }

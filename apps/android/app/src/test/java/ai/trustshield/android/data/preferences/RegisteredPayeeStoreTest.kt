@@ -373,6 +373,38 @@ class RegisteredPayeeStoreTest {
         assertTrue(store.matches(rawUpi))
     }
 
+    @Test
+    fun `register rejects empty local part and multiple separators without persisting input`() {
+        val fake = InMemoryPayeeStore()
+        val store = newStore(fake)
+
+        for (invalid in listOf("@okaxis", "a@")) {
+            try {
+                store.register(invalid)
+                fail("register accepted malformed identifier")
+            } catch (expected: IllegalArgumentException) {
+                assertFalse(expected.message.orEmpty().contains(invalid))
+            }
+        }
+        assertTrue(fake.values.isEmpty())
+        assertEquals(0, fake.writeCount)
+    }
+
+    @Test
+    fun `invalid matches and remove are harmless for malformed identifiers`() {
+        val fake = InMemoryPayeeStore()
+        val store = newStore(fake)
+        store.register(rawUpi)
+        val writes = fake.writeCount
+
+        for (invalid in listOf("@okaxis", "a@")) {
+            assertFalse(store.matches(invalid))
+            store.remove(invalid)
+        }
+        assertTrue(store.matches(rawUpi))
+        assertEquals(writes, fake.writeCount)
+    }
+
     // -------------------------------------------------------------------- defensive persistence ----
 
     @Test
@@ -456,6 +488,38 @@ class RegisteredPayeeStoreTest {
         assertEquals(1, reloaded.count())
         assertTrue(reloaded.matches(odd))
         assertEquals(listOf("sho***@ok%axis"), reloaded.maskedList())
+    }
+
+    @Test
+    fun `literal escape-looking masked text survives round trip`() {
+        val fake = InMemoryPayeeStore()
+        val odd = "shop@ok%2Caxis"
+
+        newStore(fake).register(odd)
+        assertEquals("sho***@ok%252Caxis", fake.values[RegisteredPayeeStoreKeys.MASKED])
+        val reloaded = newStore(fake)
+        assertTrue(reloaded.matches(odd))
+        assertEquals(listOf("sho***@ok%2caxis"), reloaded.maskedList())
+    }
+
+    @Test
+    fun `tampered ids are ignored and valid display positions remain aligned`() {
+        val fake = InMemoryPayeeStore()
+        val store = newStore(fake)
+        store.register(rawUpi)
+        store.register("raj@ybl")
+        val valid = requireNotNull(fake.values[RegisteredPayeeStoreKeys.IDS]).split(",")
+        fake.values[RegisteredPayeeStoreKeys.IDS] =
+            listOf("not-a-digest", valid[0], "A".repeat(64), valid[1]).joinToString(",")
+        fake.values[RegisteredPayeeStoreKeys.MASKED] =
+            "attacker***@label,spoof***@one,spoof***@two,spoof***@three"
+
+        val reloaded = newStore(fake)
+        assertEquals(2, reloaded.count())
+        assertTrue(reloaded.matches(rawUpi))
+        assertTrue(reloaded.matches("raj@ybl"))
+        assertFalse(reloaded.matches("attacker@label"))
+        assertEquals(listOf("spoof***@one", "spoof***@three"), reloaded.maskedList())
     }
 
     // --------------------------------------------------------------------------------- the salt ----

@@ -395,6 +395,57 @@ class PaymentFieldsParserTest {
         assertEquals(PaymentAppHint.UNKNOWN, parse("SomeWallet ₹500 paid").appHint)
     }
 
+    // ---- hostile and ambiguous OCR ---------------------------------------------------------
+
+    @Test
+    fun `currency marker embedded in ordinary words is not an amount`() {
+        val fields = parse("cars 500, sir 900, INRish 700, shop@okaxis")
+
+        assertNull(fields.amountMinor)
+        assertEquals("", fields.amountRaw)
+        assertEquals("shop@okaxis", fields.payeeUpi)
+    }
+
+    @Test
+    fun `malformed grouping is tolerated without consuming punctuation`() {
+        val fields = parse("₹1,2,,,@@ ₹500")
+
+        assertEquals(50000L, fields.amountMinor)
+        assertEquals("₹500", fields.amountRaw)
+    }
+
+    @Test
+    fun `masked upi embedded beside a valid address cannot become a payee`() {
+        val fields = parse("Paid to ab***cd@okaxis\\nSupport: help@trustshield.ai")
+
+        assertEquals("", fields.payeeUpi)
+    }
+
+    @Test
+    fun `phone-like and amount-like digit strings do not become utrs`() {
+        val fields = parse("Call 9876543210; balance 1234567890123")
+
+        assertEquals("", fields.utr)
+        assertNull(fields.amountMinor)
+    }
+
+    @Test
+    fun `currency followed by oversized number is skipped for later plausible amount`() {
+        val fields = parse("₹12345678901234567890
+Total ₹75")
+
+        assertEquals(7500L, fields.amountMinor)
+        assertEquals("₹75", fields.amountRaw)
+    }
+
+    @Test
+    fun `text beyond inspection limit cannot supply a payment field`() {
+        val fields = parse("x".repeat(PaymentFieldsParser.MAX_INPUT_CHARS) + " ₹500 shop@okaxis")
+
+        assertNull(fields.amountMinor)
+        assertEquals("", fields.payeeUpi)
+    }
+
     // ---- not a payment screenshot ---------------------------------------------------------
 
     @Test

@@ -120,6 +120,56 @@ class QrPayeePaymentBridgeTest {
         assertFalse(QrPayeePaymentBridge.matchesRegisteredPayee("sharma.store@okaxis", listOf(shop)))
     }
 
+    @Test
+    fun adversarialQrLabelAndSourceTextCannotOverrideTheDecodedPayeeId() {
+        val attackerLabel = payee("attacker@ybl", name = "Sharma Store shop@okaxis")
+        val input = QrPayeePaymentBridge.toAdvisoryInput(
+            sourceText = "UPI: shop@okaxis\\nPaying Sharma Store\\nattacker@ybl",
+            fields = fields("attacker@ybl", name = "Sharma Store shop@okaxis"),
+            payees = listOf(shop),
+            nowEpochMs = 99L
+        )
+
+        assertFalse(QrPayeePaymentBridge.matchesRegisteredPayee("attacker@ybl", listOf(shop)))
+        assertFalse(input.payeeMatchesRegistered)
+        // The bridge passes QR/OCR text through unchanged; only payeeUpi drives the payee comparison.
+        assertEquals("UPI: shop@okaxis\\nPaying Sharma Store\\nattacker@ybl", input.sourceText)
+        assertEquals("Sharma Store shop@okaxis", input.fields.payeeName)
+        val summary = QrPayeePaymentBridge.comparisonSummary(listOf(attackerLabel))
+        assertFalse(summary.contains("attacker@ybl"))
+        assertFalse(summary.contains("Sharma Store"))
+    }
+
+    @Test
+    fun qrDataCannotMatchThroughWhitespaceInsideIdOrUriDecorations() {
+        for (candidate in listOf("sh op@okaxis", "shop @okaxis", "shop@okaxis
+", "upi://pay?pa=shop@okaxis")) {
+            assertFalse("unexpected match for <$candidate>", QrPayeePaymentBridge.matchesRegisteredPayee(candidate, listOf(shop)))
+        }
+    }
+
+    @Test
+    fun maskedCandidateCannotMatchEvenWhenItsVisiblePrefixLooksRight() {
+        for (candidate in listOf("shop***@okaxis", "sh***@okaxis", "***shop@okaxis", "shop@okaxis***")) {
+            assertFalse("masked candidate was treated as comparable: <$candidate>", QrPayeePaymentBridge.matchesRegisteredPayee(candidate, listOf(shop)))
+        }
+    }
+
+    @Test
+    fun duplicateRegisteredHandlesCountAsEntriesButDoNotBroadenIdentityMatching() {
+        val duplicates = listOf(shop, payee(" SHOP@OKAXIS ", name = "Different label"))
+        val input = QrPayeePaymentBridge.toAdvisoryInput(
+            sourceText = "QR payment request",
+            fields = fields("shop@okaxis"),
+            payees = duplicates,
+            nowEpochMs = 7L
+        )
+        assertEquals(2, input.registeredPayeeCount)
+        assertTrue(input.payeeMatchesRegistered)
+        assertFalse(QrPayeePaymentBridge.matchesRegisteredPayee("different@ybl", duplicates))
+        assertEquals("payees=2, masked=[sh***@okaxis, SH***@OKAXIS]", QrPayeePaymentBridge.comparisonSummary(duplicates))
+    }
+
     // ------------------------------------------------------------------------ toAdvisoryInput ----
 
     @Test

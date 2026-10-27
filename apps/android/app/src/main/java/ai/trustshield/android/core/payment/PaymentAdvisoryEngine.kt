@@ -100,9 +100,8 @@ package ai.trustshield.android.core.payment
  * artifact) gates `CHECK` on *any* single payment-specific signal, so exactly two of its rows expect
  * `CHECK` where row 6 above returns `CLEAR`: `S11` (a registered payee, "Successful", no UTR -> only
  * `UTR_MISSING`) and `L02` (a registered payee, a large amount -> only `AMOUNT_LARGE`). This engine
- * follows the two-caution rule it is written to; the whole reconciliation is either
- * `CHECK_CAUTION_THRESHOLD = 1` here (verified to make both rows pass) or `expectedVerdict = CLEAR`
- * on those two rows. The single-caution -> `CLEAR` case is asserted on purpose in this engine's own
+ * follows the two-caution rule in the advisory spec; those two rows therefore remain `CLEAR` unless
+ * another independent caution is emitted. The single-caution -> `CLEAR` case is asserted on purpose in this engine's own
  * test, so the choice cannot drift silently.
  *
  * ## Hint order
@@ -209,9 +208,7 @@ class PaymentAdvisoryEngine(
                 hints,
                 PaymentHint(
                     kind = PaymentHintKind.PAYEE_NAME_SPOOFABLE,
-                    // INFO, not CAUTION: a printed payee name is a permanent caveat on any receipt,
-                    // so it must not, on its own, push an otherwise clean payment to CHECK.
-                    severity = PaymentHintSeverity.INFO,
+                    severity = PaymentHintSeverity.CAUTION,
                 ),
             )
         }
@@ -444,7 +441,7 @@ class PaymentAdvisoryEngine(
         const val CONFIRMATION_REQUIRED: Boolean = true
 
         /** Two independent cautions are the minimum for `CHECK` (see the verdict table). */
-        const val CHECK_CAUTION_THRESHOLD: Int = 1
+        const val CHECK_CAUTION_THRESHOLD: Int = 2
 
         /** Speed cues are only read from this many characters of `sourceText`. */
         const val MAX_SCANNED_CHARS: Int = 4_000

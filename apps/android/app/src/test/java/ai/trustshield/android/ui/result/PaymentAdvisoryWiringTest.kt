@@ -252,4 +252,36 @@ class PaymentAdvisoryWiringTest {
         assertFalse(drawn.any { it.contains("412345678901") })
         assertFalse(drawn.any { it.contains("Local Shop") })
     }
+
+    @Test
+    fun resultAdvisoryPathKeepsRawReceiptContentOutOfPanelCopy() {
+        val rawUpi = "private.person.928374@okaxis"
+        val rawUtr = "987654321098765"
+        val rawName = "Private Customer Name"
+        val rawAmount = "Rs 9,876"
+        val rawTimestamp = "27 Oct 2026, 7:04 pm"
+        val receipt = "Payment Successful. $rawAmount paid to $rawUpi ($rawName). UTR $rawUtr at $rawTimestamp."
+        val result = ResultPresenter.build(
+            input(source = receipt, evidence = listOf(evidenceItem(quote = "Payment Successful")))
+        )
+        val attached = advisory().copy(
+            fields = PaymentFields(
+                amountMinor = 987_600L,
+                amountRaw = rawAmount,
+                payeeUpi = rawUpi,
+                payeeName = rawName,
+                utr = rawUtr,
+                status = PaymentStatus.SUCCESS,
+                statusRaw = "Success",
+                timestampRaw = rawTimestamp
+            )
+        )
+        val state = result.copy(paymentAdvisory = attached)
+
+        assertEquals("the Result path retains the advisory for its separate card", attached, state.paymentAdvisory)
+        val panelCopy = state.visibleStrings(UiLanguage.ENGLISH) + state.screenDescription(UiLanguage.ENGLISH)
+        listOf(rawUpi, rawUtr, rawName, rawAmount, rawTimestamp).forEach { raw ->
+            assertFalse("raw payment field leaked into Result panel copy: $raw", panelCopy.any { it.contains(raw) })
+        }
+    }
 }

@@ -1,6 +1,6 @@
 # Payment advisory (A09)
 
-**Status: spec of intent.** This document describes what the payment-advisory code in this lane is meant to do. Nothing described here has been compiled or executed — static review only, build and tests pending on the lane lead. The verification table at the end records that honestly.
+**Status: implementation reviewed; execution unverified.** Static review confirms the parser, deterministic engine, salted-HMAC payee store, QR Guard bridge, Result card/copy, and optional Result state field exist in this worktree. The presenter does **not** attach an advisory automatically, so end-to-end Result wiring is not implemented. No Gradle/unit-test or emulator verification was run by this lane; see the verification table.
 
 Source of truth for types: `apps/android/app/src/main/java/ai/trustshield/android/core/payment/PaymentAdvisoryContract.kt`. If code and this document disagree at review, the code wins and this document gets corrected.
 
@@ -67,7 +67,7 @@ These are heuristics chosen for the demo, not measured optima. Boundary behaviou
 ## Privacy
 
 - Only masked UPI ids are shown or logged: `maskedUpi` (`sho***@okaxis`), `RegisteredPayee.maskedHandle`, `PayeeMasking.mask`. `PaymentFields.toString` and `PaymentHint.toString` are value-free on purpose, so a stray log line cannot leak an id, an amount or a reference number.
-- Registered payees are held and compared via a salted HMAC identifier (`SaltedPayeeRegistry`, `HmacSHA256`, salt ≥ 16 bytes) — never as a raw VPA at rest. Note the gap: the comparison the bridge performs today is an exact normalised-id match against QR Guard's in-memory session list; the persisted `RegisteredPayeeStore` named in the contract does not exist yet (open question 2).
+- Registered payees are held and compared via salted HMAC-SHA256 identifiers (`SaltedPayeeRegistry` / `RegisteredPayeeStore`), never as raw VPAs at rest. `RegisteredPayeeStore` exists and uses a caller-owned salt; source review does not establish durable persistence across app restarts or a platform-keystore-backed salt. The bridge compares exact normalized IDs against the current QR Guard payee list. Persistence and salt lifecycle remain open questions (open question 2).
 - The raw message text and the screenshot are not stored. The advisory is built, rendered and dropped with the Result state. OCR output is discarded once fields are parsed.
 - This feature makes no network call, reads no file, and opens no intent.
 
@@ -86,15 +86,16 @@ PaymentAdvisoryCard (ui/result)        hints in order, then the mandatory line
                                        wording from PaymentAdvisoryCopy (ui/result)
 ```
 
-Layering follows `ARCHITECTURE.md` boundaries: `core/payment` stays free of `android.*` and `androidx.compose.*` so parser and engine are plain-JVM testable; Compose and localized copy live in `ui/`. Present in the worktree when this document was written: contract, parser, engine, bridge, card, copy and the `ResultUiState.paymentAdvisory` field. The presenter does not yet attach an advisory — unverified until the Gradle gate.
+Layering follows `ARCHITECTURE.md` boundaries: `core/payment` stays free of `android.*` and `androidx.compose.*` so parser and engine are plain-JVM testable; Compose and localized copy live in `ui/`. Present in the worktree when this document was written: contract, parser, engine, bridge, card, copy and the `ResultUiState.paymentAdvisory` field. The presenter does not attach an advisory: callers must explicitly build/attach it. The card is renderable from `ResultUiState.paymentAdvisory`, but no end-to-end caller path was found in the reviewed production source.
 
 ## Verification status
 
 | Check | Status |
 |---|---|
-| JVM unit tests (parser, engine, bridge, result wiring) | **Not run yet** |
-| Compile (`testDebugUnitTest` / `assembleDebug`) | **Not run yet** |
-| Emulator UI path (Result screen showing the card, TalkBack text, confirmation line last) | **Not run yet** — one shared emulator, machine-wide lock, one Gradle build at a time |
+| Static source review (parser, engine, store, bridge, card, Result field/presenter attachment) | **Reviewed** — found presenter has no automatic attachment path; store implementation exists; no runtime claim implied |
+| JVM unit tests (parser, engine, bridge, result wiring) | **Not run by this lane** — test sources exist, execution belongs to lane lead |
+| Compile (`testDebugUnitTest` / `assembleDebug`) | **Not run by this lane** — pending lane lead gate |
+| Emulator UI path (Result screen showing card, TalkBack text, confirmation line last) | **Not run** — not verified; shared emulator/build use is lead-controlled |
 | Real device | Owner-only. Serial `63b0de52` must never be touched by an automated lane |
 
 Nothing in this table is a pass until the lane lead runs the gate and records the output.
@@ -111,6 +112,6 @@ Nothing in this table is a pass until the lane lead runs the gate and records th
 ## Open questions for the head
 
 1. Should the advisory fire on typed text that merely mentions an amount, instead of receipt-shaped or OCR input only?
-2. `RegisteredPayeeStore` is named in the contract but does not exist. Build the persisted salted store before the 30 Oct screening, or ship the in-memory session list and say so plainly?
-3. Should a pending status reach `STOP` at all? Today it does, but only combined with a non-registered payee — is that too strong for a demo?
-4. Copy consistency: QR Guard renders English as "...or your UPI app history", this document says "...or your UPI app's history". One wording must be chosen for both surfaces before `I18N_AUDIT` is re-run.
+2. `RegisteredPayeeStore` now exists and holds salted HMAC identifiers, but what is its intended durability and salt lifecycle? Confirm persistence semantics and whether the salt needs platform-keystore protection before screening.
+3. Should a pending status reach `STOP` at all? Current engine behavior does so only combined with a non-registered payee; decide whether that escalation is too strong for the demo.
+4. Confirm confirmation-line localization across English, Hinglish and Hindi, and re-run `I18N_AUDIT` after any copy changes.

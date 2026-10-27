@@ -90,7 +90,7 @@ object PaymentFieldsParser {
     // id is not picked up as a bogus payee either.
 
     private val UPI_PATTERN = Regex(
-        """(?<![A-Za-z0-9._*-])[A-Za-z0-9._-]{2,}@[A-Za-z][A-Za-z0-9.-]{1,}"""
+        """(?<![A-Za-z0-9._*-])[A-Za-z0-9._-]{2,}@[A-Za-z][A-Za-z0-9.-]{1,}(?![A-Za-z0-9._*-])"""
     )
 
     private val UPI_LIKE = Regex("""[A-Za-z0-9.*_-]+@[A-Za-z0-9.*_-]+""")
@@ -299,11 +299,21 @@ object PaymentFieldsParser {
 
     /** Trailing sentence punctuation and a leading dot are not part of a VPA. */
     private fun normaliseUpi(raw: String): String? {
+        // Do not "repair" malformed VPAs: stripping punctuation can turn an OCR fragment or a
+        // prefix of a larger invalid token into a different, apparently valid payee.
         if (raw.contains('*')) return null // masked: never comparable, see the MASKING note above
-        var value = raw.trim().trimEnd('.', '-', ',', ';', ':')
-        while (value.startsWith('.')) value = value.substring(1)
+        val value = raw
         val at = value.indexOf('@')
-        if (at < 2 || at == value.length - 1) return null
+        if (at < 2 || at != value.lastIndexOf('@') || at == value.length - 1) return null
+        if (value.length > 255) return null
+        val local = value.substring(0, at)
+        val handle = value.substring(at + 1)
+        if (local.first() !in 'A'..'Z' && local.first() !in 'a'..'z' && local.first() !in '0'..'9') return null
+        if (local.last() !in 'A'..'Z' && local.last() !in 'a'..'z' && local.last() !in '0'..'9') return null
+        if (".." in local || "--" in local || "_." in local || "._" in local) return null
+        if (handle.first() !in 'A'..'Z' && handle.first() !in 'a'..'z') return null
+        if (handle.last() !in 'A'..'Z' && handle.last() !in 'a'..'z' && handle.last() !in '0'..'9') return null
+        if (".." in handle || handle.startsWith('-') || handle.contains(".-") || handle.contains("-.")) return null
         return value
     }
 

@@ -382,20 +382,22 @@ object PaymentFixtures {
         ),
         Row(
             id = "S12",
-            note = "screenshot-only forwarded image with a claim (OCR text): the only evidence is " +
-                "the picture, so the claim cannot be settled from it (G1 screenshot-only + mismatch)",
+            note = "OCR-corrupted forwarded receipt: status lettering is damaged, so the parser must not " +
+                "invent success or pending; unregistered payee plus pressure still warrants CHECK",
             text = """
-                Payment ho gaya bhai
+                Payrnent Pendi ng
                 ₹6,000
                 To: demo.shop@okaxis
                 screenshot bhej diya hai
             """.trimIndent(),
-            messageText = "Bhai paisa bhej diya, ye screenshot dekh lo.",
+            messageText = "Bhai paisa bhej diya, abhi screenshot dekh lo.",
             registeredPayees = listOf(PAYEE_KIRANA),
             expectedVerdict = PaymentAdvisoryVerdict.STOP,
             expectedKindsPresent = setOf(
                 PaymentHintKind.SCREENSHOT_ONLY,
                 PaymentHintKind.PAYEE_NOT_REGISTERED,
+                PaymentHintKind.URGENCY_PRESSURE,
+                PaymentHintKind.STATUS_UNKNOWN,
             ),
             expectedKindsAbsent = setOf(
                 PaymentHintKind.PAYEE_MATCHES_REGISTERED,

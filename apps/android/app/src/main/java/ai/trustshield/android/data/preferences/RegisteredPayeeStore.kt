@@ -58,11 +58,14 @@ import javax.crypto.spec.SecretKeySpec
  */
 open class RegisteredPayeeStore(
     private val store: PayeeKeyValueStore,
-    private val salt: ByteArray
+    salt: ByteArray
 ) {
+    // Own an immutable snapshot: callers must not be able to silently change every lookup key
+    // after persisted entries have been written.
+    private val salt: ByteArray = salt.copyOf()
 
     init {
-        require(salt.size >= MINIMUM_SALT_BYTES) { "salt must be at least 16 bytes" }
+        require(this.salt.size >= MINIMUM_SALT_BYTES) { "salt must be at least 16 bytes" }
     }
 
     /**

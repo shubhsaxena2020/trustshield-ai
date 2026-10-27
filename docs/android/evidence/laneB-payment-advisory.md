@@ -63,3 +63,25 @@ No `adb`, no install, no monkey run, no screenshot, no logcat capture for this f
 2. Finish the presenter wiring, or record that the card is unreachable this phase.
 3. Run one emulator spot check (Result screen with a payment fixture: card visible, hints ordered, confirmation line last, TalkBack reads it) and update the emulator row.
 4. Only then change any status from Not run to Pass. If a row fails, keep it failed and say so.
+
+## Independent review — prior-wave diff and evidence
+
+Review scope: the preceding working-tree diff for the payment engine, parser, payee store, Result card/copy, and associated unit tests, plus this evidence record. Static review only; no tests or build were run.
+
+### Review checklist
+
+- [ ] Confirm current changes compile and the complete relevant JVM suite passes (lane lead owns Gradle; not run in this review).
+- [ ] Wire parser + registered-payee lookup + bridge + engine into the actual Result presenter; verify a real payment result reaches the card.
+- [ ] Exercise adversarial parser inputs and UPI comparison boundaries after the stricter VPA validation changes.
+- [ ] Verify registered payee persistence, salt lifetime/ownership, and comparison behavior against the intended salted-HMAC contract.
+- [ ] On the shared emulator, verify card visibility, hint order, mandatory confirmation last, and TalkBack reading order.
+- [ ] Keep all verification rows Not run until actual execution evidence is recorded.
+
+### Outstanding risks and observations
+
+- **Result wiring remains unverified and appears incomplete:** the earlier static review found `ResultUiState.paymentAdvisory` was not set by the presenter. The reviewed diff does not include presenter changes, so this gap remains outstanding; a renderable card is not evidence of an end-to-end path.
+- **Threshold behavior changed:** the diff makes `PAYEE_NAME_SPOOFABLE` a CAUTION and sets the verdict threshold to two cautions. Reconcile the resulting verdicts (including name-only and combinations of cautions) with the product policy and adversarial fixture expectations; test source additions are not execution evidence.
+- **Parser cleanup/validation needs another pass:** `normaliseUpi` contains a no-op `end`/`Int.MAX_VALUE` block. The new regex has an ASCII-token boundary guard, but malformed OCR/address cases and extraction context still need executed regression coverage; remove or justify the dead block.
+- **RegisteredPayeeStore change is only a defensive salt copy:** this diff does not establish that persisted HMAC storage is wired into the QR/advisory bridge or that the key/salt lifecycle meets the architecture contract. Treat the earlier in-memory registry limitation as unresolved pending review and integration evidence.
+- **Accessibility and localization remain static claims:** changed spoken-description construction and copy do not prove TalkBack order, clipping, or the full localized UI behavior. Emulator verification is still required.
+- **No verification claim:** prior evidence reports no Gradle, JVM, emulator, or device execution. This independent review did not run any either; no tests are claimed as passed.

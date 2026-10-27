@@ -142,6 +142,20 @@ class PaymentAdvisoryCopyTest {
     }
 
     @Test
+    fun confirmationAlwaysPointsToAuthoritativePaymentRecordsWithoutClaimingOutcome() {
+        val confirmation = PaymentAdvisoryCopy.CONFIRMATION
+        assertTrue(confirmation.hinglish.contains("bank SMS") && confirmation.hinglish.contains("UPI app"))
+        assertTrue(confirmation.english.contains("bank SMS") && confirmation.english.contains("UPI app"))
+        assertTrue(confirmation.hindi.contains("बैंक SMS") && confirmation.hindi.contains("UPI ऐप"))
+        for (text in listOf(confirmation.hinglish, confirmation.english, confirmation.hindi)) {
+            val lowered = text.lowercase()
+            assertFalse(lowered.contains("success"))
+            assertFalse(lowered.contains("fraud"))
+            assertFalse(lowered.contains("payment received"))
+        }
+    }
+
+    @Test
     fun confirmationRendersPerLanguage() {
         assertEquals(
             PaymentAdvisoryCopy.CONFIRMATION.hinglish,
@@ -386,6 +400,15 @@ class PaymentAdvisoryCopyTest {
     }
 
     // ------------------------------------------------------------------ language invariants
+
+    @Test
+    fun allHindiCopyIsSubstantivelyDevanagariAndOtherVoicesAreReadable() {
+        for (copy in allCopy() + bareHints().map { PaymentAdvisoryCopy.forHint(it) }) {
+            assertTrue("Hindi is not substantially Devanagari: ${copy.hindi}", devanagariRatio(copy.hindi) > 0.5)
+            assertTrue("Hinglish lacks Roman-script words: ${copy.hinglish}", copy.hinglish.any { it in 'a'..'z' || it in 'A'..'Z' })
+            assertTrue("English lacks readable English words: ${copy.english}", copy.english.any { it in 'a'..'z' || it in 'A'..'Z' })
+        }
+    }
 
     @Test
     fun everyCopyHasADistinctNonBlankHindiValue() {

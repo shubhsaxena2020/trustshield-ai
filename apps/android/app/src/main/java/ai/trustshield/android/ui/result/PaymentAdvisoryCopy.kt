@@ -169,9 +169,9 @@ object PaymentAdvisoryCopy {
             hindi = "स्क्रीनशॉट से कोई UPI ID पढ़ी नहीं जा सकी। प्राप्तकर्ता देखे बिना पैसे न भेजें।"
         )
         PaymentHintKind.PAYEE_NAME_SPOOFABLE -> ToneCopy(
-            hinglish = "Screen par chhapa naam badla ja sakta hai. Sirf UPI ID ki tulna par bharosa karein.",
-            english = "The name printed on the screen can be swapped. Rely only on the UPI ID comparison.",
-            hindi = "स्क्रीन पर छपा नाम बदला जा सकता है। केवल UPI ID की तुलना पर भरोसा करें।"
+            hinglish = "Screen par dikh raha naam aur UPI ID, dono apne UPI app mein check karein.",
+            english = "Check both the displayed name and UPI ID in your own UPI app.",
+            hindi = "अपने UPI ऐप में दिख रहा नाम और UPI ID, दोनों जाँचें।"
         )
         PaymentHintKind.NO_REGISTERED_PAYEES -> ToneCopy(
             hinglish = "Is phone par koi payee save nahi hai, isliye payee ki tulna nahi ho saki.",

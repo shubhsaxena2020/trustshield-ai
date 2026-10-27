@@ -490,16 +490,24 @@ class PaymentFixturesTest {
     }
 
     @Test
-    fun `S12 screenshot only claim is not treated as evidence of payment`() {
+    fun `S12 OCR-corrupted receipt does not invent a readable status`() {
         val row = rowById("S12")
         val advisory = assertRow(row)
         assertTrue(
-            "row S12 (${row.note}): OCR text plus a claim must produce SCREENSHOT_ONLY",
+            "row S12 (${row.note}): OCR text must produce SCREENSHOT_ONLY",
             advisory.hints.any { it.kind == PaymentHintKind.SCREENSHOT_ONLY },
         )
+        assertTrue("row S12: the row must declare OCR input", row.ocrUsed)
+        assertEquals(
+            "row S12: damaged status letters must not be repaired into SUCCESS or PENDING",
+            PaymentStatus.UNKNOWN,
+            advisory.fields.status,
+        )
         assertTrue(
-            "row S12: the row is the OCR case, so the fixture must declare ocrUsed",
-            row.ocrUsed,
+            "row S12: keep the urgency and payee-mismatch signals despite OCR status loss",
+            advisory.hints.map { it.kind }.containsAll(
+                listOf(PaymentHintKind.URGENCY_PRESSURE, PaymentHintKind.PAYEE_NOT_REGISTERED),
+            ),
         )
     }
 
