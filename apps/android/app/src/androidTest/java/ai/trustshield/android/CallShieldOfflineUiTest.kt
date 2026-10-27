@@ -31,20 +31,25 @@ class CallShieldOfflineUiTest {
     }
 
     @Test
-    fun offlineControlHasPhoneSizedTargetAndSelectedStateChangesOnTap() {
+    fun offlineControlHasPhoneSizedTargetAndShowsTheAutomaticSelection() {
         val intent = Intent(ApplicationProvider.getApplicationContext(), MainActivity::class.java)
             .putExtra(AppRoute.EXTRA_ROUTE, AppRoute.CALL_SHIELD.wireName)
         scenario = ActivityScenario.launch(intent)
 
-        val chooseOffline = compose.onNode(hasText("Use offline mode", substring = true))
+        val offlineOption = compose.onNode(hasText("Use offline mode", substring = true))
+        val selectedOffline = compose.onNode(hasText("Offline mode selected", substring = true))
         compose.waitUntil(15_000) {
-            compose.onAllNodes(hasText("Use offline mode", substring = true)).fetchSemanticsNodes().isNotEmpty()
+            compose.onAllNodes(hasText("Use offline mode", substring = true)).fetchSemanticsNodes().isNotEmpty() ||
+                compose.onAllNodes(hasText("Offline mode selected", substring = true)).fetchSemanticsNodes().isNotEmpty()
         }
-        chooseOffline.assertIsNotSelected()
-        val heightDp = with(compose.density) { chooseOffline.fetchSemanticsNode().size.height.toDp().value }
+        val startsOffline = compose.onAllNodes(hasText("Offline mode selected", substring = true))
+            .fetchSemanticsNodes().isNotEmpty()
+        val control = if (startsOffline) selectedOffline else offlineOption
+        if (startsOffline) selectedOffline.assertIsSelected() else offlineOption.assertIsNotSelected()
+        val heightDp = with(compose.density) { control.fetchSemanticsNode().size.height.toDp().value }
         assertTrue("offline recognizer control must have a 48 dp target, was $heightDp dp", heightDp >= 48f)
 
-        chooseOffline.performClick()
-        compose.onNode(hasText("Offline mode selected", substring = true)).assertIsSelected()
+        control.performClick()
+        selectedOffline.assertIsSelected()
     }
 }

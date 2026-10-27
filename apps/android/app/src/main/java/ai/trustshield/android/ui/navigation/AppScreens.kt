@@ -353,8 +353,8 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val session = remember { CallSpeechSession(consentGranted = true) }
-    var offlineMode by remember { mutableStateOf(false) }
     val speechRoute = remember { OfflineSpeechPolicy(networkReachable = networkIsValidated(context)) }
+    var offlineMode by remember(speechRoute) { mutableStateOf(speechRoute.useOffline) }
     var offlineFailureAction by remember { mutableStateOf<(() -> Unit)?>(null) }
     var capability by remember {
         mutableStateOf(SpeechCapabilityRules.evaluate(SpeechCapabilityProbe.probe(context), SpeechLanguage.DEFAULT))
@@ -472,6 +472,7 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
                 CallEvent.MicPermissionGranted -> permissionRequest.launch(Manifest.permission.RECORD_AUDIO)
                 CallEvent.Start -> {
                     speechRoute.updateNetworkReachable(networkIsValidated(context))
+                    offlineMode = speechRoute.useOffline
                     host.onCapability(consent, capability, if (micGranted) ai.trustshield.android.ui.call.MicPermission.GRANTED else ai.trustshield.android.ui.call.MicPermission.DENIED)
                     host.onStartRequested()
                     state = synced(host.state)
