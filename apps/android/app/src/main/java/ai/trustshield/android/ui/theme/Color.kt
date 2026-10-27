@@ -80,7 +80,11 @@ object TsTokens {
     // ---- Shape -------------------------------------------------------------------------------------
 
     val CornerSmall: Dp = 12.dp
+    val CornerMedium: Dp = 16.dp
     val CornerLarge: Dp = 20.dp
+
+    val ElevationLow: Dp = 1.dp
+    val ElevationRaised: Dp = 3.dp
 
     // ---- Interaction -------------------------------------------------------------------------------
 
@@ -113,10 +117,10 @@ object TsPalette {
     val OutlineLight = Color(0xFF5A6784)            // 5.37:1 on SurfaceLight (borders/labels)
     val OutlineVariantLight = Color(0xFFC8D2E2)     // decorative dividers (non-text only)
 
-    /** Filled accent surface for buttons: white text is 5.14:1 (plain #2F6BFF is 4.499:1). */
-    val AccentFillLight = Color(0xFF2B62EE)
+    /** Civic navy filled buttons keep white text well above 4.5:1 contrast. */
+    val AccentFillLight = Color(0xFF124E91)
     val OnAccentFillLight = Color(0xFFFFFFFF)
-    val AccentContainerLight = Color(0xFFE4EBFF)
+    val AccentContainerLight = Color(0xFFE5EDF5)
     val OnAccentContainerLight = Color(0xFF16307F)  // 10.00:1 on AccentContainerLight
 
     // Dark

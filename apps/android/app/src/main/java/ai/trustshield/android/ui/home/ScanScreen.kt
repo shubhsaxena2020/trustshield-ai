@@ -1,7 +1,6 @@
 package ai.trustshield.android.ui.home
 
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -26,21 +24,22 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ai.trustshield.android.core.normalize.HinglishNormalizer
-import ai.trustshield.android.R
 import ai.trustshield.android.data.preferences.AppLanguage
 import ai.trustshield.android.ui.theme.ToneCopy
 import ai.trustshield.android.ui.theme.TsTokens
 import ai.trustshield.android.ui.theme.TrustShieldTheme
+import ai.trustshield.android.ui.history.MetadataCheck
+import ai.trustshield.android.core.model.RiskLabel
 
 /**
  * P3-01 (issue #80) — the real Home / Scan input screen.
@@ -490,6 +489,8 @@ fun ScanScreen(
     onCheck: (String) -> Unit,
     onPickImage: () -> Unit,
     onOpenSettings: () -> Unit = {},
+    historyEntries: List<MetadataCheck> = emptyList(),
+    onClearHistory: () -> Unit = {},
     modifier: Modifier = Modifier,
     clipboardText: () -> String? = { null }
 ) {
@@ -497,218 +498,131 @@ fun ScanScreen(
     val copy: (ToneCopy) -> String = { it.text(selectedLanguage) }
     val examples = ScanExamples().entries
 
-    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+    Column(modifier = modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
         Column(
             modifier = Modifier
+                .weight(1f)
                 .widthIn(max = 560.dp)
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = TsTokens.SpacingLg, vertical = TsTokens.SpacingLg),
-            verticalArrangement = Arrangement.spacedBy(TsTokens.SpacingMd)
+                .padding(horizontal = TsTokens.SpacingLg, vertical = TsTokens.SpacingMd),
+            verticalArrangement = Arrangement.spacedBy(TsTokens.SpacingSm)
         ) {
-            Image(
-                painter = painterResource(R.drawable.trustshield_logo),
-                contentDescription = copy(ToneCopy("TrustShield AI", "TrustShield AI")),
-                modifier = Modifier.width(150.dp).heightIn(min = 36.dp)
-            )
-            Text(
-                text = copy(ScanCopy.title),
-                style = MaterialTheme.typography.headlineSmall,
-                modifier = Modifier.semantics { heading() }
-            )
-            Text(
-                text = copy(ScanCopy.subtitle),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
+            Text(copy(ScanCopy.title), style = MaterialTheme.typography.headlineSmall, modifier = Modifier.semantics { heading() })
+            Text(copy(ScanCopy.subtitle), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             NoticeLine(text = copy(ScanCopy.offlineNotice))
 
-            // ---- Field ------------------------------------------------------------------
-            OutlinedTextField(
-                value = state.text,
-                onValueChange = { onEvent(ScanInputEvent.TextChanged(it)) },
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text(copy(ScanCopy.fieldLabel)) },
-                placeholder = {
-                    Text(
-                        text = copy(ScanCopy.fieldPlaceholder),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                },
-                minLines = 6,
-                maxLines = 10,
-                isError = state.error != null,
-                supportingText = {
-                    Column(verticalArrangement = Arrangement.spacedBy(TsTokens.SpacingXs)) {
-                        Text(
-                            text = state.counterLabel,
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.semantics {
-                                contentDescription =
-                                    copy(ScanCopy.counterPrefix) + " " + state.counterLabel
+            Surface(
+                color = MaterialTheme.colorScheme.surface,
+                shape = RoundedCornerShape(TsTokens.CornerLarge),
+                tonalElevation = 2.dp,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(Modifier.padding(TsTokens.SpacingMd), verticalArrangement = Arrangement.spacedBy(TsTokens.SpacingSm)) {
+                    OutlinedTextField(
+                        value = state.text,
+                        onValueChange = { onEvent(ScanInputEvent.TextChanged(it)) },
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text(copy(ScanCopy.fieldLabel)) },
+                        placeholder = { Text(copy(ScanCopy.fieldPlaceholder), style = MaterialTheme.typography.bodyMedium) },
+                        minLines = 3,
+                        maxLines = 6,
+                        isError = state.error != null,
+                        supportingText = {
+                            Column(verticalArrangement = Arrangement.spacedBy(TsTokens.SpacingXs)) {
+                                Text(state.counterLabel, style = MaterialTheme.typography.bodySmall, modifier = Modifier.semantics {
+                                    contentDescription = copy(ScanCopy.counterPrefix) + " " + state.counterLabel
+                                })
+                                if (state.truncationNoticeVisible) Text(copy(ScanCopy.truncationNotice), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
-                        )
-                        if (state.truncationNoticeVisible) {
-                            Text(
-                                text = copy(ScanCopy.truncationNotice),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
                         }
+                    )
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(TsTokens.SpacingSm)) {
+                        OutlinedButton(
+                            onClick = { onEvent(ScanInputEvent.PasteRequested(clipboardText())) },
+                            modifier = Modifier.weight(1f).heightIn(min = TsTokens.MinTouchTarget).semantics { contentDescription = copy(ScanCopy.pasteActionDescription) }
+                        ) { Text(copy(ScanCopy.pasteAction), style = MaterialTheme.typography.labelLarge) }
+                        OutlinedButton(
+                            onClick = { onEvent(ScanInputEvent.ClearRequested) },
+                            enabled = state.canClear,
+                            modifier = Modifier.weight(1f).heightIn(min = TsTokens.MinTouchTarget).semantics { contentDescription = copy(ScanCopy.clearActionDescription) }
+                        ) { Text(copy(ScanCopy.clearAction), style = MaterialTheme.typography.labelLarge) }
                     }
-                }
-            )
-
-            // ---- Paste / Clear ----------------------------------------------------------
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(TsTokens.SpacingSm)
-            ) {
-                OutlinedButton(
-                    onClick = { onEvent(ScanInputEvent.PasteRequested(clipboardText())) },
-                    modifier = Modifier
-                        .weight(1f)
-                        .heightIn(min = TsTokens.MinTouchTarget)
-                        .semantics { contentDescription = copy(ScanCopy.pasteActionDescription) }
-                ) {
-                    Text(copy(ScanCopy.pasteAction), style = MaterialTheme.typography.labelLarge)
-                }
-                OutlinedButton(
-                    onClick = { onEvent(ScanInputEvent.ClearRequested) },
-                    enabled = state.canClear,
-                    modifier = Modifier
-                        .weight(1f)
-                        .heightIn(min = TsTokens.MinTouchTarget)
-                        .semantics { contentDescription = copy(ScanCopy.clearActionDescription) }
-                ) {
-                    Text(copy(ScanCopy.clearAction), style = MaterialTheme.typography.labelLarge)
+                    state.error?.let { ErrorBanner(copy(ScanCopy.errorLabel), copy(it.copy), copy(ScanCopy.errorDismissHint)) }
                 }
             }
 
-            // ---- Empty / error states ---------------------------------------------------
-            if (state.charCount == 0 && state.error == null) {
-                Text(
-                    text = copy(ScanCopy.emptyHint),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            state.error?.let { error ->
-                ErrorBanner(
-                    label = copy(ScanCopy.errorLabel),
-                    message = copy(error.copy),
-                    dismissHint = copy(ScanCopy.errorDismissHint)
-                )
-            }
-
-            // ---- Examples ---------------------------------------------------------------
-            Text(
-                text = copy(ScanCopy.examplesHeading),
-                style = MaterialTheme.typography.titleSmall,
-                modifier = Modifier
-                    .padding(top = TsTokens.SpacingSm)
-                    .semantics { heading() }
-            )
-            Text(
-                text = copy(ScanCopy.examplesNote),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(TsTokens.SpacingSm)
-            ) {
+            Text(copy(ScanCopy.examplesHeading), style = MaterialTheme.typography.titleSmall, modifier = Modifier.semantics { heading() })
+            Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(TsTokens.SpacingSm)) {
                 examples.forEach { example ->
                     val label = example.label.text(selectedLanguage)
                     AssistChip(
                         onClick = { onEvent(ScanInputEvent.ExampleSelected(example.text)) },
-                        label = {
-                            Text(text = label, style = MaterialTheme.typography.labelMedium)
-                        },
-                        modifier = Modifier
-                            .heightIn(min = TsTokens.MinTouchTarget)
-                            .semantics {
-                                contentDescription =
-                                    copy(ScanCopy.exampleChipDescription) + " " + label
-                            }
+                        label = { Text(label, style = MaterialTheme.typography.labelMedium) },
+                        modifier = Modifier.heightIn(min = TsTokens.MinTouchTarget).semantics { contentDescription = copy(ScanCopy.exampleChipDescription) + " " + label }
                     )
                 }
             }
-
-            // ---- Primary action ---------------------------------------------------------
-            Column(verticalArrangement = Arrangement.spacedBy(TsTokens.SpacingXs)) {
-                Button(
-                    onClick = {
-                        // Both are pure reads of the same model: the event keeps the host's state in
-                        // sync (error banner) while onCheck gets the sanitized text to analyse.
-                        val target = state.checkText()
-                        onEvent(ScanInputEvent.CheckRequested)
-                        if (target != null) onCheck(target)
-                    },
-                    enabled = state.canCheck,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .heightIn(min = TsTokens.MinTouchTarget)
-                        .semantics { contentDescription = copy(ScanCopy.checkActionDescription) }
-                ) {
-                    Text(copy(ScanCopy.checkAction), style = MaterialTheme.typography.labelLarge)
-                }
-                Text(
-                    text = copy(ScanCopy.checkOfflineNote),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                state.checkBlockedReason?.let { blocked ->
-                    Text(
-                        text = copy(blocked.copy),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+            Text(copy(ScanCopy.privacyNote), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(copy(ScanCopy.shareEntryNote), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            OutlinedButton(onClick = onPickImage, modifier = Modifier.fillMaxWidth().heightIn(min = TsTokens.MinTouchTarget).semantics { contentDescription = copy(ScanCopy.imageActionDescription) }) {
+                Text(copy(ScanCopy.imageAction), style = MaterialTheme.typography.labelLarge)
             }
+            Text(copy(ScanCopy.imageNote), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            RecentChecks(entries = historyEntries, language = selectedLanguage, onClear = onClearHistory, copy = copy)
+        }
+        Column(
+            modifier = Modifier
+                .widthIn(max = 560.dp)
+                .fillMaxWidth()
+                .padding(horizontal = TsTokens.SpacingLg, vertical = TsTokens.SpacingSm),
+            verticalArrangement = Arrangement.spacedBy(TsTokens.SpacingXs)
+        ) {
+            Button(
+                onClick = {
+                    val target = state.checkText()
+                    onEvent(ScanInputEvent.CheckRequested)
+                    if (target != null) onCheck(target)
+                },
+                enabled = state.canCheck,
+                modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp).testTag("check_button").semantics { contentDescription = copy(ScanCopy.checkActionDescription) }
+            ) { Text(copy(ScanCopy.checkAction), style = MaterialTheme.typography.labelLarge) }
+            Text(copy(ScanCopy.checkOfflineNote), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            state.checkBlockedReason?.let { Text(copy(it.copy), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+        }
+    }
+}
 
-            // ---- Secondary: image (OCR) -------------------------------------------------
-            Column(verticalArrangement = Arrangement.spacedBy(TsTokens.SpacingXs)) {
-                OutlinedButton(
-                    onClick = onPickImage,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .heightIn(min = TsTokens.MinTouchTarget)
-                        .semantics { contentDescription = copy(ScanCopy.imageActionDescription) }
-                ) {
-                    Text(copy(ScanCopy.imageAction), style = MaterialTheme.typography.labelLarge)
+@Composable
+private fun RecentChecks(
+    entries: List<MetadataCheck>,
+    language: AppLanguage,
+    onClear: () -> Unit,
+    copy: (ToneCopy) -> String
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(TsTokens.SpacingXs)) {
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+            Text(copy(ToneCopy("Recent checks", "Recent checks", "हाल की जाँच")), style = MaterialTheme.typography.titleSmall, modifier = Modifier.semantics { heading() })
+            if (entries.isNotEmpty()) TextButton(onClick = onClear) { Text(copy(ToneCopy("Clear all", "Clear all", "सभी हटाएँ"))) }
+        }
+        if (entries.isEmpty()) {
+            Text(copy(ToneCopy("Abhi koi check nahi", "No checks yet", "अभी कोई जाँच नहीं")), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        } else {
+            entries.take(3).forEach { entry ->
+                val verdict = when (entry.verdict) {
+                    RiskLabel.LOW_RISK -> ToneCopy("Kam khatra", "Low risk", "कम जोखिम")
+                    RiskLabel.CAUTION -> ToneCopy("Dhyan dein", "Caution", "सावधानी")
+                    RiskLabel.SUSPICIOUS -> ToneCopy("Sanket mile", "Suspicious", "संदिग्ध")
+                    RiskLabel.HIGH_RISK -> ToneCopy("Zyada khatra", "High risk", "उच्च जोखिम")
+                    RiskLabel.UNABLE_TO_VERIFY -> ToneCopy("Jaanch nahi ho saki", "Unable to verify", "जाँच नहीं हो सकी")
                 }
-                Text(
-                    text = copy(ScanCopy.imageNote),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            // ---- Share entry: information only, no fake button --------------------------
-            Text(
-                text = copy(ScanCopy.shareEntryNote),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            Text(
-                text = copy(ScanCopy.privacyNote),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            TextButton(
-                onClick = onOpenSettings,
-                modifier = Modifier
-                    .heightIn(min = TsTokens.MinTouchTarget)
-                    .semantics { contentDescription = copy(ScanCopy.settingsActionDescription) }
-            ) {
-                Text(copy(ScanCopy.settingsAction), style = MaterialTheme.typography.labelLarge)
+                Row(Modifier.fillMaxWidth().heightIn(min = TsTokens.MinTouchTarget), verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        Text(verdict.forLanguage(language), style = MaterialTheme.typography.titleSmall)
+                        Text(java.text.DateFormat.getTimeInstance(java.text.DateFormat.SHORT).format(java.util.Date(entry.checkedAtMillis)), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    entry.score?.let { Text(copy(ToneCopy("Skor $it", "Score $it", "स्कोर $it")), style = MaterialTheme.typography.labelMedium) }
+                }
             }
         }
     }

@@ -37,6 +37,7 @@ internal object LocalEvidenceAdapter {
         "Bank/service ke naam par personal number par call karne ko kaha" to EnglishCopy("Personal callback number using a bank or service name", "The message uses a bank or service name while directing you to a personal number."),
         "Unofficial link par KYC/detail update karne ko kaha" to EnglishCopy("KYC update requested through an unofficial link", "The message asks you to update KYC or personal details through a link."),
         "Bank/service ke naam par personal mobile number" to EnglishCopy("Personal mobile number using a bank or service name", "The message associates a personal mobile number with a bank or service."),
+        "Dhamki ke saath bill update karne ko kaha" to EnglishCopy("Utility bill update requested with disconnection threat", "The message threatens to disconnect a utility service and asks you to update a bill using a personal contact."),
         "Message mein link hai (khula nahi gaya)" to EnglishCopy("Message contains a link", "A link was detected. The app did not open or visit it."),
         "Digital arrest ka naam liya gaya" to EnglishCopy("Digital arrest claim", "The sender mentions digital arrest, which is not a legal process in India."),
         "Video call par bane rehne ko kaha" to EnglishCopy("Told you to stay on a video call", "The message instructs you to remain on a video call."),

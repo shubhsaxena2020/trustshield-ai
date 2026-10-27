@@ -41,6 +41,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.text.font.FontWeight
+import android.content.Intent
 import android.net.Uri
 import android.content.Context
 import java.util.Locale
@@ -134,6 +135,8 @@ import ai.trustshield.android.ui.theme.accent
 import ai.trustshield.android.ui.settings.SettingsScreen
 import ai.trustshield.android.ui.settings.SettingsState
 import ai.trustshield.android.ui.settings.reduce
+import ai.trustshield.android.ui.history.HistoryScreen
+import ai.trustshield.android.ui.history.MetadataCheck
 
 /**
  * App-level settings, hoisted so the theme at the root and every screen read the *same* preferences.
@@ -184,6 +187,16 @@ fun ResultRouteHost(appLanguage: AppLanguage, outcome: ScanOutcome?) {
         state = state,
         language = language,
         riskScore = announcedScore,
+        onShareResult = {
+            val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_TEXT, state.risk.label.pick(language))
+            }
+            context.startActivity(Intent.createChooser(
+                shareIntent,
+                ToneCopy("Natija share karein", "Share verdict", "परिणाम साझा करें").pick(language)
+            ))
+        },
         onSpeakResult = {
             val appTtsLanguage = when (language) {
                 UiLanguage.HINGLISH -> AppLanguage.HINGLISH
@@ -270,7 +283,9 @@ fun TrustShieldRouteContent(
     onCheck: (String) -> Unit = {},
     onImageResult: (ScanOutcome) -> Unit = {},
     sharedImageUri: String? = null,
-    onSharedImageConsumed: () -> Unit = {}
+    onSharedImageConsumed: () -> Unit = {},
+    historyEntries: List<MetadataCheck> = emptyList(),
+    onClearHistory: () -> Unit = {}
 ) {
     val nav = LocalNavActions.current
     val clipboard = LocalClipboardManager.current
@@ -285,13 +300,13 @@ fun TrustShieldRouteContent(
             sharedImageUri = sharedImageUri,
             onSharedImageConsumed = onSharedImageConsumed,
             clipboardText = { clipboard.getText()?.text },
-            onOpenSettings = { nav.navigate(AppRoute.SETTINGS) },
-            onOpenCall = { nav.navigate(AppRoute.CALL_SHIELD) },
-            onOpenQr = { nav.navigate(AppRoute.QR_GUARD) }
+            historyEntries = historyEntries,
+            onClearHistory = onClearHistory
         )
         AppRoute.RESULT -> ResultRouteHost(language, resultOutcome)
         AppRoute.CALL_SHIELD -> CallShieldRouteHost(language)
         AppRoute.QR_GUARD -> QrGuardRouteHost()
+        AppRoute.HISTORY -> HistoryScreen(historyEntries, language, onClearHistory)
         AppRoute.SETTINGS -> SettingsRouteHost()
     }
 }
@@ -307,9 +322,8 @@ private fun HomeRouteHost(
     sharedImageUri: String?,
     onSharedImageConsumed: () -> Unit,
     clipboardText: () -> String?,
-    onOpenSettings: () -> Unit,
-    onOpenCall: () -> Unit,
-    onOpenQr: () -> Unit,
+    historyEntries: List<MetadataCheck>,
+    onClearHistory: () -> Unit,
 ) {
     val context = LocalContext.current
     val sensitivity = when (LocalUserPreferences.current.sensitivity) {
@@ -348,7 +362,8 @@ private fun HomeRouteHost(
             onEvent = onScanEvent,
             onCheck = onCheck,
             onPickImage = { actions.launch() },
-            onOpenSettings = onOpenSettings,
+            historyEntries = historyEntries,
+            onClearHistory = onClearHistory,
             modifier = Modifier.weight(1f),
             clipboardText = clipboardText
         )
@@ -356,17 +371,6 @@ private fun HomeRouteHost(
             Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp)) {
                 Text(error.message(language), color = MaterialTheme.colorScheme.error)
                 Text(error.nextStep(language), style = MaterialTheme.typography.bodySmall)
-            }
-        }
-        androidx.compose.foundation.layout.Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            OutlinedButton(onClick = onOpenCall, modifier = Modifier.weight(1f).heightIn(min = 48.dp)) {
-                Text(ToneCopy("Call Shield", "Call Shield").forLanguage(language))
-            }
-            OutlinedButton(onClick = onOpenQr, modifier = Modifier.weight(1f).heightIn(min = 48.dp)) {
-                Text(ToneCopy("QR Guard", "QR Guard").forLanguage(language))
             }
         }
     }

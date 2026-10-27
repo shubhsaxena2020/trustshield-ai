@@ -22,7 +22,7 @@ import androidx.compose.ui.graphics.Color
 object TsColorSchemes {
 
     val Light: ColorScheme = lightColorScheme(
-        primary = TsPalette.AccentFillLight,          // filled accent surfaces: white text 5.14:1
+        primary = TsPalette.AccentFillLight,          // civic navy filled surfaces: white text >8:1
         onPrimary = TsPalette.OnAccentFillLight,
         primaryContainer = TsPalette.AccentContainerLight,
         onPrimaryContainer = TsPalette.OnAccentContainerLight,

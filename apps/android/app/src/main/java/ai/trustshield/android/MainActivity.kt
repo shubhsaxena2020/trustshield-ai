@@ -24,6 +24,7 @@ import ai.trustshield.android.data.preferences.resolveLanguage
 import ai.trustshield.android.core.analysis.LocalScanPipeline
 import ai.trustshield.android.core.analysis.ScanOutcome
 import ai.trustshield.android.core.score.LocalScorer
+import ai.trustshield.android.core.model.RiskLabel
 import ai.trustshield.android.input.share.ShareIntentReader
 import ai.trustshield.android.input.share.ShareIntentRead
 import ai.trustshield.android.input.share.SharedContent
@@ -40,6 +41,8 @@ import ai.trustshield.android.ui.navigation.LocalPreferencesSink
 import ai.trustshield.android.ui.navigation.LocalUserPreferences
 import ai.trustshield.android.ui.navigation.TrustShieldRouteContent
 import ai.trustshield.android.ui.theme.TrustShieldTheme
+import ai.trustshield.android.ui.history.MetadataCheck
+import ai.trustshield.android.ui.history.MetadataCheckHistory
 import java.util.Locale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -111,6 +114,25 @@ class MainActivity : ComponentActivity() {
                 else withContext(Dispatchers.IO) { loadedStore.save(pending) }
             }
             var scanState by remember { mutableStateOf(ScanInputState()) }
+            var historyStore by remember { mutableStateOf<MetadataCheckHistory?>(null) }
+            var historyEntries by remember { mutableStateOf(emptyList<MetadataCheck>()) }
+            LaunchedEffect(Unit) {
+                val (store, entries) = withContext(Dispatchers.IO) {
+                    MetadataCheckHistory(applicationContext).let { it to it.read() }
+                }
+                historyStore = store
+                historyEntries = entries
+            }
+
+            fun recordCheck(outcome: ScanOutcome) {
+                val entry = MetadataCheck(
+                    checkedAtMillis = System.currentTimeMillis(),
+                    verdict = outcome.result.risk.label,
+                    score = outcome.risk.score.takeUnless { outcome.result.risk.label == RiskLabel.UNABLE_TO_VERIFY }
+                )
+                historyStore?.add(entry)
+                historyEntries = (listOf(entry) + historyEntries).take(30)
+            }
 
             LaunchedEffect(entrySequence, incomingText) {
                 val shared = incomingText ?: return@LaunchedEffect
@@ -166,7 +188,12 @@ class MainActivity : ComponentActivity() {
                             resultOutcome = resultOutcome,
                             sharedImageUri = incomingImageUri,
                             onSharedImageConsumed = { incomingImageUri = null },
-                            onImageResult = { resultOutcome = it },
+                            onImageResult = { resultOutcome = it; recordCheck(it) },
+                            historyEntries = historyEntries,
+                            onClearHistory = {
+                                historyStore?.clear()
+                                historyEntries = emptyList()
+                            },
                             onScanEvent = { event -> scanState = reduce(scanState, event) },
                             onCheck = { text ->
                                 val sensitivity = when (preferences.sensitivity) {
@@ -174,7 +201,10 @@ class MainActivity : ComponentActivity() {
                                     ai.trustshield.android.data.preferences.Sensitivity.BALANCED -> LocalScorer.Sensitivity.STANDARD
                                     ai.trustshield.android.data.preferences.Sensitivity.HIGH -> LocalScorer.Sensitivity.HIGH
                                 }
-                                resultOutcome = LocalScanPipeline(sensitivity = sensitivity).analyzeText(text)
+                                LocalScanPipeline(sensitivity = sensitivity).analyzeText(text).also { outcome ->
+                                    resultOutcome = outcome
+                                    recordCheck(outcome)
+                                }
                             }
                         )
                     }
