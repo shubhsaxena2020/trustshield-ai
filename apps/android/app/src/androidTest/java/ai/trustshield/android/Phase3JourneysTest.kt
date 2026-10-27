@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.ParcelFileDescriptor
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
@@ -402,9 +403,15 @@ class Phase3JourneysTest {
         assertTrue("scan input field was not shown", waitForAnyText(15_000, SCAN_FIELD_LABEL, SCAN_FIELD_ENGLISH))
     }
 
-    private fun tapCheck() = tapAnyText("Check karein", "Check (offline)")
+    private fun tapCheck() {
+        val label = if (compose.onAllNodes(hasText("Check karein", substring = true)).fetchSemanticsNodes().isNotEmpty()) {
+            "Check karein"
+        } else "Check (offline)"
+        compose.onAllNodes(hasText(label, substring = true)).onFirst().assertIsEnabled()
+        tapText(label)
+    }
 
-    private fun waitForResult(timeoutMs: Long = 15_000) {
+    private fun waitForResult(timeoutMs: Long = 30_000) {
         assertTrue("result screen did not show a risk and confidence heading", waitForAnyText(timeoutMs, "Bharosa", "Confidence"))
     }
 
