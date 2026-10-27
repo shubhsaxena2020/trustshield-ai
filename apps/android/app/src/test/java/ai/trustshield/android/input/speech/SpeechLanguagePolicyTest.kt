@@ -16,6 +16,14 @@ class SpeechLanguagePolicyTest {
     }
 
     @Test
+    fun onlyHinglishFallsBackFromHindiToEnglishWhenHindiRecognitionIsUnavailable() {
+        assertEquals(SpeechLanguage.EN_IN, SpeechLanguagePolicy.fallbackTag(AppLanguage.HINGLISH, SpeechLanguage.HI_IN))
+        assertNull(SpeechLanguagePolicy.fallbackTag(AppLanguage.HINGLISH, SpeechLanguage.EN_IN))
+        assertNull(SpeechLanguagePolicy.fallbackTag(AppLanguage.HINDI, SpeechLanguage.HI_IN))
+        assertNull(SpeechLanguagePolicy.fallbackTag(AppLanguage.ENGLISH, SpeechLanguage.HI_IN))
+    }
+
+    @Test
     fun scriptSwitchNeedsTwoConsecutiveOtherScriptFinalResults() {
         val detector = SpeechScriptLanguageDetector(SpeechLanguage.HI_IN)
         assertNull(detector.observeFinal("The caller says send money"))

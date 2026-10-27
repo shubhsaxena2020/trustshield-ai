@@ -10,6 +10,12 @@ object SpeechLanguagePolicy {
             AppLanguage.ENGLISH -> SpeechLanguage.EN_IN
             AppLanguage.SYSTEM, AppLanguage.HINGLISH, AppLanguage.HINDI -> SpeechLanguage.HI_IN
         }
+
+    /** Hinglish starts with Hindi recognition and falls back to English if Android lacks hi-IN. */
+    fun fallbackTag(language: AppLanguage, currentTag: String): String? =
+        SpeechLanguage.EN_IN.takeIf {
+            language == AppLanguage.HINGLISH && currentTag == SpeechLanguage.HI_IN
+        }
 }
 
 /** Changes locale after two consecutive final results are predominantly in the other script. */

@@ -28,6 +28,7 @@ import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
@@ -411,6 +412,7 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
     val session = remember { CallSpeechSession(consentGranted = true) }
     val selectedLanguage = resolveLanguage(appLanguage, Locale.getDefault().toLanguageTag())
     val selectedSpeechTag = SpeechLanguagePolicy.selectedTag(selectedLanguage)
+    val currentAppLanguage by rememberUpdatedState(appLanguage)
     val recognitionLanguageState = remember { mutableStateOf(selectedSpeechTag) }
     var recognitionLanguage by recognitionLanguageState
     val scriptDetector = remember(selectedSpeechTag) { SpeechScriptLanguageDetector(selectedSpeechTag) }
@@ -423,6 +425,16 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
         val handler = android.os.Handler(android.os.Looper.getMainLooper())
         created = SpeechSessionCoordinator(session, { delay, action -> handler.postDelayed(action, delay) }) { _ ->
             AndroidSpeechRecognizerHandle(context, session, capability, recognitionLanguageState.value) { code ->
+                if (code == ai.trustshield.android.input.speech.RecognizerErrorCode.LANGUAGE_UNAVAILABLE) {
+                    SpeechLanguagePolicy.fallbackTag(currentAppLanguage, recognitionLanguageState.value)?.let { fallbackTag ->
+                        recognitionLanguageState.value = fallbackTag
+                        recognitionLanguageStatus = ToneCopy(
+                            "Hindi speech unavailable; switching to English",
+                            "Hindi speech recognition is unavailable; switching to English",
+                            "\u0939\u093f\u0902\u0926\u0940 \u0935\u093e\u0915\u094d \u0909\u092a\u0932\u092c\u094d\u0927 \u0928\u0939\u0940\u0902; \u0905\u0902\u0917\u094d\u0930\u0947\u091c\u093c\u0940 \u092e\u0947\u0902 \u0938\u094d\u0935\u093f\u091a \u0915\u0930 \u0930\u0939\u0947 \u0939\u0948\u0902",
+                        ).forLanguage(resolveLanguage(currentAppLanguage, Locale.getDefault().toLanguageTag()))
+                    }
+                }
                 created.onError(code)
             }
         }
