@@ -28,6 +28,7 @@ import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
@@ -70,12 +71,8 @@ import ai.trustshield.android.ui.home.rememberImageScanLauncher
 import ai.trustshield.android.ui.home.isContentUri
 import ai.trustshield.android.input.share.ContentResolverByteSource
 import ai.trustshield.android.input.share.MlKitTextRecognizer
-import ai.trustshield.android.ui.result.ActionPriority
 import ai.trustshield.android.ui.result.ConfidenceLevel
-import ai.trustshield.android.ui.result.EvidenceSeverity
 import ai.trustshield.android.ui.result.InputCoverage
-import ai.trustshield.android.ui.result.ResultActionInput
-import ai.trustshield.android.ui.result.ResultEvidenceInput
 import ai.trustshield.android.ui.result.ResultInput
 import ai.trustshield.android.ui.call.CallLanguage
 import ai.trustshield.android.ui.call.RecognizerStatus
@@ -89,6 +86,7 @@ import ai.trustshield.android.ui.call.DemoProgress
 import ai.trustshield.android.ui.call.DemoRiskPosition
 import ai.trustshield.android.ui.call.CallShieldHost
 import ai.trustshield.android.ui.call.CallShieldCopy
+import ai.trustshield.android.ui.call.withStoredChoices
 import ai.trustshield.android.ui.call.CallStage
 import ai.trustshield.android.ui.call.forLanguage
 import ai.trustshield.android.input.speech.CallSpeechSession
@@ -215,38 +213,11 @@ object AnalysisToResult {
                 Confidence.MEDIUM -> ConfidenceLevel.MEDIUM
                 Confidence.HIGH -> ConfidenceLevel.HIGH
             },
-            evidence = outcome.result.evidence.map { item ->
-                ResultEvidenceInput(
-                    id = item.id,
-                    module = when (item.module) {
-                        "stage_rules" -> "Pattern check"
-                        "legit_indicators" -> "Legitimate signal"
-                        "local_fusion" -> "Local analysis"
-                        else -> "Local check"
-                    },
-                    titleHinglish = item.titleHinglish,
-                    titleEnglish = item.titleHinglish,
-                    detailHinglish = item.detail,
-                    detailEnglish = item.detail,
-                    severity = when (item.strength) {
-                        ai.trustshield.android.core.model.Strength.WEAK -> EvidenceSeverity.INFO
-                        ai.trustshield.android.core.model.Strength.MODERATE -> EvidenceSeverity.WATCH
-                        ai.trustshield.android.core.model.Strength.STRONG -> EvidenceSeverity.STRONG
-                    },
-                    quote = item.quote.orEmpty()
-                )
-            },
+            evidence = outcome.result.evidence.map(LocalEvidenceAdapter::evidence),
             actions = outcome.result.actions.mapIndexed { index, line ->
-                ResultActionInput(
-                    id = "local-action-$index",
-                    labelHinglish = line,
-                    labelEnglish = line,
-                    detailHinglish = "Yeh agla kadam aapke faisle ke liye hai.",
-                    detailEnglish = "This next step is for you to consider.",
-                    priority = if (index == 0) ActionPriority.PRIMARY else ActionPriority.SECONDARY
-                )
+                LocalEvidenceAdapter.action(line, index)
             },
-            limitations = outcome.result.limitations.map { ToneCopy(it, it) },
+            limitations = outcome.result.limitations.map { ToneCopy(it, LocalEvidenceAdapter.limitation(it)) },
             backendAvailable = false,
             riskScore = outcome.risk.score.takeUnless {
                 outcome.result.risk.label == RiskLabel.UNABLE_TO_VERIFY
@@ -410,18 +381,35 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
     val prefs = LocalUserPreferences.current
     val sink = LocalPreferencesSink.current
     val selectedLanguage = resolveLanguage(appLanguage, Locale.getDefault().toLanguageTag())
+    // Issue #138. `CallShieldHost` owns the call session, not the user's presentation choices, and
+    // it is built before this screen reads any preference — so `host.state` always carries
+    // `CallUiState`'s defaults (HINGLISH, haptics on). Copying it verbatim (start / stop / pause /
+    // resume / ASR utterance / the lifecycle observer below) therefore reset the screen to Hinglish
+    // and re-enabled haptics behind an English, haptics-off preference. Measured on `emulator-5554`
+    // with `settings.language = ENGLISH` persisted across a force-stop: the screen rendered Hinglish
+    // and its language button still offered "English". Every host snapshot now goes through `synced`
+    // so the stored choices survive; the session's own fields are passed through untouched.
+    //
+    // The three values are `rememberUpdatedState`-backed on purpose: the 1-second tick loop and the
+    // utterance sink are launched once and keep their closure, so a plain `prefs` capture would let a
+    // later tick write a stale language back over a change made after the effect started.
+    val storedLanguage by rememberUpdatedState(selectedLanguage.toCallLanguage())
+    val storedHaptics by rememberUpdatedState(prefs.haptics)
+    val storedReducedMotion by rememberUpdatedState(prefs.reducedMotion)
+    fun synced(from: CallUiState): CallUiState =
+        from.withStoredChoices(storedLanguage, storedHaptics, storedReducedMotion)
     var consent by remember { mutableStateOf(SpeechConsent.initial()) }
     var micGranted by remember {
         mutableStateOf(ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED)
     }
     var state by remember(host) {
         mutableStateOf(
-            host.state.copy(
+            synced(host.state.copy(
                 recognizer = RecognizerStatus.UNAVAILABLE,
                 language = selectedLanguage.toCallLanguage(),
                 hapticsEnabled = prefs.haptics,
                 reducedMotion = prefs.reducedMotion
-            )
+            ))
         )
     }
     val demoSensitivity = when (prefs.sensitivity) {
@@ -480,11 +468,11 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
                 CallEvent.Start -> {
                     host.onCapability(consent, capability, if (micGranted) ai.trustshield.android.ui.call.MicPermission.GRANTED else ai.trustshield.android.ui.call.MicPermission.DENIED)
                     host.onStartRequested()
-                    state = host.state
+                    state = synced(host.state)
                 }
-                CallEvent.Stop -> { host.onStop(); state = host.state }
-                CallEvent.Pause -> { host.onHostPaused(); state = host.state }
-                CallEvent.Resume -> { host.onStartRequested(); state = host.state }
+                CallEvent.Stop -> { host.onStop(); state = synced(host.state) }
+                CallEvent.Pause -> { host.onHostPaused(); state = synced(host.state) }
+                CallEvent.Resume -> { host.onStartRequested(); state = synced(host.state) }
                 is CallEvent.SetLanguage -> {
                     host.onLanguageChanged(event.language)
                     state = host.state
@@ -534,24 +522,21 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
         capability = SpeechCapabilityRules.evaluate(SpeechCapabilityProbe.probe(context, mic), SpeechLanguage.DEFAULT)
         host.onCapability(consent, capability, if (micGranted) ai.trustshield.android.ui.call.MicPermission.GRANTED else ai.trustshield.android.ui.call.MicPermission.DENIED)
         host.onLanguageChanged(selectedLanguage.toCallLanguage())
-        state = host.state.copy(
-            hapticsEnabled = prefs.haptics,
-            reducedMotion = prefs.reducedMotion
-        )
+        state = synced(host.state)
     }
     remember(host) {
         session.setUtteranceSink(UtteranceSink { utterance ->
             speechRoute.platformSuccess()
             if (utterance.isFinal) host.onUtterance(utterance.text, utterance.confidence, utterance.tsMs)
-            state = host.state
+            state = synced(host.state)
         })
         host
     }
     DisposableEffect(lifecycleOwner, host) {
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
-                Lifecycle.Event.ON_PAUSE -> { host.onHostPaused(); state = host.state }
-                Lifecycle.Event.ON_RESUME -> { host.onHostResumed(); state = host.state }
+                Lifecycle.Event.ON_PAUSE -> { host.onHostPaused(); state = synced(host.state) }
+                Lifecycle.Event.ON_RESUME -> { host.onHostResumed(); state = synced(host.state) }
                 else -> Unit
             }
         }
@@ -566,7 +551,7 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
         while (true) {
             delay(1_000)
             host.onTick(state.elapsedSeconds + 1)
-            state = host.state
+            state = synced(host.state)
         }
     }
     }
