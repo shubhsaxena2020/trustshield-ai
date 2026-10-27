@@ -41,11 +41,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -138,15 +142,119 @@ fun QrGuardScreen(
             MandatoryConfirmationBanner(lang = lang, dark = dark)
 
             Text(
-                text = if (lang == QrLanguage.HINGLISH) {
-                    "Demo scan nakli QR data use karta hai. Asli QR camera se scan hota hai."
-                } else {
-                    "Demo scan uses sample QR data. Real QR codes are scanned with the camera."
-                },
+                text = QrA11yCopy.demoNote.text(lang),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
+    }
+}
+
+// ----------------------------------------------------------------------------------- copy layer ----
+
+/**
+ * Semantic copy for this renderer: the sentences a screen reader hears, in the same
+ * [ToneCopy] layer the visible strings use (UI_SPEC "Copy and states" — no bare English strings).
+ *
+ * Two rules drive every entry here:
+ *  - a **decode failure is never worded as tampering** (BEHAVIOR_SPEC §"QR and payment semantics";
+ *    UI_SPEC "Camera denied/no decode — never call no-decode 'tamper'"), so the unreadable wording
+ *    only ever describes the QR as unreadable and names the safe next step;
+ *  - the **registered id and the id read off the QR are never merged into one sentence**, because
+ *    the printed name is spoofable and the trusted identity is not.
+ */
+internal object QrA11yCopy {
+
+    val demoNote = ToneCopy(
+        "Demo scan nakli QR data use karta hai. Asli QR camera se scan hota hai.",
+        "Demo scan uses sample QR data. Real QR codes are scanned with the camera."
+    )
+
+    private val cameraPrefix = ToneCopy("Camera panel — ", "Camera panel — ")
+
+    /**
+     * The camera state as one honest sentence, for the panel's `stateDescription`.
+     *
+     * "No QR decoded yet" is stated as a plain fact for [CameraUiStatus.ACTIVE]: an undecoded frame
+     * says nothing about the QR being tampered with, only that nothing has been read yet.
+     */
+    fun cameraState(
+        camera: CameraUiStatus,
+        decodeSeen: Boolean,
+        emulatorCameraOff: Boolean,
+        lang: QrLanguage
+    ): String {
+        val state = when (camera) {
+            CameraUiStatus.ACTIVE -> when {
+                emulatorCameraOff -> ToneCopy(
+                    "Emulator par live scan band hai",
+                    "Live scanning is off on this emulator"
+                )
+                decodeSeen -> ToneCopy(
+                    "Camera chalu hai, koi QR padha gaya hai",
+                    "Camera is on, a QR has been read"
+                )
+                else -> ToneCopy(
+                    "Camera chalu hai, abhi tak koi QR decode nahi hua",
+                    "Camera is on, no QR decoded yet"
+                )
+            }
+            CameraUiStatus.PERMISSION_DENIED -> ToneCopy(
+                "Camera ki permission nahi mili, isliye QR padha nahi ja sakta",
+                "Camera permission is missing, so the QR cannot be read"
+            )
+            CameraUiStatus.NO_CAMERA -> ToneCopy(
+                "Is phone par camera nahi hai, isliye QR padha nahi ja sakta",
+                "This phone has no camera, so the QR cannot be read"
+            )
+            CameraUiStatus.UNKNOWN -> ToneCopy("Camera check ho raha hai", "Checking the camera")
+        }
+        return cameraPrefix.text(lang) + state.text(lang)
+    }
+
+    /**
+     * The mismatch counter as state, not as a coloured number: the count plus the standing rule that
+     * an unreadable QR is not evidence of tampering.
+     */
+    fun mismatchState(progress: String, lang: QrLanguage): String =
+        QrStrings.mismatchCounterLabel.text(lang) + ": " + progress + ". " +
+            QrStrings.occlusionNotTamper.text(lang)
+
+    /** Trusted identity first, the changeable printed name clearly second — never conflated. */
+    fun expectedPayee(maskedHandle: String, shownName: String?, lang: QrLanguage): String {
+        val id = ToneCopy(
+            "Aapka register kiya UPI ID: $maskedHandle",
+            "Your registered UPI ID: $maskedHandle"
+        ).text(lang)
+        if (shownName == null) return id
+        return id + ". " + ToneCopy(
+            "Dikhta naam: $shownName — yeh sirf label hai, badla ja sakta hai",
+            "Name shown: $shownName — that is only a label and can be changed"
+        ).text(lang)
+    }
+
+    /** What the camera actually read, with its printed name marked untrusted. */
+    fun observedPayee(maskedHandle: String, shownName: String?, lang: QrLanguage): String {
+        val id = ToneCopy(
+            "QR se mila UPI ID: $maskedHandle",
+            "UPI ID read from the QR: $maskedHandle"
+        ).text(lang)
+        if (shownName == null) return id
+        return id + ". " + ToneCopy(
+            "QR par chhapa naam: $shownName — sirf label hai, is par bharosa na karein",
+            "Name printed on the QR: $shownName — a label only, do not trust it"
+        ).text(lang)
+    }
+
+    fun expectedPayees(maskedHandles: List<String>, lang: QrLanguage): String =
+        ToneCopy("Aapka register kiya UPI ID: ", "Your registered UPI ID: ").text(lang) +
+            maskedHandles.joinToString(", ")
+
+    /** Verdict word for the observed id, so "match" is not an untranslated fragment of English. */
+    fun verdict(matched: Boolean, lang: QrLanguage): String = if (matched) {
+        ToneCopy("register kiye ID se milta hai", "matches a registered ID").text(lang)
+    } else {
+        ToneCopy("register kiye ID se alag hai", "differs from a registered ID").text(lang)
     }
 }
 
@@ -163,12 +271,19 @@ private fun QrTone.toRiskTone(): RiskTone = when (this) {
  * Colour + shaped glyph + visible label. The glyph is a real second channel, so the state stays
  * distinguishable with colour removed (QUALITY_GATES #6: alerts never colour-only; no Material icon
  * font is on the classpath — same fallback pattern as C02's `RiskTonePresentation.glyph`).
+ *
+ * Decorative for accessibility: the badge is not clickable, not toggleable and not part of the
+ * touch target, and a screen reader reading "●", "✕" or "!!" would only be noise in front of the
+ * label that carries the same state in words. [clearAndSetSemantics] removes the glyph (and its
+ * shape/colour) from the semantics tree without hiding the neighbouring text, which stays the
+ * announced channel (`IconBadge` never carries information the label omits).
  */
 @Composable
 private fun IconBadge(glyph: String, tone: RiskTone, dark: Boolean) {
     Box(
         modifier = Modifier
             .size(32.dp)
+            .clearAndSetSemantics { }
             .background(tone.accent(dark), CircleShape),
         contentAlignment = Alignment.Center
     ) {
@@ -245,7 +360,20 @@ private fun CameraStatusPanel(
         CameraUiStatus.NO_CAMERA -> "\u2715"
         CameraUiStatus.UNKNOWN -> "\u2026"
     }
-    Panel(tone = tone, dark = dark) {
+    Panel(
+        tone = tone,
+        dark = dark,
+        modifier = Modifier.semantics(mergeDescendants = true) {
+            // Said out loud, including "no QR decoded yet": a screen reader must never be told that
+            // an undecoded camera means a tampered QR.
+            stateDescription = QrA11yCopy.cameraState(
+                camera = state.camera,
+                decodeSeen = state.lastObserved != null,
+                emulatorCameraOff = emulatorCameraOff,
+                lang = lang
+            )
+        }
+    ) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(TsTokens.SpacingSm),
             verticalAlignment = Alignment.CenterVertically
@@ -273,7 +401,17 @@ private fun SignalBanner(
 ) {
     val tone = presentation.tone.toRiskTone()
     val alert = state.mismatchAlert
-    Panel(tone = tone, dark = dark) {
+    Panel(
+        tone = tone,
+        dark = dark,
+        modifier = Modifier.semantics(mergeDescendants = true) {
+            // The presentation's own reviewed sentence: MISMATCH says the ids differ, and
+            // UNREADABLE_TIMEOUT says in so many words that it is NOT proof of tampering. Polite
+            // only for the tamper alert — a live region on every decode would re-announce each frame.
+            stateDescription = presentation.contentDescription.text(lang)
+            if (signal == QrSignal.MISMATCH) liveRegion = LiveRegionMode.Polite
+        }
+    ) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(TsTokens.SpacingSm),
             verticalAlignment = Alignment.Top
@@ -296,25 +434,19 @@ private fun SignalBanner(
                     )
                     if (alert != null) {
                         // Masked ids only — an alert can be read by TalkBack or screenshotted.
+                        //
+                        // Two separate focus stops on purpose: the id the QR produced (with its
+                        // spoofable printed name) and the ids this phone trusts. Merging them into
+                        // one sentence is how a TalkBack user could mistake the sticker's name for
+                        // the registered identity.
                         Text(
-                            text = ToneCopy(
-                                "Mila: ${alert.observedMasked}  |  Expected: ${alert.expectedMasked.joinToString(", ")}",
-                                "Found: ${alert.observedMasked}  |  Expected: ${alert.expectedMasked.joinToString(", ")}",
-                                "मिला: ${alert.observedMasked}  |  अपेक्षित: ${alert.expectedMasked.joinToString(", ")}"
-                            ).text(lang),
+                            text = QrA11yCopy.observedPayee(alert.observedMasked, alert.observedName, lang),
                             style = MaterialTheme.typography.bodySmall
                         )
-                        val observedName = alert.observedName
-                        if (observedName != null) {
-                            Text(
-                                text = ToneCopy(
-                                    "QR par likha naam: $observedName",
-                                    "Name printed on QR: $observedName",
-                                    "QR पर लिखा नाम: $observedName"
-                                ).text(lang),
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
+                        Text(
+                            text = QrA11yCopy.expectedPayees(alert.expectedMasked, lang),
+                            style = MaterialTheme.typography.bodySmall
+                        )
                     }
                 }
                 if (signal == QrSignal.UNREADABLE_TIMEOUT) {
@@ -369,7 +501,20 @@ private fun ExpectedMerchantPanel(
         }
         state.payees.forEach { payee ->
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Column(modifier = Modifier.weight(1f)) {
+                // One focus stop for the trusted identity, described as the registered id *and*
+                // separately as a name that can be changed. The Remove button stays outside this
+                // merged group so it keeps its own focus stop and its 48 dp target.
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .semantics(mergeDescendants = true) {
+                            contentDescription = QrA11yCopy.expectedPayee(
+                                maskedHandle = payee.maskedHandle,
+                                shownName = payee.displayName,
+                                lang = lang
+                            )
+                        }
+                ) {
                     // Masked only: the full UPI id never reaches the screen.
                     Text(
                         text = payee.maskedHandle,
@@ -642,7 +787,15 @@ private fun ReRegisterPanel(
 @Composable
 private fun CounterPanel(state: QrUiState, lang: QrLanguage, dark: Boolean) {
     val observed = state.lastObserved
-    Panel(tone = RiskTone.NEUTRAL, dark = dark) {
+    Panel(
+        tone = RiskTone.NEUTRAL,
+        dark = dark,
+        modifier = Modifier.semantics(mergeDescendants = true) {
+            // The count is a *state*, announced as one: "2 / 3" alone reads as decoration, and the
+            // panel must also repeat that a QR that cannot be read is not evidence of tampering.
+            stateDescription = QrA11yCopy.mismatchState(state.mismatchProgress, lang)
+        }
+    ) {
         Text(
             text = QrStrings.mismatchCounterLabel.text(lang) + ": " + state.mismatchProgress,
             style = MaterialTheme.typography.bodyLarge
@@ -660,9 +813,10 @@ private fun CounterPanel(state: QrUiState, lang: QrLanguage, dark: Boolean) {
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         if (observed != null) {
-            val verdict = if (observed.matched) "match" else "mismatch"
+            // Words, not a bare "match"/"mismatch": the verdict has to survive translation and a
+            // screen reader, and "differs" must not read like "tampered".
             Text(
-                text = observed.maskedHandle + " (" + verdict + ")",
+                text = observed.maskedHandle + " — " + QrA11yCopy.verdict(observed.matched, lang),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -694,6 +848,7 @@ private fun MandatoryConfirmationBanner(lang: QrLanguage, dark: Boolean) {
 private fun Panel(
     tone: RiskTone,
     dark: Boolean,
+    modifier: Modifier = Modifier,
     content: @Composable ColumnScope.() -> Unit
 ) {
     Surface(
@@ -701,7 +856,7 @@ private fun Panel(
         contentColor = tone.onContainer(dark),
         shape = RoundedCornerShape(TsTokens.CornerLarge),
         border = BorderStroke(1.dp, tone.accent(dark)),
-        modifier = Modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth()
     ) {
         Column(
             modifier = Modifier.padding(TsTokens.SpacingMd),
