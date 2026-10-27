@@ -43,6 +43,7 @@ import ai.trustshield.android.ui.navigation.TrustShieldRouteContent
 import ai.trustshield.android.ui.theme.TrustShieldTheme
 import ai.trustshield.android.ui.history.MetadataCheck
 import ai.trustshield.android.ui.history.MetadataCheckHistory
+import ai.trustshield.android.ui.onboarding.OnboardingScreen
 import java.util.Locale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -116,6 +117,12 @@ class MainActivity : ComponentActivity() {
             var scanState by remember { mutableStateOf(ScanInputState()) }
             var historyStore by remember { mutableStateOf<MetadataCheckHistory?>(null) }
             var historyEntries by remember { mutableStateOf(emptyList<MetadataCheck>()) }
+            var onboardingComplete by remember {
+                mutableStateOf(
+                    getSharedPreferences(ONBOARDING_PREFERENCES, MODE_PRIVATE)
+                        .getBoolean(ONBOARDING_COMPLETE, false)
+                )
+            }
             LaunchedEffect(Unit) {
                 val (store, entries) = withContext(Dispatchers.IO) {
                     MetadataCheckHistory(applicationContext).let { it to it.read() }
@@ -178,7 +185,24 @@ class MainActivity : ComponentActivity() {
                     // The back stack itself is restored by AppNavHost via rememberSaveable, so
                     // process recreation returns the user to the same screen; `requestedEntry` only
                     // matters when nothing was saved, or when a genuinely new intent arrives.
-                    AppNavHost(entry = requestedEntry, entrySequence = entrySequence) { route ->
+                    if (!onboardingComplete) {
+                        OnboardingScreen(
+                            language = preferences.language,
+                            onLanguageChange = { language ->
+                                val updated = preferences.copy(language = language)
+                                preferences = updated
+                                val activeStore = preferenceStore
+                                if (activeStore == null) pendingPreferences = updated
+                                else activeStore.save(updated)
+                            },
+                            onComplete = {
+                                getSharedPreferences(ONBOARDING_PREFERENCES, MODE_PRIVATE).edit()
+                                    .putBoolean(ONBOARDING_COMPLETE, true)
+                                    .apply()
+                                onboardingComplete = true
+                            }
+                        )
+                    } else AppNavHost(entry = requestedEntry, entrySequence = entrySequence) { route ->
                         SideEffect { visibleRoute = route }
                         TrustShieldRouteContent(
                             route = route,
@@ -273,6 +297,8 @@ class MainActivity : ComponentActivity() {
     }
 
     private companion object {
+        const val ONBOARDING_PREFERENCES = "trustshield_onboarding"
+        const val ONBOARDING_COMPLETE = "complete"
         const val STATE_ENTRY_SEQUENCE = "trustshield.entry_sequence"
         const val STATE_VISIBLE_ROUTE = "trustshield.visible_route"
     }
