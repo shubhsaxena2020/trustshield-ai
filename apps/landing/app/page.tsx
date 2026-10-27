@@ -1,21 +1,127 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
+import ShieldHero from "./shield-hero";
 
-const faqs = [
-  ["Does TrustShield guarantee a message is safe?", "No. It looks for signals that may indicate risk and shows why they matter. A low-risk result is not proof that a message, person or payment is safe.", "Kya TrustShield guarantee karta hai ki message safe hai?", "Nahi. Yeh risk ke signals dikhata hai aur batata hai ki woh kyun matter karte hain. Low-risk result ka matlab yeh proof nahi ki message, person ya payment safe hai."],
-  ["Does Android send my message to a server?", "The Android app's local scan path runs on your device. Optional backend enrichment is off by default. Speech recognition may depend on your device and could use a network service.", "Kya Android mera message server ko bhejta hai?", "Android app ka local scan aapke device par chalta hai. Optional backend enrichment default se off hai. Speech recognition aapke device par depend karta hai aur network service use kar sakta hai."],
-  ["What happens when I use the web checker?", "The web checker sends submitted analysis input to its API. Signed-in history may store a summary and result. Avoid submitting sensitive content unless you understand that path.", "Web checker use karne par kya hota hai?", "Web checker bheje gaye input ko apni API par bhejta hai. Sign-in history mein summary aur result save ho sakte hain. Sensitive content bhejne se pehle is data path ko samjhein."],
-  ["Can Call Shield hear the other person on a phone call?", "No. It analyses speech that reaches your microphone while you open and start the feature. Speech recognition availability varies by device and may use a network service.", "Kya Call Shield phone call ke doosre person ko sun sakta hai?", "Nahi. Yeh sirf mic tak pahunchi awaaz check karta hai jab aap feature khol kar khud start karte hain. Speech recognition device ke hisaab se badalta hai aur network service use kar sakta hai."],
-  ["Is the Android app available to download?", "A public release link is not available yet. We will add the verified build details here when it is ready to share.", "Kya Android app download ke liye available hai?", "Abhi public release link available nahi hai. Verified build ready hone par uski details yahan milengi."],
-];
+type Language = "en" | "hi" | "hinglish";
+
+const copy = {
+  en: {
+    nav: ["How it works", "Features", "Plans", "FAQ"], language: "Language", theme: "Theme",
+    eyebrow: "A calmer second opinion", title: <>Pause before<br />you <em>pay.</em></>,
+    intro: "Scam messages are designed to hurry you. TrustShield helps you slow down, see the signals, and choose your next step.",
+    try: "Try it now", download: "Download the app", limited: "Results are guidance, not a guarantee.",
+    proof: ["Scan the message", "Read the evidence", "Verify elsewhere"],
+    featureEyebrow: "A little more clarity", featureTitle: <>See the signal.<br /><em>Keep the choice.</em></>,
+    featureIntro: "One place to pause over messages, calls and QR codes that ask you to act fast.",
+    features: [
+      ["01 · SCAN MESSAGES", "Spot pressure in the words.", "Check text and shared screenshots for urgency, authority claims, secrecy, and requests for money or credentials."],
+      ["02 · CALL SHIELD", "Stay present on a pressured call.", "Start a visible session to review speech your microphone can hear. It cannot capture the other side of a phone call."],
+      ["03 · QR GUARD", "Check before you scan to pay.", "Review the decoded destination and compare a UPI payee with the one you intended. Confirm the final payment in your UPI app."],
+      ["04 · PRIVACY", "Core scans stay on your phone.", "Supported text and QR checks run locally in the Android app. Optional speech recognition or enrichment can depend on device settings."]
+    ],
+    howEyebrow: "A simple pause", howTitle: <>From “urgent”<br />to <em>understood.</em></>, howIntro: "TrustShield organises the evidence. The decision stays with you.",
+    steps: [["01", "Bring it in", "Paste a message, share a screenshot, or point the camera at a QR code."], ["02", "Read the evidence", "See the exact words and signals that prompted the risk indicator."], ["03", "Verify elsewhere", "Contact the organisation using a number you already trust." ]],
+    evidence: "EXACT QUOTE", risk: "RISK INDICATOR", high: "More signals", quote: "“Your account will close today. Verify now to keep access.”", signal: "Urgency + credential request",
+    privacyEyebrow: "Privacy, in plain language", privacyTitle: <>Know where<br /><em>the check happens.</em></>, privacyCopy: "Core text and QR scans in the Android app run on-device. The web checker sends submitted input to its API, and signed-in history may save scan metadata and results. Avoid sending sensitive content to the web checker.",
+    plansEyebrow: "Plans", plansTitle: <>Free today.<br /><em>Clear about tomorrow.</em></>, plansIntro: "No made-up launch dates or prices. Planned tiers are not available yet.",
+    plans: [["AVAILABLE", "Individuals", "Free", "For personal use with the current checker."], ["PLANNED", "Family", "Coming later", "Shared protection tools and family setup."], ["PLANNED", "Shop", "Coming later", "Simple checks for small shops and payment counters."], ["PLANNED", "Business", "Coming later", "Team controls and organisation support."]],
+    roadmapEyebrow: "On the roadmap", roadmapTitle: <>Useful next steps,<br /><em>clearly labelled.</em></>, roadmapCopy: "These are plans, not current features.", roadmapItem: "Chrome extension", roadmapDesc: "A browser companion for checking suspicious links and messages. Planned; no release date set.",
+    teamEyebrow: "The people building it", teamTitle: "Built with care.", team: [["Shubh Saxena", "Team leader"], ["Sugandhi Agrawal", "Team"], ["Varchasva Pratap Singh", "Team"], ["Vaishnavi Shukla", "Team"], ["Stuti Jha", "Team"]],
+    faqEyebrow: "FAQ", faqTitle: <>Questions before<br /><em>you try it?</em></>, faqs: [
+      ["Does TrustShield guarantee a message is safe?", "No. It highlights patterns that may indicate risk. A low-risk result is not proof that a message, person or payment is safe."],
+      ["Does the Android app send every scan to a server?", "The core supported text and QR checks run locally. Optional speech recognition and enrichment can depend on device settings."],
+      ["What happens in the web checker?", "Submitted input is sent to the API. Signed-in history can store scan type and result metadata. Avoid submitting sensitive content."],
+      ["Can Call Shield hear the other person on a phone call?", "No. It reviews speech that reaches your microphone while you open and start the feature."],
+      ["Can I download the Android app today?", "The public APK is not published yet. The download page shows the verified release details when an APK is available."]
+    ],
+    downloadEyebrow: "Android app", downloadTitle: <>Your next check,<br /><em>one tap away.</em></>, downloadCopy: "See the install steps and release details. We will only show a download when a verified APK is published.",
+    footer: "A second opinion, not a guarantee.", privacyLink: "Privacy notice", downloadLink: "Download details", backTop: "Back to top", dark: "Dark", light: "Light"
+  },
+  hinglish: {
+    nav: ["Kaise kaam karta hai", "Features", "Plans", "FAQ"], language: "Bhasha", theme: "Theme",
+    eyebrow: "Ek shaant second opinion", title: <>Payment se pehle<br /><em>ruk kar dekho.</em></>,
+    intro: "Scam messages aapko jaldi karne par majboor karte hain. TrustShield signals dikhata hai, taaki aap soch kar agla step lein.",
+    try: "Abhi try karein", download: "App download karein", limited: "Result guidance hai, guarantee nahi.",
+    proof: ["Message scan karein", "Evidence padhein", "Alag se verify karein"],
+    featureEyebrow: "Thodi aur clarity", featureTitle: <>Signal samjhein.<br /><em>Faisla aapka.</em></>,
+    featureIntro: "Jaldi karne ko kehne wale messages, calls aur QR codes par rukne ki ek jagah.",
+    features: [
+      ["01 · MESSAGE SCAN", "Words mein pressure dekhein.", "Text ya screenshot mein urgency, authority claims, secrecy, paise ya credentials ki maang check karein."],
+      ["02 · CALL SHIELD", "Pressure wali call mein alert rahein.", "Mic tak aane wali speech review karne ke liye session khud start karein. Yeh phone call ke doosre side ko capture nahi karta."],
+      ["03 · QR GUARD", "Payment scan se pehle check karein.", "Decoded destination dekhein aur UPI payee ko apne intended payee se milayein. Payment UPI app mein confirm karein."],
+      ["04 · PRIVACY", "Core scans aapke phone par rehte hain.", "Android app mein supported text aur QR checks device par chalte hain. Optional speech recognition settings par depend kar sakta hai."]
+    ],
+    howEyebrow: "Ek chhota pause", howTitle: <>“Urgent” se<br /><em>samajh tak.</em></>, howIntro: "TrustShield evidence samajhne mein madad karta hai. Faisla aapka hai.",
+    steps: [["01", "Yahan laayein", "Message paste karein, screenshot share karein, ya QR par camera rakhein."], ["02", "Evidence padhein", "Exact words aur signals dekhein jinke chalte risk indicator dikha."], ["03", "Alag se verify karein", "Organisation ko us number par contact karein jise aap pehle se trust karte hain."]],
+    evidence: "EXACT QUOTE", risk: "RISK INDICATOR", high: "Zyada signals", quote: "“Aaj aapka account band ho jayega. Access ke liye abhi verify karein.”", signal: "Urgency + credentials ki maang",
+    privacyEyebrow: "Privacy, saaf shabdon mein", privacyTitle: <>Samjhein check<br /><em>kahan hota hai.</em></>, privacyCopy: "Android app mein core text aur QR scans device par chalte hain. Web checker input ko API par bhejta hai aur login history mein scan type aur result metadata save ho sakta hai. Sensitive content web checker par na bhejein.",
+    plansEyebrow: "Plans", plansTitle: <>Aaj free.<br /><em>Kal ke baare mein saaf.</em></>, plansIntro: "Koi banayi hui launch date ya price nahi. Planned tiers abhi available nahi hain.",
+    plans: [["AVAILABLE", "Individuals", "Free", "Current checker ke saath personal use."], ["PLANNED", "Family", "Baad mein", "Shared protection tools aur family setup."], ["PLANNED", "Shop", "Baad mein", "Chhoti dukaan aur payment counter ke liye checks."], ["PLANNED", "Business", "Baad mein", "Team controls aur organisation support."]],
+    roadmapEyebrow: "Roadmap par", roadmapTitle: <>Agla useful step,<br /><em>saaf label ke saath.</em></>, roadmapCopy: "Yeh plans hain, abhi ke features nahi.", roadmapItem: "Chrome extension", roadmapDesc: "Suspicious links aur messages check karne ke liye browser companion. Planned; release date tay nahi.",
+    teamEyebrow: "Banane wali team", teamTitle: "Soch samajh kar bana rahe hain.", team: [["Shubh Saxena", "Team leader"], ["Sugandhi Agrawal", "Team"], ["Varchasva Pratap Singh", "Team"], ["Vaishnavi Shukla", "Team"], ["Stuti Jha", "Team"]],
+    faqEyebrow: "FAQ", faqTitle: <>Try karne se pehle<br /><em>koi sawaal?</em></>, faqs: [
+      ["Kya TrustShield message safe hone ki guarantee deta hai?", "Nahi. Yeh risk ke patterns dikhata hai. Low-risk ka matlab yeh proof nahi ki message, person ya payment safe hai."],
+      ["Kya Android app har scan server par bhejta hai?", "Core supported text aur QR checks device par hote hain. Optional speech recognition aur enrichment settings par depend kar sakta hai."],
+      ["Web checker mein kya hota hai?", "Input API ko bheja jata hai. Login history scan type aur result metadata rakh sakti hai. Sensitive content submit na karein."],
+      ["Kya Call Shield phone call ke doosre person ko sun sakta hai?", "Nahi. Feature khol kar start karne par yeh sirf mic tak pahunchi speech review karta hai."],
+      ["Kya Android app ab download kar sakte hain?", "Public APK abhi publish nahi hua. Verified APK available hote hi download page par details dikhengi."]
+    ],
+    downloadEyebrow: "Android app", downloadTitle: <>Agla check,<br /><em>ek tap door.</em></>, downloadCopy: "Install steps aur release details dekhein. Verified APK publish hone par hi download dikhayenge.",
+    footer: "Second opinion, guarantee nahi.", privacyLink: "Privacy notice", downloadLink: "Download details", backTop: "Upar jaayein", dark: "Dark", light: "Light"
+  },
+  hi: {
+    nav: ["कैसे काम करता है", "फ़ीचर्स", "योजनाएँ", "सवाल"], language: "भाषा", theme: "थीम",
+    eyebrow: "एक शांत दूसरी राय", title: <>भुगतान से पहले<br /><em>रुककर सोचें।</em></>,
+    intro: "धोखाधड़ी वाले संदेश जल्दबाज़ी कराते हैं। TrustShield संकेत दिखाता है, ताकि आप सोचकर अगला कदम चुनें।",
+    try: "अभी आज़माएँ", download: "ऐप डाउनलोड करें", limited: "नतीजा केवल मार्गदर्शन है, गारंटी नहीं।",
+    proof: ["संदेश जाँचें", "सबूत पढ़ें", "अलग से पुष्टि करें"],
+    featureEyebrow: "थोड़ी और स्पष्टता", featureTitle: <>संकेत समझें।<br /><em>फ़ैसला आपका।</em></>,
+    featureIntro: "जल्दबाज़ी कराने वाले संदेशों, कॉल और QR कोड पर सोचने की एक जगह।",
+    features: [
+      ["01 · संदेश जाँच", "शब्दों में दबाव पहचानें।", "टेक्स्ट या स्क्रीनशॉट में जल्दबाज़ी, अधिकार का दावा, गोपनीयता और पैसे या जानकारी की माँग जाँचें।"],
+      ["02 · कॉल शील्ड", "दबाव वाली कॉल में सतर्क रहें।", "माइक तक पहुँची आवाज़ देखने के लिए सत्र स्वयं शुरू करें। यह फ़ोन कॉल के दूसरे व्यक्ति को रिकॉर्ड नहीं करता।"],
+      ["03 · QR गार्ड", "भुगतान से पहले जाँचें।", "डिकोड किया गया पता देखें और UPI पाने वाले की पुष्टि अपने ऐप में करें।"],
+      ["04 · गोपनीयता", "मुख्य जाँच आपके फ़ोन पर रहती है।", "Android ऐप में समर्थित टेक्स्ट और QR जाँच डिवाइस पर होती है। वैकल्पिक speech recognition सेटिंग पर निर्भर हो सकती है।"]
+    ],
+    howEyebrow: "एक छोटा विराम", howTitle: <>“ज़रूरी” से<br /><em>समझ तक।</em></>, howIntro: "TrustShield सबूत समझने में मदद करता है। निर्णय आपका है।",
+    steps: [["01", "यहाँ लाएँ", "संदेश चिपकाएँ, स्क्रीनशॉट साझा करें या कैमरा QR पर रखें।"], ["02", "सबूत पढ़ें", "वे सटीक शब्द और संकेत देखें जिनसे जोखिम सूचक दिखा।"], ["03", "अलग से पुष्टि करें", "पहले से भरोसेमंद नंबर पर संस्था से संपर्क करें।"]],
+    evidence: "सटीक उद्धरण", risk: "जोखिम संकेतक", high: "अधिक संकेत", quote: "“आज आपका खाता बंद हो जाएगा। पहुँच बनाए रखने के लिए अभी पुष्टि करें।”", signal: "जल्दबाज़ी + जानकारी की माँग",
+    privacyEyebrow: "गोपनीयता, साफ़ शब्दों में", privacyTitle: <>जानें जाँच<br /><em>कहाँ होती है।</em></>, privacyCopy: "Android ऐप की मुख्य टेक्स्ट और QR जाँच डिवाइस पर होती है। वेब checker भेजा गया input API को भेजता है और लॉगिन history में scan का प्रकार व नतीजे का metadata रह सकता है। वेब checker पर संवेदनशील जानकारी न भेजें।",
+    plansEyebrow: "योजनाएँ", plansTitle: <>आज मुफ़्त।<br /><em>आगे की बात साफ़।</em></>, plansIntro: "कोई काल्पनिक तारीख़ या कीमत नहीं। योजनाएँ अभी उपलब्ध नहीं हैं।",
+    plans: [["उपलब्ध", "व्यक्तिगत", "मुफ़्त", "मौजूदा checker का निजी उपयोग।"], ["योजना", "परिवार", "बाद में", "साझा सुरक्षा और परिवार सेटअप।"], ["योजना", "दुकान", "बाद में", "छोटी दुकानों और payment counter के लिए।"], ["योजना", "व्यवसाय", "बाद में", "टीम नियंत्रण और संगठन सहायता।"]],
+    roadmapEyebrow: "आगे की योजना", roadmapTitle: <>अगले उपयोगी कदम,<br /><em>साफ़ तौर पर।</em></>, roadmapCopy: "ये योजनाएँ हैं, अभी के फ़ीचर नहीं।", roadmapItem: "Chrome extension", roadmapDesc: "संदिग्ध link और message जाँचने के लिए browser साथी। योजना में है; तारीख़ तय नहीं।",
+    teamEyebrow: "इसे बनाने वाली टीम", teamTitle: "ध्यान से बनाया गया।", team: [["Shubh Saxena", "टीम लीडर"], ["Sugandhi Agrawal", "टीम"], ["Varchasva Pratap Singh", "टीम"], ["Vaishnavi Shukla", "टीम"], ["Stuti Jha", "टीम"]],
+    faqEyebrow: "सवाल-जवाब", faqTitle: <>आज़माने से पहले<br /><em>कुछ पूछना है?</em></>, faqs: [
+      ["क्या TrustShield संदेश सुरक्षित होने की गारंटी देता है?", "नहीं। यह जोखिम के संकेत दिखाता है। कम जोखिम का नतीजा सुरक्षा का प्रमाण नहीं है।"],
+      ["क्या Android ऐप हर जाँच सर्वर पर भेजता है?", "मुख्य समर्थित टेक्स्ट और QR जाँच डिवाइस पर होती है। वैकल्पिक speech recognition सेटिंग पर निर्भर हो सकती है।"],
+      ["वेब checker में क्या होता है?", "भेजा गया input API को जाता है। लॉगिन history scan प्रकार और नतीजे का metadata रख सकती है। संवेदनशील जानकारी न भेजें।"],
+      ["क्या Call Shield फ़ोन कॉल के दूसरे व्यक्ति को सुन सकता है?", "नहीं। फ़ीचर शुरू करने पर यह केवल माइक तक पहुँची आवाज़ की समीक्षा करता है।"],
+      ["क्या Android ऐप अभी डाउनलोड कर सकते हैं?", "सार्वजनिक APK अभी उपलब्ध नहीं है। सत्यापित APK मिलने पर विवरण download पेज पर दिखेंगे।"]
+    ],
+    downloadEyebrow: "Android ऐप", downloadTitle: <>आपकी अगली जाँच,<br /><em>बस एक टैप दूर।</em></>, downloadCopy: "इंस्टॉल करने के चरण और release विवरण देखें। सत्यापित APK प्रकाशित होने पर ही डाउनलोड मिलेगा।",
+    footer: "दूसरी राय, गारंटी नहीं।", privacyLink: "गोपनीयता सूचना", downloadLink: "डाउनलोड विवरण", backTop: "ऊपर जाएँ", dark: "डार्क", light: "लाइट"
+  }
+} as const;
+
+const teamInitials = ["SS", "SA", "VP", "VS", "SJ"];
+
+function Reveal({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return <div className={`reveal ${className}`}>{children}</div>;
+}
 
 export default function Home() {
+  const [language, setLanguage] = useState<Language>("en");
   const [dark, setDark] = useState(false);
-  const [language, setLanguage] = useState<"en" | "hinglish">("en");
-  const t = (english: string, hinglish: string) => language === "en" ? english : hinglish;
+  const t = copy[language];
   useEffect(() => {
+    const nodes = document.querySelectorAll(".reveal");
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      nodes.forEach((node) => node.classList.add("in-view"));
+      return;
+    }
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
@@ -24,62 +130,73 @@ export default function Home() {
         }
       });
     }, { threshold: 0.12 });
-    document.querySelectorAll(".reveal").forEach((node) => observer.observe(node));
-    return () => observer.disconnect();
+    document.documentElement.classList.add("reveal-ready");
+    nodes.forEach((node) => observer.observe(node));
+    return () => {
+      observer.disconnect();
+      document.documentElement.classList.remove("reveal-ready");
+    };
   }, []);
+  useEffect(() => {
+    document.documentElement.lang = language === "hi" ? "hi" : "en";
+  }, [language]);
+  const chooseLanguage = (next: Language) => {
+    setLanguage(next);
+  };
 
   return (
-    <main className={dark ? "site dark" : "site"}>
+    <main className={dark ? "site dark" : "site"} id="top">
       <header className="nav wrap">
-        <a className="brand" href="#top" aria-label="TrustShield AI home"><Image src="/logo.png" alt="TrustShield AI" width={172} height={44} priority /></a>
-        <nav aria-label={t("Main navigation", "Main navigation")}><a href="#features">{t("What it checks", "Yeh kya check karta hai")}</a><a href="#how">{t("How it works", "Kaise kaam karta hai")}</a><a href="#pricing">{t("Plans", "Plans")}</a></nav>
-        <label className="language-toggle"><span>{t("Language", "Bhasha")}</span><select value={language} onChange={(event) => setLanguage(event.target.value as "en" | "hinglish")} aria-label={t("Choose language", "Bhasha chunein")}><option value="en">English</option><option value="hinglish">Hinglish</option></select></label>
-        <button className="theme-toggle" onClick={() => setDark(!dark)} aria-label={`Switch to ${dark ? "light" : "dark"} theme`}>{dark ? "☼" : "☾"}<span>{dark ? "Light" : "Dark"}</span></button>
+        <Link className="brand" href="#top" aria-label="TrustShield AI home"><Image src="/logo.png" alt="TrustShield AI" width={176} height={45} priority /></Link>
+        <nav aria-label="Main navigation">{t.nav.map((label, i) => <a key={label} href={["#how", "#features", "#pricing", "#faq"][i]}>{label}</a>)}</nav>
+        <div className="nav-actions">
+          <label className="language-toggle"><span className="sr-only">{t.language}</span><select value={language} onChange={(event) => chooseLanguage(event.target.value as Language)} aria-label={t.language}><option value="en">EN</option><option value="hinglish">Hinglish</option><option value="hi">हि</option></select></label>
+          <button className="theme-toggle" onClick={() => setDark(!dark)} aria-label={`${t.theme}: ${dark ? t.light : t.dark}`}>{dark ? "☼" : "◐"}<span>{dark ? t.light : t.dark}</span></button>
+        </div>
       </header>
 
-      <section className="hero wrap" id="top">
-        <div className="hero-copy reveal">
-          <p className="eyebrow"><span className="status-dot" /> {t("A calmer second opinion", "Ek shaant second opinion")}</p>
-          <h1>{language === "en" ? <>Pause before<br />you <em>pay.</em></> : <>Payment se pehle<br /><em>ruk kar dekho.</em></>}</h1>
-          <p className="lede">{t("A message can look official and still ask for the wrong thing. Check the signals, read the evidence, then choose your next step.", "Message official lag sakta hai, phir bhi galat cheez maang sakta hai. Signals dekho, evidence samjho, phir agla step chuno.")}</p>
-          <div className="hero-actions"><a className="button primary" href="https://trustshield-ai-ecru.vercel.app" target="_blank" rel="noreferrer">{t("Try it now", "Abhi try karein")} <span>↗</span></a><a className="button secondary" href="#download">{t("Download the app", "App download karein")} <span>↓</span></a></div>
-          <p className="microcopy">{t("Android release link coming soon · Results are guidance, not a guarantee", "Android release link jald aayega · Result sirf guidance hai, guarantee nahi")}</p>
+      <section className="hero wrap">
+        <Reveal className="hero-copy">
+          <p className="eyebrow"><span className="status-dot" />{t.eyebrow}</p>
+          <h1>{t.title}</h1>
+          <p className="lede">{t.intro}</p>
+          <div className="hero-actions"><a className="button primary" href="https://trustshield-ai-ecru.vercel.app/login">{t.try}<span aria-hidden="true">↗</span></a><Link className="button secondary" href="/download">{t.download}<span aria-hidden="true">↓</span></Link></div>
+          <p className="microcopy">{t.limited}</p>
+          <div className="proof-row">{t.proof.map((label, i) => <span key={label}><b>0{i + 1}</b>{label}</span>)}</div>
+        </Reveal>
+        <div className="hero-art">
+          <div className="hero-glow" />
+          <ShieldHero />
+          <div className="hero-chip chip-top"><span className="chip-icon">↗</span><span>secure-bank.help<small>{language === "hi" ? "लिंक नहीं खोला गया" : language === "hinglish" ? "link open nahi hua" : "Link not opened"}</small></span></div>
+          <div className="hero-chip chip-bottom"><span className="chip-icon warning">!</span><span>{t.signal}<small>{language === "hi" ? "ठीक उद्धरण के साथ" : language === "hinglish" ? "exact quote ke saath" : "With an exact quote"}</small></span></div>
         </div>
-        <div className="hero-art" aria-label="Illustration of a message being checked for warning signs">
-          <div className="orbit orbit-one" /><div className="orbit orbit-two" />
-          <div className="phone-scene"><div className="phone-frame"><div className="phone-speaker" /><div className="phone-head"><Image src="/logo-icon.png" alt="" width={34} height={34} /><span>TrustShield check</span><b>•••</b></div><div className="message-card"><small>MESSAGE PREVIEW</small><p>“Your account will close today. Verify now to keep access.”</p><div className="message-link">secure-bank.help <span>↗</span></div></div><div className="scan-line" /><div className="evidence"><span className="evidence-icon">!</span><div><b>Urgency + credential request</b><small>Two signals found in this message</small></div><span className="evidence-arrow">↗</span></div><div className="risk"><div><small>RISK INDICATOR</small><strong>High signal</strong></div><div className="risk-meter"><i /><i /><i /><i /><i /><i /></div></div><div className="phone-foot">A signal to pause and verify</div></div></div>
-          <div className="float-note note-a"><span>↗</span> Link shown as text</div><div className="float-note note-b"><i /> Evidence, not a verdict</div>
-        </div>
-        <div className="hero-bottom"><span>{t("Built for the moment before you tap", "Tap karne se pehle rukne ke liye")}</span><span className="hero-rule" /><span>{t("Hinglish · Hindi · English", "Hinglish · Hindi · English")}</span></div>
       </section>
 
-      <section className="trust-strip"><div className="wrap strip-inner"><span>{t("LOOK FOR THE ASK", "Kya maanga ja raha hai dekho")}</span><span>{t("READ THE REASON", "Reason samjho")}</span><span>{t("VERIFY OUTSIDE THE MESSAGE", "Message ke bahar verify karo")}</span></div></section>
+      <section className="ticker" aria-label="TrustShield principles"><div className="wrap ticker-inner">{t.proof.map((label, i) => <span key={label}><i>✳</i> 0{i + 1} &nbsp; {label}</span>)}</div></section>
 
       <section className="section wrap" id="features">
-        <div className="section-heading reveal"><p className="eyebrow">{t("What you can check", "Aap kya check kar sakte hain")}</p><h2>{language === "en" ? <>Small signals.<br /><em>Clearer choices.</em></> : <>Chhote signals.<br /><em>Saaf choices.</em></>}</h2><p>{t("One place to pause over the things that arrive in a hurry.", "Jaldi mein aaye message par ruk kar sochne ki ek jagah.")}</p></div>
-        <div className="feature-grid">
-          <article className="feature-card feature-wide reveal"><div className="feature-copy"><span className="feature-index">01 / {t("MESSAGE", "MESSAGE")}</span><h3>{language === "en" ? <>Spot the pressure<br />in the words.</> : <>Words mein chhupa<br /><em>pressure dekho.</em></>}</h3><p>{t("Check pasted text and shared screenshots for urgency, authority claims, secrecy and requests for money or credentials.", "Paste kiye text aur screenshot mein jaldi, authority ka daawa, secrecy, paise ya credentials ki maang dekho.")}</p><a href="#how">{t("See the steps", "Steps dekhein")} <span>↗</span></a></div><div className="feature-graphic text-graphic"><div className="quote-line">“Your account closes <mark>{t("in 10 minutes", "10 minute mein")}</mark>.”</div><div className="signal-label"><i /> {t("Urgency signal", "Jaldi ka signal")}</div><div className="quote-line second">“Share the <mark>OTP {t("now", "abhi")}</mark> to cancel.”</div><div className="signal-label"><i /> {t("Credential request", "Credential ki maang")}</div></div></article>
-          <article className="feature-card reveal"><span className="feature-index">02 / LINK</span><div className="mini-icon link-icon">↗</div><h3>{language === "en" ? <>Inspect the link.<br />Don’t open it.</> : <>Link ko dekho.<br />Open mat karo.</>}</h3><p>{t("Static checks look at the address itself. The checker does not visit the destination just to analyse it.", "Static check sirf address dekhta hai. Analysis ke liye checker link open nahi karta.")}</p><div className="url-pill">bank-help.example <span>{t("not opened", "open nahi hua")}</span></div></article>
-          <article className="feature-card reveal"><span className="feature-index">03 / QR</span><div className="mini-icon qr-icon">▦</div><h3>{language === "en" ? <>Check before<br />you scan to pay.</> : <>Pay scan karne se<br />pehle check karo.</>}</h3><p>{t("Compare a decoded UPI payee with the payee you registered. A QR label alone does not confirm who gets paid.", "Decoded UPI payee ko apne registered payee se milao. QR label akela yeh confirm nahi karta ki paise kisko milenge.")}</p><div className="qr-row"><span className="qr-sample">▦</span><span>{t("Payee check", "Payee check")}<br /><b>{t("Confirm in your UPI app", "UPI app mein confirm karo")}</b></span></div></article>
-          <article className="feature-card feature-call reveal"><span className="feature-index">04 / CALL SHIELD</span><div className="mini-icon mic-icon">◖</div><h3>{language === "en" ? <>Stay present<br />during a pressured call.</> : <>Pressure wali call mein<br />dhyaan se suno.</>}</h3><p>{t("Start a visible microphone session to review audible speech. It does not capture the other side of a phone call.", "Mic se sunai dene wali awaaz review karne ke liye session khud start karo. Yeh phone call ke doosre side ki awaaz capture nahi karta.")}</p><span className="call-caption">{t("You start it. You can stop it.", "Aap shuru karein. Aap rok sakte hain.")}</span></article>
-        </div>
+        <Reveal className="section-heading"><p className="eyebrow">{t.featureEyebrow}</p><h2>{t.featureTitle}</h2><p>{t.featureIntro}</p></Reveal>
+        <div className="feature-grid">{t.features.map((item, i) => <Reveal className={`feature-card feature-${i + 1}`} key={item[0]}><span className="feature-index">{item[0]}</span><div className="feature-symbol">{["⌕", "◉", "▦", "⌂"][i]}</div><h3>{item[1]}</h3><p>{item[2]}</p>{i === 0 && <div className="quote-demo"><span>{t.evidence}</span><p>{t.quote}</p><b>↳ &nbsp;{t.signal}</b></div>}</Reveal>)}</div>
       </section>
 
-      <section className="how-section" id="how"><div className="wrap how-wrap"><div className="section-heading reveal"><p className="eyebrow">{t("A simple pause", "Ek chhota sa pause")}</p><h2>{language === "en" ? <>From “urgent”<br />to <em>understood.</em></> : <>“Urgent” se<br /><em>samajh tak.</em></>}</h2><p>{t("TrustShield helps organise the evidence. The decision stays with you.", "TrustShield evidence samajhne mein madad karta hai. Faisla aapka hai.")}</p></div><div className="steps"><article className="step reveal"><span className="step-number">01</span><div><h3>{t("Bring it in", "Yahan laayein")}</h3><p>{t("Paste a message, share a screenshot, or point the camera at a QR code.", "Message paste karein, screenshot share karein, ya camera QR code par rakhein.")}</p></div><span className="step-line" /></article><article className="step reveal"><span className="step-number">02</span><div><h3>{t("Review the signals", "Signals dekhein")}</h3><p>{t("See the patterns the checker found, with the evidence that triggered them.", "Checker ko mile patterns aur unke peeche ka evidence dekhein.")}</p></div><span className="step-line" /></article><article className="step reveal"><span className="step-number">03</span><div><h3>{t("Verify elsewhere", "Alag se verify karein")}</h3><p>{t("Call the organisation using a number you already trust. Never use contact details from the suspicious message.", "Organisation ko us number par call karein jo aap pehle se trust karte hain. Suspicious message ke contact details use na karein.")}</p></div><span className="step-line" /></article></div></div></section>
+      <section className="how-section" id="how"><div className="wrap how-wrap">
+        <Reveal className="section-heading"><p className="eyebrow">{t.howEyebrow}</p><h2>{t.howTitle}</h2><p>{t.howIntro}</p><div className="risk-demo"><div><span>{t.risk}</span><strong>{t.high}</strong></div><div className="risk-bars"><i /><i /><i /><i /><i /><i /></div><small>{t.signal}</small></div></Reveal>
+        <div className="steps">{t.steps.map(([number, title, desc]) => <Reveal className="step" key={number}><span className="step-number">{number}</span><div><h3>{title}</h3><p>{desc}</p></div><span className="step-rule" /></Reveal>)}</div>
+      </div></section>
 
-      <section className="privacy-section wrap" id="privacy"><div className="privacy-panel reveal"><div className="privacy-mark"><span>◌</span><span>{t("DEVICE / SERVER", "DEVICE / SERVER")}</span></div><div><p className="eyebrow">{t("Privacy, without the blanket claim", "Privacy ke baare mein saaf baat")}</p><h2>{language === "en" ? <>Know where<br /><em>the check happens.</em></> : <>Samjhein check<br /><em>kahan hota hai.</em></>}</h2><p className="privacy-copy">{t("Android’s local scan path analyses supported text and QR inputs on your device. Optional backend enrichment is off by default. Some speech recognisers may use a network service depending on device capability.", "Android ka local scan supported text aur QR ko device par check karta hai. Optional backend enrichment default se off hai. Kuch speech recogniser device ke hisaab se network service use kar sakte hain.")}</p><p className="privacy-copy">{t("The web checker sends submitted input to its API. Signed-in web history may save a summary and result. Avoid submitting sensitive content unless you understand that path.", "Web checker bheje gaye input ko API par bhejta hai. Sign-in history mein summary aur result save ho sakte hain. Sensitive content bhejne se pehle data path samjhein.")}</p></div></div></section>
+      <section className="privacy-section wrap" id="privacy"><Reveal className="privacy-panel"><div className="privacy-stamp"><Image src="/logo-icon.png" alt="" width={54} height={54} /><span>LOCAL FIRST</span></div><div><p className="eyebrow">{t.privacyEyebrow}</p><h2>{t.privacyTitle}</h2><p>{t.privacyCopy}</p><Link href="/download" className="text-link">{t.downloadLink} <span>↗</span></Link></div></Reveal></section>
 
-      <section className="roadmap-section" id="roadmap"><div className="wrap roadmap-wrap"><div className="section-heading reveal"><p className="eyebrow">{t("In progress", "Kaam jaari hai")}</p><h2>{language === "en" ? <>Built in the<br /><em>open, step by step.</em></> : <>Khule taur par<br /><em>step by step.</em></>}</h2><p>{t("Roadmap items are plans, not current capabilities.", "Roadmap ke items plans hain, abhi available features nahi.")}</p></div><div className="roadmap-list"><div className="roadmap-item current"><span className="roadmap-dot" /><div><small>{t("NOW · IN DEVELOPMENT", "ABHI · BAN RAHA HAI")}</small><h3>{t("Android scan and evidence flows", "Android scan aur evidence flows")}</h3><p>{t("Building out the core checks, local analysis and clear limits.", "Core checks, local analysis aur unki limits par kaam jaari hai.")}</p></div></div><div className="roadmap-item"><span className="roadmap-dot" /><div><small>{t("PLANNED", "PLANNED")}</small><h3>{t("Language coverage and accessibility", "Language aur accessibility improvements")}</h3><p>{t("More complete Hindi and Hinglish experiences across the app.", "App mein Hindi aur Hinglish experience ko aur behtar banana.")}</p></div></div><div className="roadmap-item"><span className="roadmap-dot" /><div><small>{t("PLANNED · SUBJECT TO REVIEW", "PLANNED · REVIEW KE BAAD")}</small><h3>{t("Release and maintenance", "Release aur maintenance")}</h3><p>{t("Release channel, support process and update cadence to be confirmed.", "Release channel, support aur update schedule confirm hona baaki hai.")}</p></div></div><p className="inspiration-todo">{t("Design research source TODO: add the owner’s friend’s GitHub URL when provided.", "Design research source TODO: owner ke friend ka GitHub URL milne par add karna hai.")}</p></div></div></section>
+      <section className="plans-section" id="pricing"><div className="wrap"><Reveal className="section-heading"><p className="eyebrow">{t.plansEyebrow}</p><h2>{t.plansTitle}</h2><p>{t.plansIntro}</p></Reveal><div className="plans">{t.plans.map(([status, name, price, desc], i) => <Reveal className={`plan-card ${i === 0 ? "plan-current" : ""}`} key={name}><span className="plan-status">{status}</span><h3>{name}</h3><p className="plan-price">{price}</p><p className="plan-description">{desc}</p>{i === 0 && <a href="https://trustshield-ai-ecru.vercel.app/login" className="text-link">{t.try} ↗</a>}</Reveal>)}</div></div></section>
 
-      <section className="plans-section wrap" id="pricing"><div className="section-heading center reveal"><p className="eyebrow">{t("Plans", "Plans")}</p><h2>{language === "en" ? <>Honest about <em>what’s next.</em></> : <>Aage kya hai, us par <em>saaf baat.</em></>}</h2><p>{t("Free for individuals. Family, Shop and Business are planned tiers; pricing and features are not set.", "Individuals ke liye Free. Family, Shop aur Business planned tiers hain; price aur features abhi tay nahi.")}</p></div><div className="plans"><article className="plan-card reveal"><small>{t("AVAILABLE", "AVAILABLE")}</small><h3>{t("Individuals", "Individuals")}</h3><p className="plan-price">{t("Free", "Free")} <span>{t("for individuals", "individuals ke liye")}</span></p><p>{t("Individual access to the current web checker, subject to service availability and limits.", "Current web checker ka individual access, service availability aur limits ke hisaab se.")}</p><span className="plan-tag">{t("No paid plan available", "Abhi paid plan nahi")}</span></article><article className="plan-card plan-featured reveal"><small>{t("PLANNED · NOT FOR SALE", "PLANNED · SALE KE LIYE NAHI")}</small><h3>Family</h3><p className="plan-price">TBD <span>{t("pricing not set", "price tay nahi")}</span></p><p>{t("Proposed family tier. Features, privacy terms and launch timing are not set.", "Proposed family tier. Features, privacy terms aur launch timing tay nahi.")}</p><span className="plan-tag">{t("Roadmap concept", "Roadmap concept")}</span></article><article className="plan-card reveal"><small>{t("PLANNED · NOT FOR SALE", "PLANNED · SALE KE LIYE NAHI")}</small><h3>Shop</h3><p className="plan-price">TBD <span>{t("pricing not set", "price tay nahi")}</span></p><p>{t("Proposed small-shop tier. Features, privacy terms and launch timing are not set.", "Proposed small-shop tier. Features, privacy terms aur launch timing tay nahi.")}</p><span className="plan-tag">{t("Roadmap concept", "Roadmap concept")}</span></article><article className="plan-card reveal"><small>{t("PLANNED · NOT FOR SALE", "PLANNED · SALE KE LIYE NAHI")}</small><h3>Business</h3><p className="plan-price">TBD <span>{t("pricing not set", "price tay nahi")}</span></p><p>{t("Proposed business tier. Features, privacy terms and launch timing are not set.", "Proposed business tier. Features, privacy terms aur launch timing tay nahi.")}</p><span className="plan-tag">{t("Roadmap concept", "Roadmap concept")}</span></article></div></section>
+      <section className="roadmap-section"><div className="wrap roadmap-wrap"><Reveal className="section-heading"><p className="eyebrow">{t.roadmapEyebrow}</p><h2>{t.roadmapTitle}</h2><p>{t.roadmapCopy}</p></Reveal><Reveal className="roadmap-card"><span className="roadmap-label">PLANNED · NO DATE SET</span><div className="roadmap-icon">⌘</div><h3>{t.roadmapItem}</h3><p>{t.roadmapDesc}</p></Reveal></div></section>
 
-      <section className="team-section"><div className="wrap team-wrap"><div><p className="eyebrow">{t("The people behind it", "Iske peeche ki team")}</p><h2>{language === "en" ? <>Made with care.<br /><em>Names coming soon.</em></> : <>Soch samajh kar bana rahe hain.<br /><em>Names jald aayenge.</em></>}</h2></div><p>{t("Team names and roles will be added when confirmed by the owner. We won’t invent credentials or affiliations to fill the space.", "Team ke names aur roles owner se confirm hone ke baad add honge. Hum credentials ya affiliations khud se nahi banayenge.")}</p><span className="team-todo">{t("TODO · OWNER TO PROVIDE APPROVED NAMES + ROLES", "TODO · OWNER APPROVED NAMES + ROLES DEIN")}</span></div></section>
+      <section className="team-section wrap"><Reveal className="section-heading"><p className="eyebrow">{t.teamEyebrow}</p><h2>{t.teamTitle}</h2></Reveal><div className="team-grid">{t.team.map(([name, role], i) => <Reveal className="team-card" key={name}><span className={`avatar avatar-${i + 1}`}>{teamInitials[i]}</span><h3>{name}</h3><p>{role}</p></Reveal>)}</div></section>
 
-      <section className="faq-section wrap" id="faq"><div className="section-heading reveal"><p className="eyebrow">{t("Good questions", "Zaroori sawaal")}</p><h2>{language === "en" ? <>Before you <em>check.</em></> : <>Check karne se <em>pehle.</em></>}</h2></div><div className="faq-list">{faqs.map(([question, answer, hinglishQuestion, hinglishAnswer]) => <details key={question} className="faq-item"><summary>{language === "en" ? question : hinglishQuestion}<span>＋</span></summary><p>{language === "en" ? answer : hinglishAnswer}</p></details>)}</div></section>
+      <section className="faq-section wrap" id="faq"><Reveal className="section-heading"><p className="eyebrow">{t.faqEyebrow}</p><h2>{t.faqTitle}</h2></Reveal><div className="faq-list">{t.faqs.map(([question, answer]) => <details className="faq-item" key={question}><summary>{question}<span aria-hidden="true">+</span></summary><p>{answer}</p></details>)}</div></section>
 
-      <section className="download-section" id="download"><div className="wrap download-wrap reveal"><div><p className="eyebrow">{t("Android app", "Android app")}</p><h2>{language === "en" ? <>Take a breath.<br /><em>Then take a look.</em></> : <>Pehle saans lein.<br /><em>Phir check karein.</em></>}</h2><p>{t("Minimum Android version: 8.0 (API 26), based on the app minSdk. The official APK is not available yet.", "Minimum Android version: 8.0 (API 26), app ke minSdk ke mutabik. Official APK abhi available nahi hai.")}</p><ol className="install-steps"><li>{t("When released, download the APK from this official page.", "Release hone par APK isi official page se download karein.")}</li><li>{t("Open the downloaded file and follow Android’s install prompt.", "Downloaded file khol kar Android ke install prompt follow karein.")}</li><li>{t("Review the app’s requested access before continuing.", "Aage badhne se pehle app ki requested permissions dekhein.")}</li></ol><div className="release-facts"><span>{t("APK size", "APK size")}<b>{t("Unavailable", "Abhi unavailable")}</b></span><span>SHA-256<b>{t("Unavailable", "Abhi unavailable")}</b></span><span>{t("QR code", "QR code")}<b>{t("Not available", "Available nahi")}</b></span></div></div><a className="button download-button" href="#download" aria-disabled="true" onClick={(event) => event.preventDefault()}>{t("Download link coming soon", "Download link jald aayega")} <span>↗</span></a><div className="download-orbit" /></div></section>
+      <section className="download-band"><div className="wrap download-wrap"><div><p className="eyebrow">{t.downloadEyebrow}</p><h2>{t.downloadTitle}</h2><p>{t.downloadCopy}</p></div><Link className="button download-button" href="/download">{t.download}<span aria-hidden="true">↗</span></Link><span className="download-orbit" /></div></section>
 
-      <footer className="footer"><div className="wrap footer-top"><a className="brand" href="#top"><Image src="/logo.png" alt="TrustShield AI" width={172} height={44} /></a><p>{t("Think before you trust.", "Soch samajh kar bharosa karein.")}<br /><span>{t("Keep the final check in your hands.", "Aakhri faisla aapke haath mein hai.")}</span></p><div className="footer-links"><a href="#privacy">{t("Privacy", "Privacy")}</a><a href="#faq">FAQ</a><a href="#roadmap">{t("Roadmap", "Roadmap")}</a><a href="https://github.com/shubhsaxena2020/trustshield-ai" target="_blank" rel="noreferrer">GitHub ↗</a></div></div><div className="wrap footer-bottom"><span>{t("© 2026 TrustShield AI · Project information may change during development.", "© 2026 TrustShield AI · Project details badal sakte hain.")}</span><span>{t("Risk signals are guidance, not certainty.", "Risk signals guidance hain, guarantee nahi.")}</span></div></footer>
+      <footer className="footer"><div className="wrap footer-top"><Link className="footer-brand" href="#top"><Image src="/logo.png" alt="TrustShield AI" width={164} height={42} /></Link><p>{t.footer}</p><nav aria-label="Footer"><Link href="/download">{t.downloadLink}</Link><a href="#privacy">{t.privacyLink}</a><a href="#top">{t.backTop} ↑</a></nav></div><div className="wrap footer-bottom"><span>© 2026 TrustShield AI</span><span>{t.limited}</span></div></footer>
     </main>
   );
 }

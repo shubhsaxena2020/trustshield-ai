@@ -177,6 +177,8 @@ def readiness(response: Response):
 @router.post("/api/v1/analyze/text", response_model=AnalysisResult, dependencies=[Depends(limit_light)])
 def analyze_text_endpoint(body: TextIn, request: Request, response: Response,
                            user: CurrentUser | None = Depends(get_current_user)):
+    if not body.text.strip():
+        raise HTTPException(422, "Text cannot be blank. Kripya message likhein.")
     try:
         result = _publish(request, response, analyze_text(body.text))
     except InvalidInput as e:
@@ -188,6 +190,8 @@ def analyze_text_endpoint(body: TextIn, request: Request, response: Response,
 @router.post("/api/v1/analyze/url", response_model=AnalysisResult, dependencies=[Depends(limit_light)])
 def analyze_url_endpoint(body: UrlIn, request: Request, response: Response,
                           user: CurrentUser | None = Depends(get_current_user)):
+    if not body.url.strip():
+        raise HTTPException(422, "URL cannot be blank. Kripya URL enter karein.")
     result = _publish(request, response, analyze_url(body.url))
     _record_history(request, user, result)
     return result
