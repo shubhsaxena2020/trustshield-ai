@@ -1,6 +1,6 @@
 # Payment advisory (A09)
 
-**Status: implementation reviewed; execution unverified.** Static review confirms the parser, deterministic engine, salted-HMAC payee store, QR Guard bridge, Result card/copy, and optional Result state field exist in this worktree. The presenter does **not** attach an advisory automatically, so end-to-end Result wiring is not implemented. No Gradle/unit-test or emulator verification was run by this lane; see the verification table.
+**Status: implementation present; Result path incomplete; execution unverified.** Static review confirms the parser, deterministic engine, QR Guard bridge, Result card/copy, and optional Result state field exist. `ResultPresenter` does not set `paymentAdvisory`, and no production caller was found connecting parser, bridge, and engine. A Result card is renderable if a caller supplies state but no automatic end-to-end scan path is present. The inspected bridge uses QR Guard's current registered-payee list; durable HMAC-backed storage is not evidenced. No Gradle/unit-test or emulator verification was run by this lane; see the verification table.
 
 Source of truth for types: `apps/android/app/src/main/java/ai/trustshield/android/core/payment/PaymentAdvisoryContract.kt`. If code and this document disagree at review, the code wins and this document gets corrected.
 
@@ -67,7 +67,7 @@ These are heuristics chosen for the demo, not measured optima. Boundary behaviou
 ## Privacy
 
 - Only masked UPI ids are shown or logged: `maskedUpi` (`sho***@okaxis`), `RegisteredPayee.maskedHandle`, `PayeeMasking.mask`. `PaymentFields.toString` and `PaymentHint.toString` are value-free on purpose, so a stray log line cannot leak an id, an amount or a reference number.
-- Registered payees are held and compared via salted HMAC-SHA256 identifiers (`SaltedPayeeRegistry` / `RegisteredPayeeStore`), never as raw VPAs at rest. `RegisteredPayeeStore` exists and uses a caller-owned salt; source review does not establish durable persistence across app restarts or a platform-keystore-backed salt. The bridge compares exact normalized IDs against the current QR Guard payee list. Persistence and salt lifecycle remain open questions (open question 2).
+- The advisory bridge compares exact normalized IDs against QR Guard's current payee list; this is not evidence of durable registered-payee persistence or a platform-keystore-backed salt. The inspected source does not establish that HMAC-backed storage is integrated with the bridge. Persistence and salt lifecycle remain open questions (open question 2).
 - The raw message text and the screenshot are not stored. The advisory is built, rendered and dropped with the Result state. OCR output is discarded once fields are parsed.
 - This feature makes no network call, reads no file, and opens no intent.
 

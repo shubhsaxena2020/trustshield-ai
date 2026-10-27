@@ -223,9 +223,12 @@ open class RegisteredPayeeStore(
         /** Comparison key; mirrors `normalizePayeeId` in `ui/qr/QrUiState.kt`. */
         private fun normalize(upi: String): String = upi.trim().lowercase()
 
-        /** Mirrors `SaltedPayeeRegistry.identifierOf`: one `@`, non-empty handle. */
-        private fun isUpiShaped(value: String): Boolean =
-            value.contains('@') && value.substringAfter('@').isNotEmpty()
+        /** Accept one non-empty local part and handle; reject whitespace and extra separators. */
+        private fun isUpiShaped(value: String): Boolean {
+            val at = value.indexOf('@')
+            return at > 0 && at == value.lastIndexOf('@') && at < value.lastIndex &&
+                value.none { it.isWhitespace() || it.isISOControl() }
+        }
 
         /** Integrity check for a persisted id; a corrupt string must not count as a payee. */
         private fun isIdentifier(value: String): Boolean =

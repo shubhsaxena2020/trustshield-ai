@@ -77,7 +77,7 @@ object PaymentFieldsParser {
      */
     private const val AMOUNT_NUMBER = """[0-9](?:[0-9]|,(?=[0-9]))*(?:\.[0-9]{1,2})?"""
 
-    private val AMOUNT_PATTERN = Regex("""(?i)$CURRENCY_MARKER[ \t\u00A0]*($AMOUNT_NUMBER)""")
+    private val AMOUNT_PATTERN = Regex("""(?i)$CURRENCY_MARKER[ \t\u00A0]*($AMOUNT_NUMBER)(?![0-9A-Za-z])""")
 
     // ---- payee UPI ------------------------------------------------------------------------
     //

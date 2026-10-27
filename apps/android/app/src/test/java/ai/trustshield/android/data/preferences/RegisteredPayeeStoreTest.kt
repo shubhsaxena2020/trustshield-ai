@@ -374,11 +374,11 @@ class RegisteredPayeeStoreTest {
     }
 
     @Test
-    fun `register rejects empty local part and multiple separators without persisting input`() {
+    fun `register rejects empty local part, multiple separators, whitespace and controls`() {
         val fake = InMemoryPayeeStore()
         val store = newStore(fake)
 
-        for (invalid in listOf("@okaxis", "a@")) {
+        for (invalid in listOf("@okaxis", "a@", "two@@bank", "shop @bank", "shop@bank\n")) {
             try {
                 store.register(invalid)
                 fail("register accepted malformed identifier")
@@ -397,7 +397,7 @@ class RegisteredPayeeStoreTest {
         store.register(rawUpi)
         val writes = fake.writeCount
 
-        for (invalid in listOf("@okaxis", "a@")) {
+        for (invalid in listOf("@okaxis", "a@", "two@@bank", "shop @bank", "shop@bank\n")) {
             assertFalse(store.matches(invalid))
             store.remove(invalid)
         }

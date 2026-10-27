@@ -56,6 +56,37 @@ class PaymentAdvisoryAccessibilityAuditTest {
     }
 
     @Test
+    fun spokenDescriptionContainsSectionVerdictAdviceAndConfirmationInReadingOrder() {
+        val source = java.io.File(
+            "src/main/java/ai/trustshield/android/ui/result/PaymentAdvisoryCard.kt"
+        ).readText()
+        val order = listOf(
+            "append(sectionTitle)",
+            "append(headline)",
+            "append(advice)",
+            "hintRows.forEach",
+            "append(confirmation)"
+        ).map(source::indexOf)
+        assertTrue("all spoken clauses must be present", order.all { it >= 0 })
+        assertEquals("clauses must follow TalkBack reading order", order.sorted(), order)
+        assertTrue("card must merge descendants into one accessible node", source.contains("mergeDescendants = true"))
+        assertTrue("spoken description must be exposed", source.contains("contentDescription = spokenDescription"))
+    }
+
+    @Test
+    fun verdictAndHintSeverityHaveNonColorTextSignalsAndWrappingContent() {
+        val source = java.io.File(
+            "src/main/java/ai/trustshield/android/ui/result/PaymentAdvisoryCard.kt"
+        ).readText()
+        assertTrue("verdict glyph must be rendered as text", source.contains("glyph = advisoryVerdictGlyph(verdict)"))
+        assertTrue("hint severity glyph must be rendered", source.contains("glyph = row.first"))
+        assertTrue("section title must be marked as a heading", source.contains("heading()"))
+        assertFalse("fixed-height layout can clip larger text", Regex("\.height\(").containsMatchIn(source))
+        assertFalse("maxLines can clip larger text", source.contains("maxLines"))
+        assertTrue("hint text should take available width and wrap", source.contains("Modifier.weight(1f)"))
+    }
+
+    @Test
     fun disclaimerRemainsTheLastContentDescriptionClauseEvenWithoutHints() {
         // PaymentAdvisoryCard constructs its merged spoken text as section, verdict, advice,
         // zero-or-more hints, then this confirmation. Pin its sentinel clause and require that

@@ -57,6 +57,23 @@ Counts are a static count of `@Test` annotations, not a test report.
 
 No `adb`, no install, no monkey run, no screenshot, no logcat capture for this feature. Nothing on this page came from a running app.
 
+## Follow-up static reconciliation (2026-10-27)
+
+Re-read the brief and current implementation after the earlier review. This is a documentation-only
+reconciliation; it does not add execution evidence.
+
+- `ResultUiState.paymentAdvisory` remains nullable with a null default. `ResultPresenter` does not
+  set it, and a search of production Kotlin found no caller wiring `PaymentFieldsParser`,
+  `QrPayeePaymentBridge`, and `PaymentAdvisoryEngine` together. `ResultScreen` can render the card
+  when given a non-null advisory; that is not an end-to-end path.
+- The current QR bridge compares the screenshot UPI ID against the passed QR Guard payee list by
+  exact normalized ID. The inspected bridge does not establish durable HMAC-backed persistence or
+  keystore-protected salt integration. Do not describe that storage as integrated or persisted.
+- Existing verification rows remain **Not run**: no Gradle/JVM execution, emulator check, or device
+  check was performed by this lane. Test annotation counts below are static source counts only.
+- No implementation changes were made in this follow-up. This evidence is limited to the static
+  observations above and leaves runtime behavior pending.
+
 ## Required next step for the lane lead
 
 1. Run the Gradle gate (`:app:testDebugUnitTest`, then `:app:assembleDebug`) and paste the real result into the verification table in `docs/android/PAYMENT_ADVISORY.md`.

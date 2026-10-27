@@ -298,6 +298,18 @@ class PaymentAdvisoryEngineTest {
     }
 
     @Test
+    fun `zero and negative amounts never trigger a large amount warning`() {
+        for (amount in listOf(0L, -1L, Long.MIN_VALUE)) {
+            val advisory = engine.evaluate(
+                input(fields = fields(amountMinor = amount, utr = "123456789012"),
+                    registeredPayeeCount = 1, payeeMatchesRegistered = true)
+            )
+            assertFalse("amount=$amount", has(advisory, PaymentHintKind.AMOUNT_LARGE))
+            assertFalse("amount=$amount", has(advisory, PaymentHintKind.AMOUNT_ROUND_LARGE))
+        }
+    }
+
+    @Test
     fun `a custom policy moves the large amount threshold`() {
         val sensitive: PaymentAdvisoryEngine =
             PaymentAdvisoryEngine(PaymentAdvisoryPolicy(largeAmountMinor = 100_000L))
@@ -519,6 +531,27 @@ class PaymentAdvisoryEngineTest {
     }
 
     @Test
+    fun `extreme timestamp and recent policy values do not overflow into recent`() {
+        val hugeWindow = PaymentAdvisoryEngine(
+            PaymentAdvisoryPolicy(recentMinutes = Long.MAX_VALUE)
+        )
+        val cases = listOf(
+            fields(timestampEpochMs = Long.MIN_VALUE) to Long.MAX_VALUE,
+            fields(timestampEpochMs = 1L) to Long.MAX_VALUE,
+            fields(timestampEpochMs = Long.MAX_VALUE) to 1L,
+        )
+
+        for ((receiptFields, now) in cases) {
+            val advisory = hugeWindow.evaluate(
+                input(fields = receiptFields, registeredPayeeCount = 1,
+                    payeeMatchesRegistered = true, nowEpochMs = now)
+            )
+            assertFalse("timestamp=${receiptFields.timestampEpochMs}, now=$now",
+                has(advisory, PaymentHintKind.TIME_RECENT))
+        }
+    }
+
+    @Test
     fun `now of zero disables the recent check`() {
         val advisory: PaymentAdvisory = engine.evaluate(
             input(
@@ -584,6 +617,67 @@ class PaymentAdvisoryEngineTest {
 
         assertTrue(has(advisory, PaymentHintKind.URGENCY_PRESSURE))
         assertEquals(PaymentAdvisoryVerdict.CHECK, advisory.verdict)
+    }
+
+    @Test
+    fun `AUDIT protective negation does not suppress lexical urgency`() {
+        // Known false positive: the speed-cue rule does not distinguish a warning from an instruction.
+        val advisory: PaymentAdvisory = engine.evaluate(
+            input(
+                text = "Abhi paise mat bhejna; pehle bank se verify karo",
+                fields = fields(utr = "123456789012"),
+                registeredPayeeCount = 1,
+                payeeMatchesRegistered = true
+            )
+        )
+
+        assertTrue(has(advisory, PaymentHintKind.URGENCY_PRESSURE))
+        assertEquals(PaymentAdvisoryVerdict.CHECK, advisory.verdict)
+    }
+
+    @Test
+    fun `AUDIT amount zero and negative do not trigger amount thresholds`() {
+        for (amountMinor in listOf(0L, -1L, -200_000L)) {
+            val advisory: PaymentAdvisory = engine.evaluate(
+                input(
+                    fields = fields(amountMinor = amountMinor, utr = "123456789012"),
+                    registeredPayeeCount = 1,
+                    payeeMatchesRegistered = true
+                )
+            )
+
+            assertFalse("amount=$amountMinor", has(advisory, PaymentHintKind.AMOUNT_LARGE))
+            assertFalse("amount=$amountMinor", has(advisory, PaymentHintKind.AMOUNT_ROUND_LARGE))
+        }
+    }
+
+    @Test
+    fun `AUDIT payee match flag is authoritative even when supplied payee text differs`() {
+        val advisory: PaymentAdvisory = engine.evaluate(
+            input(
+                fields = fields(payeeUpi = "other@okaxis", amountMinor = 200_000L),
+                registeredPayeeCount = 1,
+                payeeMatchesRegistered = true
+            )
+        )
+
+        assertTrue(has(advisory, PaymentHintKind.PAYEE_MATCHES_REGISTERED))
+        assertFalse(has(advisory, PaymentHintKind.PAYEE_NOT_REGISTERED))
+        assertFalse(has(advisory, PaymentHintKind.AMOUNT_ROUND_LARGE))
+    }
+
+    @Test
+    fun `AUDIT an at sign alone qualifies as a payee identifier`() {
+        val advisory: PaymentAdvisory = engine.evaluate(
+            input(
+                fields = fields(payeeUpi = "@", utr = "123456789012"),
+                registeredPayeeCount = 1,
+                payeeMatchesRegistered = false
+            )
+        )
+
+        assertTrue(has(advisory, PaymentHintKind.PAYEE_NOT_REGISTERED))
+        assertEquals("***", hint(advisory, PaymentHintKind.PAYEE_NOT_REGISTERED).maskedPayee)
     }
 
     @Test

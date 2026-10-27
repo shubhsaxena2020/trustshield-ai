@@ -139,6 +139,7 @@ class PaymentAdvisoryCopyTest {
         assertTrue("confirmation Hindi must not be blank", hindi.isNotBlank())
         assertTrue("confirmation Hindi must be Devanagari", devanagariRatio(hindi) > 0.6)
         assertTrue(hindi.contains("पुष्टि"))
+        assertTrue("Hindi confirmation must state where confirmation is obtained", hindi.contains("से ही मिलती है"))
     }
 
     @Test

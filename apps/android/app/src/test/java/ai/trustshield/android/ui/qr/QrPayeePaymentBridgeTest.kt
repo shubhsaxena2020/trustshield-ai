@@ -141,6 +141,46 @@ class QrPayeePaymentBridgeTest {
     }
 
     @Test
+    fun printedNameAndScreenshotClaimsCannotTurnAnUnregisteredIdIntoAMatch() {
+        val forgedName = fields("other@ybl", name = "Sharma Store")
+        val source = "SUCCESS\\nPaid to Sharma Store\\nshop@okaxis"
+        val input = QrPayeePaymentBridge.toAdvisoryInput(
+            sourceText = source,
+            fields = forgedName,
+            payees = listOf(shop),
+            nowEpochMs = 123L
+        )
+
+        assertFalse(input.payeeMatchesRegistered)
+        assertEquals(1, input.registeredPayeeCount)
+        assertEquals("other@ybl", input.fields.payeeUpi)
+        assertEquals("Sharma Store", input.fields.payeeName)
+        assertEquals(source, input.sourceText)
+    }
+
+    @Test
+    fun matchingIdRemainsIdentityMatchDespiteDifferentPrintedName() {
+        val input = QrPayeePaymentBridge.toAdvisoryInput(
+            sourceText = "Paid to Fake Support",
+            fields = fields(" SHOP@OKAXIS ", name = "Fake Support"),
+            payees = listOf(shop),
+            nowEpochMs = 1L
+        )
+
+        // This is an exact normalized identifier match only; it does not authenticate the label,
+        // prove the payment moved, or authorize suppressing the separate confirmation disclaimer.
+        assertTrue(input.payeeMatchesRegistered)
+        assertEquals(1, input.registeredPayeeCount)
+    }
+
+    @Test
+    fun aMaskedRegisteredHandleCannotMatchEvenWhenCandidateIsReadable() {
+        val maskedRegistration = payee("sho***@okaxis", name = "Sharma Store")
+        assertFalse(QrPayeePaymentBridge.matchesRegisteredPayee("shop@okaxis", listOf(maskedRegistration)))
+        assertFalse(QrPayeePaymentBridge.matchesRegisteredPayee("sho***@okaxis", listOf(maskedRegistration)))
+    }
+
+    @Test
     fun qrDataCannotMatchThroughWhitespaceInsideIdOrUriDecorations() {
         for (candidate in listOf("sh op@okaxis", "shop @okaxis", "shop@okaxis
 ", "upi://pay?pa=shop@okaxis")) {

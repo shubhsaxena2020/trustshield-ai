@@ -67,7 +67,7 @@ object PaymentAdvisoryCopy {
     val CONFIRMATION: ToneCopy = ToneCopy(
         hinglish = "Pakka confirmation sirf aapke bank SMS ya UPI app ki history mein milega.",
         english = "Final confirmation only comes from your bank SMS or your UPI app's history.",
-        hindi = "अंतिम पुष्टि केवल आपके बैंक SMS या UPI ऐप के लेन-देन इतिहास से करें।"
+        hindi = "अंतिम पुष्टि केवल आपके बैंक SMS या UPI ऐप के लेन-देन इतिहास से ही मिलती है।"
     )
 
     /**

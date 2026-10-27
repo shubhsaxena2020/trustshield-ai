@@ -230,6 +230,49 @@ class PaymentFieldsParserTest {
     }
 
     @Test
+    fun `encoded uri values are not silently decoded into payment fields`() {
+        val fields = parse("upi://pay?pa=merchant%40okaxis&pn=Sharma%20Store&am=1200")
+
+        assertEquals("", fields.payeeUpi)
+        assertEquals("Sharma%20Store", fields.payeeName)
+        assertNull(fields.amountMinor)
+    }
+
+    @Test
+    fun `duplicate pa parameters select the payee adjacent to its cue`() {
+        val fields = parse("upi://pay?pa=first@okaxis&pn=First&pa=second@okhdfcbank&pn=Second")
+
+        assertEquals("first@okaxis", fields.payeeUpi)
+        assertEquals("First", fields.payeeName)
+        assertNull(fields.amountMinor)
+    }
+
+    @Test
+    fun `hostile uri values do not become amount or payee identity`() {
+        val fields = parse("upi://pay?pa=attacker@okaxis&pn=₹9,999.99%26&am=999999999999999999")
+
+        assertEquals("attacker@okaxis", fields.payeeUpi)
+        assertEquals("%26", fields.payeeName)
+        assertNull(fields.amountMinor)
+    }
+
+    @Test
+    fun `masked and malformed duplicate pa values are not repaired`() {
+        val fields = parse("upi://pay?pa=ab***cd@okaxis&pa=bad..name@okaxis")
+
+        assertEquals("", fields.payeeUpi)
+    }
+
+    @Test
+    fun `hostile uri delimiters cannot make parameter text an amount`() {
+        val fields = parse("upi://pay?pa=merchant@okaxis&pn=₹500&am=500")
+
+        assertEquals("merchant@okaxis", fields.payeeUpi)
+        assertNull(fields.amountMinor)
+        assertEquals("", fields.payeeName)
+    }
+
+    @Test
     fun `payee name on the line after the cue is read`() {
         val fields = parse("Paid to\nSharma Store\n₹500")
 
@@ -407,7 +450,15 @@ class PaymentFieldsParserTest {
     }
 
     @Test
-    fun `malformed grouping is tolerated without consuming punctuation`() {
+    fun `currency amount cannot be a prefix of an alphanumeric token`() {
+        val fields = parse("₹500abc then ₹75")
+
+        assertEquals(7500L, fields.amountMinor)
+        assertEquals("₹75", fields.amountRaw)
+    }
+
+    @Test
+    fun `malformed grouping is tolerated without consuming punctuation`()
         val fields = parse("₹1,2,,,@@ ₹500")
 
         assertEquals(50000L, fields.amountMinor)

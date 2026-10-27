@@ -214,7 +214,7 @@ class PaymentAdvisoryEngine(
         }
 
         // ---- amount -----------------------------------------------------------------------------
-        if (amountMinor != null && amountMinor >= policy.largeAmountMinor) {
+        if (amountMinor != null && amountMinor > 0L && amountMinor >= policy.largeAmountMinor) {
             add(
                 hints,
                 PaymentHint(
@@ -385,10 +385,12 @@ class PaymentAdvisoryEngine(
     private fun isRecent(timestampEpochMs: Long?, nowEpochMs: Long): Boolean {
         if (timestampEpochMs == null) return false
         if (nowEpochMs <= 0L) return false
-        val windowMs: Long = policy.recentMinutes * MILLIS_PER_MINUTE
-        if (windowMs < 0L) return false
-        val ageMs: Long = nowEpochMs - timestampEpochMs
-        return ageMs in 0L..windowMs
+        if (policy.recentMinutes < 0L) return false
+        // Compare against a safely bounded cutoff instead of subtracting timestamps or multiplying
+        // an arbitrary policy value; either operation can overflow for adversarial Long inputs.
+        val windowMs: Long = minOf(policy.recentMinutes, MAX_RECENT_MINUTES) * MILLIS_PER_MINUTE
+        val cutoffEpochMs: Long = if (nowEpochMs < windowMs) 0L else nowEpochMs - windowMs
+        return timestampEpochMs in cutoffEpochMs..nowEpochMs
     }
 
     /**
@@ -447,6 +449,9 @@ class PaymentAdvisoryEngine(
         const val MAX_SCANNED_CHARS: Int = 4_000
 
         const val MILLIS_PER_MINUTE: Long = 60_000L
+
+        /** Largest minutes value whose conversion to milliseconds fits in a signed Long. */
+        const val MAX_RECENT_MINUTES: Long = Long.MAX_VALUE / MILLIS_PER_MINUTE
 
         /**
          * Display order: `WARNING` (0) before `CAUTION` (1) before `INFO` (2), then the declaration

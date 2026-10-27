@@ -254,6 +254,23 @@ class PaymentAdvisoryWiringTest {
     }
 
     @Test
+    fun resultScreenConditionallyMountsTheCardAfterRiskAndBeforeConfidence() {
+        val source = java.io.File(
+            "src/main/java/ai/trustshield/android/ui/result/ResultScreen.kt"
+        ).readText()
+        val risk = source.indexOf("RiskHeader(risk = state.risk, language = language)")
+        val conditional = source.indexOf("state.paymentAdvisory?.let { advisory ->")
+        val card = source.indexOf("PaymentAdvisoryCard(advisory = advisory, language = language)")
+        val confidence = source.indexOf("ConfidenceBadgeView(badge = state.confidence, language = language)")
+        val evidence = source.indexOf("EvidenceSection(state = state, language = language)")
+
+        assertTrue("risk header should precede payment advisory", risk >= 0 && conditional > risk)
+        assertTrue("card should render inside the optional advisory branch", card > conditional)
+        assertTrue("advisory should precede confidence", confidence > card)
+        assertTrue("evidence should follow confidence", evidence > confidence)
+    }
+
+    @Test
     fun resultAdvisoryPathKeepsRawReceiptContentOutOfPanelCopy() {
         val rawUpi = "private.person.928374@okaxis"
         val rawUtr = "987654321098765"
