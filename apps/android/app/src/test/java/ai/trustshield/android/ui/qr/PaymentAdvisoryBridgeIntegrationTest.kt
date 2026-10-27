@@ -16,7 +16,7 @@ class PaymentAdvisoryBridgeIntegrationTest {
 
     @Test
     fun registeredQrPayeeFlowsThroughParsedReceiptAsMatch() {
-        val receipt = "Successful payment\\nPaid to: Corner Shop\\nUPI ID: corner@okaxis\\nAmount: ₹250.00"
+        val receipt = "Successful payment\nPaid to: Corner Shop\nUPI ID: corner@okaxis\nAmount: ₹250.00"
         val payees = listOf(RegisteredPayee(handle = " Corner@OkAxis ", name = "Shop"))
         val fields = PaymentFieldsParser.parse(receipt)
 
@@ -37,7 +37,7 @@ class PaymentAdvisoryBridgeIntegrationTest {
 
     @Test
     fun differentIdWithSamePrintedNameIsNotRegisteredAndUrgencyReachesStop() {
-        val receipt = "Successful payment\\nPaid to: Corner Shop\\nUPI ID: impostor@okaxis\\nAmount: ₹5000\\nPlease pay now only"
+        val receipt = "Successful payment\nPaid to: Corner Shop\nUPI ID: impostor@okaxis\nAmount: ₹5000\nPlease pay now only"
         val payees = listOf(RegisteredPayee(handle = "corner@okaxis", name = "Corner Shop"))
         val fields = PaymentFieldsParser.parse(receipt)
 
@@ -58,7 +58,7 @@ class PaymentAdvisoryBridgeIntegrationTest {
 
     @Test
     fun emptyRegistryAndMaskedCandidateAreNotMisreportedAsMismatch() {
-        val fields = PaymentFieldsParser.parse("Paid to: Shop\\nUPI ID: corner@okaxis\\nAmount: ₹25")
+        val fields = PaymentFieldsParser.parse("Paid to: Shop\nUPI ID: corner@okaxis\nAmount: ₹25")
         val noPayees = QrPayeePaymentBridge.toAdvisoryInput("", fields, emptyList(), 0L)
         val maskedCandidate = QrPayeePaymentBridge.toAdvisoryInput(
             "", fields.copy(payeeUpi = "cor***@okaxis"),
@@ -71,5 +71,30 @@ class PaymentAdvisoryBridgeIntegrationTest {
         assertFalse(maskedCandidate.payeeMatchesRegistered)
         assertTrue(engine.evaluate(maskedCandidate).hints.any { it.kind == PaymentHintKind.PAYEE_MISSING })
         assertFalse(engine.evaluate(maskedCandidate).hints.any { it.kind == PaymentHintKind.PAYEE_NOT_REGISTERED })
+    }
+
+
+    @Test
+    fun ocrReceiptFlowsThroughParserBridgeAndEngineWithoutExposingRawPayee() {
+        val receipt = "Payment successful\nPaid to: Corner Shop\nUPI ID: corner@okaxis\nAmount: ₹125.50"
+        val fields = PaymentFieldsParser.parse(receipt)
+        val input = QrPayeePaymentBridge.toAdvisoryInput(
+            sourceText = receipt,
+            fields = fields,
+            payees = listOf(RegisteredPayee(handle = "corner@okaxis", name = "Corner Shop")),
+            nowEpochMs = 0L,
+            ocrUsed = true
+        )
+
+        val advisory = engine.evaluate(input)
+        val debugOutput = "${input.fields} ${advisory} ${advisory.hints}"
+
+        assertEquals("corner@okaxis", fields.payeeUpi)
+        assertEquals(12_550L, fields.amountMinor)
+        assertTrue(advisory.isPaymentScreenshot)
+        assertTrue(advisory.hints.any { it.kind == PaymentHintKind.PAYEE_MATCHES_REGISTERED })
+        assertTrue(advisory.hints.any { it.kind == PaymentHintKind.SCREENSHOT_ONLY })
+        assertTrue(advisory.confirmationRequired)
+        assertFalse(debugOutput.contains("corner@okaxis"))
     }
 }

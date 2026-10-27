@@ -1116,6 +1116,38 @@ class PaymentAdvisoryEngineTest {
         assertFalse(advisory.toString().contains("fraud", ignoreCase = true))
     }
 
+    @Test
+    fun `Long MAX amount is retained without overflow or sign confusion`() {
+        val advisory = engine.evaluate(
+            input(
+                fields = fields(amountMinor = Long.MAX_VALUE, utr = "123456789012"),
+                registeredPayeeCount = 1,
+                payeeMatchesRegistered = false
+            )
+        )
+
+        assertTrue(has(advisory, PaymentHintKind.AMOUNT_LARGE))
+        assertTrue(has(advisory, PaymentHintKind.AMOUNT_ROUND_LARGE))
+        assertEquals(Long.MAX_VALUE, hint(advisory, PaymentHintKind.AMOUNT_LARGE).amountMinor)
+        assertEquals(Long.MAX_VALUE, hint(advisory, PaymentHintKind.AMOUNT_ROUND_LARGE).amountMinor)
+        assertEquals(PaymentAdvisoryVerdict.STOP, advisory.verdict)
+    }
+
+    @Test
+    fun `nonpositive large threshold disables the large amount hint`() {
+        val unbounded = PaymentAdvisoryEngine(
+            PaymentAdvisoryPolicy(largeAmountMinor = 0L)
+        )
+        val advisory = unbounded.evaluate(
+            input(fields = fields(amountMinor = 1L, utr = "123456789012"),
+                registeredPayeeCount = 1, payeeMatchesRegistered = true)
+        )
+
+        assertFalse(has(advisory, PaymentHintKind.AMOUNT_LARGE))
+        assertFalse(has(advisory, PaymentHintKind.AMOUNT_ROUND_LARGE))
+        assertEquals(PaymentAdvisoryVerdict.CLEAR, advisory.verdict)
+    }
+
     // ---- hardening --------------------------------------------------------------------------
 
     @Test

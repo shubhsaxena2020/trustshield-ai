@@ -24,6 +24,14 @@ class PaymentAdvisoryContractTest {
         assertEquals(PaymentAdvisoryVerdict.STOP, stop.verdict)
         assertTrue(clear.confirmationRequired)
         assertTrue(stop.confirmationRequired)
+
+        // A single warning yields CHECK; disclaimer presence is unconditional across every verdict.
+        val check = evaluate(
+            PaymentFields(amountMinor = 100_000L, payeeUpi = "violet-shop@okaxis"),
+            registered = 1
+        )
+        assertEquals(PaymentAdvisoryVerdict.CHECK, check.verdict)
+        assertTrue(check.confirmationRequired)
     }
 
     @Test

@@ -58,8 +58,7 @@ class PaymentAdvisoryComposePathTest {
         val description = buildString {
             append(title).append(". ").append(headline).append(". ").append(advice)
             advisory.hints.forEach { hint ->
-                append(". ").append(PaymentAdvisoryCopy.severityGlyph(hint))
-                    .append(". ").append(PaymentAdvisoryCopy.forHint(hint).hinglish)
+                append(". ").append(PaymentAdvisoryCopy.forHint(hint).hinglish)
             }
             append(". ").append(confirmation)
         }
@@ -110,8 +109,7 @@ class PaymentAdvisoryComposePathTest {
             append(PaymentAdvisoryCopy.verdictHeadline(advisory.verdict).hinglish).append(". ")
             append(PaymentAdvisoryCopy.verdictAdvice(advisory.verdict).hinglish)
             advisory.hints.forEach { hint ->
-                append(". ").append(PaymentAdvisoryCopy.severityGlyph(hint))
-                    .append(". ").append(PaymentAdvisoryCopy.forHint(hint).hinglish)
+                append(". ").append(PaymentAdvisoryCopy.forHint(hint).hinglish)
             }
             append(". ").append(confirmation)
         }

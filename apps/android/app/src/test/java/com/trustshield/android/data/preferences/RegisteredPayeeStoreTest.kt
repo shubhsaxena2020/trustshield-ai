@@ -28,6 +28,19 @@ class RegisteredPayeeStoreAuditTest {
     }
 
     @Test
+    fun persistedEntriesRequireTheSameSaltToMatchAfterReload() {
+        val backend = MemoryPayeeStore()
+        RegisteredPayeeStore(backend, salt).register("shop@okaxis")
+
+        val reloadedWithDifferentSalt = RegisteredPayeeStore(
+            backend,
+            ByteArray(16) { (it + 101).toByte() }
+        )
+
+        assertFalse(reloadedWithDifferentSalt.matches("shop@okaxis"))
+    }
+
+    @Test
     fun corruptOrMisalignedStoredValuesNeverExposeContentOrCrashReads() {
         val backend = MemoryPayeeStore()
         backend.values[RegisteredPayeeStoreKeys.IDS] = "bad-digest,,${"A".repeat(64)}"

@@ -198,7 +198,7 @@ object PaymentAdvisoryCopy {
             ),
             hinglish = "{amount} jaisa bada round figure aam taur par lure hota hai — jaise refund ya fees ke naam par.",
             english = "A large round figure like {amount} is a common lure, for example as a refund or a fee.",
-            hindi = "{amount} जैसी बड़ी गोल रकम अक्सर लुभाने का तरीका होती है — जैसे रिफ़ंड या फ़ीस के नाम पर।"
+            hindi = "{amount} जैसी बड़ी गोल रकम रिफ़ंड या फ़ीस के नाम पर लुभाने के लिए इस्तेमाल की जा सकती है।"
         )
         PaymentHintKind.AMOUNT_MISSING -> ToneCopy(
             hinglish = "Screenshot mein amount padha nahi ja saka. Screen par amount dekhe bina pay na karein.",

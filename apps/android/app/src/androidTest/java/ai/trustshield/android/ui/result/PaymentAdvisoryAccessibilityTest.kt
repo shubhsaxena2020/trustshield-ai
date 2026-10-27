@@ -72,6 +72,8 @@ class PaymentAdvisoryAccessibilityTest {
         val node = compose.onNodeWithContentDescription(description)
         node.assertExists()
         assertEquals("confirmation must be the final spoken clause", description.length - confirmation.length, description.lastIndexOf(confirmation))
+        val clausePositions = pieces.map(description::indexOf)
+        assertTrue("spoken clauses must follow visual order", clausePositions.zipWithNext().all { (first, next) -> first >= 0 && first < next })
         hints.forEach { hint -> assertEquals(1, Regex(Regex.escape(PaymentAdvisoryCopy.forHint(hint).hinglish)).findAll(description).count()) }
         compose.onNodeWithText("dem-recipient@upi", useUnmergedTree = true).assertDoesNotExist()
     }
@@ -116,13 +118,10 @@ class PaymentAdvisoryAccessibilityTest {
     }
 
     @Test
-    fun modifierCanProvideAtLeastFortyEightDpHitAreaWithoutMakingCardClickable() {
-        // Advisory is deliberately non-interactive: surrounding layout must not add a fake action.
-        // Check measured content bounds in dp, and make its large container genuinely >=48 dp tall.
-        render(PaymentAdvisoryVerdict.CHECK, cardModifier = androidx.compose.ui.Modifier)
-        val node = compose.onNodeWithContentDescription(confirmation, substring = true).assertExists()
-        node.assertDoesNotHaveClickActionCompat()
-        // A display card is not a touch target; minimum-target rules apply only if an action is added.
+    fun advisoryCardHasNoInteractiveAction() {
+        render(PaymentAdvisoryVerdict.CHECK)
+        compose.onNodeWithContentDescription(confirmation, substring = true).assertExists()
+            .assertDoesNotHaveClickActionCompat()
     }
 
     private fun androidx.compose.ui.test.SemanticsNodeInteraction.assertDoesNotHaveClickActionCompat() {
