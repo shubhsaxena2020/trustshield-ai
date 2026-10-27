@@ -73,8 +73,7 @@ class PaymentAdvisoryComposePathTest {
             append(PaymentAdvisoryCopy.verdictHeadline(advisory.verdict).hindi).append(". ")
             append(PaymentAdvisoryCopy.verdictAdvice(advisory.verdict).hindi)
             advisory.hints.forEach { hint ->
-                append(". ").append(PaymentAdvisoryCopy.severityGlyph(hint))
-                    .append(". ").append(PaymentAdvisoryCopy.forHint(hint).hindi)
+                append(". ").append(PaymentAdvisoryCopy.forHint(hint).hindi)
             }
             append(". ").append(PaymentAdvisoryCopy.CONFIRMATION.hindi)
         }
