@@ -317,9 +317,23 @@ drove the fixes above; keeping it visible is the point of an honest fixture tabl
    estimate a false-positive rate on real traffic. The category rates above are limited to six selected
    scam/control pairs per family. A real 300-message holdout is not possible in this
    window (HEAD_ORDERS_ANDROID section 2.7); the honest reporting stays "rule/normaliser tests".
-7. **No emulator spot check was run in this lane.** All rows were measured on the JVM, which is the same
-   engine the app calls (`LocalScanPipeline`). A device spot check of three rows needs the shared Phase 4
-   emulator lock; that check is left to the head's merge verification rather than claimed here.
+
+## Final verification run (2026-10-28)
+
+Commands ran from `apps/android` in the isolated `android/P7-A-detection` worktree. Gradle used
+`--no-daemon -Dorg.gradle.jvmargs=-Xmx2g` and the configured Android SDK. The connected journey used only
+the already-running shared `emulator-5554` (`head-api36`); no physical device was targeted.
+
+| Command | Result |
+|---|---|
+| `.\gradlew.bat :app:testDebugUnitTest --no-daemon '-Dorg.gradle.jvmargs=-Xmx2g'` | PASS — 1,192 tests, 0 skipped, 0 failures, 0 errors (61 JUnit XML report classes). Tail: `BUILD SUCCESSFUL in 10m 10s`; `25 actionable tasks: 1 executed, 24 up-to-date`. |
+| `.\gradlew.bat :app:connectedDebugAndroidTest '-Pandroid.testInstrumentationRunnerArguments.class=ai.trustshield.android.Phase3JourneysTest' --no-daemon '-Dorg.gradle.jvmargs=-Xmx2g'` | PASS — `Phase3JourneysTest` 11/11, 0 skipped, 0 failed on `head-api36(AVD) - 16`. Tail: `BUILD SUCCESSFUL in 1m 20s`. |
+| `.\gradlew.bat :app:assembleDebug --no-daemon '-Dorg.gradle.jvmargs=-Xmx2g'` | PASS — `BUILD SUCCESSFUL in 12s`; arm64-only APK at `apps/android/app/build/outputs/apk/debug/app-arm64-v8a-debug.apk` (86,665,802 bytes), SHA-256 `aba8534b37a4babae6c6dd78822b2817840061431a176d9429da2101e2d22c03`. |
+
+The fixture-specific run ended `SUMMARY|total=167|pass=167|miss=0`. The 47 pre-existing cases remain
+green with exact expected bands, including electricity-disconnection F07 at 70 and the bank-credit control
+at 0. The expanded synthetic categories are summarized above; these values do not establish real-world
+accuracy or satisfy the separate 90% holdout-recall goal.
 
 ## Contract and privacy notes
 
