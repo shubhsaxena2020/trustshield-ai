@@ -131,6 +131,21 @@ class QrGuardHostTest {
     }
 
     @Test
+    fun scannedUpiQrShowsPaymentAdvisoryAndMasksTheDecodedPayee() {
+        val session = render()
+        compose.waitForIdle()
+        session.applyPermission(granted)
+        session.onUiEvent(QrEvent.RegisterPayee("known@okaxis", "Known shop"))
+        session.onUiEvent(QrEvent.StartWatch(1L))
+        session.onDecoded("upi://pay?pa=other@ybl&pn=Known%20shop&am=6000&tn=pay%20now")
+        compose.waitForIdle()
+
+        assertVisible(ai.trustshield.android.ui.result.PaymentAdvisoryCopy.SECTION_TITLE.hinglish)
+        assertVisible(ai.trustshield.android.ui.result.PaymentAdvisoryCopy.CONFIRMATION.hinglish)
+        assertFalse(nodesWith("other@ybl").isNotEmpty())
+    }
+
+    @Test
     fun confirmedLiveQrShowsMaskedRegistrationAndDoesNotReopenCapture() {
         val session = render()
         val liveQr = "upi://pay?pa=demo-recipient@upi&pn=TRUSTSHIELD%20DEMO%20ONLY&am=0.00&cu=INR"

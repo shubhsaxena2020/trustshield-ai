@@ -115,6 +115,10 @@ fun ResultScreen(
 
         RiskHeader(risk = state.risk, language = language)
 
+        state.paymentAdvisory?.let { advisory ->
+            PaymentAdvisoryCard(advisory = advisory, language = language)
+        }
+
         ConfidenceBadgeView(badge = state.confidence, language = language)
 
         EvidenceSection(state = state, language = language)

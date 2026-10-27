@@ -58,6 +58,12 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import kotlinx.coroutines.delay
 import ai.trustshield.android.core.analysis.ScanOutcome
+import ai.trustshield.android.core.model.InputType
+import ai.trustshield.android.core.payment.PaymentFieldsParser
+import ai.trustshield.android.core.payment.PaymentAdvisoryEngine
+import ai.trustshield.android.core.payment.maskedForPresentation
+import ai.trustshield.android.ui.qr.RegisteredPayee
+import ai.trustshield.android.ui.qr.QrPayeePaymentBridge
 import ai.trustshield.android.core.model.Confidence
 import ai.trustshield.android.core.model.RiskLabel
 import ai.trustshield.android.core.score.LocalScorer
@@ -157,12 +163,12 @@ val LocalPreferencesSink: ProvidableCompositionLocal<(UserPreferences) -> Unit> 
  * The state comes from the in-memory local analysis result; no sample fixture is used in the app.
  */
 @Composable
-fun ResultRouteHost(appLanguage: AppLanguage, outcome: ScanOutcome?) {
+fun ResultRouteHost(appLanguage: AppLanguage, outcome: ScanOutcome?, payees: List<RegisteredPayee> = emptyList()) {
     val context = LocalContext.current
     val nav = LocalNavActions.current
     val prefs = LocalUserPreferences.current
     val sink = LocalPreferencesSink.current
-    val state = remember(outcome) { outcome?.let(AnalysisToResult::build) }
+    val state = remember(outcome, payees) { outcome?.let { AnalysisToResult.build(it, payees) } }
     var language by remember(appLanguage) { mutableStateOf(UiLanguage.of(appLanguage)) }
     val tts = remember(context) { AndroidSpokenVerdictTts(context) }
     val speaker = remember(tts) { SpokenVerdictSpeaker(tts) }
@@ -241,7 +247,7 @@ fun ResultRouteHost(appLanguage: AppLanguage, outcome: ScanOutcome?) {
 
 /** Adapts the real local engine output to the Result screen's quote-verifying presentation model. */
 object AnalysisToResult {
-    fun build(outcome: ScanOutcome) = ResultPresenter.build(
+    fun build(outcome: ScanOutcome, payees: List<RegisteredPayee> = emptyList()) = ResultPresenter.build(
         ResultInput(
             sourceText = outcome.analyzedText,
             coverage = if (outcome.result.risk.label == RiskLabel.UNABLE_TO_VERIFY) {
@@ -268,7 +274,20 @@ object AnalysisToResult {
                 outcome.result.risk.label == RiskLabel.UNABLE_TO_VERIFY
             }
         )
-    )
+    ).let { state ->
+        val fields = PaymentFieldsParser.parse(outcome.analyzedText)
+        val fromOcr = outcome.result.inputType == InputType.IMAGE
+        if (!fields.looksLikeReceipt || (!fromOcr && !fields.hasPayeeUpi && !fields.hasUtr)) state
+        else state.copy(paymentAdvisory = PaymentAdvisoryEngine().evaluate(
+            QrPayeePaymentBridge.toAdvisoryInput(
+                sourceText = outcome.analyzedText,
+                fields = fields,
+                payees = payees,
+                nowEpochMs = System.currentTimeMillis(),
+                ocrUsed = fromOcr
+            )
+        ).maskedForPresentation())
+    }
 }
 
 /** Route map for the shipped screens. No preview-only or placeholder destination is reachable. */
@@ -289,6 +308,7 @@ fun TrustShieldRouteContent(
 ) {
     val nav = LocalNavActions.current
     val clipboard = LocalClipboardManager.current
+    var registeredPayees by remember { mutableStateOf(emptyList<RegisteredPayee>()) }
     when (route) {
         AppRoute.HOME -> HomeRouteHost(
             english = english,
@@ -303,10 +323,10 @@ fun TrustShieldRouteContent(
             historyEntries = historyEntries,
             onClearHistory = onClearHistory
         )
-        AppRoute.RESULT -> ResultRouteHost(language, resultOutcome)
+        AppRoute.RESULT -> ResultRouteHost(language, resultOutcome, registeredPayees)
         AppRoute.CALL_SHIELD -> CallShieldRouteHost(language)
-        AppRoute.QR_GUARD -> QrGuardRouteHost()
-        AppRoute.HISTORY -> HistoryScreen(historyEntries, language, onClearHistory)
+         AppRoute.HISTORY -> HistoryScreen(historyEntries, language, onClearHistory)
+         AppRoute.QR_GUARD -> QrGuardRouteHost { registeredPayees = it }
         AppRoute.SETTINGS -> SettingsRouteHost()
     }
 }
@@ -921,8 +941,8 @@ private fun CallDemoExperience(
  * remain inert data; no destination is opened.
  */
 @Composable
-fun QrGuardRouteHost() {
-    QrGuardHost()
+fun QrGuardRouteHost(onPayeesChanged: (List<RegisteredPayee>) -> Unit = {}) {
+    QrGuardHost(onPayeesChanged = onPayeesChanged)
 }
 
 /**
