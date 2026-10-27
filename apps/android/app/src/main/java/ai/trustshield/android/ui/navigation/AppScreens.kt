@@ -76,6 +76,7 @@ import ai.trustshield.android.input.share.MlKitTextRecognizer
 import ai.trustshield.android.ui.result.ConfidenceLevel
 import ai.trustshield.android.ui.result.InputCoverage
 import ai.trustshield.android.ui.result.ResultInput
+import ai.trustshield.android.ui.result.pick
 import ai.trustshield.android.ui.call.CallLanguage
 import ai.trustshield.android.ui.call.RecognizerStatus
 import ai.trustshield.android.ui.call.CallEvent
@@ -96,6 +97,12 @@ import ai.trustshield.android.input.speech.SpeechSessionCoordinator
 import ai.trustshield.android.input.speech.SpeechCapabilityProbe
 import ai.trustshield.android.input.speech.SpeechCapabilityRules
 import ai.trustshield.android.input.speech.SpeechLanguage
+import ai.trustshield.android.input.speech.SpeechLanguagePolicy
+import ai.trustshield.android.input.speech.SpeechScriptLanguageDetector
+import ai.trustshield.android.ui.voice.AndroidSpokenVerdictTts
+import ai.trustshield.android.ui.voice.SpokenVerdictContent
+import ai.trustshield.android.ui.voice.SpokenVerdictResult
+import ai.trustshield.android.ui.voice.SpokenVerdictSpeaker
 import ai.trustshield.android.input.speech.SpeechConsent
 import ai.trustshield.android.input.speech.SpeechCapabilityReport
 import ai.trustshield.android.input.speech.MicPermission as SpeechMicPermission
@@ -148,11 +155,17 @@ val LocalPreferencesSink: ProvidableCompositionLocal<(UserPreferences) -> Unit> 
  */
 @Composable
 fun ResultRouteHost(appLanguage: AppLanguage, outcome: ScanOutcome?) {
+    val context = LocalContext.current
     val nav = LocalNavActions.current
     val prefs = LocalUserPreferences.current
     val sink = LocalPreferencesSink.current
     val state = remember(outcome) { outcome?.let(AnalysisToResult::build) }
     var language by remember(appLanguage) { mutableStateOf(UiLanguage.of(appLanguage)) }
+    val tts = remember(context) { AndroidSpokenVerdictTts(context) }
+    val speaker = remember(tts) { SpokenVerdictSpeaker(tts) }
+    DisposableEffect(speaker, tts) {
+        onDispose { speaker.stop(); tts.shutdown() }
+    }
 
     if (state == null || outcome == null) return
 
@@ -171,6 +184,23 @@ fun ResultRouteHost(appLanguage: AppLanguage, outcome: ScanOutcome?) {
         state = state,
         language = language,
         riskScore = announcedScore,
+        onSpeakResult = {
+            val appTtsLanguage = when (language) {
+                UiLanguage.HINGLISH -> AppLanguage.HINGLISH
+                UiLanguage.ENGLISH -> AppLanguage.ENGLISH
+                UiLanguage.HINDI -> AppLanguage.HINDI
+            }
+            val spoken = speaker.speak(
+                appTtsLanguage,
+                SpokenVerdictContent(
+                    riskLevel = state.risk.label.pick(language),
+                    advice = state.actions.firstOrNull()?.detail?.pick(language) ?: state.risk.summary.pick(language),
+                    evidenceTitles = state.evidence.map { it.title.pick(language) },
+                ),
+                Locale.getDefault().toLanguageTag(),
+            )
+            spoken is SpokenVerdictResult.Spoken
+        },
         onToggleLanguage = {
             language = when (language) {
                 UiLanguage.HINGLISH -> UiLanguage.ENGLISH
@@ -324,8 +354,8 @@ private fun HomeRouteHost(
         )
         imageError?.let { error ->
             Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp)) {
-                Text(error.message(english), color = MaterialTheme.colorScheme.error)
-                Text(error.nextStep(english), style = MaterialTheme.typography.bodySmall)
+                Text(error.message(language), color = MaterialTheme.colorScheme.error)
+                Text(error.nextStep(language), style = MaterialTheme.typography.bodySmall)
             }
         }
         androidx.compose.foundation.layout.Row(
@@ -352,12 +382,24 @@ private fun HomeRouteHost(
 fun CallShieldRouteHost(appLanguage: AppLanguage) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
+    val tts = remember(context) { AndroidSpokenVerdictTts(context) }
+    val spokenVerdict = remember(tts) { SpokenVerdictSpeaker(tts) }
+    DisposableEffect(spokenVerdict, tts) {
+        onDispose { spokenVerdict.stop(); tts.shutdown() }
+    }
     val session = remember { CallSpeechSession(consentGranted = true) }
+    val selectedLanguage = resolveLanguage(appLanguage, Locale.getDefault().toLanguageTag())
+    val selectedSpeechTag = SpeechLanguagePolicy.selectedTag(selectedLanguage)
+    val currentAppLanguage by rememberUpdatedState(appLanguage)
+    val recognitionLanguageState = remember { mutableStateOf(selectedSpeechTag) }
+    var recognitionLanguage by recognitionLanguageState
+    val scriptDetector = remember(selectedSpeechTag) { SpeechScriptLanguageDetector(selectedSpeechTag) }
+    var recognitionLanguageStatus by remember { mutableStateOf<String?>(null) }
     val speechRoute = remember { OfflineSpeechPolicy(networkReachable = networkIsValidated(context)) }
     var offlineMode by remember(speechRoute) { mutableStateOf(speechRoute.useOffline) }
     var offlineFailureAction by remember { mutableStateOf<(() -> Unit)?>(null) }
     var capability by remember {
-        mutableStateOf(SpeechCapabilityRules.evaluate(SpeechCapabilityProbe.probe(context), SpeechLanguage.DEFAULT))
+        mutableStateOf(SpeechCapabilityRules.evaluate(SpeechCapabilityProbe.probe(context), selectedSpeechTag))
     }
     val coordinator = remember(session) {
         lateinit var created: SpeechSessionCoordinator
@@ -372,9 +414,19 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
                     onReady = { handler.post { session.onReadyForSpeech() } },
                 ).also { offlineMode = true }
             } else {
-                AndroidSpeechRecognizerHandle(context, session, capability, SpeechLanguage.DEFAULT) { code ->
+                AndroidSpeechRecognizerHandle(context, session, capability, recognitionLanguageState.value) { code ->
                     speechRoute.platformError(code)
                     offlineMode = speechRoute.useOffline
+                    if (code == ai.trustshield.android.input.speech.RecognizerErrorCode.LANGUAGE_UNAVAILABLE) {
+                        SpeechLanguagePolicy.fallbackTag(currentAppLanguage, recognitionLanguageState.value)?.let { fallbackTag ->
+                            recognitionLanguageState.value = fallbackTag
+                            recognitionLanguageStatus = ToneCopy(
+                                "Hindi speech unavailable; switching to English",
+                                "Hindi speech recognition is unavailable; switching to English",
+                                "\u0939\u093f\u0902\u0926\u0940 \u0935\u093e\u0915\u094d \u0909\u092a\u0932\u092c\u094d\u0927 \u0928\u0939\u0940\u0902; \u0905\u0902\u0917\u094d\u0930\u0947\u091c\u093c\u0940 \u092e\u0947\u0902 \u0938\u094d\u0935\u093f\u091a \u0915\u0930 \u0930\u0939\u0947 \u0939\u0948\u0902",
+                            ).forLanguage(resolveLanguage(currentAppLanguage, Locale.getDefault().toLanguageTag()))
+                        }
+                    }
                     created.onError(code)
                 }
             }
@@ -384,7 +436,6 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
     val host = remember(coordinator) { CallShieldHost(coordinator) }
     val prefs = LocalUserPreferences.current
     val sink = LocalPreferencesSink.current
-    val selectedLanguage = resolveLanguage(appLanguage, Locale.getDefault().toLanguageTag())
     // Issue #138. `CallShieldHost` owns the call session, not the user's presentation choices, and
     // it is built before this screen reads any preference — so `host.state` always carries
     // `CallUiState`'s defaults (HINGLISH, haptics on). Copying it verbatim (start / stop / pause /
@@ -450,10 +501,58 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
         )
     } else {
         Column(modifier = Modifier.fillMaxSize()) {
+    if (offlineMode && selectedLanguage == AppLanguage.ENGLISH) {
+        Surface(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+            color = MaterialTheme.colorScheme.tertiaryContainer,
+            contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+            shape = RoundedCornerShape(12.dp),
+        ) {
+            Text(
+                ToneCopy(
+                    "Vosk offline sirf Hindi pehchanta hai. English ke liye system recogniser use karein.",
+                    "The on-device recogniser is Hindi-only. No English model is bundled.",
+                    "Vosk offline sirf Hindi pehchanta hai. English ke liye system recogniser use karein.",
+                ).forLanguage(selectedLanguage.toCallLanguage()),
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                style = MaterialTheme.typography.bodySmall,
+            )
+        }
+        if (networkIsValidated(context)) {
+            OutlinedButton(
+                onClick = {
+                    speechRoute.selectOffline(false)
+                    offlineMode = false
+                },
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).heightIn(min = 48.dp),
+            ) {
+                Text(
+                    ToneCopy(
+                        "Online system recogniser par switch karein",
+                        "Switch to system recogniser",
+                        "Online system recogniser par switch karein",
+                    ).forLanguage(selectedLanguage.toCallLanguage()),
+                )
+            }
+        }
+    }
+    recognitionLanguageStatus?.let { status ->
+        Surface(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+            color = MaterialTheme.colorScheme.secondaryContainer,
+            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+            shape = RoundedCornerShape(12.dp),
+        ) {
+            Text(status, modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp), style = MaterialTheme.typography.bodySmall)
+        }
+    }
     if (offlineMode && state.isListening) {
         Text(
-            ToneCopy("Offline mode: phone par hi speech pehchaan", "Offline mode: on-device recognizer")
-                .let { if (prefs.language == AppLanguage.ENGLISH) it.english else it.hinglish },
+            ToneCopy(
+                "Offline mode: phone par hi speech pehchaan",
+                "Offline mode: on-device recogniser",
+                "ऑफ़लाइन मोड: आवाज़ फ़ोन पर ही पहचानी जाती है",
+            ).forLanguage(selectedLanguage),
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -477,7 +576,7 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
                     host.onStartRequested()
                     state = synced(host.state)
                 }
-                CallEvent.Stop -> { host.onStop(); state = synced(host.state) }
+                CallEvent.Stop -> { spokenVerdict.stop(); host.onStop(); state = synced(host.state) }
                 CallEvent.Pause -> { host.onHostPaused(); state = synced(host.state) }
                 CallEvent.Resume -> { host.onStartRequested(); state = synced(host.state) }
                 is CallEvent.SetLanguage -> {
@@ -494,6 +593,26 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
                     sink(prefs.copy(reducedMotion = event.reducedMotion))
                 }
                 else -> state = CallShieldReducer.reduce(state, event)
+            }
+        },
+        onSpeakAlert = {
+            val alert = state.alert
+            if (alert == null) false else {
+                val appTtsLanguage = when (state.language) {
+                    ai.trustshield.android.ui.call.CallLanguage.HINGLISH -> AppLanguage.HINGLISH
+                    ai.trustshield.android.ui.call.CallLanguage.ENGLISH -> AppLanguage.ENGLISH
+                    ai.trustshield.android.ui.call.CallLanguage.HINDI -> AppLanguage.HINDI
+                }
+                val result = spokenVerdict.speak(
+                    appTtsLanguage,
+                    SpokenVerdictContent(
+                        riskLevel = CallShieldCopy.warning(alert.severity).forLanguage(state.language),
+                        advice = CallShieldCopy.riskExplainer.forLanguage(state.language),
+                        evidenceTitles = alert.stages.map { CallShieldCopy.stageLabel(it).forLanguage(state.language) },
+                    ),
+                    Locale.getDefault().toLanguageTag(),
+                )
+                result is SpokenVerdictResult.Spoken
             }
         },
         onOpenStagedDemo = { demoOpen = true },
@@ -524,23 +643,56 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
             ),
         ) {
             Text(
-                if (speechRoute.useOffline) "Offline mode selected. Tap to use system recognizer"
-                else "Use offline mode - Vosk Hindi recognizer",
+                ToneCopy(
+                    if (speechRoute.useOffline) "Offline mode chuna gaya. System recogniser ke liye tap karein"
+                    else "Offline mode use karein - Vosk Hindi recogniser",
+                    if (speechRoute.useOffline) "Offline mode selected. Tap to use the system recogniser"
+                    else "Use offline mode - Vosk Hindi recogniser",
+                    if (speechRoute.useOffline) "ऑफ़लाइन मोड चुना गया है। सिस्टम recogniser के लिए टैप करें"
+                    else "ऑफ़लाइन मोड इस्तेमाल करें - Vosk हिंदी recogniser",
+                ).forLanguage(selectedLanguage),
             )
         }
     }
     }
-    LaunchedEffect(consent, micGranted, prefs.language) {
+    LaunchedEffect(consent, micGranted, prefs.language, recognitionLanguage) {
         val mic = if (micGranted) SpeechMicPermission.Granted else SpeechMicPermission.Denied
-        capability = SpeechCapabilityRules.evaluate(SpeechCapabilityProbe.probe(context, mic), SpeechLanguage.DEFAULT)
+        capability = SpeechCapabilityRules.evaluate(SpeechCapabilityProbe.probe(context, mic), recognitionLanguage)
         host.onCapability(consent, capability, if (micGranted) ai.trustshield.android.ui.call.MicPermission.GRANTED else ai.trustshield.android.ui.call.MicPermission.DENIED)
         host.onLanguageChanged(selectedLanguage.toCallLanguage())
         state = synced(host.state)
     }
+    LaunchedEffect(selectedSpeechTag) {
+        recognitionLanguage = selectedSpeechTag
+        recognitionLanguageStatus = null
+    }
     remember(host) {
         session.setUtteranceSink(UtteranceSink { utterance ->
+            if (utterance.isFinal) {
+                scriptDetector.observeFinal(utterance.text)?.let { detectedTag ->
+                    recognitionLanguage = detectedTag
+                    val mic = if (micGranted) SpeechMicPermission.Granted else SpeechMicPermission.Denied
+                    capability = SpeechCapabilityRules.evaluate(SpeechCapabilityProbe.probe(context, mic), detectedTag)
+                    host.onCapability(
+                        consent,
+                        capability,
+                        if (micGranted) ai.trustshield.android.ui.call.MicPermission.GRANTED
+                        else ai.trustshield.android.ui.call.MicPermission.DENIED,
+                    )
+                    val languageName = if (detectedTag == SpeechLanguage.EN_IN) {
+                        ToneCopy("English", "English", "\u0905\u0902\u0917\u094d\u0930\u0947\u091c\u093c\u0940").forLanguage(selectedLanguage)
+                    } else {
+                        ToneCopy("Hindi", "Hindi", "\u0939\u093f\u0902\u0926\u0940").forLanguage(selectedLanguage)
+                    }
+                    recognitionLanguageStatus = ToneCopy(
+                        "Ab $languageName mein speech pehchani ja rahi hai",
+                        "Speech recognition switched to $languageName",
+                        "\u0905\u092c $languageName \u092e\u0947\u0902 \u0935\u093e\u0915\u094d \u092a\u0939\u091a\u093e\u0928\u0940 \u091c\u093e \u0930\u0939\u0940 \u0939\u0948",
+                    ).forLanguage(selectedLanguage)
+                }
+                host.onUtterance(utterance.text, utterance.confidence, utterance.tsMs)
+            }
             speechRoute.platformSuccess()
-            if (utterance.isFinal) host.onUtterance(utterance.text, utterance.confidence, utterance.tsMs)
             state = synced(host.state)
         })
         host
@@ -663,7 +815,11 @@ private fun CallDemoExperience(
                             ai.trustshield.android.core.model.Confidence.LOW -> ToneCopy("Kam", "Low", "\u0915\u092e").forLanguage(language)
                         }
                         Text(
-                            "${step.score}/100 · ${ToneCopy("Samajh", "Confidence", "\u092d\u0930\u094b\u0938\u0947 \u0915\u093e \u0938\u094d\u0924\u0930").forLanguage(language)}: $confidence",
+                            ToneCopy(
+                                "${step.score}/100 · Samajh: $confidence",
+                                "${step.score}/100 · Confidence: $confidence",
+                                "${step.score}/100 · \u092d\u0930\u094b\u0938\u0947 \u0915\u093e \u0938\u094d\u0924\u0930: $confidence",
+                            ).forLanguage(language),
                             style = MaterialTheme.typography.titleMedium
                         )
                         Text(step.position.explanation(language), style = MaterialTheme.typography.bodySmall)
@@ -717,12 +873,12 @@ private fun CallDemoExperience(
                                 fontWeight = FontWeight.SemiBold
                             )
                             chip.quotes.forEach { quote ->
-                                Text("“$quote”", style = MaterialTheme.typography.bodySmall)
+                                Text(quoteExactEvidence(quote), style = MaterialTheme.typography.bodySmall)
                             }
                         }
                     }
                 }
-                Text("“${step.line.text}”", style = MaterialTheme.typography.bodyMedium)
+                Text(quoteExactEvidence(step.line.text), style = MaterialTheme.typography.bodyMedium)
             }
 
             Text(
@@ -777,7 +933,7 @@ fun QrGuardRouteHost() {
 fun SettingsRouteHost() {
     val prefs = LocalUserPreferences.current
     val sink = LocalPreferencesSink.current
-    var state by remember { mutableStateOf(SettingsState.from(prefs)) }
+    var state by remember(prefs) { mutableStateOf(SettingsState.from(prefs)) }
 
     SettingsScreen(
         state = state,
@@ -855,3 +1011,5 @@ private fun DemoPositionBand(position: DemoRiskPosition?, tone: RiskTone, langua
         }
     }
 }
+
+private fun quoteExactEvidence(text: String): String = "\u201c$text\u201d"

@@ -75,7 +75,8 @@ import ai.trustshield.android.ui.theme.TrustShieldTheme
 internal fun ToneCopy.text(english: Boolean): String = if (english) this.english else this.hinglish
 
 private fun ToneCopy.text(language: AppLanguage): String = when (language) {
-    AppLanguage.SYSTEM, AppLanguage.HINGLISH -> hinglish
+    AppLanguage.SYSTEM -> forLanguage(AppLanguage.SYSTEM)
+    AppLanguage.HINGLISH -> hinglish
     AppLanguage.ENGLISH -> english
     AppLanguage.HINDI -> hindi
 }

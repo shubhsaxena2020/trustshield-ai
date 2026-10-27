@@ -138,11 +138,10 @@ fun QrGuardScreen(
             MandatoryConfirmationBanner(lang = lang, dark = dark)
 
             Text(
-                text = if (lang == QrLanguage.HINGLISH) {
-                    "Demo scan nakli QR data use karta hai. Asli QR camera se scan hota hai."
-                } else {
-                    "Demo scan uses sample QR data. Real QR codes are scanned with the camera."
-                },
+                text = ToneCopy(
+                    "Demo scan nakli QR data use karta hai. Asli QR camera se scan hota hai.",
+                    "Demo scan uses sample QR data. Real QR codes are scanned with the camera.",
+                ).text(lang),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -650,7 +649,7 @@ private fun CounterPanel(state: QrUiState, lang: QrLanguage, dark: Boolean) {
         val occludedFor = state.occlusion
         Text(
             text = QrStrings.occlusionTimerLabel.text(lang) + ": " +
-                (if (occludedFor != null) (occludedFor.elapsedMs / 1000L).toString() + "s" else "-"),
+                (if (occludedFor != null) (occludedFor.elapsedMs / 1000L).toString() + QrStrings.elapsedSeconds.text(lang) else "-"),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
