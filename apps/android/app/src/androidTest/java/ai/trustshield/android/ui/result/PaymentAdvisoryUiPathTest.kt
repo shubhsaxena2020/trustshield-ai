@@ -5,6 +5,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import ai.trustshield.android.core.analysis.LocalScanPipeline
 import ai.trustshield.android.core.payment.PaymentAdvisory
 import ai.trustshield.android.core.payment.PaymentAdvisoryVerdict
 import ai.trustshield.android.core.payment.PaymentFields
@@ -12,6 +13,8 @@ import ai.trustshield.android.core.payment.PaymentHint
 import ai.trustshield.android.core.payment.PaymentHintKind
 import ai.trustshield.android.core.payment.PaymentHintSeverity
 import ai.trustshield.android.ui.theme.RiskTone
+import ai.trustshield.android.ui.navigation.AnalysisToResult
+import ai.trustshield.android.ui.qr.RegisteredPayee
 import ai.trustshield.android.ui.theme.TrustShieldTheme
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -123,5 +126,22 @@ class PaymentAdvisoryUiPathTest {
         compose.waitForIdle()
         compose.onNodeWithText(PaymentAdvisoryCopy.SECTION_TITLE.hinglish).assertExists()
         compose.onNodeWithText(PaymentAdvisoryCopy.CONFIRMATION.hinglish).assertExists()
+    }
+
+    @Test
+    fun paymentLikeMessageBuildsAndRendersAdvisoryOnResultScreen() {
+        val outcome = LocalScanPipeline().analyzeText("Pay Rs 6,000 to shop@okaxis now")
+        val state = AnalysisToResult.build(outcome, listOf(RegisteredPayee("known@okaxis")))
+        val builtAdvisory = requireNotNull(state.paymentAdvisory)
+
+        compose.setContent {
+            TrustShieldTheme {
+                ResultScreen(state = state)
+            }
+        }
+        compose.waitForIdle()
+        compose.onNodeWithText(PaymentAdvisoryCopy.SECTION_TITLE.hinglish).assertExists()
+        compose.onNodeWithText(PaymentAdvisoryCopy.CONFIRMATION.hinglish).assertExists()
+        compose.onNodeWithText(PaymentAdvisoryCopy.forHint(builtAdvisory.hints.first()).hinglish).assertExists()
     }
 }

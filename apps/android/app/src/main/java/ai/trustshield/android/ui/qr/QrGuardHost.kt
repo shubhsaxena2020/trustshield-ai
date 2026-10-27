@@ -684,7 +684,7 @@ internal class QrGuardSession(
             status = PaymentStatus.UNKNOWN,
             appHint = PaymentAppHint.UNKNOWN
         )
-        return PaymentAdvisoryEngine.evaluate(QrPayeePaymentBridge.toAdvisoryInput(
+        return PaymentAdvisoryEngine().evaluate(QrPayeePaymentBridge.toAdvisoryInput(
             sourceText = payload,
             fields = fields,
             payees = state.payees,

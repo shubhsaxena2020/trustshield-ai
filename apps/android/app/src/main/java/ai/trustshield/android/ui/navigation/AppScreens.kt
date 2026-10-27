@@ -265,7 +265,7 @@ object AnalysisToResult {
         val fields = PaymentFieldsParser.parse(outcome.analyzedText)
         val fromOcr = outcome.result.inputType == InputType.IMAGE
         if (!fields.looksLikeReceipt || (!fromOcr && !fields.hasPayeeUpi && !fields.hasUtr)) state
-        else state.copy(paymentAdvisory = PaymentAdvisoryEngine.evaluate(
+        else state.copy(paymentAdvisory = PaymentAdvisoryEngine().evaluate(
             QrPayeePaymentBridge.toAdvisoryInput(
                 sourceText = outcome.analyzedText,
                 fields = fields,
