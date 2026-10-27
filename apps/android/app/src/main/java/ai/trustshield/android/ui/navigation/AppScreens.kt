@@ -21,6 +21,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.Button
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -38,6 +39,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.text.font.FontWeight
 import android.net.Uri
 import android.content.Context
@@ -452,6 +454,7 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
                 .let { if (prefs.language == AppLanguage.ENGLISH) it.english else it.hinglish },
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
             style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
     offlineFailureAction = { host.onStop(); offlineMode = false; state = host.state }
@@ -466,6 +469,7 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
                 }
                 CallEvent.MicPermissionGranted -> permissionRequest.launch(Manifest.permission.RECORD_AUDIO)
                 CallEvent.Start -> {
+                    speechRoute.updateNetworkReachable(networkIsValidated(context))
                     host.onCapability(consent, capability, if (micGranted) ai.trustshield.android.ui.call.MicPermission.GRANTED else ai.trustshield.android.ui.call.MicPermission.DENIED)
                     host.onStartRequested()
                     state = synced(host.state)
@@ -475,8 +479,8 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
                 CallEvent.Resume -> { host.onStartRequested(); state = synced(host.state) }
                 is CallEvent.SetLanguage -> {
                     host.onLanguageChanged(event.language)
-                    state = host.state
                     sink(prefs.copy(language = event.language.toAppLanguage()))
+                    state = host.state.withStoredChoices(event.language, prefs.haptics, prefs.reducedMotion)
                 }
                 is CallEvent.SetHaptics -> {
                     state = CallShieldReducer.reduce(state, event)
@@ -503,16 +507,22 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
         )
     }
     if (!state.isListening) {
-        TextButton(
+        OutlinedButton(
             onClick = {
                 speechRoute.selectOffline(!speechRoute.useOffline)
                 offlineMode = speechRoute.useOffline
             },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).semantics {
+                selected = offlineMode
+            },
+            colors = ButtonDefaults.outlinedButtonColors(
+                containerColor = if (speechRoute.useOffline) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
+                contentColor = if (speechRoute.useOffline) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.primary,
+            ),
         ) {
             Text(
-                if (speechRoute.useOffline) "Offline mode selected · Tap to use system recognizer"
-                else "Use offline mode · Vosk Hindi recognizer",
+                if (speechRoute.useOffline) "Offline mode selected. Tap to use system recognizer"
+                else "Use offline mode - Vosk Hindi recognizer",
             )
         }
     }

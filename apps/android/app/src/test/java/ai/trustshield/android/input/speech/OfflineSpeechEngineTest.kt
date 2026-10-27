@@ -20,6 +20,14 @@ class OfflineSpeechEngineTest {
     }
 
     @Test
+    fun `network loss before start automatically selects offline engine`() {
+        val policy = OfflineSpeechPolicy(networkReachable = true)
+        assertFalse(policy.useOffline)
+        policy.updateNetworkReachable(false)
+        assertTrue(policy.useOffline)
+    }
+
+    @Test
     fun `two platform errors switch to offline and explicit choice is honored`() {
         val policy = OfflineSpeechPolicy(networkReachable = true)
         assertFalse(policy.platformError(RecognizerErrorCode.NETWORK))

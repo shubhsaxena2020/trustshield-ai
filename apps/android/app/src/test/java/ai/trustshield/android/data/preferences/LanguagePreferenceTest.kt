@@ -83,15 +83,15 @@ class LanguagePreferenceTest {
     // ---------------------------------------------------------------------------------------
 
     @Test
-    fun shippingDefaultLanguageIsHinglish() {
+    fun shippingDefaultLanguageFollowsThePhoneAndFallsBackToHinglish() {
         // Three independent spellings of "the default" must agree, so a stray construction-site
         // default (e.g. `UserPreferences(language = ENGLISH)`) cannot hide behind the companion.
-        assertEquals("constructor default", AppLanguage.HINGLISH, UserPreferences().language)
-        assertEquals("companion default", AppLanguage.HINGLISH, UserPreferences.defaults().language)
-        assertEquals("DEFAULTS value", AppLanguage.HINGLISH, UserPreferences.DEFAULTS.language)
+        assertEquals("constructor default", AppLanguage.SYSTEM, UserPreferences().language)
+        assertEquals("companion default", AppLanguage.SYSTEM, UserPreferences.defaults().language)
+        assertEquals("DEFAULTS value", AppLanguage.SYSTEM, UserPreferences.DEFAULTS.language)
 
         // An empty store — a first launch — is the same thing.
-        assertEquals(AppLanguage.HINGLISH, PreferencePersistence(FakeStore()).load().language)
+        assertEquals(AppLanguage.SYSTEM, PreferencePersistence(FakeStore()).load().language)
 
         // And it is the product default on screen, not just in the model.
         val effects = resolve(
@@ -173,7 +173,7 @@ class LanguagePreferenceTest {
             store.put(SettingsKeys.LANGUAGE, value)
 
             val loaded = PreferencePersistence(store).load()
-            assertEquals("garbage '$value' must fall back to Hinglish", AppLanguage.HINGLISH, loaded.language)
+            assertEquals("garbage '$value' must fall back to SYSTEM", AppLanguage.SYSTEM, loaded.language)
             assertEquals(
                 "garbage '$value' must leave the rest at defaults",
                 UserPreferences.defaults(),
@@ -190,7 +190,7 @@ class LanguagePreferenceTest {
     @Test
     fun missingLanguageKeyDecodesToTheDefault() {
         // Nothing stored at all.
-        assertEquals(AppLanguage.HINGLISH, PreferencePersistence(FakeStore()).load().language)
+        assertEquals(AppLanguage.SYSTEM, PreferencePersistence(FakeStore()).load().language)
 
         // Every other key present, language simply absent (an older build that predates the
         // toggle). The stored theme must still be honoured — only language falls back.
@@ -202,7 +202,7 @@ class LanguagePreferenceTest {
         assertFalse("precondition: no language key is present", store.contents().containsKey(SettingsKeys.LANGUAGE))
 
         val loaded = PreferencePersistence(store).load()
-        assertEquals(AppLanguage.HINGLISH, loaded.language)
+        assertEquals(AppLanguage.SYSTEM, loaded.language)
         assertEquals(ThemeMode.DARK, loaded.themeMode)
         assertEquals(Sensitivity.HIGH, loaded.sensitivity)
         assertFalse("an unrelated stored choice must not be reset by the missing language", loaded.haptics)
@@ -379,12 +379,12 @@ class LanguagePreferenceTest {
             assertEquals(ThemeMode.DARK, afterRelaunch.themeMode)
 
             val effects = resolve(preferences = afterRelaunch, systemInDarkTheme = false)
-            assertEquals("QR copy for $language", language.name, effects.qrLanguage.name)
-            assertEquals("Call copy for $language", language.name, effects.callLanguage.name)
-            assertEquals("Result copy for $language", language.name, effects.resultLanguage.name)
+            val resolvedLanguage = if (language == AppLanguage.SYSTEM) AppLanguage.HINGLISH else language
+            assertEquals("QR copy for $language", resolvedLanguage.name, effects.qrLanguage.name)
+            assertEquals("Call copy for $language", resolvedLanguage.name, effects.callLanguage.name)
+            assertEquals("Result copy for $language", resolvedLanguage.name, effects.resultLanguage.name)
         }
-        // A third language would need a mapping in all three screen enums; fail loudly if added.
-        assertEquals(2, AppLanguage.values().size)
+        assertEquals(setOf(AppLanguage.SYSTEM, AppLanguage.HINGLISH, AppLanguage.ENGLISH, AppLanguage.HINDI), AppLanguage.values().toSet())
     }
 
     @Test
@@ -400,6 +400,6 @@ class LanguagePreferenceTest {
         // Exactly one language value survives — no "ENGLISH" remnant can be read back later.
         assertEquals(AppLanguage.HINGLISH.name, store.contents()[SettingsKeys.LANGUAGE])
         assertEquals(AppLanguage.HINGLISH, store.relaunch().readAll().let { UserPreferences.fromMap(it).language })
-        assertEquals("Hinglish (default)", SettingsCopy.languageHinglish.forLanguage(AppLanguage.HINGLISH))
+        assertEquals("Hinglish", SettingsCopy.languageHinglish.forLanguage(AppLanguage.HINGLISH))
     }
 }
