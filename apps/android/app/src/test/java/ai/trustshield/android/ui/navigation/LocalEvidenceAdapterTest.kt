@@ -31,6 +31,22 @@ class LocalEvidenceAdapterTest {
     }
 
     @Test
+    fun utilityBillRuleGetsASpecificEvidenceTitle() {
+        val evidence = Evidence.unquoted(
+            module = "stage_rules",
+            titleHinglish = "Dhamki ke saath bill update karne ko kaha",
+            detail = "Bill update karne ko kaha gaya.",
+            severity = Severity.HIGH,
+            strength = Strength.STRONG,
+        )
+
+        assertEquals(
+            "Utility bill update requested with disconnection threat",
+            LocalEvidenceAdapter.evidence(evidence).titleEnglish
+        )
+    }
+
+    @Test
     fun englishResultActionUsesEnglishCopy() {
         val result = LocalEvidenceAdapter.action(LocalScorer.ACTION_HIGH_STOP, 0)
 
