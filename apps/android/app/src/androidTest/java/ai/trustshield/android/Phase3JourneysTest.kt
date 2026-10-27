@@ -416,22 +416,21 @@ class Phase3JourneysTest {
     private fun waitForResult(timeoutMs: Long = 30_000) {
         val shown = try {
             compose.waitUntil(timeoutMs) {
-                compose.onAllNodes(
-                    SemanticsMatcher("result announcement contains risk and confidence") { node ->
-                        val announcement = node.config
-                            .getOrNull(SemanticsProperties.ContentDescription)
-                            ?.joinToString(" ")
-                            ?: return@SemanticsMatcher false
-                        val hasRisk = listOf(
-                            "jaankari", "kam khatra", "dhyan dein", "zyada khatra",
-                            "information", "low risk", "caution", "high risk"
-                        ).any { announcement.contains(it, ignoreCase = true) }
-                        val hasConfidence = listOf(
-                            "bharosa", "confidence"
-                        ).any { announcement.contains(it, ignoreCase = true) }
-                        hasRisk && hasConfidence
-                    }
-                ).fetchSemanticsNodes().isNotEmpty()
+                val announcements = compose.onAllNodes(
+                    SemanticsMatcher.keyIsDefined(SemanticsProperties.ContentDescription)
+                ).fetchSemanticsNodes().flatMap {
+                    it.config[SemanticsProperties.ContentDescription]
+                }
+                announcements.any { announcement ->
+                    val hasRisk = listOf(
+                        "jaankari", "kam khatra", "dhyan dein", "zyada khatra",
+                        "information", "low risk", "caution", "high risk"
+                    ).any { announcement.contains(it, ignoreCase = true) }
+                    val hasConfidence = listOf(
+                        "bharosa", "confidence"
+                    ).any { announcement.contains(it, ignoreCase = true) }
+                    hasRisk && hasConfidence
+                }
             }
             true
         } catch (_: androidx.compose.ui.test.ComposeTimeoutException) {
