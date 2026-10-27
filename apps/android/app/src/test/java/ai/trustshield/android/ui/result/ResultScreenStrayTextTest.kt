@@ -1,5 +1,6 @@
 package ai.trustshield.android.ui.result
 
+import ai.trustshield.android.data.preferences.AppLanguage
 import ai.trustshield.android.ui.theme.Contrast
 import ai.trustshield.android.ui.theme.RiskTone
 import ai.trustshield.android.ui.theme.ToneCopy
@@ -33,6 +34,13 @@ import java.util.Locale
  * one of the visible strings".
  */
 class ResultScreenStrayTextTest {
+
+    @Test
+    fun systemLanguageFollowsTheDeviceLocaleWithoutChangingTheStoredChoice() {
+        assertEquals(UiLanguage.ENGLISH, UiLanguage.of(AppLanguage.SYSTEM, "en-IN"))
+        assertEquals(UiLanguage.HINDI, UiLanguage.of(AppLanguage.SYSTEM, "hi-IN"))
+        assertEquals(UiLanguage.HINGLISH, UiLanguage.of(AppLanguage.SYSTEM, "fr-FR"))
+    }
 
     // ------------------------------------------------------------------ helpers
 

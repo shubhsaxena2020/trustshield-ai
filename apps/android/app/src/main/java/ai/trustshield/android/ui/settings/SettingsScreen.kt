@@ -43,6 +43,7 @@ import ai.trustshield.android.data.preferences.AppLanguage
 import ai.trustshield.android.data.preferences.Sensitivity
 import ai.trustshield.android.data.preferences.ThemeMode
 import ai.trustshield.android.ui.theme.TsTokens
+import ai.trustshield.android.ui.theme.ToneCopy
 import ai.trustshield.android.ui.theme.TrustShieldTheme
 
 /**
@@ -192,7 +193,7 @@ fun SettingsScreen(
             )
         }
 
-        DeviceCheckPanel(english = state.preferences.language == AppLanguage.ENGLISH)
+        DeviceCheckPanel(language = state.preferences.language)
 
         Spacer(Modifier.height(TsTokens.SpacingLg))
 
@@ -256,22 +257,23 @@ fun SettingsScreen(
 }
 
 @Composable
-private fun DeviceCheckPanel(english: Boolean) {
+private fun DeviceCheckPanel(language: AppLanguage) {
     val context = LocalContext.current
     var expanded by remember { mutableStateOf(false) }
     var hindiLocale by remember { mutableStateOf(DeviceCheckLocale.NOT_CHECKED) }
     val current = DeviceCheckProbe.snapshot(context, hindiLocale)
 
-    SettingsSection(title = if (english) "Device check" else "Device check") {
+    SettingsSection(title = ToneCopy("Device check", "Device check").forLanguage(language)) {
         TextButton(
             onClick = { expanded = !expanded },
             modifier = Modifier.fillMaxWidth().heightIn(min = TsTokens.MinTouchTarget),
         ) {
-            Text(if (expanded) {
-                if (english) "Hide device details" else "Device ki jaankari chhupayein"
-            } else {
-                if (english) "Show device details" else "Device ki jaankari dekhein"
-            })
+            Text(
+                ToneCopy(
+                    "Device ki jaankari ${if (expanded) "chhupayein" else "dekhein"}",
+                    "${if (expanded) "Hide" else "Show"} device details",
+                ).forLanguage(language),
+            )
         }
         if (expanded) {
             LaunchedEffect(Unit) {
@@ -281,14 +283,14 @@ private fun DeviceCheckPanel(english: Boolean) {
                     onResult = { hindiLocale = it },
                 )
             }
-            val locale = DeviceCheckCopy.localeStatus(current.hindiLocale, english)
+            val locale = DeviceCheckCopy.localeStatus(current.hindiLocale, language)
             Column(verticalArrangement = Arrangement.spacedBy(TsTokens.SpacingXs)) {
-                DeviceCheckLine(if (english) "Android" else "Android", "${current.androidVersion} (API ${current.apiLevel})")
+                DeviceCheckLine("Android", "${current.androidVersion} (API ${current.apiLevel})")
                 DeviceCheckLine("ABI", current.abi)
-                DeviceCheckLine("Speech recognizer", DeviceCheckCopy.availability(current.recognizerAvailable, english))
-                DeviceCheckLine(if (english) "Hindi hi-IN" else "Hindi hi-IN", locale)
-                DeviceCheckLine("Camera permission", DeviceCheckCopy.permission(current.cameraPermission, english))
-                DeviceCheckLine("Microphone permission", DeviceCheckCopy.permission(current.microphonePermission, english))
+                DeviceCheckLine(ToneCopy("Speech recognizer", "Speech recognizer").forLanguage(language), DeviceCheckCopy.availability(current.recognizerAvailable, language))
+                DeviceCheckLine(ToneCopy("Hindi hi-IN", "Hindi hi-IN").forLanguage(language), locale)
+                DeviceCheckLine(ToneCopy("Camera permission", "Camera permission").forLanguage(language), DeviceCheckCopy.permission(current.cameraPermission, language))
+                DeviceCheckLine(ToneCopy("Microphone permission", "Microphone permission").forLanguage(language), DeviceCheckCopy.permission(current.microphonePermission, language))
             }
         }
     }

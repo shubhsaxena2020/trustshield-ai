@@ -31,6 +31,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -45,6 +48,7 @@ import ai.trustshield.android.ui.theme.RiskTone
 import ai.trustshield.android.ui.theme.RiskToneCopy
 import ai.trustshield.android.ui.theme.TsMotion
 import ai.trustshield.android.ui.theme.TsTokens
+import ai.trustshield.android.ui.theme.ToneCopy
 import ai.trustshield.android.ui.theme.TrustShieldTheme
 import ai.trustshield.android.ui.theme.accent
 import ai.trustshield.android.ui.theme.container
@@ -74,6 +78,7 @@ fun CallShieldScreen(
     state: CallUiState,
     onEvent: (CallEvent) -> Unit,
     modifier: Modifier = Modifier,
+    onSpeakAlert: (() -> Boolean)? = null,
     // Fallbacks required by UI_SPEC for denied mic / missing recogniser. They are callbacks only:
     // no speech code exists in this package, and neither path is labelled live ASR.
     onOpenStagedDemo: (() -> Unit)? = null,
@@ -94,7 +99,7 @@ fun CallShieldScreen(
             Header(state = state, onEvent = onEvent)
 
             // Sticky warning: outside the scroll area, so it stays visible while the user reads.
-            state.alert?.let { alert -> WarningBanner(alert = alert, state = state) }
+            state.alert?.let { alert -> WarningBanner(alert = alert, state = state, onSpeakAlert = onSpeakAlert) }
 
             Column(
                 modifier = Modifier
@@ -190,7 +195,8 @@ private fun Header(state: CallUiState, onEvent: (CallEvent) -> Unit) {
 // -------------------------------------------------------------------------------------------------
 
 @Composable
-private fun WarningBanner(alert: CallAlert, state: CallUiState) {
+private fun WarningBanner(alert: CallAlert, state: CallUiState, onSpeakAlert: (() -> Boolean)?) {
+    var speechUnavailable by remember(state.language) { mutableStateOf(false) }
     val language = state.language
     val presentation = RiskToneCopy.of(alert.tone)
     val body = CallShieldCopy.warning(alert.severity).forLanguage(language)
@@ -232,6 +238,24 @@ private fun WarningBanner(alert: CallAlert, state: CallUiState) {
                         style = MaterialTheme.typography.bodySmall,
                         color = alert.tone.onContainer()
                     )
+                    if (onSpeakAlert != null) {
+                        TextButton(
+                            onClick = { speechUnavailable = !onSpeakAlert() },
+                            modifier = Modifier.heightIn(min = TsTokens.MinTouchTarget),
+                        ) {
+                            Text(ToneCopy("Alert sunen", "Read alert aloud", "\u091a\u0947\u0924\u093e\u0935\u0928\u0940 \u0938\u0941\u0928\u0947\u0902").forLanguage(language))
+                        }
+                        if (speechUnavailable) {
+                            Text(
+                                ToneCopy(
+                                    "Is device par padhne wali awaaz nahi mili. Alert text mein dekhein.",
+                                    "No offline voice is available. Read the alert on screen.",
+                                    "\u0907\u0938 \u0921\u093f\u0935\u093e\u0907\u0938 \u092a\u0930 \u0905\u092b\u093c\u0932\u093e\u0907\u0928 \u0906\u0935\u093e\u091c\u093c \u0928\u0939\u0940\u0902 \u092e\u093f\u0932\u0940\u0964 \u091a\u0947\u0924\u093e\u0935\u0928\u0940 \u0938\u094d\u0915\u094d\u0930\u0940\u0928 \u092a\u0930 \u092a\u0922\u093c\u0947\u0902\u0964",
+                                ).forLanguage(language),
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                        }
+                    }
                 }
             }
         }

@@ -1,5 +1,6 @@
 package ai.trustshield.android.ui.theme
 
+import ai.trustshield.android.data.preferences.AppLanguage
 import androidx.compose.material3.ColorScheme
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -22,6 +23,18 @@ import kotlin.math.abs
  * `Typography` all construct normally inside a JVM unit test, so the tokens are tested as shipped.
  */
 class ThemeTest {
+    @Test
+    fun systemCopyFollowsTheCurrentPhoneLocale() {
+        val original = Locale.getDefault()
+        try {
+            Locale.setDefault(Locale.forLanguageTag("hi-IN"))
+            assertEquals("हिंदी", ToneCopy("Hinglish", "English", "हिंदी").forLanguage(AppLanguage.SYSTEM))
+            Locale.setDefault(Locale.forLanguageTag("en-IN"))
+            assertEquals("English", ToneCopy("Hinglish", "English", "हिंदी").forLanguage(AppLanguage.SYSTEM))
+        } finally {
+            Locale.setDefault(original)
+        }
+    }
 
     // ---------------------------------------------------------------- helpers
 

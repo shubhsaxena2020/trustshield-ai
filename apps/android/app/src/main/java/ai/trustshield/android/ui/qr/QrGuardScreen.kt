@@ -138,11 +138,10 @@ fun QrGuardScreen(
             MandatoryConfirmationBanner(lang = lang, dark = dark)
 
             Text(
-                text = if (lang == QrLanguage.HINGLISH) {
-                    "Demo scan nakli QR data use karta hai. Asli QR camera se scan hota hai."
-                } else {
-                    "Demo scan uses sample QR data. Real QR codes are scanned with the camera."
-                },
+                text = ToneCopy(
+                    "Demo scan nakli QR data use karta hai. Asli QR camera se scan hota hai.",
+                    "Demo scan uses sample QR data. Real QR codes are scanned with the camera.",
+                ).text(lang),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
