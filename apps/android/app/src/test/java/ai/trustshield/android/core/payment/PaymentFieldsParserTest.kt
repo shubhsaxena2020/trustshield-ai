@@ -583,6 +583,19 @@ Total ₹75")
     }
 
     @Test
+    fun `malformed upi local and handle separators are rejected`() {
+        listOf(
+            ".merchant@okaxis",
+            "merchant.@okaxis",
+            "merchant@okaxis-",
+            "merchant@-okaxis",
+            "merchant@okaxis.-bank",
+        ).forEach { candidate ->
+            assertEquals("malformed UPI must not be repaired: $candidate", "", parse("Paid to $candidate").payeeUpi)
+        }
+    }
+
+    @Test
     fun `multiple currency amounts are ambiguous`() {
         val fields = parse("₹500\\nTotal ₹700")
         assertNull(fields.amountMinor)
@@ -636,5 +649,39 @@ Total ₹75")
         assertNull(fields.amountMinor)
         assertEquals("", fields.utr)
         assertEquals("merchant@okaxis", fields.payeeUpi)
+    }
+
+    @Test
+    fun `invalid cued upi is not replaced by an unrelated valid footer address`() {
+        val fields = parse("Paid to bad..merchant@okaxis\\nSupport help@trustshield.ai")
+
+        assertEquals("", fields.payeeUpi)
+    }
+
+    @Test
+    fun `amount with malformed decimal or adjacent second separator is not repaired`() {
+        listOf("₹500.000", "₹500..00", "₹500,00.123").forEach { text ->
+            val fields = parse(text)
+            assertNull("unexpected amount from $text", fields.amountMinor)
+            assertEquals("", fields.amountRaw)
+        }
+    }
+
+    @Test
+    fun `unrelated failed status still prevents a success claim`() {
+        val fields = parse("₹500\\nPayment successful\\nPrevious attempt failed")
+
+        assertEquals(PaymentStatus.FAILED, fields.status)
+        assertEquals("failed", fields.statusRaw)
+    }
+
+    @Test
+    fun `urgency and payment words alone do not establish a receipt outcome`() {
+        val text = "Pay now urgently ₹500; offer ends tonight"
+        val fields = parse(text)
+
+        assertEquals(PaymentStatus.UNKNOWN, fields.status)
+        assertFalse(fields.looksLikeReceipt)
+        assertFalse(PaymentFieldsParser.looksLikePaymentScreenshot(text))
     }
 }

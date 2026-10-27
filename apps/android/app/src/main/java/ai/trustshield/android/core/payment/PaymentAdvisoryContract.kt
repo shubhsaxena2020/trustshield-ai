@@ -1,5 +1,8 @@
 package ai.trustshield.android.core.payment
 
+private val VALID_PAYMENT_UPI_ID = Regex("""[A-Za-z0-9._-]{2,}@[A-Za-z][A-Za-z0-9.-]{1,}""")
+private val VALID_PAYMENT_UTR = Regex("""[0-9]{4}(?:[ -]?[0-9]{4}){2}""")
+
 /**
  * Lane B / payment advisory — the pinned contract every payment-advisory file implements against.
  *
@@ -72,8 +75,12 @@ data class PaymentFields(
     val appHint: PaymentAppHint = PaymentAppHint.UNKNOWN
 ) {
     val hasAmount: Boolean get() = amountMinor != null && amountMinor > 0L
-    val hasPayeeUpi: Boolean get() = payeeUpi.contains('@')
-    val hasUtr: Boolean get() = utr.isNotBlank()
+
+    /** A VPA must be a complete, unmasked identifier, not merely text containing `@`. */
+    val hasPayeeUpi: Boolean get() = VALID_PAYMENT_UPI_ID.matches(payeeUpi)
+
+    /** Parser contract: a reference is a 12-digit token (optionally grouped by spaces/hyphens). */
+    val hasUtr: Boolean get() = VALID_PAYMENT_UTR.matches(utr)
 
     /**
      * True only when there is enough structure to look like a payment receipt:

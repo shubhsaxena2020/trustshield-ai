@@ -84,7 +84,9 @@ object QrPayeePaymentBridge {
     fun matchesRegisteredPayee(payeeUpi: String, payees: List<RegisteredPayee>): Boolean {
         val candidate = comparableId(payeeUpi) ?: return false
         if (payees.isEmpty()) return false
-        return payees.any { it.key == candidate }
+        // Do not let malformed/stale registrations become evidence. The same structural guard used
+        // for decoded QR ids applies to both sides of the comparison.
+        return payees.any { comparableId(it.handle) == candidate }
     }
 
     /**

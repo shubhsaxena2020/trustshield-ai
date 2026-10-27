@@ -227,6 +227,38 @@ class QrPayeePaymentBridgeTest {
     }
 
     @Test
+    fun maskMarkerIsNeverComparableRegardlessOfCaseOrPosition() {
+        val registrations = listOf(shop, payee("***@okaxis"), payee("shop@okaxis***"))
+        for (candidate in listOf("sh***op@okaxis", "shop@***axis", "SHOP@OKAXIS***", "***shop@okaxis")) {
+            assertFalse("mask marker was treated as a readable identifier: <$candidate>",
+                QrPayeePaymentBridge.matchesRegisteredPayee(candidate, registrations))
+        }
+        assertFalse(QrPayeePaymentBridge.matchesRegisteredPayee("shop@okaxis", registrations))
+    }
+
+    @Test
+    fun unicodeWhitespaceAndUriEncodingDoNotNormalizeIntoRegisteredIdentity() {
+        for (candidate in listOf(
+            "shop\u00a0@okaxis", "shop@okaxis\u200b", "shop%40okaxis", "upi://pay?pa=shop%40okaxis"
+        )) {
+            assertFalse("unexpected normalization match for <$candidate>",
+                QrPayeePaymentBridge.matchesRegisteredPayee(candidate, listOf(shop)))
+        }
+    }
+
+    @Test
+    fun adversarialNamesAndMultilineHandlesDoNotLeakThroughSummaryOrToString() {
+        val hostile = payee("victim@okaxis\nattacker@evil", name = "shop@okaxis\nSharma Store")
+        val summary = QrPayeePaymentBridge.comparisonSummary(listOf(hostile))
+
+        assertFalse(summary.contains("victim@okaxis"))
+        assertFalse(summary.contains("attacker@evil"))
+        assertFalse(summary.contains("Sharma Store"))
+        assertFalse(hostile.toString().contains("victim@okaxis"))
+        assertFalse(hostile.toString().contains("shop@okaxis"))
+    }
+
+    @Test
     fun duplicateRegisteredHandlesCountAsEntriesButDoNotBroadenIdentityMatching() {
         val duplicates = listOf(shop, payee(" SHOP@OKAXIS ", name = "Different label"))
         val input = QrPayeePaymentBridge.toAdvisoryInput(
@@ -239,6 +271,63 @@ class QrPayeePaymentBridgeTest {
         assertTrue(input.payeeMatchesRegistered)
         assertFalse(QrPayeePaymentBridge.matchesRegisteredPayee("different@ybl", duplicates))
         assertEquals("payees=2, masked=[sh***@okaxis, SH***@OKAXIS]", QrPayeePaymentBridge.comparisonSummary(duplicates))
+    }
+
+    @Test
+    fun malformedRegisteredPayeeCannotValidateAnOtherwisePlausibleCandidate() {
+        val registrations = listOf(
+            payee("shop @okaxis"),
+            payee("shop@okaxis.evil"),
+            payee("shop@okaxis\nattacker@ybl"),
+            payee("shоp@okaxis") // Cyrillic о, not ASCII o.
+        )
+
+        for (candidate in listOf("shop@okaxis", "shopx@okaxis", "attacker@ybl")) {
+            assertFalse(
+                "malformed registration must not validate <$candidate>",
+                QrPayeePaymentBridge.matchesRegisteredPayee(candidate, registrations)
+            )
+        }
+    }
+
+    @Test
+    fun registeredPayeeCountAndMismatchAreDistinctFromMissingOrUnregisteredState() {
+        val registered = listOf(shop, demo)
+
+        val missing = QrPayeePaymentBridge.toAdvisoryInput(
+            sourceText = "Payment screenshot",
+            fields = fields(""),
+            payees = registered,
+            nowEpochMs = 10L
+        )
+        assertEquals(2, missing.registeredPayeeCount)
+        assertFalse(missing.payeeMatchesRegistered)
+
+        val mismatched = QrPayeePaymentBridge.toAdvisoryInput(
+            sourceText = "Paid to Sharma Store; shop@okaxis",
+            fields = fields("other@okaxis", name = "Sharma Store"),
+            payees = registered,
+            nowEpochMs = 11L
+        )
+        assertEquals(2, mismatched.registeredPayeeCount)
+        assertFalse(mismatched.payeeMatchesRegistered)
+        assertEquals("other@okaxis", mismatched.fields.payeeUpi)
+    }
+
+    @Test
+    fun maskedMismatchDoesNotBecomeAnAuthoritativeRegisteredPayeeMismatch() {
+        val input = QrPayeePaymentBridge.toAdvisoryInput(
+            sourceText = "Paid to sho***@okaxis",
+            fields = fields("sho***@okaxis"),
+            payees = listOf(shop),
+            nowEpochMs = 12L
+        )
+
+        assertEquals(1, input.registeredPayeeCount)
+        assertFalse(input.payeeMatchesRegistered)
+        // A false comparison bit alone cannot express a validated mismatch; the core contract also
+        // receives the readable candidate so its separate hint selection can distinguish states.
+        assertEquals("sho***@okaxis", input.fields.payeeUpi)
     }
 
     // ------------------------------------------------------------------------ toAdvisoryInput ----

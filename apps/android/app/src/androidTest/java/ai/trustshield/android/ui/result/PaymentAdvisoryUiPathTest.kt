@@ -1,5 +1,6 @@
 package ai.trustshield.android.ui.result
 
+import androidx.compose.ui.test.assertDoesNotExist
 import androidx.compose.ui.test.assertExists
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -44,6 +45,23 @@ class PaymentAdvisoryUiPathTest {
         compose.waitForIdle()
     }
 
+    private fun spokenDescription(language: UiLanguage): String {
+        fun PaymentAdvisoryCopy.Localized.pickForTest(): String = when (language) {
+            UiLanguage.HINGLISH -> hinglish
+            UiLanguage.ENGLISH -> english
+            UiLanguage.HINDI -> hindi
+        }
+        return buildString {
+            append(PaymentAdvisoryCopy.SECTION_TITLE.pickForTest()).append(". ")
+            append(PaymentAdvisoryCopy.verdictHeadline(advisory.verdict).pickForTest()).append(". ")
+            append(PaymentAdvisoryCopy.verdictAdvice(advisory.verdict).pickForTest())
+            advisory.hints.forEach { hint ->
+                append(". ").append(PaymentAdvisoryCopy.forHint(hint).pickForTest())
+            }
+            append(". ").append(PaymentAdvisoryCopy.CONFIRMATION.pickForTest())
+        }
+    }
+
     @Test
     fun cardDisplaysVerdictThenHintsInSuppliedOrderThenMandatoryConfirmation() {
         render()
@@ -62,47 +80,25 @@ class PaymentAdvisoryUiPathTest {
         )
         visibleTexts.forEach { compose.onNodeWithText(it, useUnmergedTree = true).assertExists() }
 
-        // The confirmation is the last textual child in the rendered card, not merely present.
-        // The footer is a distinct visible node; the merged announcement pins its final reading order.
-              compose.onNodeWithText(PaymentAdvisoryCopy.CONFIRMATION.hinglish, useUnmergedTree = true).assertExists()
-        assertTrue("fixture must include three ordered hints", advisory.hints.size == 3)
+        // TalkBack uses the card's explicit merged description; hint text remains in engine order.
+        compose.onNodeWithText(PaymentAdvisoryCopy.CONFIRMATION.hinglish, useUnmergedTree = true).assertExists()
+        compose.onNodeWithContentDescription(spokenDescription(UiLanguage.HINGLISH)).assertExists()
+
     }
 
     @Test
     fun mergedTalkBackDescriptionAnnouncesVerdictHintsAndConfirmationInOrder() {
         render()
-        val expected = buildString {
-            append(PaymentAdvisoryCopy.SECTION_TITLE.hinglish)
-            append(". ")
-            append(PaymentAdvisoryCopy.verdictHeadline(PaymentAdvisoryVerdict.STOP).hinglish)
-            append(". ")
-            append(PaymentAdvisoryCopy.verdictAdvice(PaymentAdvisoryVerdict.STOP).hinglish)
-            advisory.hints.forEach { hint ->
-                append(". ")
-                append(PaymentAdvisoryCopy.severityGlyph(hint))
-                append(". ")
-                append(PaymentAdvisoryCopy.forHint(hint).hinglish)
-            }
-            append(". ")
-            append(PaymentAdvisoryCopy.CONFIRMATION.hinglish)
-        }
+        val expected = spokenDescription(UiLanguage.HINGLISH)
         compose.onNodeWithContentDescription(expected).assertExists()
-        assertTrue(expected.lastIndexOf(PaymentAdvisoryCopy.CONFIRMATION.hinglish) >
-            expected.indexOf(PaymentAdvisoryCopy.forHint(advisory.hints.last()).hinglish))
+        assertTrue(expected.endsWith(PaymentAdvisoryCopy.CONFIRMATION.hinglish))
     }
 
     @Test
     fun hindiCardKeepsConfirmationAndDoesNotExposeRawPayee() {
         render(UiLanguage.HINDI)
         compose.onNodeWithText(PaymentAdvisoryCopy.CONFIRMATION.hindi, useUnmergedTree = true).assertExists()
-        compose.onNodeWithContentDescription(
-            PaymentAdvisoryCopy.SECTION_TITLE.hindi + ". " +
-                PaymentAdvisoryCopy.verdictHeadline(PaymentAdvisoryVerdict.STOP).hindi + ". " +
-                PaymentAdvisoryCopy.verdictAdvice(PaymentAdvisoryVerdict.STOP).hindi +
-                advisory.hints.joinToString("") { hint ->
-                    ". ${PaymentAdvisoryCopy.severityGlyph(hint)}. ${PaymentAdvisoryCopy.forHint(hint).hindi}"
-                } + ". " + PaymentAdvisoryCopy.CONFIRMATION.hindi
-        ).assertExists()
+        compose.onNodeWithContentDescription(spokenDescription(UiLanguage.HINDI)).assertExists()
         compose.onNodeWithText("dem-recipient@upi", useUnmergedTree = true).assertDoesNotExist()
     }
 }

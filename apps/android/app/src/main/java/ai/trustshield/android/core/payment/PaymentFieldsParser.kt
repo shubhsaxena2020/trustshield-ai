@@ -14,8 +14,8 @@ import kotlin.math.abs
  * Scope and limits (binding):
  *  - **Text in, [PaymentFields] out.** Regex and string operations only: no `android.*`, no I/O, no
  *    clock, no OCR, no network. The same text always yields the same fields.
- *  - **Never throws.** Input is bounded to [MAX_INPUT_CHARS] and each field extraction is guarded, so
- *    even a megabyte of junk returns blanks instead of an exception.
+ *  - **Never throws.** Input is accepted only up to [MAX_INPUT_CHARS] and each field extraction is
+ *    guarded, so even a megabyte of junk returns blanks instead of an exception.
  *  - **Hints only.** A screenshot never proves settlement (`docs/android/BEHAVIOR_SPEC.md`, "QR and
  *    payment semantics"). These fields are a soft reading of a picture; the caller still has to show
  *    the bank-SMS / UPI-history confirmation line.
@@ -30,8 +30,8 @@ import kotlin.math.abs
 object PaymentFieldsParser {
 
     /**
-     * Hard bound on how many characters are inspected. Longer input is truncated, not rejected, so an
-     * oversized OCR blob costs the same as this many characters and cannot blow up the caller's frame.
+     * Hard bound on accepted input length. Longer input is rejected in full instead of inspecting a
+     * potentially misleading prefix; oversized OCR blobs cannot blow up the caller's frame.
      */
     const val MAX_INPUT_CHARS: Int = 4000
 
@@ -185,13 +185,16 @@ object PaymentFieldsParser {
      * Reads the payment fields out of [text].
      *
      * Never throws: blank, emoji-only, mismatched or arbitrarily large input comes back with blank
-     * fields and [PaymentStatus.UNKNOWN]. Only the first [MAX_INPUT_CHARS] characters are inspected.
+     * fields and [PaymentStatus.UNKNOWN]. Inputs longer than [MAX_INPUT_CHARS] are rejected in full.
      *
      * Every value that can be read also keeps the exact source substring it came from, so a UI can
      * quote the receipt instead of paraphrasing it.
      */
     fun parse(text: String): PaymentFields {
-        val scan = bounded(text)
+        // Reject rather than truncate: a cut token at the boundary could become a false amount,
+        // payee, status, or reference and look like a complete extracted field.
+        if (text.length > MAX_INPUT_CHARS) return PaymentFields()
+        val scan = text
         if (scan.isEmpty()) return PaymentFields()
 
         val amount: AmountHit? = guarded(null) { findAmount(scan) }
@@ -225,7 +228,9 @@ object PaymentFieldsParser {
      * jayega, call 9876543210") costs one pass and returns false without a full parse.
      */
     fun looksLikePaymentScreenshot(text: String): Boolean {
-        val scan = bounded(text)
+        // A prefix of an oversized OCR blob is not sufficient to claim receipt-like content.
+        if (text.length > MAX_INPUT_CHARS) return false
+        val scan = text
         if (scan.isEmpty()) return false
         val hasCurrencyAmount: Boolean = guarded(false) { findAmount(scan) != null }
         if (!hasCurrencyAmount) return false
@@ -587,11 +592,6 @@ object PaymentFieldsParser {
     // =======================================================================================
     // plumbing
     // =======================================================================================
-
-    private fun bounded(text: String): String {
-        if (text.isEmpty()) return ""
-        return if (text.length <= MAX_INPUT_CHARS) text else text.substring(0, MAX_INPUT_CHARS)
-    }
 
     /** Field-level fail-closed: one pathological field must not cost the caller the other nine. */
     private inline fun <T> guarded(fallback: T, block: () -> T): T =

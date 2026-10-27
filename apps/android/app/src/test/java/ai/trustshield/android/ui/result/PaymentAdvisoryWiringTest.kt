@@ -108,14 +108,17 @@ class PaymentAdvisoryWiringTest {
     }
 
     @Test
-    fun presenterStillReturnsNoAdvisoryEvenWhenTheTextLooksLikeAPaymentReceipt() {
-        // Wiring only: the presenter is not the place that decides to attach an advisory, so even a
-        // receipt-shaped source keeps the default. Whatever builds the advisory attaches it later.
+    fun presenterParsesPaymentReceiptAndAttachesAnAdvisoryWithoutChangingRiskWiring() {
         val state = ResultPresenter.build(
             input(source = paymentSource, evidence = listOf(evidenceItem(quote = "Payment Successful")))
         )
         assertFalse(state.unableToVerify)
-        assertNull("presenter must keep the default", state.paymentAdvisory)
+        val attached = state.paymentAdvisory
+        assertTrue("payment receipt should receive a parsed advisory", attached != null)
+        assertTrue(attached!!.isPaymentScreenshot)
+        assertEquals(150_000L, attached.fields.amountMinor)
+        assertEquals("sho***@okaxis", attached.hints.first().maskedPayee)
+        assertEquals("Payment Successful", state.evidence.single().quote.text)
     }
 
     // ------------------------------------- 2. copy() leaves every other field intact

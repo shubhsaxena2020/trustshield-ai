@@ -158,6 +158,16 @@ class PaymentAdvisoryCopyTest {
     }
 
     @Test
+    fun confirmationLineIsNonBlankAndDistinctInEverySupportedLanguage() {
+        val lines = UiLanguage.entries.map { language ->
+            PaymentAdvisoryCopy.CONFIRMATION.pick(language).also { text ->
+                assertTrue("$language confirmation must not be blank", text.isNotBlank())
+            }
+        }
+        assertEquals("each supported language must have its own confirmation", lines.size, lines.toSet().size)
+    }
+
+    @Test
     fun confirmationRendersPerLanguage() {
         assertEquals(
             PaymentAdvisoryCopy.CONFIRMATION.hinglish,

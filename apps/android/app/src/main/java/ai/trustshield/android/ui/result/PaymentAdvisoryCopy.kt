@@ -242,7 +242,7 @@ object PaymentAdvisoryCopy {
         )
         PaymentHintKind.URGENCY_PRESSURE -> ToneCopy(
             hinglish = "Message mein jaldi, abhi ya turant jaisa dabaav hai. Jaldbaazi scam ka aam pattern hai.",
-            english = "The message pushes for speed with words like jaldi, abhi or turant. Urgency is a common scam pattern.",
+            english = "The message pressures you to act quickly, now or immediately. Urgency is a common scam pattern.",
             hindi = "संदेश में जल्दी, अभी या तुरंत जैसा दबाव है। जल्दबाज़ी धोखाधड़ी का आम पैटर्न है।"
         )
         PaymentHintKind.SCREENSHOT_ONLY -> ToneCopy(

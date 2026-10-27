@@ -407,9 +407,15 @@ class PaymentAdvisoryEngine(
             if (sourceText.length <= MAX_SCANNED_CHARS) sourceText
             else sourceText.substring(0, MAX_SCANNED_CHARS)
         val haystack: String = scanned.lowercase()
-        if (PROTECTIVE_URGENCY_PHRASES.any { phrase -> haystack.contains(phrase) }) return false
+        // Remove only the recognized protective wording before scanning. A blanket early return
+        // would hide independent pressure elsewhere in the same message (e.g. "don't pay now;
+        // transfer immediately").
+        var actionableText: String = haystack
+        for (phrase in PROTECTIVE_URGENCY_PHRASES) {
+            actionableText = actionableText.replace(phrase, " ")
+        }
         for (cue in URGENCY_CUES) {
-            if (containsCue(haystack, cue)) return true
+            if (containsCue(actionableText, cue)) return true
         }
         return false
     }

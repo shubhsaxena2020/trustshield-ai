@@ -309,10 +309,15 @@ private class SharedPreferencesPayeeKeyValueStore(
     override fun getString(key: String): String? = prefs.getString(key, null)
 
     override fun putString(key: String, value: String) {
-        prefs.edit().putString(key, value).commit()
+        check(prefs.edit().putString(key, value).commit()) { WRITE_FAILED_MESSAGE }
     }
 
     override fun remove(key: String) {
-        prefs.edit().remove(key).commit()
+        check(prefs.edit().remove(key).commit()) { WRITE_FAILED_MESSAGE }
+    }
+
+    private companion object {
+        // Do not include the key or value: either may reveal persistence details/content.
+        const val WRITE_FAILED_MESSAGE = "registered payee storage write failed"
     }
 }

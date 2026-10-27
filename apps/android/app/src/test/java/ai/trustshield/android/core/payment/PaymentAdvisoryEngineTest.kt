@@ -926,6 +926,29 @@ class PaymentAdvisoryEngineTest {
         assertEquals(PaymentAdvisoryVerdict.CHECK, advisory.verdict)
     }
 
+    @Test
+    fun `policy boundaries do not let a threshold override imply a registered payee`() {
+        val custom = PaymentAdvisoryEngine(
+            PaymentAdvisoryPolicy(largeAmountMinor = 100_000L, roundAmountMinor = 200_000L,
+                roundDivisorMinor = 100_000L)
+        )
+        val below = custom.evaluate(input(fields = fields(amountMinor = 99_999L),
+            registeredPayeeCount = 1, payeeMatchesRegistered = false))
+        val at = custom.evaluate(input(fields = fields(amountMinor = 100_000L),
+            registeredPayeeCount = 1, payeeMatchesRegistered = false))
+        val zeroRegistry = custom.evaluate(input(fields = fields(amountMinor = 200_000L),
+            registeredPayeeCount = 0, payeeMatchesRegistered = true))
+
+        assertFalse(has(below, PaymentHintKind.AMOUNT_LARGE))
+        assertEquals(PaymentAdvisoryVerdict.CHECK, below.verdict)
+        assertTrue(has(at, PaymentHintKind.AMOUNT_LARGE))
+        assertEquals(PaymentAdvisoryVerdict.STOP, at.verdict)
+        assertFalse(has(zeroRegistry, PaymentHintKind.PAYEE_MATCHES_REGISTERED))
+        assertTrue(has(zeroRegistry, PaymentHintKind.NO_REGISTERED_PAYEES))
+        assertTrue(has(zeroRegistry, PaymentHintKind.AMOUNT_ROUND_LARGE))
+        assertEquals(PaymentAdvisoryVerdict.CHECK, zeroRegistry.verdict)
+    }
+
     // ---- ordering / uniqueness --------------------------------------------------------------
 
     @Test
