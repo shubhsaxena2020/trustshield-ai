@@ -36,6 +36,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -179,6 +180,7 @@ fun SettingsScreen(
                 label = copy(SettingsCopy.hapticsLabel),
                 detail = copy(SettingsCopy.hapticsDetail),
                 checked = state.haptics,
+                testTag = "settings_haptics_toggle",
                 onCheckedChange = { onEvent(SettingsEvent.SetHaptics(it)) }
             )
         }
@@ -189,6 +191,7 @@ fun SettingsScreen(
                 label = copy(SettingsCopy.reducedMotionLabel),
                 detail = copy(SettingsCopy.reducedMotionDetail),
                 checked = state.reducedMotion,
+                testTag = "settings_reduced_motion_toggle",
                 onCheckedChange = { onEvent(SettingsEvent.SetReducedMotion(it)) }
             )
         }
@@ -387,6 +390,7 @@ private fun ToggleRow(
     label: String,
     detail: String,
     checked: Boolean,
+    testTag: String,
     onCheckedChange: (Boolean) -> Unit
 ) {
     Row(
@@ -400,6 +404,7 @@ private fun ToggleRow(
             )
             .semantics(mergeDescendants = true) {
                 contentDescription = "$label. $detail"
+                this.testTag = testTag
             }
             .padding(vertical = TsTokens.SpacingXs),
         verticalAlignment = Alignment.CenterVertically

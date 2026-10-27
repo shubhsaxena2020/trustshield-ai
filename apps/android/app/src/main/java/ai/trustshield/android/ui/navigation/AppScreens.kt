@@ -423,7 +423,7 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
                             recognitionLanguageStatus = ToneCopy(
                                 "Hindi speech unavailable; switching to English",
                                 "Hindi speech recognition is unavailable; switching to English",
-                                "\u0939\u093f\u0902\u0926\u0940 \u0935\u093e\u0915\u094d \u0909\u092a\u0932\u092c\u094d\u0927 \u0928\u0939\u0940\u0902; \u0905\u0902\u0917\u094d\u0930\u0947\u091c\u093c\u0940 \u092e\u0947\u0902 \u0938\u094d\u0935\u093f\u091a \u0915\u0930 \u0930\u0939\u0947 \u0939\uੈ",
+                                "\u0939\u093f\u0902\u0926\u0940 \u0935\u093e\u0915\u094d \u0909\u092a\u0932\u092c\u094d\u0927 \u0928\u0939\u0940\u0902; \u0905\u0902\u0917\u094d\u0930\u0947\u091c\u093c\u0940 \u092e\u0947\u0902 \u0938\u094d\u0935\u093f\u091a \u0915\u0930 \u0930\u0939\u0947 \u0939\u0948\u0902",
                             ).forLanguage(resolveLanguage(currentAppLanguage, Locale.getDefault().toLanguageTag()))
                         }
                     }
@@ -548,8 +548,11 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
     }
     if (offlineMode && state.isListening) {
         Text(
-            ToneCopy("Offline mode: phone par hi speech pehchaan", "Offline mode: on-device recognizer")
-                .let { if (prefs.language == AppLanguage.ENGLISH) it.english else it.hinglish },
+            ToneCopy(
+                "Offline mode: phone par hi speech pehchaan",
+                "Offline mode: on-device recogniser",
+                "ऑफ़लाइन मोड: आवाज़ फ़ोन पर ही पहचानी जाती है",
+            ).forLanguage(selectedLanguage),
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -640,8 +643,14 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
             ),
         ) {
             Text(
-                if (speechRoute.useOffline) "Offline mode selected. Tap to use system recognizer"
-                else "Use offline mode - Vosk Hindi recognizer",
+                ToneCopy(
+                    if (speechRoute.useOffline) "Offline mode chuna gaya. System recogniser ke liye tap karein"
+                    else "Offline mode use karein - Vosk Hindi recogniser",
+                    if (speechRoute.useOffline) "Offline mode selected. Tap to use the system recogniser"
+                    else "Use offline mode - Vosk Hindi recogniser",
+                    if (speechRoute.useOffline) "ऑफ़लाइन मोड चुना गया है। सिस्टम recogniser के लिए टैप करें"
+                    else "ऑफ़लाइन मोड इस्तेमाल करें - Vosk हिंदी recogniser",
+                ).forLanguage(selectedLanguage),
             )
         }
     }
@@ -924,7 +933,7 @@ fun QrGuardRouteHost() {
 fun SettingsRouteHost() {
     val prefs = LocalUserPreferences.current
     val sink = LocalPreferencesSink.current
-    var state by remember { mutableStateOf(SettingsState.from(prefs)) }
+    var state by remember(prefs) { mutableStateOf(SettingsState.from(prefs)) }
 
     SettingsScreen(
         state = state,
