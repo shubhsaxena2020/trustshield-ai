@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -144,7 +145,7 @@ fun AppNavHost(
                         Box {
                             IconButton(
                                 onClick = { languageMenuOpen = true },
-                                modifier = Modifier.testTag("language_picker")
+                                modifier = Modifier.widthIn(min = 120.dp).testTag("language_picker")
                             ) {
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,

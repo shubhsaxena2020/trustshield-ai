@@ -64,6 +64,7 @@ class AppShellUiTest {
 
         compose.onNodeWithTag("language_picker").performClick()
         compose.onNodeWithTag("language_${AppLanguage.HINDI.name.lowercase()}").performClick()
+        compose.onNodeWithText("\u0939\u093f\u0928\u094d\u0926\u0940").assertIsDisplayed()
         compose.onNodeWithTag("language_picker").assertTextContains("हिन्दी")
     }
 }
