@@ -123,11 +123,16 @@ class UiCopyGuardTest {
         var depth = 0
         var inString = false
         var escaped = false
-        for (index in openParen until source.length) {
+        var index = openParen
+        while (index < source.length) {
             val char = source[index]
             if (inString) {
                 if (escaped) escaped = false
                 else if (char == '\\') escaped = true
+                else if (char == '$' && index + 1 < source.length && source[index + 1] == '{') {
+                    index = skipTemplateExpression(source, index + 2)
+                    continue
+                }
                 else if (char == '"') inString = false
             } else {
                 when (char) {
@@ -139,6 +144,7 @@ class UiCopyGuardTest {
                     }
                 }
             }
+            index++
         }
         return -1
     }

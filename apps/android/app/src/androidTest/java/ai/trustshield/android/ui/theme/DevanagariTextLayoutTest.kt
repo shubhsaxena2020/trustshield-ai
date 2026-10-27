@@ -22,15 +22,18 @@ class DevanagariTextLayoutTest {
 
     @Test
     fun systemFontRendersHindiWithoutMissingGlyphsAtLargeFontScale() {
-        val hindi = "जोखिम का स्तर"
-        assertTrue("system font must contain Devanagari glyphs", Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            typeface = Typeface.DEFAULT
-        }.hasGlyph(hindi))
+        val hindi = "\u091c\u094b\u0916\u093f\u092e \u0915\u093e \u0938\u094d\u0924\u0930"
+        val devanagariTypeface = Typeface.createFromFile("/system/fonts/NotoSansDevanagari-VF.ttf")
+        val glyphPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { typeface = devanagariTypeface }
+        val hindiLetters = listOf("\u091c", "\u0916", "\u092e", "\u0915", "\u0938", "\u0924", "\u0930")
+        assertTrue("system font must contain the Devanagari letters used by the sample", hindiLetters.all(glyphPaint::hasGlyph))
 
         var lineHeightPx = 0f
+        var expectedLineHeightPx = 0f
         var layoutHeightPx = 0
         compose.setContent {
-            CompositionLocalProvider(LocalDensity provides Density(compose.density, fontScale = 1.3f)) {
+            CompositionLocalProvider(LocalDensity provides Density(compose.density.density, fontScale = 1.3f)) {
+                expectedLineHeightPx = with(LocalDensity.current) { 36.sp.toPx() }
                 MaterialTheme {
                     Box {
                         Text(
@@ -50,7 +53,7 @@ class DevanagariTextLayoutTest {
         }
         compose.waitForIdle()
 
-        assertTrue("scaled line height should retain Hindi marks: $lineHeightPx", lineHeightPx >= compose.density * 36f * 1.3f - 1f)
+        assertTrue("scaled line height should retain Hindi marks: $lineHeightPx < $expectedLineHeightPx", lineHeightPx >= expectedLineHeightPx - 1f)
         assertTrue("text layout must contain the full line: $layoutHeightPx", layoutHeightPx >= lineHeightPx)
     }
 }
