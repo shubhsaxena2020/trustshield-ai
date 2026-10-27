@@ -1,7 +1,7 @@
 <resources>
     <style name="Theme.TrustShield" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/splash_background</item>
-        <item name="windowSplashScreenAnimatedIcon">@drawable/trustshield_logo_icon</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/trustshield_splash_icon</item>
         <item name="postSplashScreenTheme">@style/Theme.TrustShield.App</item>
     </style>
 

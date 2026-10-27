@@ -2,4 +2,5 @@
     <color name="trustshield_blue">#2F6BFF</color>
     <color name="launcher_background">#2F6BFF</color>
     <color name="splash_background">#F7F9FC</color>
+    <color name="trustshield_splash_tint">#124E91</color>
 </resources>
