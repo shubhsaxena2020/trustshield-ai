@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -33,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import ai.trustshield.android.ui.theme.RiskTone
@@ -60,8 +62,13 @@ import ai.trustshield.android.ui.theme.onSurface
  * Accessibility (QUALITY_GATES section 6):
  *  - colour is never the only differentiator — every tone travels with a glyph, a label and a
  *    content description;
- *  - reading order is risk -> confidence -> evidence, because that is the declaration order;
- *  - every control is at least [TsTokens.MinTouchTarget] tall, and nothing has a fixed height, so
+ *  - reading order is risk -> confidence -> evidence: the verdict block is one merged focus stop
+ *    that speaks the risk band, the score (when one is known) and the confidence band in a single
+ *    utterance, so evidence can never be reached before both are heard;
+ *  - the verdict block, the evidence section and the actions section are TalkBack headings, and
+ *    every evidence card is one merged stop carrying its severity, its category, its detail and the
+ *    exact quote — never a bare quote fragment with no context;
+ *  - every control is at least [TsTokens.MinTouchTarget] square, and nothing has a fixed height, so
  *    200% font scale at 320 dp wraps instead of clipping.
  */
 @Composable
@@ -74,8 +81,10 @@ fun ResultScreen(
      * Issue #115: this used to be a visible `Text("Risk score: N/100")` in the navigation host, drawn
      * above the header row. The screen's visual design is a coarse band with no figure (see the class
      * doc), so the number is only ever *spoken* -- [ResultUiState.screenDescription] appends
-     * [RiskScoreSpeech.announcement] to the panel's content description. `null` (the default, and the
-     * Unable-to-Verify case) means no figure is announced at all.
+     * [RiskScoreSpeech.announcement] to the verdict block's content description. When this and
+     * [RiskBand.score] are both `null` (the Unable-to-Verify case) no figure is announced at all;
+     * when only this is `null` the figure the band already draws is still spoken, so nothing visible
+     * goes unheard.
      */
     riskScore: Int? = null,
     onToggleLanguage: () -> Unit = {},
@@ -93,9 +102,7 @@ fun ResultScreen(
         verticalArrangement = Arrangement.spacedBy(TsTokens.SpacingMd)
     ) {
         ResultTopBar(
-            state = state,
             language = language,
-            riskScore = riskScore,
             onToggleLanguage = onToggleLanguage,
             onBack = onBack
         )
@@ -104,7 +111,14 @@ fun ResultScreen(
             UnableToVerifyBanner(status = state.status, language = language)
         }
 
-        RiskHeader(risk = state.risk, language = language)
+        // The screen-level announcement lives on the verdict block, not on the bar title: risk first,
+        // then the score when the engine gave one (the host's figure wins over the band's own), then
+        // confidence — all before the first evidence card in the reading order.
+        RiskHeader(
+            risk = state.risk,
+            language = language,
+            spokenSummary = state.screenDescription(language, riskScore ?: state.risk.score)
+        )
 
         state.paymentAdvisory?.let { advisory ->
             PaymentAdvisoryCard(advisory = advisory, language = language)
@@ -148,9 +162,7 @@ fun ResultScreen(
 
 @Composable
 private fun ResultTopBar(
-    state: ResultUiState,
     language: UiLanguage,
-    riskScore: Int?,
     onToggleLanguage: () -> Unit,
     onBack: (() -> Unit)?
 ) {
@@ -161,24 +173,28 @@ private fun ResultTopBar(
         if (onBack != null) {
             TextButton(
                 onClick = onBack,
-                modifier = Modifier.heightIn(min = TsTokens.MinTouchTarget)
-            ) { Text(ToneCopy("\u2039 Peeche", "\u2039 Back", "\u2039 \u0935\u093e\u092a\u0938").pick(language)) }
+                modifier = Modifier
+                    .widthIn(min = TsTokens.MinTouchTarget)
+                    .heightIn(min = TsTokens.MinTouchTarget)
+            ) { Text(ToneCopy("Peeche", "Back", "\u0935\u093e\u092a\u0938").pick(language)) }
             Spacer(Modifier.width(TsTokens.SpacingSm))
         }
         Text(
             text = ToneCopy(ResultCopy.TITLE_HINGLISH, ResultCopy.TITLE_ENGLISH).pick(language),
             style = MaterialTheme.typography.headlineSmall,
-            // One announcement for the whole panel head: risk first, then confidence, then the score
-            // in words. The score is *only* here -- it is never drawn as text (issue #115).
-            modifier = Modifier
-                .weight(1f)
-                .semantics { contentDescription = state.screenDescription(language, riskScore) }
+            // The bar title is decoration. The one spoken summary of this screen belongs to the
+            // merged verdict block below, so it is not announced twice here (and the figure it
+            // appends stays spoken-only, never drawn -- issue #115).
+            modifier = Modifier.weight(1f)
         )
         TextButton(
             onClick = onToggleLanguage,
-            modifier = Modifier.heightIn(min = TsTokens.MinTouchTarget).semantics {
-                contentDescription = ResultCopy.LANGUAGE_TOGGLE_DESCRIPTION.pick(language)
-            }
+            modifier = Modifier
+                .widthIn(min = TsTokens.MinTouchTarget)
+                .heightIn(min = TsTokens.MinTouchTarget)
+                .semantics {
+                    contentDescription = ResultCopy.LANGUAGE_TOGGLE_DESCRIPTION.pick(language)
+                }
         ) {
             Text(
                 when (language) {
@@ -191,13 +207,27 @@ private fun ResultTopBar(
     }
 }
 
+/**
+ * The verdict block: [RiskBand] label + summary, the band strip, and the screen's single spoken
+ * summary — one merged TalkBack stop, and the first heading on the screen.
+ *
+ * [spokenSummary] is [ResultUiState.screenDescription], i.e. the risk band first, then the score when
+ * one is known, then the confidence band: a screen reader hears risk **and** confidence before it can
+ * reach any evidence card (UI_SPEC "Polish and accessibility acceptance").
+ *
+ * `heading()` sits on this merged node rather than on the label [Text] because a merged descendant is
+ * never presented on its own and its heading flag is swallowed by the merge — the heading has to be
+ * declared where TalkBack actually lands. The visible label, glyph and strip stay exactly as they
+ * were: colour is the third channel, never the only one.
+ */
 @Composable
-private fun RiskHeader(risk: RiskBand, language: UiLanguage) {
+private fun RiskHeader(risk: RiskBand, language: UiLanguage, spokenSummary: String) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
             .semantics(mergeDescendants = true) {
-                contentDescription = risk.contentDescription.pick(language)
+                heading()
+                contentDescription = spokenSummary
             },
         color = risk.tone.container(),
         shape = RoundedCornerShape(TsTokens.CornerLarge)
@@ -259,6 +289,14 @@ private fun RiskBandStrip(tone: RiskTone) {
     }
 }
 
+/**
+ * The separate confidence badge, on its own axis from the risk band.
+ *
+ * The level is carried three ways so it never depends on the filled/half/empty glyph colour: visible
+ * label text, a spoken `contentDescription` with the reason, and `stateDescription` — TalkBack can
+ * read the chip as a *state* (", low confidence") when the user lands on it directly, and the glyph
+ * itself is never announced as an empty shape.
+ */
 @Composable
 private fun ConfidenceBadgeView(badge: ConfidenceBadge, language: UiLanguage) {
     Surface(
@@ -267,6 +305,7 @@ private fun ConfidenceBadgeView(badge: ConfidenceBadge, language: UiLanguage) {
             .semantics(mergeDescendants = true) {
                 contentDescription = ResultCopy.CONFIDENCE_TITLE.pick(language) + ": " +
                     badge.label.pick(language) + ". " + badge.reason.pick(language)
+                stateDescription = badge.label.pick(language)
             },
         color = MaterialTheme.colorScheme.surfaceVariant,
         shape = RoundedCornerShape(TsTokens.CornerSmall),
@@ -355,10 +394,24 @@ private fun EvidenceSection(state: ResultUiState, language: UiLanguage) {
     }
 }
 
+/**
+ * One evidence card, exposed to TalkBack as a **single** focus stop.
+ *
+ * Before the merge, a swipe landed on the severity label, the module caption, the title, the detail
+ * and then the quote as five unrelated fragments — the quote arriving with no statement of which
+ * signal it supports or how strong that signal is. Now the card is one utterance built by
+ * [evidenceCardDescription]: severity -> category -> detail -> the quote, labelled as the exact
+ * wording from the input (and as shortened when it is). The quote stays *inside* this description
+ * instead of owning a node, so it can never be read out of context.
+ */
 @Composable
 private fun EvidenceCard(item: EvidenceItem, language: UiLanguage) {
     Surface(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .semantics(mergeDescendants = true) {
+                contentDescription = evidenceCardDescription(item, language)
+            },
         color = MaterialTheme.colorScheme.surface,
         shape = RoundedCornerShape(TsTokens.CornerSmall),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
@@ -402,11 +455,41 @@ private fun EvidenceCard(item: EvidenceItem, language: UiLanguage) {
 }
 
 /**
+ * The single TalkBack sentence for one evidence card.
+ *
+ * Severity first, so how strong the signal is never depends on colour or on a glyph; then the
+ * category — the signal's own title plus the rule module that raised it, exactly as the card draws
+ * them; then the detail; then the quote, announced with the same caption the card shows. The caption
+ * comes from [quoteCaption], so the spoken and the drawn wording can never drift apart: "exact quote"
+ * is the verbatim claim (the text is sliced out of the input by the presenter), and a shortened span
+ * says so instead of letting the ellipsis pass for the user's own punctuation.
+ *
+ * Pure string building from existing copy — no new strings, no colour, no layout.
+ */
+private fun evidenceCardDescription(item: EvidenceItem, language: UiLanguage): String =
+    item.severityLabel.pick(language) + ". " +
+        item.title.pick(language) + ". " +
+        ToneCopy(item.module, item.module).pick(language) + ". " +
+        item.detail.pick(language) + ". " +
+        quoteCaption(item.quote, language) + ": " + item.quote.text
+
+/** "Exact quote", with the shortened marker appended when the rendered span is a prefix. */
+private fun quoteCaption(quote: ExactQuote, language: UiLanguage): String =
+    if (quote.truncated) {
+        ResultCopy.QUOTE_LABEL.pick(language) + " \u00B7 " + ResultCopy.QUOTE_TRUNCATED.pick(language)
+    } else {
+        ResultCopy.QUOTE_LABEL.pick(language)
+    }
+
+/**
  * The exact quote, visually highlighted and never paraphrased.
  *
  * [ExactQuote.text] is sliced out of the analysed source by the presenter, so what is drawn here is
  * literally what the user typed/shared. When it is a shortened span the caption says so — the
  * ellipsis is never passed off as the user's own punctuation.
+ *
+ * This block owns no semantics of its own: it is merged into its [EvidenceCard], which announces the
+ * quote together with the severity and the category it belongs to.
  */
 @Composable
 private fun ExactQuoteBlock(quote: ExactQuote, tone: RiskTone, language: UiLanguage) {
@@ -420,11 +503,7 @@ private fun ExactQuoteBlock(quote: ExactQuote, tone: RiskTone, language: UiLangu
             verticalArrangement = Arrangement.spacedBy(TsTokens.SpacingXs)
         ) {
             Text(
-                text = if (quote.truncated) {
-                    ResultCopy.QUOTE_LABEL.pick(language) + " \u00B7 " + ResultCopy.QUOTE_TRUNCATED.pick(language)
-                } else {
-                    ResultCopy.QUOTE_LABEL.pick(language)
-                },
+                text = quoteCaption(quote, language),
                 style = MaterialTheme.typography.labelMedium,
                 color = tone.onContainer()
             )
@@ -548,6 +627,14 @@ private fun FooterNotes(state: ResultUiState, language: UiLanguage) {
     }
 }
 
+/**
+ * A section heading — evidence, actions and limits all use it.
+ *
+ * `heading()` is what makes TalkBack's heading gesture work: it jumps verdict -> what we found ->
+ * what you can do, instead of swiping through every evidence card to reach the actions. The verdict
+ * heading is declared on its own merged block (see [RiskHeader]) because a heading inside a merged
+ * subtree is dropped by the merge.
+ */
 @Composable
 private fun SectionTitle(text: String) {
     Text(

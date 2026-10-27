@@ -32,6 +32,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -135,6 +136,8 @@ internal object ScanCopy {
         "These are synthetic demo messages. They contain no real person's data."
     )
     val exampleChipDescription = ToneCopy("Example bharein:", "Fill in the example:")
+    val exampleChipSelectedState = ToneCopy("Chuna hua", "Selected")
+    val exampleChipNotSelectedState = ToneCopy("Nahi chuna hua", "Not selected")
 
     val checkAction = ToneCopy("Check karein (offline)", "Check (offline)")
     val checkActionDescription = ToneCopy(
@@ -144,6 +147,14 @@ internal object ScanCopy {
     val checkOfflineNote = ToneCopy(
         "Verdict isi phone par banta hai — internet ki zarurat nahi.",
         "The verdict is computed on this phone — no internet needed."
+    )
+    val checkAvailableState = ToneCopy(
+        "Check abhi chal sakta hai",
+        "Check is available now"
+    )
+    val checkBlockedStatePrefix = ToneCopy(
+        "Check abhi nahi chal sakta:",
+        "Check is not available yet:"
     )
 
     val imageAction = ToneCopy("Screenshot se check karein", "Check from a screenshot")
@@ -198,7 +209,9 @@ internal object ScanCopy {
         pasteAction, pasteActionDescription, clearAction, clearActionDescription,
         emptyHint, truncationNotice,
         examplesHeading, examplesNote, exampleChipDescription,
+        exampleChipSelectedState, exampleChipNotSelectedState,
         checkAction, checkActionDescription, checkOfflineNote,
+        checkAvailableState, checkBlockedStatePrefix,
         imageAction, imageActionDescription, imageNote,
         shareEntryNote, settingsAction, settingsActionDescription, privacyNote,
         errorLabel, errorDismissHint,
@@ -477,9 +490,14 @@ data class ScanExamples(val entries: List<ScanExample> = DEFAULT_ENTRIES) {
  * @param clipboardText reads the clipboard **on demand only**. The default returns `null`, so the
  *   screen never touches the clipboard during composition and a preview/test cannot leak it.
  *
- * Accessibility contract: every action is at least 48 dp with visible text plus a content
- * description, headings carry `heading()`, the error is a polite live region, colour is never the
- * only signal, and the whole column scrolls so 320 dp / 200 % font scale cannot clip.
+ * Accessibility contract: every interactive control is at least 48 dp in **both** dimensions
+ * (minimum width, not only height, so a short label cannot produce a narrow target), each carries
+ * visible text plus a content description, headings carry `heading()`, the error is a polite live
+ * region armed only when it has something to say, the primary action states whether it is
+ * available and why not, example chips state whether they are the selected one, colour is never
+ * the only signal, and the whole column scrolls so 320 dp / 200 % font scale cannot clip. No `Text`
+ * on this screen sets `maxLines`/`overflow`; the only line bound is the field's own scrolling
+ * window (see below), which never truncates copy.
  */
 @Composable
 fun ScanScreen(
@@ -537,6 +555,9 @@ fun ScanScreen(
                     )
                 },
                 minLines = 6,
+                // A scrolling window, not a truncation: the field keeps every character and
+                // scrolls internally, so a 20,000-character paste cannot push the actions off
+                // screen at 200 % font scale. Deliberately not raised.
                 maxLines = 10,
                 isError = state.error != null,
                 supportingText = {
@@ -569,6 +590,7 @@ fun ScanScreen(
                     onClick = { onEvent(ScanInputEvent.PasteRequested(clipboardText())) },
                     modifier = Modifier
                         .weight(1f)
+                        .widthIn(min = TsTokens.MinTouchTarget)
                         .heightIn(min = TsTokens.MinTouchTarget)
                         .semantics { contentDescription = copy(ScanCopy.pasteActionDescription) }
                 ) {
@@ -579,6 +601,7 @@ fun ScanScreen(
                     enabled = state.canClear,
                     modifier = Modifier
                         .weight(1f)
+                        .widthIn(min = TsTokens.MinTouchTarget)
                         .heightIn(min = TsTokens.MinTouchTarget)
                         .semantics { contentDescription = copy(ScanCopy.clearActionDescription) }
                 ) {
@@ -624,22 +647,35 @@ fun ScanScreen(
             ) {
                 examples.forEach { example ->
                     val label = example.label.text(selectedLanguage)
+                    // A chip is "selected" only while its exact text is still the field content:
+                    // any edit changes the source to TYPED, so a stale highlight cannot survive.
+                    val isSelected = state.source == ScanInputSource.EXAMPLE &&
+                        state.text == example.text
                     AssistChip(
                         onClick = { onEvent(ScanInputEvent.ExampleSelected(example.text)) },
                         label = {
                             Text(text = label, style = MaterialTheme.typography.labelMedium)
                         },
                         modifier = Modifier
+                            .widthIn(min = TsTokens.MinTouchTarget)
                             .heightIn(min = TsTokens.MinTouchTarget)
-                            .semantics {
+                            // mergeDescendants keeps each chip to exactly one focus stop: label,
+                            // selection state and action are read once, not as two nodes.
+                            .semantics(mergeDescendants = true) {
                                 contentDescription =
                                     copy(ScanCopy.exampleChipDescription) + " " + label
+                                stateDescription = if (isSelected) {
+                                    copy(ScanCopy.exampleChipSelectedState)
+                                } else {
+                                    copy(ScanCopy.exampleChipNotSelectedState)
+                                }
                             }
                     )
                 }
             }
 
             // ---- Primary action ---------------------------------------------------------
+            val blockedReason = state.checkBlockedReason
             Column(verticalArrangement = Arrangement.spacedBy(TsTokens.SpacingXs)) {
                 Button(
                     onClick = {
@@ -653,21 +689,54 @@ fun ScanScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .heightIn(min = TsTokens.MinTouchTarget)
-                        .semantics { contentDescription = copy(ScanCopy.checkActionDescription) }
+                        .semantics {
+                            contentDescription = copy(ScanCopy.checkActionDescription)
+                            // A disabled M3 Button has no click action, so TalkBack would reach it
+                            // without ever saying why it cannot run. The state description carries
+                            // availability plus the exact blocked reason, and changes with it.
+                            stateDescription = if (state.canCheck) {
+                                copy(ScanCopy.checkAvailableState)
+                            } else {
+                                // Defensive fallback: the rules only block with a declared error,
+                                // but a state restored from a bundle could arrive with neither.
+                                copy(ScanCopy.checkBlockedStatePrefix) + " " +
+                                    copy((blockedReason ?: ScanInputError.EMPTY_INPUT).copy)
+                            }
+                        }
                 ) {
                     Text(copy(ScanCopy.checkAction), style = MaterialTheme.typography.labelLarge)
                 }
-                Text(
-                    text = copy(ScanCopy.checkOfflineNote),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                state.checkBlockedReason?.let { blocked ->
+                // What the verdict is and, when the action is unavailable, why: merged into one
+                // node so TalkBack announces the whole verdict/preview area as one sentence
+                // instead of two fragments of small print.
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .semantics(mergeDescendants = true) {
+                            contentDescription = buildString {
+                                append(copy(ScanCopy.checkOfflineNote))
+                                if (blockedReason != null) {
+                                    append(' ')
+                                    append(copy(ScanCopy.checkBlockedStatePrefix))
+                                    append(' ')
+                                    append(copy(blockedReason.copy))
+                                }
+                            }
+                        },
+                    verticalArrangement = Arrangement.spacedBy(TsTokens.SpacingXs)
+                ) {
                     Text(
-                        text = copy(blocked.copy),
+                        text = copy(ScanCopy.checkOfflineNote),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                    blockedReason?.let { blocked ->
+                        Text(
+                            text = copy(blocked.copy),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             }
 
@@ -705,6 +774,7 @@ fun ScanScreen(
             TextButton(
                 onClick = onOpenSettings,
                 modifier = Modifier
+                    .widthIn(min = TsTokens.MinTouchTarget)
                     .heightIn(min = TsTokens.MinTouchTarget)
                     .semantics { contentDescription = copy(ScanCopy.settingsActionDescription) }
             ) {
@@ -741,9 +811,14 @@ private fun NoticeLine(text: String) {
 /**
  * Inline error state. Text label + message + the way out ("typing clears it"), so the state is
  * never colour-only, and a polite live region so TalkBack announces it when it appears.
+ *
+ * The live region is armed only while there is something to say: a banner composed with a blank
+ * message (a caller that renders it defensively) must not interrupt TalkBack on first composition
+ * with an empty announcement.
  */
 @Composable
 private fun ErrorBanner(label: String, message: String, dismissHint: String) {
+    val announce = message.isNotBlank()
     Surface(
         color = MaterialTheme.colorScheme.errorContainer,
         contentColor = MaterialTheme.colorScheme.onErrorContainer,
@@ -751,8 +826,12 @@ private fun ErrorBanner(label: String, message: String, dismissHint: String) {
         modifier = Modifier
             .fillMaxWidth()
             .semantics(mergeDescendants = true) {
-                liveRegion = LiveRegionMode.Polite
-                contentDescription = "$label. $message $dismissHint"
+                // Compose has no "silent" live-region value: the region is armed by setting the
+                // property at all, so a blank banner simply never sets it.
+                if (announce) {
+                    liveRegion = LiveRegionMode.Polite
+                    contentDescription = "$label. $message $dismissHint"
+                }
             }
     ) {
         Column(

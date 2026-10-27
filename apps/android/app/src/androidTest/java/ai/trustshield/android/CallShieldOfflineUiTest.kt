@@ -1,6 +1,8 @@
 package ai.trustshield.android
 
 import android.content.Intent
+import ai.trustshield.android.data.preferences.AppLanguage
+import ai.trustshield.android.data.preferences.SharedPreferencesUserPreferencesStore
 import ai.trustshield.android.ui.navigation.AppRoute
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
@@ -11,8 +13,10 @@ import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.After
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -24,6 +28,13 @@ class CallShieldOfflineUiTest {
     val compose: ComposeTestRule = createEmptyComposeRule()
 
     private var scenario: ActivityScenario<MainActivity>? = null
+
+    @Before
+    fun useEnglishCopy() {
+        val store = SharedPreferencesUserPreferencesStore
+            .open(InstrumentationRegistry.getInstrumentation().targetContext)
+        store.save(store.reset().copy(language = AppLanguage.ENGLISH))
+    }
 
     @After
     fun closeActivity() {

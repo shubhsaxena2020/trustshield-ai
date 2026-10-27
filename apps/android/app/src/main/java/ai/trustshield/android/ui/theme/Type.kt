@@ -42,11 +42,11 @@ object TsTypeScale {
 val TsTypography: Typography = Typography(
     displayLarge = TextStyle(
         fontFamily = FontFamily.Default, fontWeight = FontWeight.Normal,
-        fontSize = TsTypeScale.HeadlineSp.sp, lineHeight = 36.sp
+        fontSize = TsTypeScale.HeadlineSp.sp, lineHeight = 40.sp
     ),
     displayMedium = TextStyle(
         fontFamily = FontFamily.Default, fontWeight = FontWeight.Normal,
-        fontSize = TsTypeScale.HeadlineSp.sp, lineHeight = 36.sp
+        fontSize = TsTypeScale.HeadlineSp.sp, lineHeight = 40.sp
     ),
     displaySmall = TextStyle(
         fontFamily = FontFamily.Default, fontWeight = FontWeight.Normal,
@@ -54,7 +54,7 @@ val TsTypography: Typography = Typography(
     ),
     headlineLarge = TextStyle(
         fontFamily = FontFamily.Default, fontWeight = FontWeight.SemiBold,
-        fontSize = TsTypeScale.HeadlineSp.sp, lineHeight = 36.sp
+        fontSize = TsTypeScale.HeadlineSp.sp, lineHeight = 40.sp
     ),
     headlineMedium = TextStyle(
         fontFamily = FontFamily.Default, fontWeight = FontWeight.SemiBold,

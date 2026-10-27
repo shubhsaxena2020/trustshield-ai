@@ -11,6 +11,8 @@ import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.core.content.ContextCompat
@@ -412,7 +414,29 @@ class Phase3JourneysTest {
     }
 
     private fun waitForResult(timeoutMs: Long = 30_000) {
-        assertTrue("result screen did not show a risk and confidence heading", waitForAnyText(timeoutMs, "Bharosa", "Confidence"))
+        val shown = try {
+            compose.waitUntil(timeoutMs) {
+                val announcements = compose.onAllNodes(
+                    SemanticsMatcher.keyIsDefined(SemanticsProperties.ContentDescription)
+                ).fetchSemanticsNodes().flatMap {
+                    it.config[SemanticsProperties.ContentDescription]
+                }
+                announcements.any { announcement ->
+                    val hasRisk = listOf(
+                        "jaankari", "kam khatra", "dhyan dein", "zyada khatra",
+                        "information", "low risk", "caution", "high risk"
+                    ).any { announcement.contains(it, ignoreCase = true) }
+                    val hasConfidence = listOf(
+                        "bharosa", "confidence"
+                    ).any { announcement.contains(it, ignoreCase = true) }
+                    hasRisk && hasConfidence
+                }
+            }
+            true
+        } catch (_: androidx.compose.ui.test.ComposeTimeoutException) {
+            false
+        }
+        assertTrue("result screen did not announce its risk and confidence", shown)
     }
 
     private fun waitForContentDescription(text: String, timeoutMs: Long = 15_000) {

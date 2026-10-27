@@ -15,7 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -38,17 +38,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ai.trustshield.android.ui.theme.RiskTone
 import ai.trustshield.android.ui.theme.RiskToneCopy
+import ai.trustshield.android.ui.theme.ToneCopy
 import ai.trustshield.android.ui.theme.TsMotion
 import ai.trustshield.android.ui.theme.TsTokens
-import ai.trustshield.android.ui.theme.ToneCopy
 import ai.trustshield.android.ui.theme.TrustShieldTheme
 import ai.trustshield.android.ui.theme.accent
 import ai.trustshield.android.ui.theme.container
@@ -98,6 +99,12 @@ fun CallShieldScreen(
         Column(Modifier.fillMaxSize()) {
             Header(state = state, onEvent = onEvent)
 
+            // Stop is the first control after the title chrome and sits outside the scroll region, so
+            // it is both the earliest reachable control and always on screen: the fastest way out of
+            // a live call must never be behind a scroll area
+            // (UI_SPEC "Back and Stop always end a session", QUALITY_GATES #6).
+            StopBar(state = state, onEvent = onEvent)
+
             // Sticky warning: outside the scroll area, so it stays visible while the user reads.
             state.alert?.let { alert -> WarningBanner(alert = alert, state = state, onSpeakAlert = onSpeakAlert) }
 
@@ -131,8 +138,6 @@ fun CallShieldScreen(
                 Footer(state = state)
                 Spacer(Modifier.height(TsTokens.SpacingXl))
             }
-
-            StopBar(state = state, onEvent = onEvent)
         }
     }
 }
@@ -201,17 +206,28 @@ private fun WarningBanner(alert: CallAlert, state: CallUiState, onSpeakAlert: ((
     val presentation = RiskToneCopy.of(alert.tone)
     val body = CallShieldCopy.warning(alert.severity).forLanguage(language)
     val noAccusation = CallShieldCopy.noAccusation.forLanguage(language)
+    val bannerScroll = rememberScrollState()
 
     Surface(
         modifier = Modifier
             .fillMaxWidth()
+            // The banner is pinned (it must not scroll away), but at 320 dp / 200 % font the critical
+            // copy alone is several screens tall -- pinned and unbounded it starved the scroll column
+            // below to zero height, which made every stage and the footer unreachable. Capping it
+            // and letting the banner scroll keeps the warning on screen *and* keeps the page usable.
+            // TalkBack is unaffected by the cap: the merged description below is read in full.
+            .heightIn(max = 240.dp)
             .semantics(mergeDescendants = true) {
                 contentDescription = body + " " + noAccusation
             },
         color = alert.tone.container(),
         contentColor = alert.tone.onContainer()
     ) {
-        Column(Modifier.padding(TsTokens.SpacingLg)) {
+        Column(
+            Modifier
+                .verticalScroll(bannerScroll)
+                .padding(TsTokens.SpacingLg)
+        ) {
             Row(verticalAlignment = Alignment.Top) {
                 GlyphBadge(
                     glyph = presentation.glyph,
@@ -338,18 +354,7 @@ private fun StatusCard(state: CallUiState, onEvent: (CallEvent) -> Unit) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            Column(horizontalAlignment = Alignment.End) {
-                Text(
-                    text = CallShieldCopy.timerLabel.forLanguage(language),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = formatElapsed(state.elapsedSeconds),
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
+            SessionStatusSummary(state = state)
         }
 
         Spacer(Modifier.height(TsTokens.SpacingMd))
@@ -394,6 +399,51 @@ private fun StatusCard(state: CallUiState, onEvent: (CallEvent) -> Unit) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
+// Session status: one merged, polled reading (state + elapsed + risk + confidence)
+// -------------------------------------------------------------------------------------------------
+
+/**
+ * The elapsed clock is visible, but it must never be *pushed* at TalkBack: it changes every second,
+ * so a live region here would chatter through the whole call. This node therefore carries **no**
+ * `liveRegion`, and the ticking text is not its own focus stop — instead the whole block is one
+ * merged node whose `contentDescription` is rebuilt on every composition and therefore read at
+ * focus time ("polled") rather than on change.
+ *
+ * Deliberate choice: the description reports whole **minutes**, not `mm:ss`, so a focused node is
+ * re-described at most once a minute instead of once a second.
+ */
+@Composable
+private fun SessionStatusSummary(state: CallUiState) {
+    val language = state.language
+    val phaseText = CallShieldScreenCopy.phase(state.phase).forLanguage(language)
+    val elapsedText = CallShieldScreenCopy.elapsedMinutes(state.elapsedSeconds / 60).forLanguage(language)
+    val toneLabel = RiskToneCopy.of(state.tone).label.forLanguage(language)
+    val confidenceLabel = CallShieldCopy.confidenceLevel(state.confidence).forLanguage(language)
+
+    val status = phaseText + ". " + elapsedText + ". " +
+        CallShieldCopy.riskHeading.forLanguage(language) + ": " + toneLabel + ". " +
+        CallShieldCopy.confidenceHeading.forLanguage(language) + ": " + confidenceLabel
+
+    Column(
+        modifier = Modifier.semantics(mergeDescendants = true) {
+            contentDescription = status
+        },
+        horizontalAlignment = Alignment.End
+    ) {
+        Text(
+            text = CallShieldCopy.timerLabel.forLanguage(language),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Text(
+            text = formatElapsed(state.elapsedSeconds),
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.SemiBold
+        )
     }
 }
 
@@ -515,6 +565,23 @@ private fun StageChipRow(chip: StageChip, language: CallLanguage, reducedMotion:
     } else {
         CallShieldCopy.stageNotFound.forLanguage(language)
     }
+    // One focus stop, one sentence: stage name -> found/not yet -> the exact line that was heard.
+    // Without an explicit description the merged node announced the quote last, after the long
+    // stage explanation, so "did this stage fire?" was the hardest thing to hear.
+    val spoken = buildString {
+        append(label)
+        append(". ")
+        append(statusText)
+        chip.quote?.let { quote ->
+            append(". ")
+            append(CallShieldScreenCopy.quoteLead.forLanguage(language))
+            append(" \u201C")
+            append(quote)
+            append("\u201D")
+        }
+        append(". ")
+        append(detail)
+    }
 
     val containerColor by animateColorAsState(
         targetValue = tone.container(),
@@ -531,7 +598,7 @@ private fun StageChipRow(chip: StageChip, language: CallLanguage, reducedMotion:
         modifier = Modifier
             .fillMaxWidth()
             .semantics(mergeDescendants = true) {
-                stateDescription = statusText
+                contentDescription = spoken
             },
         shape = RoundedCornerShape(TsTokens.CornerSmall),
         color = containerColor,
@@ -746,13 +813,16 @@ private fun Footer(state: CallUiState) {
 }
 
 // -------------------------------------------------------------------------------------------------
-// Stop bar (always visible, large target)
+// Stop bar (first focus stop, always visible, large target)
 // -------------------------------------------------------------------------------------------------
 
 @Composable
 private fun StopBar(state: CallUiState, onEvent: (CallEvent) -> Unit) {
     val language = state.language
     val active = state.phase == SessionPhase.LISTENING || state.phase == SessionPhase.PAUSED
+    // The visible label stays the long "Stop — stop listening" copy. The *announced* label spells
+    // out that the microphone is what stops: heard out of context, a bare "Stop" is ambiguous.
+    val announced = CallShieldScreenCopy.stopAction.forLanguage(language)
     Surface(color = MaterialTheme.colorScheme.surface, tonalElevation = 1.dp) {
         Column(
             modifier = Modifier
@@ -770,6 +840,10 @@ private fun StopBar(state: CallUiState, onEvent: (CallEvent) -> Unit) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(min = 56.dp)
+                    .semantics {
+                        role = Role.Button
+                        contentDescription = announced
+                    }
             ) {
                 Text(
                     text = CallShieldCopy.stop.forLanguage(language),
@@ -805,12 +879,16 @@ private fun SectionCard(alertTone: Boolean = false, content: @Composable () -> U
  * Icon channel for tones and stages. C02 supplies a text glyph and an icon *name*; the extended
  * Material icon set is not on this app's classpath, so the glyph is rendered here. This keeps the
  * alert non-colour-only (label + icon + text) without adding a dependency.
+ *
+ * The badge is a *minimum* 48 dp rather than a fixed square: at 200% font scale a fixed 48 dp box
+ * clipped the glyph (worst case "!!" in the sticky warning), and that clipped box was then the only
+ * icon channel for the tone.
  */
 @Composable
 private fun GlyphBadge(glyph: String, background: Color, foreground: Color) {
     Box(
         modifier = Modifier
-            .size(TsTokens.MinTouchTarget)
+            .sizeIn(minWidth = TsTokens.MinTouchTarget, minHeight = TsTokens.MinTouchTarget)
             .background(color = background, shape = RoundedCornerShape(TsTokens.CornerSmall)),
         contentAlignment = Alignment.Center
     ) {
@@ -821,6 +899,48 @@ private fun GlyphBadge(glyph: String, background: Color, foreground: Color) {
             color = foreground
         )
     }
+}
+
+// -------------------------------------------------------------------------------------------------
+// Screen-local copy for the accessibility affordances added in this file
+// -------------------------------------------------------------------------------------------------
+
+/**
+ * TalkBack-facing strings that [CallShieldCopy] does not own. That object belongs to another work
+ * package and its strings are asserted by `CallScreenTest`, so anything new lives here; nothing in
+ * this file may hardcode a bare user-visible English sentence.
+ */
+internal object CallShieldScreenCopy {
+
+    /** Session state, read as the first clause of the polled status summary. */
+    fun phase(phase: SessionPhase): ToneCopy = when (phase) {
+        SessionPhase.IDLE -> ToneCopy("Session shuru nahi hua", "Session not started")
+        SessionPhase.LISTENING -> ToneCopy("Sun raha hai", "Listening")
+        SessionPhase.PAUSED -> ToneCopy("Rukha hua hai", "Paused")
+        SessionPhase.STOPPED -> ToneCopy("Band hai", "Stopped")
+    }
+
+    /**
+     * Whole minutes only. The visible clock ticks per second; the description must not, or a focused
+     * node would be re-read every second — the exact chatter this change removes.
+     */
+    fun elapsedMinutes(minutes: Int): ToneCopy = when {
+        minutes <= 0 -> ToneCopy("Ek minute se kam", "Under a minute")
+        minutes == 1 -> ToneCopy("1 minute", "1 minute")
+        else -> ToneCopy("$minutes minute", "$minutes minutes")
+    }
+
+    /**
+     * Announced label for the Stop control. The visible label stays [CallShieldCopy.stop]; this one
+     * says what actually stops, because a bare "Stop" is ambiguous during a live call.
+     */
+    val stopAction = ToneCopy(
+        "Stop — sunna band karein, mic band ho jata hai",
+        "Stop — stop listening, turns the microphone off"
+    )
+
+    /** Introduces a retained quote inside a stage chip so it is not heard as new speech. */
+    val quoteLead = ToneCopy("Suni gayi line", "Heard line")
 }
 
 // -------------------------------------------------------------------------------------------------

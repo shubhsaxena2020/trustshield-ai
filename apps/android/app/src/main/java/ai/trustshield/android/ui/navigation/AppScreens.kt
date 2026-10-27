@@ -39,6 +39,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.text.font.FontWeight
 import android.net.Uri
@@ -742,6 +743,49 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
     }
 }
 
+/**
+ * Copy for the staged-demo chrome.
+ *
+ * The demo draws its own close / language / back controls above and below the script; they are not
+ * part of Call Shield's screen, so they are labelled here. Every close/back affordance says **what
+ * it ends** (UI_SPEC "Back and Stop always end a session"): "Peeche" or "Close demo" alone never
+ * tells a screen-reader user whether the demo, the session or just one line is going away.
+ */
+internal object DemoChromeCopy {
+
+    /** Closing the demo ends the demo session and returns to Call Shield. */
+    val closeDemo: ToneCopy = ToneCopy(
+        hinglish = "Demo band karein. Demo khatam, Call Shield screen par wapas.",
+        english = "Close demo. Ends the demo and returns to the Call Shield screen."
+    )
+
+    /** The script's step-back: it moves one line earlier and ends nothing. */
+    val previousLine: ToneCopy = ToneCopy(
+        hinglish = "Peeche. Demo ki pichli line par.",
+        english = "Back. The previous demo line."
+    )
+
+    /** The demo's current language, as a spoken name — the visible button shows the *next* one. */
+    fun spokenName(language: CallLanguage): ToneCopy = when (language) {
+        CallLanguage.HINGLISH -> ToneCopy("Hinglish", "Hinglish", "\u0939\u093f\u0902\u0917\u094d\u0932\u093f\u0936")
+        CallLanguage.ENGLISH -> ToneCopy("English", "English", "\u0905\u0902\u0917\u094d\u0930\u0947\u091c\u093c\u0940")
+        CallLanguage.HINDI -> ToneCopy("Hindi", "Hindi", "\u0939\u093f\u0928\u094d\u0926\u0940")
+    }
+
+    /**
+     * Visible label of the demo's language button. Unchanged behaviour: it names the language a tap
+     * switches *to*, which is why [languageButton] announces the label first and the current language
+     * second.
+     */
+    val nextLanguageLabel: ToneCopy = ToneCopy("English", "Hinglish", "\u0939\u093f\u0902\u0917\u094d\u0932\u093f\u0936")
+
+    /** Announced on the demo's language button: what a tap gives you, and what is showing now. */
+    fun languageButton(next: String, current: String): ToneCopy = ToneCopy(
+        hinglish = "$next. Demo bhasha: $current. Badalne ke liye tap karein.",
+        english = "$next. Demo language: $current. Tap to change."
+    )
+}
+
 private fun networkIsValidated(context: Context): Boolean {
     val manager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? android.net.ConnectivityManager
         ?: return false
@@ -787,11 +831,36 @@ private fun CallDemoExperience(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 2.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            TextButton(onClick = onClose, modifier = Modifier.heightIn(min = 48.dp)) {
+            // `weight(fill = false)`: at 320 dp / 200 % the two labels wrap inside their own share
+            // of the row instead of one squeezing the other to nothing (no clipped chrome).
+            TextButton(
+                onClick = onClose,
+                modifier = Modifier
+                    .weight(1f, fill = false)
+                    .heightIn(min = 48.dp)
+                    .semantics {
+                        // Says what this control ends and where the user lands: closing the demo
+                        // leaves the Call Shield screen (UI_SPEC "Back and Stop always end a
+                        // session").
+                        contentDescription = DemoChromeCopy.closeDemo.forLanguage(language)
+                    }
+            ) {
                 Text(ToneCopy("Demo band karein", "Close demo", "\u0921\u0947\u092e\u094b \u092c\u0902\u0926 \u0915\u0930\u0947\u0902").forLanguage(language))
             }
-            TextButton(onClick = onToggleLanguage, modifier = Modifier.heightIn(min = 48.dp)) {
-                Text(ToneCopy("English", "Hinglish", "हिंग्लिश").forLanguage(language))
+            TextButton(
+                onClick = onToggleLanguage,
+                modifier = Modifier
+                    .heightIn(min = 48.dp)
+                    .semantics {
+                        val nextLanguage = DemoChromeCopy.nextLanguageLabel.forLanguage(language)
+                        val currentLanguageName = DemoChromeCopy.spokenName(language).forLanguage(language)
+                        contentDescription = DemoChromeCopy
+                            .languageButton(nextLanguage, currentLanguageName)
+                            .forLanguage(language)
+                        stateDescription = currentLanguageName
+                    }
+            ) {
+                Text(DemoChromeCopy.nextLanguageLabel.forLanguage(language))
             }
         }
 
@@ -917,7 +986,17 @@ private fun CallDemoExperience(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            OutlinedButton(onClick = onBack, enabled = progress.steps.isNotEmpty(), modifier = Modifier.weight(1f).heightIn(min = 48.dp)) {
+            OutlinedButton(
+                onClick = onBack,
+                enabled = progress.steps.isNotEmpty(),
+                modifier = Modifier
+                    .weight(1f)
+                    .heightIn(min = 48.dp)
+                    .semantics {
+                        // Says what it ends: one script line, not the demo and not the session.
+                        contentDescription = DemoChromeCopy.previousLine.forLanguage(language)
+                    }
+            ) {
                 Text(ToneCopy("Peeche", "Back", "\u092a\u0940\u091b\u0947").forLanguage(language))
             }
             Button(onClick = onAdvance, enabled = !progress.finished, modifier = Modifier.weight(1.25f).heightIn(min = 48.dp)) {

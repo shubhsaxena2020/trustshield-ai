@@ -51,9 +51,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -879,10 +881,29 @@ internal object QrHostCopy {
         "If the camera is not available, type the UPI ID below to register it."
     )
 
+    /**
+     * The preview surface. Without a label the only camera stop on the screen is an empty black
+     * rectangle; with it, a screen reader is told what the rectangle is and that no photo is kept.
+     */
+    val cameraPreviewDescription = ToneCopy(
+        "Live camera preview — QR isi frame se padha jata hai, photo save nahi hoti.",
+        "Live camera preview — the QR is read from this frame; no photo is saved."
+    )
+
     val setupCaptureHeading = ToneCopy("Yeh QR mila", "This QR was read")
     val setupCaptureHelp = ToneCopy(
         "Camera ne yeh UPI ID padhi. Agar yeh aapke dukaan ka asli QR hai to register karein — tabhi nazar shuru hogi.",
         "The camera read this UPI ID. Register it only if this is your shop's real QR — watching starts after that."
+    )
+    /** Announced as a state: "registered" must never be only the row's colour. */
+    val registeredTrustedState = ToneCopy(
+        "registered aur bharosemand — isi UPI ID se camera compare karta hai. Naam sirf label hai.",
+        "registered and trusted — the camera compares against this UPI ID. The name is only a label."
+    )
+    /** Announced as a state: a decoded id is not yet the trusted identity. */
+    val setupCaptureUnverifiedState = ToneCopy(
+        "camera ne padha hai, abhi register nahi hua — bharosa tabhi jab aap confirm karein",
+        "read by the camera, not registered yet — trusted only once you confirm"
     )
     val setupCaptureConfirm = ToneCopy("Haan, yeh mera QR hai — register karein", "Yes, this is my QR — register")
     val setupCaptureDismiss = ToneCopy("Nahi, dobara dekhein", "No, scan again")
@@ -1143,6 +1164,10 @@ private fun CameraPanel(
                     // preview legible and leaves the rest of the column for the state.
                     .heightIn(min = 120.dp, max = 200.dp)
                     .background(Color.Black, RoundedCornerShape(TsTokens.CornerSmall))
+                    // A bare preview is a silent black rectangle to TalkBack; name what it is.
+                    .semantics {
+                        contentDescription = QrHostCopy.cameraPreviewDescription.text(lang)
+                    }
             ) {
                 AndroidView(
                     factory = { context ->
@@ -1227,7 +1252,11 @@ private fun SetupCapturePanel(
                     Text(
                         text = QrStrings.registeredPayee.text(lang).replace("{id}", payee.maskedHandle),
                         style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Medium
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.semantics {
+                            // Announced as a state, not just a tinted row.
+                            stateDescription = QrHostCopy.registeredTrustedState.text(lang)
+                        }
                     )
                 }
                 Text(
@@ -1238,11 +1267,15 @@ private fun SetupCapturePanel(
             return@HostPanel
         }
         Text(text = QrHostCopy.setupCaptureHelp.text(lang), style = MaterialTheme.typography.bodySmall)
-        // Masked only: the full UPI id never reaches the screen.
+        // Masked only: the full UPI id never reaches the screen. Announced as an *unverified*
+        // reading — a decoded id is not the trusted identity until the shopkeeper confirms it.
         Text(
             text = capture.masked,
             style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Medium
+            fontWeight = FontWeight.Medium,
+            modifier = Modifier.semantics {
+                stateDescription = QrHostCopy.setupCaptureUnverifiedState.text(lang)
+            }
         )
         capture.name?.let { name ->
             Text(
@@ -1437,12 +1470,19 @@ private fun HostPanel(
     }
 }
 
-/** Tone + glyph badge: a real second channel next to the colour (QUALITY_GATES gate 6). */
+/**
+ * Tone + glyph badge: a real second channel next to the colour (QUALITY_GATES gate 6).
+ *
+ * Decorative for accessibility — it is not clickable, not toggleable and carries nothing the status
+ * text beside it does not already say in words, so [clearAndSetSemantics] keeps the raw glyph out of
+ * the accessibility tree instead of having TalkBack read "●" or "✕" before the state label.
+ */
 @Composable
 private fun HostBadge(glyph: String, tone: RiskTone, dark: Boolean) {
     Box(
         modifier = Modifier
             .size(32.dp)
+            .clearAndSetSemantics { }
             .background(tone.accent(dark), CircleShape),
         contentAlignment = Alignment.Center
     ) {
