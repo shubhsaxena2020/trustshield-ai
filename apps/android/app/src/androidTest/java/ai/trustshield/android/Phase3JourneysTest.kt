@@ -22,6 +22,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import ai.trustshield.android.data.preferences.SharedPreferencesUserPreferencesStore
+import ai.trustshield.android.data.preferences.AppLanguage
 import ai.trustshield.android.ui.navigation.AppRoute
 import ai.trustshield.android.ui.call.CallShieldCopy
 import org.junit.After
@@ -77,9 +78,9 @@ class Phase3JourneysTest {
      */
     @Before
     fun resetPersistedSettings() {
-        SharedPreferencesUserPreferencesStore
+        val store = SharedPreferencesUserPreferencesStore
             .open(InstrumentationRegistry.getInstrumentation().targetContext)
-            .reset()
+        store.save(store.reset().copy(language = AppLanguage.HINGLISH))
     }
 
     @After
