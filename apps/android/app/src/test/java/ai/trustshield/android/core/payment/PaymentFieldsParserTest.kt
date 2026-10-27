@@ -465,11 +465,19 @@ class PaymentFieldsParserTest {
     }
 
     @Test
-    fun `malformed grouping is tolerated without consuming punctuation`()
+    fun `malformed grouping is tolerated without consuming punctuation`() {
         val fields = parse("₹1,2,,,@@ ₹500")
 
         assertEquals(50000L, fields.amountMinor)
         assertEquals("₹500", fields.amountRaw)
+    }
+
+    @Test
+    fun `malformed decimal punctuation is skipped for a later valid amount`() {
+        val fields = parse("₹1.2.3 then Total ₹75")
+
+        assertEquals(7500L, fields.amountMinor)
+        assertEquals("₹75", fields.amountRaw)
     }
 
     @Test

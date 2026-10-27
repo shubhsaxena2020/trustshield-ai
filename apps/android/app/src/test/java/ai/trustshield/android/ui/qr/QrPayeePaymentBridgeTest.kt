@@ -213,8 +213,7 @@ class QrPayeePaymentBridgeTest {
 
     @Test
     fun qrDataCannotMatchThroughWhitespaceInsideIdOrUriDecorations() {
-        for (candidate in listOf("sh op@okaxis", "shop @okaxis", "shop@okaxis
-", "upi://pay?pa=shop@okaxis")) {
+        for (candidate in listOf("sh op@okaxis", "shop @okaxis", "shop@okaxis\n", "upi://pay?pa=shop@okaxis")) {
             assertFalse("unexpected match for <$candidate>", QrPayeePaymentBridge.matchesRegisteredPayee(candidate, listOf(shop)))
         }
     }
@@ -279,13 +278,58 @@ class QrPayeePaymentBridgeTest {
             payee("shop @okaxis"),
             payee("shop@okaxis.evil"),
             payee("shop@okaxis\nattacker@ybl"),
-            payee("shоp@okaxis") // Cyrillic о, not ASCII o.
+            payee("shоp@okaxis"), // Cyrillic о, not ASCII o.
+            payee("@okaxis"),
+            payee("shop@"),
+            payee("shop@@okaxis"),
+            payee("shop!@okaxis")
         )
 
         for (candidate in listOf("shop@okaxis", "shopx@okaxis", "attacker@ybl")) {
             assertFalse(
                 "malformed registration must not validate <$candidate>",
                 QrPayeePaymentBridge.matchesRegisteredPayee(candidate, registrations)
+            )
+        }
+    }
+
+    @Test
+    fun normalizationFixtureMatrixMatchesOnlyTrimmedCaseInsensitiveWholeIds() {
+        val fixtures = listOf(
+            Triple(" Shop@OkAxis ", "shop@okaxis", true),
+            Triple("\tSHOP@OKAXIS\n", "  shop@okaxis  ", true),
+            Triple("shop+tag@okaxis", "shop@okaxis", false),
+            Triple("shop@okaxis.evil", "shop@okaxis", false),
+            Triple("shop@okaxis", "other@okaxis", false),
+            Triple("shop@ybl", "shop@okaxis", false)
+        )
+        for ((candidate, registration, expected) in fixtures) {
+            assertEquals(
+                "comparison result for candidate=<$candidate>, registration=<$registration>",
+                expected,
+                QrPayeePaymentBridge.matchesRegisteredPayee(candidate, listOf(payee(registration)))
+            )
+        }
+    }
+
+    @Test
+    fun emptyAndMalformedCandidatesNeverMatchEvenIfRegistrationsContainTheSameText() {
+        val malformed = listOf("", "   ", "@okaxis", "shop@", "shop@@okaxis", "shop !@okaxis")
+        for (candidate in malformed) {
+            assertFalse(
+                "malformed candidate must not match itself: <$candidate>",
+                QrPayeePaymentBridge.matchesRegisteredPayee(candidate, listOf(payee(candidate)))
+            )
+        }
+    }
+
+    @Test
+    fun surroundingWhitespaceIsIgnoredButEmbeddedWhitespaceIsNot() {
+        assertTrue(QrPayeePaymentBridge.matchesRegisteredPayee("  shop@okaxis  ", listOf(payee("\tshop@okaxis\n"))))
+        for (candidate in listOf("shop @okaxis", "sh op@okaxis", "shop@oka xis")) {
+            assertFalse(
+                "embedded whitespace must remain significant: <$candidate>",
+                QrPayeePaymentBridge.matchesRegisteredPayee(candidate, listOf(shop))
             )
         }
     }

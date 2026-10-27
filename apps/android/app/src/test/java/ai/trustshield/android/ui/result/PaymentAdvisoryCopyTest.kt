@@ -289,6 +289,25 @@ class PaymentAdvisoryCopyTest {
     }
 
     @Test
+    fun mandatoryConfirmationIsPresentInEveryLanguageAndMakesNoOutcomeClaim() {
+        val confirmation = PaymentAdvisoryCopy.CONFIRMATION
+        val lines = listOf(confirmation.hinglish, confirmation.english, confirmation.hindi)
+
+        assertEquals("confirmation must cover every supported language", UiLanguage.entries.size, lines.size)
+        lines.forEachIndexed { index, text ->
+            val language = UiLanguage.entries[index]
+            assertTrue("$language confirmation must not be blank", text.isNotBlank())
+            assertFalse("$language confirmation must not claim success: $text", text.contains("success", ignoreCase = true))
+            assertFalse("$language confirmation must not claim fraud: $text", text.contains("fraud", ignoreCase = true))
+            assertFalse("$language confirmation must not claim payment received: $text", text.contains("payment received", ignoreCase = true))
+            if (language == UiLanguage.HINDI) {
+                assertFalse("Hindi confirmation must not claim success: $text", text.contains("सफल"))
+                assertFalse("Hindi confirmation must not claim fraud: $text", text.contains("धोखाधड़ी"))
+            }
+        }
+    }
+
+    @Test
     fun everyCopyPassesAbsoluteSafetyGuard() {
         for (text in allStrings()) {
             assertTrue(
@@ -296,6 +315,22 @@ class PaymentAdvisoryCopyTest {
                 AbsoluteSafetyGuard.isClean(text)
             )
         }
+    }
+
+    @Test
+    fun noCopyClaimsPaymentSucceededOrProvesFraud() {
+        val prohibitedOutcomeClaims = listOf("payment succeeded", "payment successful", "fraud confirmed", "this is fraud")
+        for (text in allStrings()) {
+            val lowered = text.lowercase()
+            for (claim in prohibitedOutcomeClaims) {
+                assertFalse("outcome claim '$claim' in: $text", lowered.contains(claim))
+            }
+        }
+    }
+
+    @Test
+    fun paymentAdvisoryContractRequiresConfirmation() {
+        assertTrue("the advisory contract must require its confirmation line", PaymentAdvisoryContract.CONFIRMATION_REQUIRED)
     }
 
     // ------------------------------------------------------------------ rupee formatting

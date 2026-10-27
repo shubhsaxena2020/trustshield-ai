@@ -1,12 +1,12 @@
 # Payment advisory (A09)
 
-**Status: Result presenter and render wiring exist; production payee-registry integration and runtime verification remain unestablished.** Static review confirms the parser and deterministic engine are invoked by `ResultPresenter.present` (in `ResultUiState.kt`), which puts the advisory in `ResultUiState.paymentAdvisory` when payment-like input is recognized; `ResultScreen` conditionally renders it. The input field `ResultInput` accepts registered-payee count and match values, but defaults them to zero/false. The presenter currently parses `input.sourceText`, invokes the engine, and attaches a non-null advisory when `isPaymentScreenshot` is true. The separate `QrPayeePaymentBridge` converts an explicitly supplied payee list into comparison values, but the presenter does not call that bridge or load `RegisteredPayeeStore`; its `registeredPayeeCount` and `payeeMatchesRegistered` inputs default to zero/false. Therefore advisory calculation and conditional Result rendering are implemented, while production comparison against locally registered payees is not wired or demonstrated. The store implementation writes HMAC-SHA256 identifiers and masked display values through a SharedPreferences adapter, but is not shown integrated into this advisory/bridge path. Its salt is caller-supplied (minimum 16 bytes); no production keystore-backed provider, durable salt lifecycle, or restart-safe consistency guarantee is established. No Gradle/unit-test or emulator verification was run by this lane; see the verification table.
+**Status: Result presenter/render wiring and conditional payee-list-to-advisory bridge use are present in source; production store-to-Result provisioning and execution of tests remain unverified.** Static review confirms `ResultPresenter.present` parses `input.sourceText`, evaluates the engine, and attaches `ResultUiState.paymentAdvisory` for recognized payment input; `ResultScreen` conditionally renders it. When `ResultInput.registeredPayees` is non-empty, the presenter calls `QrPayeePaymentBridge.toAdvisoryInput`; otherwise it constructs input from the supplied count/match fields, which default to zero/false. The QR integration test source exercises a `QrGuardSession` payee snapshot through the bridge and renders the resulting card. Neither that test nor the presenter establishes a production caller that supplies the registered-payee list from `RegisteredPayeeStore`; no production store-to-Result provisioning is established. The store persists HMAC-SHA256 identifiers and masked display values through a SharedPreferences adapter; its salt is caller-supplied (minimum 16 bytes), with no production keystore-backed provider or durable salt lifecycle established. Gradle, JVM, instrumentation, and emulator tests were not run by this lane.
 
 Source of truth for types: `apps/android/app/src/main/java/ai/trustshield/android/core/payment/PaymentAdvisoryContract.kt`. If code and this document disagree at review, the code wins and this document gets corrected.
 
 ## Purpose and scope
 
-The engine can produce an advisory for payment-like fields, including OCR-derived fields, and `ResultPresenter.present` invokes the parser and engine and attaches a value to `ResultUiState.paymentAdvisory` for recognized payment input. The following describes component behavior; it does not establish that local registered payees are loaded or compared in the production scan flow. The advisory is intended for UPI/PSP receipt-like input (amount plus at least one of UPI id, reference number, or readable status line) or OCR-derived text.
+The engine can produce an advisory for payment-like fields, including OCR-derived fields, and `ResultPresenter.present` invokes the parser and engine and attaches a value to `ResultUiState.paymentAdvisory` for recognized payment input. The following describes component behavior; Result's presenter compares against a supplied registered-payee list through the bridge when one is provided. No production caller supplying that list from `RegisteredPayeeStore` is established. Instrumentation-test source exercises the component path but does not establish test execution. The advisory is intended for UPI/PSP receipt-like input (amount plus at least one of UPI id, reference number, or readable status line) or OCR-derived text.
 
 It answers one question: **does this payment screen deserve a pause?** It never answers — and must never be worded to imply it answers — *"was this money transferred?"*
 
@@ -67,33 +67,38 @@ These are heuristics chosen for the demo, not measured optima. Boundary behaviou
 ## Privacy
 
 - Only masked UPI ids are shown or logged: `maskedUpi` (`sho***@okaxis`), `RegisteredPayee.maskedHandle`, `PayeeMasking.mask`. `PaymentFields.toString` and `PaymentHint.toString` are value-free on purpose, so a stray log line cannot leak an id, an amount or a reference number.
-- The advisory bridge compares exact normalized IDs against the payee list passed to it; it does not itself load the `RegisteredPayeeStore`. That store implementation persists HMAC-SHA256 identifiers and masked values using SharedPreferences, with a caller-supplied salt of at least 16 bytes. No production wiring from the store to this bridge/advisory was found, nor a keystore-backed salt provider, atomic/durable persistence guarantee, or key-rotation/restart consistency policy. Persisted HMAC values alone do not establish a safe salt lifecycle. These are implementation gaps, not guarantees.
-- The advisory parser and presenter consume source text in memory; no persistence or logging of raw payment text was found in the inspected advisory path. This source review does not establish end-to-end handling of OCR output or prove that every caller discards its input after processing. The presenter does build/attach an advisory for recognized payment input, but this does not establish production payee matching or runtime behavior.
+- When a non-empty payee list is supplied to `ResultPresenter`, it uses the bridge to compare exact normalized IDs; the bridge does not itself load `RegisteredPayeeStore`. The store persists HMAC-SHA256 identifiers and masked values using SharedPreferences, with a caller-supplied salt of at least 16 bytes. No production wiring from the store to the presenter, keystore-backed salt provider, atomic/durable persistence guarantee, or key-rotation/restart consistency policy was found. Persisted HMAC values alone do not establish a safe salt lifecycle. These are implementation gaps, not guarantees.
+- The advisory parser and presenter consume source text in memory; no persistence or logging of raw payment text was found in the inspected advisory path. This source review does not establish end-to-end handling of OCR output or prove that every caller discards its input after processing. The presenter builds/attaches an advisory for recognized payment input and compares supplied payee data when present; source review does not establish which production callers supply that data or runtime behavior.
 - This feature makes no network call, reads no file, and opens no intent.
 
 ## Wiring
 
 ```
-PaymentFieldsParser (core/payment)     pasted text or OCR -> PaymentFields
+ResultPresenter.present (ui/result)   sourceText -> parser -> engine
         v
-QrPayeePaymentBridge (ui/qr)           registeredPayeeCount + payeeMatchesRegistered
+ResultUiState.paymentAdvisory          nullable for recognized payment input
         v
-PaymentAdvisoryEngine (core/payment)   input -> PaymentAdvisory (hints, verdict)
+ResultScreen -> PaymentAdvisoryCard    conditional render; hints then mandatory line
+
+ResultInput.registeredPayees (if given)
         v
-ResultUiState.paymentAdvisory          nullable; null when not a receipt
-        v
-PaymentAdvisoryCard (ui/result)        hints in order, then the mandatory line
-                                       wording from PaymentAdvisoryCopy (ui/result)
+QrPayeePaymentBridge.toAdvisoryInput -> PaymentAdvisoryEngine
+                                       QR integration test source exercises
+                                       a QR Guard snapshot through this path
+
+RegisteredPayeeStore                  persisted store component; production
+                                       provisioning to ResultInput unestablished
 ```
 
-Layering follows `ARCHITECTURE.md` boundaries: `core/payment` stays free of `android.*` and `androidx.compose.*` so parser and engine are plain-JVM testable; Compose and localized copy live in `ui/`. Implemented in the inspected source: contract, parser, engine, bridge conversion function, card, copy and `ResultUiState.paymentAdvisory`. `ResultScreen` conditionally renders a non-null advisory; the presenter parses source text, evaluates the engine, and attaches the advisory for recognized payment input. The presenter does not invoke `QrPayeePaymentBridge` or read `RegisteredPayeeStore`, so its registered-payee count/match values remain the input defaults (zero/false). Thus Result advisory calculation/rendering is implemented, but payee comparison in the production Result path is not. The store implementation exists and persists HMAC-SHA256 identifiers plus masked values via SharedPreferences, but this does not demonstrate production wiring, a keystore-backed key source, durable key lifecycle, or restart/rotation consistency. No runtime verification is implied.
+Layering follows `ARCHITECTURE.md` boundaries: `core/payment` stays free of `android.*` and `androidx.compose.*` so parser and engine are plain-JVM testable; Compose and localized copy live in `ui/`. Implemented in the inspected source: contract, parser, engine, bridge conversion function, card, copy and `ResultUiState.paymentAdvisory`. `ResultScreen` conditionally renders a non-null advisory; the presenter parses source text, evaluates the engine, and attaches the advisory for recognized payment input. When `ResultInput.registeredPayees` is non-empty, the presenter invokes `QrPayeePaymentBridge.toAdvisoryInput` and compares against that supplied list; otherwise it uses the supplied count/match fields (defaulting to zero/false). Result advisory calculation/rendering and conditional bridge comparison are implemented, but production provisioning of payees from `RegisteredPayeeStore` is not established. The store implementation exists and persists HMAC-SHA256 identifiers plus masked values via SharedPreferences, but this does not demonstrate production wiring, a keystore-backed key source, durable key lifecycle, or restart/rotation consistency. No runtime verification is implied.
 
 ## Verification status
 
 | Check | Status |
 |---|---|
-| Static source review (parser, engine, store, bridge, card, Result field/presenter attachment) | **Static review only** — presenter calculation/attachment for recognized input, conditional rendering and store implementation confirmed; presenter does not supply registered payee comparison data. Store-to-bridge production wiring and keystore-backed salt/key lifecycle not evidenced. No runtime claim implied |
-| JVM unit tests (parser, engine, bridge, result wiring) | **Not run by this lane** — test sources exist, execution belongs to lane lead |
+| Static source review (parser, engine, store, bridge, card, Result attachment, QR integration test source) | **Verified by source inspection only** — Result calculation/attachment and conditional rendering exist; QR bridge can compare explicit payee lists and an instrumentation test source exercises it with a QR Guard session payee snapshot and card rendering. No production scan-to-advisory wiring or execution is implied; Result presenter does not supply registered-payee comparison data |
+| JVM unit tests | **Sources present; not run by this lane** — includes parser, engine, bridge, store, privacy and Result wiring tests; execution belongs to lane lead |
+| QR Guard advisory instrumentation test | **Source present; not run** — `PaymentAdvisoryQrIntegrationTest` exercises constructed component flow and UI assertions; no pass claimed |
 | Compile (`testDebugUnitTest` / `assembleDebug`) | **Not run by this lane** — pending lane lead gate |
 | Emulator UI path (Result screen showing card, TalkBack text, confirmation line last) | **Not run** — not verified; shared emulator/build use is lead-controlled |
 | Real device | Owner-only. Serial `63b0de52` must never be touched by an automated lane |

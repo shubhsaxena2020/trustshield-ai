@@ -375,7 +375,8 @@ class PaymentAdvisoryEngine(
     private fun isLargeRoundAmount(amountMinor: Long?, payeeMatchesRegistered: Boolean): Boolean {
         if (amountMinor == null || amountMinor <= 0L) return false
         if (payeeMatchesRegistered) return false
-        if (amountMinor < policy.roundAmountMinor) return false
+        // A non-positive floor disables this threshold, matching largeAmountMinor semantics.
+        if (policy.roundAmountMinor <= 0L || amountMinor < policy.roundAmountMinor) return false
         val divisor: Long = policy.roundDivisorMinor
         if (divisor <= 0L) return false
         return amountMinor % divisor == 0L

@@ -192,13 +192,13 @@ object PaymentAdvisoryCopy {
         PaymentHintKind.AMOUNT_ROUND_LARGE -> withAmount(
             hint = hint,
             generic = ToneCopy(
-                hinglish = "Bada round figure refund ya fees ke naam par lure ke taur par use ho sakta hai. Details check karein.",
-                english = "A large round figure can be used as a lure, for example for a refund or fee. Check the details.",
-                hindi = "बड़ी गोल रकम का इस्तेमाल रिफ़ंड या फ़ीस के नाम पर लुभाने के लिए किया जा सकता है। विवरण जाँचें।"
+                hinglish = "Badi gol amount apne aap mein scam ka proof nahi hai. Refund ya fees ki baat ho, toh details khud check karein.",
+                english = "A large round amount is not proof of a scam by itself. If it is described as a refund or fee, check the details yourself.",
+                hindi = "बड़ी गोल राशि अपने आप में धोखाधड़ी का प्रमाण नहीं है। इसे रिफ़ंड या फ़ीस बताया जाए, तो विवरण स्वयं जाँचें।"
             ),
-            hinglish = "{amount} jaisa bada round figure aam taur par lure hota hai — jaise refund ya fees ke naam par.",
-            english = "A large round figure like {amount} is a common lure, for example as a refund or a fee.",
-            hindi = "{amount} जैसी बड़ी गोल रकम रिफ़ंड या फ़ीस के नाम पर लुभाने के लिए इस्तेमाल की जा सकती है।"
+            hinglish = "{amount} ek badi gol amount hai. Refund ya fees ki baat ho, toh details khud check karein.",
+            english = "{amount} is a large round amount. If it is described as a refund or fee, check the details yourself.",
+            hindi = "{amount} एक बड़ी गोल राशि है। इसे रिफ़ंड या फ़ीस बताया जाए, तो विवरण स्वयं जाँचें।"
         )
         PaymentHintKind.AMOUNT_MISSING -> ToneCopy(
             hinglish = "Screenshot mein amount padha nahi ja saka. Screen par amount dekhe bina pay na karein.",

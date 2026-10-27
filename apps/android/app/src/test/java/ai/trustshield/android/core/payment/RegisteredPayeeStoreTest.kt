@@ -108,6 +108,54 @@ class RegisteredPayeeStoreTest {
     }
 
     @Test
+    fun `mask never reveals more than three local characters across short and long identifiers`() {
+        val store = RegisteredPayeeStore(MemoryStore(), salt)
+        val identifiers = listOf("a@bank", "ab@bank", "abc@bank", "abcdef@bank")
+
+        identifiers.forEach(store::register)
+
+        assertEquals(
+            listOf("a***@bank", "ab***@bank", "abc***@bank", "abc***@bank"),
+            store.maskedList()
+        )
+        identifiers.forEach { identifier ->
+            val localPart = identifier.substringBefore('@')
+            assertFalse(store.maskedList().any { it.substringBefore("***").contains(localPart) && localPart.length > 3 })
+        }
+    }
+
+    @Test
+    fun `raw identifier is absent from every persisted value and public display result after restart`() {
+        val backend = MemoryStore()
+        val privateId = "ultrasecretmerchant@okaxis"
+        RegisteredPayeeStore(backend, salt).register(privateId)
+
+        val restarted = RegisteredPayeeStore(backend, salt)
+        val exposed = (backend.values.values + restarted.maskedList()).joinToString("|")
+        assertFalse(exposed.contains(privateId))
+        assertFalse(exposed.contains("ultrasecretmerchant"))
+        assertEquals(listOf("ult***@okaxis"), restarted.maskedList())
+        assertTrue(restarted.matches(privateId))
+    }
+
+    @Test
+    fun `invalid salt boundaries are rejected without writing persisted data`() {
+        listOf(ByteArray(0), ByteArray(15)).forEach { invalidSalt ->
+            val backend = MemoryStore()
+            val error = runCatching { RegisteredPayeeStore(backend, invalidSalt) }.exceptionOrNull()
+
+            assertTrue(error is IllegalArgumentException)
+            assertTrue(backend.values.isEmpty())
+        }
+
+        val minimumSalt = ByteArray(RegisteredPayeeStore.MINIMUM_SALT_BYTES)
+        val backend = MemoryStore()
+        val store = RegisteredPayeeStore(backend, minimumSalt)
+        store.register("boundary@bank")
+        assertTrue(RegisteredPayeeStore(backend, minimumSalt).matches("boundary@bank"))
+    }
+
+    @Test
     fun `invalid or blank decoded identifiers do not match or throw`() {
         val store = RegisteredPayeeStore(MemoryStore(), salt)
 

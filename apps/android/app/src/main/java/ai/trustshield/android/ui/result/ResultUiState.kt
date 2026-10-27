@@ -7,6 +7,8 @@ import ai.trustshield.android.core.payment.PaymentFieldsParser
 import ai.trustshield.android.ui.theme.RiskTone
 import ai.trustshield.android.ui.theme.RiskToneCopy
 import ai.trustshield.android.ui.theme.ToneCopy
+import ai.trustshield.android.ui.qr.QrPayeePaymentBridge
+import ai.trustshield.android.ui.qr.RegisteredPayee
 
 /**
  * C03 — Result / evidence screen: **pure** state, copy and presenter.
@@ -303,6 +305,12 @@ data class ResultUiState(
     val paymentAdvisory: PaymentAdvisory? = null
 ) {
 
+    /** Avoid leaking source quotes, which may contain payment identifiers, through debug logging. */
+    override fun toString(): String =
+        "ResultUiState(status=${status::class.simpleName}, evidenceCount=${evidence.size}, " +
+            "droppedEvidenceCount=${droppedEvidence.count}, actionCount=${actions.size}, " +
+            "analysedCharacters=$analysedCharacters, hasPaymentAdvisory=${paymentAdvisory != null})"
+
     /** One flat list of everything this state can put on screen, used by the safety tests. */
     fun visibleStrings(language: UiLanguage = UiLanguage.Default): List<String> {
         val out = mutableListOf<String>()
@@ -454,12 +462,20 @@ data class ResultInput(
     /** True when this source text came from screenshot OCR. */
     val paymentOcrUsed: Boolean = false,
     /** Locally registered payees known to the caller; identifiers are never passed here. */
+    /** QR Guard's local payees; ids are only compared transiently and never rendered/logged. */
+    val registeredPayees: List<RegisteredPayee> = emptyList(),
+    /** Legacy precomputed values for callers without QR Guard payee context. */
     val registeredPayeeCount: Int = 0,
-    /** Caller has compared the parsed UPI identifier against its protected local registry. */
     val payeeMatchesRegistered: Boolean = false,
     /** Optional deterministic clock for the payment recency hint; zero disables it. */
     val paymentNowEpochMs: Long = 0L
-)
+) {
+    /** Source OCR/text and payee handles can contain identifiers; keep them out of debug strings. */
+    override fun toString(): String =
+        "ResultInput(coverage=$coverage, evidenceCount=${evidence.size}, actionsCount=${actions.size}, " +
+            "sourceCharacters=${sourceText.length}, registeredPayeeCount=${registeredPayees.size}, " +
+            "paymentOcrUsed=$paymentOcrUsed)"
+}
 
 // ---------------------------------------------------------------------------------------------
 // Normalisation + exact-quote verification
@@ -879,7 +895,15 @@ object ResultPresenter {
             .sortedBy { it.priority.ordinal } // PRIMARY steps first; stable within a group
 
         val paymentFields = PaymentFieldsParser.parse(input.sourceText)
-        val paymentAdvisory = PaymentAdvisoryEngine().evaluate(
+        val paymentInput = if (input.registeredPayees.isNotEmpty()) {
+            QrPayeePaymentBridge.toAdvisoryInput(
+                sourceText = input.sourceText,
+                fields = paymentFields,
+                payees = input.registeredPayees,
+                nowEpochMs = input.paymentNowEpochMs.coerceAtLeast(0L),
+                ocrUsed = input.paymentOcrUsed
+            )
+        } else {
             PaymentAdvisoryInput(
                 sourceText = input.sourceText,
                 fields = paymentFields,
@@ -888,7 +912,9 @@ object ResultPresenter {
                 nowEpochMs = input.paymentNowEpochMs.coerceAtLeast(0L),
                 ocrUsed = input.paymentOcrUsed
             )
-        ).takeIf { it.isPaymentScreenshot }
+        }
+        val paymentAdvisory = PaymentAdvisoryEngine().evaluate(paymentInput)
+            .takeIf { it.isPaymentScreenshot }
 
         return ResultUiState(
             status = status,

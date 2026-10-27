@@ -21,13 +21,17 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** QR Guard registered payees flow into payment advice and visible user guidance. */
+/** Isolated contract checks for adapting QR Guard payees to the advisory UI.
+ *
+ * These tests do not render [QrGuardScreen] or exercise a production scan-to-advisory path: the
+ * current QR Guard screen does not invoke this bridge. Keep that distinction explicit.
+ */
 @RunWith(AndroidJUnit4::class)
 class PaymentAdvisoryQrIntegrationTest {
     @get:Rule
     val compose = createComposeRule()
 
-    private val receipt = "Successful payment\\nPaid to: Corner Shop\\nUPI ID: corner@okaxis\\nAmount: ₹250.00"
+    private val receipt = "Successful payment\nPaid to: Corner Shop\nUPI ID: corner@okaxis\nAmount: ₹250.00"
 
     private fun evaluate(payees: List<RegisteredPayee>) = PaymentAdvisoryEngine().evaluate(
         QrPayeePaymentBridge.toAdvisoryInput(
@@ -48,7 +52,7 @@ class PaymentAdvisoryQrIntegrationTest {
     }
 
     @Test
-    fun registeredQrGuardMerchantShowsMatchAndNonSettlementDisclaimer() {
+    fun simulatedQrGuardPayeeProducesMatchWhenManuallyAdaptedToAdvisory() {
         val guard = QrGuardSession(clock = { 0L })
         guard.simulate(QrSimulationFlow.Match)
         val payees = guard.snapshot().state.payees
@@ -66,7 +70,7 @@ class PaymentAdvisoryQrIntegrationTest {
     }
 
     @Test
-    fun samePrintedMerchantNameWithDifferentQrPayeeShowsMismatchCaution() {
+    fun differentPayeeWithSamePrintedNameProducesMismatchWhenManuallyAdapted() {
         val advisory = evaluate(listOf(RegisteredPayee(handle = "impostor@okaxis", name = "Corner Shop")))
         assertEquals(PaymentAdvisoryVerdict.STOP, advisory.verdict)
         assertTrue(advisory.hints.any { it.kind == PaymentHintKind.PAYEE_NOT_REGISTERED })

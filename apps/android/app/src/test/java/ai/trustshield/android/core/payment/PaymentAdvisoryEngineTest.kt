@@ -324,6 +324,49 @@ class PaymentAdvisoryEngineTest {
     }
 
     @Test
+    fun `nonpositive round floor disables round warning even for divisible amounts`() {
+        for (floor in listOf(0L, -1L, Long.MIN_VALUE)) {
+            val configured = PaymentAdvisoryEngine(PaymentAdvisoryPolicy(roundAmountMinor = floor))
+            val advisory = configured.evaluate(
+                input(fields = fields(amountMinor = 900_000L), registeredPayeeCount = 1)
+            )
+
+            assertFalse("floor=$floor", has(advisory, PaymentHintKind.AMOUNT_ROUND_LARGE))
+            // The separate large-amount rule remains enabled and the unregistered payee keeps CHECK.
+            assertTrue("floor=$floor", has(advisory, PaymentHintKind.AMOUNT_LARGE))
+            assertEquals("floor=$floor", PaymentAdvisoryVerdict.CHECK, advisory.verdict)
+        }
+    }
+
+    @Test
+    fun `disabled round floor does not change urgency verdict combinations`() {
+        val configured = PaymentAdvisoryEngine(PaymentAdvisoryPolicy(roundAmountMinor = 0L))
+        val registered = configured.evaluate(
+            input(
+                text = "turant transfer karo",
+                fields = fields(amountMinor = 200_000L, utr = "123456789012"),
+                registeredPayeeCount = 1,
+                payeeMatchesRegistered = true
+            )
+        )
+        val unregistered = configured.evaluate(
+            input(
+                text = "turant transfer karo",
+                fields = fields(amountMinor = 200_000L, utr = "123456789012"),
+                registeredPayeeCount = 1,
+                payeeMatchesRegistered = false
+            )
+        )
+
+        assertFalse(has(registered, PaymentHintKind.AMOUNT_ROUND_LARGE))
+        assertTrue(has(registered, PaymentHintKind.URGENCY_PRESSURE))
+        assertEquals(PaymentAdvisoryVerdict.CHECK, registered.verdict)
+        assertFalse(has(unregistered, PaymentHintKind.AMOUNT_ROUND_LARGE))
+        assertTrue(has(unregistered, PaymentHintKind.URGENCY_PRESSURE))
+        assertEquals(PaymentAdvisoryVerdict.STOP, unregistered.verdict)
+    }
+
+    @Test
     fun `a zero round divisor is inert instead of a crash`() {
         val broken: PaymentAdvisoryEngine =
             PaymentAdvisoryEngine(PaymentAdvisoryPolicy(roundDivisorMinor = 0L))
