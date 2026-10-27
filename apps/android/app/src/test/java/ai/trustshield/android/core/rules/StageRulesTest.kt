@@ -423,4 +423,63 @@ class StageRulesTest {
         assertTrue(result.askTypes.isEmpty())
         assertFalse(result.stageIds.contains(StageId.URGENCY))
     }
+
+    @Test
+    fun `English utility cut warning with a direct payment request has threat and ask evidence`() {
+        val result = rules.detect(
+            "Electricity office: power will be cut tonight for unpaid bill. " +
+                "Call this mobile now and pay Rs 2,000 to reconnect.",
+        )
+
+        assertTrue(result.stageIds.contains(StageId.THREAT_OR_REWARD))
+        assertTrue(result.stageIds.contains(StageId.ASK))
+        assertTrue(result.askTypes.contains(AskType.MONEY_TRANSFER))
+    }
+
+    @Test
+    fun `past customs duty and no job registration fee are not payment asks`() {
+        val controls = listOf(
+            "Customs duty was paid at checkout. Your international package is expected Friday.",
+            "Interview invitation for Tuesday at our office. There is no application or registration fee.",
+        )
+
+        controls.forEach { text ->
+            val result = rules.detect(text)
+            assertFalse(
+                "false payment ask in: $text; evidence=${result.evidence.map { it.quote }}",
+                result.askTypes.contains(AskType.MONEY_TRANSFER),
+            )
+        }
+    }
+
+    @Test
+    fun `Devanagari money words with Hindi send imperatives are directional asks`() {
+        listOf(
+            "अभी १५००० रुपये भेजो",
+            "जुर्माने के २५०० रुपये अभी भेजें",
+            "मैं पुलिस अधिकारी हूँ। आपके नाम वारंट है, किसी को मत बताना और अभी १५००० रुपये भेजो।",
+            "आपके पार्सल में प्रतिबंधित सामान मिला। जुर्माने के २५०० रुपये अभी भेजें नहीं तो केस दर्ज होगा।",
+        ).forEach { text ->
+            val result = rules.detect(text)
+            assertTrue("missing money ask for: $text (${result.stageIds})", result.askTypes.contains(AskType.MONEY_TRANSFER))
+        }
+    }
+
+    @Test
+    fun `Devanagari conditional nahi to does not negate the preceding money ask`() {
+        listOf(
+            "OTP batao nahi to account band.",
+            "OTP बताओ नहीं तो खाता बंद होगा।",
+        ).forEach { text ->
+            val result = rules.detect(text)
+            assertTrue("conditional threat hid the ask: $text", result.askTypes.contains(AskType.OTP_PIN))
+        }
+    }
+
+    @Test
+    fun `unrelated no earlier in the clause does not suppress an OTP request`() {
+        val result = rules.detect("No problem sir, OTP batao")
+
+        assertTrue(result.askTypes.contains(AskType.OTP_PIN))
+    }
 }
