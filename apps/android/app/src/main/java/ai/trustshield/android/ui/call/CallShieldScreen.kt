@@ -2,7 +2,12 @@ package ai.trustshield.android.ui.call
 
 import android.view.HapticFeedbackConstants
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -12,6 +17,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -19,10 +25,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
@@ -37,6 +46,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.draw.graphicsLayer
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -73,6 +87,7 @@ import ai.trustshield.android.ui.theme.onSurface
  *  - the app never claims to capture the other side of a cellular/VoIP call.
  */
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CallShieldScreen(
     state: CallUiState,
@@ -85,6 +100,9 @@ fun CallShieldScreen(
     onTypeTranscript: (() -> Unit)? = null
 ) {
     val view = LocalView.current
+    var showConsentSheet by remember(state.consent) {
+        mutableStateOf(state.consent == ConsentState.NOT_GIVEN)
+    }
 
     // SEAM: the reducer guarantees at most one pulse per changed high-risk state, so this effect
     // cannot fire per ASR chunk. Re-keying on the counter (not on the tone) keeps it single-shot.
@@ -109,7 +127,19 @@ fun CallShieldScreen(
             ) {
                 Spacer(Modifier.height(TsTokens.SpacingMd))
                 if (state.consent == ConsentState.NOT_GIVEN) {
-                    ConsentCard(state = state, onEvent = onEvent)
+                    SectionCard {
+                        Text(
+                            text = CallShieldCopy.consentTitle.forLanguage(state.language),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        TextButton(
+                            onClick = { showConsentSheet = true },
+                            modifier = Modifier.heightIn(min = TsTokens.MinTouchTarget)
+                        ) {
+                            Text(ToneCopy("Consent padhein", "Review consent", "सहमति पढ़ें").forLanguage(state.language))
+                        }
+                    }
                     Spacer(Modifier.height(TsTokens.SpacingMd))
                 }
                 StatusCard(state = state, onEvent = onEvent)
@@ -133,6 +163,14 @@ fun CallShieldScreen(
             }
 
             StopBar(state = state, onEvent = onEvent)
+        }
+    }
+
+    if (showConsentSheet && state.consent == ConsentState.NOT_GIVEN) {
+        ModalBottomSheet(onDismissRequest = { showConsentSheet = false }) {
+            ConsentCard(state = state, onEvent = onEvent) {
+                showConsentSheet = false
+            }
         }
     }
 }
@@ -267,7 +305,7 @@ private fun WarningBanner(alert: CallAlert, state: CallUiState, onSpeakAlert: ((
 // -------------------------------------------------------------------------------------------------
 
 @Composable
-private fun ConsentCard(state: CallUiState, onEvent: (CallEvent) -> Unit) {
+private fun ConsentCard(state: CallUiState, onEvent: (CallEvent) -> Unit, onAccepted: () -> Unit) {
     val language = state.language
     SectionCard {
         Text(
@@ -283,7 +321,10 @@ private fun ConsentCard(state: CallUiState, onEvent: (CallEvent) -> Unit) {
         )
         Spacer(Modifier.height(TsTokens.SpacingMd))
         Button(
-            onClick = { onEvent(CallEvent.GiveConsent) },
+            onClick = {
+                onEvent(CallEvent.GiveConsent)
+                onAccepted()
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(min = TsTokens.MinTouchTarget)
@@ -354,37 +395,23 @@ private fun StatusCard(state: CallUiState, onEvent: (CallEvent) -> Unit) {
 
         Spacer(Modifier.height(TsTokens.SpacingMd))
 
-        when (state.phase) {
-            SessionPhase.LISTENING -> OutlinedButton(
-                onClick = { onEvent(CallEvent.Pause) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = TsTokens.MinTouchTarget)
-            ) { Text(CallShieldCopy.pause.forLanguage(language)) }
-
-            SessionPhase.PAUSED -> Button(
-                onClick = { onEvent(CallEvent.Resume) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = TsTokens.MinTouchTarget)
-            ) { Text(CallShieldCopy.resume.forLanguage(language)) }
-
-            SessionPhase.IDLE -> Button(
-                onClick = { onEvent(CallEvent.Start) },
-                enabled = state.canStart,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = TsTokens.MinTouchTarget)
-            ) { Text(CallShieldCopy.start.forLanguage(language)) }
-
-            SessionPhase.STOPPED -> Button(
-                onClick = { onEvent(CallEvent.Start) },
-                enabled = state.canStart,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = TsTokens.MinTouchTarget)
-            ) { Text(CallShieldCopy.startNew.forLanguage(language)) }
+        val label = when (state.phase) {
+            SessionPhase.LISTENING -> CallShieldCopy.pause.forLanguage(language)
+            SessionPhase.PAUSED -> CallShieldCopy.resume.forLanguage(language)
+            SessionPhase.IDLE -> CallShieldCopy.start.forLanguage(language)
+            SessionPhase.STOPPED -> CallShieldCopy.startNew.forLanguage(language)
         }
+        val onClick = when (state.phase) {
+            SessionPhase.LISTENING -> ({ onEvent(CallEvent.Pause) })
+            SessionPhase.PAUSED -> ({ onEvent(CallEvent.Resume) })
+            SessionPhase.IDLE, SessionPhase.STOPPED -> ({ onEvent(CallEvent.Start) })
+        }
+        MicActionButton(
+            label = label,
+            enabled = state.phase == SessionPhase.PAUSED || state.phase == SessionPhase.LISTENING || state.canStart,
+            listening = state.phase == SessionPhase.LISTENING,
+            onClick = onClick
+        )
 
         if (state.consent == ConsentState.GIVEN && state.phase == SessionPhase.IDLE) {
             Spacer(Modifier.height(TsTokens.SpacingSm))
@@ -394,6 +421,64 @@ private fun StatusCard(state: CallUiState, onEvent: (CallEvent) -> Unit) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
+    }
+}
+
+@Composable
+private fun MicActionButton(label: String, enabled: Boolean, listening: Boolean, onClick: () -> Unit) {
+    val animationsEnabled = remember { android.animation.ValueAnimator.areAnimatorsEnabled() }
+    val transition = rememberInfiniteTransition(label = "call-mic-pulse")
+    val pulse by transition.animateFloat(
+        initialValue = 1f,
+        targetValue = if (animationsEnabled && listening) 1.045f else 1f,
+        animationSpec = infiniteRepeatable(tween(1150), repeatMode = RepeatMode.Reverse),
+        label = "call-mic-pulse-scale"
+    )
+    Button(
+        onClick = onClick,
+        enabled = enabled,
+        shape = CircleShape,
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(TsTokens.SpacingMd),
+        modifier = Modifier
+            .size(132.dp)
+            .graphicsLayer {
+                val scale = if (animationsEnabled && listening) pulse else 1f
+                scaleX = scale
+                scaleY = scale
+            }
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(TsTokens.SpacingXs)) {
+            MicGlyph(MaterialTheme.colorScheme.onPrimary)
+            Text(label, style = MaterialTheme.typography.labelMedium, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+        }
+    }
+}
+
+@Composable
+private fun MicGlyph(color: Color) {
+    Canvas(Modifier.size(30.dp)) {
+        val stroke = Stroke(width = 2.4.dp.toPx(), cap = StrokeCap.Round)
+        val capsuleWidth = size.width * .32f
+        val capsuleHeight = size.height * .52f
+        val left = (size.width - capsuleWidth) / 2
+        drawRoundRect(
+            color = color,
+            topLeft = Offset(left, 0f),
+            size = Size(capsuleWidth, capsuleHeight),
+            cornerRadius = androidx.compose.ui.geometry.CornerRadius(capsuleWidth / 2),
+            style = stroke
+        )
+        drawArc(
+            color = color,
+            startAngle = 0f,
+            sweepAngle = 180f,
+            useCenter = false,
+            topLeft = Offset(size.width * .22f, size.height * .22f),
+            size = Size(size.width * .56f, size.height * .54f),
+            style = stroke
+        )
+        drawLine(color, Offset(size.width / 2, size.height * .75f), Offset(size.width / 2, size.height * .94f), stroke.width, StrokeCap.Round)
+        drawLine(color, Offset(size.width * .32f, size.height * .96f), Offset(size.width * .68f, size.height * .96f), stroke.width, StrokeCap.Round)
     }
 }
 

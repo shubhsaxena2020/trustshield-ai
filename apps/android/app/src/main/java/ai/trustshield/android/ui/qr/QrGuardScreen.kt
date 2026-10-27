@@ -13,7 +13,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -95,15 +97,20 @@ fun QrGuardScreen(
     val signal = state.signal
     val signalCopy = QrSignalCopy.of(signal)
 
-    Box(modifier = modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
+    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
         Column(
             modifier = Modifier
                 .widthIn(max = 480.dp)
                 .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
-                .padding(TsTokens.SpacingLg),
-            verticalArrangement = Arrangement.spacedBy(TsTokens.SpacingMd)
+                .fillMaxHeight()
         ) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
+                    .padding(TsTokens.SpacingLg),
+                verticalArrangement = Arrangement.spacedBy(TsTokens.SpacingMd)
+            ) {
             Text(
                 text = QrStrings.title.text(lang),
                 style = MaterialTheme.typography.headlineSmall,
@@ -127,8 +134,6 @@ fun QrGuardScreen(
 
             ExpectedMerchantPanel(state = state, dark = dark, lang = lang, onEvent = onEvent)
 
-            ActionRow(state = state, lang = lang, onEvent = onEvent)
-
             if (state.phase == QrPhase.RE_REGISTER) {
                 ReRegisterPanel(state = state, lang = lang, dark = dark, onEvent = onEvent)
             }
@@ -145,6 +150,18 @@ fun QrGuardScreen(
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+            }
+
+            Surface(color = MaterialTheme.colorScheme.surface, tonalElevation = 2.dp) {
+                ActionRow(
+                    state = state,
+                    lang = lang,
+                    onEvent = onEvent,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = TsTokens.SpacingLg, vertical = TsTokens.SpacingSm)
+                )
+            }
         }
     }
 }
@@ -430,8 +447,13 @@ private fun ExpectedMerchantPanel(
 }
 
 @Composable
-private fun ActionRow(state: QrUiState, lang: QrLanguage, onEvent: (QrEvent) -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(TsTokens.SpacingSm)) {
+private fun ActionRow(
+    state: QrUiState,
+    lang: QrLanguage,
+    onEvent: (QrEvent) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(TsTokens.SpacingSm)) {
         when (state.phase) {
             QrPhase.SETUP, QrPhase.STOPPED -> {
                 Button(

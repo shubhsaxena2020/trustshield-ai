@@ -101,7 +101,7 @@ fun SettingsScreen(
         Spacer(Modifier.height(TsTokens.SpacingMd))
 
         // ---- Theme ---------------------------------------------------------------------------
-        SettingsSection(title = copy(SettingsCopy.themeSection)) {
+        SettingsSection(title = ToneCopy("Dikhawat", "Appearance", "रूप").forLanguage(state.preferences.language)) {
             OptionRow(
                 label = copy(SettingsCopy.themeSystem),
                 detail = copy(SettingsCopy.themeSystemDetail),
@@ -152,7 +152,7 @@ fun SettingsScreen(
         }
 
         // ---- Sensitivity ---------------------------------------------------------------------
-        SettingsSection(title = copy(SettingsCopy.sensitivitySection)) {
+        SettingsSection(title = ToneCopy("Privacy", "Privacy", "गोपनीयता").forLanguage(state.preferences.language)) {
             OptionRow(
                 label = copy(SettingsCopy.sensitivityLow),
                 detail = copy(SettingsCopy.sensitivityLowDetail),
@@ -175,7 +175,7 @@ fun SettingsScreen(
         }
 
         // ---- Haptics -------------------------------------------------------------------------
-        SettingsSection(title = copy(SettingsCopy.hapticsSection)) {
+        SettingsSection(title = ToneCopy("Call Shield", "Call Shield", "कॉल शील्ड").forLanguage(state.preferences.language)) {
             ToggleRow(
                 label = copy(SettingsCopy.hapticsLabel),
                 detail = copy(SettingsCopy.hapticsDetail),
@@ -186,7 +186,7 @@ fun SettingsScreen(
         }
 
         // ---- Reduced motion ------------------------------------------------------------------
-        SettingsSection(title = copy(SettingsCopy.reducedMotionSection)) {
+        SettingsSection(title = ToneCopy("Dikhawat aur motion", "Appearance and motion", "रूप और गति").forLanguage(state.preferences.language)) {
             ToggleRow(
                 label = copy(SettingsCopy.reducedMotionLabel),
                 detail = copy(SettingsCopy.reducedMotionDetail),
@@ -220,7 +220,7 @@ fun SettingsScreen(
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        SettingsSection(title = copy(SettingsCopy.aboutSection)) {
+        SettingsSection(title = ToneCopy("About aur licences", "About and licences", "परिचय और लाइसेंस").forLanguage(state.preferences.language)) {
             SupportingNote(copy(SettingsCopy.aboutBody))
         }
 
