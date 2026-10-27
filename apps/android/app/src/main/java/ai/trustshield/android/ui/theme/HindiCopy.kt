@@ -303,6 +303,7 @@ internal object HindiCopy {
         "What we found (with exact quotes)" to "क्या मिला (सटीक उद्धरणों के साथ)",
         "What you can do" to "आप क्या कर सकते हैं",
         "What this check cannot do" to "यह जाँच क्या नहीं कर सकती",
+        "Characters checked:" to "जाँचे गए अक्षर:",
         "Exact quote" to "सटीक उद्धरण",
         "Quote shortened" to "उद्धरण छोटा किया गया",
         "Confidence" to "भरोसे का स्तर",

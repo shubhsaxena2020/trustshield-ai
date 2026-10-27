@@ -36,7 +36,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -63,9 +62,8 @@ import androidx.compose.animation.core.tween
  *
  * Layout follows `docs/android/UI_SPEC.md`: a scrollable panel with the risk header first, the
  * confidence badge as a separate element, evidence cards carrying exact highlighted quotes, then
- * actions, limitations and the offline/backend note. A critical band is never animated and never
- * pulses; there is no score animation anywhere, because a fake sense of precision is worse than no
- * number at all.
+ * actions, limitations and the offline/backend note. The score arc animates once when a new result
+ * arrives; critical bands never pulse and the displayed score stays static.
  *
  * Accessibility (QUALITY_GATES section 6):
  *  - colour is never the only differentiator — every tone travels with a glyph, a label and a
@@ -244,13 +242,10 @@ private fun ScoreGauge(score: Int?, tone: RiskTone, language: UiLanguage) {
         animationSpec = if (animationsEnabled) tween(TsTokens.MotionMediumMs) else snap(),
         label = "risk-gauge"
     )
-    val accessibleScore = score?.let {
-        ToneCopy("Skor: $it/100", "Score: $it/100", "स्कोर: $it/100").pick(language)
-    } ?: ToneCopy("Score nahi mila", "No risk score available", "जोखिम स्कोर उपलब्ध नहीं").pick(language)
     val arcColor = tone.accent()
     val trackColor = MaterialTheme.colorScheme.outlineVariant
     Box(
-        modifier = Modifier.size(116.dp).semantics(mergeDescendants = true) { contentDescription = accessibleScore },
+        modifier = Modifier.size(116.dp),
         contentAlignment = Alignment.Center
     ) {
         Canvas(Modifier.fillMaxSize()) {
