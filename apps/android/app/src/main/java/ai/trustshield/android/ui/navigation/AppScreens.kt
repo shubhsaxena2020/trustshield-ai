@@ -287,12 +287,14 @@ private fun HomeRouteHost(
         Sensitivity.BALANCED -> LocalScorer.Sensitivity.STANDARD
         Sensitivity.HIGH -> LocalScorer.Sensitivity.HIGH
     }
-    val recognizer = remember { MlKitTextRecognizer() }
-    DisposableEffect(recognizer) { onDispose { recognizer.close() } }
+    val recognizer = remember { lazy { MlKitTextRecognizer() } }
+    DisposableEffect(recognizer) {
+        onDispose { if (recognizer.isInitialized()) recognizer.value.close() }
+    }
     val controller = remember(recognizer, sensitivity) {
         ImageScanController(
             pipeline = ai.trustshield.android.core.analysis.LocalScanPipeline(sensitivity = sensitivity),
-            recognizer = OcrRecognizer { bytes, mime -> recognizer.recognize(bytes, mime) },
+            recognizer = OcrRecognizer { bytes, mime -> recognizer.value.recognize(bytes, mime) },
             readBytes = { raw ->
                 if (isContentUri(raw)) ContentResolverByteSource(context.contentResolver, Uri.parse(raw)) else null
             }
