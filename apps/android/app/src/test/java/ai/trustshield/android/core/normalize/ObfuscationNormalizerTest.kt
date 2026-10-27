@@ -71,6 +71,20 @@ class ObfuscationNormalizerTest {
         assertEquals("bill", n.rawQuoteOf(6, 10))
     }
 
+    @Test
+    fun `leet account block code and imperative folds preserve source spans`() {
+        val raw = "acc0unt bl0ck c0de share kar0"
+        val normalized = normalizer.normalize(raw)
+
+        assertEquals("account block code share karo", normalized.text)
+        assertEquals("acc0unt", normalized.rawQuoteOf(0, 7))
+        assertEquals("bl0ck", normalized.rawQuoteOf(8, 13))
+        assertEquals("c0de", normalized.rawQuoteOf(14, 18))
+        assertTrue(raw.contains(normalized.rawQuoteOf(0, 7)))
+        assertTrue(raw.contains(normalized.rawQuoteOf(8, 13)))
+        assertTrue(raw.contains(normalized.rawQuoteOf(14, 18)))
+    }
+
     // ---- fold 2: letter spacing --------------------------------------------------------------
 
     @Test
@@ -82,6 +96,7 @@ class ObfuscationNormalizerTest {
         assertEquals("aadhaar", normalizer.normalize("a a d h a a r").text)
         assertEquals("cvv", normalizer.normalize("c v v").text)
         assertEquals("dob", normalizer.normalize("d o b").text)
+        assertEquals("block", normalizer.normalize("b l o c k").text)
     }
 
     @Test

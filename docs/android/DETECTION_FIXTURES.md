@@ -256,6 +256,9 @@ No score weight, band, floor, ceiling, `corroborationMin`, reduction factor or c
 | R18 | `StageRules.kt` negation scope | stop a preceding prohibition at `and` / `और` / `but` / `लेकिन`; treat `नहीं तो` as conditional | “किसी को मत बताना और ... रुपये भेजो” contains two actions; “भेजें नहीं तो केस दर्ज होगा” is a threat tail |
 | R19 | `StageRules.kt` OTP ask / delivery skip | recognize “read the OTP to me” and allow the explicit courier-agent-at-door control | the English phone request is an ask, while handing the code to a nearby delivery agent is a legitimate flow |
 | R20 | `StageRules.kt` personal-info ask | recognize requests for a seed/recovery phrase or private key | the investment fixture asks for wallet credentials without changing the score threshold |
+| R21 | `HinglishNormalizer.kt` obfuscation whitelist | fold spaced `b l o c k` and leetspeak `acc0unt`, `bl0ck`, `c0de`, `kar0` to their known words while preserving raw spans | existing end-to-end obfuscation cases require threat plus ask evidence from these exact spellings |
+| R22 | `StageRules.kt` money ask | allow up to 48 characters between a directional pay/transfer/send verb and an explicit amount | “Pay courier and GST charges of ₹4,999” is a requested payment, while an unrequested duty mention stays non-ask |
+| R23 | `UtilityServiceRules.kt` utility threat | recognize explicit English “power will be cut” / “electricity will be disconnected” wording | the new English disconnection row was otherwise invisible to the threat stage |
 
 Two expectations were corrected rather than "made green" by a rule, and both corrections are recorded in
 the fixture source:

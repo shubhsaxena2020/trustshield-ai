@@ -722,7 +722,7 @@ private val ASK_RULES: List<Rule> = listOf(
             rx("""(?:₹|rs\.?|inr)\s?\d[\d,]*[^.!?\n]{0,40}?\b$SEND_MONEY\b"""),
             rx("""\b\d{3,}[\d,]*[^.!?\n]{0,40}?\b$SEND_MONEY\b"""),
             rx("""\b(?:paise|paisa|money|amount|rakam|rupees|rupaye|rupya)\b[^.!?\n]{0,40}?\b$SEND_MONEY\b"""),
-            rx("""\b(?:pay|transfer|send|deposit)\b[^.!?\n]{0,20}?(?:₹\s?\d{3,}|\b(?:rs\.?|inr)\s?\d{3,}|\b\d{3,})"""),
+            rx("""\b(?:pay|transfer|send|deposit)\b[^.!?\n]{0,48}?(?:₹\s?\d{3,}|\b(?:rs\.?|inr)\s?\d{3,}|\b\d{3,})"""),
             rx("""\b$SEND_MONEY\b[^.!?\n]{0,24}?\b(?:paise|paisa|money|amount|fee|fees|deposit|rupaye)\b"""),
             rx("""$MONEY_CUE[^.!?\n]{0,26}?\b(?:chahiye|maango|mang rahe|demand|need)\b"""),
             rx("""\b(?:qr|upi)\b[^.!?\n]{0,28}?\bscan\w*\b|\bscan\w*\b[^.!?\n]{0,28}?\b(?:qr|upi)\b"""),

@@ -538,7 +538,7 @@ class HinglishNormalizer : TextNormalizer {
          */
         private val LEET_SPELLINGS: Set<String> = setOf(
             "otp", "pin", "kyc", "upi", "apk", "cvv", "sbi", "hdfc", "icici",
-            "anydesk", "teamviewer", "bijli", "bank", "account", "block",
+            "anydesk", "teamviewer", "bijli", "bank", "account", "block", "code", "karo",
         )
 
         private val MIN_LEET_TOKEN_LENGTH: Int = LEET_SPELLINGS.minOf { it.length }
@@ -576,7 +576,7 @@ class HinglishNormalizer : TextNormalizer {
          */
         private val SPACED_SPELLINGS: Set<String> = setOf(
             "otp", "pin", "kyc", "upi", "apk", "cvv", "sbi", "cbi", "ed", "dob", "aadhaar",
-            "bank",
+            "bank", "block",
         )
 
         /** Shorter runs are ordinary text (`a b`, `e d`, `i.e.`), never an obfuscated token. */
