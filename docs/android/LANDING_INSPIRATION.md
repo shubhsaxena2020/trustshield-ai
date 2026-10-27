@@ -1,6 +1,6 @@
 # Landing page inspiration review
 
-Reviewed locally from `C:\Users\shubh\ui-research\Wesbite_Source` on 27 Oct 2026. The repository has no root license. Only `squaredmedia/LICENSE` was found among the project folders; absent project licenses mean study-only. No source code, text, fonts, images, models, or other assets were copied into TrustShield AI. The page and 3D scene are original implementations of broad interaction ideas using React Three Fiber, Three.js, and Framer Motion.
+Reviewed locally from `C:\Users\shubh\ui-research\Wesbite_Source` on 27 Oct 2026. The repository has no root license. Only `squaredmedia/LICENSE` was found among the project folders; absent project licenses mean study-only. No source code, text, fonts, images, models, or other assets were copied into TrustShield AI. The page and 3D scene are original implementations of broad interaction ideas using React Three Fiber, Three.js, and CSS transitions.
 
 | Project | License status | Idea considered for TrustShield AI |
 | --- | --- | --- |
@@ -11,7 +11,7 @@ Reviewed locally from `C:\Users\shubh\ui-research\Wesbite_Source` on 27 Oct 2026
 | `learn-arduino-red.vercel.app` | No project license found; study-only | Small explanatory markers around a 3D object; adapted as scam bubbles and blocked signal labels. |
 | `meticulai` | No project license found; study-only | Section-by-section discovery; no game mechanics or assets used. |
 | `mindrobotics` | No project license found; study-only | Scroll-linked visual progression; adapted to modest reveal transitions and no scroll-bound heavy rendering. |
-| `reactbits` | No project license found; study-only | Component-level motion examples; reimplemented with local Framer Motion transitions. |
+| `reactbits` | No project license found; study-only | Component-level motion examples; adapted as simple CSS reveal transitions. |
 | `reactbits-pro` | No project license found; study-only | Motion documentation patterns; no component code or styling copied. |
 | `samaymaurya-replica` | No project license found; study-only | Combination of 3D and motion as an art direction reference; implementation and composition are new. |
 | `seovyn` | No project license found; study-only | Long-page content hierarchy and scannable section navigation. |
