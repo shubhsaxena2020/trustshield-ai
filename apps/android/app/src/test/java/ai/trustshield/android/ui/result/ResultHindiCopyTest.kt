@@ -2,10 +2,46 @@ package ai.trustshield.android.ui.result
 
 import ai.trustshield.android.ui.theme.RiskTone
 import ai.trustshield.android.ui.theme.ToneCopy
+import ai.trustshield.android.ui.theme.HindiCopy
+import ai.trustshield.android.ui.navigation.LocalEvidenceAdapter
+import ai.trustshield.android.core.model.Evidence
+import ai.trustshield.android.core.model.Severity
+import ai.trustshield.android.core.model.Strength
+import java.io.File
 import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ResultHindiCopyTest {
+    @Test
+    fun everyCoreRuleHasSpecificHindiTitleAndDescription() {
+        val rules = listOf(
+            File("src/main/java/ai/trustshield/android/core/rules"),
+            File("apps/android/app/src/main/java/ai/trustshield/android/core/rules"),
+        ).firstOrNull(File::isDirectory) ?: error("Cannot locate deterministic core rules")
+        val titlePattern = Regex("titleHinglish\\s*=\\s*\"([^\"]+)\"")
+        val titles = rules.walkTopDown()
+            .filter { it.isFile && it.extension == "kt" }
+            .flatMap { file -> titlePattern.findAll(file.readText()).map { it.groupValues[1] } }
+            .toList()
+
+        assertTrue("No rule titles found", titles.isNotEmpty())
+        titles.forEach { title ->
+            val result = LocalEvidenceAdapter.evidence(
+                Evidence.unquoted(
+                    module = "stage_rules",
+                    titleHinglish = title,
+                    detail = "Rule description",
+                    severity = Severity.LOW,
+                    strength = Strength.WEAK,
+                )
+            )
+            assertNotEquals("Generic result title for rule: $title", "Signal detected", result.titleEnglish)
+            assertHindiTranslation(title, result.titleEnglish)
+            assertHindiTranslation(title, result.detailEnglish)
+        }
+    }
+
     @Test
     fun everyStaticResultMessageHasHindiCopy() {
         val messages = buildList {
@@ -36,5 +72,10 @@ class ResultHindiCopyTest {
         messages.forEach { message ->
             assertNotEquals("Missing Hindi Result copy for: ${message.english}", message.english, message.hindi)
         }
+    }
+
+    private fun assertHindiTranslation(context: String, english: String) {
+        val hindi = HindiCopy.forEnglish(english)
+        assertTrue("Missing Hindi copy for $context: $english", hindi != english && hindi.any { it in '\u0900'..'\u097F' })
     }
 }

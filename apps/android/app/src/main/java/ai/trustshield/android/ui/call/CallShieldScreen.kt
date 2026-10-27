@@ -97,7 +97,8 @@ fun CallShieldScreen(
     // Fallbacks required by UI_SPEC for denied mic / missing recogniser. They are callbacks only:
     // no speech code exists in this package, and neither path is labelled live ASR.
     onOpenStagedDemo: (() -> Unit)? = null,
-    onTypeTranscript: (() -> Unit)? = null
+    onTypeTranscript: (() -> Unit)? = null,
+    offlineStatus: ToneCopy? = null
 ) {
     val view = LocalView.current
     var showConsentSheet by remember(state.consent) {
@@ -115,6 +116,21 @@ fun CallShieldScreen(
     Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Column(Modifier.fillMaxSize()) {
             Header(state = state, onEvent = onEvent)
+
+            offlineStatus?.let { status ->
+                Surface(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = TsTokens.SpacingLg, vertical = TsTokens.SpacingXs),
+                    color = MaterialTheme.colorScheme.tertiaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                    shape = RoundedCornerShape(TsTokens.CornerSmall),
+                ) {
+                    Text(
+                        text = status.forLanguage(state.language),
+                        modifier = Modifier.padding(horizontal = TsTokens.SpacingMd, vertical = TsTokens.SpacingSm),
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
+            }
 
             // Sticky warning: outside the scroll area, so it stays visible while the user reads.
             state.alert?.let { alert -> WarningBanner(alert = alert, state = state, onSpeakAlert = onSpeakAlert) }

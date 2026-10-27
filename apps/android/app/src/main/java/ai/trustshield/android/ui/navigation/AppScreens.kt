@@ -570,22 +570,15 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
             Text(status, modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp), style = MaterialTheme.typography.bodySmall)
         }
     }
-    if (offlineMode && state.isListening) {
-        Text(
-            ToneCopy(
-                "Offline mode: phone par hi speech pehchaan",
-                "Offline mode: on-device recogniser",
-                "ऑफ़लाइन मोड: आवाज़ फ़ोन पर ही पहचानी जाती है",
-            ).forLanguage(selectedLanguage),
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    }
     offlineFailureAction = { host.onStop(); offlineMode = false; state = host.state }
     CallShieldScreen(
         state = state,
         modifier = Modifier.weight(1f),
+        offlineStatus = if (offlineMode && state.isListening) ToneCopy(
+            "Offline mode: phone par hi speech pehchaan",
+            "Offline mode: on-device speech recognition",
+            "ऑफ़लाइन मोड: आवाज़ फ़ोन पर ही पहचानी जाती है",
+        ) else null,
         onEvent = { event ->
             when (event) {
                 CallEvent.GiveConsent -> {
@@ -670,10 +663,10 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
                 ToneCopy(
                     if (speechRoute.useOffline) "Offline mode chuna gaya. System recogniser ke liye tap karein"
                     else "Offline mode use karein - Vosk Hindi recogniser",
-                    if (speechRoute.useOffline) "Offline mode selected. Tap to use the system recogniser"
-                    else "Use offline mode - Vosk Hindi recogniser",
-                    if (speechRoute.useOffline) "ऑफ़लाइन मोड चुना गया है। सिस्टम recogniser के लिए टैप करें"
-                    else "ऑफ़लाइन मोड इस्तेमाल करें - Vosk हिंदी recogniser",
+                    if (speechRoute.useOffline) "Offline mode selected. Tap to use system speech recognition"
+                    else "Use offline mode - Vosk Hindi speech recognition",
+                    if (speechRoute.useOffline) "ऑफ़लाइन मोड चुना गया है। सिस्टम वाक् पहचान के लिए टैप करें"
+                    else "ऑफ़लाइन मोड इस्तेमाल करें - Vosk हिंदी वाक् पहचान",
                 ).forLanguage(selectedLanguage),
             )
         }
