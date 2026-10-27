@@ -384,7 +384,11 @@ private fun ExpectedMerchantPanel(
                 if (editable) {
                     OutlinedButton(
                         onClick = { onEvent(QrEvent.RemovePayee(payee.handle)) },
-                        modifier = Modifier.heightIn(min = TsTokens.MinTouchTarget)
+                        modifier = Modifier
+                            .heightIn(min = TsTokens.MinTouchTarget)
+                            .semantics {
+                                contentDescription = QrStrings.removePayee.text(lang) + ": " + payee.maskedHandle
+                            }
                     ) {
                         Text(QrStrings.removePayee.text(lang), style = MaterialTheme.typography.labelMedium)
                     }

@@ -24,6 +24,90 @@ class RegisteredPayeeStoreTest {
     }
 
     @Test
+    fun `salt shorter than minimum is rejected and caller mutation cannot change keys`() {
+        val backend = MemoryStore()
+        val tooShort = ByteArray(15)
+        assertTrue(runCatching { RegisteredPayeeStore(backend, tooShort) }
+            .exceptionOrNull() is IllegalArgumentException)
+
+        val callerSalt = salt.copyOf()
+        val store = RegisteredPayeeStore(backend, callerSalt)
+        store.register("shop@okaxis")
+        callerSalt.fill(0)
+
+        assertTrue(store.matches("SHOP@OKAXIS"))
+        assertFalse(RegisteredPayeeStore(backend, callerSalt).matches("shop@okaxis"))
+    }
+
+    @Test
+    fun `malformed ids with controls and extra separators never match and removal is harmless`() {
+        val store = RegisteredPayeeStore(MemoryStore(), salt)
+        val malformed = listOf(
+            "@bank", "name@", "name@@bank", "name@bank@extra", "name withspace@bank",
+            "name\u0000@bank", "name@bank
+", " @bank", "name@ bank"
+        )
+
+        malformed.forEach { value ->
+            assertFalse("unexpected match for malformed value", store.matches(value))
+            store.remove(value)
+        }
+        assertTrue(store.isEmpty())
+    }
+
+    @Test
+    fun `different salts cannot recognize persisted payee and never expose raw identifier`() {
+        val backend = MemoryStore()
+        val firstSaltStore = RegisteredPayeeStore(backend, salt)
+        firstSaltStore.register("secretmerchant@okaxis")
+
+        val persisted = backend.values.values.joinToString("|")
+        assertFalse(persisted.contains("secretmerchant"))
+        val otherSalt = ByteArray(16) { (it + 31).toByte() }
+        val otherStore = RegisteredPayeeStore(backend, otherSalt)
+        assertFalse(otherStore.matches("secretmerchant@okaxis"))
+        assertEquals(listOf("sec***@okaxis"), firstSaltStore.maskedList())
+    }
+
+    @Test
+    fun `truncated and hostile persisted data remains masked and later writes preserve valid entries`() {
+        val backend = MemoryStore()
+        backend.values[RegisteredPayeeStoreKeys.IDS] =
+            "${"c".repeat(64)},${"d".repeat(64)},${"C".repeat(64)},short,${"c".repeat(64)}"
+        backend.values[RegisteredPayeeStoreKeys.MASKED] =
+            "good***@bank,raw@bank,attacker
+ text,"
+
+        val restored = RegisteredPayeeStore(backend, salt)
+        assertEquals(2, restored.count()) // uppercase and duplicate identifiers are rejected
+        assertEquals(listOf("good***@bank", "***"), restored.maskedList())
+        restored.register("newshop@ybl")
+
+        val afterWrite = RegisteredPayeeStore(backend, salt)
+        assertEquals(3, afterWrite.count())
+        assertEquals(listOf("good***@bank", "***", "new***@ybl"), afterWrite.maskedList())
+    }
+
+    @Test
+    fun `clear survives reconstruction and repeated lifecycle operations`() {
+        val backend = MemoryStore()
+        RegisteredPayeeStore(backend, salt).apply {
+            register("first@okaxis")
+            register("second@ybl")
+            clear()
+            clear()
+        }
+
+        val afterClear = RegisteredPayeeStore(backend, salt)
+        assertTrue(afterClear.isEmpty())
+        assertEquals(0, afterClear.count())
+        assertEquals(emptyList<String>(), afterClear.maskedList())
+        assertFalse(afterClear.matches("first@okaxis"))
+        afterClear.register("third@bank")
+        assertEquals(listOf("thi***@bank"), RegisteredPayeeStore(backend, salt).maskedList())
+    }
+
+    @Test
     fun `invalid or blank decoded identifiers do not match or throw`() {
         val store = RegisteredPayeeStore(MemoryStore(), salt)
 

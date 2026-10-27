@@ -1,5 +1,28 @@
 # Android internationalization audit
 
+## Payment-advisory mandatory line: current worktree review (28 Oct 2026)
+
+Scope: mandatory confirmation wording and its rendering in the Result payment advisory and QR Guard, across Hinglish, English, and Hindi (Devanagari). Static source review only; no tests or runtime/TalkBack verification were run for this audit.
+
+### Evidence
+
+- `apps/android/app/src/main/java/ai/trustshield/android/ui/result/PaymentAdvisoryCopy.kt` defines `CONFIRMATION` with explicit Hinglish, English, and Devanagari Hindi values. Hinglish is the pinned line `Pakka confirmation sirf aapke bank SMS ya UPI app ki history mein milega.`; English says `Final confirmation only comes from your bank SMS or your UPI app's history.`; Hindi says `अंतिम पुष्टि केवल आपके बैंक SMS या UPI ऐप के लेन-देन इतिहास से ही मिलती है।`
+- `ResultUiState.kt`'s `UiLanguage` includes HINGLISH, ENGLISH, and HINDI, and `ToneCopy.pick` selects the corresponding field (Hindi falls back to English only when the Hindi value is blank). The advisory copy explicitly provides Hindi values, including its mandatory line.
+- `PaymentAdvisoryCard.kt` gets the confirmation via `PaymentAdvisoryCopy.CONFIRMATION.pick(language)`, appends it last to the merged accessibility description, and draws `AdvisoryConfirmationLine` after the verdict and all hint rows. This source structure makes it unconditional even when `hintRows` is empty.
+- QR Guard has a separate `QrLanguage` enum with HINGLISH, ENGLISH, HINDI and a `ToneCopy.text` selector. However, its mandatory line in `QrUiState.kt` supplies only two constructor values: Hinglish and English. Its Hindi value therefore comes from `ToneCopy`'s generic `HindiCopy.forEnglish(english)` fallback, not an explicit reviewable translation. `QrGuardScreen.kt` displays that copy both visibly and as the banner content description.
+- `docs/android/PAYMENT_ADVISORY.md` documents the Hinglish and English lines but not a Hindi line, and describes the requirement as “in both languages”; this documentation does not reflect the three-language implementation scope.
+
+### Gaps / limits
+
+- Explicit Hindi translation evidence exists for the Result advisory, but not for QR Guard's mandatory line; the Hindi QR rendering depends on the shared fallback table and was not validated for exact wording/equivalence here.
+- The advisory line is structurally last in source, including the merged content description. Actual visual order, selection persistence, and spoken order in TalkBack remain unverified without runtime/UI testing.
+- No automated assertion or test result was examined here proving the exact line is present in all three language selections, every advisory state, or QR Guard. Source declarations and rendering order are static evidence, not runtime proof.
+
+---
+
+# Android internationalization audit
+ ב
+
 Snapshot: 27 Oct 2026, branch `android/P6-U1-language`, from `origin/android-finals`. Scope: app UI Kotlin under `apps/android/app/src/main/java/ai/trustshield/android/ui`.
 
 ## Findings

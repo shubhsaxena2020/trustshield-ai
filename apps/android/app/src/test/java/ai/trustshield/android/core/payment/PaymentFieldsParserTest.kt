@@ -684,4 +684,43 @@ Total ₹75")
         assertFalse(fields.looksLikeReceipt)
         assertFalse(PaymentFieldsParser.looksLikePaymentScreenshot(text))
     }
+
+    @Test
+    fun `ocr punctuation and spacing do not repair malformed upi identity`() {
+        val fields = parse("Paid to\nmerchant..name @ okaxis\nSupport: help@trustshield.ai")
+
+        assertEquals("", fields.payeeUpi)
+        assertFalse(fields.hasPayeeUpi)
+    }
+
+    @Test
+    fun `ocr-like near status words do not imply successful payment`() {
+        val text = "₹500\nPayment successfuI\nTransactlon complete"
+        val fields = parse(text)
+
+        assertEquals(PaymentStatus.UNKNOWN, fields.status)
+        assertEquals("", fields.statusRaw)
+        assertFalse(fields.looksLikeReceipt)
+    }
+
+    @Test
+    fun `conflicting noisy status evidence does not override explicit failure`() {
+        val fields = parse("Payment successful\nPayment fa1led\nStatus: Pending")
+
+        assertEquals(PaymentStatus.FAILED, fields.status)
+        assertEquals("failed", fields.statusRaw)
+    }
+
+    @Test
+    fun `malformed ocr payment identifiers are absent from rendered fields`() {
+        val text = "₹500\nPaid to private.person@okaxis\nUTR 1234-5678-9012"
+        val fields = parse(text)
+        val rendered = fields.toString()
+
+        assertEquals("", fields.payeeUpi)
+        assertEquals("", fields.utr)
+        assertFalse(rendered.contains("private.person@okaxis"))
+        assertFalse(rendered.contains("1234-5678-9012"))
+        assertFalse(rendered.contains(text))
+    }
 }

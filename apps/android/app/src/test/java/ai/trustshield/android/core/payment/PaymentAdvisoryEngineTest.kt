@@ -1103,6 +1103,36 @@ class PaymentAdvisoryEngineTest {
     }
 
     @Test
+    fun `AUDIT urgency stays CHECK across the large amount boundary for a registered payee`() {
+        val below: PaymentAdvisory = engine.evaluate(
+            input(
+                text = "turant transfer karo",
+                fields = fields(amountMinor = 499_999L, utr = "123456789012"),
+                registeredPayeeCount = 1,
+                payeeMatchesRegistered = true
+            )
+        )
+        val at: PaymentAdvisory = engine.evaluate(
+            input(
+                text = "turant transfer karo",
+                fields = fields(amountMinor = 500_000L, utr = "123456789012"),
+                registeredPayeeCount = 1,
+                payeeMatchesRegistered = true
+            )
+        )
+
+        assertTrue(has(below, PaymentHintKind.URGENCY_PRESSURE))
+        assertFalse(has(below, PaymentHintKind.AMOUNT_LARGE))
+        assertFalse(has(below, PaymentHintKind.AMOUNT_ROUND_LARGE))
+        assertEquals(PaymentAdvisoryVerdict.CHECK, below.verdict)
+        assertTrue(has(at, PaymentHintKind.URGENCY_PRESSURE))
+        assertTrue(has(at, PaymentHintKind.AMOUNT_LARGE))
+        // A registered match suppresses the round-amount warning, even at this round threshold.
+        assertFalse(has(at, PaymentHintKind.AMOUNT_ROUND_LARGE))
+        assertEquals(PaymentAdvisoryVerdict.CHECK, at.verdict)
+    }
+
+    @Test
     fun `AUDIT pending alone is one caution and does not lift CLEAR`() {
         val advisory: PaymentAdvisory = engine.evaluate(
             input(fields = fields(status = PaymentStatus.PENDING, utr = "123456789012"),

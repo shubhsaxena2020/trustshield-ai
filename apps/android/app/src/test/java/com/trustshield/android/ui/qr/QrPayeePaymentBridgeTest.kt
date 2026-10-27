@@ -31,6 +31,34 @@ class QrPayeePaymentBridgeTest {
     }
 
     @Test
+    fun comparisonTrimsWhitespaceAndIgnoresCaseOnBothSides() {
+        val variants = listOf(
+            RegisteredPayee(handle = "  SHOP@OKAXIS  ", name = "Sharma Store"),
+            RegisteredPayee(handle = "shop@okaxis", name = "Sharma Store")
+        )
+        listOf("SHOP@OKAXIS", "  shop@okaxis  ", "\tShOp@OkAxIs\n").forEach { candidate ->
+            assertTrue("trimmed, case-insensitive exact id should match <$candidate>",
+                QrPayeePaymentBridge.matchesRegisteredPayee(candidate, variants))
+        }
+    }
+
+    @Test
+    fun malformedAndMaskedIdentifiersNeverMatchEvenWhenRegistrationLooksSimilar() {
+        val malformedOrMaskedRegistrations = listOf(
+            RegisteredPayee(handle = "sho***@okaxis", name = "Sharma Store"),
+            RegisteredPayee(handle = "shop @okaxis", name = "Sharma Store"),
+            RegisteredPayee(handle = "shop@okaxis.evil", name = "Sharma Store")
+        )
+        listOf("sho***@okaxis", "shop***@okaxis", "shop @okaxis", "shop@okaxis.evil")
+            .forEach { candidate ->
+                assertFalse("masked/malformed id must not match <$candidate>",
+                    QrPayeePaymentBridge.matchesRegisteredPayee(candidate, malformedOrMaskedRegistrations))
+            }
+        assertFalse("masked candidate must not match a valid registration",
+            QrPayeePaymentBridge.matchesRegisteredPayee("sho***@okaxis", listOf(registered)))
+    }
+
+    @Test
     fun emptyAndPathologicalIdsAreNonMatchesWithoutThrowing() {
         listOf("", " ", "***", "shop***@okaxis", "x".repeat(100_000), "\n\t").forEach { candidate ->
             assertFalse(QrPayeePaymentBridge.matchesRegisteredPayee(candidate, listOf(registered)))

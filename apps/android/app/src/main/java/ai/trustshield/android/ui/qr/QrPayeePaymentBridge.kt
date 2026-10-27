@@ -114,6 +114,8 @@ object QrPayeePaymentBridge {
         // `***` is what every mask in the app emits; the hidden characters are exactly what a
         // comparison needs, so a masked id is "not comparable", never a match and never a mismatch.
         if (trimmed.contains(MASK_MARKER)) return null
+        // Matching must not turn malformed QR data or stale registrations into positive evidence.
+        if (!isPlausibleUpiId(trimmed)) return null
         return normalizePayeeId(trimmed)
     }
 }
