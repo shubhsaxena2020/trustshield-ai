@@ -105,3 +105,13 @@ This checklist records source inspection only. It is not a build, test, emulator
 - No payment screenshot establishes settlement. The required confirmation text directs users to bank SMS or UPI app history; no success/fraud claim is supported.
 
 Before any verification status is changed, the lane lead should wire or explicitly defer the presenter path, run the permitted Gradle gate and record actual results, then perform the authorized emulator spot check for visibility, ordering, disclaimer-last, and accessibility. No phone/device result is claimed here.
+
+## Prior-wave diff review (2026-10-28)
+
+Scope: reviewed the current worktree status and the available `apps/android` diff, then inspected current Result state/card references. This is static source/diff evidence only; no Gradle, JVM test, emulator, or device execution was performed.
+
+- The tracked diff contains a five-line change in `apps/android/app/src/main/java/ai/trustshield/android/core/payment/PaymentFieldsParser.kt`: it attempts to skip status matches preceded by English `not`, `never`, or `no`. This is an unexecuted parser change, not evidence that negation handling works. The displayed Kotlin regex literal contains doubled backslashes in its `\\b` and `\\s` expressions; review flags this for author/compile/test confirmation rather than asserting runtime effect.
+- The worktree also contains untracked `apps/android/app/src/test/java/ai/trustshield/android/ui/result/PaymentAdvisoryLocalizationTest.kt` and `docs/android/evidence/payment-advisory-acceptance-checklist.md`. They are present, but were not part of the tracked `git diff`; their test assertions/results were not validated or executed.
+- Current source still declares `ResultUiState.paymentAdvisory` nullable with a `null` default. `ResultScreen` conditionally renders `PaymentAdvisoryCard` for a non-null value. The inspected state declaration alone does not show presenter population or prove a production end-to-end path; retain that wiring gap unless separately demonstrated.
+- The card source documents that it draws the mandatory confirmation line last, while `PaymentAdvisoryCopy` has bilingual Hinglish/English copy. This is source intent, not verified rendered order, Hindi Devanagari support, or TalkBack behavior.
+- No test/build result is claimed. Payment amount/payee/urgency policy correctness, parser regression behavior, privacy at runtime, localization/accessibility, and actual Result reachability remain unverified in this review.

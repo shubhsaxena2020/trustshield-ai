@@ -1,6 +1,9 @@
 package ai.trustshield.android.ui.result
 
 import ai.trustshield.android.core.payment.PaymentAdvisory
+import ai.trustshield.android.core.payment.PaymentAdvisoryEngine
+import ai.trustshield.android.core.payment.PaymentAdvisoryInput
+import ai.trustshield.android.core.payment.PaymentFieldsParser
 import ai.trustshield.android.ui.theme.RiskTone
 import ai.trustshield.android.ui.theme.RiskToneCopy
 import ai.trustshield.android.ui.theme.ToneCopy
@@ -447,7 +450,15 @@ data class ResultInput(
     /** Backend enrichment is off by default; a caller must opt in explicitly. */
     val backendAvailable: Boolean = BackendEnrichment.ENABLED_BY_DEFAULT,
     /** A05's deterministic 0..100 reading; omitted for unsupported/unreadable inputs. */
-    val riskScore: Int? = null
+    val riskScore: Int? = null,
+    /** True when this source text came from screenshot OCR. */
+    val paymentOcrUsed: Boolean = false,
+    /** Locally registered payees known to the caller; identifiers are never passed here. */
+    val registeredPayeeCount: Int = 0,
+    /** Caller has compared the parsed UPI identifier against its protected local registry. */
+    val payeeMatchesRegistered: Boolean = false,
+    /** Optional deterministic clock for the payment recency hint; zero disables it. */
+    val paymentNowEpochMs: Long = 0L
 )
 
 // ---------------------------------------------------------------------------------------------
@@ -867,6 +878,18 @@ object ResultPresenter {
             }
             .sortedBy { it.priority.ordinal } // PRIMARY steps first; stable within a group
 
+        val paymentFields = PaymentFieldsParser.parse(input.sourceText)
+        val paymentAdvisory = PaymentAdvisoryEngine().evaluate(
+            PaymentAdvisoryInput(
+                sourceText = input.sourceText,
+                fields = paymentFields,
+                registeredPayeeCount = input.registeredPayeeCount.coerceAtLeast(0),
+                payeeMatchesRegistered = input.payeeMatchesRegistered,
+                nowEpochMs = input.paymentNowEpochMs.coerceAtLeast(0L),
+                ocrUsed = input.paymentOcrUsed
+            )
+        ).takeIf { it.isPaymentScreenshot }
+
         return ResultUiState(
             status = status,
             risk = risk,
@@ -877,7 +900,8 @@ object ResultPresenter {
             limitations = limitations,
             backend = backend,
             quoteLimit = MAX_QUOTE_CHARS,
-            analysedCharacters = input.sourceText.length
+            analysedCharacters = input.sourceText.length,
+            paymentAdvisory = paymentAdvisory
         )
     }
 

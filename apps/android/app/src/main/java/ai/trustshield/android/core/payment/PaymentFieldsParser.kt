@@ -486,6 +486,11 @@ object PaymentFieldsParser {
         for (match in pattern.findAll(scan)) {
             count += 1
             if (count > MAX_STATUS_CANDIDATES) break
+            // Receipt prose can mention a status without asserting it ("not successful", "never paid").
+            // Fail closed on a short, immediately preceding English negation rather than turning
+            // negated text into a payment outcome.
+            val prefix = scan.substring(maxOf(0, match.range.first - 16), match.range.first)
+            if (Regex("""(?i)(?:\bnot|\bnever|\bno)\s+$""").containsMatchIn(prefix)) continue
             into.add(StatusHit(status = status, start = match.range.first, raw = match.value))
         }
     }

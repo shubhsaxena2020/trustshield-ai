@@ -74,7 +74,6 @@ fun PaymentAdvisoryCard(
         append(advice)
         hintRows.forEach { row ->
             append(". ")
-            // Spoken hint copy is clearer than announcing its decorative punctuation glyph.
             append(row.second)
         }
         append(". ")

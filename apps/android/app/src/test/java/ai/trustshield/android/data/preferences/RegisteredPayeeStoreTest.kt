@@ -483,6 +483,31 @@ class RegisteredPayeeStoreTest {
     }
 
     @Test
+    fun `tampered masked display cannot leak arbitrary content`() {
+        val fake = InMemoryPayeeStore()
+        newStore(fake).register(rawUpi)
+        fake.values[RegisteredPayeeStoreKeys.MASKED] = "shop@okaxis"
+
+        val reloaded = newStore(fake)
+
+        assertTrue(reloaded.matches(rawUpi))
+        assertEquals(listOf(RegisteredPayeeStore.UNKNOWN_MASKED), reloaded.maskedList())
+    }
+
+    @Test
+    fun `tampered display rejects markup and preserves safe masked entries`() {
+        val fake = InMemoryPayeeStore()
+        val writer = newStore(fake)
+        writer.register(rawUpi)
+        writer.register("raj@ybl")
+        fake.values[RegisteredPayeeStoreKeys.MASKED] = "<script>@evil,raj***@ybl"
+
+        val reloaded = newStore(fake)
+
+        assertEquals(listOf(RegisteredPayeeStore.UNKNOWN_MASKED, "raj***@ybl"), reloaded.maskedList())
+    }
+
+    @Test
     fun `a missing masked entry keeps the payee matched and masks to stars`() {
         val fake = InMemoryPayeeStore()
         newStore(fake).register(rawUpi)

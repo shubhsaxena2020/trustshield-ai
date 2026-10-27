@@ -56,6 +56,19 @@ class PaymentAdvisoryAccessibilityAuditTest {
     }
 
     @Test
+    fun localizedDisclaimerDoesNotClaimPaymentSuccessOrFraud() {
+        languages(PaymentAdvisoryCopy.CONFIRMATION).forEach { text ->
+            val normalized = text.lowercase()
+            assertFalse("disclaimer must not claim success: ", normalized.contains("success"))
+            assertFalse("disclaimer must not accuse of fraud: ", normalized.contains("fraud"))
+            assertFalse("disclaimer must not claim payment received: ", normalized.contains("payment received"))
+        }
+        assertTrue(PaymentAdvisoryCopy.CONFIRMATION.hinglish.contains("bank SMS"))
+        assertTrue(PaymentAdvisoryCopy.CONFIRMATION.english.contains("bank SMS"))
+        assertTrue(PaymentAdvisoryCopy.CONFIRMATION.hindi.contains("बैंक SMS"))
+    }
+
+    @Test
     fun spokenDescriptionContainsSectionVerdictAdviceAndConfirmationInReadingOrder() {
         val source = java.io.File(
             "src/main/java/ai/trustshield/android/ui/result/PaymentAdvisoryCard.kt"
@@ -71,6 +84,7 @@ class PaymentAdvisoryAccessibilityAuditTest {
         assertEquals("clauses must follow TalkBack reading order", order.sorted(), order)
         assertTrue("card must merge descendants into one accessible node", source.contains("mergeDescendants = true"))
         assertTrue("spoken description must be exposed", source.contains("contentDescription = spokenDescription"))
+        assertFalse("spoken hint clause should not announce decorative severity glyph", source.contains("append(row.first)"))
     }
 
     @Test

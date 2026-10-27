@@ -354,6 +354,13 @@ class PaymentFieldsParserTest {
     }
 
     @Test
+    fun `negated status words do not report settlement`() {
+        assertEquals(PaymentStatus.UNKNOWN, parse("Payment not successful").status)
+        assertEquals(PaymentStatus.UNKNOWN, parse("Payment was never paid").status)
+        assertEquals(PaymentStatus.UNKNOWN, parse("No transaction completed").status)
+    }
+
+    @Test
     fun `status is unknown without a status word`() {
         val fields = parse("₹500 to shop@okaxis")
 

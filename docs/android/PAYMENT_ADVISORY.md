@@ -1,12 +1,12 @@
 # Payment advisory (A09)
 
-**Status: components and conditional Result rendering present; automatic Result attachment incomplete; execution unverified.** Static review confirms the parser, deterministic engine, QR Guard bridge, Result card/copy, optional Result state field, and `RegisteredPayeeStore` implementation exist. `ResultScreen` renders the card when `state.paymentAdvisory` is non-null, but `ResultPresenter` leaves that field null and no production caller was found connecting parser, bridge, and engine; an automatic end-to-end scan path is therefore not evidenced. The store persists HMAC-SHA256 identifiers and masked values, but accepts an injected salt and no production keystore-backed salt provider/integration was established by this review. No Gradle/unit-test or emulator verification was run by this lane; see the verification table.
+**Status: advisory components exist, but production Result wiring is absent; persistence and key provisioning are not established; execution unverified.** Static review confirms the parser, deterministic engine, QR Guard bridge, Result card/copy, nullable Result state field, and `RegisteredPayeeStore` implementation exist. `ResultScreen` renders the card only when `state.paymentAdvisory` is non-null; `ResultUiState` defaults it to null, and no production caller was found connecting parser, bridge, and engine. This is not an end-to-end feature in the current production path. The store implementation writes HMAC-SHA256 identifiers and masked display values through a SharedPreferences adapter, but is not shown integrated into this advisory/bridge path. Its salt is caller-supplied (minimum 16 bytes); no production keystore-backed provider, durable salt lifecycle, or restart-safe consistency guarantee is established. No Gradle/unit-test or emulator verification was run by this lane; see the verification table.
 
 Source of truth for types: `apps/android/app/src/main/java/ai/trustshield/android/core/payment/PaymentAdvisoryContract.kt`. If code and this document disagree at review, the code wins and this document gets corrected.
 
 ## Purpose and scope
 
-The advisory appears on the Result screen when the analysed input looks like a payment screenshot (UPI/PSP receipt: an amount plus at least one of a UPI id, a reference number, or a readable status line), or when the text came out of OCR.
+The engine can produce an advisory for payment-like fields, including OCR-derived fields, but current production Result wiring does not invoke it or attach a value to `ResultUiState.paymentAdvisory`. The following describes component behavior if a caller supplies an advisory; it is not a claim that scans currently trigger it. The advisory is intended for UPI/PSP receipt-like input (amount plus at least one of UPI id, reference number, or readable status line) or OCR-derived text.
 
 It answers one question: **does this payment screen deserve a pause?** It never answers — and must never be worded to imply it answers — *"was this money transferred?"*
 
@@ -67,8 +67,8 @@ These are heuristics chosen for the demo, not measured optima. Boundary behaviou
 ## Privacy
 
 - Only masked UPI ids are shown or logged: `maskedUpi` (`sho***@okaxis`), `RegisteredPayee.maskedHandle`, `PayeeMasking.mask`. `PaymentFields.toString` and `PaymentHint.toString` are value-free on purpose, so a stray log line cannot leak an id, an amount or a reference number.
-- The advisory bridge compares exact normalized IDs against QR Guard's current payee list; this is not evidence of durable registered-payee persistence or a platform-keystore-backed salt. The inspected source does not establish that HMAC-backed storage is integrated with the bridge. Persistence and salt lifecycle remain open questions (open question 2).
-- The raw message text and the screenshot are not stored. The advisory is built, rendered and dropped with the Result state. OCR output is discarded once fields are parsed.
+- The advisory bridge compares exact normalized IDs against the payee list passed to it; it does not itself load the `RegisteredPayeeStore`. That store implementation persists HMAC-SHA256 identifiers and masked values using SharedPreferences, with a caller-supplied salt of at least 16 bytes. No production wiring from the store to this bridge/advisory was found, nor a keystore-backed salt provider, atomic/durable persistence guarantee, or key-rotation/restart consistency policy. Persisted HMAC values alone do not establish a safe salt lifecycle. These are implementation gaps, not guarantees.
+- The raw message text and the screenshot are not stored. The advisory data class and parser operate on transient values; no raw payment text persistence/logging was found in the inspected feature code. OCR output handling beyond the parser remains caller-dependent. The Result presenter does not currently build/attach an advisory, so do not infer an exercised transient lifecycle.
 - This feature makes no network call, reads no file, and opens no intent.
 
 ## Wiring
@@ -86,13 +86,13 @@ PaymentAdvisoryCard (ui/result)        hints in order, then the mandatory line
                                        wording from PaymentAdvisoryCopy (ui/result)
 ```
 
-Layering follows `ARCHITECTURE.md` boundaries: `core/payment` stays free of `android.*` and `androidx.compose.*` so parser and engine are plain-JVM testable; Compose and localized copy live in `ui/`. Present in the worktree when this document was written: contract, parser, engine, bridge, card, copy and the `ResultUiState.paymentAdvisory` field. The presenter does not attach an advisory: callers must explicitly build/attach it. The card is renderable from `ResultUiState.paymentAdvisory`, but no end-to-end caller path was found in the reviewed production source.
+Layering follows `ARCHITECTURE.md` boundaries: `core/payment` stays free of `android.*` and `androidx.compose.*` so parser and engine are plain-JVM testable; Compose and localized copy live in `ui/`. Present in the worktree when this document was written: contract, parser, engine, bridge, card, copy and the `ResultUiState.paymentAdvisory` field. `ResultScreen` conditionally renders `ResultUiState.paymentAdvisory`; the field defaults to null and `ResultPresenter` does not populate it. No production caller connects parser + QR bridge + engine, so the card is renderable but currently unreachable via the reviewed normal scan flow.
 
 ## Verification status
 
 | Check | Status |
 |---|---|
-| Static source review (parser, engine, store, bridge, card, Result field/presenter attachment) | **Reviewed** — conditional ResultScreen card rendering and HMAC-backed store implementation confirmed; presenter leaves the advisory unset, no production end-to-end attachment or keystore-backed salt provider/integration evidenced; no runtime claim implied |
+| Static source review (parser, engine, store, bridge, card, Result field/presenter attachment) | **Static review only** — conditional rendering and store implementation confirmed; production presenter leaves advisory unset; store-to-bridge wiring and keystore-backed salt lifecycle not evidenced. No runtime claim implied |
 | JVM unit tests (parser, engine, bridge, result wiring) | **Not run by this lane** — test sources exist, execution belongs to lane lead |
 | Compile (`testDebugUnitTest` / `assembleDebug`) | **Not run by this lane** — pending lane lead gate |
 | Emulator UI path (Result screen showing card, TalkBack text, confirmation line last) | **Not run** — not verified; shared emulator/build use is lead-controlled |
@@ -112,6 +112,6 @@ Nothing in this table is a pass until the lane lead runs the gate and records th
 ## Open questions for the head
 
 1. Should the advisory fire on typed text that merely mentions an amount, instead of receipt-shaped or OCR input only?
-2. `RegisteredPayeeStore` now exists and holds salted HMAC identifiers, but what is its intended durability and salt lifecycle? Confirm persistence semantics and whether the salt needs platform-keystore protection before screening.
+2. `RegisteredPayeeStore` implementation exists, but production use by the payment advisory is not established. Define and wire durable storage semantics and a keystore-backed salt/key lifecycle (including restart and rotation behavior) before claiming persisted payee matching.
 3. Should a pending status reach `STOP` at all? Current engine behavior does so only combined with a non-registered payee; decide whether that escalation is too strong for the demo.
 4. Confirm confirmation-line localization across English, Hinglish and Hindi, and re-run `I18N_AUDIT` after any copy changes.

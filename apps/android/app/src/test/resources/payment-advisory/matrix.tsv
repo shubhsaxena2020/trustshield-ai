@@ -1,0 +1,11 @@
+# Synthetic fixture matrix; columns: id, text, registeredCount, matches, nowMs, expectedAmountMinor, expectedStatus, expectedHints, expectedVerdict
+upi_match	Payment successful Rs 25.00 paid to violet-shop@okaxis UTR 123456789012	1	true	2000000	2500	SUCCESS	PAYEE_MATCHES_REGISTERED|UTR_PRESENT|TIME_MISSING	CLEAR
+upi_mismatch	Payment successful Rs 25.00 paid to amber-shop@okaxis UTR 123456789012	1	false	2000000	2500	SUCCESS	PAYEE_NOT_REGISTERED|UTR_PRESENT|TIME_MISSING	CHECK
+large_amount_boundary_below	Payment successful Rs 4999.99 paid to violet-shop@okaxis UTR 123456789012	1	true	2000000	499999	SUCCESS	PAYEE_MATCHES_REGISTERED|UTR_PRESENT|TIME_MISSING	CLEAR
+large_amount_boundary_at	Payment successful Rs 5000.00 paid to violet-shop@okaxis UTR 123456789012	1	true	2000000	500000	SUCCESS	PAYEE_MATCHES_REGISTERED|AMOUNT_LARGE|UTR_PRESENT|TIME_MISSING	CLEAR
+round_amount_boundary_at	Payment successful Rs 2000.00 paid to amber-shop@okaxis UTR 123456789012	1	false	2000000	200000	SUCCESS	PAYEE_NOT_REGISTERED|AMOUNT_ROUND_LARGE|UTR_PRESENT|TIME_MISSING	STOP
+urgency_immediate	Payment failed Rs 25.00 paid to amber-shop@okaxis UTR 123456789012 Pay immediately	1	false	2000000	2500	FAILED	PAYEE_NOT_REGISTERED|STATUS_FAILED|URGENCY_PRESSURE|UTR_PRESENT|TIME_MISSING	STOP
+urgency_protective	Payment successful Rs 25.00 paid to violet-shop@okaxis UTR 123456789012 do not pay now	1	true	2000000	2500	SUCCESS	PAYEE_MATCHES_REGISTERED|UTR_PRESENT|TIME_MISSING	CLEAR
+pending_status	Payment Pending Rs 25.00 paid to violet-shop@okaxis UTR 123456789012	1	true	2000000	2500	PENDING	STATUS_PENDING|PAYEE_MATCHES_REGISTERED|UTR_PRESENT|TIME_MISSING	CLEAR
+failed_status	Payment declined Rs 25.00 paid to violet-shop@okaxis UTR 123456789012	1	true	2000000	2500	FAILED	STATUS_FAILED|PAYEE_MATCHES_REGISTERED|UTR_PRESENT|TIME_MISSING	CHECK
+malformed_amount_and_upi	Payment successful Rs 999999999999999999999 paid to sho***@okaxis	1	false	2000000		SUCCESS	PAYEE_MISSING|UTR_MISSING|AMOUNT_MISSING|TIME_MISSING|SCREENSHOT_ONLY	CHECK

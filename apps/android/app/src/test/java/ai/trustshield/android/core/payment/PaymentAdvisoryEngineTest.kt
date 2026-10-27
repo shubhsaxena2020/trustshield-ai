@@ -620,8 +620,7 @@ class PaymentAdvisoryEngineTest {
     }
 
     @Test
-    fun `AUDIT protective negation does not suppress lexical urgency`() {
-        // Known false positive: the speed-cue rule does not distinguish a warning from an instruction.
+    fun `protective instruction not to send money suppresses urgency`() {
         val advisory: PaymentAdvisory = engine.evaluate(
             input(
                 text = "Abhi paise mat bhejna; pehle bank se verify karo",
@@ -631,8 +630,8 @@ class PaymentAdvisoryEngineTest {
             )
         )
 
-        assertTrue(has(advisory, PaymentHintKind.URGENCY_PRESSURE))
-        assertEquals(PaymentAdvisoryVerdict.CHECK, advisory.verdict)
+        assertFalse(has(advisory, PaymentHintKind.URGENCY_PRESSURE))
+        assertEquals(PaymentAdvisoryVerdict.CLEAR, advisory.verdict)
     }
 
     @Test
@@ -664,6 +663,33 @@ class PaymentAdvisoryEngineTest {
         assertTrue(has(advisory, PaymentHintKind.PAYEE_MATCHES_REGISTERED))
         assertFalse(has(advisory, PaymentHintKind.PAYEE_NOT_REGISTERED))
         assertFalse(has(advisory, PaymentHintKind.AMOUNT_ROUND_LARGE))
+    }
+
+    @Test
+    fun `match flag without registered payees cannot establish a match`() {
+        val advisory = engine.evaluate(input(
+            fields = fields(amountMinor = 200_000L, utr = "123456789012"),
+            registeredPayeeCount = 0,
+            payeeMatchesRegistered = true
+        ))
+
+        assertFalse(has(advisory, PaymentHintKind.PAYEE_MATCHES_REGISTERED))
+        assertTrue(has(advisory, PaymentHintKind.NO_REGISTERED_PAYEES))
+        assertTrue(has(advisory, PaymentHintKind.AMOUNT_ROUND_LARGE))
+        assertEquals(PaymentAdvisoryVerdict.CHECK, advisory.verdict)
+    }
+
+    @Test
+    fun `negative registry count is treated as no registered payees`() {
+        val advisory = engine.evaluate(input(
+            fields = fields(amountMinor = 200_000L),
+            registeredPayeeCount = -1,
+            payeeMatchesRegistered = true
+        ))
+
+        assertTrue(has(advisory, PaymentHintKind.NO_REGISTERED_PAYEES))
+        assertFalse(has(advisory, PaymentHintKind.PAYEE_MATCHES_REGISTERED))
+        assertTrue(has(advisory, PaymentHintKind.AMOUNT_ROUND_LARGE))
     }
 
     @Test

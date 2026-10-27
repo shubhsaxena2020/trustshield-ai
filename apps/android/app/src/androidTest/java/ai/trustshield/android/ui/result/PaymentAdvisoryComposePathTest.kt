@@ -5,6 +5,8 @@ import androidx.compose.ui.test.assertExists
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import ai.trustshield.android.core.payment.PaymentAdvisory
 import ai.trustshield.android.core.payment.PaymentAdvisoryVerdict
@@ -80,5 +82,43 @@ class PaymentAdvisoryComposePathTest {
         compose.onNodeWithContentDescription(description).assertExists()
         compose.onNodeWithText(PaymentAdvisoryCopy.CONFIRMATION.hindi, useUnmergedTree = true).assertExists()
         compose.onNodeWithText("dem-recipient@upi", useUnmergedTree = true).assertDoesNotExist()
+    }
+
+    @Test
+    fun actualResultPathKeepsRiskAndConfidenceAlongsidePaymentCaution() {
+        render()
+        val result = ResultPresenter.build(ResultFixtures.bankCreditInput).copy(paymentAdvisory = advisory)
+        // This checks ResultScreen attachment, not just the standalone advisory card.
+        compose.onNodeWithText(PaymentAdvisoryCopy.SECTION_TITLE.hinglish, useUnmergedTree = true).assertExists()
+        compose.onNodeWithText(PaymentAdvisoryCopy.CONFIRMATION.hinglish, useUnmergedTree = true).assertExists()
+        compose.onNodeWithText(result.risk.label.hinglish, useUnmergedTree = true).assertExists()
+        compose.onNodeWithText(result.confidence.label.hinglish, useUnmergedTree = true).assertExists()
+        compose.onNodeWithContentDescription(result.screenDescription(UiLanguage.HINGLISH)).assertExists()
+        advisory.hints.forEach { hint ->
+            compose.onNodeWithText(PaymentAdvisoryCopy.severityGlyph(hint), useUnmergedTree = true).assertExists()
+            compose.onNodeWithText(PaymentAdvisoryCopy.forHint(hint).hinglish, useUnmergedTree = true).assertExists()
+        }
+        compose.onNodeWithText("dem-recipient@upi", useUnmergedTree = true).assertDoesNotExist()
+    }
+
+    @Test
+    fun advisoryAnnouncementEndsExactlyAtConfirmationAndMakesNoFraudClaim() {
+        render()
+        val confirmation = PaymentAdvisoryCopy.CONFIRMATION.hinglish
+        val description = buildString {
+            append(PaymentAdvisoryCopy.SECTION_TITLE.hinglish).append(". ")
+            append(PaymentAdvisoryCopy.verdictHeadline(advisory.verdict).hinglish).append(". ")
+            append(PaymentAdvisoryCopy.verdictAdvice(advisory.verdict).hinglish)
+            advisory.hints.forEach { hint ->
+                append(". ").append(PaymentAdvisoryCopy.severityGlyph(hint))
+                    .append(". ").append(PaymentAdvisoryCopy.forHint(hint).hinglish)
+            }
+            append(". ").append(confirmation)
+        }
+        compose.onNodeWithContentDescription(description).assertExists()
+        assertEquals(description.length - confirmation.length, description.lastIndexOf(confirmation))
+        compose.onNodeWithText("Fraud", ignoreCase = true, useUnmergedTree = true).assertDoesNotExist()
+        compose.onNodeWithText("Scammer", ignoreCase = true, useUnmergedTree = true).assertDoesNotExist()
+        assertTrue(advisory.verdict == PaymentAdvisoryVerdict.CHECK)
     }
 }

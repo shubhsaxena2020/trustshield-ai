@@ -165,7 +165,9 @@ class PaymentAdvisoryEngine(
         val hints: LinkedHashMap<PaymentHintKind, PaymentHint> = LinkedHashMap()
 
         // ---- payee ------------------------------------------------------------------------------
-        if (fields.hasPayeeUpi && input.registeredPayeeCount > 0 && !input.payeeMatchesRegistered) {
+        val hasRegisteredPayees: Boolean = input.registeredPayeeCount > 0
+        val registeredMatch: Boolean = fields.hasPayeeUpi && hasRegisteredPayees && input.payeeMatchesRegistered
+        if (fields.hasPayeeUpi && hasRegisteredPayees && !registeredMatch) {
             add(
                 hints,
                 PaymentHint(
@@ -175,7 +177,7 @@ class PaymentAdvisoryEngine(
                 ),
             )
         }
-        if (input.payeeMatchesRegistered) {
+        if (registeredMatch) {
             add(
                 hints,
                 PaymentHint(
@@ -193,7 +195,7 @@ class PaymentAdvisoryEngine(
                 ),
             )
         }
-        if (fields.hasPayeeUpi && input.registeredPayeeCount == 0) {
+        if (fields.hasPayeeUpi && !hasRegisteredPayees) {
             add(
                 hints,
                 PaymentHint(
@@ -214,7 +216,9 @@ class PaymentAdvisoryEngine(
         }
 
         // ---- amount -----------------------------------------------------------------------------
-        if (amountMinor != null && amountMinor > 0L && amountMinor >= policy.largeAmountMinor) {
+        if (amountMinor != null && amountMinor > 0L && policy.largeAmountMinor > 0L &&
+            amountMinor >= policy.largeAmountMinor
+        ) {
             add(
                 hints,
                 PaymentHint(
@@ -224,7 +228,7 @@ class PaymentAdvisoryEngine(
                 ),
             )
         }
-        if (isLargeRoundAmount(amountMinor, input.payeeMatchesRegistered)) {
+        if (isLargeRoundAmount(amountMinor, registeredMatch)) {
             add(
                 hints,
                 PaymentHint(
@@ -403,6 +407,7 @@ class PaymentAdvisoryEngine(
             if (sourceText.length <= MAX_SCANNED_CHARS) sourceText
             else sourceText.substring(0, MAX_SCANNED_CHARS)
         val haystack: String = scanned.lowercase()
+        if (PROTECTIVE_URGENCY_PHRASES.any { phrase -> haystack.contains(phrase) }) return false
         for (cue in URGENCY_CUES) {
             if (containsCue(haystack, cue)) return true
         }
@@ -481,6 +486,11 @@ class PaymentAdvisoryEngine(
             "now only",
             "immediately",
             "jldi",
+        )
+
+        private val PROTECTIVE_URGENCY_PHRASES: List<String> = listOf(
+            "abhi paise mat bhej", "abhi paise nahi bhej", "do not pay now",
+            "don't pay now", "mat bhejo abhi", "jaldi mat karo",
         )
 
         /** `WARNING` = 0, `CAUTION` = 1, `INFO` = 2; exhaustive so a new severity cannot be ignored. */

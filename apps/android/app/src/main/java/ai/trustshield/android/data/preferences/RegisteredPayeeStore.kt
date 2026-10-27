@@ -136,7 +136,9 @@ open class RegisteredPayeeStore(
             if (!isIdentifier(identifier)) continue
             if (entries.containsKey(identifier)) continue
             val display = masked.getOrNull(index)?.trim().orEmpty()
-            entries[identifier] = display.ifEmpty { UNKNOWN_MASKED }
+            // Preferences are editable/corruptible input. Never surface an arbitrary stored value as
+            // display text: accept only the shape emitted by maskedUpi for a UPI-shaped value.
+            entries[identifier] = display.takeIf(::isSafeMaskedDisplay) ?: UNKNOWN_MASKED
         }
         return entries
     }
@@ -234,6 +236,18 @@ open class RegisteredPayeeStore(
         private fun isIdentifier(value: String): Boolean =
             value.length == IDENTIFIER_HEX_LENGTH &&
                 value.all { it in '0'..'9' || it in 'a'..'f' }
+
+        /** Reject arbitrary preference content, including raw IDs and injected UI text. */
+        private fun isSafeMaskedDisplay(value: String): Boolean {
+            val at = value.indexOf('@')
+            if (at !in 4 until value.lastIndex || value.indexOf('@', at + 1) >= 0) return false
+            val prefix = value.substring(0, at)
+            val localPrefix = prefix.removeSuffix("***")
+            return prefix.endsWith("***") && localPrefix.length in 1..3 &&
+                localPrefix.none { it.isWhitespace() || it.isISOControl() } &&
+                value.substring(at + 1).isNotBlank() &&
+                value.none { it.isWhitespace() || it.isISOControl() }
+        }
     }
 }
 
