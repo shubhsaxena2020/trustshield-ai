@@ -93,6 +93,7 @@ fun QrGuardScreen(
     onEvent: (QrEvent) -> Unit,
     modifier: Modifier = Modifier,
     emulatorCameraOff: Boolean = false,
+    paymentAdvisory: ai.trustshield.android.core.payment.PaymentAdvisory? = null,
 ) {
     val dark = isSystemInDarkTheme()
     val lang = state.language
@@ -138,6 +139,17 @@ fun QrGuardScreen(
             }
 
             CounterPanel(state = state, lang = lang, dark = dark)
+
+            paymentAdvisory?.let { advisory ->
+                ai.trustshield.android.ui.result.PaymentAdvisoryCard(
+                    advisory = advisory,
+                    language = when (lang) {
+                        QrLanguage.HINGLISH -> ai.trustshield.android.ui.result.UiLanguage.HINGLISH
+                        QrLanguage.ENGLISH -> ai.trustshield.android.ui.result.UiLanguage.ENGLISH
+                        QrLanguage.HINDI -> ai.trustshield.android.ui.result.UiLanguage.HINDI
+                    }
+                )
+            }
 
             MandatoryConfirmationBanner(lang = lang, dark = dark)
 

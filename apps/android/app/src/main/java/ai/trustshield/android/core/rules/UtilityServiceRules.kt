@@ -225,6 +225,10 @@ internal val UTILITY_DISCONNECT_RULES: List<Rule> = listOf(
         patterns = listOf(
             rx("""\b$UTILITY_SERVICE_NOUN\b[^.!?\n]{0,48}?\b(?:$SERVICE_DISCONNECT)\b"""),
             rx("""\b(?:$SERVICE_DISCONNECT)\b[^.!?\n]{0,40}?\b$UTILITY_SERVICE_NOUN\b"""),
+            rx(
+                """\b$UTILITY_SERVICE_NOUN\b[^.!?\n]{0,28}?\b(?:will|is going to|is set to)\s+""" +
+                    """(?:be\s+)?(?:cut off|cut|shut off|disconnected|suspended)\b""",
+            ),
             // A completed loss only counts when it is about the reader's own service (see
             // SERVICE_DISCONNECT_PAST): a locality-wide "power cut ho gaya" notice is not a threat.
             rx("""\b$READER_POSSESSIVE\b[^.!?\n]{0,50}?\b(?:$SERVICE_DISCONNECT_PAST)\b"""),
