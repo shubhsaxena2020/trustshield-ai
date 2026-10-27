@@ -65,8 +65,17 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import java.security.SecureRandom
+import java.math.BigDecimal
+import java.math.RoundingMode
 import kotlinx.coroutines.delay
 import ai.trustshield.android.data.preferences.AppLanguage
+import ai.trustshield.android.core.payment.PaymentAdvisory
+import ai.trustshield.android.core.payment.PaymentAdvisoryEngine
+import ai.trustshield.android.core.payment.PaymentFields
+import ai.trustshield.android.core.payment.PaymentAppHint
+import ai.trustshield.android.core.payment.PaymentStatus
+import ai.trustshield.android.core.payment.maskedForPresentation
+import ai.trustshield.android.ui.result.UiLanguage
 import ai.trustshield.android.data.preferences.resolveLanguage
 import ai.trustshield.android.input.qr.AnalyzerEvent
 import ai.trustshield.android.input.qr.CameraPermissionState
@@ -257,7 +266,8 @@ internal data class QrGuardView(
     /** Stable CameraX fault token, mapped to user copy by [QrHostCopy.faultText]. */
     val faultToken: String? = null,
     /** True once the shopkeeper has created the local re-register PIN for this session. */
-    val hasPin: Boolean = false
+    val hasPin: Boolean = false,
+    val paymentAdvisory: PaymentAdvisory? = null
 ) {
     /** True while a demo has been run: the screen must say so instead of implying live decoding. */
     val demoActive: Boolean get() = demoFlow != null
@@ -305,6 +315,7 @@ internal class QrGuardSession(
     private val extractor: PayeeExtractor = SimulatedQrFixtures.payeeExtractor()
 
     private var sessionPin: String? = null
+    private var paymentAdvisory: PaymentAdvisory? = null
 
     /**
      * C06's policy, with a real PIN verifier wired to [sessionPin].
@@ -419,6 +430,7 @@ internal class QrGuardSession(
         }
 
         val payee = extractor.extract(payload)
+        paymentAdvisory = paymentAdvisoryForQr(payload)
         lastFrameUnreadable = payee == null
         lastDecoded = payee?.let {
             DecodedPayee(
@@ -654,8 +666,30 @@ internal class QrGuardSession(
             demoFlow = demoFlow,
             demoMessage = demoMessage,
             faultToken = faultToken,
-            hasPin = sessionPin != null
+            hasPin = sessionPin != null,
+            paymentAdvisory = paymentAdvisory
         )
+    }
+
+    private fun paymentAdvisoryForQr(payload: String): PaymentAdvisory? {
+        val qr = UpiQrParser.parse(payload)
+        val vpa = qr.payeeVpa?.takeIf { qr.isUpi && it.isNotBlank() } ?: return null
+        val amount = qr.amount?.takeIf { !qr.hasFlag(ai.trustshield.android.input.qr.UpiFlag.MALFORMED_AMOUNT) }
+        val minor = runCatching { amount?.let { BigDecimal(it).movePointRight(2).setScale(0, RoundingMode.UNNECESSARY).longValueExact() } }.getOrNull()
+        val fields = PaymentFields(
+            amountMinor = minor,
+            amountRaw = if (minor != null) "\u20B9${amount}" else "",
+            payeeUpi = vpa,
+            payeeName = qr.payeeName.orEmpty(),
+            status = PaymentStatus.UNKNOWN,
+            appHint = PaymentAppHint.UNKNOWN
+        )
+        return PaymentAdvisoryEngine().evaluate(QrPayeePaymentBridge.toAdvisoryInput(
+            sourceText = payload,
+            fields = fields,
+            payees = state.payees,
+            nowEpochMs = System.currentTimeMillis()
+        )).takeIf { it.isPaymentScreenshot }?.maskedForPresentation()
     }
 
     private fun newWatcher(): QrWatcher {
@@ -957,9 +991,11 @@ internal fun QrGuardHostContent(
     onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier,
     onPreviewCreated: (PreviewView) -> Unit = {},
-    onLanguageChanged: (QrLanguage) -> Unit = {}
+    onLanguageChanged: (QrLanguage) -> Unit = {},
+    onPayeesChanged: (List<RegisteredPayee>) -> Unit = {}
 ) {
     val view = session.view
+    LaunchedEffect(view.state.payees) { onPayeesChanged(view.state.payees) }
     val lang = view.state.language
     val dark = isSystemInDarkTheme()
     val hapticView = LocalView.current
@@ -1008,6 +1044,7 @@ internal fun QrGuardHostContent(
             state = view.state,
             onEvent = dispatch,
             emulatorCameraOff = emulatorCameraOff,
+            paymentAdvisory = view.paymentAdvisory,
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f, fill = false)
@@ -1444,7 +1481,7 @@ private fun HostBadge(glyph: String, tone: RiskTone, dark: Boolean) {
  * app's settings page above.
  */
 @Composable
-fun QrGuardHost(modifier: Modifier = Modifier) {
+fun QrGuardHost(modifier: Modifier = Modifier, onPayeesChanged: (List<RegisteredPayee>) -> Unit = {}) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val preferences = LocalUserPreferences.current
@@ -1572,7 +1609,8 @@ fun QrGuardHost(modifier: Modifier = Modifier) {
                     }
                 )
             )
-        }
+        },
+        onPayeesChanged = onPayeesChanged
     )
 }
 
