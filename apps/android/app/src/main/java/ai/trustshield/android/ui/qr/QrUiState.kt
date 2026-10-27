@@ -791,6 +791,7 @@ object QrStrings {
     // counters
     val mismatchCounterLabel = ToneCopy("Lagatar valid mismatch", "Consecutive valid mismatch")
     val occlusionTimerLabel = ToneCopy("QR dikhna band (timer)", "No QR visible (timer)")
+    val elapsedSeconds = ToneCopy("s", "s", "सेकंड")
     val occlusionNotTamper = ToneCopy(
         "QR na dikhna tamper ka saboot nahi hai.",
         "Not seeing the QR is not proof of tampering."

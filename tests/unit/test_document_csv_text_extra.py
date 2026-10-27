@@ -183,9 +183,10 @@ def test_csv_oversized_field_rejected():
 # ---------- accepted sanity ----------
 
 def test_txt_accepted_fixture():
-    r = extract_txt((FIX / "clean.txt").read_bytes())
+    payload = (FIX / "clean.txt").read_bytes()
+    r = extract_txt(payload)
     assert r.format == "txt"
-    assert r.metadata["size_bytes"] == 85
+    assert r.metadata["size_bytes"] == len(payload)
 
 
 def test_csv_accepted_fixture():

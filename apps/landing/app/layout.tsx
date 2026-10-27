@@ -4,7 +4,14 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "TrustShield AI — pause before you pay",
   description:
-    "Check suspicious messages, links and QR codes. See the evidence, understand the limits, and decide for yourself.",
+    "Pause over suspicious messages, calls and QR codes. Read the evidence, understand the limits, and choose your next step.",
+  applicationName: "TrustShield AI",
+  icons: { icon: "/logo-icon.png", apple: "/logo-icon.png" },
+  openGraph: {
+    title: "TrustShield AI — pause before you pay",
+    description: "A calmer second opinion for suspicious messages, calls and QR codes.",
+    type: "website",
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

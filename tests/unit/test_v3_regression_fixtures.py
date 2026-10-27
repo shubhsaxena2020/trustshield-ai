@@ -5,6 +5,7 @@ these fixed probabilities, taken from the promoted artifact, prove a regenerated
 model behaves the same. See docs/REPRODUCIBILITY.md.
 """
 import pytest
+from pathlib import Path
 
 from services.analysis.ml.classifier import TextClassifier
 
@@ -18,6 +19,11 @@ FIXTURES = [
     ("Dear customer your parcel is held, pay Rs 49 customs fee at http://delhivery-track.xyz", 0.921),
     ("Team meeting moved to 3 PM, please confirm.", 0.4797),
 ]
+V3_ARTIFACT = Path(__file__).resolve().parents[2] / "models" / "trained" / "trustshield_text_v3.joblib"
+pytestmark = pytest.mark.skipif(
+    not V3_ARTIFACT.is_file(),
+    reason="MODEL_ARTIFACT_MISSING: trustshield_text_v3.joblib is required for fixed-probability regression checks; no model was downloaded.",
+)
 
 
 @pytest.fixture(scope="module")

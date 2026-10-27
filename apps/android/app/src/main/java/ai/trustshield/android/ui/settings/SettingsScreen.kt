@@ -40,6 +40,7 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -47,6 +48,7 @@ import ai.trustshield.android.data.preferences.AppLanguage
 import ai.trustshield.android.data.preferences.Sensitivity
 import ai.trustshield.android.data.preferences.ThemeMode
 import ai.trustshield.android.ui.theme.TsTokens
+import ai.trustshield.android.ui.theme.ToneCopy
 import ai.trustshield.android.ui.theme.TrustShieldTheme
 
 /**
@@ -225,6 +227,7 @@ fun SettingsScreen(
                 detail = copy(SettingsCopy.hapticsDetail),
                 checked = state.haptics,
                 language = state.language,
+                testTag = "settings_haptics_toggle",
                 onCheckedChange = { onEvent(SettingsEvent.SetHaptics(it)) }
             )
         }
@@ -236,11 +239,12 @@ fun SettingsScreen(
                 detail = copy(SettingsCopy.reducedMotionDetail),
                 checked = state.reducedMotion,
                 language = state.language,
+                testTag = "settings_reduced_motion_toggle",
                 onCheckedChange = { onEvent(SettingsEvent.SetReducedMotion(it)) }
             )
         }
 
-        DeviceCheckPanel(english = state.preferences.language == AppLanguage.ENGLISH)
+        DeviceCheckPanel(language = state.preferences.language)
 
         Spacer(Modifier.height(TsTokens.SpacingLg))
 
@@ -304,7 +308,7 @@ fun SettingsScreen(
 }
 
 @Composable
-private fun DeviceCheckPanel(english: Boolean) {
+private fun DeviceCheckPanel(language: AppLanguage) {
     val context = LocalContext.current
     var expanded by remember { mutableStateOf(false) }
     var hindiLocale by remember { mutableStateOf(DeviceCheckLocale.NOT_CHECKED) }
@@ -313,7 +317,7 @@ private fun DeviceCheckPanel(english: Boolean) {
     // layer. It keeps the screen's existing boolean split because `DeviceCheckCopy` in
     // `DeviceCheck.kt` (not this file) only knows Hinglish and English.
     val copy: (SettingText) -> String = {
-        it.forLanguage(if (english) AppLanguage.ENGLISH else AppLanguage.HINGLISH)
+        it.forLanguage(language)
     }
 
     SettingsSection(title = copy(SettingsA11yCopy.deviceCheckSection)) {
@@ -336,7 +340,7 @@ private fun DeviceCheckPanel(english: Boolean) {
                     onResult = { hindiLocale = it },
                 )
             }
-            val locale = DeviceCheckCopy.localeStatus(current.hindiLocale, english)
+            val locale = DeviceCheckCopy.localeStatus(current.hindiLocale, language)
             Column(verticalArrangement = Arrangement.spacedBy(TsTokens.SpacingXs)) {
                 DeviceCheckLine(
                     copy(SettingsA11yCopy.deviceAndroid),
@@ -345,7 +349,7 @@ private fun DeviceCheckPanel(english: Boolean) {
                 DeviceCheckLine(copy(SettingsA11yCopy.deviceAbi), current.abi)
                 DeviceCheckLine(
                     copy(SettingsA11yCopy.deviceSpeechRecognizer),
-                    DeviceCheckCopy.availability(current.recognizerAvailable, english)
+                    DeviceCheckCopy.availability(current.recognizerAvailable, language)
                 )
                 DeviceCheckLine(
                     copy(SettingsA11yCopy.deviceHindiLocale),
@@ -354,11 +358,11 @@ private fun DeviceCheckPanel(english: Boolean) {
                 )
                 DeviceCheckLine(
                     copy(SettingsA11yCopy.deviceCamera),
-                    DeviceCheckCopy.permission(current.cameraPermission, english)
+                    DeviceCheckCopy.permission(current.cameraPermission, language)
                 )
                 DeviceCheckLine(
                     copy(SettingsA11yCopy.deviceMicrophone),
-                    DeviceCheckCopy.permission(current.microphonePermission, english)
+                    DeviceCheckCopy.permission(current.microphonePermission, language)
                 )
             }
         }
@@ -502,6 +506,7 @@ private fun ToggleRow(
     detail: String,
     checked: Boolean,
     language: AppLanguage,
+    testTag: String,
     onCheckedChange: (Boolean) -> Unit
 ) {
     val stateLabel = (if (checked) SettingsA11yCopy.switchOn else SettingsA11yCopy.switchOff)
@@ -518,6 +523,7 @@ private fun ToggleRow(
             .semantics(mergeDescendants = true) {
                 contentDescription = "$label. $detail"
                 stateDescription = stateLabel
+                this.testTag = testTag
             }
             .padding(vertical = TsTokens.SpacingXs),
         verticalAlignment = Alignment.CenterVertically
