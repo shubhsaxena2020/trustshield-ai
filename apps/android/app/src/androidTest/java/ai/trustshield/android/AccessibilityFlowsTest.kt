@@ -62,10 +62,10 @@ class AccessibilityFlowsTest {
         assertTouchTarget(check)
         check.performScrollTo().performClick()
 
-        waitForText("Evidence")
+        waitForText("Kya mila (exact quote ke saath)")
         val risk = compose.onNode(hasContentDescription("Zyada khatra", substring = true))
-        val confidence = compose.onAllNodes(hasText("Bharosa", substring = true)).onFirst()
-        val evidence = compose.onNode(hasText("Evidence"))
+        val confidence = compose.onNode(hasContentDescription("Bharosa:", substring = true))
+        val evidence = compose.onNode(hasText("Kya mila (exact quote ke saath)"))
         val riskTop = risk.fetchSemanticsNode().boundsInRoot.top
         val confidenceTop = confidence.fetchSemanticsNode().boundsInRoot.top
         val evidenceTop = evidence.fetchSemanticsNode().boundsInRoot.top
@@ -101,8 +101,11 @@ class AccessibilityFlowsTest {
         waitForText("Settings")
         val haptics = compose.onNode(hasTestTag("settings_haptics_toggle"))
         haptics.assert(SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "Chalu"))
+        haptics.performScrollTo()
         assertTouchTarget(haptics)
-        assertTouchTarget(compose.onNode(hasTestTag("settings_reduced_motion_toggle")))
+        val reducedMotion = compose.onNode(hasTestTag("settings_reduced_motion_toggle"))
+        reducedMotion.performScrollTo()
+        assertTouchTarget(reducedMotion)
     }
 
     private fun launch() {
