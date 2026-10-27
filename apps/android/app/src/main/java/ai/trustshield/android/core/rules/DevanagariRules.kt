@@ -126,6 +126,7 @@ private const val DEV_TELL_VERB =
  * (`TELL` has `बताओ`, `बता दो`, `बताइए`, `भेजो`, `भेज दो`, `शेयर करो`). Keeping this list separate
  * is what stops "otp डालो" from producing two ask cards for one request.
  */
+private const val DEV_TELL_VERB_MISSING_EXTRA = "(?:डालें|डाल दीजें|भेजें)"
 private const val DEV_TELL_VERB_MISSING =
     "(?:बताएं|बताइएगा|बताओगे|बता दीजिए|भेजिए|भेज दीजिए|भेज दें|भेज देना|डालो|डालिए|डाल दो|" +
         "डाल दीजिए|लिखो|लिखिए|बोल दो|बोलिए|दीजिए|दे दो|पढ़कर सुनाओ|कन्फर्म करो|वेरिफाई करो|" +
@@ -138,9 +139,11 @@ private const val DEV_ID_NOUN =
 
 /** Money nouns and the Devanagari verbs that move them towards the sender. */
 private const val DEV_MONEY_NOUN = "(?:पैसे|पैसा|रुपये|रुपए|रकम|धन|भुगतान|पेमेंट|अमाउंट)"
+private const val DEV_MONEY_NOUN_EXTRA = "(?:शुल्क|फीस|जुर्माना|₹\\s?\\d{3,})"
 private const val DEV_SEND_MONEY =
     "(?:भेजो|भेज दो|भेजिए|भेज दें|भेज दीजिए|ट्रांसफर करो|ट्रांसफर कर दो|जमा करो|जमा कर दो|" +
         "दे दो|दीजिए|वापस करो|वापस भेजो|लौटाओ)"
+private const val DEV_SEND_MONEY_EXTRA = "(?:भेजें|भेज दीजिए|जमा करें|जमा कर दें|डालें|भुगतान करें)"
 
 /** The callback imperative in Devanagari: "कॉल करें", "फोन कीजिए", "संपर्क करें". */
 private const val DEV_CALLBACK_VERB =
@@ -351,9 +354,9 @@ internal val DEV_ASK_RULES: List<Rule> = listOf(
         strength = Strength.STRONG,
         patterns = listOf(
             // "otp डालो" / "पिन भेजिए" - only the verbs TELL is missing, so no double ask
-            rx("""\b(?:otp|pin|mpin|cvv|password|passcode)\b[^।.!?\n]{0,30}?\b$DEV_TELL_VERB_MISSING\b"""),
+            rx("""\b(?:otp|pin|mpin|cvv|password|passcode)\b[^।.!?\n]{0,30}?\b(?:$DEV_TELL_VERB_MISSING|$DEV_TELL_VERB_MISSING_EXTRA)\b"""),
             // "डालो otp"
-            rx("""\b$DEV_TELL_VERB_MISSING\b[^।.!?\n]{0,20}?\b(?:otp|pin|mpin|cvv|password)\b"""),
+            rx("""\b(?:$DEV_TELL_VERB_MISSING|$DEV_TELL_VERB_MISSING_EXTRA)\b[^।.!?\n]{0,20}?\b(?:otp|pin|mpin|cvv|password)\b"""),
         ),
         askType = AskType.OTP_PIN,
         guarded = true,
@@ -383,9 +386,9 @@ internal val DEV_ASK_RULES: List<Rule> = listOf(
         strength = Strength.STRONG,
         patterns = listOf(
             // "पैसे भेज दो" - MONEY_CUE/SEND_MONEY in StageRules are Roman only
-            rx("""\b$DEV_MONEY_NOUN\b[^।.!?\n]{0,30}?\b$DEV_SEND_MONEY\b"""),
+            rx("""(?:\b$DEV_MONEY_NOUN\b|$DEV_MONEY_NOUN_EXTRA)[^।.!?\n]{0,48}?\b(?:$DEV_SEND_MONEY|$DEV_SEND_MONEY_EXTRA)\b"""),
             // "भेज दो 5000"
-            rx("""\b$DEV_SEND_MONEY\b[^।.!?\n]{0,24}?\b$DEV_MONEY_NOUN\b"""),
+            rx("""\b(?:$DEV_SEND_MONEY|$DEV_SEND_MONEY_EXTRA)\b[^।.!?\n]{0,48}?(?:\b$DEV_MONEY_NOUN\b|$DEV_MONEY_NOUN_EXTRA)"""),
         ),
         askType = AskType.MONEY_TRANSFER,
         guarded = true,

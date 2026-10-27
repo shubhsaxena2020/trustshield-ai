@@ -94,7 +94,7 @@ internal const val OFFER_PAY_VERB =
         "deposit karo|deposit kar do|daal do|daalo|daal dena|send karo|send kar do|" +
         "bhugtan karo|bhugtan kijiye|clear karo|clear kar do|bhej do|bhej de|bhej dena|bhejiye|" +
         "bhejna|bhejo|bhar do|bharo|bharna|bharni|" +
-        "pay|transfer|send|deposit|remit|paid|" +
+        "pay|transfer|send|deposit|remit|" +
         "भेजो|भेज दो|भेजिए|भेजें|ट्रांसफर करो|जमा करो|जमा करें|भुगतान करो|भुगतान करें|" +
         "भरो|भरना|भर दो|डालो|डाल दो)"
 
@@ -141,7 +141,7 @@ internal const val OFFER_PAY_VERB_STRICT =
  * not in the engine's negation vocabulary.
  */
 internal val SKIP_NO_FEE_ADVICE: Regex = rx(
-    """(?:\bno (?:registration |joining |processing |security |advance )?(?:fee|fees|charge|charges|deposit)\b""" +
+    """(?:\bno (?:application or )?(?:registration |joining |processing |security |advance )?(?:fee|fees|charge|charges|deposit)\b""" +
         """|\bnever (?:pay|send|transfer)\b[^.!?\n]{0,24}?\b(?:fee|fees|money|amount|paise|deposit)\b""" +
         """|\bdo not (?:pay|send|transfer)\b[^.!?\n]{0,24}?\b(?:fee|fees|money|amount|paise|deposit)\b""" +
         """|\b(?:koi|koe|koyi) (?:bhi )?(?:fee|fees|charge|charges|paise|paisa|payment) (?:nahi|nahin)\b""" +
