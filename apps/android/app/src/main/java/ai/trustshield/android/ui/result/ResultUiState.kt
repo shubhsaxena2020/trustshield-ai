@@ -1,5 +1,6 @@
 package ai.trustshield.android.ui.result
 
+import ai.trustshield.android.core.payment.PaymentAdvisory
 import ai.trustshield.android.ui.theme.RiskTone
 import ai.trustshield.android.ui.theme.RiskToneCopy
 import ai.trustshield.android.ui.theme.ToneCopy
@@ -294,7 +295,9 @@ data class ResultUiState(
     /** Number of source characters analysed, for an honest "what was looked at" line. */
     val analysedCharacters: Int,
     /** The verdict always comes from the deterministic engine; this is a constant, not a toggle. */
-    val deterministicVerdict: Boolean = true
+    val deterministicVerdict: Boolean = true,
+    /** Soft payment hints for this scan; null when the input was not a payment screenshot. Never proof of settlement. */
+    val paymentAdvisory: PaymentAdvisory? = null
 ) {
 
     /** One flat list of everything this state can put on screen, used by the safety tests. */
