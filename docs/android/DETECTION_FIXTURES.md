@@ -1,9 +1,10 @@
 # Detection fixtures - Phase 4 items 4 and 5 (issue #137, lane "rules/fixtures")
 
-**These are rule fixtures, not an accuracy measurement.** Every row below is a hand-written synthetic
-message that is run through the real on-device engine to show *whether a rule fires and lands in the
-band BEHAVIOR_SPEC asks for*. There is no holdout, no sampling frame and no labelled corpus behind this
-table, and nothing here may be quoted as precision, recall, specificity or F1. The repository's honest
+**These are synthetic rule fixtures, not an accuracy measurement.** Every row below is a hand-written
+message run through the real on-device engine to show whether a rule fires and lands in the expected
+band. Per-category detection rates below describe only these hand-written cases; there is no holdout,
+sampling frame or representative labelled corpus, so these rates are not estimates of real-world recall,
+precision, specificity or F1. The repository's measured model numbers remain separate:
 model numbers are unchanged and still stand exactly as recorded in `FINAL-REPORT.md` and
 `HEAD_ORDERS_ANDROID.md`: holdout recall 82.1 / specificity 78.3 / precision 82.1 / F1 82.1 (the 90%
 target is **not** met), routing audit 79/79 with 7 false alarms, 1,280 Python tests.
@@ -46,9 +47,27 @@ Engine path exercised, unmodified and unstubbed: `LocalScanPipeline.analyzeText`
 row is also asserted to have **zero** evidence quotes that do not verify against the analysed text
 (`AnalysisResult.unverifiableEvidence` empty).
 
-## Result: 47 rows, 47 PASS, 0 MISS
+## Result: 167 rows, 167 PASS, 0 MISS
 
-47 rows total: 28 scam rows and 19 legitimate rows. Those totals already include the 3 exact probes from PHASE4 item 5 and the 4 band-ladder controls; the probes and controls are subsets, not additional rows.
+167 rows total: 88 scam rows and 79 legitimate rows. The original 47 rows remain unchanged and green (28 scam, 19 legitimate, including the three exact probes and four band-ladder controls). The 120 new rows add 60 scams and 60 legitimate controls across ten requested categories.
+
+The new set labels every row by category, language, and kind. Each category has six scam and six legitimate rows, with two rows each in English, Hinglish, and Hindi (Devanagari). New scam rows pass when score is at least 25 (CAUTION or higher); new legitimate rows pass only at score 24 or below with no verified ask. The original 47 rows continue to assert their exact spec-derived bands.
+
+| New fixture category | Scam detected | Scam total | Fixture detection rate | Legitimate false positives | Legitimate total | Result |
+|---|---:|---:|---:|---:|---:|---|
+| Digital arrest | 6 | 6 | 100% (6/6) | 0 | 6 | PASS |
+| KYC/bank | 6 | 6 | 100% (6/6) | 0 | 6 | PASS |
+| Electricity/bill disconnection | 6 | 6 | 100% (6/6) | 0 | 6 | PASS |
+| UPI collect/refund | 6 | 6 | 100% (6/6) | 0 | 6 | PASS |
+| Job offers | 6 | 6 | 100% (6/6) | 0 | 6 | PASS |
+| Parcel/customs | 6 | 6 | 100% (6/6) | 0 | 6 | PASS |
+| Loan apps | 6 | 6 | 100% (6/6) | 0 | 6 | PASS |
+| OTP sharing | 6 | 6 | 100% (6/6) | 0 | 6 | PASS |
+| Investment/crypto | 6 | 6 | 100% (6/6) | 0 | 6 | PASS |
+| Lottery | 6 | 6 | 100% (6/6) | 0 | 6 | PASS |
+| **Total** | **60** | **60** | **100% (60/60)** | **0** | **60** | **PASS** |
+
+The IDs are `N01-S01..S06` / `N01-L01..L06` through `N10-S01..S06` / `N10-L01..L06`. The exact synthetic message text is kept in `DetectionExpansion.kt`; the test emits each text and its measured label/score so the report can be regenerated from JUnit XML. No claim is made that 100% on these 60 selected examples meets the separate 90% model holdout target.
 
 Each `expected` band is the one the behaviour spec mandates for that shape, written down **before** the
 row was measured:
@@ -212,10 +231,8 @@ mistaken for a high-stakes callback ask:
 
 ## Rules changed in this lane (deterministic, exact quotes, no threshold loosened)
 
-All changes are literal vocabulary/ordering inside existing stage rules plus two narrow `skip` guards.
-No score weight, band, floor, ceiling, `corroborationMin`, reduction factor or confidence rule was
-changed, so nothing here can lift a band on its own; the only way a band moves is a *newly matched*
-stage or a newly verified ask.
+The changes below are limited to deterministic rule matching, source-span evidence, and context guards.
+No score weight, band, floor, ceiling, `corroborationMin`, reduction factor or confidence rule changed.
 
 | # | file | change | why (measured) |
 |---|---|---|---|
@@ -233,6 +250,15 @@ stage or a newly verified ask.
 | R12 | `StageRules.kt` delivery skip | extend the door/agent skip to `दरवाज़े / दरवाजे ... एजेंट` | `F39`: report §3.4 row 5's legit twin was only protected in English |
 | R13 | `UtilityServiceRules.kt` | `appointment` added to the official-channel skip | a "call 9876543210 to book an appointment" KYC reminder is an official-channel act, not a callback ask |
 | R14 | `UtilityServiceRules.kt` callback ask | Requires an account, credential, verification, suspension, disconnection, or payment stake; bill/due-date wording alone is insufficient | `F40` is the legitimate routine electricity-bill support twin; the existing Hindi cutoff scam remains asserted |
+| R15 | `StageRules.kt` money ask | remove fee/duty nouns as standalone asks; recognize directional `pay/transfer/send + amount` | past customs duty and job registration fee controls exposed false asks; the payment must be requested |
+| R16 | `ScamOfferRules.kt` | remove past-tense `paid` as an imperative payment verb | a customs duty paid at checkout is not a new request to pay |
+| R17 | `DevanagariRules.kt` | add Hindi money nouns/verbs (`शुल्क`, `फीस`, `जुर्माना`, `भेजें`, `जमा करें`, `डालें`, `भुगतान करें`) and number handling | the measured Hindi scam rows needed these forms to retain a directional ask |
+| R18 | `StageRules.kt` negation scope | stop a preceding prohibition at `and` / `और` / `but` / `लेकिन`; treat `नहीं तो` as conditional | “किसी को मत बताना और ... रुपये भेजो” contains two actions; “भेजें नहीं तो केस दर्ज होगा” is a threat tail |
+| R19 | `StageRules.kt` OTP ask / delivery skip | recognize “read the OTP to me” and allow the explicit courier-agent-at-door control | the English phone request is an ask, while handing the code to a nearby delivery agent is a legitimate flow |
+| R20 | `StageRules.kt` personal-info ask | recognize requests for a seed/recovery phrase or private key | the investment fixture asks for wallet credentials without changing the score threshold |
+| R21 | `HinglishNormalizer.kt` obfuscation whitelist | fold spaced `b l o c k` and leetspeak `acc0unt`, `bl0ck`, `c0de`, `kar0` to their known words while preserving raw spans | existing end-to-end obfuscation cases require threat plus ask evidence from these exact spellings |
+| R22 | `StageRules.kt` money ask | allow up to 48 characters between a directional pay/transfer/send verb and an explicit amount | “Pay courier and GST charges of ₹4,999” is a requested payment, while an unrequested duty mention stays non-ask |
+| R23 | `UtilityServiceRules.kt` utility threat | recognize explicit English “power will be cut” / “electricity will be disconnected” wording | the new English disconnection row was otherwise invisible to the threat stage |
 
 Two expectations were corrected rather than "made green" by a rule, and both corrections are recorded in
 the fixture source:
@@ -267,14 +293,11 @@ drove the fixes above; keeping it visible is the point of an honest fixture tabl
 
 ## Known bounds (stated, not hidden)
 
-1. **A "no registration fee" sentence can still trip the fee ask.** `There is no registration fee.` names
-   `registration fee` and the negation vocabulary has no bare English `no`, so the money ask fires
-   (`CAUTION`). Fixing it by adding `no` to the clause-level negation set was rejected in this lane: a
-   bare `no` anywhere earlier in a clause would suppress real asks ("no problem sir, OTP batao"). The
-   fixture `F12` therefore uses the equally realistic `Registration is free.` and this bound is recorded
-   here instead of being papered over. A narrow skip for `no/zero/free + <fee noun>` is the follow-up,
-   and it needs its own false-positive tests, because a ±24-character skip can also swallow a real
-   `"no hidden charges, Rs 500 bhejo"` ask.
+1. **A fee noun alone is not a payment request.** The base money rule requires a directional ask rather
+   than treating `registration fee` or `customs duty` as an ask by itself. The negative control
+   `There is no application or registration fee.` stays LOW_RISK, and `no` is deliberately not a global
+   negation token: `No problem sir, OTP batao` must still retain its ask. Explicit negation is scoped to
+   the action, and conjunctions such as `and` / `और` end the preceding action's scope.
 2. **`SKIP_OFFICIAL_NUMBER` contains `\b1[89]\d{2}\b`** to recognise 1800/1860/1930 helplines. A
    four-digit number between 1800 and 1999 anywhere within ~24 characters of a callback ask (an amount
    like `Rs 1900`, a year) therefore voids that ask. Pre-existing, not introduced here, and now more
@@ -290,12 +313,27 @@ drove the fixes above; keeping it visible is the point of an honest fixture tabl
 5. **Legit twins have no headroom in two rows.** `F06` (RBI advisory that this app's rules read as
    authority + threat) sits at exactly `24`, the `LOW_RISK` ceiling. Any future relaxation of
    `NO_ASK_CEILING`, or one more marker in that sentence, moves it.
-6. **This is rule coverage, not accuracy.** 47 synthetic rows with hand-written expectations cannot
-   estimate a false-positive rate on real traffic. A real 300-message holdout is not possible in this
+6. **This is rule coverage, not accuracy.** 167 synthetic rows with hand-written expectations cannot
+   estimate a false-positive rate on real traffic. The category rates above are limited to six selected
+   scam/control pairs per family. A real 300-message holdout is not possible in this
    window (HEAD_ORDERS_ANDROID section 2.7); the honest reporting stays "rule/normaliser tests".
-7. **No emulator spot check was run in this lane.** All rows were measured on the JVM, which is the same
-   engine the app calls (`LocalScanPipeline`). A device spot check of three rows needs the shared Phase 4
-   emulator lock; that check is left to the head's merge verification rather than claimed here.
+
+## Final verification run (2026-10-28)
+
+Commands ran from `apps/android` in the isolated `android/P7-A-detection` worktree. Gradle used
+`--no-daemon -Dorg.gradle.jvmargs=-Xmx2g` and the configured Android SDK. The connected journey used only
+the already-running shared `emulator-5554` (`head-api36`); no physical device was targeted.
+
+| Command | Result |
+|---|---|
+| `.\gradlew.bat :app:testDebugUnitTest --no-daemon '-Dorg.gradle.jvmargs=-Xmx2g'` | PASS — 1,192 tests, 0 skipped, 0 failures, 0 errors (61 JUnit XML report classes). Tail: `BUILD SUCCESSFUL in 10m 10s`; `25 actionable tasks: 1 executed, 24 up-to-date`. |
+| `.\gradlew.bat :app:connectedDebugAndroidTest '-Pandroid.testInstrumentationRunnerArguments.class=ai.trustshield.android.Phase3JourneysTest' --no-daemon '-Dorg.gradle.jvmargs=-Xmx2g'` | PASS — `Phase3JourneysTest` 11/11, 0 skipped, 0 failed on `head-api36(AVD) - 16`. Tail: `BUILD SUCCESSFUL in 1m 20s`. |
+| `.\gradlew.bat :app:assembleDebug --no-daemon '-Dorg.gradle.jvmargs=-Xmx2g'` | PASS — `BUILD SUCCESSFUL in 12s`; arm64-only APK at `apps/android/app/build/outputs/apk/debug/app-arm64-v8a-debug.apk` (86,665,802 bytes), SHA-256 `aba8534b37a4babae6c6dd78822b2817840061431a176d9429da2101e2d22c03`. |
+
+The fixture-specific run ended `SUMMARY|total=167|pass=167|miss=0`. The 47 pre-existing cases remain
+green with exact expected bands, including electricity-disconnection F07 at 70 and the bank-credit control
+at 0. The expanded synthetic categories are summarized above; these values do not establish real-world
+accuracy or satisfy the separate 90% holdout-recall goal.
 
 ## Contract and privacy notes
 

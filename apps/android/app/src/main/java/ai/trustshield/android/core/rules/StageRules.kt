@@ -161,7 +161,9 @@ class StageRules(private val normalizer: TextNormalizer) {
         if (NEGATION_INSIDE.containsMatchIn(CONDITIONAL_NAHI.replace(inner, " "))) return true
         val clauseStart = clauseStartBefore(text, start)
         val before = text.substring(clauseStart, start)
-        if (NEGATION_BEFORE.containsMatchIn(before)) return true
+        val scopeBoundary = NEGATION_SCOPE_BOUNDARY.findAll(before).lastOrNull()?.range?.last?.plus(1) ?: 0
+        val actionPrefix = before.substring(scopeBoundary)
+        if (NEGATION_BEFORE.containsMatchIn(actionPrefix)) return true
         val clauseEnd = clauseEndAfter(text, end)
         val after = text.substring(end, clauseEnd)
         if (after.isEmpty()) return false
@@ -246,7 +248,8 @@ class StageRules(private val normalizer: TextNormalizer) {
         val NEGATION_AFTER =
             rx("""(?<![\p{L}\p{M}\p{N}])(?:mat|na|nahi|nahin|naa|nhi|not|never|dont|don't|मत|नहीं|न)(?![\p{L}\p{M}\p{N}])""")
         val NEGATION_INSIDE = NEGATION_AFTER
-        val CONDITIONAL_NAHI = rx("""(?<![\p{L}\p{M}\p{N}])(?:nahi|nahin|na|nhi)\s+to(?![\p{L}\p{M}\p{N}])""")
+        val CONDITIONAL_NAHI = rx("""(?<![\p{L}\p{M}\p{N}])(?:nahi|nahin|na|nhi|नहीं|नहि)\s+तो(?![\p{L}\p{M}\p{N}])|(?<![\p{L}\p{M}\p{N}])(?:nahi|nahin|na|nhi)\s+to(?![\p{L}\p{M}\p{N}])""")
+        val NEGATION_SCOPE_BOUNDARY = rx("""(?<![\p{L}\p{M}\p{N}])(?:and|but|also|और|लेकिन)(?![\p{L}\p{M}\p{N}])""")
     }
 }
 
@@ -335,7 +338,7 @@ private val SKIP_POLICE_AFTER = rx(
  * the OTP with our agent on WhatsApp" is the same redirect one clause further on.
  */
 private val SKIP_DELIVERY_SHARE_TO_AGENT = rx(
-    """(?:\bshare\s+only\s+with\s+(?:the\s+)?(?:delivery\s+)?agent\b|""" +
+        """(?:\bshare\s+only\s+with\s+(?:the\s+)?(?:(?:delivery|courier)\s+)?agent\b|""" +
         """\b(?:share|give|hand over|de do|de dena|dedo)\b[^.!?\n]{0,24}?(?:delivery\s+)?otp\b""" +
         """[^.!?\n]{0,32}?\b(?:agent|delivery (?:boy|person|partner)|courier)\b""" +
         """(?!\s*(?:on|par|pe|via|over|through)\b[^.!?\n]{0,14}?""" +
@@ -405,7 +408,7 @@ private val AUTHORITY_RULES: List<Rule> = listOf(
         ),
         skip = SKIP_POLICE_AFTER,
     ),
-)
+) + EXTENDED_AUTHORITY_RULES
 
 // ---------------------------------------------------------------------------------------------
 // Stage 2 — THREAT_OR_REWARD. Alone: LOW/WEAK. Severity discipline lives here, not in fusion.
@@ -495,7 +498,7 @@ private val THREAT_RULES: List<Rule> = listOf(
             ),
         ),
     ),
-) + UTILITY_DISCONNECT_RULES
+) + UTILITY_DISCONNECT_RULES + EXTENDED_THREAT_RULES
 // ---------------------------------------------------------------------------------------------
 // Stage 3 — URGENCY. Alone: LOW/WEAK ("Akele: weak").
 // ---------------------------------------------------------------------------------------------
@@ -520,7 +523,7 @@ private val URGENCY_RULES: List<Rule> = listOf(
             ),
         ),
     ),
-)
+) + EXTENDED_URGENCY_RULES
 
 // ---------------------------------------------------------------------------------------------
 // Stage 4 — SECRECY / isolation. Alone: MEDIUM/MODERATE ("moderate with a claim/threat").
@@ -686,7 +689,7 @@ private val SECRECY_RULES: List<Rule> = listOf(
             rx("""\b(?:akele|akela|alone|अकेले)\b[^.!?\n]{0,20}?\b(?:raho|rahiye|rehna|stay|rakho)\b"""),
         ),
     ),
-)
+) + EXTENDED_SECRECY_RULES
 // ---------------------------------------------------------------------------------------------
 // Stage 5 — ASK, with direction. Non-negated: HIGH/STRONG. Every rule here is negation-guarded, so
 // "OTP kisi ke saath share na karein" stays a warning instead of becoming an ask.
@@ -702,6 +705,7 @@ private val ASK_RULES: List<Rule> = listOf(
         patterns = listOf(
             rx("""\b$OTP_WORD\b[^.!?\n]{0,44}?\b$TELL\b"""),
             rx("""\b$TELL\b[^.!?\n]{0,34}?\b$OTP_WORD\b"""),
+            rx("""\bread\b[^.!?\n]{0,24}?\b(?:otp|verification code|security code)\b[^.!?\n]{0,20}?\b(?:to me|over the phone|on this call)\b"""),
             rx("""\b(?:otp|pin|cvv|password|code)\b[^.!?\n]{0,22}?\b(?:daal|enter|type|likh|forward|reply)\w*\b"""),
         ),
         askType = AskType.OTP_PIN,
@@ -718,10 +722,7 @@ private val ASK_RULES: List<Rule> = listOf(
             rx("""(?:₹|rs\.?|inr)\s?\d[\d,]*[^.!?\n]{0,40}?\b$SEND_MONEY\b"""),
             rx("""\b\d{3,}[\d,]*[^.!?\n]{0,40}?\b$SEND_MONEY\b"""),
             rx("""\b(?:paise|paisa|money|amount|rakam|rupees|rupaye|rupya)\b[^.!?\n]{0,40}?\b$SEND_MONEY\b"""),
-            rx(
-                """\b(?:processing|registration|clearance|service|file|security|advance|refundable|customs|gst|""" +
-                    """penalty|challan|court)\s?(?:fee|fees|charges?|deposit|duty|amount)\b""",
-            ),
+            rx("""\b(?:pay|transfer|send|deposit)\b[^.!?\n]{0,48}?(?:₹\s?\d{3,}|\b(?:rs\.?|inr)\s?\d{3,}|\b\d{3,})"""),
             rx("""\b$SEND_MONEY\b[^.!?\n]{0,24}?\b(?:paise|paisa|money|amount|fee|fees|deposit|rupaye)\b"""),
             rx("""$MONEY_CUE[^.!?\n]{0,26}?\b(?:chahiye|maango|mang rahe|demand|need)\b"""),
             rx("""\b(?:qr|upi)\b[^.!?\n]{0,28}?\bscan\w*\b|\bscan\w*\b[^.!?\n]{0,28}?\b(?:qr|upi)\b"""),
@@ -788,11 +789,13 @@ private val ASK_RULES: List<Rule> = listOf(
                 """\b(?:card|aadhaar|aadhar|account)\b[^.!?\n]{0,18}?\b(?:number|no|details)\b""" +
                     """[^.!?\n]{0,18}?\b(?:batao|bhejo|share|send|daal)\w*\b""",
             ),
+            rx("""\b(?:send|share|tell|read out)\b[^.!?\n]{0,24}?\b(?:seed phrase|recovery phrase|private key|wallet password)\b"""),
+            rx("""\b(?:seed phrase|recovery phrase|private key|wallet password)\b[^.!?\n]{0,24}?\b(?:send|share|tell|read out|provide)\b"""),
         ),
         askType = AskType.PERSONAL_INFO,
         guarded = true,
     ),
-) + UTILITY_SERVICE_ASK_RULES
+) + UTILITY_SERVICE_ASK_RULES + EXTENDED_ASK_RULES
 
 // ---------------------------------------------------------------------------------------------
 // Analyzer-directed manipulation ("prompt injection") is DATA, never an instruction. It becomes

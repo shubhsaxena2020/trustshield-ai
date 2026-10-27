@@ -109,8 +109,8 @@ object DetectionFixtures {
         text: String,
     ) = Fixture(id, family, language, FixtureKind.LEGITIMATE, RiskLabel.LOW_RISK, LEGIT_TWIN, text)
 
-    /** Every row, in family order. 47 total: 28 scam and 19 legitimate, including probes and controls. */
-    val rows: List<Fixture> = listOf(
+    /** Original locked rows: 47 total (28 scam, 19 legitimate), including probes and controls. */
+    private val establishedRows: List<Fixture> = listOf(
 
         // ---------------------------------------------------------------------------------------
         // 1. KYC link + OTP
@@ -548,4 +548,7 @@ object DetectionFixtures {
             text = OTP_NOTICE,
         ),
     )
+
+    /** 120 additional synthetic, labeled cases for the ten screening scam families. */
+    val rows: List<Fixture> = establishedRows + DetectionExpansion.rows
 }
