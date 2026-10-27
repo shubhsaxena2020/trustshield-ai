@@ -339,6 +339,18 @@ class CallSpeechSessionTest {
     }
 
     @Test
+    fun unavailableRecognitionLanguageCanRetryWithFallback() {
+        val (session, _) = listeningSession()
+
+        val event = session.onRecognizerError(RecognizerErrorCode.LANGUAGE_UNAVAILABLE)
+
+        assertEquals(
+            SpeechEvent.Failed(ErrorReason.NETWORK, retryable = true, code = RecognizerErrorCode.LANGUAGE_UNAVAILABLE),
+            event,
+        )
+    }
+
+    @Test
     fun anUnknownErrorCodeFailsClosedRatherThanSilently() {
         val (session, _) = listeningSession()
 

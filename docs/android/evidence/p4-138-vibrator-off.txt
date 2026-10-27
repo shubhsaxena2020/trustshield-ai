@@ -1,0 +1,4 @@
+Haptics OFF: demo ladder 10 -> 44 -> 52 -> 75/100 reached CRITICAL; the same dumpsys section contained no new ai.trustshield.android vibration after the run (count stayed at 1, timestamped 22:17:27, i.e. the earlier haptics-ON run).
+
+Only entry present after the haptics-OFF run (unchanged from the haptics-ON run):
+10-26 22:17:27.087 |   effect |             finished | duration:    36ms | usage: TOUCH | ai.trustshield.android (uid=10216, deviceId=0) | reason: performHapticFeedback(constant=0): ViewRootImpl#performHapticFeedback | played: Prebaked=HEAVY_CLICK(MEDIUM, with fallback)

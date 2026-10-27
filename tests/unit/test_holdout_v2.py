@@ -11,9 +11,16 @@ import pytest
 from scripts.prepare_holdout_v2 import PREVIOUS_HOLDOUT_SHA256, audit_quality_check, prepare_holdout_v2
 
 
+RAW_HOLDOUT = Path(__file__).resolve().parents[2] / "datasets" / "raw" / "holdout_v2"
+RAW_HOLDOUT_READY = (
+    (RAW_HOLDOUT / "codex_holdout2.jsonl").is_file()
+    and any((RAW_HOLDOUT / "mendeley_financial_scams" / "extracted").rglob("*.csv"))
+    and (RAW_HOLDOUT / "reportsmishing" / "final_dataset_output.csv").is_file()
+    and (RAW_HOLDOUT / "reportsmishing" / "LICENSE.txt").is_file()
+)
 needs_raw_holdout = pytest.mark.skipif(
-    not (Path(__file__).resolve().parents[2] / "datasets" / "raw" / "holdout_v2").exists(),
-    reason="raw v2 holdout sources are not part of the published tree")
+    not RAW_HOLDOUT_READY,
+    reason="RAW_HOLDOUT_ARTIFACTS_MISSING: required private raw source files are absent; no dataset was downloaded.")
 
 
 def _row(text: str, *, row_id: str, source: str = "toy-synthetic", binary: str = "legitimate", category: str = "legitimate") -> dict:

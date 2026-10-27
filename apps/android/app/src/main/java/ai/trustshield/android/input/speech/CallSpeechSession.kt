@@ -397,7 +397,8 @@ class CallSpeechSession(
             RecognizerErrorCode.NO_MATCH, RecognizerErrorCode.SPEECH_TIMEOUT -> null
             RecognizerErrorCode.RECOGNIZER_BUSY -> ErrorReason.BUSY
             RecognizerErrorCode.INSUFFICIENT_PERMISSIONS -> ErrorReason.NO_PERMISSION
-            RecognizerErrorCode.NETWORK, RecognizerErrorCode.NETWORK_TIMEOUT -> ErrorReason.NETWORK
+            RecognizerErrorCode.NETWORK, RecognizerErrorCode.NETWORK_TIMEOUT,
+            RecognizerErrorCode.LANGUAGE_UNAVAILABLE -> ErrorReason.NETWORK
             RecognizerErrorCode.AUDIO -> ErrorReason.AUDIO
             RecognizerErrorCode.SERVER -> ErrorReason.SERVER
             RecognizerErrorCode.CLIENT -> ErrorReason.CLIENT
@@ -444,6 +445,7 @@ object RecognizerErrorCode {
     const val NO_MATCH = 7
     const val RECOGNIZER_BUSY = 8
     const val INSUFFICIENT_PERMISSIONS = 9
+    const val LANGUAGE_UNAVAILABLE = 12
 }
 
 /** Lifecycle of one visible session. `Error` is terminal for that attempt. */

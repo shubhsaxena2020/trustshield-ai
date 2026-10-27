@@ -239,14 +239,14 @@ class StageRules(private val normalizer: TextNormalizer) {
     private companion object {
         const val MODULE = "stage_rules"
         const val SKIP_WINDOW = 24
-        val CLAUSE_BREAKS = charArrayOf('.', ',', '!', '?', ';', '\n', '\r', '|')
+        val CLAUSE_BREAKS = charArrayOf('.', ',', '!', '?', ';', '\n', '\r', '|', '\u0964')
 
         val NEGATION_BEFORE =
-            rx("""(?<![\p{L}\p{N}])(?:mat|na|nahi|nahin|naa|nhi|not|never|dont|don't|do not|मत|नहीं|न)(?![\p{L}\p{N}])""")
+            rx("""(?<![\p{L}\p{M}\p{N}])(?:mat|na|nahi|nahin|naa|nhi|not|never|dont|don't|do not|मत|नहीं|न)(?![\p{L}\p{M}\p{N}])""")
         val NEGATION_AFTER =
-            rx("""(?<![\p{L}\p{N}])(?:mat|na|nahi|nahin|naa|nhi|not|never|dont|don't|मत|नहीं)(?![\p{L}\p{N}])""")
+            rx("""(?<![\p{L}\p{M}\p{N}])(?:mat|na|nahi|nahin|naa|nhi|not|never|dont|don't|मत|नहीं|न)(?![\p{L}\p{M}\p{N}])""")
         val NEGATION_INSIDE = NEGATION_AFTER
-        val CONDITIONAL_NAHI = rx("""(?<![\p{L}\p{N}])(?:nahi|nahin|na|nhi)\s+to(?![\p{L}\p{N}])""")
+        val CONDITIONAL_NAHI = rx("""(?<![\p{L}\p{M}\p{N}])(?:nahi|nahin|na|nhi)\s+to(?![\p{L}\p{M}\p{N}])""")
     }
 }
 
@@ -302,7 +302,7 @@ private const val OTP_WORD =
 private const val TELL =
     "(?:batao|bata do|batado|btao|bataye\\w*|batayen|batana|bata de|share|send|bhejo|bhej do|bhej de|" +
         "bhejna|de do|dedo|dena|provide|tell|type|enter|daal do|daalo|daal|forward|reply|confirm|" +
-        "verify|likho|bol do|bolo|read out|बताओ|बता दो|बताइए|भेजो|भेज दो|शेयर करो)"
+        "verify|likho|bol do|bolo|read out|बताओ|बता दो|बताइए|बताएं|भेजो|भेज दो|भेजें|भेजिए|शेयर करो)"
 
 /** Verbs that move money towards the sender. */
 private const val SEND_MONEY =
@@ -339,7 +339,21 @@ private val SKIP_DELIVERY_SHARE_TO_AGENT = rx(
         """\b(?:share|give|hand over|de do|de dena|dedo)\b[^.!?\n]{0,24}?(?:delivery\s+)?otp\b""" +
         """[^.!?\n]{0,32}?\b(?:agent|delivery (?:boy|person|partner)|courier)\b""" +
         """(?!\s*(?:on|par|pe|via|over|through)\b[^.!?\n]{0,14}?""" +
-        """\b(?:whats\w*|telegram|phone|call|chat|video|app|sms)\b))""",
+        """\b(?:whats\w*|telegram|phone|call|chat|video|app|sms)\b)|""" +
+        """(?:\b(?:डिलीवरी\s+)?(?:otp|ओटीपी)\b[^.!?\n]{0,36}(?:दरवाज़े|दरवाजे)\s+पर[^.!?\n]{0,24}एजेंट\b""" +
+        """(?![^.!?\n]{0,32}(?:फोन|कॉल|व्हाट्सएप|video\s+call))))""",
+)
+
+/**
+ * Protective anti-download advice. A cyber-police or CERT-In advisory that tells the reader **not** to
+ * download an unknown APK names the same two tokens a scam does ("download" + "APK"), so the APK ask
+ * rule would otherwise accuse the warning. The refusal is the verb (`बचें` / "avoid" / "beware"), never
+ * a bare "alert"/"warning", because `"Warning: account band ho jayega, yeh APK install karo"` is a real
+ * scam shape and must keep its ask.
+ */
+private val SKIP_ANTI_DOWNLOAD_ADVICE = rx(
+    """(?:बचें|बचे|बचना|बचाएं|avoid(?:ing)?|beware|do\s+not\s+download|don'?t\s+download|""" +
+        """never\s+download|download\s+mat\s+karo|download\s+na\s+karein)""",
 )
 
 // ---------------------------------------------------------------------------------------------
@@ -423,7 +437,7 @@ private val THREAT_RULES: List<Rule> = listOf(
         strength = Strength.WEAK,
         patterns = listOf(
             rx(
-                """\b(?:arrest\w*|giraftar\w*|गिरफ़्तार|गिरफ्तार|fir\b|एफआईआर|warrant\w*|वारंट|""" +
+                """\b(?:arrest\w*|giraftar\w*|गिरफ़्तार\p{M}*|गिरफ्तार\p{M}*|fir\b|एफआईआर|warrant\w*|वारंट|""" +
                     """non[- ]?bailable|money laundering|मनी लॉन्ड्रिंग|drugs? found|drugs? seized|""" +
                     """illegal parcel|court (?:notice|summons|case)|legal action|case (?:registered|darj))\b""",
             ),
@@ -445,8 +459,40 @@ private val THREAT_RULES: List<Rule> = listOf(
                     """guaranteed (?:returns?|profit)|assured (?:returns?|profit)|double (?:your )?money|""" +
                     """won\b|jeet\w*|jeeta|jeeti|लाख|crore|karod)\b""",
             ),
-            rx("""\b\d+\s?%\s?(?:return|returns|profit|monthly|daily)\b"""),
+            rx("""\b\d+\s?%\s?(?:return|returns|profit|monthly|daily|मुनाफा|मुनाफ़ा|रिटर्न|प्रॉफिट)\b"""),
             rx("""\b(?:selected|select ho gaye|congratulations|badhai ho)\b[^.!?\n]{0,30}?\b(?:job|prize|reward|offer)\b"""),
+        ),
+    ),
+    Rule(
+        titleHinglish = "Ghar baithe kamai ka laalach",
+        detail = "Message ghar baithe naukri, roz ki kamai ya 'salary' ka lalach de raha hai. " +
+            "Aise offer ke saath registration fee maangna hi asli scam step hota hai.",
+        severity = Severity.LOW,
+        strength = Strength.WEAK,
+        patterns = listOf(
+            rx(
+                """\b(?:work from home|work-from-home|ghar baithe|घर बैठे|part[- ]?time)\b""" +
+                    """[^.!?\n]{0,30}?\b(?:job|naukri|नौकरी|kaam|काम)\b""",
+            ),
+            rx(
+                """\b(?:job|naukri|नौकरी|kaam|काम|salary|तनख्वाह)\b[^.!?\n]{0,34}?""" +
+                    """\b(?:salary|income|kamai|kamao|kamaye|kamaayen|earn|per day|roz|रोज|""" +
+                    """कमाओ|कमाई|कमाएं|महीना|monthly)\b""",
+            ),
+            rx("""\b(?:roz|रोज|daily|per day)\b[^.!?\n]{0,20}?\b(?:₹|rs\.?|inr|कमाओ|कमाई|earn|kamao|kamai)\b"""),
+        ),
+    ),
+    Rule(
+        titleHinglish = "Warna police/case ki dhamki",
+        detail = "Message 'warna police complaint / case' ki dhamki dekar dabaav banata hai. Asli " +
+            "bank ya department paise wapas maangne ke liye dhamki nahi deta.",
+        severity = Severity.LOW,
+        strength = Strength.WEAK,
+        patterns = listOf(
+            rx(
+                """\b(?:warna|varna|nahi to|नहीं तो|वरना)\b[^.!?\n]{0,30}?""" +
+                    """\b(?:police|पुलिस|complaint|शिकायत|fir\b|एफआईआर|case|केस|legal action|report)\b""",
+            ),
         ),
     ),
 ) + UTILITY_DISCONNECT_RULES + EXTENDED_THREAT_RULES
@@ -462,7 +508,7 @@ private val URGENCY_RULES: List<Rule> = listOf(
         strength = Strength.WEAK,
         patterns = listOf(
             rx(
-                """\b(?:abhi|abhi hi|abhee|turant|तुरंत|foran|फौरन|jaldi|जल्दी|aaj raat|आज रात|""" +
+                """\b(?:abhi|abhi hi|abhee|turant|तुरंत|अभी|अभी ही|foran|फौरन|jaldi|जल्दी|aaj raat|आज रात|""" +
                     """aaj hi|last date(?: hai)? aaj|aaj last date|आज ही|last chance|aakhri mauka|अंतिम मौका|before midnight|midnight se pehle|""" +
                     """final warning|turant karo|abhi karo)\b""",
             ),
@@ -713,11 +759,12 @@ private val ASK_RULES: List<Rule> = listOf(
         severity = Severity.HIGH,
         strength = Strength.STRONG,
         patterns = listOf(
-            rx("""\b(?:download|install)\b[^.!?\n]{0,26}?(?:[\w.-]+\.apk|\bapk\b)"""),
-            rx("""(?:[\w.-]+\.apk|\bapk\b)[^.!?\n]{0,26}?\b(?:download|install)\b"""),
+            rx("""\b(?:download|install|डाउनलोड|इंस्टॉल)\b[^.!?\n]{0,26}?(?:[\w.-]+\.apk|\bapk\b)"""),
+            rx("""(?:[\w.-]+\.apk|\bapk\b)[^.!?\n]{0,26}?\b(?:download|install|डाउनलोड|इंस्टॉल)\b"""),
         ),
         askType = AskType.APK_INSTALL,
         guarded = true,
+        skip = SKIP_ANTI_DOWNLOAD_ADVICE,
     ),
     Rule(
         titleHinglish = "Personal detail maangi gayi",
@@ -730,7 +777,8 @@ private val ASK_RULES: List<Rule> = listOf(
                 """\b(?:aadhaar|aadhar|adhaar|आधार|card number|card no|debit card|credit card|atm card|""" +
                     """account number|acc(?:ount)? no|ifsc|date of birth|dob|pan number|pan card|""" +
                     """passport number|16 digit)\b[^.!?\n]{0,32}?""" +
-                    """\b(?:share|bhejo|batao|send|tell|provide|daal|enter|forward|photo|screenshot|whatsapp)\w*\b""",
+                    """\b(?:share|bhejo|batao|send|tell|provide|daal|enter|forward|photo|screenshot|whatsapp|""" +
+                    """भेजें|भेजो|बताएं)\w*\b""",
             ),
             rx(
                 """\b(?:share|bhejo|batao|send|tell|provide|forward|daal)\w*\b[^.!?\n]{0,30}?""" +

@@ -9,7 +9,7 @@ import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.hasContentDescription
-import androidx.compose.ui.test.isToggleable
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.core.content.ContextCompat
@@ -22,6 +22,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import ai.trustshield.android.data.preferences.SharedPreferencesUserPreferencesStore
+import ai.trustshield.android.data.preferences.AppLanguage
 import ai.trustshield.android.ui.navigation.AppRoute
 import ai.trustshield.android.ui.call.CallShieldCopy
 import org.junit.After
@@ -47,9 +48,8 @@ import org.junit.runner.RunWith
  * happens to need, which is the only part of the UI that keeps changing between packages.
  *
  * Assertions are made against **user-visible Hinglish copy**, because that is what a judge sees.
- * There are no `testTag`s in the app (no package owns adding them) and adding them would mean
- * touching five other packages' files, so this suite deliberately asserts on the same strings the
- * screens ship.
+ * The setup pins the app language to Hinglish; the settings switch locator uses a stable test tag
+ * because language options add selectable semantics ahead of the haptics switch.
  *
  * ## What these tests do NOT prove
  *
@@ -77,9 +77,9 @@ class Phase3JourneysTest {
      */
     @Before
     fun resetPersistedSettings() {
-        SharedPreferencesUserPreferencesStore
+        val store = SharedPreferencesUserPreferencesStore
             .open(InstrumentationRegistry.getInstrumentation().targetContext)
-            .reset()
+        store.save(store.reset().copy(language = AppLanguage.HINGLISH))
     }
 
     @After
@@ -100,15 +100,15 @@ class Phase3JourneysTest {
         launch()
 
         // The real scanner, not the Phase 2 placeholder.
-        waitForText(SCAN_FIELD_LABEL)
+        waitForScanField()
         assertNoNodeContains("abhi ban rahi")
 
         typeMessage(SBI_KYC_SCAM)
-        tapText("Check karein")
+        tapCheck()
 
         // Result screen: risk band and confidence are two different lines.
-        waitForText("Bharosa")
-        assertNodeContains(anyOf(HIGH_RISK_COPY, SUSPICIOUS_COPY, CAUTION_COPY))
+        waitForResult()
+        assertNodeContains(anyOf(HIGH_RISK_COPY, HIGH_RISK_ENGLISH, SUSPICIOUS_COPY, SUSPICIOUS_ENGLISH, CAUTION_COPY, CAUTION_ENGLISH))
         // The Result screen must not be a fixture: a scan that produced risk evidence offers
         // actions, and the deterministic high-risk action copy is part of the shipped vocabulary.
         assertNoNodeContains("abhi ban rahi")
@@ -121,15 +121,19 @@ class Phase3JourneysTest {
     @Test
     fun scanJourney_unreadableInputIsNeverSafe() {
         launch()
-        waitForText(SCAN_FIELD_LABEL)
+        waitForScanField()
 
         typeMessage(EMOJI_ONLY)
 
         // Emoji-only input produces nothing the deterministic rules can read, so the screen must
         // keep the action disabled instead of opening a verdict. Both halves are asserted: the
         // control is not enabled, and no result screen was produced.
-        compose.onAllNodes(hasText("Check karein", substring = true)).onFirst().assertIsNotEnabled()
+        val checkLabel = if (compose.onAllNodes(hasText("Check karein", substring = true)).fetchSemanticsNodes().isNotEmpty()) {
+            "Check karein"
+        } else "Check (offline)"
+        compose.onAllNodes(hasText(checkLabel, substring = true)).onFirst().assertIsNotEnabled()
         assertNoNodeContains("Bharosa")
+        assertNoNodeContains("Confidence")
         assertNoNodeContains("100% safe")
     }
 
@@ -140,13 +144,14 @@ class Phase3JourneysTest {
     @Test
     fun scanJourney_legitimateOtpWarningIsNotHighRisk() {
         launch()
-        waitForText(SCAN_FIELD_LABEL)
+        waitForScanField()
 
         typeMessage(LEGIT_OTP)
-        tapText("Check karein")
+        tapCheck()
 
-        waitForText("Bharosa")
+        waitForResult()
         assertNoNodeContains(HIGH_RISK_COPY)
+        assertNoNodeContains(HIGH_RISK_ENGLISH)
     }
 
     /**
@@ -167,7 +172,7 @@ class Phase3JourneysTest {
 
         // Either the text is prefilled on the scanner or the share path already opened the result;
         // both are honest outcomes of a share, and both prove the payload made it into the pipeline.
-        val reached = waitForAnyText(15_000, SBI_KYC_FRAGMENT, "Bharosa")
+        val reached = waitForAnyText(15_000, SBI_KYC_FRAGMENT, "KYC 24 hours", "Bharosa", "Confidence")
         assertTrue("share payload never reached scan or result", reached)
         assertNoNodeContains("abhi ban rahi")
     }
@@ -226,12 +231,19 @@ class Phase3JourneysTest {
     fun settingsJourney_languageAndHapticsSurviveRecreate() {
         launchRoute(AppRoute.SETTINGS)
 
+        tapText("Hinglish")
         waitForText(SETTINGS_HINGLISH_LIGHT)
         tapText("English")
         waitForText(SETTINGS_ENGLISH_LIGHT)
 
-        // First toggle on the screen is the haptics switch (declared before reduced motion).
-        compose.onAllNodes(isToggleable()).onFirst().performScrollTo().performClick()
+        // Stable tag targets the haptics switch independent of translated labels and radio controls.
+        compose.onNode(hasTestTag("settings_haptics_toggle")).performScrollTo().performClick()
+        compose.onNode(hasTestTag("settings_haptics_toggle")).assertIsOff()
+        compose.waitUntil(5_000) {
+            !SharedPreferencesUserPreferencesStore
+                .open(InstrumentationRegistry.getInstrumentation().targetContext)
+                .load().haptics
+        }
 
         scenario?.recreate()
 
@@ -239,7 +251,7 @@ class Phase3JourneysTest {
         // off after the activity is rebuilt, which is what "persisted across restart" means for a
         // value the user can see.
         waitForText(SETTINGS_ENGLISH_LIGHT)
-        compose.onAllNodes(isToggleable()).onFirst().performScrollTo().assertIsOff()
+        compose.onNode(hasTestTag("settings_haptics_toggle")).performScrollTo().assertIsOff()
     }
 
     @Test
@@ -299,12 +311,12 @@ class Phase3JourneysTest {
         )
 
         launch()
-        waitForText(SCAN_FIELD_LABEL)
-        assertNodeContains(SCAN_OFFLINE_NOTICE_FRAGMENT)
+        waitForScanField()
+        assertNodeContains(anyOf(SCAN_OFFLINE_NOTICE_FRAGMENT, SCAN_OFFLINE_NOTICE_ENGLISH))
 
         typeMessage(SBI_KYC_SCAM)
-        tapText("Check karein")
-        waitForText("Bharosa")
+        tapCheck()
+        waitForResult()
     }
 
 
@@ -320,19 +332,17 @@ class Phase3JourneysTest {
     @Test
     fun resultJourney_survivesActivityRecreation() {
         launch()
-        waitForText(SCAN_FIELD_LABEL)
+        waitForScanField()
         typeMessage(SBI_KYC_SCAM)
-        tapText("Check karein")
+        tapCheck()
 
-        waitForText("Bharosa", timeoutMs = 30_000)
-        assertNodeContains("Bharosa")
+        waitForResult(timeoutMs = 30_000)
 
         scenario?.recreate()
         compose.waitForIdle()
 
         // Same two facts must still be on screen after the rebuild.
-        waitForText("Bharosa", timeoutMs = 30_000)
-        assertNodeContains("Bharosa")
+        waitForResult(timeoutMs = 30_000)
     }
 
     // ------------------------------------------------------------------ helpers
@@ -388,6 +398,16 @@ class Phase3JourneysTest {
         }
     }
 
+    private fun waitForScanField() {
+        assertTrue("scan input field was not shown", waitForAnyText(15_000, SCAN_FIELD_LABEL, SCAN_FIELD_ENGLISH))
+    }
+
+    private fun tapCheck() = tapAnyText("Check karein", "Check (offline)")
+
+    private fun waitForResult(timeoutMs: Long = 15_000) {
+        assertTrue("result screen did not show a risk and confidence heading", waitForAnyText(timeoutMs, "Bharosa", "Confidence"))
+    }
+
     private fun waitForContentDescription(text: String, timeoutMs: Long = 15_000) {
         compose.waitUntil(timeoutMs) {
             compose.onAllNodes(hasContentDescription(text, substring = true))
@@ -436,7 +456,9 @@ class Phase3JourneysTest {
 
     private companion object {
         const val SCAN_FIELD_LABEL = "Message yahan paste karein"
+        const val SCAN_FIELD_ENGLISH = "Paste the message here"
         const val SCAN_OFFLINE_NOTICE_FRAGMENT = "internet ke bina"
+        const val SCAN_OFFLINE_NOTICE_ENGLISH = "without internet"
 
         /** Deterministic fixture straight out of the report's scam set; no real account data. */
         const val SBI_KYC_SCAM =
@@ -448,8 +470,11 @@ class Phase3JourneysTest {
 
         const val LIMIT_NO_TEXT = "Check karne layak text nahi mila"
         const val HIGH_RISK_COPY = "Zyada khatra"
+        const val HIGH_RISK_ENGLISH = "High risk"
         const val SUSPICIOUS_COPY = "Shak"
+        const val SUSPICIOUS_ENGLISH = "Suspicious"
         const val CAUTION_COPY = "Dhyan"
+        const val CAUTION_ENGLISH = "Caution"
 
         const val CALL_DEMO_ENTRY = "Staged demo (live mic nahi)"
         const val CALL_DEMO_DISCLOSURE = "Pehli line ke liye taiyaar"

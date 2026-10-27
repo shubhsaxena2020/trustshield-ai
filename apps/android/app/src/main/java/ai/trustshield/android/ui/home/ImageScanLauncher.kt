@@ -53,6 +53,9 @@
  */
 package ai.trustshield.android.ui.home
 
+import ai.trustshield.android.data.preferences.AppLanguage
+import ai.trustshield.android.ui.theme.ToneCopy
+
 import ai.trustshield.android.core.analysis.LocalScanPipeline
 import ai.trustshield.android.core.analysis.ScanOutcome
 import ai.trustshield.android.core.model.RiskLabel
@@ -203,8 +206,12 @@ enum class ImageScanError(
     /** Copy for the language the user chose (Hinglish is the default, never the fallback). */
     fun message(english: Boolean): String = if (english) messageEnglish else messageHinglish
 
+    fun message(language: AppLanguage): String = ToneCopy(messageHinglish, messageEnglish).forLanguage(language)
+
     /** "What to do next" for the language the user chose. */
     fun nextStep(english: Boolean): String = if (english) nextStepEnglish else nextStepHinglish
+
+    fun nextStep(language: AppLanguage): String = ToneCopy(nextStepHinglish, nextStepEnglish).forLanguage(language)
 
     /** Diagnostics stay content-free, so the printed value is the stable code. */
     override fun toString(): String = "ImageScanError($code)"

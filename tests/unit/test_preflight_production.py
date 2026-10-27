@@ -1,6 +1,14 @@
+from pathlib import Path
+
 import pytest
 
 from scripts import preflight
+
+V3_ARTIFACT = Path(__file__).resolve().parents[2] / "models" / "trained" / "trustshield_text_v3.joblib"
+MODEL_REQUIRED = pytest.mark.skipif(
+    not V3_ARTIFACT.is_file(),
+    reason="MODEL_ARTIFACT_MISSING: trustshield_text_v3.joblib is required for a healthy-model production preflight; no model was downloaded.",
+)
 
 GOOD = {
     "TRUSTSHIELD_ENV": "production",
@@ -31,6 +39,7 @@ def _failures():
     return {item["check"] for item in preflight.results if item["status"] == "FAIL"}
 
 
+@MODEL_REQUIRED
 def test_valid_production_configuration_passes_deployment_checks():
     preflight.check_production(None)
     failed = _failures()
