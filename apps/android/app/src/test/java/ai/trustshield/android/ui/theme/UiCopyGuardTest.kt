@@ -22,14 +22,14 @@ class UiCopyGuardTest {
                             val copyEnd = closingParen(body, copy.range.last)
                             if (copyEnd < 0) null else copy.range.first..copyEnd
                         }.toList()
-                        stringLiterals.findAll(body).filterNot { literal ->
-                            val value = literal.groupValues[1]
-                            value in exactQuoteAllowList || copyRanges.any { literal.range.first in it } ||
+                        visibleStringLiterals(body).asSequence().filterNot { (offset, value) ->
+                            value in exactQuoteAllowList || value == "{id}" ||
+                                copyRanges.any { offset in it } ||
                                 !value.replace(Regex("\\\\u[0-9a-fA-F]{4}"), "").any { it.isLetterOrDigit() } ||
                                 Regex("^\\$\\{?[A-Za-z0-9_.]+}?$").matches(value)
-                        }.map { literal ->
-                            val offset = openParen + 1 + literal.range.first
-                            "${file.relativeTo(main)}:${source.take(offset).count { it == '\n' } + 1}: ${literal.groupValues[1]}"
+                        }.map { (offset, value) ->
+                            val absoluteOffset = openParen + 1 + offset
+                            "${file.relativeTo(main)}:${source.take(absoluteOffset).count { it == '\n' } + 1}: $value"
                         }
                     }
                 }
@@ -56,7 +56,68 @@ class UiCopyGuardTest {
 
     private val composeTextBodies = Regex("""\bText\s*\(""")
     private val copyCalls = Regex("""\b(?:ToneCopy|SettingText|UiCopy)\s*\(""")
-    private val stringLiterals = Regex(""""((?:\\.|[^"\\])*)"""")
+
+    /** Finds visible string content while skipping Kotlin expressions inside `${ ... }`. */
+    private fun visibleStringLiterals(source: String): List<Pair<Int, String>> {
+        val values = mutableListOf<Pair<Int, String>>()
+        var index = 0
+        while (index < source.length) {
+            if (source[index] != '"') {
+                index++
+                continue
+            }
+            val start = index++
+            val literal = StringBuilder()
+            while (index < source.length && source[index] != '"') {
+                when {
+                    source[index] == '\\' -> {
+                        if (index + 5 < source.length && source[index + 1] == 'u') {
+                            val code = source.substring(index + 2, index + 6).toIntOrNull(16)
+                            if (code != null) literal.append(code.toChar())
+                            index += 6
+                        } else {
+                            if (index + 1 < source.length) literal.append(source[index + 1])
+                            index += 2
+                        }
+                    }
+                    source[index] == '$' && index + 1 < source.length && source[index + 1] == '{' -> {
+                        index = skipTemplateExpression(source, index + 2)
+                    }
+                    source[index] == '$' && index + 1 < source.length && (source[index + 1].isLetterOrDigit() || source[index + 1] == '_') -> {
+                        index += 2
+                        while (index < source.length && (source[index].isLetterOrDigit() || source[index] == '_' || source[index] == '.')) index++
+                    }
+                    else -> literal.append(source[index++])
+                }
+            }
+            values += start to literal.toString()
+            if (index < source.length) index++
+        }
+        return values
+    }
+
+    private fun skipTemplateExpression(source: String, start: Int): Int {
+        var depth = 1
+        var index = start
+        var inString = false
+        var escaped = false
+        while (index < source.length && depth > 0) {
+            val char = source[index]
+            if (inString) {
+                if (escaped) escaped = false
+                else if (char == '\\') escaped = true
+                else if (char == '"') inString = false
+            } else {
+                when (char) {
+                    '"' -> inString = true
+                    '{' -> depth++
+                    '}' -> depth--
+                }
+            }
+            index++
+        }
+        return index
+    }
 
     private fun closingParen(source: String, openParen: Int): Int {
         var depth = 0

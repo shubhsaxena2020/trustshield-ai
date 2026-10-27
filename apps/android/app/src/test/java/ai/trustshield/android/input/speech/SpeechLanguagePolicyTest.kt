@@ -29,7 +29,7 @@ class SpeechLanguagePolicyTest {
         assertNull(detector.observeFinal("The caller says send money"))
         assertNull(detector.observeFinal("क A"))
         assertNull(detector.observeFinal("The caller says send money"))
-        assertNull(detector.observeFinal("The caller says send money"))
+        assertEquals(SpeechLanguage.EN_IN, detector.observeFinal("The caller says send money"))
         assertEquals(SpeechLanguage.EN_IN, detector.languageTag)
     }
 

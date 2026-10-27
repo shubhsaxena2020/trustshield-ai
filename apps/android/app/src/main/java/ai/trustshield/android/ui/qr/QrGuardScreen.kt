@@ -649,7 +649,7 @@ private fun CounterPanel(state: QrUiState, lang: QrLanguage, dark: Boolean) {
         val occludedFor = state.occlusion
         Text(
             text = QrStrings.occlusionTimerLabel.text(lang) + ": " +
-                (if (occludedFor != null) (occludedFor.elapsedMs / 1000L).toString() + "s" else "-"),
+                (if (occludedFor != null) (occludedFor.elapsedMs / 1000L).toString() + QrStrings.elapsedSeconds.text(lang) else "-"),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
