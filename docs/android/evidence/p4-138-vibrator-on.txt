@@ -1,0 +1,2 @@
+Recent vibrations:
+10-26 22:17:27.087 |   effect |             finished | duration:    36ms | start: 22:17:27.089 | end: 22:17:27.123 | scale:     NONE (adaptive=1.00) | flags:    0 | usage: TOUCH | ai.trustshield.android (uid=10216, deviceId=0) | reason: performHapticFeedback(constant=0): ViewRootImpl#performHapticFeedback | played: Prebaked=HEAVY_CLICK(MEDIUM, with fallback) | original: null

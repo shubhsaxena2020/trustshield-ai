@@ -188,6 +188,16 @@ class ThemeTest {
     }
 
     @Test
+    fun offlineSpeechBannerUsesReadableDarkThemeText() {
+        val scheme = TsColorSchemes.Dark
+        assertNormalText(
+            "offline speech banner onSurfaceVariant / surface (dark)",
+            scheme.onSurfaceVariant,
+            scheme.surface
+        )
+    }
+
+    @Test
     fun nonTextGraphicsClearThreeToOneInBothThemes() {
         // Brand/risk hues drive icons, left rules and meter fills -> 3:1, not 4.5:1.
         assertNonText("Accent / SurfaceLight", TsTokens.Accent, TsPalette.SurfaceLight)
