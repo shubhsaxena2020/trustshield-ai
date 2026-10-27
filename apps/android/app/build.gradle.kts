@@ -1,3 +1,7 @@
+import java.io.File
+import java.net.URL
+import java.security.MessageDigest
+import java.util.zip.ZipFile
 import java.util.Properties
 
 plugins {
@@ -22,13 +26,14 @@ android {
         versionCode = 1
         versionName = "0.1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        ndk { abiFilters += setOf("arm64-v8a", "x86_64") }
     }
 
     splits {
         abi {
             isEnable = true
             reset()
-            include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+            include("arm64-v8a", "x86_64")
             isUniversalApk = true
         }
     }
@@ -45,7 +50,9 @@ android {
     buildTypes {
         getByName("release") {
             signingConfig = signingConfigs.getByName("release")
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
 
@@ -57,10 +64,44 @@ android {
     buildFeatures { compose = true }
 }
 
+// The 42 MB model is intentionally kept out of Git. This task fetches the pinned Apache-2.0
+// model into the ignored assets directory before packaging; recognition never downloads it.
+val prepareVoskHindiModel by tasks.registering {
+    val modelDir = layout.projectDirectory.dir("src/main/assets/model-hi").asFile
+    outputs.dir(modelDir)
+    doLast {
+        if (File(modelDir, "am/final.mdl").isFile) return@doLast
+        val archive = File(temporaryDir, "vosk-model-small-hi-0.22.zip")
+        val expectedSha256 = "7c50a10866889f0ac21d912c20537a055a597ed09fc1d3e5bcd798f9f0017e48"
+        if (!archive.isFile) {
+            URL("https://alphacephei.com/vosk/models/vosk-model-small-hi-0.22.zip")
+                .openStream().use { input -> archive.outputStream().use { output -> input.copyTo(output) } }
+        }
+        val digest = MessageDigest.getInstance("SHA-256")
+            .digest(archive.readBytes()).joinToString("") { "%02x".format(it) }
+        check(digest == expectedSha256) { "Vosk Hindi model SHA-256 mismatch: $digest" }
+        modelDir.deleteRecursively()
+        modelDir.mkdirs()
+        ZipFile(archive).use { zip ->
+            val prefix = "vosk-model-small-hi-0.22/"
+            zip.entries().asSequence().filterNot { it.isDirectory }.forEach { entry ->
+                require(entry.name.startsWith(prefix) && !entry.name.contains(".."))
+                val target = File(modelDir, entry.name.removePrefix(prefix))
+                target.parentFile?.mkdirs()
+                zip.getInputStream(entry).use { input -> target.outputStream().use { output -> input.copyTo(output) } }
+            }
+        }
+        check(File(modelDir, "am/final.mdl").isFile) { "Vosk Hindi model archive is incomplete" }
+    }
+}
+tasks.named("preBuild").configure { dependsOn(prepareVoskHindiModel) }
+
 dependencies {
+    implementation("com.alphacephei:vosk-android:0.3.75")
     implementation(platform("androidx.compose:compose-bom:2025.04.01"))
     implementation("androidx.activity:activity-compose:1.10.1")
     implementation("androidx.core:core-splashscreen:1.0.1")
+    implementation("androidx.profileinstaller:profileinstaller:1.4.1")
     implementation("androidx.camera:camera-camera2:1.6.2")
     implementation("androidx.camera:camera-lifecycle:1.6.2")
     implementation("androidx.camera:camera-view:1.6.2")
