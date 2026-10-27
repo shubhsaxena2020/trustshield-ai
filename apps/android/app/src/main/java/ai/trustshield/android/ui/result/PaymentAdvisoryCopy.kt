@@ -192,9 +192,9 @@ object PaymentAdvisoryCopy {
         PaymentHintKind.AMOUNT_ROUND_LARGE -> withAmount(
             hint = hint,
             generic = ToneCopy(
-                hinglish = "Bada round figure aam taur par lure hota hai — jaise refund ya fees ke naam par.",
-                english = "A large round figure is a common lure, for example as a refund or a fee.",
-                hindi = "बड़ी गोल रकम अक्सर लुभाने का तरीका होती है — जैसे रिफ़ंड या फ़ीस के नाम पर।"
+                hinglish = "Bada round figure refund ya fees ke naam par lure ke taur par use ho sakta hai. Details check karein.",
+                english = "A large round figure can be used as a lure, for example for a refund or fee. Check the details.",
+                hindi = "बड़ी गोल रकम का इस्तेमाल रिफ़ंड या फ़ीस के नाम पर लुभाने के लिए किया जा सकता है। विवरण जाँचें।"
             ),
             hinglish = "{amount} jaisa bada round figure aam taur par lure hota hai — jaise refund ya fees ke naam par.",
             english = "A large round figure like {amount} is a common lure, for example as a refund or a fee.",

@@ -67,6 +67,37 @@ class QrPayeePaymentBridgeTest {
     }
 
     @Test
+    fun normalizationTrimsAndIgnoresCaseButDoesNotRewriteInternalCharacters() {
+        assertTrue(QrPayeePaymentBridge.matchesRegisteredPayee("	SHOP@OKAXIS	", listOf(payee("shop@okaxis"))))
+        assertFalse(QrPayeePaymentBridge.matchesRegisteredPayee("shop+tag@okaxis", listOf(shop)))
+        assertFalse(QrPayeePaymentBridge.matchesRegisteredPayee("shop.@okaxis", listOf(shop)))
+        assertFalse(QrPayeePaymentBridge.matchesRegisteredPayee("shop@okaxis.evil", listOf(shop)))
+    }
+
+    @Test
+    fun emptyAndInvalidRegistrationEntriesCannotCreateAnEmptyOrBlankMatch() {
+        val registrations = listOf(payee(""), payee("   "), shop)
+        assertFalse(QrPayeePaymentBridge.matchesRegisteredPayee("", registrations))
+        assertFalse(QrPayeePaymentBridge.matchesRegisteredPayee("   ", registrations))
+        assertFalse(QrPayeePaymentBridge.matchesRegisteredPayee("not-registered@ybl", registrations))
+        assertTrue(QrPayeePaymentBridge.matchesRegisteredPayee("shop@okaxis", registrations))
+    }
+
+    @Test
+    fun normalizationDoesNotTreatUnicodeLookalikesAsTheSameIdentifier() {
+        assertFalse(QrPayeePaymentBridge.matchesRegisteredPayee("shоp@okaxis", listOf(shop)))
+    }
+
+    @Test
+    fun comparisonSummaryMasksEvenMalformedAndEmptyRegistrationValues() {
+        val unusual = listOf(payee(""), payee("plainlocal"), payee("***@okaxis"))
+        val summary = QrPayeePaymentBridge.comparisonSummary(unusual)
+        assertEquals("payees=3, masked=[***, pl***, ***@okaxis]", summary)
+        assertFalse(summary.contains("plainlocal"))
+        assertFalse(summary.contains("***@okaxis"))
+    }
+
+    @Test
     fun sameHandleDifferentLocalPartDoesNotMatch() {
         assertFalse(QrPayeePaymentBridge.matchesRegisteredPayee("other@okaxis", listOf(shop)))
         assertFalse(QrPayeePaymentBridge.matchesRegisteredPayee("shop@ybl", listOf(shop)))

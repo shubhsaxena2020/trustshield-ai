@@ -1,6 +1,6 @@
 # Payment advisory (A09)
 
-**Status: implementation present; Result path incomplete; execution unverified.** Static review confirms the parser, deterministic engine, QR Guard bridge, Result card/copy, and optional Result state field exist. `ResultPresenter` does not set `paymentAdvisory`, and no production caller was found connecting parser, bridge, and engine. A Result card is renderable if a caller supplies state but no automatic end-to-end scan path is present. The inspected bridge uses QR Guard's current registered-payee list; durable HMAC-backed storage is not evidenced. No Gradle/unit-test or emulator verification was run by this lane; see the verification table.
+**Status: components and conditional Result rendering present; automatic Result attachment incomplete; execution unverified.** Static review confirms the parser, deterministic engine, QR Guard bridge, Result card/copy, optional Result state field, and `RegisteredPayeeStore` implementation exist. `ResultScreen` renders the card when `state.paymentAdvisory` is non-null, but `ResultPresenter` leaves that field null and no production caller was found connecting parser, bridge, and engine; an automatic end-to-end scan path is therefore not evidenced. The store persists HMAC-SHA256 identifiers and masked values, but accepts an injected salt and no production keystore-backed salt provider/integration was established by this review. No Gradle/unit-test or emulator verification was run by this lane; see the verification table.
 
 Source of truth for types: `apps/android/app/src/main/java/ai/trustshield/android/core/payment/PaymentAdvisoryContract.kt`. If code and this document disagree at review, the code wins and this document gets corrected.
 
@@ -92,7 +92,7 @@ Layering follows `ARCHITECTURE.md` boundaries: `core/payment` stays free of `and
 
 | Check | Status |
 |---|---|
-| Static source review (parser, engine, store, bridge, card, Result field/presenter attachment) | **Reviewed** — found presenter has no automatic attachment path; store implementation exists; no runtime claim implied |
+| Static source review (parser, engine, store, bridge, card, Result field/presenter attachment) | **Reviewed** — conditional ResultScreen card rendering and HMAC-backed store implementation confirmed; presenter leaves the advisory unset, no production end-to-end attachment or keystore-backed salt provider/integration evidenced; no runtime claim implied |
 | JVM unit tests (parser, engine, bridge, result wiring) | **Not run by this lane** — test sources exist, execution belongs to lane lead |
 | Compile (`testDebugUnitTest` / `assembleDebug`) | **Not run by this lane** — pending lane lead gate |
 | Emulator UI path (Result screen showing card, TalkBack text, confirmation line last) | **Not run** — not verified; shared emulator/build use is lead-controlled |

@@ -172,6 +172,55 @@ class RegisteredPayeeStoreTest {
     }
 
     @Test
+    fun `raw payee is absent from public and persisted representations`() {
+        val fake = InMemoryPayeeStore()
+        val store = newStore(fake)
+        val raw = "secret-handle@bank.example"
+        store.register(raw)
+
+        val representations = listOf(
+            fake.values.toString(), fake.values.values.toString(), fake.values.keys.toString(),
+            store.maskedList().toString(), store.count().toString(), store.isEmpty().toString(),
+            store.toString()
+        )
+        for (representation in representations) {
+            assertFalse("representation leaked the raw payee", representation.contains(raw))
+            assertFalse("representation leaked the local handle", representation.contains("secret-handle"))
+        }
+        assertTrue(store.matches(raw))
+        assertEquals(listOf("sec***@bank.example"), store.maskedList())
+    }
+
+    @Test
+    fun `invalid registration exception representations do not echo submitted handle`() {
+        val store = newStore(InMemoryPayeeStore())
+        val rejected = "private-handle-without-at"
+
+        try {
+            store.register(rejected)
+            fail("register accepted malformed identifier")
+        } catch (expected: IllegalArgumentException) {
+            assertFalse(expected.message.orEmpty().contains(rejected))
+            assertFalse(expected.toString().contains(rejected))
+            assertFalse(expected.stackTraceToString().contains(rejected))
+        }
+    }
+
+    @Test
+    fun `store snapshots salt so caller mutation cannot change persisted identifiers`() {
+        val mutableSalt = salt.copyOf()
+        val fake = InMemoryPayeeStore()
+        val store = newStore(fake, mutableSalt)
+        store.register(rawUpi)
+        val originalId = fake.values[RegisteredPayeeStoreKeys.IDS]
+
+        mutableSalt.fill(0)
+
+        assertTrue(store.matches(rawUpi))
+        assertEquals(originalId, fake.values[RegisteredPayeeStoreKeys.IDS])
+    }
+
+    @Test
     fun `persisted ids are 64 hex characters and carry no at sign`() {
         val fake = InMemoryPayeeStore()
         val store = newStore(fake)

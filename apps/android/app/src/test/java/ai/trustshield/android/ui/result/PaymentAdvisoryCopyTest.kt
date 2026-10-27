@@ -134,12 +134,13 @@ class PaymentAdvisoryCopyTest {
     }
 
     @Test
-    fun confirmationHindiIsDevanagariAndNonBlank() {
+    fun confirmationHindiIsPinnedExactlyAndWrittenInDevanagari() {
         val hindi = PaymentAdvisoryCopy.CONFIRMATION.hindi
-        assertTrue("confirmation Hindi must not be blank", hindi.isNotBlank())
+        assertEquals(
+            "अंतिम पुष्टि केवल आपके बैंक SMS या UPI ऐप के लेन-देन इतिहास से ही मिलती है।",
+            hindi
+        )
         assertTrue("confirmation Hindi must be Devanagari", devanagariRatio(hindi) > 0.6)
-        assertTrue(hindi.contains("पुष्टि"))
-        assertTrue("Hindi confirmation must state where confirmation is obtained", hindi.contains("से ही मिलती है"))
     }
 
     @Test

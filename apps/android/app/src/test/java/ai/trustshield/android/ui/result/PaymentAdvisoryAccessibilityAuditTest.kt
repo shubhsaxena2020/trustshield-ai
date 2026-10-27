@@ -96,4 +96,43 @@ class PaymentAdvisoryAccessibilityAuditTest {
         assertEquals(3, confirmationByLanguage.toSet().size)
         assertTrue(PaymentAdvisoryCopy.CONFIRMATION.hinglish.endsWith("."))
     }
+    @Test
+    fun everyVerdictHasDistinctEnglishAndDevanagariCopy() {
+        PaymentAdvisoryVerdict.entries.forEach { verdict ->
+            val copy = PaymentAdvisoryCopy.verdictHeadline(verdict)
+            assertTrue("English copy should be English", copy.english.any { it in 'A'..'Z' })
+            assertTrue("Hindi copy should use Devanagari", copy.hindi.any { it in 'ऀ'..'ॿ' })
+            assertFalse("Hindi copy must not be a Romanized fallback", copy.hindi == copy.hinglish)
+        }
+        val advice = PaymentAdvisoryVerdict.entries.map(PaymentAdvisoryCopy::verdictAdvice)
+        advice.forEach { copy ->
+            assertTrue(copy.english.any { it in 'A'..'Z' })
+            assertTrue(copy.hindi.any { it in 'ऀ'..'ॿ' })
+        }
+    }
+
+    @Test
+    fun disclaimerAndRenderedAccessibleCopyContainNoTemplateMarkers() {
+        val fixedCopy = listOf(PaymentAdvisoryCopy.SECTION_TITLE, PaymentAdvisoryCopy.CONFIRMATION) +
+            PaymentAdvisoryVerdict.entries.flatMap {
+                listOf(PaymentAdvisoryCopy.verdictHeadline(it), PaymentAdvisoryCopy.verdictAdvice(it))
+            }
+        fixedCopy.flatMap(::languages).forEach { text ->
+            assertFalse("unexpanded template marker", text.contains('{') || text.contains('}'))
+        }
+        assertTrue(PaymentAdvisoryCopy.CONFIRMATION.english.endsWith("."))
+        assertTrue(PaymentAdvisoryCopy.CONFIRMATION.hindi.endsWith("।"))
+    }
+
+    @Test
+    fun accessibilityImplementationDoesNotPinTextSizeOrLineCount() {
+        val source = java.io.File(
+            "src/main/java/ai/trustshield/android/ui/result/PaymentAdvisoryCard.kt"
+        ).readText()
+        assertFalse("fixed font sizes opt out of system dynamic type", Regex("\bfontSize\s*=").containsMatchIn(source))
+        assertFalse("line limits can truncate at large font scale", Regex("\b(maxLines|softWrap\s*=\s*false)\b").containsMatchIn(source))
+        assertTrue("advisory text should use scalable Material typography", source.contains("MaterialTheme.typography.bodyMedium"))
+        assertTrue("headline should use scalable Material typography", source.contains("MaterialTheme.typography.titleMedium"))
+    }
+
 }

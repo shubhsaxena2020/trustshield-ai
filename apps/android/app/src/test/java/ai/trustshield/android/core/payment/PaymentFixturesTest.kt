@@ -624,6 +624,43 @@ class PaymentFixturesTest {
     }
 
     @Test
+    fun `benign payment notice stays distinct from an added transfer ask and pressure`() {
+        val benignNotice = rowById("L03")
+        val pressuredAsk = benignNotice.copy(
+            id = "L03-adversarial-ask",
+            note = "same informational credit notice with an added urgent request to return money",
+            messageText = "Rs 5,000 credited. Galti se bheja, abhi turant wapas isi UPI par bhejo. " +
+                "Kisi ko mat batana.",
+        )
+
+        val benign = advise(benignNotice)
+        val adversarial = advise(pressuredAsk)
+
+        assertFalse("L03: an informational incoming-credit notice is not a payment screenshot", benign.isPaymentScreenshot)
+        assertFalse("L03: a credit notice alone must not invent a transfer ask", benign.hints.any {
+            it.kind == PaymentHintKind.URGENCY_PRESSURE
+        })
+        assertTrue("L03-adversarial-ask: the added immediate transfer request must be surfaced", adversarial.hints.any {
+            it.kind == PaymentHintKind.URGENCY_PRESSURE
+        })
+        assertFalse("L03-adversarial-ask: a message is still not a payment screenshot", adversarial.isPaymentScreenshot)
+    }
+
+    @Test
+    fun `receipt screenshot remains non-proof even when its parsed status says success`() {
+        val receipt = rowById("L04")
+        val advisory = advise(receipt)
+
+        assertTrue("L04 fixture should exercise screenshot recognition", advisory.isPaymentScreenshot)
+        assertEquals("L04 fixture status should be parsed from its receipt", PaymentStatus.SUCCESS, advisory.fields.status)
+        assertTrue("L04: a screenshot must always be paired with bank-history confirmation", advisory.confirmationRequired)
+        assertTrue(
+            "L04: success text is not proof and must not be represented as a success/fraud warning",
+            advisory.hints.none { it.kind == PaymentHintKind.URGENCY_PRESSURE },
+        )
+    }
+
+    @Test
     fun `evaluating the same row twice yields the same verdict and hints`() {
         for (row in PaymentFixtures.rows) {
             val first = advise(row)

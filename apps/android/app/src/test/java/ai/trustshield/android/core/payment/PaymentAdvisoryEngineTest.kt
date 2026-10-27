@@ -772,6 +772,28 @@ class PaymentAdvisoryEngineTest {
         assertEquals(PaymentAdvisoryVerdict.CLEAR, advisory.verdict)
     }
 
+    @Test
+    fun `AUDIT urgency cue at character 4000 fires but at 4001 is ignored`() {
+        val cueAtEdge: String = "a".repeat(3_994) + " jaldi"
+        val cuePastEdge: String = "a".repeat(3_995) + " jaldi"
+        assertEquals(4_000, cueAtEdge.length)
+        assertEquals(4_001, cuePastEdge.length)
+
+        val included: PaymentAdvisory = engine.evaluate(
+            input(text = cueAtEdge, fields = fields(utr = "123456789012"),
+                registeredPayeeCount = 1, payeeMatchesRegistered = true)
+        )
+        val excluded: PaymentAdvisory = engine.evaluate(
+            input(text = cuePastEdge, fields = fields(utr = "123456789012"),
+                registeredPayeeCount = 1, payeeMatchesRegistered = true)
+        )
+
+        assertTrue(has(included, PaymentHintKind.URGENCY_PRESSURE))
+        assertEquals(PaymentAdvisoryVerdict.CHECK, included.verdict)
+        assertFalse(has(excluded, PaymentHintKind.URGENCY_PRESSURE))
+        assertEquals(PaymentAdvisoryVerdict.CLEAR, excluded.verdict)
+    }
+
     // ---- verdict table ----------------------------------------------------------------------
 
     @Test
@@ -1012,6 +1034,36 @@ class PaymentAdvisoryEngineTest {
 
         assertTrue(has(atFloor, PaymentHintKind.AMOUNT_ROUND_LARGE))
         assertFalse(has(belowFloor, PaymentHintKind.AMOUNT_ROUND_LARGE))
+    }
+
+    @Test
+    fun `AUDIT large amount boundary changes verdict with unregistered payee`() {
+        val below: PaymentAdvisory = engine.evaluate(
+            input(fields = fields(amountMinor = 499_999L, utr = "123456789012"),
+                registeredPayeeCount = 1, payeeMatchesRegistered = false)
+        )
+        val at: PaymentAdvisory = engine.evaluate(
+            input(fields = fields(amountMinor = 500_000L, utr = "123456789012"),
+                registeredPayeeCount = 1, payeeMatchesRegistered = false)
+        )
+
+        assertFalse(has(below, PaymentHintKind.AMOUNT_LARGE))
+        assertEquals(PaymentAdvisoryVerdict.CHECK, below.verdict)
+        assertTrue(has(at, PaymentHintKind.AMOUNT_LARGE))
+        assertEquals(PaymentAdvisoryVerdict.STOP, at.verdict)
+    }
+
+    @Test
+    fun `AUDIT pending alone is one caution and does not lift CLEAR`() {
+        val advisory: PaymentAdvisory = engine.evaluate(
+            input(fields = fields(status = PaymentStatus.PENDING, utr = "123456789012"),
+                registeredPayeeCount = 1, payeeMatchesRegistered = true)
+        )
+
+        assertEquals(listOf(PaymentHintKind.STATUS_PENDING),
+            advisory.cautions.map { produced -> produced.kind })
+        assertEquals(PaymentAdvisoryVerdict.CLEAR, advisory.verdict)
+        assertTrue(advisory.confirmationRequired)
     }
 
     @Test

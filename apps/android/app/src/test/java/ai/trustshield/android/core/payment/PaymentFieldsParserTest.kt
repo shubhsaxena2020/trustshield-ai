@@ -561,4 +561,73 @@ Total ₹75")
         assertEquals(PaymentStatus.UNKNOWN, fields.status)
         assertEquals("", fields.utr)
     }
+
+    @Test
+    fun `ambiguous unlabelled upi addresses do not invent a payee`() {
+        val fields = parse("₹500\\nmerchant@okaxis\\nsupport@trustshield.ai")
+        assertEquals("", fields.payeeUpi)
+    }
+
+    @Test
+    fun `unsafe upi punctuation is rejected`() {
+        listOf("merchant;@okaxis", "merchant@@okaxis").forEach { candidate ->
+            assertEquals("", parse("Paid to $candidate").payeeUpi)
+        }
+    }
+
+    @Test
+    fun `multiple currency amounts are ambiguous`() {
+        val fields = parse("₹500\\nTotal ₹700")
+        assertNull(fields.amountMinor)
+        assertEquals("", fields.amountRaw)
+    }
+
+    @Test
+    fun `malformed decimal precision is rejected`() {
+        val fields = parse("₹12.345")
+        assertNull(fields.amountMinor)
+        assertEquals("", fields.amountRaw)
+    }
+
+    @Test
+    fun `multiple labelled references are ambiguous`() {
+        assertEquals("", parse("UTR 123456789012\\nRRN 987654321098").utr)
+    }
+
+    @Test
+    fun `malformed and oversized labelled references are rejected`() {
+        assertEquals("", parse("UTR 12345-67890-123").utr)
+        assertEquals("", parse("UTR 12345678901234567890").utr)
+    }
+
+    @Test
+    fun `multiple timestamps do not select an arbitrary time`() {
+        val fields = parse("₹500\\n27 Oct 2026, 9:15 pm\\n28 Oct 2026, 9:15 pm")
+        assertEquals("", fields.timestampRaw)
+        assertNull(fields.timestampEpochMs)
+    }
+
+    @Test
+    fun `malformed timestamp never normalizes overflow components`() {
+        val fields = parse("₹500\\n27/13/2026 25:61")
+        assertEquals("27/13/2026 25:61", fields.timestampRaw)
+        assertNull(fields.timestampEpochMs)
+    }
+
+    @Test
+    fun `toString redacts raw payment identifiers`() {
+        val hostile = "₹500\\nPaid to merchant@okaxis\\nUTR 123456789012"
+        val rendered = parse(hostile).toString()
+        assertFalse(rendered.contains("merchant@okaxis"))
+        assertFalse(rendered.contains("123456789012"))
+        assertFalse(rendered.contains(hostile))
+    }
+
+    @Test
+    fun `uri parameters cannot masquerade as ordinary amount or utr text`() {
+        val fields = parse("upi://pay?pa=merchant@okaxis&pn=Shop&am=₹500&note=UTR%20123456789012")
+        assertNull(fields.amountMinor)
+        assertEquals("", fields.utr)
+        assertEquals("merchant@okaxis", fields.payeeUpi)
+    }
 }

@@ -81,24 +81,27 @@ reconciliation; it does not add execution evidence.
 3. Run one emulator spot check (Result screen with a payment fixture: card visible, hints ordered, confirmation line last, TalkBack reads it) and update the emulator row.
 4. Only then change any status from Not run to Pass. If a row fails, keep it failed and say so.
 
-## Independent review — prior-wave diff and evidence
+## Acceptance checklist and known limitations (static source review)
 
-Review scope: the preceding working-tree diff for the payment engine, parser, payee store, Result card/copy, and associated unit tests, plus this evidence record. Static review only; no tests or build were run.
+This checklist records source inspection only. It is not a build, test, emulator, or device result.
 
-### Review checklist
+### Acceptance checklist
 
-- [ ] Confirm current changes compile and the complete relevant JVM suite passes (lane lead owns Gradle; not run in this review).
-- [ ] Wire parser + registered-payee lookup + bridge + engine into the actual Result presenter; verify a real payment result reaches the card.
-- [ ] Exercise adversarial parser inputs and UPI comparison boundaries after the stricter VPA validation changes.
-- [ ] Verify registered payee persistence, salt lifetime/ownership, and comparison behavior against the intended salted-HMAC contract.
-- [ ] On the shared emulator, verify card visibility, hint order, mandatory confirmation last, and TalkBack reading order.
-- [ ] Keep all verification rows Not run until actual execution evidence is recorded.
+- [x] Advisory contract, parser, deterministic engine, QR bridge, Result card/copy, and nullable Result state field are present in the worktree.
+- [x] Static source shows the card places its mandatory bank/UPI-history confirmation disclaimer after the hints; the disclaimer is a non-settlement-claim.
+- [x] QR bridge compares normalized payee IDs exactly, does not compare printed names, and treats masked IDs as not comparable.
+- [x] `RegisteredPayeeStore` exists and stores HMAC identifiers plus masked display strings; it does not expose raw IDs through its read APIs.
+- [ ] End-to-end Result acceptance: `ResultPresenter` does not set `paymentAdvisory`, and no production caller was found connecting parser, bridge, and engine. The feature is not established as reachable from a real scan.
+- [ ] Policy acceptance: source sets `PAYEE_NAME_SPOOFABLE` to CAUTION and uses a two-caution CHECK threshold. Product-policy reconciliation is still needed; source/test presence is not a policy sign-off.
+- [ ] Privacy architecture acceptance: the store requires a caller-supplied salt (minimum 16 bytes), copies it, and HMACs IDs, but the inspected code does not establish keystore-backed salt provisioning or prove that this store is wired into the advisory/QR path.
+- [ ] Runtime acceptance: no compile, JVM test, emulator UI/TalkBack, or device check was run by this lane. All verification rows remain Not run; annotation counts above are not passed-test counts.
 
-### Outstanding risks and observations
+### Known limitations and follow-up
 
-- **Result wiring remains unverified and appears incomplete:** the earlier static review found `ResultUiState.paymentAdvisory` was not set by the presenter. The reviewed diff does not include presenter changes, so this gap remains outstanding; a renderable card is not evidence of an end-to-end path.
-- **Threshold behavior changed:** the diff makes `PAYEE_NAME_SPOOFABLE` a CAUTION and sets the verdict threshold to two cautions. Reconcile the resulting verdicts (including name-only and combinations of cautions) with the product policy and adversarial fixture expectations; test source additions are not execution evidence.
-- **Parser cleanup/validation needs another pass:** `normaliseUpi` contains a no-op `end`/`Int.MAX_VALUE` block. The new regex has an ASCII-token boundary guard, but malformed OCR/address cases and extraction context still need executed regression coverage; remove or justify the dead block.
-- **RegisteredPayeeStore change is only a defensive salt copy:** this diff does not establish that persisted HMAC storage is wired into the QR/advisory bridge or that the key/salt lifecycle meets the architecture contract. Treat the earlier in-memory registry limitation as unresolved pending review and integration evidence.
-- **Accessibility and localization remain static claims:** changed spoken-description construction and copy do not prove TalkBack order, clipping, or the full localized UI behavior. Emulator verification is still required.
-- **No verification claim:** prior evidence reports no Gradle, JVM, emulator, or device execution. This independent review did not run any either; no tests are claimed as passed.
+- Result presenter wiring is absent; a renderable card and optional state field do not make an end-to-end feature.
+- Store implementation is present, but durable integration and production salt/key lifecycle are not established by this inspection. `ARCHITECTURE.md` requires salted/HMAC-protected identifiers and treats keystore/PIN design as a gate; do not claim that gate has been met.
+- Parser and threshold behavior require executed regression coverage and policy review; this review does not infer correctness from tests on disk.
+- Localization/accessibility claims remain unverified at runtime, including Hindi Devanagari coverage, TalkBack order, clipping, and the confirmation line's actual rendered position.
+- No payment screenshot establishes settlement. The required confirmation text directs users to bank SMS or UPI app history; no success/fraud claim is supported.
+
+Before any verification status is changed, the lane lead should wire or explicitly defer the presenter path, run the permitted Gradle gate and record actual results, then perform the authorized emulator spot check for visibility, ordering, disclaimer-last, and accessibility. No phone/device result is claimed here.
