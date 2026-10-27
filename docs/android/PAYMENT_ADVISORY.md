@@ -1,12 +1,12 @@
 # Payment advisory (A09)
 
-**Status: implementation reviewed; execution unverified.** Static review confirms the parser, deterministic engine, salted-HMAC payee store, QR Guard bridge, Result card/copy, and optional Result state field exist in this worktree. The presenter does **not** attach an advisory automatically, so end-to-end Result wiring is not implemented. No Gradle/unit-test or emulator verification was run by this lane; see the verification table.
+**Status: implementation wired; execution pending.** The Result route now attaches a receipt advisory using the scan's `InputType` provenance and the payees registered in QR Guard during the current app session. QR Guard derives an advisory directly from decoded UPI fields and its current registered-payee list. Both paths render the same localized advisory card. Build and device verification remain pending; see the verification table.
 
 Source of truth for types: `apps/android/app/src/main/java/ai/trustshield/android/core/payment/PaymentAdvisoryContract.kt`. If code and this document disagree at review, the code wins and this document gets corrected.
 
 ## Purpose and scope
 
-The advisory appears on the Result screen when the analysed input looks like a payment screenshot (UPI/PSP receipt: an amount plus at least one of a UPI id, a reference number, or a readable status line), or when the text came out of OCR.
+The advisory appears on the Result screen when the analysed input looks like a payment receipt (an amount plus at least one of a UPI id, a reference number, or a readable status line), or when receipt-shaped text came out of OCR. QR Guard shows it for a decoded UPI QR with a readable payee id, including amount and urgency hints when present.
 
 It answers one question: **does this payment screen deserve a pause?** It never answers — and must never be worded to imply it answers — *"was this money transferred?"*
 
@@ -74,19 +74,13 @@ These are heuristics chosen for the demo, not measured optima. Boundary behaviou
 ## Wiring
 
 ```
-PaymentFieldsParser (core/payment)     pasted text or OCR -> PaymentFields
-        v
-QrPayeePaymentBridge (ui/qr)           registeredPayeeCount + payeeMatchesRegistered
-        v
-PaymentAdvisoryEngine (core/payment)   input -> PaymentAdvisory (hints, verdict)
-        v
-ResultUiState.paymentAdvisory          nullable; null when not a receipt
-        v
-PaymentAdvisoryCard (ui/result)        hints in order, then the mandatory line
-                                       wording from PaymentAdvisoryCopy (ui/result)
+Result: ScanOutcome.inputType + analyzedText -> PaymentFieldsParser -> QrPayeePaymentBridge(current payees)
+        -> PaymentAdvisoryEngine -> ResultUiState.paymentAdvisory -> PaymentAdvisoryCard
+QR:     decoded UPI payload -> UpiQrParser -> PaymentFields + current payees
+        -> PaymentAdvisoryEngine -> QrGuardView.paymentAdvisory -> PaymentAdvisoryCard
 ```
 
-Layering follows `ARCHITECTURE.md` boundaries: `core/payment` stays free of `android.*` and `androidx.compose.*` so parser and engine are plain-JVM testable; Compose and localized copy live in `ui/`. Present in the worktree when this document was written: contract, parser, engine, bridge, card, copy and the `ResultUiState.paymentAdvisory` field. The presenter does not attach an advisory: callers must explicitly build/attach it. The card is renderable from `ResultUiState.paymentAdvisory`, but no end-to-end caller path was found in the reviewed production source.
+Layering follows `ARCHITECTURE.md` boundaries: `core/payment` stays free of `android.*` and `androidx.compose.*` so parser and engine are plain-JVM testable; Compose and localized copy live in `ui/`. Registered payees are passed between routes in memory for the current app session; neither analyzed text nor scanned payload is persisted by this advisory path.
 
 ## Verification status
 

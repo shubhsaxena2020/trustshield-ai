@@ -193,6 +193,18 @@ data class PaymentAdvisory(
             "hints=${hints.map { it.kind }})"
 }
 
+/** Drops parser source fragments before an advisory crosses into longer-lived UI state. */
+fun PaymentAdvisory.maskedForPresentation(): PaymentAdvisory = copy(
+    fields = fields.copy(
+        amountRaw = "",
+        payeeUpi = fields.maskedUpi,
+        payeeName = "",
+        utr = "",
+        statusRaw = "",
+        timestampRaw = ""
+    )
+)
+
 /**
  * Thresholds, in paise. Kept as data so a fixture can pin a boundary instead of guessing, and so
  * sensitivity work can adjust them later without touching rule code.

@@ -11,6 +11,7 @@ import ai.trustshield.android.core.payment.PaymentFields
 import ai.trustshield.android.core.payment.PaymentHint
 import ai.trustshield.android.core.payment.PaymentHintKind
 import ai.trustshield.android.core.payment.PaymentHintSeverity
+import ai.trustshield.android.ui.theme.RiskTone
 import ai.trustshield.android.ui.theme.TrustShieldTheme
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -104,5 +105,23 @@ class PaymentAdvisoryUiPathTest {
                 } + ". " + PaymentAdvisoryCopy.CONFIRMATION.hindi
         ).assertExists()
         compose.onNodeWithText("dem-recipient@upi", useUnmergedTree = true).assertDoesNotExist()
+    }
+
+    @Test
+    fun resultScreenRouteRendersAttachedPaymentAdvisory() {
+        val base = ResultPresenter.build(ResultInput(
+            sourceText = "Paid ₹6,000 to dem***@upi",
+            coverage = InputCoverage.READABLE_SUPPORTED,
+            riskTone = RiskTone.AMBER,
+            confidence = ConfidenceLevel.MEDIUM
+        ))
+        compose.setContent {
+            TrustShieldTheme {
+                ResultScreen(state = base.copy(paymentAdvisory = advisory))
+            }
+        }
+        compose.waitForIdle()
+        compose.onNodeWithText(PaymentAdvisoryCopy.SECTION_TITLE.hinglish).assertExists()
+        compose.onNodeWithText(PaymentAdvisoryCopy.CONFIRMATION.hinglish).assertExists()
     }
 }

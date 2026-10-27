@@ -142,8 +142,7 @@ class QrPayeePaymentBridgeTest {
 
     @Test
     fun qrDataCannotMatchThroughWhitespaceInsideIdOrUriDecorations() {
-        for (candidate in listOf("sh op@okaxis", "shop @okaxis", "shop@okaxis
-", "upi://pay?pa=shop@okaxis")) {
+        for (candidate in listOf("sh op@okaxis", "shop @okaxis", "shop@okaxis\n", "upi://pay?pa=shop@okaxis")) {
             assertFalse("unexpected match for <$candidate>", QrPayeePaymentBridge.matchesRegisteredPayee(candidate, listOf(shop)))
         }
     }
