@@ -3,3 +3,6 @@ node_modules/
 *.tsbuildinfo
 .vercel
 .env*
+
+# The release APK is copied in at deploy time; never commit it.
+/public/downloads/*.apk
