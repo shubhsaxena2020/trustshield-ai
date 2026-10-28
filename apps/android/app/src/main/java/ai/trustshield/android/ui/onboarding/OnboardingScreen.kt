@@ -24,6 +24,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -121,7 +122,7 @@ fun OnboardingScreen(
             )
         }
         if (pager.currentPage < 2) {
-            OutlinedButton(
+            OutlinedButton(colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
                 onClick = onComplete,
                 modifier = Modifier.fillMaxWidth().height(52.dp)
             ) { Text(ToneCopy("Abhi nahi", "Skip", "छोड़ें").forLanguage(resolved)) }
@@ -149,7 +150,7 @@ private fun LanguageChoices(
                     if (selected == option) {
                         Button(onClick = { onSelect(option) }, modifier = Modifier.weight(1f)) { Text(label.forLanguage(language)) }
                     } else {
-                        OutlinedButton(onClick = { onSelect(option) }, modifier = Modifier.weight(1f)) { Text(label.forLanguage(language)) }
+                        OutlinedButton(colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface), onClick = { onSelect(option) }, modifier = Modifier.weight(1f)) { Text(label.forLanguage(language)) }
                     }
                 }
             }

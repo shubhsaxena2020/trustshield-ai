@@ -17,13 +17,13 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.heading
@@ -32,6 +32,9 @@ import androidx.compose.ui.unit.dp
 import ai.trustshield.android.core.model.RiskLabel
 import ai.trustshield.android.data.preferences.AppLanguage
 import ai.trustshield.android.ui.theme.ToneCopy
+import ai.trustshield.android.ui.theme.RiskTone
+import ai.trustshield.android.ui.theme.accent
+import ai.trustshield.android.ui.theme.onSurface
 import ai.trustshield.android.ui.theme.TsTokens
 
 @Composable
@@ -57,7 +60,7 @@ fun HistoryScreen(
                 modifier = Modifier.semantics { heading() }
             )
             if (entries.isNotEmpty()) {
-                TextButton(onClick = onClear, modifier = Modifier.height(TsTokens.MinTouchTarget)) {
+                TextButton(onClick = onClear, modifier = Modifier.height(TsTokens.MinTouchTarget), colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface)) {
                     Text(copy(ToneCopy("Clear all", "Clear all", "सभी हटाएँ")))
                 }
             }
@@ -78,13 +81,15 @@ fun HistoryScreen(
 private fun HistoryRow(item: MetadataCheck, language: AppLanguage) {
     val context = LocalContext.current
     val time = DateFormat.getTimeFormat(context).format(item.checkedAtMillis)
-    val (label, tone) = when (item.verdict) {
-        RiskLabel.LOW_RISK -> ToneCopy("Kam khatra", "Low risk", "कम जोखिम") to Color(0xFF16845B)
-        RiskLabel.CAUTION -> ToneCopy("Dhyan dein", "Caution", "सावधानी") to Color(0xFF8A5000)
-        RiskLabel.SUSPICIOUS -> ToneCopy("Sanket mile", "Suspicious", "संदिग्ध") to Color(0xFFA32D38)
-        RiskLabel.HIGH_RISK -> ToneCopy("Zyada khatra", "High risk", "उच्च जोखिम") to Color(0xFFA32D38)
-        RiskLabel.UNABLE_TO_VERIFY -> ToneCopy("Jaanch nahi ho saki", "Unable to verify", "जाँच नहीं हो सकी") to MaterialTheme.colorScheme.onSurfaceVariant
+    val (label, riskTone) = when (item.verdict) {
+        RiskLabel.LOW_RISK -> ToneCopy("Kam khatra", "Low risk", "कम जोखिम") to RiskTone.GREEN
+        RiskLabel.CAUTION -> ToneCopy("Dhyan dein", "Caution", "सावधानी") to RiskTone.AMBER
+        RiskLabel.SUSPICIOUS -> ToneCopy("Sanket mile", "Suspicious", "संदिग्ध") to RiskTone.RED
+        RiskLabel.HIGH_RISK -> ToneCopy("Zyada khatra", "High risk", "उच्च जोखिम") to RiskTone.RED
+        RiskLabel.UNABLE_TO_VERIFY -> ToneCopy("Jaanch nahi ho saki", "Unable to verify", "जाँच नहीं हो सकी") to RiskTone.NEUTRAL
     }
+    val dotTone = if (riskTone == RiskTone.NEUTRAL) MaterialTheme.colorScheme.onSurfaceVariant else riskTone.accent()
+    val labelTone = if (riskTone == RiskTone.NEUTRAL) MaterialTheme.colorScheme.onSurfaceVariant else riskTone.onSurface()
     Surface(
         color = MaterialTheme.colorScheme.surface,
         shape = RoundedCornerShape(TsTokens.CornerSmall),
@@ -96,9 +101,9 @@ private fun HistoryRow(item: MetadataCheck, language: AppLanguage) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Canvas(Modifier.size(12.dp)) { drawCircle(tone) }
+            Canvas(Modifier.size(12.dp)) { drawCircle(dotTone) }
             Column(Modifier.weight(1f)) {
-                Text(label.forLanguage(language), style = MaterialTheme.typography.titleSmall, color = tone)
+                Text(label.forLanguage(language), style = MaterialTheme.typography.titleSmall, color = labelTone)
                 Text(time, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             item.score?.let { score ->
@@ -115,7 +120,7 @@ private fun HistoryRow(item: MetadataCheck, language: AppLanguage) {
 @Composable
 private fun EmptyHistory(copy: (ToneCopy) -> String) {
     val illustrationFill = MaterialTheme.colorScheme.secondaryContainer
-    val illustrationStroke = MaterialTheme.colorScheme.primary
+    val illustrationStroke = MaterialTheme.colorScheme.onSurface
     Column(
         modifier = Modifier.fillMaxWidth().padding(top = 36.dp),
         horizontalAlignment = Alignment.CenterHorizontally,

@@ -543,7 +543,7 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
             )
         }
         if (networkIsValidated(context)) {
-            OutlinedButton(
+            OutlinedButton(colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
                 onClick = {
                     speechRoute.selectOffline(false)
                     offlineMode = false
@@ -635,7 +635,7 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
         onOpenStagedDemo = { demoOpen = true },
         onTypeTranscript = null
     )
-    OutlinedButton(
+    OutlinedButton(colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
         onClick = { demoOpen = true },
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp).heightIn(min = 48.dp)
     ) {
@@ -656,7 +656,7 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
             },
             colors = ButtonDefaults.outlinedButtonColors(
                 containerColor = if (speechRoute.useOffline) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
-                contentColor = if (speechRoute.useOffline) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.primary,
+                contentColor = if (speechRoute.useOffline) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
             ),
         ) {
             Text(
@@ -784,10 +784,10 @@ private fun CallDemoExperience(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 2.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            TextButton(onClick = onClose, modifier = Modifier.heightIn(min = 48.dp)) {
+            TextButton(colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface), onClick = onClose, modifier = Modifier.heightIn(min = 48.dp)) {
                 Text(ToneCopy("Demo band karein", "Close demo", "\u0921\u0947\u092e\u094b \u092c\u0902\u0926 \u0915\u0930\u0947\u0902").forLanguage(language))
             }
-            TextButton(onClick = onToggleLanguage, modifier = Modifier.heightIn(min = 48.dp)) {
+            TextButton(colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface), onClick = onToggleLanguage, modifier = Modifier.heightIn(min = 48.dp)) {
                 Text(ToneCopy("English", "Hinglish", "हिंग्लिश").forLanguage(language))
             }
         }
@@ -914,13 +914,13 @@ private fun CallDemoExperience(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            OutlinedButton(onClick = onBack, enabled = progress.steps.isNotEmpty(), modifier = Modifier.weight(1f).heightIn(min = 48.dp)) {
+            OutlinedButton(colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface), onClick = onBack, enabled = progress.steps.isNotEmpty(), modifier = Modifier.weight(1f).heightIn(min = 48.dp)) {
                 Text(ToneCopy("Peeche", "Back", "\u092a\u0940\u091b\u0947").forLanguage(language))
             }
             Button(onClick = onAdvance, enabled = !progress.finished, modifier = Modifier.weight(1.25f).heightIn(min = 48.dp)) {
                 Text(ToneCopy("Agli line", "Next line", "\u0905\u0917\u0932\u0940 \u092a\u0902\u0915\u094d\u0924\u093f").forLanguage(language))
             }
-            OutlinedButton(onClick = onReset, modifier = Modifier.weight(1f).heightIn(min = 48.dp)) {
+            OutlinedButton(colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface), onClick = onReset, modifier = Modifier.weight(1f).heightIn(min = 48.dp)) {
                 Text(ToneCopy("Phir se", "Reset", "\u092b\u093f\u0930 \u0938\u0947").forLanguage(language))
             }
         }

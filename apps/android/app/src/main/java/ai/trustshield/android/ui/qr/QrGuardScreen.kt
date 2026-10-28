@@ -32,6 +32,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -243,7 +244,7 @@ private fun LanguageChip(label: ToneCopy, selected: Boolean, onClick: () -> Unit
             Text(label.hinglish, style = MaterialTheme.typography.labelMedium)
         }
     } else {
-        OutlinedButton(onClick = onClick, modifier = minHeight) {
+        OutlinedButton(colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface), onClick = onClick, modifier = minHeight) {
             Text(label.hinglish, style = MaterialTheme.typography.labelMedium)
         }
     }
@@ -410,7 +411,7 @@ private fun ExpectedMerchantPanel(
                     }
                 }
                 if (editable) {
-                    OutlinedButton(
+                    OutlinedButton(colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
                         onClick = { onEvent(QrEvent.RemovePayee(payee.handle)) },
                         modifier = Modifier.heightIn(min = TsTokens.MinTouchTarget)
                     ) {
@@ -500,7 +501,7 @@ private fun ActionRow(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(TsTokens.SpacingSm)
                 ) {
-                    OutlinedButton(
+                    OutlinedButton(colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
                         onClick = { onEvent(QrEvent.Stop) },
                         modifier = Modifier
                             .weight(1f)
@@ -524,7 +525,7 @@ private fun ActionRow(
             }
 
             QrPhase.RE_REGISTER -> {
-                TextButton(
+                TextButton(colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
                     onClick = { onEvent(QrEvent.CloseReRegister) },
                     modifier = Modifier.heightIn(min = TsTokens.MinTouchTarget)
                 ) { Text(QrStrings.pinCancel.text(lang)) }

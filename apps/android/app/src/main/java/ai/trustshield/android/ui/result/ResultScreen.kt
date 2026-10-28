@@ -132,7 +132,7 @@ fun ResultScreen(
         BackendNote(backend = state.backend, language = language)
 
         if (onSpeakResult != null) {
-            OutlinedButton(
+            OutlinedButton(colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
                 onClick = { speechUnavailable = !onSpeakResult() },
                 modifier = Modifier.fillMaxWidth().heightIn(min = TsTokens.MinTouchTarget),
             ) {
@@ -151,7 +151,7 @@ fun ResultScreen(
             }
         }
 
-        OutlinedButton(
+        OutlinedButton(colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
             onClick = onShareResult,
             modifier = Modifier.fillMaxWidth().heightIn(min = TsTokens.MinTouchTarget)
         ) {
@@ -175,7 +175,7 @@ private fun ResultTopBar(
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (onBack != null) {
-            TextButton(
+            TextButton(colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
                 onClick = onBack,
                 modifier = Modifier.heightIn(min = TsTokens.MinTouchTarget)
             ) { Text(ToneCopy("\u2039 Peeche", "\u2039 Back", "\u2039 \u0935\u093e\u092a\u0938").pick(language)) }
@@ -190,7 +190,7 @@ private fun ResultTopBar(
                 .weight(1f)
                 .semantics { contentDescription = state.screenDescription(language, riskScore) }
         )
-        TextButton(
+        TextButton(colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
             onClick = onToggleLanguage,
             modifier = Modifier.heightIn(min = TsTokens.MinTouchTarget).semantics {
                 contentDescription = ResultCopy.LANGUAGE_TOGGLE_DESCRIPTION.pick(language)
@@ -510,7 +510,7 @@ private fun ActionsSection(
                 )
             ) { content() }
         } else {
-            OutlinedButton(onClick = { onAction(action.id) }, modifier = modifier) { content() }
+            OutlinedButton(colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface), onClick = { onAction(action.id) }, modifier = modifier) { content() }
         }
     }
 }

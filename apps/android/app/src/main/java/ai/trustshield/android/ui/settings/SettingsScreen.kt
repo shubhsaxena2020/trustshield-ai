@@ -20,10 +20,13 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -200,7 +203,7 @@ fun SettingsScreen(
 
         Spacer(Modifier.height(TsTokens.SpacingLg))
 
-        OutlinedButton(
+        OutlinedButton(colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
             onClick = { onEvent(SettingsEvent.RequestReset) },
             enabled = !state.isAtDefaults,
             modifier = Modifier
@@ -240,7 +243,7 @@ fun SettingsScreen(
             title = { Text(copy(SettingsCopy.resetDialogTitle)) },
             text = { Text(copy(SettingsCopy.resetDialogBody)) },
             confirmButton = {
-                TextButton(
+                TextButton(colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
                     onClick = { onEvent(SettingsEvent.ConfirmReset) },
                     modifier = Modifier.heightIn(min = TsTokens.MinTouchTarget)
                 ) {
@@ -248,7 +251,7 @@ fun SettingsScreen(
                 }
             },
             dismissButton = {
-                TextButton(
+                TextButton(colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
                     onClick = { onEvent(SettingsEvent.CancelReset) },
                     modifier = Modifier.heightIn(min = TsTokens.MinTouchTarget)
                 ) {
@@ -267,7 +270,7 @@ private fun DeviceCheckPanel(language: AppLanguage) {
     val current = DeviceCheckProbe.snapshot(context, hindiLocale)
 
     SettingsSection(title = ToneCopy("Device check", "Device check").forLanguage(language)) {
-        TextButton(
+        TextButton(colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
             onClick = { expanded = !expanded },
             modifier = Modifier.fillMaxWidth().heightIn(min = TsTokens.MinTouchTarget),
         ) {
@@ -362,7 +365,14 @@ private fun OptionRow(
             .padding(vertical = TsTokens.SpacingXs),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        RadioButton(selected = selected, onClick = null)
+        RadioButton(
+            selected = selected,
+            onClick = null,
+            colors = RadioButtonDefaults.colors(
+                selectedColor = MaterialTheme.colorScheme.onSurface,
+                unselectedColor = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        )
         Spacer(Modifier.width(TsTokens.SpacingMd))
         Column(modifier = Modifier.fillMaxWidth()) {
             Text(
@@ -422,7 +432,16 @@ private fun ToggleRow(
             )
         }
         Spacer(Modifier.width(TsTokens.SpacingMd))
-        Switch(checked = checked, onCheckedChange = null)
+        Switch(
+            checked = checked,
+            onCheckedChange = null,
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = MaterialTheme.colorScheme.onSurface,
+                checkedTrackColor = MaterialTheme.colorScheme.surfaceVariant,
+                uncheckedThumbColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant
+            )
+        )
     }
 }
 
@@ -457,7 +476,7 @@ private fun ResetAppliedBanner(
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.weight(1f)
             )
-            TextButton(
+            TextButton(colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
                 onClick = onDismiss,
                 modifier = Modifier.heightIn(min = TsTokens.MinTouchTarget)
             ) {

@@ -22,6 +22,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -539,11 +540,11 @@ fun ScanScreen(
                         }
                     )
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(TsTokens.SpacingSm)) {
-                        OutlinedButton(
+                        OutlinedButton(colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
                             onClick = { onEvent(ScanInputEvent.PasteRequested(clipboardText())) },
                             modifier = Modifier.weight(1f).heightIn(min = TsTokens.MinTouchTarget).semantics { contentDescription = copy(ScanCopy.pasteActionDescription) }
                         ) { Text(copy(ScanCopy.pasteAction), style = MaterialTheme.typography.labelLarge) }
-                        OutlinedButton(
+                        OutlinedButton(colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
                             onClick = { onEvent(ScanInputEvent.ClearRequested) },
                             enabled = state.canClear,
                             modifier = Modifier.weight(1f).heightIn(min = TsTokens.MinTouchTarget).semantics { contentDescription = copy(ScanCopy.clearActionDescription) }
@@ -566,7 +567,7 @@ fun ScanScreen(
             }
             Text(copy(ScanCopy.privacyNote), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Text(copy(ScanCopy.shareEntryNote), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            OutlinedButton(onClick = onPickImage, modifier = Modifier.fillMaxWidth().heightIn(min = TsTokens.MinTouchTarget).semantics { contentDescription = copy(ScanCopy.imageActionDescription) }) {
+            OutlinedButton(colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface), onClick = onPickImage, modifier = Modifier.fillMaxWidth().heightIn(min = TsTokens.MinTouchTarget).semantics { contentDescription = copy(ScanCopy.imageActionDescription) }) {
                 Text(copy(ScanCopy.imageAction), style = MaterialTheme.typography.labelLarge)
             }
             Text(copy(ScanCopy.imageNote), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -604,7 +605,7 @@ private fun RecentChecks(
     Column(verticalArrangement = Arrangement.spacedBy(TsTokens.SpacingXs)) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
             Text(copy(ToneCopy("Recent checks", "Recent checks", "हाल की जाँच")), style = MaterialTheme.typography.titleSmall, modifier = Modifier.semantics { heading() })
-            if (entries.isNotEmpty()) TextButton(onClick = onClear) { Text(copy(ToneCopy("Clear all", "Clear all", "सभी हटाएँ"))) }
+            if (entries.isNotEmpty()) TextButton(colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface), onClick = onClear) { Text(copy(ToneCopy("Clear all", "Clear all", "सभी हटाएँ"))) }
         }
         if (entries.isEmpty()) {
             Text(copy(ToneCopy("Abhi koi check nahi", "No checks yet", "अभी कोई जाँच नहीं")), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)

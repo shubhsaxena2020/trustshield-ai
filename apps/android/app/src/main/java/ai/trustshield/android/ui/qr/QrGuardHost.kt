@@ -38,6 +38,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -1262,7 +1263,7 @@ private fun SetupCapturePanel(
                 .fillMaxWidth()
                 .heightIn(min = TsTokens.MinTouchTarget)
         ) { Text(QrHostCopy.setupCaptureConfirm.text(lang)) }
-        TextButton(
+        TextButton(colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
             onClick = { session.dismissSetupCapture() },
             modifier = Modifier.heightIn(min = TsTokens.MinTouchTarget)
         ) { Text(QrHostCopy.setupCaptureDismiss.text(lang)) }
@@ -1398,7 +1399,7 @@ private fun DemoButtonRow(
 
 @Composable
 private fun RowScope.DemoButton(label: ToneCopy, onClick: () -> Unit) {
-    OutlinedButton(
+    OutlinedButton(colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
         onClick = onClick,
         modifier = Modifier
             .weight(1f)

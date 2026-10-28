@@ -149,7 +149,7 @@ fun CallShieldScreen(
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold
                         )
-                        TextButton(
+                        TextButton(colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
                             onClick = { showConsentSheet = true },
                             modifier = Modifier.heightIn(min = TsTokens.MinTouchTarget)
                         ) {
@@ -222,7 +222,7 @@ private fun Header(state: CallUiState, onEvent: (CallEvent) -> Unit) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            TextButton(
+            TextButton(colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
                 onClick = {
                     onEvent(
                         CallEvent.SetLanguage(
@@ -293,7 +293,7 @@ private fun WarningBanner(alert: CallAlert, state: CallUiState, onSpeakAlert: ((
                         color = alert.tone.onContainer()
                     )
                     if (onSpeakAlert != null) {
-                        TextButton(
+                        TextButton(colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
                             onClick = { speechUnavailable = !onSpeakAlert() },
                             modifier = Modifier.heightIn(min = TsTokens.MinTouchTarget),
                         ) {
@@ -697,7 +697,7 @@ private fun HeldAlertCard(state: CallUiState, onEvent: (CallEvent) -> Unit) {
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Spacer(Modifier.height(TsTokens.SpacingMd))
-        OutlinedButton(
+        OutlinedButton(colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
             onClick = { onEvent(CallEvent.RetryListening) },
             modifier = Modifier.heightIn(min = TsTokens.MinTouchTarget)
         ) {
@@ -733,7 +733,7 @@ private fun PermissionCard(
                 modifier = Modifier.heightIn(min = TsTokens.MinTouchTarget)
             ) { Text(CallShieldCopy.grantPermission.forLanguage(language)) }
             onTypeTranscript?.let { open ->
-                OutlinedButton(
+                OutlinedButton(colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
                     onClick = open,
                     modifier = Modifier.heightIn(min = TsTokens.MinTouchTarget)
                 ) { Text(CallShieldCopy.typedTranscript.forLanguage(language)) }
@@ -771,7 +771,7 @@ private fun RecognizerCard(
                 ) { Text(CallShieldCopy.typedTranscript.forLanguage(language)) }
             }
             onOpenStagedDemo?.let { open ->
-                OutlinedButton(
+                OutlinedButton(colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
                     onClick = open,
                     modifier = Modifier.heightIn(min = TsTokens.MinTouchTarget)
                 ) { Text(CallShieldCopy.stagedDemo.forLanguage(language)) }
