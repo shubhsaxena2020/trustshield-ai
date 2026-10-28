@@ -44,6 +44,7 @@ import androidx.compose.ui.text.font.FontWeight
 import android.content.Intent
 import android.net.Uri
 import android.content.Context
+import android.app.Activity
 import java.util.Locale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -54,6 +55,8 @@ import android.Manifest
 import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import kotlinx.coroutines.delay
@@ -101,6 +104,7 @@ import ai.trustshield.android.ui.call.withStoredChoices
 import ai.trustshield.android.ui.call.CallStage
 import ai.trustshield.android.ui.call.forLanguage
 import ai.trustshield.android.input.speech.CallSpeechSession
+import ai.trustshield.android.input.speech.Snapshot
 import ai.trustshield.android.input.speech.SpeechSessionCoordinator
 import ai.trustshield.android.input.speech.SpeechCapabilityProbe
 import ai.trustshield.android.input.speech.SpeechCapabilityRules
@@ -158,6 +162,24 @@ val LocalUserPreferences: ProvidableCompositionLocal<UserPreferences> =
 /** Persists a changed [UserPreferences]. Provided by `MainActivity`; a no-op in previews. */
 val LocalPreferencesSink: ProvidableCompositionLocal<(UserPreferences) -> Unit> =
     staticCompositionLocalOf { {} }
+
+/** Keeps the in-memory call host across Activity configuration recreation only. */
+class CallShieldRouteRetainedState : ViewModel() {
+    var session: CallSpeechSession? = null
+    var sessionSnapshot: Snapshot? = null
+    var coordinator: SpeechSessionCoordinator? = null
+    var host: CallShieldHost? = null
+
+    fun clear() {
+        host?.onCleared()
+        host = null
+        coordinator = null
+        session = null
+        sessionSnapshot = null
+    }
+
+    override fun onCleared() { clear() }
+}
 
 /**
  * Result destination host.
@@ -409,13 +431,25 @@ private fun HomeRouteHost(
 @Composable
 fun CallShieldRouteHost(appLanguage: AppLanguage) {
     val context = LocalContext.current
+    val activity = context as? Activity
+    val retained = remember(activity) {
+        val owner = activity as? androidx.lifecycle.ViewModelStoreOwner
+            ?: error("Call Shield requires an Activity ViewModelStoreOwner")
+        ViewModelProvider(owner)[CallShieldRouteRetainedState::class.java]
+    }
     val lifecycleOwner = LocalLifecycleOwner.current
     val tts = remember(context) { AndroidSpokenVerdictTts(context) }
     val spokenVerdict = remember(tts) { SpokenVerdictSpeaker(tts) }
     DisposableEffect(spokenVerdict, tts) {
         onDispose { spokenVerdict.stop(); tts.shutdown() }
     }
-    val session = remember { CallSpeechSession(consentGranted = true) }
+    val session = retained.session ?: remember {
+        CallSpeechSession(consentGranted = true).also { created ->
+            retained.sessionSnapshot?.let(created::restore)
+            retained.sessionSnapshot = null
+            retained.session = created
+        }
+    }
     DisposableEffect(tts, session) {
         tts.onSpeakingChanged = session::setInputSuppressed
         onDispose {
@@ -444,13 +478,13 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
     var capability by remember {
         mutableStateOf(SpeechCapabilityRules.evaluate(SpeechCapabilityProbe.probe(context), selectedSpeechTag))
     }
-    val coordinator = remember(session) {
+    val coordinator = retained.coordinator ?: remember(session) {
         lateinit var created: SpeechSessionCoordinator
         val handler = android.os.Handler(android.os.Looper.getMainLooper())
         created = SpeechSessionCoordinator(session, { delay, action -> handler.postDelayed(action, delay) }) { _ ->
             if (speechRoute.useOffline) {
                 VoskSpeechRecognizerHandle(
-                    context = context,
+                    context = context.applicationContext,
                     onPartial = { text -> handler.post { created.onPartialUtterance(text) } },
                     onFinal = { text -> handler.post { created.onUtterance(text) } },
                     onFailure = { handler.post { offlineFailureAction?.invoke() ?: created.stop() } },
@@ -458,7 +492,7 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
                 ).also { offlineMode = true }
             } else {
                 AndroidSpeechRecognizerHandle(
-                    context, session, capability, recognitionLanguageState.value,
+                    context.applicationContext, session, capability, recognitionLanguageState.value,
                     preferOffline = prefs.voiceRecognition != VoiceRecognitionChoice.ONLINE_PREFERRED,
                     finalResultListener = { text, confidence -> created.onPlatformFinalResult(text, confidence) },
                 ) { code ->
@@ -480,8 +514,9 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
             }
         }
         created
-    }
-    val host = remember(coordinator) { CallShieldHost(coordinator) }.also { hostRef.value = it }
+    }.also { retained.coordinator = it }
+    val host = retained.host ?: remember(coordinator) { CallShieldHost(coordinator) }.also { retained.host = it }
+    hostRef.value = host
     // Issue #138. `CallShieldHost` owns the call session, not the user's presentation choices, and
     // it is built before this screen reads any preference — so `host.state` always carries
     // `CallUiState`'s defaults (HINGLISH, haptics on). Copying it verbatim (start / stop / pause /
@@ -499,7 +534,13 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
     val storedReducedMotion by rememberUpdatedState(prefs.reducedMotion)
     fun synced(from: CallUiState): CallUiState =
         from.withStoredChoices(storedLanguage, storedHaptics, storedReducedMotion)
-    var consent by remember { mutableStateOf(SpeechConsent.initial()) }
+    var consent by remember(host) {
+        mutableStateOf(
+            if (host.state.consent == ai.trustshield.android.ui.call.ConsentState.GIVEN) {
+                SpeechConsent.initial().grant()
+            } else SpeechConsent.initial()
+        )
+    }
     var micGranted by remember {
         mutableStateOf(ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED)
     }
@@ -773,7 +814,8 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(observer)
             session.setUtteranceSink(null)
-            host.onCleared()
+            retained.sessionSnapshot = session.snapshot()
+            if (activity?.isChangingConfigurations != true) retained.clear()
         }
     }
     LaunchedEffect(host) {
@@ -1034,9 +1076,9 @@ fun SettingsRouteHost() {
                 "Voice self-test is not available yet.",
                 "Voice self-test अभी उपलब्ध नहीं है।",
             ).forLanguage(prefs.language)
-        }
+        },
+        voiceMessage = voiceMessage
     )
-    voiceMessage?.let { Text(it, modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.bodySmall) }
 }
 
 /**

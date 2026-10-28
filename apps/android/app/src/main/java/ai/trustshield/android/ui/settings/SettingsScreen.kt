@@ -79,6 +79,7 @@ fun SettingsScreen(
     onEvent: (SettingsEvent) -> Unit,
     onPlayVoiceSample: () -> Unit = {},
     onVoiceSelfTest: () -> Unit = {},
+    voiceMessage: String? = null,
     modifier: Modifier = Modifier
 ) {
     val copy: (SettingText) -> String = { state.text(it) }
@@ -209,6 +210,7 @@ fun SettingsScreen(
                 onClick = onVoiceSelfTest,
                 modifier = Modifier.fillMaxWidth().heightIn(min = TsTokens.MinTouchTarget)
             ) { Text(ToneCopy("Voice self-test", "Voice self-test", "Voice self-test").forLanguage(state.language)) }
+            voiceMessage?.let { SupportingNote(it) }
         }
 
         // ---- Sensitivity ---------------------------------------------------------------------
