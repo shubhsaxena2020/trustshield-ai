@@ -52,8 +52,12 @@ android {
     buildTypes {
         getByName("release") {
             signingConfig = signingConfigs.getByName("release")
-            isMinifyEnabled = true
-            isShrinkResources = true
+            // R8 minification is OFF on purpose: with it on, the release build rendered a blank screen on
+            // Android 9 (API 28) because Compose text layout referenced android.text.Layout$TextInclusionStrategy
+            // (API 35) unguarded after optimisation (NoClassDefFoundError, found on a real Redmi Note 5 Pro, not
+            // reproducible on the API 36 emulator). Re-enable only together with a test on an API 26-28 device.
+            isMinifyEnabled = false
+            isShrinkResources = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
