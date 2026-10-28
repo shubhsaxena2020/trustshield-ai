@@ -4,6 +4,7 @@ import ai.trustshield.android.data.preferences.AppLanguage
 import ai.trustshield.android.data.preferences.Sensitivity
 import ai.trustshield.android.data.preferences.ThemeMode
 import ai.trustshield.android.data.preferences.UserPreferences
+import ai.trustshield.android.data.preferences.VoiceRecognitionChoice
 import ai.trustshield.android.data.preferences.resolveLanguage
 import ai.trustshield.android.ui.theme.ToneCopy
 import java.util.Locale
@@ -193,6 +194,9 @@ sealed interface SettingsEvent {
     data class SelectSensitivity(val sensitivity: Sensitivity) : SettingsEvent
     data class SetHaptics(val enabled: Boolean) : SettingsEvent
     data class SetReducedMotion(val enabled: Boolean) : SettingsEvent
+    data class SelectVoiceRecognition(val choice: VoiceRecognitionChoice) : SettingsEvent
+    data class SetSpokenVerdictMuted(val muted: Boolean) : SettingsEvent
+    data class SetSpokenVerdictRate(val rate: Float) : SettingsEvent
 
     /** Opens the reset confirmation. Does not change any preference. */
     data object RequestReset : SettingsEvent
@@ -234,6 +238,19 @@ fun SettingsState.reduce(event: SettingsEvent): SettingsState = when (event) {
             preferences = preferences.copy(reducedMotion = event.enabled),
             notice = SettingsNotice.NONE
         )
+
+    is SettingsEvent.SelectVoiceRecognition -> copy(
+        preferences = preferences.copy(voiceRecognition = event.choice), notice = SettingsNotice.NONE
+    )
+
+    is SettingsEvent.SetSpokenVerdictMuted -> copy(
+        preferences = preferences.copy(spokenVerdictMuted = event.muted), notice = SettingsNotice.NONE
+    )
+
+    is SettingsEvent.SetSpokenVerdictRate -> copy(
+        preferences = preferences.copy(spokenVerdictRate = event.rate.coerceIn(0.75f, 1.25f)),
+        notice = SettingsNotice.NONE
+    )
 
     SettingsEvent.RequestReset ->
         copy(notice = SettingsNotice.RESET_REQUESTED)

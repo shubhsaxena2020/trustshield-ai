@@ -8,7 +8,7 @@ import android.speech.tts.Voice
 import java.util.Locale
 
 /** Thin Android adapter; it selects an installed local voice and never requests a network voice. */
-class AndroidSpokenVerdictTts(context: Context) : SpokenVerdictTts {
+class AndroidSpokenVerdictTts(private val context: Context) : SpokenVerdictTts {
     @Volatile var onSpeakingChanged: ((Boolean) -> Unit)? = null
     @Volatile
     private var ready = false
@@ -42,6 +42,16 @@ class AndroidSpokenVerdictTts(context: Context) : SpokenVerdictTts {
         return started
     }
 
+    override fun setSpeechRate(rate: Float) {
+        if (ready) engine.setSpeechRate(rate.coerceIn(0.75f, 1.25f))
+    }
+
+    fun installLanguageData() {
+        val install = android.content.Intent(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA)
+            .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+        runCatching { context.applicationContext.startActivity(install) }
+    }
+
     override fun stop() {
         if (ready) engine.stop()
         onSpeakingChanged?.invoke(false)
@@ -58,6 +68,8 @@ class AndroidSpokenVerdictTts(context: Context) : SpokenVerdictTts {
         if (!ready) return null
         val desired = Locale.forLanguageTag(languageTag)
         return runCatching {
+            val available = engine.isLanguageAvailable(desired)
+            if (available < TextToSpeech.LANG_AVAILABLE) return null
             engine.voices.firstOrNull { voice ->
                 voice.locale.language.equals(desired.language, ignoreCase = true) &&
                     voice.locale.country.equals(desired.country, ignoreCase = true) &&

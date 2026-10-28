@@ -24,6 +24,7 @@ class CallShieldOfflineUiTest {
     @get:Rule
     val compose: ComposeTestRule = createEmptyComposeRule()
 
+
     private var scenario: ActivityScenario<MainActivity>? = null
 
     @Before
@@ -58,4 +59,5 @@ class CallShieldOfflineUiTest {
         control.performClick()
         selectedOffline.assertIsSelected()
     }
+
 }

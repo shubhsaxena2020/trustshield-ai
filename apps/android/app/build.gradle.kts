@@ -1,5 +1,7 @@
 import java.io.File
+import java.io.FileOutputStream
 import java.net.URL
+import java.net.HttpURLConnection
 import java.security.MessageDigest
 import java.util.zip.ZipFile
 import java.util.Properties
@@ -73,12 +75,47 @@ val prepareVoskHindiModel by tasks.registering {
         if (File(modelDir, "am/final.mdl").isFile) return@doLast
         val archive = File(temporaryDir, "vosk-model-small-hi-0.22.zip")
         val expectedSha256 = "7c50a10866889f0ac21d912c20537a055a597ed09fc1d3e5bcd798f9f0017e48"
-        if (!archive.isFile) {
-            URL("https://alphacephei.com/vosk/models/vosk-model-small-hi-0.22.zip")
-                .openStream().use { input -> archive.outputStream().use { output -> input.copyTo(output) } }
+        val localZip = providers.gradleProperty("voskModelZip").orNull?.let(::File)
+        if (localZip != null) {
+            check(localZip.isFile) { "voskModelZip does not exist: ${localZip.absolutePath}" }
+            localZip.copyTo(archive, overwrite = true)
+        } else if (!archive.isFile || sha256(archive) != expectedSha256) {
+            val partial = File(temporaryDir, "vosk-model-small-hi-0.22.zip.part")
+            var failure: Exception? = null
+            for (attempt in 0 until 5) {
+                try {
+                    val offset = partial.takeIf(File::isFile)?.length() ?: 0L
+                    val connection = URL("https://alphacephei.com/vosk/models/vosk-model-small-hi-0.22.zip")
+                        .openConnection() as HttpURLConnection
+                    connection.connectTimeout = 30_000
+                    connection.readTimeout = 90_000
+                    if (offset > 0L) connection.setRequestProperty("Range", "bytes=$offset-")
+                    connection.connect()
+                    val append = offset > 0L && connection.responseCode == HttpURLConnection.HTTP_PARTIAL
+                    connection.inputStream.use { input ->
+                        val output = if (append) FileOutputStream(partial, true) else partial.outputStream()
+                        output.use { input.copyTo(it) }
+                    }
+                    connection.disconnect()
+                    partial.copyTo(archive, overwrite = true)
+                    if (sha256(archive) != expectedSha256) {
+                        partial.delete()
+                        archive.delete()
+                        error("Downloaded Vosk model checksum did not match the pinned SHA-256")
+                    }
+                    partial.delete()
+                    failure = null
+                    break
+                } catch (error: Exception) {
+                    failure = error
+                    if (attempt < 4) Thread.sleep(1_000L shl attempt)
+                }
+            }
+            check(failure == null) {
+                "Could not download Vosk Hindi model after 5 attempts. Retry with network, or pass -PvoskModelZip=<path to the verified zip>. Last error: ${failure?.message}"
+            }
         }
-        val digest = MessageDigest.getInstance("SHA-256")
-            .digest(archive.readBytes()).joinToString("") { "%02x".format(it) }
+        val digest = sha256(archive)
         check(digest == expectedSha256) { "Vosk Hindi model SHA-256 mismatch: $digest" }
         modelDir.deleteRecursively()
         modelDir.mkdirs()
@@ -94,6 +131,9 @@ val prepareVoskHindiModel by tasks.registering {
         check(File(modelDir, "am/final.mdl").isFile) { "Vosk Hindi model archive is incomplete" }
     }
 }
+
+fun sha256(file: File): String = MessageDigest.getInstance("SHA-256")
+    .digest(file.readBytes()).joinToString("") { "%02x".format(it) }
 tasks.named("preBuild").configure { dependsOn(prepareVoskHindiModel) }
 
 dependencies {

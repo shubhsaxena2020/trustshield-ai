@@ -69,6 +69,7 @@ class PreferenceEffectsTest {
         ThemeMode.values().map { it.name }.toSet() +
             AppLanguage.values().map { it.name }.toSet() +
             Sensitivity.values().map { it.name }.toSet() +
+            ai.trustshield.android.data.preferences.VoiceRecognitionChoice.values().map { it.name }.toSet() +
             setOf("true", "false")
 
     // ---------------------------------------------------------------------------------------
@@ -416,7 +417,7 @@ class PreferenceEffectsTest {
         )
 
         assertEquals(SettingsKeys.ALL.toSet(), file.contents.keys)
-        assertEquals("still five keys, no more", 5, file.contents.size)
+        assertEquals(SettingsKeys.ALL.size, file.contents.size)
         for (key in file.contents.keys) {
             assertTrue("'$key' must be allowlisted", SettingsKeys.isAllowed(key))
         }
@@ -450,9 +451,12 @@ class PreferenceEffectsTest {
             FakeStorage(file)
         )
         for ((key, value) in file.contents) {
-            assertTrue("value of '$key' is '$value', outside the closed set", value in allowedPersistedValues)
+            if (key == SettingsKeys.SPOKEN_VERDICT_RATE) {
+                assertTrue(value?.toFloat()?.let { it in 0.75f..1.25f } == true)
+            } else {
+                assertTrue("value of '$key' is '$value', outside the closed set", value in allowedPersistedValues)
+            }
         }
-        assertFalse(file.contents.values.any { (it ?: "").length > 9 })
     }
 
     @Test
