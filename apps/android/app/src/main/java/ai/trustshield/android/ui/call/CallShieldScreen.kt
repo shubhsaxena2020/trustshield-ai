@@ -122,8 +122,8 @@ fun CallShieldScreen(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = TsTokens.SpacingLg, vertical = TsTokens.SpacingXs)
                         .heightIn(min = TsTokens.MinTouchTarget)
                         .semantics { contentDescription = status.forLanguage(state.language) },
-                    color = MaterialTheme.colorScheme.tertiaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                    color = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
                     shape = RoundedCornerShape(TsTokens.CornerSmall),
                 ) {
                     Text(

@@ -453,6 +453,7 @@ internal class QrGuardSession(
      */
     fun onUnreadable() {
         if (state.phase == QrPhase.SETUP || state.phase == QrPhase.STOPPED) return
+        paymentAdvisory = null
         lastFrameUnreadable = true
         lastDecoded = null
         apply(watcher.observeUnreadable())
@@ -473,7 +474,7 @@ internal class QrGuardSession(
     fun onUiEvent(event: QrEvent) {
         val before = state
         // 1. C06 owns the UI transition: language, PIN gate, acknowledge, phase, payee validation.
-        putState(QrReducer.reduce(before, event, policy))
+        putState(QrReducer.reduce(before, event, policy.copy(pinConfigured = sessionPin != null)))
 
         // 2. Mirror only the rules B06 owns, then let the projection reconcile the two.
         when (event) {
@@ -487,6 +488,8 @@ internal class QrGuardSession(
                 lastDecoded = null
                 lastFrameUnreadable = false
                 faultToken = null
+                paymentAdvisory = null
+                watcher = newWatcher()
             }
 
             QrEvent.Stop -> {
@@ -496,6 +499,7 @@ internal class QrGuardSession(
                 pendingSetup = null
                 lastDecoded = null
                 lastFrameUnreadable = false
+                paymentAdvisory = null
                 // A stopped session keeps no verdict memory: a fresh watcher over the same registry.
                 watcher = newWatcher()
             }
@@ -685,8 +689,9 @@ internal class QrGuardSession(
             status = PaymentStatus.UNKNOWN,
             appHint = PaymentAppHint.UNKNOWN
         )
+        if (qr.hasFlag(ai.trustshield.android.input.qr.UpiFlag.MALFORMED_PAYEE)) return null
         return PaymentAdvisoryEngine().evaluate(QrPayeePaymentBridge.toAdvisoryInput(
-            sourceText = payload,
+            sourceText = "",
             fields = fields,
             payees = state.payees,
             nowEpochMs = System.currentTimeMillis()
@@ -705,6 +710,7 @@ internal class QrGuardSession(
      */
     private fun captureSetup(payload: String) {
         val vpa = extractor.extract(payload) ?: return
+        if (!isPlausibleUpiId(vpa)) return
         if (state.payees.any { it.key == normalizePayeeId(vpa) }) {
             if (pendingSetup != null) {
                 pendingSetup = null
@@ -800,6 +806,7 @@ internal class QrGuardSession(
     }
 
     private fun apply(status: QrWatcherStatus, tick: Boolean = false) {
+        if (status.state == QrGuardState.Occluded) paymentAdvisory = null
         putState(project(status, tick = tick))
         publish()
     }
@@ -832,10 +839,8 @@ internal class QrGuardSession(
         val demo = vpas
             .map { it.trim() }
             .filter { isPlausibleUpiId(it) }
-            .map { RegisteredPayee(handle = it, name = null) }
-        val merged = (state.payees + demo).distinctBy { it.key }
-        putState(state.copy(payees = merged))
-        syncRegistry(merged)
+        demo.forEach { runCatching { registry.register(it) } }
+        watcher = newWatcher()
     }
 
     private companion object {

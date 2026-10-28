@@ -349,4 +349,32 @@ class QrGuardHostTest {
             )
         }
     }
+
+    @Test
+    fun registeredQrThenDifferentQrAndUnreadableInputKeepTheirDistinctStates() {
+        val session = newSession()
+        session.applyPermission(granted)
+        session.onDecoded("upi://pay?pa=shop@okaxis&pn=Shop&cu=INR")
+        session.confirmSetupCapture()
+        assertEquals(1, session.snapshot().state.payees.size)
+
+        session.onUiEvent(QrEvent.StartWatch())
+        repeat(3) { index ->
+            session.onDecoded(
+                "upi://pay?pa=other@okaxis&pn=Other&am=100.00&cu=INR",
+                atMs = 2_000L * (index + 1)
+            )
+        }
+        assertEquals(QrSignal.MISMATCH, session.snapshot().state.signal)
+        assertTrue(session.snapshot().state.isTamperEvidence)
+
+        val unreadable = newSession()
+        unreadable.applyPermission(granted)
+        unreadable.onDecoded("upi://pay?pa=shop@okaxis")
+        unreadable.confirmSetupCapture()
+        unreadable.onUiEvent(QrEvent.StartWatch())
+        unreadable.onDecoded("this is not a readable UPI QR")
+        assertFalse(unreadable.snapshot().state.isTamperEvidence)
+        assertEquals(null, unreadable.snapshot().paymentAdvisory)
+    }
 }

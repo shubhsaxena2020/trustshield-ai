@@ -289,6 +289,17 @@ class PaymentAdvisoryCopyTest {
     // ------------------------------------------------------------------ rupee formatting
 
     @Test
+    fun prefilledQrAmountNamesMaskedDestinationAndAmount() {
+        val fields = ai.trustshield.android.core.payment.PaymentFields(
+            amountMinor = 12_500L,
+            payeeUpi = "dem***@upi"
+        )
+        val summary = requireNotNull(PaymentAdvisoryCopy.qrAmountSummary(fields))
+        assertEquals("This QR asks you to pay ₹125 to dem***@upi.", summary.english)
+        assertFalse(summary.english.contains("demo-recipient"))
+    }
+
+    @Test
     fun formatRupeesZeroIsZeroRupees() {
         assertEquals("\u20B90", PaymentAdvisoryCopy.formatRupees(0L))
     }

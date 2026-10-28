@@ -18,6 +18,7 @@ import com.google.android.gms.tasks.Tasks
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.BinaryBitmap
 import com.google.zxing.DecodeHintType
+import com.google.zxing.InvertedLuminanceSource
 import com.google.zxing.MultiFormatReader
 import com.google.zxing.NotFoundException
 import com.google.zxing.common.HybridBinarizer
@@ -208,11 +209,17 @@ internal class ZxingQrBarcodeReader : BarcodeReader {
     }
 
     override fun read(frame: QrLuminanceFrame): Task<String?> = try {
-        val bitmap = BinaryBitmap(HybridBinarizer(frame.toUprightSource()))
+        val source = frame.toUprightSource()
+        val bitmap = BinaryBitmap(HybridBinarizer(source))
         val payload = try {
             reader.decodeWithState(bitmap).text
         } catch (_: NotFoundException) {
-            null
+            reader.reset()
+            try {
+                reader.decodeWithState(BinaryBitmap(HybridBinarizer(InvertedLuminanceSource(source)))).text
+            } catch (_: NotFoundException) {
+                null
+            }
         } finally {
             reader.reset()
         }

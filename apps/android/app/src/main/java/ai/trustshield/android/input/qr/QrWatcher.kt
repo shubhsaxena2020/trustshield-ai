@@ -139,7 +139,7 @@ class SaltedPayeeRegistry(private val salt: ByteArray) : PayeeRegistry {
     override fun clear() = entries.clear()
 
     private fun identifierOf(vpa: String): String {
-        val normalized = vpa.trim()
+        val normalized = vpa.trim().lowercase(java.util.Locale.ROOT)
         // Never echo the value in the message: exception text must not carry a raw VPA.
         require(normalized.contains('@') && normalized.substringAfter('@').isNotEmpty()) {
             "payee identifier must be a UPI id of the form local@handle"
