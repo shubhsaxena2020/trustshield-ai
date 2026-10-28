@@ -2,9 +2,9 @@
     "version":  "0.1.0",
     "downloadUrl":  "https://trustshield-ai-landing-p6.vercel.app/downloads/TrustShield-AI-0.1.0-arm64.apk",
     "releasePageUrl":  "https://trustshield-ai-landing-p6.vercel.app/download",
-    "sha256":  "72005652ddf5b6948436f240fccc6f27db31a01d196c562c3bfbcb2e3dc7ad12",
+    "sha256":  "b296e99cf8e994334fb782f538729270958c8fec3dfd1058746b1ba8e1101dcd",
     "sha256Placeholder":  "Awaiting the verified APK release",
-    "sizeBytes":  70926419,
+    "sizeBytes":  80288923,
     "sizePlaceholder":  "To be confirmed at release",
     "versionPlaceholder":  "Not published",
     "minimumAndroidVersion":  "8.0"
