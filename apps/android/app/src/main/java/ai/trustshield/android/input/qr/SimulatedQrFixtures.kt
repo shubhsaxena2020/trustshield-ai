@@ -159,6 +159,7 @@ object SimulatedQrFixtures {
         val vpa = parsed.payeeVpa
         when {
             parsed.kind != QrPayloadKind.UPI -> null
+            parsed.hasFlag(UpiFlag.AMBIGUOUS_PAYEE) -> null
             parsed.hasFlag(UpiFlag.MISSING_PAYEE) -> null
             parsed.hasFlag(UpiFlag.MALFORMED_PAYEE) -> null
             vpa.isNullOrBlank() -> null
