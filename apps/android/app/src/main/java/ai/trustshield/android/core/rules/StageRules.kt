@@ -130,10 +130,6 @@ class StageRules(private val normalizer: TextNormalizer) {
 
     /** First accepted occurrence of [pattern] for [rule], skipping protective/skip zones. */
     private fun firstAccepted(text: String, rule: Rule, pattern: Regex): MatchResult? {
-        // Whole-text precondition (see [Rule.requires]): constant for this text, so check it once.
-        if (rule.requires != null && !rule.requires.containsMatchIn(text)) return null
-        if (rule.requiresAll.any { !it.containsMatchIn(text) }) return null
-        if (rule.requiresAny.isNotEmpty() && rule.requiresAny.none { it.containsMatchIn(text) }) return null
         for (match in pattern.findAll(text)) {
             val start = match.range.first
             val end = match.range.last + 1
@@ -205,6 +201,12 @@ class StageRules(private val normalizer: TextNormalizer) {
         val seen = HashSet<String>()
         for (rule in rules) {
             if (hits.size >= limit) break
+            // Requirements depend only on this input, not on a rule's alternative pattern. Check
+            // them once per rule; repeating a long `requires` regex for every pattern needlessly
+            // turns a bounded scan into many full-input scans.
+            if (rule.requires != null && !rule.requires.containsMatchIn(text)) continue
+            if (rule.requiresAll.any { !it.containsMatchIn(text) }) continue
+            if (rule.requiresAny.isNotEmpty() && rule.requiresAny.none { it.containsMatchIn(text) }) continue
             for (pattern in rule.patterns) {
                 val match = firstAccepted(text, rule, pattern) ?: continue
                 val matched = text.substring(match.range.first, match.range.last + 1).trim()
