@@ -38,6 +38,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -1194,8 +1195,7 @@ private fun CameraPanel(
         if (!permission.canUseCamera) {
             Text(
                 text = QrHostCopy.manualFallback.text(lang),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                style = MaterialTheme.typography.bodySmall
             )
         }
     }
@@ -1262,7 +1262,7 @@ private fun SetupCapturePanel(
                 .fillMaxWidth()
                 .heightIn(min = TsTokens.MinTouchTarget)
         ) { Text(QrHostCopy.setupCaptureConfirm.text(lang)) }
-        TextButton(
+        TextButton(colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
             onClick = { session.dismissSetupCapture() },
             modifier = Modifier.heightIn(min = TsTokens.MinTouchTarget)
         ) { Text(QrHostCopy.setupCaptureDismiss.text(lang)) }
@@ -1354,8 +1354,7 @@ private fun SimulatePanel(
         )
         Text(
             text = QrHostCopy.simulationHelp.text(lang),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            style = MaterialTheme.typography.bodySmall
         )
 
         DemoButtonRow(
@@ -1398,7 +1397,7 @@ private fun DemoButtonRow(
 
 @Composable
 private fun RowScope.DemoButton(label: ToneCopy, onClick: () -> Unit) {
-    OutlinedButton(
+    OutlinedButton(colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
         onClick = onClick,
         modifier = Modifier
             .weight(1f)
@@ -1450,7 +1449,7 @@ private fun HostBadge(glyph: String, tone: RiskTone, dark: Boolean) {
             text = glyph,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
-            color = if (dark) Color(0xFF10141C) else Color.White,
+            color = MaterialTheme.colorScheme.background,
             textAlign = TextAlign.Center
         )
     }

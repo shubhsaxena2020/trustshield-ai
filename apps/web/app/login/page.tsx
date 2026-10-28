@@ -5,13 +5,13 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
+import { authNetworkMessage } from "@/lib/authNetworkMessage.mjs";
 
 type InvalidFields = { email: boolean; password: boolean };
 
 const NO_INVALID_FIELDS: InvalidFields = { email: false, password: false };
 
 // auth-js reports a failed fetch with status 0 and a bare "Failed to fetch".
-const NETWORK_ERROR_MESSAGE = "Could not reach the server. Check your connection and try again.";
 
 /** Which field(s) a failed sign-in implicates, for aria-invalid and focus placement. */
 function invalidFieldsFor(message: string): InvalidFields {
@@ -70,14 +70,14 @@ export default function LoginPage() {
         const status = signInError.status ?? 0;
         const rejected = status >= 400 && status < 500;
         setInvalid(rejected ? invalidFieldsFor(signInError.message) : NO_INVALID_FIELDS);
-        setError(status === 0 ? NETWORK_ERROR_MESSAGE : signInError.message);
+        setError(status === 0 ? authNetworkMessage(typeof navigator === "undefined" || navigator.onLine !== false) : signInError.message);
         return;
       }
       succeeded = true;
       router.push("/");
     } catch {
       setInvalid(NO_INVALID_FIELDS);
-      setError(NETWORK_ERROR_MESSAGE);
+      setError(authNetworkMessage(typeof navigator === "undefined" || navigator.onLine !== false));
     } finally {
       inFlight.current = false;
       // Keep "Logging in…" visible while the redirect lands.

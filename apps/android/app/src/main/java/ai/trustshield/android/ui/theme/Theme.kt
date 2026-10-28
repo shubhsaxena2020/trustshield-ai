@@ -22,7 +22,7 @@ import androidx.compose.ui.graphics.Color
 object TsColorSchemes {
 
     val Light: ColorScheme = lightColorScheme(
-        primary = TsPalette.AccentFillLight,          // filled accent surfaces: white text 5.14:1
+        primary = TsPalette.AccentFillLight,
         onPrimary = TsPalette.OnAccentFillLight,
         primaryContainer = TsPalette.AccentContainerLight,
         onPrimaryContainer = TsPalette.OnAccentContainerLight,
@@ -40,8 +40,8 @@ object TsColorSchemes {
         surfaceVariant = TsPalette.SurfaceVariantLight,
         onSurfaceVariant = TsPalette.OnSurfaceVariantLight,
         surfaceTint = TsTokens.Accent,
-        inverseSurface = Color(0xFF1B2330),
-        inverseOnSurface = Color(0xFFE6ECF5),
+        inverseSurface = Color(0xFF242424),
+        inverseOnSurface = Color(0xFFFFFFFF),
         error = TsTokens.RiskRed,                     // 5.21:1 with white
         onError = Color(0xFFFFFFFF),
         errorContainer = TsPalette.RedContainerLight,
@@ -52,7 +52,7 @@ object TsColorSchemes {
     )
 
     val Dark: ColorScheme = darkColorScheme(
-        primary = TsTokens.AccentDark,                // 8.74:1 on SurfaceDark
+        primary = TsTokens.AccentDark,
         onPrimary = TsPalette.OnAccentFillDark,
         primaryContainer = TsPalette.AccentContainerDark,
         onPrimaryContainer = TsPalette.OnAccentContainerDark,
@@ -70,8 +70,8 @@ object TsColorSchemes {
         surfaceVariant = TsPalette.SurfaceVariantDark,
         onSurfaceVariant = TsPalette.OnSurfaceVariantDark,
         surfaceTint = TsTokens.AccentDark,
-        inverseSurface = Color(0xFFE6ECF5),
-        inverseOnSurface = Color(0xFF12161F),
+        inverseSurface = Color(0xFFE5E5E5),
+        inverseOnSurface = Color(0xFF000000),
         error = TsTokens.RiskRedDark,                 // 8.02:1 on SurfaceDark
         onError = Color(0xFF3A0A0E),
         errorContainer = TsPalette.RedContainerDark,

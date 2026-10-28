@@ -91,14 +91,16 @@ class _BodyTooLarge(Exception):
 class BodyLimitMiddleware:
     """Reject oversize bodies before they are parsed or spooled to disk (Content-Length and streamed bytes)."""
 
-    def __init__(self, app, max_bytes: int):
+    def __init__(self, app, max_bytes: int, chat_upload_max_bytes: int | None = None):
         self.app, self.max_bytes = app, max_bytes
+        self.chat_upload_max_bytes = chat_upload_max_bytes or max_bytes
 
     async def __call__(self, scope, receive, send):
         if scope["type"] != "http" or scope["method"] not in {"POST", "PUT", "PATCH"}:
             return await self.app(scope, receive, send)
+        max_bytes = self.chat_upload_max_bytes if scope.get("path") == "/api/v1/chat/upload" else self.max_bytes
         declared = next((v for k, v in scope["headers"] if k == b"content-length"), None)
-        if declared is not None and declared.isdigit() and int(declared) > self.max_bytes:
+        if declared is not None and declared.isdigit() and int(declared) > max_bytes:
             start, body = _json_response_parts(413, {"detail": "Request body too large"})
             await send(start)
             await send(body)
@@ -113,7 +115,7 @@ class BodyLimitMiddleware:
             message = await receive()
             if message["type"] == "http.request":
                 seen += len(message.get("body", b""))
-                if seen > self.max_bytes:
+                if seen > max_bytes:
                     exceeded = True
                     raise _BodyTooLarge()
             return message

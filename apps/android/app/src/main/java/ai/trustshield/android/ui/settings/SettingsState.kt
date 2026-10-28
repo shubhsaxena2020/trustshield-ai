@@ -44,13 +44,13 @@ object SettingsCopy {
     )
 
     val themeSection = SettingText("Theme", "Theme")
-    val themeSystem = SettingText("Phone jaisa (system)", "Match phone (system)")
+    val themeSystem = SettingText("System", "System")
     val themeSystemDetail = SettingText(
-        "Phone ke light/dark mode ko follow karega.",
-        "Follows your phone's light/dark mode."
+        "Phone ke appearance ko follow karega.",
+        "Follows your phone's appearance."
     )
-    val themeLight = SettingText("Hamesha light", "Always light")
-    val themeDark = SettingText("Hamesha dark", "Always dark")
+    val themeLight = SettingText("White", "White")
+    val themeDark = SettingText("Black", "Black")
 
     val languageSection = SettingText("Bhasha / Language", "Language")
     val languageSystem = SettingText("Phone ki bhasha", "Use phone language")

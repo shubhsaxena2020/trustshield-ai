@@ -31,6 +31,7 @@ class MainActivityResultRetentionTest {
 
     @Before
     fun selectHinglishForCopyAssertions() {
+        markOnboardingCompleteForTest()
         val store = SharedPreferencesUserPreferencesStore
             .open(InstrumentationRegistry.getInstrumentation().targetContext)
         store.save(store.reset().copy(language = AppLanguage.HINGLISH))

@@ -13,6 +13,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.After
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -24,6 +25,11 @@ class CallShieldOfflineUiTest {
     val compose: ComposeTestRule = createEmptyComposeRule()
 
     private var scenario: ActivityScenario<MainActivity>? = null
+
+    @Before
+    fun completeOnboardingForJourney() {
+        markOnboardingCompleteForTest()
+    }
 
     @After
     fun closeActivity() {

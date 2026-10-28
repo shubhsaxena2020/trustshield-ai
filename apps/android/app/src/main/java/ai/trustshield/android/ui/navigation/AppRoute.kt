@@ -1,8 +1,7 @@
 package ai.trustshield.android.ui.navigation
 
 /**
- * The five destinations of `docs/android/UI_SPEC.md`: Home/Scan, Result, Call Shield, QR Guard,
- * Settings.
+ * Five primary tabs plus the secondary Result route: Check, Call Shield, QR Guard, History, Settings.
  *
  * This file is deliberately **pure Kotlin** — no `android.*`, no `androidx.compose.*` imports — so
  * the navigation model can be exercised by `testDebugUnitTest` on a plain JVM (`NavTest.kt`). The
@@ -26,10 +25,15 @@ enum class AppRoute(val wireName: String) {
     /** QR Guard — locally registered payee comparison. QR payloads are parsed as data, never opened. */
     QR_GUARD("qr_guard"),
 
+    /** Metadata-only recent checks. Raw message content is never retained. */
+    HISTORY("history"),
+
     /** Theme, language, sensitivity, haptics. */
     SETTINGS("settings");
 
     companion object {
+
+        val primaryTabs: List<AppRoute> = listOf(HOME, CALL_SHIELD, QR_GUARD, HISTORY, SETTINGS)
 
         /** The root destination. Back from here leaves the app; a stack is never empty. */
         val ROOT: AppRoute = HOME

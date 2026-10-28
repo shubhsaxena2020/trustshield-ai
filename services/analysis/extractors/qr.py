@@ -79,6 +79,12 @@ class OpenCVQRDecoder(QRDecoder):
         gray = cv2.cvtColor(base, cv2.COLOR_RGB2GRAY)
         yield gray
         yield cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+        # Inverted codes (light modules on a dark card, e.g. PhonePe's dark QR) are not read by
+        # OpenCV's detector until the polarity is flipped.
+        inverted = cv2.bitwise_not(base)
+        yield inverted
+        yield cv2.copyMakeBorder(inverted, self._BORDER, self._BORDER, self._BORDER, self._BORDER,
+                                 cv2.BORDER_CONSTANT, value=(0, 0, 0))
 
     def decode(self, image: Image.Image) -> QRResult:
         base = np.array(image.convert("RGB"))

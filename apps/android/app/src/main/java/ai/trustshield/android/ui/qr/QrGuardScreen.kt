@@ -13,7 +13,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -30,6 +32,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -96,15 +99,20 @@ fun QrGuardScreen(
     val signal = state.signal
     val signalCopy = QrSignalCopy.of(signal)
 
-    Box(modifier = modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
+    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
         Column(
             modifier = Modifier
                 .widthIn(max = 480.dp)
                 .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
-                .padding(TsTokens.SpacingLg),
-            verticalArrangement = Arrangement.spacedBy(TsTokens.SpacingMd)
+                .fillMaxHeight()
         ) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
+                    .padding(TsTokens.SpacingLg),
+                verticalArrangement = Arrangement.spacedBy(TsTokens.SpacingMd)
+            ) {
             Text(
                 text = QrStrings.title.text(lang),
                 style = MaterialTheme.typography.headlineSmall,
@@ -127,8 +135,6 @@ fun QrGuardScreen(
             }
 
             ExpectedMerchantPanel(state = state, dark = dark, lang = lang, onEvent = onEvent)
-
-            ActionRow(state = state, lang = lang, onEvent = onEvent)
 
             if (state.phase == QrPhase.RE_REGISTER) {
                 ReRegisterPanel(state = state, lang = lang, dark = dark, onEvent = onEvent)
@@ -157,6 +163,18 @@ fun QrGuardScreen(
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+            }
+
+            Surface(color = MaterialTheme.colorScheme.surface, tonalElevation = 2.dp) {
+                ActionRow(
+                    state = state,
+                    lang = lang,
+                    onEvent = onEvent,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = TsTokens.SpacingLg, vertical = TsTokens.SpacingSm)
+                )
+            }
         }
     }
 }
@@ -187,7 +205,7 @@ private fun IconBadge(glyph: String, tone: RiskTone, dark: Boolean) {
             text = glyph,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
-            color = if (dark) Color(0xFF10141C) else Color.White,
+            color = MaterialTheme.colorScheme.background,
             textAlign = TextAlign.Center
         )
     }
@@ -226,7 +244,7 @@ private fun LanguageChip(label: ToneCopy, selected: Boolean, onClick: () -> Unit
             Text(label.hinglish, style = MaterialTheme.typography.labelMedium)
         }
     } else {
-        OutlinedButton(onClick = onClick, modifier = minHeight) {
+        OutlinedButton(colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface), onClick = onClick, modifier = minHeight) {
             Text(label.hinglish, style = MaterialTheme.typography.labelMedium)
         }
     }
@@ -393,7 +411,7 @@ private fun ExpectedMerchantPanel(
                     }
                 }
                 if (editable) {
-                    OutlinedButton(
+                    OutlinedButton(colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
                         onClick = { onEvent(QrEvent.RemovePayee(payee.handle)) },
                         modifier = Modifier.heightIn(min = TsTokens.MinTouchTarget)
                     ) {
@@ -442,8 +460,13 @@ private fun ExpectedMerchantPanel(
 }
 
 @Composable
-private fun ActionRow(state: QrUiState, lang: QrLanguage, onEvent: (QrEvent) -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(TsTokens.SpacingSm)) {
+private fun ActionRow(
+    state: QrUiState,
+    lang: QrLanguage,
+    onEvent: (QrEvent) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(TsTokens.SpacingSm)) {
         when (state.phase) {
             QrPhase.SETUP, QrPhase.STOPPED -> {
                 Button(
@@ -478,7 +501,7 @@ private fun ActionRow(state: QrUiState, lang: QrLanguage, onEvent: (QrEvent) -> 
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(TsTokens.SpacingSm)
                 ) {
-                    OutlinedButton(
+                    OutlinedButton(colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
                         onClick = { onEvent(QrEvent.Stop) },
                         modifier = Modifier
                             .weight(1f)
@@ -502,7 +525,7 @@ private fun ActionRow(state: QrUiState, lang: QrLanguage, onEvent: (QrEvent) -> 
             }
 
             QrPhase.RE_REGISTER -> {
-                TextButton(
+                TextButton(colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
                     onClick = { onEvent(QrEvent.CloseReRegister) },
                     modifier = Modifier.heightIn(min = TsTokens.MinTouchTarget)
                 ) { Text(QrStrings.pinCancel.text(lang)) }

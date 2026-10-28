@@ -37,6 +37,7 @@ internal object LocalEvidenceAdapter {
         "Bank/service ke naam par personal number par call karne ko kaha" to EnglishCopy("Personal callback number using a bank or service name", "The message uses a bank or service name while directing you to a personal number."),
         "Unofficial link par KYC/detail update karne ko kaha" to EnglishCopy("KYC update requested through an unofficial link", "The message asks you to update KYC or personal details through a link."),
         "Bank/service ke naam par personal mobile number" to EnglishCopy("Personal mobile number using a bank or service name", "The message associates a personal mobile number with a bank or service."),
+        "Dhamki ke saath bill update karne ko kaha" to EnglishCopy("Utility bill update requested with disconnection threat", "The message threatens to disconnect a utility service and asks you to update a bill using a personal contact."),
         "Message mein link hai (khula nahi gaya)" to EnglishCopy("Message contains a link", "A link was detected. The app did not open or visit it."),
         "Digital arrest ka naam liya gaya" to EnglishCopy("Digital arrest claim", "The sender mentions digital arrest, which is not a legal process in India."),
         "Video call par bane rehne ko kaha" to EnglishCopy("Told you to stay on a video call", "The message instructs you to remain on a video call."),
@@ -53,6 +54,38 @@ internal object LocalEvidenceAdapter {
         "Bill ki due date di gayi hai" to EnglishCopy("Bill due-date reminder", "The message gives a routine bill due date without a disconnection threat."),
         "Delivery OTP darwaze par dene ke liye" to EnglishCopy("Delivery OTP for the doorstep handover", "The OTP is for an in-person delivery handover, not for a caller."),
         "Warning ke andar scam ka example quote kiya gaya hai" to EnglishCopy("Scam example quoted in a warning", "The message quotes a scam example and warns you about it."),
+        "Devanagari mein sanstha ka dawa" to EnglishCopy("Organization claim in Hindi text", "The Hindi text claims to represent an organization; the claim alone does not verify who sent it."),
+        "Devanagari mein parcel/khatre ki dhamki" to EnglishCopy("Parcel or legal threat in Hindi text", "The Hindi text uses a parcel or legal threat to create pressure."),
+        "Devanagari mein jaldbaazi" to EnglishCopy("Urgency in Hindi text", "The Hindi text asks for immediate action. Urgency alone is not proof of a scam."),
+        "Devanagari mein kisi ko batane se roka" to EnglishCopy("Secrecy request in Hindi text", "The Hindi text asks you to keep the matter secret, which can isolate you from advice."),
+        "कोड batane ko kaha gaya" to EnglishCopy("Code requested in Hindi text", "The message asks you to share a code. Never share a one-time code with a caller."),
+        "OTP/PIN Devanagari mein daalne ko kaha" to EnglishCopy("OTP or PIN requested in Hindi text", "The Hindi text asks you to enter an OTP or PIN. Never enter a code at an unverified request."),
+        "आधार/detail Devanagari mein maangi gayi" to EnglishCopy("Identity details requested in Hindi text", "The Hindi text asks for identity information. Verify the request through an official channel."),
+        "पैसे bhejne ko kaha (Devanagari)" to EnglishCopy("Money transfer requested in Hindi text", "The Hindi text asks you to send money. Verify the request independently."),
+        "Personal number par call karne ko kaha (Devanagari)" to EnglishCopy("Personal number callback requested in Hindi text", "The Hindi text directs you to a personal number instead of an independently verified official channel."),
+        "KYC link par update karne ko kaha (Devanagari)" to EnglishCopy("KYC update requested through a link in Hindi text", "The Hindi text asks you to update KYC through a link. Open the official app or site yourself."),
+        "Fake HR / recruiter ka dawa" to EnglishCopy("Fake recruiter claim", "The sender claims to represent a recruiter or employer. Verify the company and vacancy independently."),
+        "Loan app ki vasooli aur photo ki dhamki" to EnglishCopy("Loan collection and photo threat", "The message threatens to expose photos or contacts to pressure repayment."),
+        "Aapke naam par drugs/illegal parcel" to EnglishCopy("Illegal parcel claim", "The message claims an illegal parcel is linked to you and uses the claim to demand action."),
+        "Paise double karne ka laalach" to EnglishCopy("Promise to double your money", "The message promises unusually high returns for sending money."),
+        "Seats/slots khatam hone ka dabaav" to EnglishCopy("Limited seats or slots pressure", "The message creates urgency by claiming that seats or slots are about to run out."),
+        "Job ke naam par registration/joining fee" to EnglishCopy("Job registration or joining fee", "The sender asks for an upfront registration or joining fee for a job."),
+        "Telegram/WhatsApp recruiter ne paise maange" to EnglishCopy("Recruiter asks for money in chat", "A recruiter account asks for money through Telegram or WhatsApp. Verify the employer independently."),
+        "Loan approve hone par processing fee" to EnglishCopy("Loan processing fee request", "The message asks for a fee to release or process a loan."),
+        "CIBIL score sudharne ki fee" to EnglishCopy("Credit score improvement fee", "The message asks for payment to improve a credit score. Verify any service before paying."),
+        "Parcel customs mein ruka - clearance fee" to EnglishCopy("Parcel held by customs; clearance fee requested", "The message claims a parcel is held and asks for a clearance fee."),
+        "Parcel link par delivery/clearance charge" to EnglishCopy("Parcel delivery charge through a link", "The message asks for a delivery or clearance charge through a link."),
+        "Parcel ka naam/address unofficial link par update" to EnglishCopy("Parcel details requested through an unofficial link", "The message asks you to update a parcel name or address through an unofficial link."),
+        "Trading app par paisa daalne ko kaha" to EnglishCopy("Money requested for a trading app", "The sender asks you to deposit money into a trading app. Check the platform independently."),
+        "Profit withdraw karne ke liye tax" to EnglishCopy("Tax requested to release profits", "The message asks for an upfront tax or fee before you can withdraw promised profits."),
+        "Prize/claim ke liye pehle fee" to EnglishCopy("Fee requested before a prize claim", "The message asks for payment before releasing a prize or claim."),
+        "Request expire hone par paisa katne ki dhamki" to EnglishCopy("Threat of money loss if a request expires", "The message pressures you to accept a payment request to avoid losing money."),
+        "Request accept karne ki jaldbaazi" to EnglishCopy("Pressure to accept a payment request", "The message urges you to accept a payment request immediately."),
+        "UPI collect request accept karne ko kaha" to EnglishCopy("UPI collect request acceptance requested", "The message asks you to approve a UPI collect request. Approval can send money from your account."),
+        "Collect request decline karne se roka" to EnglishCopy("Told not to reject a payment request", "The sender discourages you from declining a payment request, limiting your choice."),
+        "Paisa receive karne ke liye PIN maanga" to EnglishCopy("PIN requested to receive money", "A PIN is not needed to receive money. Entering it can authorize a payment."),
+        "Galti se bheja, wapas bhejo" to EnglishCopy("Asked to return money allegedly sent by mistake", "The sender asks you to transfer money back. Verify any unexpected credit with your bank first."),
+        "Screenshot dikhakar paise maange" to EnglishCopy("Money requested based on a payment screenshot", "A screenshot is not proof that a payment settled. Check your bank or UPI app history."),
     )
 
     private val actionCopy = mapOf(
@@ -68,7 +101,7 @@ internal object LocalEvidenceAdapter {
 
     fun evidence(item: Evidence): ResultEvidenceInput {
         val english = evidenceCopy[item.titleHinglish]
-            ?: EnglishCopy("Signal detected", "This signal is shown with its exact quote and contributes to the overall assessment.")
+            ?: EnglishCopy(item.titleHinglish, item.detail)
         return ResultEvidenceInput(
             id = item.id,
             module = when (item.module) {

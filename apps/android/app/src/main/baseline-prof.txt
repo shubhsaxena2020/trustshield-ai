@@ -2,3 +2,9 @@ SLai/trustshield/android/MainActivity;->onCreate(Landroid/os/Bundle;)V
 Lai/trustshield/android/ui/theme/ThemeKt;
 Lai/trustshield/android/ui/navigation/AppScreensKt;
 Lai/trustshield/android/ui/home/ScanScreenKt;
+Lai/trustshield/android/ui/result/ResultScreenKt;
+Lai/trustshield/android/ui/history/HistoryScreenKt;
+Lai/trustshield/android/ui/settings/SettingsScreenKt;
+Lai/trustshield/android/ui/qr/QrGuardScreenKt;
+Lai/trustshield/android/ui/call/CallShieldScreenKt;
+Lai/trustshield/android/ui/onboarding/OnboardingScreenKt;

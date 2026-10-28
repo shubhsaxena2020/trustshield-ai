@@ -5,10 +5,10 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
+import { authNetworkMessage } from "@/lib/authNetworkMessage.mjs";
 
 const errorId = "signup-error";
 const passwordHintId = "signup-password-hint";
-const NETWORK_ERROR_MESSAGE = "Could not reach the server. Check your connection and try again.";
 
 /** Which field, if any, a GoTrue error message/code is about. */
 function fieldForAuthError(message: string, code?: string): "email" | "password" | null {
@@ -68,7 +68,7 @@ export default function SignupPage() {
         setBusy(false);
         // Surface the server message verbatim; only classify which field it refers to.
         const status = signUpError.status ?? 0;
-        setError(status === 0 ? NETWORK_ERROR_MESSAGE : signUpError.message);
+        setError(status === 0 ? authNetworkMessage(typeof navigator === "undefined" || navigator.onLine !== false) : signUpError.message);
         setErrorField(status === 0 ? null : fieldForAuthError(signUpError.message, signUpError.code));
         return;
       }
@@ -88,7 +88,7 @@ export default function SignupPage() {
     } catch {
       setBusy(false);
       setErrorField(null);
-      setError(NETWORK_ERROR_MESSAGE);
+      setError(authNetworkMessage(typeof navigator === "undefined" || navigator.onLine !== false));
     } finally {
       inFlight.current = false;
     }
