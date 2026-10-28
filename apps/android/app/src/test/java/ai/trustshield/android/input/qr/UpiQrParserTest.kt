@@ -132,11 +132,22 @@ class UpiQrParserTest {
     }
 
     @Test
+    fun `duplicate payee parameter is marked ambiguous without changing selected value`() {
+        val parsed = UpiQrParser.parse("upi://pay?pa=attacker@ybl&pa=shop@okaxis&cu=INR")
+
+        assertEquals("shop@okaxis", parsed.payeeVpa)
+        assertTrue(parsed.hasFlag(UpiFlag.AMBIGUOUS_PAYEE))
+    }
+
+    @Test
     fun `duplicate parameter whose last value is blank clears the field`() {
         // keep_blank_values=True: the last value wins even when it is empty.
         val parsed = UpiQrParser.parse("upi://pay?pa=ravi@okaxis&pa=")
         assertEquals("", parsed.payeeVpa)
-        assertEquals(listOf(UpiFlag.PAYMENT_REQUEST, UpiFlag.MISSING_PAYEE), parsed.flags.toList())
+        assertEquals(
+            listOf(UpiFlag.PAYMENT_REQUEST, UpiFlag.AMBIGUOUS_PAYEE, UpiFlag.MISSING_PAYEE),
+            parsed.flags.toList(),
+        )
     }
 
     @Test

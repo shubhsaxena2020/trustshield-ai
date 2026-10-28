@@ -168,6 +168,7 @@ class CallShieldHost(
 
     private var consent: SpeechConsent = SpeechConsent.initial()
     private var report: SpeechCapabilityReport? = null
+    private var bundledOfflineSelected: Boolean = false
     private var startedAtMillis: Long? = null
     private var cleared: Boolean = false
 
@@ -180,15 +181,23 @@ class CallShieldHost(
      * Removing consent is a gate, not a preference: a session that is running is ended here rather
      * than left listening.
      */
-    fun onCapability(consent: SpeechConsent, report: SpeechCapabilityReport, micPermission: MicPermission) {
+    fun onCapability(
+        consent: SpeechConsent,
+        report: SpeechCapabilityReport,
+        micPermission: MicPermission,
+        offlineEngineSelected: Boolean = false,
+    ) {
         if (cleared) return
         this.consent = consent
         this.report = report
+        bundledOfflineSelected = offlineEngineSelected
         state = state.copy(
             consent = if (consent.canStartSession) ConsentState.GIVEN else ConsentState.NOT_GIVEN,
             permission = micPermission,
-            recognizer = recognizerFor(report),
-            recognitionDisclosure = report.toCallRecognitionDisclosure(),
+            recognizer = recognizerFor(report, offlineEngineSelected),
+            recognitionDisclosure = if (offlineEngineSelected && report.status == SpeechStatus.MissingService) {
+                ai.trustshield.android.ui.call.RecognitionDisclosure.ON_DEVICE_UNVERIFIED
+            } else report.toCallRecognitionDisclosure(),
         )
         if (!consent.canStartSession &&
             (state.phase == SessionPhase.LISTENING || state.phase == SessionPhase.PAUSED)
@@ -245,7 +254,10 @@ class CallShieldHost(
         }
 
         // 2. P3-09 decides, in its own order: language, one-session guard, capability, consent, mode.
-        when (val prepared = coordinator.prepare(consent, capability, capability.languageTag)) {
+        when (val prepared = coordinator.prepare(
+            consent, capability, capability.languageTag,
+            bundledOfflineSelected = bundledOfflineSelected,
+        )) {
             is SpeechStartOutcome.Blocked -> {
                 val reason = blockReasonFor(prepared.reason)
                 state = gated.copy(phase = SessionPhase.IDLE, blocked = reason)
@@ -328,7 +340,12 @@ class CallShieldHost(
     /** A failed recogniser callback, classified by B05. A terminal failure ends the session. */
     fun onRecognizerError(code: Int) {
         if (cleared) return
-        val event = coordinator.onError(code)
+        onCoordinatorError(coordinator.onError(code))
+    }
+
+    /** Applies a callback already classified by the coordinator, without classifying it twice. */
+    fun onCoordinatorError(event: SpeechEvent) {
+        if (cleared) return
         if (event is SpeechEvent.Failed) {
             if (event.code == ai.trustshield.android.input.speech.RecognizerErrorCode.CLIENT ||
                 event.reason == ErrorReason.BUSY || event.reason == ErrorReason.NETWORK
@@ -515,7 +532,8 @@ class CallShieldHost(
     }
 
     /** A report is "recogniser available" only when the real rules say a session could run. */
-    private fun recognizerFor(report: SpeechCapabilityReport): RecognizerStatus = when {
+    private fun recognizerFor(report: SpeechCapabilityReport, offlineEngineSelected: Boolean): RecognizerStatus = when {
+        report.status == SpeechStatus.MissingService && offlineEngineSelected -> RecognizerStatus.AVAILABLE
         report.status == SpeechStatus.MissingService || report.status == SpeechStatus.Unavailable ->
             RecognizerStatus.UNAVAILABLE
         report.sessionPossible -> RecognizerStatus.AVAILABLE

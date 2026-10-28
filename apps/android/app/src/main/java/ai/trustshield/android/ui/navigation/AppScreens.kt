@@ -118,6 +118,7 @@ import ai.trustshield.android.input.speech.AndroidSpeechRecognizerHandle
 import ai.trustshield.android.input.speech.OfflineSpeechPolicy
 import ai.trustshield.android.input.speech.VoskSpeechRecognizerHandle
 import ai.trustshield.android.input.speech.RecognizerErrorCode
+import ai.trustshield.android.input.speech.SpeechEvent
 import ai.trustshield.android.ui.qr.QrGuardScreen
 import ai.trustshield.android.ui.qr.QrGuardHost
 import ai.trustshield.android.ui.qr.QrEvent
@@ -412,6 +413,13 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
         onDispose { spokenVerdict.stop(); tts.shutdown() }
     }
     val session = remember { CallSpeechSession(consentGranted = true) }
+    DisposableEffect(tts, session) {
+        tts.onSpeakingChanged = session::setInputSuppressed
+        onDispose {
+            tts.onSpeakingChanged = null
+            session.setInputSuppressed(false)
+        }
+    }
     val selectedLanguage = resolveLanguage(appLanguage, Locale.getDefault().toLanguageTag())
     val selectedSpeechTag = SpeechLanguagePolicy.selectedTag(selectedLanguage)
     val currentAppLanguage by rememberUpdatedState(appLanguage)
@@ -420,6 +428,7 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
     val scriptDetector = remember(selectedSpeechTag) { SpeechScriptLanguageDetector(selectedSpeechTag) }
     var recognitionLanguageStatus by remember { mutableStateOf<String?>(null) }
     val speechRoute = remember { OfflineSpeechPolicy(networkReachable = networkIsValidated(context)) }
+    val hostRef = remember { mutableStateOf<CallShieldHost?>(null) }
     var offlineMode by remember(speechRoute) { mutableStateOf(speechRoute.useOffline) }
     var offlineFailureAction by remember { mutableStateOf<(() -> Unit)?>(null) }
     var capability by remember {
@@ -438,7 +447,10 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
                     onReady = { handler.post { session.onReadyForSpeech() } },
                 ).also { offlineMode = true }
             } else {
-                AndroidSpeechRecognizerHandle(context, session, capability, recognitionLanguageState.value) { code ->
+                AndroidSpeechRecognizerHandle(
+                    context, session, capability, recognitionLanguageState.value,
+                    finalResultListener = { text, confidence -> created.onPlatformFinalResult(text, confidence) },
+                ) { code ->
                     speechRoute.platformError(code)
                     offlineMode = speechRoute.useOffline
                     if (code == ai.trustshield.android.input.speech.RecognizerErrorCode.LANGUAGE_UNAVAILABLE) {
@@ -451,13 +463,14 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
                             ).forLanguage(resolveLanguage(currentAppLanguage, Locale.getDefault().toLanguageTag()))
                         }
                     }
-                    created.onError(code)
+                    val event = created.onError(code)
+                    if (event is SpeechEvent.Failed) hostRef.value?.onCoordinatorError(event)
                 }
             }
         }
         created
     }
-    val host = remember(coordinator) { CallShieldHost(coordinator) }
+    val host = remember(coordinator) { CallShieldHost(coordinator) }.also { hostRef.value = it }
     val prefs = LocalUserPreferences.current
     val sink = LocalPreferencesSink.current
     // Issue #138. `CallShieldHost` owns the call session, not the user's presentation choices, and
@@ -589,7 +602,11 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
                 CallEvent.Start -> {
                     speechRoute.updateNetworkReachable(networkIsValidated(context))
                     offlineMode = speechRoute.useOffline
-                    host.onCapability(consent, capability, if (micGranted) ai.trustshield.android.ui.call.MicPermission.GRANTED else ai.trustshield.android.ui.call.MicPermission.DENIED)
+                    host.onCapability(
+                        consent, capability,
+                        if (micGranted) ai.trustshield.android.ui.call.MicPermission.GRANTED else ai.trustshield.android.ui.call.MicPermission.DENIED,
+                        offlineEngineSelected = offlineMode,
+                    )
                     host.onStartRequested()
                     state = synced(host.state)
                 }
@@ -632,11 +649,12 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
                 result is SpokenVerdictResult.Spoken
             }
         },
-        onOpenStagedDemo = { demoOpen = true },
+        onOpenStagedDemo = { if (!state.isListening) demoOpen = true },
         onTypeTranscript = null
     )
     OutlinedButton(colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
-        onClick = { demoOpen = true },
+        onClick = { if (!state.isListening) demoOpen = true },
+        enabled = !state.isListening,
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp).heightIn(min = 48.dp)
     ) {
         Text(
@@ -672,10 +690,14 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
         }
     }
     }
-    LaunchedEffect(consent, micGranted, prefs.language, recognitionLanguage) {
+    LaunchedEffect(consent, micGranted, prefs.language, recognitionLanguage, offlineMode) {
         val mic = if (micGranted) SpeechMicPermission.Granted else SpeechMicPermission.Denied
         capability = SpeechCapabilityRules.evaluate(SpeechCapabilityProbe.probe(context, mic), recognitionLanguage)
-        host.onCapability(consent, capability, if (micGranted) ai.trustshield.android.ui.call.MicPermission.GRANTED else ai.trustshield.android.ui.call.MicPermission.DENIED)
+        host.onCapability(
+            consent, capability,
+            if (micGranted) ai.trustshield.android.ui.call.MicPermission.GRANTED else ai.trustshield.android.ui.call.MicPermission.DENIED,
+            offlineEngineSelected = offlineMode,
+        )
         host.onLanguageChanged(selectedLanguage.toCallLanguage())
         state = synced(host.state)
     }
@@ -695,6 +717,7 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
                         capability,
                         if (micGranted) ai.trustshield.android.ui.call.MicPermission.GRANTED
                         else ai.trustshield.android.ui.call.MicPermission.DENIED,
+                        offlineEngineSelected = offlineMode,
                     )
                     val languageName = if (detectedTag == SpeechLanguage.EN_IN) {
                         ToneCopy("English", "English", "\u0905\u0902\u0917\u094d\u0930\u0947\u091c\u093c\u0940").forLanguage(selectedLanguage)
@@ -718,7 +741,11 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_PAUSE -> { host.onHostPaused(); state = synced(host.state) }
-                Lifecycle.Event.ON_RESUME -> { host.onHostResumed(); state = synced(host.state) }
+                Lifecycle.Event.ON_RESUME -> {
+                    micGranted = ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
+                    host.onHostResumed()
+                    state = synced(host.state)
+                }
                 else -> Unit
             }
         }

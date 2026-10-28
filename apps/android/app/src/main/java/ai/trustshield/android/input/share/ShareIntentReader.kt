@@ -96,6 +96,7 @@ enum class ShareIntentIssue(val code: String, val message: String) {
     EMPTY_CLIP("empty_clip", "Share ki list khaali thi."),
     NULL_STREAM_URI("null_stream_uri", "Share mein ek khaali file entry thi, address nahi mila."),
     HTML_TEXT_IGNORED("html_text_ignored", "HTML wala hissa text ki tarah nahi padha jaata."),
+    CLIP_ITEMS_TRUNCATED("clip_items_truncated", "Share mein bahut items the; pehle 20 hi padhe gaye."),
     ;
 
     override fun toString(): String = "ShareIntentIssue($code)"
@@ -270,6 +271,7 @@ object ShareIntentReaderCore {
 
         val issues = ArrayList<ShareIntentIssue>(4)
         if (!snapshot.htmlText.isNullOrBlank()) issues += ShareIntentIssue.HTML_TEXT_IGNORED
+        if (snapshot.clipItemCount > ShareBounds.MAX_CLIP_ITEMS) issues += ShareIntentIssue.CLIP_ITEMS_TRUNCATED
         if (snapshot.clipItemCount > 0 && snapshot.clipTextParts.isEmpty() && snapshot.clipUris.isEmpty()) {
             issues += ShareIntentIssue.EMPTY_CLIP
         }
@@ -331,7 +333,7 @@ object ShareIntentReaderCore {
             text = body,
             subject = subject,
             streams = streams.map { toStreamRef(it) },
-            clipCount = snapshot.clipItemCount,
+            clipCount = streams.size,
         )
 
         return when (content) {
@@ -360,7 +362,7 @@ object ShareIntentReaderCore {
     private fun mergedText(snapshot: ShareIntentSnapshot): String? {
         val sources = ArrayList<String>(2 + snapshot.clipTextParts.size)
         snapshot.text?.let { sources += it }
-        sources += snapshot.clipTextParts
+        sources += snapshot.clipTextParts.take(ShareBounds.MAX_CLIP_ITEMS)
 
         val distinct = LinkedHashSet<String>(sources.size)
         for (source in sources) {
@@ -467,11 +469,11 @@ class ShareIntentReader(private val context: Context) {
         val clipMime = guarded({ clip?.description?.getMimeType(0) }, null)
         val clipItemCount = guarded({ clip?.itemCount ?: 0 }, 0)
 
-        val clipTextParts = ArrayList<String>(minOf(clipItemCount, ShareBounds.MAX_IMAGES + 1))
-        val clipUris = ArrayList<ShareIntentStreamSnapshot>(minOf(clipItemCount, ShareBounds.MAX_IMAGES + 1))
+        val clipTextParts = ArrayList<String>(minOf(clipItemCount, ShareBounds.MAX_CLIP_ITEMS))
+        val clipUris = ArrayList<ShareIntentStreamSnapshot>(minOf(clipItemCount, ShareBounds.MAX_CLIP_ITEMS))
         val seenUriStrings = LinkedHashSet<String>(ShareBounds.MAX_IMAGES)
         var nullStreamRecorded = false
-        for (index in 0 until clipItemCount) {
+        for (index in 0 until minOf(clipItemCount, ShareBounds.MAX_CLIP_ITEMS)) {
             val item = guarded({ clip?.getItemAt(index) }, null)
             val itemText = guarded({ item?.text?.toString() }, null)
             val itemUri = guarded({ item?.uri }, null)

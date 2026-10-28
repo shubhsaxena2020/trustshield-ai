@@ -105,8 +105,12 @@ class SpeechConsent private constructor(val state: SpeechConsentState) {
  */
 object ConsentGate {
 
-    fun check(consent: SpeechConsent, report: SpeechCapabilityReport): ConsentDecision {
-        if (report.status == SpeechStatus.MissingService) {
+    fun check(
+        consent: SpeechConsent,
+        report: SpeechCapabilityReport,
+        bundledOfflineSelected: Boolean = false,
+    ): ConsentDecision {
+        if (report.status == SpeechStatus.MissingService && !bundledOfflineSelected) {
             return ConsentDecision.Block(ConsentBlockReason.RecognizerUnavailable)
         }
         if (report.status == SpeechStatus.Unavailable) {

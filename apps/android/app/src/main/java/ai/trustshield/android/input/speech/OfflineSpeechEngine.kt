@@ -31,6 +31,54 @@ internal fun interface SpeechTextSink {
     fun onText(text: String, isFinal: Boolean)
 }
 
+/** Publishes a model directory only after the copy and its byte count have been verified. */
+internal object AtomicModelInstaller {
+    private const val COMPLETE_MARKER = ".trustshield-model-bytes"
+
+    fun isComplete(target: File): Boolean {
+        if (!target.isDirectory || !File(target, "am/final.mdl").let { it.isFile && it.length() > 0L }) return false
+        val expected = File(target, COMPLETE_MARKER).takeIf(File::isFile)?.readText()?.toLongOrNull() ?: return false
+        return expected > 0L && modelBytes(target) == expected
+    }
+
+    fun install(target: File, copyInto: (File) -> Long) {
+        val parent = requireNotNull(target.parentFile)
+        parent.mkdirs()
+        val temporary = File(parent, "${target.name}.tmp")
+        val backup = File(parent, "${target.name}.old")
+        if (!target.exists() && backup.exists()) {
+            if (isComplete(backup)) {
+                check(backup.renameTo(target)) { "could not restore existing model backup" }
+            } else {
+                backup.deleteRecursively()
+            }
+        }
+        temporary.deleteRecursively()
+        backup.deleteRecursively()
+        check(temporary.mkdirs()) { "could not create temporary model directory" }
+        try {
+            val expectedBytes = copyInto(temporary)
+            val copiedBytes = modelBytes(temporary)
+            check(expectedBytes > 0L && copiedBytes == expectedBytes) { "model copy size mismatch" }
+            check(File(temporary, "am/final.mdl").let { it.isFile && it.length() > 0L }) { "model acoustic file missing" }
+            File(temporary, COMPLETE_MARKER).writeText(expectedBytes.toString())
+            if (target.exists()) check(target.renameTo(backup)) { "could not back up existing model" }
+            if (!temporary.renameTo(target)) {
+                backup.renameTo(target)
+                error("could not publish copied model")
+            }
+            backup.deleteRecursively()
+        } catch (failure: Throwable) {
+            temporary.deleteRecursively()
+            if (!target.exists() && backup.exists()) backup.renameTo(target)
+            throw failure
+        }
+    }
+
+    private fun modelBytes(directory: File): Long =
+        directory.walkTopDown().filter { it.isFile && it.name != COMPLETE_MARKER }.sumOf(File::length)
+}
+
 /** One microphone reader and one Vosk decoder, owned by a single worker thread. */
 internal class OfflineSpeechEngine(
     private val pcm: PcmSource,
@@ -77,9 +125,8 @@ internal class OfflineSpeechEngine(
 
     fun stop() {
         if (!stopped.compareAndSet(false, true)) return
-        stopPcm()
-        worker?.takeIf { it !== Thread.currentThread() }?.join()
         worker = null
+        stopPcm()
     }
 
     private fun emit(json: String, isFinal: Boolean) {
@@ -109,7 +156,11 @@ internal class VoskSpeechRecognizerHandle(
         val active = OfflineSpeechEngine(
             pcm = AndroidPcmSource(),
             decoderFactory = VoskDecoderFactory {
-                if (!File(localModel, "am/final.mdl").isFile) copyAssets(context.assets, "model-hi", localModel)
+                if (!AtomicModelInstaller.isComplete(localModel)) {
+                    AtomicModelInstaller.install(localModel) { temporary ->
+                        copyAssets(context.assets, "model-hi", temporary)
+                    }
+                }
                 val model = Model(localModel.absolutePath)
                 val recognizer = Recognizer(model, 16_000.0f)
                 object : VoskDecoder {
@@ -131,14 +182,26 @@ internal class VoskSpeechRecognizerHandle(
         engine?.also { engine = null; it.stop() }
     }
 
-    private fun copyAssets(assets: android.content.res.AssetManager, path: String, target: File) {
+    private fun copyAssets(assets: android.content.res.AssetManager, path: String, target: File): Long {
         target.mkdirs()
-        assets.list(path).orEmpty().forEach { name ->
+        return assets.list(path).orEmpty().sumOf { name ->
             val childPath = "$path/$name"
             val child = File(target, name)
             val isDirectory = assets.list(childPath)?.isNotEmpty() == true
             if (isDirectory) copyAssets(assets, childPath, child)
-            else assets.open(childPath).use { input -> child.outputStream().use { input.copyTo(it) } }
+            else assets.open(childPath).use { input ->
+                child.outputStream().use { output ->
+                    val buffer = ByteArray(8192)
+                    var total = 0L
+                    while (true) {
+                        val count = input.read(buffer)
+                        if (count < 0) break
+                        output.write(buffer, 0, count)
+                        total += count
+                    }
+                    total
+                }
+            }
         }
     }
 }
@@ -173,6 +236,7 @@ internal class OfflineSpeechPolicy(networkReachable: Boolean, userSelected: Bool
         private set
 
     fun platformError(code: Int): Boolean {
+        if (code == RecognizerErrorCode.SPEECH_TIMEOUT || code == RecognizerErrorCode.NO_MATCH) return useOffline
         if (code == RecognizerErrorCode.LANGUAGE_UNAVAILABLE) {
             consecutivePlatformErrors = 0
             useOffline = true

@@ -47,6 +47,11 @@ class SimulatedQrFixturesTest {
     // ---------------------------------------------------------------- MATCH flow
 
     @Test
+    fun `duplicate payee parameters are not comparable`() {
+        assertNull(extractor.extract("upi://pay?pa=attacker@ybl&pa=shop@okaxis&cu=INR"))
+    }
+
+    @Test
     fun `match flow registers the shop QR and stays watching with no alert`() {
         // report §7: SETUP -> WATCH on the same `pa`, green LED, no alarm.
         val result = SimulatedQrFixtures.run(QrSimulationFlow.Match)

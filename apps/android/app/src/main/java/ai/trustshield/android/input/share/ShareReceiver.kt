@@ -50,6 +50,9 @@ object ShareBounds {
     /** At most five images per share; the sixth is a rejection, not a silent trim. */
     const val MAX_IMAGES: Int = 5
 
+    /** At most twenty ClipData items are inspected during share intake. */
+    const val MAX_CLIP_ITEMS: Int = 20
+
     const val MIME_APK: String = "application/vnd.android.package-archive"
     const val MIME_HTML: String = "text/html"
 

@@ -43,6 +43,9 @@ enum class UpiFlag(val evidenceCategory: String?) {
     /** `qr_malformed_payee` — `pa` failed the structural VPA pattern. */
     MALFORMED_PAYEE("qr_malformed_payee"),
 
+    /** Android-only fail-closed signal: more than one `pa` value was supplied. */
+    AMBIGUOUS_PAYEE(null),
+
     /** `qr_prefilled_amount` — `am` is a well-formed amount inside the accepted range. */
     PREFILLED_AMOUNT("qr_prefilled_amount"),
 
@@ -202,7 +205,9 @@ object UpiQrParser {
         val oversized = LinkedHashSet<String>()
         flags.add(UpiFlag.PAYMENT_REQUEST)
 
-        val fields = parseQuery(extractQuery(scan))
+        val query = parseQuery(extractQuery(scan))
+        val fields = query.values
+        if ("pa" in query.duplicateKeys) flags.add(UpiFlag.AMBIGUOUS_PAYEE)
 
         val rawSelected = linkedMapOf<String, String?>(
             "payee_vpa" to fields["pa"],
@@ -306,8 +311,11 @@ object UpiQrParser {
      * pairs split on `&` only, `=` split once, names lowercased after percent-decoding, a pair without
      * `=` keeps a blank value, and an empty pair is skipped.
      */
-    private fun parseQuery(query: String): Map<String, String> {
+    private data class ParsedQuery(val values: Map<String, String>, val duplicateKeys: Set<String>)
+
+    private fun parseQuery(query: String): ParsedQuery {
         val out = LinkedHashMap<String, String>()
+        val duplicateKeys = LinkedHashSet<String>()
         for (pair in query.split('&')) {
             if (pair.isEmpty()) continue
             val eq = pair.indexOf('=')
@@ -317,9 +325,10 @@ object UpiQrParser {
             if (name.length > MAX_NAME_CHARS) continue
             val key = name.lowercase()
             if (key !in PAYLOAD_KEYS) continue
+            if (key in out) duplicateKeys.add(key)
             out[key] = decodeComponent(rawValue, MAX_FIELD_INPUT_CHARS)
         }
-        return out
+        return ParsedQuery(out, duplicateKeys)
     }
 
     /**

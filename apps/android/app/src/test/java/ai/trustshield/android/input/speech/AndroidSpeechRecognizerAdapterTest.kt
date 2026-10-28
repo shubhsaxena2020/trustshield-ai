@@ -496,6 +496,34 @@ class AndroidSpeechRecognizerAdapterTest {
     }
 
     @Test
+    fun platformFinalResultRestartsRecognizerAndKeepsSessionListening() {
+        val harness = Harness()
+        startPlan(harness)
+
+        val event = harness.coordinator.onPlatformFinalResult("final result", 0.9f)
+
+        assertTrue(event is SpeechEvent.Accepted)
+        assertEquals(2, harness.factoryCalls)
+        assertEquals(1, harness.handles[0].destroyCount)
+        assertEquals(1, harness.handles[1].startCount)
+        assertEquals(SpeechSessionState.Listening, harness.session.state)
+        assertEquals(1, harness.session.transcript().size)
+    }
+
+    @Test
+    fun platformEmptyFinalResultAlsoRestartsSingleShotRecognizer() {
+        val harness = Harness()
+        startPlan(harness)
+
+        val event = harness.coordinator.onPlatformFinalResult(null, null)
+
+        assertTrue(event is SpeechEvent.EmptyResult || event is SpeechEvent.NoSpeech)
+        assertEquals(2, harness.factoryCalls)
+        assertEquals(1, harness.handles[1].startCount)
+        assertEquals(SpeechSessionState.Listening, harness.session.state)
+    }
+
+    @Test
     fun busyErrorsUseCappedExponentialRetryAndSessionCanStartAgainAfterStop() {
         val session = CallSpeechSession(consentGranted = true)
         val handles = mutableListOf<FakeHandle>()

@@ -517,6 +517,45 @@ class CallShieldHostTest {
         assertEquals(1, rig.handleFactoryCalls)
     }
 
+    @Test
+    fun `terminal coordinator callback moves host out of listening`() {
+        val rig = Rig()
+        assertTrue(rig.host.onStartRequested() is CallStartOutcome.Listening)
+
+        val event = rig.coordinator.onError(RecognizerErrorCode.SERVER)
+        rig.host.onCoordinatorError(event)
+
+        assertEquals(SessionPhase.STOPPED, rig.host.state.phase)
+        assertFalse(rig.host.state.isListening)
+        assertFalse(rig.host.isListening)
+        assertTrue(rig.host.retainsNoTranscript)
+    }
+
+    @Test
+    fun `missing platform service can start explicitly selected bundled offline route`() {
+        val missingService = SpeechCapabilityRules.evaluate(
+            ai.trustshield.android.input.speech.SpeechEnvironment(
+                apiLevel = 36,
+                recognizerServiceAvailable = false,
+                onDeviceAvailable = false,
+                hiInModelDownloaded = false,
+                micPermission = SpeechMic.Granted,
+            ),
+            ai.trustshield.android.input.speech.SpeechLanguage.HI_IN,
+        )
+        val rig = Rig(report = missingService)
+        rig.host.onCapability(
+            SpeechConsent.initial().grant(), missingService, MicPermission.GRANTED,
+            offlineEngineSelected = true,
+        )
+
+        val outcome = rig.host.onStartRequested()
+
+        assertTrue(outcome is CallStartOutcome.Listening)
+        assertEquals(SessionPhase.LISTENING, rig.host.state.phase)
+        assertEquals(RecognizerStatus.AVAILABLE, rig.host.state.recognizer)
+    }
+
     // ------------------------------------------------------------------ 12. clear
 
     @Test

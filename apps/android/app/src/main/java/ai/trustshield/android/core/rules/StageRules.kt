@@ -99,7 +99,8 @@ class StageRules(private val normalizer: TextNormalizer) {
         val usedIds = HashSet<String>()
         var budget = StageDetection.MAX_EVIDENCE_TOTAL
 
-        for (stage in StageId.playbookOrder) {
+        val evaluationOrder = listOf(StageId.ASK) + StageId.playbookOrder.filterNot { it == StageId.ASK }
+        for (stage in evaluationOrder) {
             if (budget <= 0) break
             val hits = collect(text, rulesFor(stage), minOf(StageDetection.MAX_EVIDENCE_PER_STAGE, budget))
             if (hits.isEmpty()) continue
@@ -120,7 +121,7 @@ class StageRules(private val normalizer: TextNormalizer) {
 
         return StageDetection(
             raw = raw,
-            stages = stages,
+            stages = stages.sortedBy { StageId.playbookOrder.indexOf(it.stage) },
             askTypes = askTypes,
             truncated = truncated,
             injection = injection,
@@ -129,12 +130,11 @@ class StageRules(private val normalizer: TextNormalizer) {
 
     /** First accepted occurrence of [pattern] for [rule], skipping protective/skip zones. */
     private fun firstAccepted(text: String, rule: Rule, pattern: Regex): MatchResult? {
-        // Whole-text precondition (see [Rule.requires]): constant for this text, so check it once.
-        if (rule.requires != null && !rule.requires.containsMatchIn(text)) return null
         for (match in pattern.findAll(text)) {
             val start = match.range.first
             val end = match.range.last + 1
             if (end <= start) continue
+            if (rule.askType == AskType.MONEY_TRANSFER && completedFirstPersonTransfer(text, start, end)) continue
             if (rule.skip != null && overlapsSkip(text, start, end, rule.skip)) continue
             if (rule.guarded && isNegated(text, start, end)) continue
             return match
@@ -144,7 +144,7 @@ class StageRules(private val normalizer: TextNormalizer) {
 
     private fun overlapsSkip(text: String, start: Int, end: Int, skip: Regex): Boolean {
         val from = (start - SKIP_WINDOW).coerceAtLeast(0)
-        val to = (end + SKIP_WINDOW).coerceAtMost(text.length)
+        val to = (end + SKIP_FORWARD).coerceAtMost(text.length)
         return skip.containsMatchIn(text.substring(from, to))
     }
 
@@ -189,12 +189,24 @@ class StageRules(private val normalizer: TextNormalizer) {
         return text.length
     }
 
+    private fun completedFirstPersonTransfer(text: String, start: Int, end: Int): Boolean {
+        val clauseStart = clauseStartBefore(text, start)
+        val clauseEnd = clauseEndAfter(text, end)
+        return COMPLETED_FIRST_PERSON_TRANSFER.containsMatchIn(text.substring(clauseStart, clauseEnd))
+    }
+
     private fun collect(text: String, rules: List<Rule>, limit: Int): List<Hit> {
         if (limit <= 0) return emptyList()
         val hits = ArrayList<Hit>(limit)
         val seen = HashSet<String>()
         for (rule in rules) {
             if (hits.size >= limit) break
+            // Requirements depend only on this input, not on a rule's alternative pattern. Check
+            // them once per rule; repeating a long `requires` regex for every pattern needlessly
+            // turns a bounded scan into many full-input scans.
+            if (rule.requires != null && !rule.requires.containsMatchIn(text)) continue
+            if (rule.requiresAll.any { !it.containsMatchIn(text) }) continue
+            if (rule.requiresAny.isNotEmpty() && rule.requiresAny.none { it.containsMatchIn(text) }) continue
             for (pattern in rule.patterns) {
                 val match = firstAccepted(text, rule, pattern) ?: continue
                 val matched = text.substring(match.range.first, match.range.last + 1).trim()
@@ -241,6 +253,7 @@ class StageRules(private val normalizer: TextNormalizer) {
     private companion object {
         const val MODULE = "stage_rules"
         const val SKIP_WINDOW = 24
+        const val SKIP_FORWARD = 72
         val CLAUSE_BREAKS = charArrayOf('.', ',', '!', '?', ';', '\n', '\r', '|', '\u0964')
 
         val NEGATION_BEFORE =
@@ -250,6 +263,9 @@ class StageRules(private val normalizer: TextNormalizer) {
         val NEGATION_INSIDE = NEGATION_AFTER
         val CONDITIONAL_NAHI = rx("""(?<![\p{L}\p{M}\p{N}])(?:nahi|nahin|na|nhi|नहीं|नहि)\s+तो(?![\p{L}\p{M}\p{N}])|(?<![\p{L}\p{M}\p{N}])(?:nahi|nahin|na|nhi)\s+to(?![\p{L}\p{M}\p{N}])""")
         val NEGATION_SCOPE_BOUNDARY = rx("""(?<![\p{L}\p{M}\p{N}])(?:and|but|also|और|लेकिन)(?![\p{L}\p{M}\p{N}])""")
+        val COMPLETED_FIRST_PERSON_TRANSFER = rx(
+            """\b(?:maine|main\s+ne|hum\s+ne|i\s+sent|i\s+have\s+sent)\b[^.!?\n]{0,80}?\b(?:bhej|send|transfer|jama|paid)\w*\b[^.!?\n]{0,24}?\b(?:diye|diya|di\s+hai|diya\s+hai|bheja\s+tha|kar\s+diya|sent|paid)\b""",
+        )
     }
 }
 
@@ -273,6 +289,10 @@ internal class Rule(
      * the match loop, so it costs nothing and cannot move a quote boundary.
      */
     val requires: Regex? = null,
+    /** Each independent cue must occur somewhere in the text. */
+    val requiresAll: List<Regex> = emptyList(),
+    /** At least one cue must occur somewhere in the text. */
+    val requiresAny: List<Regex> = emptyList(),
 )
 // ---------------------------------------------------------------------------------------------
 // Pattern compilation
@@ -545,6 +565,16 @@ private const val SECRECY_ASK_VERB =
     "(?:batao|bata\\s*do|batado|bata\\s*de|bhejo|bhej\\s*do|bhej\\s*de|de\\s*do|dedo|" +
         "share\\s*karo|send|forward|reply|bol\\s*do|bolo|daal\\s*do|daalo|likho)"
 
+private const val SECRECY_POSITIVE_ASK_CUE =
+    "(?:batao|bata\\s*do|batado|bhejo|bhej\\s*do|bhej\\s*de|share\\s*karo|" +
+        "send\\s+(?:me|to\\s+me|now)|forward\\s+(?:it|this)|reply\\s+(?:with|to)|" +
+        "pay\\s+(?:now|me|to)|transfer\\s+(?:now|to)|daal\\s*do|daalo|bol\\s*do|bolo)"
+
+private val SECRECY_DIRECT_THREAT_CUE = rx(
+    """\b(?:warna|varna|nahi\s+to|confidential|gopniya|police|cbi|customs|narcotics|arrest|""" +
+        """warrant|raid|legal\s+action|case\s+(?:hai|darj|registered)|call\s+cut|video\s+call|akele)\b""",
+)
+
 /**
  * Roman-Hindi imperatives that turn the *tail* of the sentence into a request. Narrower than
  * [SECRECY_ASK_VERB] on purpose: English "send"/"forward" in a tail is ordinary bank boilerplate
@@ -633,6 +663,7 @@ private val SECRECY_RULES: List<Rule> = listOf(
         ),
         // Issue #114: "OTP kisi ko na batayein" is the bank's own safety line, not isolation.
         skip = SKIP_CREDENTIAL_SHARE_ADVICE,
+        requiresAny = listOf(SECRECY_DIRECT_THREAT_CUE, rx("""\b$SECRECY_POSITIVE_ASK_CUE\b""")),
     ),
     Rule(
         titleHinglish = "Confidential case",
@@ -760,8 +791,8 @@ private val ASK_RULES: List<Rule> = listOf(
         severity = Severity.HIGH,
         strength = Strength.STRONG,
         patterns = listOf(
-            rx("""\b(?:download|install|डाउनलोड|इंस्टॉल)\b[^.!?\n]{0,26}?(?:[\w.-]+\.apk|\bapk\b)"""),
-            rx("""(?:[\w.-]+\.apk|\bapk\b)[^.!?\n]{0,26}?\b(?:download|install|डाउनलोड|इंस्टॉल)\b"""),
+            rx("""\b(?:download|install|डाउनलोड|इंस्टॉल)\b[^.!?\n]{0,26}?(?:[\w.-]{1,255}\.apk|\bapk\b)"""),
+            rx("""(?:[\w.-]{1,255}\.apk|\bapk\b)[^.!?\n]{0,26}?\b(?:download|install|डाउनलोड|इंस्टॉल)\b"""),
         ),
         askType = AskType.APK_INSTALL,
         guarded = true,

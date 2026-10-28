@@ -285,6 +285,7 @@ class SpeechSessionCoordinator(
         consent: SpeechConsent,
         report: SpeechCapabilityReport,
         languageTag: String = SpeechLanguage.DEFAULT,
+        bundledOfflineSelected: Boolean = false,
     ): SpeechStartOutcome {
         // 1. Input contract. Not a device fact, so it is checked before anything is promised.
         if (!SpeechLanguage.isSelectable(languageTag)) {
@@ -295,7 +296,7 @@ class SpeechSessionCoordinator(
 
         // 3. Capability and consent, in the same order ConsentGate uses: a missing service or an
         //    unsupported Android version blocks before consent is even considered.
-        when (val decision = ConsentGate.check(consent, report)) {
+        when (val decision = ConsentGate.check(consent, report, bundledOfflineSelected)) {
             is ConsentDecision.Block ->
                 return SpeechStartOutcome.Blocked(SpeechBlockReason.of(decision.reason))
 
@@ -309,7 +310,7 @@ class SpeechSessionCoordinator(
         }
 
         // 5. Mode comes from the verified report alone.
-        val mode = recognitionModeFor(report)
+        val mode = recognitionModeFor(report, bundledOfflineSelected)
             ?: return SpeechStartOutcome.Blocked(SpeechBlockReason.CapabilityUnavailable)
 
         val ready = buildPlan(report, mode, languageTag)
@@ -389,6 +390,16 @@ class SpeechSessionCoordinator(
     /** Final hypothesis from a recogniser. Text only; B05 bounds and timestamps it. */
     fun onUtterance(text: String?, confidence: Float? = null): SpeechEvent = session.onFinalResult(text, confidence).also {
         if (it is SpeechEvent.Accepted) synchronized(lock) { retryAttempt = 0; error = null }
+    }
+
+    /** The Android platform recognizer is single-shot after a final result; start its next turn. */
+    fun onPlatformFinalResult(text: String?, confidence: Float? = null): SpeechEvent {
+        val event = onUtterance(text, confidence)
+        val activePlan = currentPlan
+        if (activePlan != null && session.state is SpeechSessionState.Listening) {
+            session.replaceRecognizer(handleFactory(activePlan.recognitionMode))
+        }
+        return event
     }
 
     /** Interim hypothesis, forwarded so the host sees the same words the user hears. */
@@ -507,9 +518,11 @@ class AndroidSpeechRecognizerAdapter(
     }, { _ ->
         // The mode parameter is informational: the handle re-derives it from the same report, so a
         // caller cannot hand it a mode the report does not support.
-        AndroidSpeechRecognizerHandle(context, session, report, languageTag, recognizerFactory) { code ->
-            this@AndroidSpeechRecognizerAdapter.onError(code)
-        }
+        AndroidSpeechRecognizerHandle(
+            context, session, report, languageTag, recognizerFactory,
+            finalResultListener = { text, confidence -> this@AndroidSpeechRecognizerAdapter.onPlatformFinalResult(text, confidence) },
+            errorListener = { code -> this@AndroidSpeechRecognizerAdapter.onError(code) },
+        )
     })
 
     /** True while the session this adapter drives is live (`Starting` / `Listening`). */
@@ -564,6 +577,9 @@ class AndroidSpeechRecognizerAdapter(
     /** Forwards a final hypothesis. Text only; nothing is logged or persisted. */
     fun onUtterance(text: String?, confidence: Float? = null): SpeechEvent =
         coordinator.onUtterance(text, confidence)
+
+    fun onPlatformFinalResult(text: String?, confidence: Float? = null): SpeechEvent =
+        coordinator.onPlatformFinalResult(text, confidence)
 
     /** Forwards an interim hypothesis. */
     fun onPartialUtterance(text: String?, confidence: Float? = null): SpeechEvent =
