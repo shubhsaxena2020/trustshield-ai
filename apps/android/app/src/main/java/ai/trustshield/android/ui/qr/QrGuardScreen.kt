@@ -142,7 +142,9 @@ fun QrGuardScreen(
 
             CounterPanel(state = state, lang = lang, dark = dark)
 
-            paymentAdvisory?.let { advisory ->
+            paymentAdvisory?.takeIf {
+                state.phase == QrPhase.WATCH || state.phase == QrPhase.RE_REGISTER
+            }?.let { advisory ->
                 ai.trustshield.android.ui.result.PaymentAdvisoryCard(
                     advisory = advisory,
                     language = when (lang) {
