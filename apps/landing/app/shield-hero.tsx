@@ -1,10 +1,12 @@
 "use client";
 
 import { Component, useEffect, useRef, useState, type ReactNode } from "react";
+import Image from "next/image";
 
-class SceneBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+class SceneBoundary extends Component<{ children: ReactNode; onFailure: () => void }, { failed: boolean }> {
   state = { failed: false };
   static getDerivedStateFromError() { return { failed: true }; }
+  componentDidCatch() { this.props.onFailure(); }
   render() { return this.state.failed ? null : this.props.children; }
 }
 
@@ -59,10 +61,10 @@ export default function ShieldHero() {
     if (visual.current) visual.current.style.transform = "translate3d(0,0,0)";
   }
 
-  return <div className="shield-visual" onPointerMove={handlePointerMove} onPointerLeave={resetPointer}>
-    <div className="css-shield" aria-hidden="true"><span>✓</span></div>
+  return <div className={Scene ? "shield-visual three-active" : "shield-visual"} onPointerMove={handlePointerMove} onPointerLeave={resetPointer}>
+    <Image className="shield-fallback" src="/shield-static.svg" alt="" width={320} height={360} priority />
     <div className="css-bubble bubble-one" aria-hidden="true">OTP?</div>
     <div className="css-bubble bubble-two" aria-hidden="true">PAY</div>
-    <div ref={visual} className="shield-motion" aria-hidden="true">{Scene && <SceneBoundary><Scene /></SceneBoundary>}</div>
+    <div ref={visual} className="shield-motion" aria-hidden="true">{Scene && <SceneBoundary onFailure={() => setScene(null)}><Scene /></SceneBoundary>}</div>
   </div>;
 }
