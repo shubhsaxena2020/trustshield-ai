@@ -42,6 +42,8 @@ enum class AppLanguage {
     HINDI
 }
 
+enum class VoiceRecognitionChoice { AUTOMATIC, OFFLINE_ONLY, ONLINE_PREFERRED }
+
 /** Resolve the persisted choice for rendering without replacing SYSTEM in storage. */
 fun resolveLanguage(language: AppLanguage, systemLanguageTag: String?): AppLanguage {
     if (language != AppLanguage.SYSTEM) return language
@@ -154,6 +156,9 @@ object SettingsKeys {
     const val SENSITIVITY = "settings.sensitivity"
     const val HAPTICS = "settings.haptics"
     const val REDUCED_MOTION = "settings.reduced_motion"
+    const val VOICE_RECOGNITION = "settings.voice_recognition"
+    const val SPOKEN_VERDICT_MUTED = "settings.spoken_verdict_muted"
+    const val SPOKEN_VERDICT_RATE = "settings.spoken_verdict_rate"
 
     /** Complete allowlist, in the deterministic order used by [UserPreferences.toMap]. */
     val ALL: List<String> = listOf(
@@ -161,7 +166,10 @@ object SettingsKeys {
         LANGUAGE,
         SENSITIVITY,
         HAPTICS,
-        REDUCED_MOTION
+        REDUCED_MOTION,
+        VOICE_RECOGNITION,
+        SPOKEN_VERDICT_MUTED,
+        SPOKEN_VERDICT_RATE
     )
 
     /**
@@ -199,7 +207,10 @@ data class UserPreferences(
     val language: AppLanguage = AppLanguage.SYSTEM,
     val sensitivity: Sensitivity = Sensitivity.BALANCED,
     val haptics: Boolean = true,
-    val reducedMotion: Boolean = false
+    val reducedMotion: Boolean = false,
+    val voiceRecognition: VoiceRecognitionChoice = VoiceRecognitionChoice.AUTOMATIC,
+    val spokenVerdictMuted: Boolean = false,
+    val spokenVerdictRate: Float = 1.0f
 ) {
 
     /** Deterministic, ordered, string-only encoding. The only shape that is ever persisted. */
@@ -208,7 +219,10 @@ data class UserPreferences(
         SettingsKeys.LANGUAGE to language.name,
         SettingsKeys.SENSITIVITY to sensitivity.name,
         SettingsKeys.HAPTICS to haptics.toString(),
-        SettingsKeys.REDUCED_MOTION to reducedMotion.toString()
+        SettingsKeys.REDUCED_MOTION to reducedMotion.toString(),
+        SettingsKeys.VOICE_RECOGNITION to voiceRecognition.name,
+        SettingsKeys.SPOKEN_VERDICT_MUTED to spokenVerdictMuted.toString(),
+        SettingsKeys.SPOKEN_VERDICT_RATE to spokenVerdictRate.coerceIn(0.75f, 1.25f).toString()
     )
 
     /**
@@ -237,7 +251,11 @@ data class UserPreferences(
                 language = parseEnum(raw[SettingsKeys.LANGUAGE], base.language),
                 sensitivity = parseEnum(raw[SettingsKeys.SENSITIVITY], base.sensitivity),
                 haptics = parseBoolean(raw[SettingsKeys.HAPTICS], base.haptics),
-                reducedMotion = parseBoolean(raw[SettingsKeys.REDUCED_MOTION], base.reducedMotion)
+                reducedMotion = parseBoolean(raw[SettingsKeys.REDUCED_MOTION], base.reducedMotion),
+                voiceRecognition = parseEnum(raw[SettingsKeys.VOICE_RECOGNITION], base.voiceRecognition),
+                spokenVerdictMuted = parseBoolean(raw[SettingsKeys.SPOKEN_VERDICT_MUTED], base.spokenVerdictMuted),
+                spokenVerdictRate = raw[SettingsKeys.SPOKEN_VERDICT_RATE]?.toFloatOrNull()
+                    ?.takeIf { it.isFinite() }?.coerceIn(0.75f, 1.25f) ?: base.spokenVerdictRate
             )
         }
 

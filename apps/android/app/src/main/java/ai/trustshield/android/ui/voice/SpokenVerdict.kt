@@ -14,6 +14,7 @@ data class SpokenVerdictContent(
 interface SpokenVerdictTts {
     fun hasVoice(languageTag: String): Boolean
     fun speak(text: String, languageTag: String): Boolean
+    fun setSpeechRate(rate: Float) = Unit
     fun stop()
 }
 
@@ -32,7 +33,11 @@ class SpokenVerdictSpeaker(private val tts: SpokenVerdictTts) {
     ): SpokenVerdictResult {
         val resolved = resolveLanguage(language, systemLanguageTag)
         val primaryTag = if (resolved == AppLanguage.ENGLISH) SpeechLanguage.EN_IN else SpeechLanguage.HI_IN
-        val candidates = if (primaryTag == SpeechLanguage.HI_IN) {
+        val candidates = if (resolved == AppLanguage.ENGLISH) {
+            listOf(SpeechLanguage.EN_IN, SpeechLanguage.EN_US)
+        } else if (primaryTag == SpeechLanguage.HI_IN) {
+            // Hinglish verdicts contain Hindi advice and labels, so the local hi-IN voice
+            // preserves the dominant pronunciation; en-IN remains a tested fallback.
             listOf(SpeechLanguage.HI_IN, SpeechLanguage.EN_IN)
         } else {
             listOf(SpeechLanguage.EN_IN)

@@ -71,6 +71,7 @@ import ai.trustshield.android.data.preferences.AppLanguage
 import ai.trustshield.android.data.preferences.UserPreferences
 import ai.trustshield.android.data.preferences.resolveLanguage
 import ai.trustshield.android.data.preferences.Sensitivity
+import ai.trustshield.android.data.preferences.VoiceRecognitionChoice
 import ai.trustshield.android.ui.home.ScanInputEvent
 import ai.trustshield.android.ui.home.ScanInputState
 import ai.trustshield.android.ui.home.ScanScreen
@@ -427,7 +428,14 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
     var recognitionLanguage by recognitionLanguageState
     val scriptDetector = remember(selectedSpeechTag) { SpeechScriptLanguageDetector(selectedSpeechTag) }
     var recognitionLanguageStatus by remember { mutableStateOf<String?>(null) }
-    val speechRoute = remember { OfflineSpeechPolicy(networkReachable = networkIsValidated(context)) }
+    val prefs = LocalUserPreferences.current
+    val sink = LocalPreferencesSink.current
+    val speechRoute = remember(prefs.voiceRecognition) {
+        OfflineSpeechPolicy(
+            networkReachable = networkIsValidated(context),
+            userSelected = prefs.voiceRecognition == VoiceRecognitionChoice.OFFLINE_ONLY,
+        )
+    }
     val hostRef = remember { mutableStateOf<CallShieldHost?>(null) }
     var offlineMode by remember(speechRoute) { mutableStateOf(speechRoute.useOffline) }
     var offlineFailureAction by remember { mutableStateOf<(() -> Unit)?>(null) }
@@ -471,8 +479,6 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
         created
     }
     val host = remember(coordinator) { CallShieldHost(coordinator) }.also { hostRef.value = it }
-    val prefs = LocalUserPreferences.current
-    val sink = LocalPreferencesSink.current
     // Issue #138. `CallShieldHost` owns the call session, not the user's presentation choices, and
     // it is built before this screen reads any preference — so `host.state` always carries
     // `CallUiState`'s defaults (HINGLISH, haptics on). Copying it verbatim (start / stop / pause /
@@ -587,10 +593,13 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
     CallShieldScreen(
         state = state,
         modifier = Modifier.weight(1f),
-        offlineStatus = if (offlineMode && state.isListening) ToneCopy(
-            "Offline mode: phone par hi speech pehchaan",
-            "Offline mode: on-device speech recognition",
-            "ऑफ़लाइन मोड: आवाज़ फ़ोन पर ही पहचानी जाती है",
+        offlineStatus = if (state.isListening) ToneCopy(
+            if (offlineMode) "Offline voice. Online: your voice is sent to Google's speech service. Offline: processed on this phone."
+            else "Online voice (Google). Online: your voice is sent to Google's speech service. Offline: processed on this phone.",
+            if (offlineMode) "Offline voice. Online: your voice is sent to Google's speech service. Offline: processed on this phone."
+            else "Online voice (Google). Online: your voice is sent to Google's speech service. Offline: processed on this phone.",
+            if (offlineMode) "ऑफ़लाइन आवाज़। ऑनलाइन: आपकी आवाज़ Google की speech service को भेजी जाती है। ऑफ़लाइन: इसी फ़ोन पर process होती है।"
+            else "ऑनलाइन आवाज़ (Google)। ऑनलाइन: आपकी आवाज़ Google की speech service को भेजी जाती है। ऑफ़लाइन: इसी फ़ोन पर process होती है।",
         ) else null,
         onEvent = { event ->
             when (event) {
@@ -689,6 +698,13 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
             )
         }
     }
+    }
+    LaunchedEffect(prefs.voiceRecognition) {
+        when (prefs.voiceRecognition) {
+            VoiceRecognitionChoice.OFFLINE_ONLY -> speechRoute.selectOffline(true)
+            VoiceRecognitionChoice.AUTOMATIC, VoiceRecognitionChoice.ONLINE_PREFERRED -> speechRoute.selectOnlinePreferred()
+        }
+        offlineMode = speechRoute.useOffline
     }
     LaunchedEffect(consent, micGranted, prefs.language, recognitionLanguage, offlineMode) {
         val mic = if (micGranted) SpeechMicPermission.Granted else SpeechMicPermission.Denied
@@ -977,6 +993,13 @@ fun QrGuardRouteHost(onPayeesChanged: (List<RegisteredPayee>) -> Unit = {}) {
 fun SettingsRouteHost() {
     val prefs = LocalUserPreferences.current
     val sink = LocalPreferencesSink.current
+    val context = LocalContext.current
+    val settingsTts = remember(context) { AndroidSpokenVerdictTts(context) }
+    val settingsSpeaker = remember(settingsTts) { SpokenVerdictSpeaker(settingsTts) }
+    var voiceMessage by remember { mutableStateOf<String?>(null) }
+    DisposableEffect(settingsTts, settingsSpeaker) {
+        onDispose { settingsSpeaker.stop(); settingsTts.shutdown() }
+    }
     var state by remember { mutableStateOf(SettingsState.from(prefs)) }
 
     SettingsScreen(
@@ -987,8 +1010,29 @@ fun SettingsRouteHost() {
                 sink(next.preferences)
             }
             state = next
+        },
+        onPlayVoiceSample = {
+            settingsTts.setSpeechRate(prefs.spokenVerdictRate)
+            val result = settingsSpeaker.speak(
+                prefs.language,
+                SpokenVerdictContent("TrustShield", "Aapka verdict tayyar hai. Your verdict is ready.", emptyList()),
+                Locale.getDefault().toLanguageTag(),
+            )
+            voiceMessage = if (result is SpokenVerdictResult.Spoken) null else ToneCopy(
+                "Is bhasha ka voice data nahi mila. Ab speech data install karein.",
+                "This language voice is missing. Install speech data now.",
+                "इस भाषा की आवाज़ उपलब्ध नहीं है। Speech data install करें।",
+            ).forLanguage(prefs.language).also { settingsTts.installLanguageData() }
+        },
+        onVoiceSelfTest = {
+            voiceMessage = ToneCopy(
+                "Voice self-test abhi uplabdh nahi hai.",
+                "Voice self-test is not available yet.",
+                "Voice self-test अभी उपलब्ध नहीं है।",
+            ).forLanguage(prefs.language)
         }
     )
+    voiceMessage?.let { Text(it, modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.bodySmall) }
 }
 
 /**

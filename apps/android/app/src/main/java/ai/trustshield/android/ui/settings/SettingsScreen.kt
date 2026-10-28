@@ -24,6 +24,7 @@ import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.ButtonDefaults
@@ -76,6 +77,8 @@ import ai.trustshield.android.ui.theme.TrustShieldTheme
 fun SettingsScreen(
     state: SettingsState,
     onEvent: (SettingsEvent) -> Unit,
+    onPlayVoiceSample: () -> Unit = {},
+    onVoiceSelfTest: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val copy: (SettingText) -> String = { state.text(it) }
@@ -152,6 +155,60 @@ fun SettingsScreen(
                 onClick = { onEvent(SettingsEvent.SelectLanguage(AppLanguage.HINDI)) }
             )
             SupportingNote(copy(SettingsCopy.languageHint))
+        }
+
+        // ---- Voice ---------------------------------------------------------------------------
+        SettingsSection(title = ToneCopy("Voice", "Voice", "आवाज़").forLanguage(state.language)) {
+            OptionRow(
+                label = ToneCopy("Automatic (default)", "Automatic (default)", "Automatic (default)").forLanguage(state.language),
+                detail = ToneCopy("Online par Google; offline par phone", "Google online; phone offline", "Online par Google; offline par phone").forLanguage(state.language),
+                selected = state.preferences.voiceRecognition == ai.trustshield.android.data.preferences.VoiceRecognitionChoice.AUTOMATIC,
+                onClick = { onEvent(SettingsEvent.SelectVoiceRecognition(ai.trustshield.android.data.preferences.VoiceRecognitionChoice.AUTOMATIC)) }
+            )
+            OptionRow(
+                label = ToneCopy("Offline only (Vosk)", "Offline only (Vosk)", "Sirf offline (Vosk)").forLanguage(state.language),
+                detail = ToneCopy("Network kabhi use nahi hoga", "Never uses the network", "Network kabhi use nahi hoga").forLanguage(state.language),
+                selected = state.preferences.voiceRecognition == ai.trustshield.android.data.preferences.VoiceRecognitionChoice.OFFLINE_ONLY,
+                onClick = { onEvent(SettingsEvent.SelectVoiceRecognition(ai.trustshield.android.data.preferences.VoiceRecognitionChoice.OFFLINE_ONLY)) }
+            )
+            OptionRow(
+                label = ToneCopy("Online preferred", "Online preferred", "Online preferred").forLanguage(state.language),
+                detail = ToneCopy("Google recogniser ko preference dein", "Prefer Google's recogniser", "Google recogniser ko preference dein").forLanguage(state.language),
+                selected = state.preferences.voiceRecognition == ai.trustshield.android.data.preferences.VoiceRecognitionChoice.ONLINE_PREFERRED,
+                onClick = { onEvent(SettingsEvent.SelectVoiceRecognition(ai.trustshield.android.data.preferences.VoiceRecognitionChoice.ONLINE_PREFERRED)) }
+            )
+            SupportingNote(ToneCopy(
+                "Online: your voice is sent to Google's speech service. Offline: processed on this phone.",
+                "Online: your voice is sent to Google's speech service. Offline: processed on this phone.",
+                "Online par: aapki voice Google speech service ko bheji jaati hai. Offline par: isi phone par process hoti hai."
+            ).forLanguage(state.language))
+            ToggleRow(
+                label = ToneCopy("Spoken verdict", "Spoken verdict", "Spoken verdict").forLanguage(state.language),
+                detail = ToneCopy("Verdict ko awaaz mein sunayein", "Read the verdict aloud", "Verdict ko awaaz mein sunayein").forLanguage(state.language),
+                checked = !state.preferences.spokenVerdictMuted,
+                testTag = "settings_spoken_verdict_toggle",
+                onCheckedChange = { onEvent(SettingsEvent.SetSpokenVerdictMuted(!it)) }
+            )
+            Text(
+                ToneCopy("Speech rate: %.2fx".format(state.preferences.spokenVerdictRate), "Speech rate: %.2fx".format(state.preferences.spokenVerdictRate), "Speech rate: %.2fx".format(state.preferences.spokenVerdictRate)).forLanguage(state.language),
+                modifier = Modifier.padding(top = TsTokens.SpacingXs)
+            )
+            Slider(
+                value = state.preferences.spokenVerdictRate,
+                onValueChange = { onEvent(SettingsEvent.SetSpokenVerdictRate(it)) },
+                valueRange = 0.75f..1.25f,
+                steps = 9,
+                modifier = Modifier.fillMaxWidth().heightIn(min = TsTokens.MinTouchTarget)
+                    .semantics { contentDescription = ToneCopy("Speech rate", "Speech rate", "Speech rate").forLanguage(state.language) }
+            )
+            OutlinedButton(
+                onClick = onPlayVoiceSample,
+                modifier = Modifier.fillMaxWidth().heightIn(min = TsTokens.MinTouchTarget)
+            ) { Text(ToneCopy("Play sample", "Play sample", "Sample sunayein").forLanguage(state.language)) }
+            OutlinedButton(
+                onClick = onVoiceSelfTest,
+                modifier = Modifier.fillMaxWidth().heightIn(min = TsTokens.MinTouchTarget)
+            ) { Text(ToneCopy("Voice self-test", "Voice self-test", "Voice self-test").forLanguage(state.language)) }
         }
 
         // ---- Sensitivity ---------------------------------------------------------------------
