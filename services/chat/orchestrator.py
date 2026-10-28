@@ -99,7 +99,7 @@ def _is_document_attachment(data=None, declared_mime=None, filename=None):
     return False
 
 
-def analyze_turn(message: str, image: tuple[bytes, str | None, str | None] | None, plan: RoutePlan) -> tuple[AnalysisResult, list[str]]:
+def analyze_turn(message: str, image: tuple[bytes, str | None, str | None] | list[tuple[bytes, str | None, str | None]] | None, plan: RoutePlan) -> tuple[AnalysisResult, list[str]]:
     """Returns (fused result, input_types that were actually analysed)."""
     text = (message or "").strip()
     if plan.kind == "url":
