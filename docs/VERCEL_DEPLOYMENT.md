@@ -14,6 +14,7 @@ The browser calls the API with relative URLs (`/api/v1/...`), so production need
 `CORS_ALLOWED_ORIGINS` and then allows no cross-origin caller). Local development keeps `http://localhost:8000` and
 `http://localhost:3000`. The API receives the original path (`/api/v1/...`); `/api/v1/healthz` and `/api/v1/readyz` exist because only
 `/api/*` is routed to the backend.
+Vercel may add `Access-Control-Allow-Origin: *` to public static HTML responses; this does not enable cross-origin access to the API or user data.
 
 ## What was verified about the platform (docs + a throwaway probe project, deleted afterwards)
 
@@ -51,7 +52,7 @@ check then verifies the v1 artifact against the manifest) and redeploy. Retraini
 `PORT=8000`, `TRUSTSHIELD_ENV=production` (the same hardened profile everywhere), `ENABLE_WEB_SANDBOX=false`,
 `TRUSTSHIELD_TRUSTED_PROXY_HOPS=1` (observed: the edge sets a single `X-Forwarded-For` entry). Unset: `CORS_ALLOWED_ORIGINS`,
 `NEXT_PUBLIC_API_URL` (same-origin), `TRUSTSHIELD_DEBUG_PROXY` (observation-only route; set temporarily on a Preview, never in production).
-`MAX_UPLOAD_SIZE=4194304` is baked into the image (below the 4.5 MB platform cap; the chat UI limits each message's combined attachments to 4 MB).
+`MAX_UPLOAD_SIZE=4194304` is baked into the image (below the 4.5 MB platform cap; the chat UI limits each message's combined attachments to 4 MB to leave room for multipart overhead). Requests above Vercel's 4.5 MB platform limit are rejected before reaching FastAPI, so only the browser can provide a tailored message for those requests.
 
 ## Workflow: local -> Preview (staging) -> Production
 
@@ -107,8 +108,7 @@ The conversational assistant is the production web experience. `/api/v1/chat/str
 new environment variables are required (`TRUSTSHIELD_AI_PROVIDER` is ignored in production). Same limits as before: Hobby, 2 GiB / 1 vCPU,
 4 MiB total browser-side attachment budget, sandbox disabled, stateless, per-instance rate limits.
 
-## Historical conversational AI assistant preview
+## Historical preview configuration
 
-Same deployment shape as the conversational build above; no new infrastructure. `TRUSTSHIELD_AI_PROVIDER` is unset on this
-Preview, so every reply is the deterministic provider — no LLM credential exists or is used. See
-`docs/PROVIDER_CONFIGURATION.md` for exactly what enabling a remote provider would require (a paid API key; not done).
+An earlier preview used the deterministic provider because `TRUSTSHIELD_AI_PROVIDER` was unset; this describes that preview only, not the production conversational build. See
+`docs/PROVIDER_CONFIGURATION.md` for the requirements to enable a remote provider.

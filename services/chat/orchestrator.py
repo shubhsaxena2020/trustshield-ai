@@ -69,6 +69,9 @@ _DOCUMENT_MIMES = {
 
 
 def _is_document_attachment(data=None, declared_mime=None, filename=None):
+    raw = data or b""
+    if raw.startswith((b"\x89PNG\r\n\x1a\n", b"\xff\xd8\xff")) or (raw.startswith(b"RIFF") and raw[8:12] == b"WEBP"):
+        return False
     if filename and "." in filename:
         if filename.rsplit(".", 1)[-1].lower() in {e.lstrip(".") for e in _DOCUMENT_EXTENSIONS}:
             return True
@@ -76,7 +79,6 @@ def _is_document_attachment(data=None, declared_mime=None, filename=None):
         media = declared_mime.split(";", 1)[0].strip().lower()
         if media in _DOCUMENT_MIMES or media.startswith("text/"):
             return True
-    raw = data or b""
     head = raw[:8]
     if head.startswith(b"%PDF"):
         return True

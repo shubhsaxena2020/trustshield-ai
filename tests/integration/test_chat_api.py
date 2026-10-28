@@ -371,3 +371,10 @@ def test_stream_does_not_claim_generic_unscanned_text_was_analysed():
     if meta["intent"]["intent"] == "analyze_text" and not any(event["type"] == "analysis" for event in events):
         assert meta["response_type"] == "chat"
         assert "answered conversationally" in meta["intent"]["reason"]
+
+
+def test_image_bytes_with_text_mime_are_identified_as_images(monkeypatch):
+    monkeypatch.setenv("TRUSTSHIELD_OCR_PROVIDER", "mock")
+    response = client.post("/api/v1/chat/upload", files={"file": ("qr.txt", _qr_png("https://example.com/mime"), "text/plain")})
+    assert response.status_code == 200, response.text
+    assert response.json()["analysis"]["qr_payload"] == "https://example.com/mime"
