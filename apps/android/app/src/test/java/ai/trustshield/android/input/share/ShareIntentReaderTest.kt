@@ -202,6 +202,18 @@ class ShareIntentReaderTest {
         )
     }
 
+    @Test
+    fun clipTextItemsAreCapped() {
+        val parts = (1..50_000).map { "x$it" }
+        val read = ShareIntentReaderCore.read(
+            snapshot(clipItemCount = parts.size, clipTextParts = parts),
+        )
+
+        val text = accepted(read).share.content as SharedContent.Text
+        assertEquals((1..20).joinToString("\n") { "x$it" }, text.text)
+        assertTrue(read.issueCodes().contains("clip_items_truncated"))
+    }
+
     // ------------------------------------------------------------------ action validation
 
     @Test

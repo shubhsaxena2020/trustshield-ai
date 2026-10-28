@@ -7,6 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -43,6 +44,7 @@ import ai.trustshield.android.ui.theme.TrustShieldTheme
 import java.util.Locale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.launch
 
 /**
  * The single activity. It owns nothing but the theme and the navigation host: no scoring, no network,
@@ -62,6 +64,7 @@ class MainActivity : ComponentActivity() {
     private var incomingImageUri: String? by mutableStateOf(null)
     private var resultOutcome: ScanOutcome? by mutableStateOf(null)
     private var visibleRoute: AppRoute by mutableStateOf(AppRoute.HOME)
+    private var shareReadSequence = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
@@ -74,17 +77,10 @@ class MainActivity : ComponentActivity() {
         // status bar is never light-on-light. Insets are consumed by AppNavHost (safeDrawingPadding).
         enableEdgeToEdge()
         requestedEntry = routeFromIntent(intent)
-        incomingText = sharedText(intent)
-        incomingImageUri = sharedImageUri(intent)
-        if (incomingText != null) {
-            requestedEntry = AppRoute.HOME
-            entrySequence++
-        } else if (incomingImageUri != null) {
-            requestedEntry = AppRoute.HOME
-            entrySequence++
-        }
+        if (isShareIntent(intent)) requestedEntry = AppRoute.HOME
+        readSharedIntent(intent)
         val explicitRoute = routeFromIntent(intent)
-        if (restoredWithoutOutcome && incomingText == null && incomingImageUri == null &&
+        if (restoredWithoutOutcome && !isShareIntent(intent) &&
             (explicitRoute == null || explicitRoute == AppRoute.RESULT)
         ) {
             // A process-death restore cannot recover the in-memory verdict without persisting the
@@ -191,15 +187,8 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        incomingText = sharedText(intent)
-        incomingImageUri = sharedImageUri(intent)
-        if (incomingText != null) {
-            requestedEntry = AppRoute.HOME
-            entrySequence++
-        } else if (incomingImageUri != null) {
-            requestedEntry = AppRoute.HOME
-            entrySequence++
-        }
+        if (isShareIntent(intent)) requestedEntry = AppRoute.HOME
+        readSharedIntent(intent)
         routeFromIntent(intent)?.let { route ->
             requestedEntry = route
             entrySequence++
@@ -218,29 +207,37 @@ class MainActivity : ComponentActivity() {
     private fun routeFromIntent(intent: Intent?): AppRoute? =
         AppRoute.fromWire(intent?.getStringExtra(AppRoute.EXTRA_ROUTE))
 
-    private fun sharedText(intent: Intent?): String? {
-        if (intent == null) return null
-        val shareIntent = if (intent.action == Intent.ACTION_SEND_MULTIPLE && intent.type == "text/plain") {
-            Intent(intent).setAction(Intent.ACTION_SEND)
-        } else intent
-        val read = ShareIntentReader(this).read(shareIntent) as? ShareIntentRead.Accepted ?: return null
-        val accepted = read.share.accept()
-        return when (val content = accepted.content) {
-            is SharedContent.Text, is SharedContent.Link, is SharedContent.TextAndLink ->
-                accepted.analysableOrNull()?.takeIf { it.isNotBlank() }
-            else -> null
+    private fun readSharedIntent(intent: Intent?) {
+        val incoming = intent?.takeIf(::isShareIntent) ?: return
+        val sequence = ++shareReadSequence
+        lifecycleScope.launch {
+            val payload = withContext(Dispatchers.IO) {
+                val source = if (incoming.action == Intent.ACTION_SEND_MULTIPLE && incoming.type == "text/plain") {
+                    Intent(incoming).setAction(Intent.ACTION_SEND)
+                } else incoming
+                val accepted = (ShareIntentReader(this@MainActivity).read(source) as? ShareIntentRead.Accepted)
+                    ?.share?.accept() ?: return@withContext null to null
+                val text = when (accepted.content) {
+                    is SharedContent.Text, is SharedContent.Link, is SharedContent.TextAndLink ->
+                        accepted.analysableOrNull()?.takeIf(String::isNotBlank)
+                    else -> null
+                }
+                val image = when (val content = accepted.content) {
+                    is SharedContent.Images -> content.image.uriString
+                    is SharedContent.MultipleImages -> content.images.firstOrNull()?.uriString
+                    else -> null
+                }
+                text to image
+            }
+            if (sequence != shareReadSequence) return@launch
+            incomingText = payload.first
+            incomingImageUri = payload.second
+            if (payload.first != null || payload.second != null) entrySequence++
         }
     }
 
-    private fun sharedImageUri(intent: Intent?): String? {
-        if (intent == null) return null
-        val read = ShareIntentReader(this).read(intent) as? ShareIntentRead.Accepted ?: return null
-        return when (val content = read.share.accept().content) {
-            is SharedContent.Images -> content.image.uriString
-            is SharedContent.MultipleImages -> content.images.firstOrNull()?.uriString
-            else -> null
-        }
-    }
+    private fun isShareIntent(intent: Intent?): Boolean =
+        intent?.action == Intent.ACTION_SEND || intent?.action == Intent.ACTION_SEND_MULTIPLE
 
     private companion object {
         const val STATE_ENTRY_SEQUENCE = "trustshield.entry_sequence"
