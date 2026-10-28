@@ -513,6 +513,12 @@ internal object HindiCopy {
             "White" -> "सफ़ेद"
             "Black" -> "काला"
             "Follows your phone's appearance." -> "फ़ोन की थीम के अनुसार दिखता है।"
+            "The message was too long, so only its beginning was checked." -> "संदेश बहुत लंबा था, इसलिए केवल उसके शुरुआती हिस्से की जाँच हुई।"
+            "No text was available to check." -> "जाँच के लिए कोई पाठ उपलब्ध नहीं था।"
+            "The text was too short for a reliable check." -> "विश्वसनीय जाँच के लिए पाठ बहुत छोटा था।"
+            "The audio was unclear, so this result is less reliable." -> "ऑडियो स्पष्ट नहीं था, इसलिए इस नतीजे पर कम भरोसा करें।"
+            "No scam pattern was found. That does not prove the message is 100% safe." -> "धोखाधड़ी का पैटर्न नहीं मिला। इससे यह साबित नहीं होता कि संदेश पूरी तरह सुरक्षित है।"
+            "Older call content left the analysis window; only recent words were fully checked." -> "कॉल की पुरानी बातें विश्लेषण से बाहर हो गईं; केवल हाल के शब्दों की पूरी जाँच हुई।"
             else -> resultTranslations[source] ?: translations[source] ?: source
         }
     }

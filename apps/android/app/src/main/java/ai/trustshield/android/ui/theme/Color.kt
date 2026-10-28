@@ -50,7 +50,7 @@ object TsTokens {
     // AccentDark 8.74:1 | RiskGreenDark 10.16:1 | RiskAmberDark 10.25:1 | RiskRedDark 8.02:1
     // Hues are lifted and desaturated so each stays recognisable while clearing 4.5:1 as text.
 
-    val AccentDark = Color(0xFFFFFFFF)
+    val AccentDark = Color(0xFF000000)
     val RiskGreenDark = Color(0xFF4ED9A4)
     val RiskAmberDark = Color(0xFFF5B85C)
     val RiskRedDark = Color(0xFFFF8A93)
@@ -134,7 +134,7 @@ object TsPalette {
 
     val AccentContainerDark = Color(0xFF292929)
     val OnAccentContainerDark = Color(0xFFFFFFFF)
-    val OnAccentFillDark = Color(0xFF000000)
+    val OnAccentFillDark = Color(0xFFFFFFFF)
 
     // Tone containers (see RiskTone.container / RiskTone.onContainer)
     val NeutralContainerLight = Color(0xFFE5E5E5)
