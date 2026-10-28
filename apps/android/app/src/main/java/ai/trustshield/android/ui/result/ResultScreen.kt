@@ -38,7 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.platform.LocalAccessibilityManager
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -97,9 +97,9 @@ fun ResultScreen(
     modifier: Modifier = Modifier
 ) {
     var speechUnavailable by remember(language) { mutableStateOf(false) }
-    val accessibilityManager = LocalAccessibilityManager.current
+    val view = LocalView.current
     LaunchedEffect(state.risk, state.confidence, language, riskScore) {
-        accessibilityManager?.announceForAccessibility(state.screenDescription(language, riskScore))
+        view.announceForAccessibility(state.screenDescription(language, riskScore))
     }
     Column(
         modifier = modifier
