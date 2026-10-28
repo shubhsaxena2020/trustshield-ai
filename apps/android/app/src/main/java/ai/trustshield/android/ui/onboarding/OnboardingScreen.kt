@@ -71,7 +71,7 @@ fun OnboardingScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                OnboardingIllustration(page, MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primaryContainer)
+                OnboardingIllustration(page, MaterialTheme.colorScheme.onSurface, MaterialTheme.colorScheme.secondaryContainer)
                 Spacer(Modifier.height(28.dp))
                 Text(
                     text = title(page).forLanguage(resolved),
