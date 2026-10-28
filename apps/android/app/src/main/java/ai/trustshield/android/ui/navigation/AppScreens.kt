@@ -331,11 +331,12 @@ fun TrustShieldRouteContent(
     sharedImageUri: String? = null,
     onSharedImageConsumed: () -> Unit = {},
     historyEntries: List<MetadataCheck> = emptyList(),
+    registeredPayees: List<RegisteredPayee> = emptyList(),
+    onRegisteredPayeesChanged: (List<RegisteredPayee>) -> Unit = {},
     onClearHistory: () -> Unit = {}
 ) {
     val nav = LocalNavActions.current
     val clipboard = LocalClipboardManager.current
-    var registeredPayees by remember { mutableStateOf(emptyList<RegisteredPayee>()) }
     when (route) {
         AppRoute.HOME -> HomeRouteHost(
             english = english,
@@ -354,7 +355,7 @@ fun TrustShieldRouteContent(
         AppRoute.CALL_SHIELD -> CallShieldRouteHost(language)
         AppRoute.BOMB_SHIELD -> ai.trustshield.android.ui.bomb.BombShieldScreen(language) { nav.back() }
          AppRoute.HISTORY -> HistoryScreen(historyEntries, language, onClearHistory)
-         AppRoute.QR_GUARD -> QrGuardRouteHost { registeredPayees = it }
+         AppRoute.QR_GUARD -> QrGuardRouteHost(onRegisteredPayeesChanged)
         AppRoute.SETTINGS -> SettingsRouteHost()
     }
 }
@@ -457,7 +458,7 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
         onDispose { spokenVerdict.stop(); tts.shutdown() }
     }
     val session = retained.session ?: remember {
-        CallSpeechSession(consentGranted = true).also { created ->
+        CallSpeechSession(consentGranted = false).also { created ->
             retained.sessionSnapshot?.let(created::restore)
             retained.sessionSnapshot = null
             retained.session = created
@@ -612,7 +613,7 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
                 ToneCopy(
                     "Vosk offline sirf Hindi pehchanta hai. English ke liye system recogniser use karein.",
                     "The on-device recogniser is Hindi-only. No English model is bundled.",
-                    "Vosk offline sirf Hindi pehchanta hai. English ke liye system recogniser use karein.",
+                    "Vosk offline केवल हिंदी पहचानता है। अंग्रेज़ी के लिए सिस्टम वाक् पहचान चुनें।",
                 ).forLanguage(selectedLanguage.toCallLanguage()),
                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
                 style = MaterialTheme.typography.bodySmall,

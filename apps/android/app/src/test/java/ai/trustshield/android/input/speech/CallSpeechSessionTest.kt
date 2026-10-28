@@ -115,6 +115,18 @@ class CallSpeechSessionTest {
     }
 
     @Test
+    fun consentMustBeGrantedOnThisSessionBeforeStartCanReachTheRecognizer() {
+        val handle = FakeHandle()
+        val session = CallSpeechSession(clock = { 1_000L })
+
+        assertEquals(StartResult.Refused(RefusalReason.NO_CONSENT), session.start(handle))
+        assertEquals(0, handle.starts)
+        session.setConsentGranted(true)
+        assertEquals(StartResult.Started, session.start(handle))
+        assertEquals(1, handle.starts)
+    }
+
+    @Test
     fun startWithConsentReachesStartingThenListening() {
         val handle = FakeHandle()
         val session = CallSpeechSession(clock = { 1_000L }, consentGranted = true)

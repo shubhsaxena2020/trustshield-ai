@@ -984,16 +984,19 @@ object QrGuidanceCopy {
         QrGuidance.REGISTER_PAYEE -> QrStrings.setupNeedsPayee
         QrGuidance.GRANT_CAMERA_PERMISSION -> ToneCopy(
             QrStrings.cameraDenied.hinglish + " " + QrStrings.cameraDeniedHelp.hinglish,
-            QrStrings.cameraDenied.english + " " + QrStrings.cameraDeniedHelp.english
+            QrStrings.cameraDenied.english + " " + QrStrings.cameraDeniedHelp.english,
+            QrStrings.cameraDenied.hindi + " " + QrStrings.cameraDeniedHelp.hindi
         )
         QrGuidance.NO_CAMERA -> ToneCopy(
             QrStrings.cameraNone.hinglish + " " + QrStrings.cameraNoneHelp.hinglish,
-            QrStrings.cameraNone.english + " " + QrStrings.cameraNoneHelp.english
+            QrStrings.cameraNone.english + " " + QrStrings.cameraNoneHelp.english,
+            QrStrings.cameraNone.hindi + " " + QrStrings.cameraNoneHelp.hindi
         )
         QrGuidance.OCCLUDED -> QrSignalCopy.of(QrSignal.UNREADABLE_TIMEOUT).detail
         QrGuidance.MISMATCH_ACTION -> ToneCopy(
             QrSignalCopy.of(QrSignal.MISMATCH).detail.hinglish + " " + QrStrings.stopPaymentNow.hinglish,
-            QrSignalCopy.of(QrSignal.MISMATCH).detail.english + " " + QrStrings.stopPaymentNow.english
+            QrSignalCopy.of(QrSignal.MISMATCH).detail.english + " " + QrStrings.stopPaymentNow.english,
+            QrSignalCopy.of(QrSignal.MISMATCH).detail.hindi + " " + QrStrings.stopPaymentNow.hindi
         )
         QrGuidance.PIN_LOCKED_OUT -> QrStrings.pinLockedOut
         QrGuidance.PIN_NOT_CONFIGURED -> QrStrings.pinNotConfigured

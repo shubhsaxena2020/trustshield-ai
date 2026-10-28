@@ -236,6 +236,8 @@ class SpeechSessionCoordinator(
     private val handleFactory: (SpeechRecognitionMode) -> RecognizerHandle,
 ) {
 
+    fun setConsentGranted(granted: Boolean) = session.setConsentGranted(granted)
+
     private val lock = Any()
     private var plan: SpeechSessionPlan? = null
     private var error: SpeechSessionState.Error? = null

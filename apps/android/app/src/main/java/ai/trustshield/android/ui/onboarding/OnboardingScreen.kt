@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
@@ -96,7 +97,7 @@ fun OnboardingScreen(
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
             repeat(3) { page ->
                 Surface(
-                    color = if (pager.currentPage == page) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,
+                    color = if (pager.currentPage == page) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.outline,
                     shape = CircleShape,
                     modifier = Modifier.size(if (pager.currentPage == page) 10.dp else 8.dp)
                 ) { }
@@ -111,7 +112,7 @@ fun OnboardingScreen(
                     else pager.animateScrollToPage(pager.currentPage + 1)
                 }
             },
-            modifier = Modifier.fillMaxWidth().height(56.dp)
+            modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)
         ) {
             Text(
                 if (pager.currentPage == 2) {
@@ -124,7 +125,7 @@ fun OnboardingScreen(
         if (pager.currentPage < 2) {
             OutlinedButton(colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
                 onClick = onComplete,
-                modifier = Modifier.fillMaxWidth().height(52.dp)
+                modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp)
             ) { Text(ToneCopy("Abhi nahi", "Skip", "छोड़ें").forLanguage(resolved)) }
         }
     }
