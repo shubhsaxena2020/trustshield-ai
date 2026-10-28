@@ -1,5 +1,5 @@
 <resources>
-    <color name="trustshield_blue">#000000</color>
+    <color name="trustshield_monochrome">#000000</color>
     <color name="launcher_background">#000000</color>
     <color name="splash_background">#FFFFFF</color>
     <color name="trustshield_splash_tint">#000000</color>

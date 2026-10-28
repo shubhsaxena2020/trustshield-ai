@@ -101,7 +101,7 @@ internal object LocalEvidenceAdapter {
 
     fun evidence(item: Evidence): ResultEvidenceInput {
         val english = evidenceCopy[item.titleHinglish]
-            ?: EnglishCopy("Signal detected", "This signal is shown with its exact quote and contributes to the overall assessment.")
+            ?: EnglishCopy(item.titleHinglish, item.detail)
         return ResultEvidenceInput(
             id = item.id,
             module = when (item.module) {

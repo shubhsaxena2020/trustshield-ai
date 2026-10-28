@@ -47,6 +47,22 @@ class LocalEvidenceAdapterTest {
     }
 
     @Test
+    fun unmappedEvidenceKeepsItsSpecificReasonInsteadOfGenericCopy() {
+        val evidence = Evidence.unquoted(
+            module = "local_fusion",
+            titleHinglish = "Unknown sender pattern",
+            detail = "The sender asks you to verify a payment through an unfamiliar channel.",
+            severity = Severity.MODERATE,
+            strength = Strength.MODERATE,
+        )
+
+        val result = LocalEvidenceAdapter.evidence(evidence)
+
+        assertEquals("Unknown sender pattern", result.titleEnglish)
+        assertEquals("The sender asks you to verify a payment through an unfamiliar channel.", result.detailEnglish)
+    }
+
+    @Test
     fun englishResultActionUsesEnglishCopy() {
         val result = LocalEvidenceAdapter.action(LocalScorer.ACTION_HIGH_STOP, 0)
 

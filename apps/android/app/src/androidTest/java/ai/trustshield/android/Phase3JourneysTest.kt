@@ -234,9 +234,9 @@ class Phase3JourneysTest {
         launchRoute(AppRoute.SETTINGS)
 
         tapText("Hinglish")
-        waitForText(SETTINGS_HINGLISH_LIGHT)
+        waitForVisibleLabel(SETTINGS_HINGLISH_LIGHT)
         tapText("English")
-        waitForText(SETTINGS_ENGLISH_LIGHT)
+        waitForVisibleLabel(SETTINGS_ENGLISH_LIGHT)
 
         // Stable tag targets the haptics switch independent of translated labels and radio controls.
         compose.onNode(hasTestTag("settings_haptics_toggle")).performScrollTo().performClick()
@@ -252,14 +252,14 @@ class Phase3JourneysTest {
         // English copy and the toggle position both survived the recreation: the switch is still
         // off after the activity is rebuilt, which is what "persisted across restart" means for a
         // value the user can see.
-        waitForText(SETTINGS_ENGLISH_LIGHT)
+        waitForVisibleLabel(SETTINGS_ENGLISH_LIGHT)
         compose.onNode(hasTestTag("settings_haptics_toggle")).performScrollTo().assertIsOff()
     }
 
     @Test
     fun settingsDeviceCheck_reportsPlatformAndPermissionSnapshot() {
         launchRoute(AppRoute.SETTINGS)
-        waitForText(SETTINGS_HINGLISH_LIGHT)
+        waitForVisibleLabel(SETTINGS_HINGLISH_LIGHT)
         tapText("Device ki jaankari dekhein")
 
         waitForText("Android")
@@ -400,6 +400,13 @@ class Phase3JourneysTest {
         }
     }
 
+    private fun waitForVisibleLabel(text: String, timeoutMs: Long = 15_000) {
+        compose.waitUntil(timeoutMs) {
+            compose.onAllNodes(hasText(text, substring = true)).fetchSemanticsNodes().isNotEmpty() ||
+                compose.onAllNodes(hasContentDescription(text, substring = true)).fetchSemanticsNodes().isNotEmpty()
+        }
+    }
+
     private fun waitForScanField() {
         assertTrue("scan input field was not shown", waitForAnyText(15_000, SCAN_FIELD_LABEL, SCAN_FIELD_ENGLISH))
     }
@@ -491,7 +498,7 @@ class Phase3JourneysTest {
         const val QR_STOP_PAYMENT = "payment mat karein"
         const val QR_OCCLUSION_NOT_TAMPER = "tamper ka saboot nahi"
 
-        const val SETTINGS_HINGLISH_LIGHT = "Hamesha light"
-        const val SETTINGS_ENGLISH_LIGHT = "Always light"
+        const val SETTINGS_HINGLISH_LIGHT = "White"
+        const val SETTINGS_ENGLISH_LIGHT = "White"
     }
 }

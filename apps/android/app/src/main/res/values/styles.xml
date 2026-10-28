@@ -6,7 +6,7 @@
     </style>
 
     <style name="Theme.TrustShield.App" parent="android:style/Theme.Material.Light.NoActionBar">
-        <item name="android:colorAccent">@color/trustshield_blue</item>
+        <item name="android:colorAccent">@color/trustshield_monochrome</item>
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>

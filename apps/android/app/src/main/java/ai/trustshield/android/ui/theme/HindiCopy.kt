@@ -503,5 +503,17 @@ internal object HindiCopy {
         "This is a suggested next step; confirm important requests independently." to "यह केवल अगला कदम सुझाता है; ज़रूरी अनुरोधों की अलग से पुष्टि करें।",
     )
 
-    fun forEnglish(source: String): String = resultTranslations[source] ?: translations[source] ?: source
+    fun forEnglish(source: String): String {
+        val unsupportedLanguagePrefix = "This language is not fully supported yet: "
+        if (source.startsWith(unsupportedLanguagePrefix)) {
+            return "यह भाषा अभी पूरी तरह समर्थित नहीं है: " + source.removePrefix(unsupportedLanguagePrefix)
+        }
+        return when (source) {
+            "System" -> "सिस्टम"
+            "White" -> "सफ़ेद"
+            "Black" -> "काला"
+            "Follows your phone's appearance." -> "फ़ोन की थीम के अनुसार दिखता है।"
+            else -> resultTranslations[source] ?: translations[source] ?: source
+        }
+    }
 }

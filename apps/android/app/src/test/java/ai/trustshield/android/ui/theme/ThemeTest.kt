@@ -107,20 +107,20 @@ class ThemeTest {
 
     @Test
     fun brandAndRiskHuesAreExactlyTheSpecValues() {
-        assertHex("Accent", 0xFF2F6BFFL, TsTokens.Accent)
+        assertHex("monochrome Accent", 0xFF000000L, TsTokens.Accent)
         assertHex("RiskGreen", 0xFF16845BL, TsTokens.RiskGreen)
         assertHex("RiskAmber", 0xFFB86B00L, TsTokens.RiskAmber)
         assertHex("RiskRed", 0xFFC73642L, TsTokens.RiskRed)
 
-        // The four hues must be recognisably different from each other, not merely unequal ints.
+        // Interface accents are monochrome; only the risk tones retain distinct hues.
         assertPairwiseDistinct(
-            "light brand hues",
-            listOf(TsTokens.Accent, TsTokens.RiskGreen, TsTokens.RiskAmber, TsTokens.RiskRed),
+            "light risk hues",
+            listOf(TsTokens.RiskGreen, TsTokens.RiskAmber, TsTokens.RiskRed),
             minChannelDistance = 60
         )
         assertPairwiseDistinct(
-            "dark brand hues",
-            listOf(TsTokens.AccentDark, TsTokens.RiskGreenDark, TsTokens.RiskAmberDark, TsTokens.RiskRedDark),
+            "dark risk hues",
+            listOf(TsTokens.RiskGreenDark, TsTokens.RiskAmberDark, TsTokens.RiskRedDark),
             minChannelDistance = 60
         )
     }
@@ -128,7 +128,6 @@ class ThemeTest {
     @Test
     fun darkCounterpartsAreLighterAndClearNormalTextOnDarkSurface() {
         listOf(
-            "Accent" to (TsTokens.Accent to TsTokens.AccentDark),
             "RiskGreen" to (TsTokens.RiskGreen to TsTokens.RiskGreenDark),
             "RiskAmber" to (TsTokens.RiskAmber to TsTokens.RiskAmberDark),
             "RiskRed" to (TsTokens.RiskRed to TsTokens.RiskRedDark)
@@ -210,11 +209,7 @@ class ThemeTest {
     }
 
     /**
-     * The two spec hues that *cannot* carry normal text on a light surface, pinned as measured facts.
-     *
-     * This is why [TsTokens.AccentTextLight] / [TsTokens.RiskAmberTextLight] and
-     * [TsPalette.AccentFillLight] exist: the spec hexes are brand-exact and must not drift, so the
-     * token layer answers the gap explicitly instead of leaving screens to guess which hue is safe.
+     * Monochrome controls and risk colors retain safe text contrast on the white theme.
      */
     @Test
     fun specHexesThatMissNormalTextOnLightAreDocumentedAndHaveSafeAlternatives() {
@@ -227,10 +222,7 @@ class ThemeTest {
             )
         )
 
-        assertTrue(
-            "Accent should sit just under 4.5:1 on the light surface; measured $accentOnLight",
-            accentOnLight < Contrast.NORMAL_TEXT_MIN && accentOnLight >= Contrast.NON_TEXT_MIN
-        )
+        assertTrue("Monochrome accent must meet normal-text contrast", accentOnLight >= Contrast.NORMAL_TEXT_MIN)
         assertTrue(
             "RiskAmber should sit under 4.5:1 on the light surface; measured $amberOnLight",
             amberOnLight < Contrast.NORMAL_TEXT_MIN && amberOnLight >= Contrast.NON_TEXT_MIN
