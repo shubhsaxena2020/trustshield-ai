@@ -1195,8 +1195,7 @@ private fun CameraPanel(
         if (!permission.canUseCamera) {
             Text(
                 text = QrHostCopy.manualFallback.text(lang),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                style = MaterialTheme.typography.bodySmall
             )
         }
     }
@@ -1355,8 +1354,7 @@ private fun SimulatePanel(
         )
         Text(
             text = QrHostCopy.simulationHelp.text(lang),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            style = MaterialTheme.typography.bodySmall
         )
 
         DemoButtonRow(
