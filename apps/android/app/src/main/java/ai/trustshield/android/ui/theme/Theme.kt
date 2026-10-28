@@ -52,7 +52,7 @@ object TsColorSchemes {
     )
 
     val Dark: ColorScheme = darkColorScheme(
-        primary = TsTokens.AccentDark,
+        primary = TsPalette.OnSurfaceDark,
         onPrimary = TsPalette.OnAccentFillDark,
         primaryContainer = TsPalette.AccentContainerDark,
         onPrimaryContainer = TsPalette.OnAccentContainerDark,
