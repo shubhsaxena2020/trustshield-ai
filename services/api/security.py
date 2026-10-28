@@ -101,7 +101,7 @@ class BodyLimitMiddleware:
         max_bytes = self.chat_upload_max_bytes if scope.get("path") == "/api/v1/chat/upload" else self.max_bytes
         declared = next((v for k, v in scope["headers"] if k == b"content-length"), None)
         if declared is not None and declared.isdigit() and int(declared) > max_bytes:
-            start, body = _json_response_parts(413, {"detail": "Request body too large"})
+            start, body = _json_response_parts(413, {"detail": "This upload is too large. Please use a smaller file."})
             await send(start)
             await send(body)
             return
@@ -127,7 +127,7 @@ class BodyLimitMiddleware:
             if message["type"] == "http.response.start":
                 if exceeded and not started:
                     # A parser downstream may have turned the aborted read into a 400; the real reason is size.
-                    start, body = _json_response_parts(413, {"detail": "Request body too large"})
+                    start, body = _json_response_parts(413, {"detail": "This upload is too large. Please use a smaller file."})
                     started = suppress = True
                     await send(start)
                     await send(body)
@@ -139,7 +139,7 @@ class BodyLimitMiddleware:
             await self.app(scope, limited_receive, tracking_send)
         except _BodyTooLarge:
             if not started:
-                start, body = _json_response_parts(413, {"detail": "Request body too large"})
+                start, body = _json_response_parts(413, {"detail": "This upload is too large. Please use a smaller file."})
                 await send(start)
                 await send(body)
 

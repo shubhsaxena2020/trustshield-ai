@@ -18,7 +18,7 @@ export function RiskCard({ analysis }: { analysis: ChatAnalysis }) {
         <dl className="flex flex-wrap gap-x-6 gap-y-1 text-sm">
           <div className="flex gap-1">
             <dt className="text-zinc-500">Risk score</dt>
-            <dd className="font-semibold">{analysis.risk_score}/100</dd>
+            <dd className="font-semibold">{analysis.risk_level === "unable_to_verify" ? "not available" : `${analysis.risk_score}/100`}</dd>
           </div>
           <div className="flex gap-1">
             <dt className="text-zinc-500">Confidence</dt>
@@ -26,9 +26,11 @@ export function RiskCard({ analysis }: { analysis: ChatAnalysis }) {
           </div>
         </dl>
       </div>
-      <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-zinc-200" role="img" aria-label={`Risk score ${analysis.risk_score} out of 100`}>
-        <div className="h-full rounded-full bg-teal-400" style={{ width: `${Math.min(100, Math.max(0, analysis.risk_score))}%` }} />
-      </div>
+      {analysis.risk_level !== "unable_to_verify" && (
+        <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-zinc-200" role="img" aria-label={`Risk score ${analysis.risk_score} out of 100`}>
+          <div className="h-full rounded-full bg-teal-400" style={{ width: `${Math.min(100, Math.max(0, analysis.risk_score))}%` }} />
+        </div>
+      )}
 
       {analysis.qr_payload && (
         <p className="mt-3 break-all text-sm">
