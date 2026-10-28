@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -69,7 +70,7 @@ fun HistoryScreen(
             EmptyHistory(copy)
         } else {
             LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(entries, key = { item -> item.checkedAtMillis }) { item ->
+                items(entries, key = { item -> "${item.checkedAtMillis}:${item.verdict.wire}" }) { item ->
                     HistoryRow(item = item, language = language)
                 }
             }
@@ -99,7 +100,7 @@ private fun HistoryRow(item: MetadataCheck, language: AppLanguage) {
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().height(TsTokens.MinTouchTarget).padding(horizontal = 14.dp),
+            modifier = Modifier.fillMaxWidth().heightIn(min = TsTokens.MinTouchTarget).padding(horizontal = 14.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {

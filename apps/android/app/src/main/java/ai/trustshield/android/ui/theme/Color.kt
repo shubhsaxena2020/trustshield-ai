@@ -19,10 +19,9 @@ import kotlin.math.pow
  *
  *  1. **Brand / hazard hues** ([Accent], [RiskGreen], [RiskAmber], [RiskRed]) — exact spec hexes.
  *     Use them for fills, strokes, icons, indicators, progress arcs. They clear the WCAG 2.1
- *     *non-text* minimum (>= 3:1) against the light surface; amber is 3.87:1 and accent 4.27:1, so
- *     neither may be used for normal-size body text on a light background.
+ *     *non-text* minimum (>= 3:1) against the light surface; use the text-safe hues for body text.
  *  2. **Dark counterparts** ([AccentDark], [RiskGreenDark], [RiskAmberDark], [RiskRedDark]) —
- *     measured 8.0:1 .. 10.3:1 against the dark surface, so they are safe for text *and* graphics.
+ *     checked by [ThemeTest] against the current dark surface.
  *  3. **Text-safe light hues** ([AccentTextLight], [RiskGreenTextLight], [RiskAmberTextLight],
  *     [RiskRedTextLight]) — the light-mode answer to (1) for normal-size text, each >= 6.1:1 on the
  *     light surface.
@@ -37,27 +36,23 @@ object TsTokens {
     /** Monochrome foreground used for fills, focus rings and indicators. */
     val Accent = Color(0xFF000000)
 
-    /** Risk green, `#16845B`. 4.68:1 on white, 4.44:1 on [TsPalette.SurfaceLight]. */
+    /** Risk green, `#16845B`; use as a graphic on light surfaces. */
     val RiskGreen = Color(0xFF16845B)
 
-    /** Risk amber, `#B86B00`. 4.09:1 on white -> graphics only, never normal text on light. */
+    /** Risk amber, `#B86B00`; use as a graphic on light surfaces. */
     val RiskAmber = Color(0xFFB86B00)
 
-    /** Risk red, `#C73642`. 5.21:1 on white, safe for text on light. */
+    /** Risk red, `#C73642`; use the text-safe token for light surface text. */
     val RiskRed = Color(0xFFC73642)
 
-    // ---- Accessible dark counterparts (measured against TsPalette.SurfaceDark #12161F) -------------
-    // AccentDark 8.74:1 | RiskGreenDark 10.16:1 | RiskAmberDark 10.25:1 | RiskRedDark 8.02:1
-    // Hues are lifted and desaturated so each stays recognisable while clearing 4.5:1 as text.
+    // ---- Dark counterparts, measured against the current theme surface in ThemeTest ----------------
 
-    val AccentDark = Color(0xFF000000)
+    val AccentDark = Color(0xFF757575)
     val RiskGreenDark = Color(0xFF4ED9A4)
     val RiskAmberDark = Color(0xFFF5B85C)
     val RiskRedDark = Color(0xFFFF8A93)
 
-    // ---- Text-safe light hues (measured against TsPalette.SurfaceLight #F7F9FC) --------------------
-    // AccentTextLight 6.51:1 | RiskGreenTextLight 6.27:1 | RiskAmberTextLight 6.17:1
-    // RiskRedTextLight 6.66:1
+    // ---- Text-safe light hues, measured against the current theme surface in ThemeTest -------------
     // Only the amber/accent entries are strictly required (the spec hexes miss 4.5:1 on light), but
     // the whole band exists so a screen never has to reason about which hue is safe where.
 
@@ -112,15 +107,15 @@ object TsPalette {
     val SurfaceLight = Color(0xFFF5F5F5)
     val BackgroundLight = Color(0xFFFFFFFF)
     val OnSurfaceLight = Color(0xFF000000)
-    val OnSurfaceVariantLight = Color(0xFF595959)
-    val SurfaceVariantLight = Color(0xFFE5E5E5)
+    val OnSurfaceVariantLight = Color(0xFF1F1F1F)
+    val SurfaceVariantLight = Color(0xFF888888)
     val OutlineLight = Color(0xFF595959)
-    val OutlineVariantLight = Color(0xFFD0D0D0)
+    val OutlineVariantLight = Color(0xFF595959)
 
     /** White theme primary buttons use a white fill and black text. */
-    val AccentFillLight = Color(0xFFFFFFFF)
+    val AccentFillLight = Color(0xFF888888)
     val OnAccentFillLight = Color(0xFF000000)
-    val AccentContainerLight = Color(0xFFE5E5E5)
+    val AccentContainerLight = Color(0xFF888888)
     val OnAccentContainerLight = Color(0xFF000000)
 
     // Dark
@@ -130,9 +125,9 @@ object TsPalette {
     val OnSurfaceVariantDark = Color(0xFFBDBDBD)
     val SurfaceVariantDark = Color(0xFF242424)
     val OutlineDark = Color(0xFFBDBDBD)
-    val OutlineVariantDark = Color(0xFF414141)
+    val OutlineVariantDark = Color(0xFF757575)
 
-    val AccentContainerDark = Color(0xFF292929)
+    val AccentContainerDark = Color(0xFF757575)
     val OnAccentContainerDark = Color(0xFFFFFFFF)
     val OnAccentFillDark = Color(0xFFFFFFFF)
 
@@ -146,7 +141,7 @@ object TsPalette {
     val RedContainerLight = Color(0xFFFBE0E2)
     val OnRedContainerLight = Color(0xFF6E141C)     // 9.47:1
 
-    val NeutralContainerDark = Color(0xFF242424)
+    val NeutralContainerDark = Color(0xFF757575)
     val OnNeutralContainerDark = Color(0xFFFFFFFF)
     val GreenContainerDark = Color(0xFF10321F)
     val OnGreenContainerDark = Color(0xFFA8E9C9)    // 10.12:1
@@ -183,7 +178,7 @@ fun RiskTone.onContainer(dark: Boolean): Color = when (this) {
 
 /**
  * Brand hue for the tone: icon tint, left rule, meter fill. Non-text graphics only on light
- * (accent 4.27:1, green 4.44:1, amber 3.87:1, red 4.94:1 vs [TsPalette.SurfaceLight] -> all >= 3:1).
+ * Contrast of the selected graphic token is covered by [ThemeTest].
  */
 fun RiskTone.accent(dark: Boolean): Color = when (this) {
     RiskTone.NEUTRAL -> if (dark) TsPalette.OnSurfaceVariantDark else TsPalette.OnSurfaceVariantLight

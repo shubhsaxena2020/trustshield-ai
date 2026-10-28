@@ -79,9 +79,11 @@ class ThemeTest {
         "onSecondary / secondary" to (scheme.onSecondary to scheme.secondary),
         "onSecondaryContainer / secondaryContainer" to (scheme.onSecondaryContainer to scheme.secondaryContainer),
         "onTertiary / tertiary" to (scheme.onTertiary to scheme.tertiary),
+        "onTertiaryContainer / tertiaryContainer" to (scheme.onTertiaryContainer to scheme.tertiaryContainer),
         "onError / error" to (scheme.onError to scheme.error),
         "onErrorContainer / errorContainer" to (scheme.onErrorContainer to scheme.errorContainer),
-        "inverseOnSurface / inverseSurface" to (scheme.inverseOnSurface to scheme.inverseSurface)
+        "inverseOnSurface / inverseSurface" to (scheme.inverseOnSurface to scheme.inverseSurface),
+        "inversePrimary / inverseSurface" to (scheme.inversePrimary to scheme.inverseSurface)
     )
 
     private fun assertPairwiseDistinct(what: String, colors: List<Color>, minChannelDistance: Int) {
@@ -206,6 +208,13 @@ class ThemeTest {
         }
         assertNonText("outline / SurfaceLight", TsColorSchemes.Light.outline, TsPalette.SurfaceLight)
         assertNonText("outline / SurfaceDark", TsColorSchemes.Dark.outline, TsPalette.SurfaceDark)
+        assertNonText("primary fill / SurfaceLight", TsColorSchemes.Light.primary, TsColorSchemes.Light.surface)
+        assertNonText("primary fill / SurfaceDark", TsColorSchemes.Dark.primary, TsColorSchemes.Dark.surface)
+        assertNonText("outlineVariant / SurfaceLight", TsColorSchemes.Light.outlineVariant, TsColorSchemes.Light.surface)
+        assertNonText("outlineVariant / SurfaceDark", TsColorSchemes.Dark.outlineVariant, TsColorSchemes.Dark.surface)
+        assertNonText("surfaceVariant / SurfaceLight", TsColorSchemes.Light.surfaceVariant, TsColorSchemes.Light.surface)
+        assertNonText("accentContainer / SurfaceDark", TsPalette.AccentContainerDark, TsPalette.SurfaceDark)
+        assertNonText("neutralContainer / SurfaceDark", TsPalette.NeutralContainerDark, TsPalette.SurfaceDark)
     }
 
     /**

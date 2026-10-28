@@ -47,7 +47,6 @@ internal object HindiCopy {
         "Elapsed" to "बीता समय",
         "Hinglish" to "हिंग्लिश",
         "Permission first" to "पहले अनुमति दें",
-        "Call Shield uses the microphone only after you start it. \${path.english} \$storageEn" to "Call Shield माइक्रोफ़ोन का उपयोग तभी करता है जब आप इसे शुरू करते हैं। \${path.hindi} \$storageHi",
         "I understand, give permission" to "मैं समझता/समझती हूँ, अनुमति दें",
         "Permission noted. The session starts only after microphone and speech checks." to "अनुमति दर्ज हो गई। सत्र तभी शुरू होगा जब माइक्रोफ़ोन और वाणी की जाँच पूरी होगी।",
         "Start session" to "सत्र शुरू करें",
@@ -72,9 +71,7 @@ internal object HindiCopy {
         "not yet" to "अभी नहीं मिला",
         "Risk level" to "जोखिम स्तर",
         "The level comes from the pattern of words only; it is not a judgement about any person." to "यह स्तर केवल बोले गए शब्दों के पैटर्न पर आधारित है; यह किसी व्यक्ति के बारे में फैसला नहीं है।",
-        "Confidence" to "विश्वास स्तर",
         "Confidence describes how clearly the audio was understood — not a probability that anyone is guilty." to "विश्वास स्तर बताता है कि आवाज़ कितनी स्पष्ट समझी गई — यह किसी के दोषी होने की संभावना नहीं है।",
-        "Unable to verify" to "जाँच नहीं हो सकी",
         "Low" to "कम",
         "Medium" to "मध्यम",
         "High" to "ज़्यादा",
@@ -277,20 +274,7 @@ internal object HindiCopy {
         "Hindi" to "हिन्दी",
         "OK" to "ठीक है",
         "Result" to "नतीजा",
-        "Score: \$score/100" to "स्कोर: \$score/100",
         "The system language is selected by default. Choose Hinglish, English or Hindi here." to "डिफ़ॉल्ट रूप से फ़ोन की भाषा चुनी जाती है। यहाँ हिंग्लिश, अंग्रेज़ी या हिन्दी चुनें।",
-        "None of the quotes matched the source text" to "कोई उद्धरण दिए गए स्रोत-पाठ से मेल नहीं खाता।",
-        "Do not tap any link, do not share an OTP or money, and verify by calling the official bank/police number yourself." to "किसी लिंक पर न जाएँ, OTP या पैसे साझा न करें, और बैंक या पुलिस के आधिकारिक नंबर पर खुद कॉल करके पुष्टि करें।",
-        "We cannot give a firm verdict on this input. Below is what failed and the safest next step." to "इस इनपुट पर पक्का निर्णय नहीं दिया जा सकता। नीचे बताई गई कमी और सुरक्षित अगला कदम देखें।",
-        "The text or language could not be read fully, so confidence is low." to "टेक्स्ट या भाषा पूरी तरह पढ़ी नहीं जा सकी, इसलिए भरोसे का स्तर कम है।",
-        "No evidence quote could be verified." to "किसी भी साक्ष्य उद्धरण की पुष्टि नहीं हो सकी।",
-        "What you can do" to "आप क्या कर सकते हैं",
-        "What we found (with exact quotes)" to "क्या मिला (सटीक उद्धरण सहित)",
-        "Low confidence" to "कम भरोसा",
-        "Medium confidence" to "मध्यम भरोसा",
-        "High confidence" to "ज़्यादा भरोसा",
-        "Exact quote" to "सटीक उद्धरण",
-        "Pattern check" to "पैटर्न जाँच",
         "Sanstha ka dawa" to "संस्था का दावा",
         "Message bank, police ya kisi sarkari agency ki taraf se bolne ka dawa karta hai. Akele yeh scam ka saboot nahi hai, lekin asli sanstha OTP ya paise phone par nahi maangti." to "संदेश बैंक, पुलिस या सरकारी एजेंसी से होने का दावा करता है। यह अकेले धोखाधड़ी का प्रमाण नहीं है, लेकिन असली संस्था फ़ोन पर OTP या पैसे नहीं माँगती।",
         "Arrest ya legal dhamki" to "गिरफ़्तारी या कानूनी धमकी",
@@ -298,7 +282,6 @@ internal object HindiCopy {
         "Yeh message akele khatra nahi dikhata. Anjaan link par OTP ya paise phir bhi na dein." to "यह संदेश अकेले जोखिम नहीं दिखाता। फिर भी अनजान लिंक पर OTP न दें और पैसे न भेजें।",
         "This next step is for you to consider." to "इस अगले कदम पर आप विचार कर सकते हैं।"
     )
-
     private val resultTranslations = mapOf(
         "The message instructs you to remain on a video call." to "संदेश आपको वीडियो कॉल पर बने रहने का निर्देश देता है।",
         "Stop for now. Do not share an OTP, PIN, password, or money." to "अभी रुकें। OTP, PIN, पासवर्ड या पैसे साझा न करें।",
@@ -503,6 +486,10 @@ internal object HindiCopy {
         "This is a suggested next step; confirm important requests independently." to "यह केवल अगला कदम सुझाता है; ज़रूरी अनुरोधों की अलग से पुष्टि करें।",
     )
 
+
+    internal fun duplicateEnglishKeys(): Set<String> = translations.keys.intersect(resultTranslations.keys)
+
+    internal fun allHindiValues(): List<String> = (translations.values + resultTranslations.values).toList()
     fun forEnglish(source: String): String {
         val unsupportedLanguagePrefix = "This language is not fully supported yet: "
         if (source.startsWith(unsupportedLanguagePrefix)) {

@@ -189,6 +189,7 @@ class CallShieldHost(
     ) {
         if (cleared) return
         this.consent = consent
+        coordinator.setConsentGranted(consent.canStartSession)
         this.report = report
         bundledOfflineSelected = offlineEngineSelected
         state = state.copy(

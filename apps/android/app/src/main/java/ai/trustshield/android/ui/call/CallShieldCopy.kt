@@ -74,20 +74,31 @@ object CallShieldCopy {
 
     val consentTitle = ToneCopy("Pehle anumati", "Permission first")
     fun consentBody(disclosure: RecognitionDisclosure): ToneCopy {
-        val path = analysisDisclosure(disclosure)
-        val storageHi = "App audio recording store nahi karta; pehchana gaya text sirf is session ki memory me " +
-            "rehta hai aur Stop par hata diya jata hai."
-        val storageEn = "The app does not store audio recordings; recognized text stays in session memory only " +
-            "and is cleared when you stop."
-        val storageHindi = "ऐप ऑडियो रिकॉर्डिंग सेव नहीं करता; पहचाना गया टेक्स्ट केवल इस सेशन की मेमोरी में रहता है " +
-            "और Stop करने पर मिटा दिया जाता है।"
+        val disclosureEnglish = when (disclosure) {
+            RecognitionDisclosure.NOT_CHECKED -> "The recognition path has not been checked; the recognizer may use the internet and audio may leave this device."
+            RecognitionDisclosure.ON_DEVICE_UNVERIFIED -> "Offline behavior is unverified; this on-device recognition path has not been tested."
+            RecognitionDisclosure.MAY_USE_NETWORK -> "The recognizer may use the internet and audio may leave this device."
+            RecognitionDisclosure.UNAVAILABLE -> "Speech recognition is unavailable on this device."
+        }
+        val disclosureHinglish = when (disclosure) {
+            RecognitionDisclosure.NOT_CHECKED -> "Recognition path check nahi hua; recognizer internet use kar sakta hai aur awaaz phone se bahar ja sakti hai."
+            RecognitionDisclosure.ON_DEVICE_UNVERIFIED -> "Offline behavior verify nahi hua; is on-device recognition path ka test nahi hua."
+            RecognitionDisclosure.MAY_USE_NETWORK -> "Recognizer internet use kar sakta hai aur awaaz phone se bahar ja sakti hai."
+            RecognitionDisclosure.UNAVAILABLE -> "Is device par speech recognition available nahi hai."
+        }
+        val disclosureHindi = when (disclosure) {
+            RecognitionDisclosure.NOT_CHECKED -> "???? ????? ?? ????? ????? ???? ??? ??; ?????????? ??????? ???????? ?? ???? ?? ?? ????? ?? ???? ?? ???? ?? ???? ???"
+            RecognitionDisclosure.ON_DEVICE_UNVERIFIED -> "??????? ??????? ???????? ???? ??; ?????? ?? ????? ?? ?? ????? ?? ??????? ???? ??? ???"
+            RecognitionDisclosure.MAY_USE_NETWORK -> "?????????? ??????? ???????? ?? ???? ?? ?? ????? ?? ???? ?? ???? ?? ???? ???"
+            RecognitionDisclosure.UNAVAILABLE -> "?? ?????? ?? ???? ????? ?????? ???? ???"
+        }
         return ToneCopy(
-            "Call Shield tabhi mic use karta hai jab aap shuru karein. ${path.hinglish} $storageHi",
-            "Call Shield uses the microphone only after you start it. ${path.english} $storageEn",
-            "Call Shield माइक्रोफ़ोन का उपयोग केवल आपके शुरू करने पर करता है। ${path.hindi} $storageHindi"
+            "Start karne par Call Shield aas-paas ki baat sun kar text banata hai. $disclosureHinglish Recording save nahi hoti. Automatic ya Online mode mein internet hone par awaaz sirf Google Speech ko bheji ja sakti hai; kahin aur nahi.",
+            "After you start, Call Shield listens to nearby speech and turns it into text. $disclosureEnglish Audio is not recorded or stored. In Automatic or Online mode, if internet is available, speech may be sent only to Google Speech; it is not sent anywhere else. The app does not store audio recordings.",
+            "???? ???? ?? Call Shield ????? ?? ??? ????? ??? ??????? ??? ????? ??? $disclosureHindi ????? ??????? ?? ??? ???? ????? Automatic ?? Online ??? ??? ??????? ?????? ???? ?? ????? ???? Google Speech ?? ???? ?? ???? ??; ??? ???? ?? ???? ???? ?????"
         )
     }
-    val consentAction = ToneCopy("Main samajh gaya, anumati deta hoon", "I understand, give permission")
+    val consentAction = ToneCopy("Main samajh gaya, anumati deta hoon", "I understand and agree", "\u092e\u0948\u0902 \u0938\u092e\u091d \u0917\u092f\u093e/\u0917\u092f\u0940 \u0939\u0942\u0901 \u0914\u0930 \u0938\u0939\u092e\u0924\u093f \u0926\u0947\u0924\u093e/\u0926\u0947\u0924\u0940 \u0939\u0942\u0901")
     val consentGiven = ToneCopy(
         "Anumati note hui. Mic aur speech check ke baad hi session shuru hoga.",
         "Permission noted. The session starts only after microphone and speech checks."

@@ -56,7 +56,7 @@ class CallSpeechSession(
     private val clock: () -> Long = { System.currentTimeMillis() },
     private val windowMs: Long = DEFAULT_WINDOW_MS,
     private val maxUtterances: Int = DEFAULT_MAX_UTTERANCES,
-    private val consentGranted: Boolean = false,
+    consentGranted: Boolean = false,
     private val lowConfidenceThreshold: Float = DEFAULT_LOW_CONFIDENCE,
     private val maxTextChars: Int = DEFAULT_MAX_TEXT_CHARS,
 ) {
@@ -68,6 +68,7 @@ class CallSpeechSession(
     }
 
     private val lock = Any()
+    private var consentGranted: Boolean = consentGranted
     private val rolling = ArrayDeque<Utterance>()
 
     private var currentState: SpeechSessionState = SpeechSessionState.Idle
@@ -108,6 +109,14 @@ class CallSpeechSession(
     /** Drops recognizer callbacks while the app's own spoken alert is playing. */
     fun setInputSuppressed(suppressed: Boolean) {
         inputSuppressed = suppressed
+    }
+
+    /** Consent is session-scoped and must be explicitly granted before start. */
+    fun setConsentGranted(granted: Boolean) {
+        synchronized(lock) {
+            consentGranted = granted
+            if (!granted && (currentState is SpeechSessionState.Starting || currentState is SpeechSessionState.Listening)) stop()
+        }
     }
 
     // ---------------------------------------------------------------- lifecycle

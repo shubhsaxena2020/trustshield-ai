@@ -207,7 +207,7 @@ fun AppNavHost(
                                 }
                             },
                             icon = { AppGlyph(route.glyphKind(), MaterialTheme.colorScheme.onSurfaceVariant) },
-                            label = { Text(label.forLanguage(selectedLanguage), maxLines = 1) },
+                            label = { Text(label.forLanguage(selectedLanguage), maxLines = 2) },
                             colors = NavigationBarItemDefaults.colors(
                                 selectedIconColor = MaterialTheme.colorScheme.onSurface,
                                 selectedTextColor = MaterialTheme.colorScheme.onSurface,
