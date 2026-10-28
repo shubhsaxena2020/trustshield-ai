@@ -276,6 +276,20 @@ object PaymentAdvisoryCopy {
         return out.toString()
     }
 
+    /** A pre-filled QR amount and its masked destination, stated as a request rather than a payment. */
+    fun qrAmountSummary(fields: ai.trustshield.android.core.payment.PaymentFields): ToneCopy? {
+        val amount = fields.amountMinor?.takeIf { it > 0L }?.let(::formatRupees) ?: return null
+        val rawPayee = fields.payeeUpi.trim()
+        val payee = if (rawPayee.contains("***")) rawPayee else
+            ai.trustshield.android.core.payment.maskedUpi(rawPayee)
+        if (!payee.contains('@')) return null
+        return ToneCopy(
+            hinglish = "QR par $amount dene ke liye $payee dikh raha hai.",
+            english = "This QR asks you to pay $amount to $payee.",
+            hindi = "यह QR $payee को $amount देने के लिए कहता है।"
+        )
+    }
+
     /**
      * Appends [rupees] with Indian digit grouping: the last three digits stay together, every group
      * above them is two digits (`1,20,000`). A single `StringBuilder` pass, no collections.

@@ -441,6 +441,37 @@ class CameraXBarcodeDecoderTest {
         decoder.close()
     }
 
+    @Test
+    fun pureJvmQrReaderDecodesInvertedSyntheticQrAndClosesTheFrame() {
+        val expected = "upi://pay?pa=demo@okaxis&pn=Test"
+        val matrix = QRCodeWriter().encode(
+            expected,
+            BarcodeFormat.QR_CODE,
+            256,
+            256,
+            mapOf(EncodeHintType.MARGIN to 2),
+        )
+        val pixels = ByteArray(matrix.width * matrix.height) { index ->
+            val x = index % matrix.width
+            val y = index / matrix.width
+            if (matrix[x, y]) 0xFF.toByte() else 0
+        }
+        val frame = FakeFrame(
+            widthPx = matrix.width,
+            heightPx = matrix.height,
+            rotationDegrees = 0,
+            luminanceFactory = {
+                QrLuminanceFrame(matrix.width, matrix.height, pixels, 0)
+            },
+        )
+        val decoder = CameraXBarcodeDecoder(ZxingQrBarcodeReader(), DirectExecutor, 60_000L)
+
+        assertTrue(decoder.offer(42L, frame))
+        assertSamePayload("inverted synthetic QR", expected, decoder.decode(42L))
+        assertEquals("frame closes", 1, frame.closeCount.get())
+        decoder.close()
+    }
+
     // ---------------------------------------------------------------- helpers
 
     private fun waitForDecodeStart(decoder: CameraXBarcodeDecoder): Boolean {

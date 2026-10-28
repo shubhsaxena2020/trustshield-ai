@@ -60,6 +60,7 @@ fun PaymentAdvisoryCard(
     val headline = PaymentAdvisoryCopy.verdictHeadline(advisory.verdict).pick(language)
     val advice = PaymentAdvisoryCopy.verdictAdvice(advisory.verdict).pick(language)
     val confirmation = PaymentAdvisoryCopy.CONFIRMATION.pick(language)
+    val qrAmountSummary = PaymentAdvisoryCopy.qrAmountSummary(advisory.fields)?.pick(language)
     val hintRows = advisory.hints.map { hint ->
         PaymentAdvisoryCopy.severityGlyph(hint) to PaymentAdvisoryCopy.forHint(hint).pick(language)
     }
@@ -72,6 +73,7 @@ fun PaymentAdvisoryCard(
         append(headline)
         append(". ")
         append(advice)
+        qrAmountSummary?.let { append(". "); append(it) }
         hintRows.forEach { row ->
             append(". ")
             append(row.first)
@@ -104,6 +106,8 @@ fun PaymentAdvisoryCard(
             )
 
             AdvisoryVerdictBlock(verdict = advisory.verdict, headline = headline, advice = advice)
+
+            qrAmountSummary?.let { Text(text = it, style = MaterialTheme.typography.bodyMedium) }
 
             hintRows.forEach { row ->
                 AdvisorySeverityRow(
