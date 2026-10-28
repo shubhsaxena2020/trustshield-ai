@@ -326,6 +326,7 @@ fun TrustShieldRouteContent(
         )
         AppRoute.RESULT -> ResultRouteHost(language, resultOutcome, registeredPayees)
         AppRoute.CALL_SHIELD -> CallShieldRouteHost(language)
+        AppRoute.BOMB_SHIELD -> ai.trustshield.android.ui.bomb.BombShieldScreen(language) { nav.back() }
          AppRoute.HISTORY -> HistoryScreen(historyEntries, language, onClearHistory)
          AppRoute.QR_GUARD -> QrGuardRouteHost { registeredPayees = it }
         AppRoute.SETTINGS -> SettingsRouteHost()
@@ -347,6 +348,7 @@ private fun HomeRouteHost(
     onClearHistory: () -> Unit,
 ) {
     val context = LocalContext.current
+    val nav = LocalNavActions.current
     val sensitivity = when (LocalUserPreferences.current.sensitivity) {
         Sensitivity.LOW -> LocalScorer.Sensitivity.LOW
         Sensitivity.BALANCED -> LocalScorer.Sensitivity.STANDARD
@@ -376,6 +378,10 @@ private fun HomeRouteHost(
         onSharedImageConsumed()
     }
     Column(modifier = Modifier.fillMaxSize()) {
+        OutlinedButton(
+            onClick = { nav.navigate(AppRoute.BOMB_SHIELD) },
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).heightIn(min = 48.dp)
+        ) { Text(ToneCopy("Bomb Shield · SMS aur call flood", "Bomb Shield · message and call floods", "Bomb Shield · संदेश और कॉल की बाढ़").forLanguage(language)) }
         ScanScreen(
             state = scanState,
             english = english,
@@ -979,16 +985,23 @@ fun SettingsRouteHost() {
     val sink = LocalPreferencesSink.current
     var state by remember { mutableStateOf(SettingsState.from(prefs)) }
 
-    SettingsScreen(
-        state = state,
-        onEvent = { event ->
-            val next = state.reduce(event)
-            if (next.preferences != state.preferences) {
-                sink(next.preferences)
-            }
-            state = next
+    val nav = LocalNavActions.current
+    Column(Modifier.fillMaxSize()) {
+        TextButton(onClick = { nav.navigate(AppRoute.BOMB_SHIELD) }, modifier = Modifier.heightIn(min = 48.dp).padding(horizontal = 16.dp)) {
+            Text(ToneCopy("Bomb Shield", "Bomb Shield", "बम शील्ड").forLanguage(state.preferences.language))
         }
-    )
+        SettingsScreen(
+            state = state,
+            modifier = Modifier.weight(1f),
+            onEvent = { event ->
+                val next = state.reduce(event)
+                if (next.preferences != state.preferences) {
+                    sink(next.preferences)
+                }
+                state = next
+            }
+        )
+    }
 }
 
 /**

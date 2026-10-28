@@ -22,6 +22,9 @@ enum class AppRoute(val wireName: String) {
     /** Call Shield — user-started analysis of audible microphone speech while the app is visible. */
     CALL_SHIELD("call_shield"),
 
+    /** Optional on-device monitor for bursts of messages and calls. */
+    BOMB_SHIELD("bomb_shield"),
+
     /** QR Guard — locally registered payee comparison. QR payloads are parsed as data, never opened. */
     QR_GUARD("qr_guard"),
 
