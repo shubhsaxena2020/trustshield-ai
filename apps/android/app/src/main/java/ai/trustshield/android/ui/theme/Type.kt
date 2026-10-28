@@ -42,62 +42,62 @@ object TsTypeScale {
 val TsTypography: Typography = Typography(
     displayLarge = TextStyle(
         fontFamily = FontFamily.Default, fontWeight = FontWeight.Normal,
-        fontSize = TsTypeScale.HeadlineSp.sp, lineHeight = 36.sp
+        fontSize = TsTypeScale.HeadlineSp.sp, lineHeight = 40.sp
     ),
     displayMedium = TextStyle(
         fontFamily = FontFamily.Default, fontWeight = FontWeight.Normal,
-        fontSize = TsTypeScale.HeadlineSp.sp, lineHeight = 36.sp
+        fontSize = TsTypeScale.HeadlineSp.sp, lineHeight = 40.sp
     ),
     displaySmall = TextStyle(
         fontFamily = FontFamily.Default, fontWeight = FontWeight.Normal,
-        fontSize = TsTypeScale.TitleSp.sp, lineHeight = 28.sp
+        fontSize = TsTypeScale.TitleSp.sp, lineHeight = 30.sp
     ),
     headlineLarge = TextStyle(
         fontFamily = FontFamily.Default, fontWeight = FontWeight.SemiBold,
-        fontSize = TsTypeScale.HeadlineSp.sp, lineHeight = 36.sp
+        fontSize = TsTypeScale.HeadlineSp.sp, lineHeight = 40.sp
     ),
     headlineMedium = TextStyle(
         fontFamily = FontFamily.Default, fontWeight = FontWeight.SemiBold,
-        fontSize = TsTypeScale.TitleSp.sp, lineHeight = 28.sp
+        fontSize = TsTypeScale.TitleSp.sp, lineHeight = 30.sp
     ),
     headlineSmall = TextStyle(
         fontFamily = FontFamily.Default, fontWeight = FontWeight.SemiBold,
-        fontSize = TsTypeScale.TitleSp.sp, lineHeight = 28.sp
+        fontSize = TsTypeScale.TitleSp.sp, lineHeight = 30.sp
     ),
     titleLarge = TextStyle(
         fontFamily = FontFamily.Default, fontWeight = FontWeight.SemiBold,
-        fontSize = TsTypeScale.TitleSp.sp, lineHeight = 28.sp
+        fontSize = TsTypeScale.TitleSp.sp, lineHeight = 30.sp
     ),
     titleMedium = TextStyle(
         fontFamily = FontFamily.Default, fontWeight = FontWeight.Medium,
-        fontSize = TsTypeScale.BodySp.sp, lineHeight = 24.sp
+        fontSize = TsTypeScale.BodySp.sp, lineHeight = 26.sp
     ),
     titleSmall = TextStyle(
         fontFamily = FontFamily.Default, fontWeight = FontWeight.Medium,
-        fontSize = TsTypeScale.SupportSp.sp, lineHeight = 20.sp
+        fontSize = TsTypeScale.SupportSp.sp, lineHeight = 22.sp
     ),
     bodyLarge = TextStyle(
         fontFamily = FontFamily.Default, fontWeight = FontWeight.Normal,
-        fontSize = TsTypeScale.BodySp.sp, lineHeight = 24.sp
+        fontSize = TsTypeScale.BodySp.sp, lineHeight = 26.sp
     ),
     bodyMedium = TextStyle(
         fontFamily = FontFamily.Default, fontWeight = FontWeight.Normal,
-        fontSize = TsTypeScale.SupportSp.sp, lineHeight = 20.sp
+        fontSize = TsTypeScale.SupportSp.sp, lineHeight = 22.sp
     ),
     bodySmall = TextStyle(
         fontFamily = FontFamily.Default, fontWeight = FontWeight.Normal,
-        fontSize = TsTypeScale.SupportSp.sp, lineHeight = 20.sp
+        fontSize = TsTypeScale.SupportSp.sp, lineHeight = 22.sp
     ),
     labelLarge = TextStyle(
         fontFamily = FontFamily.Default, fontWeight = FontWeight.Medium,
-        fontSize = TsTypeScale.BodySp.sp, lineHeight = 24.sp
+        fontSize = TsTypeScale.BodySp.sp, lineHeight = 26.sp
     ),
     labelMedium = TextStyle(
         fontFamily = FontFamily.Default, fontWeight = FontWeight.Medium,
-        fontSize = TsTypeScale.SupportSp.sp, lineHeight = 20.sp
+        fontSize = TsTypeScale.SupportSp.sp, lineHeight = 22.sp
     ),
     labelSmall = TextStyle(
         fontFamily = FontFamily.Default, fontWeight = FontWeight.Medium,
-        fontSize = TsTypeScale.SupportSp.sp, lineHeight = 20.sp
+        fontSize = TsTypeScale.SupportSp.sp, lineHeight = 22.sp
     )
 )

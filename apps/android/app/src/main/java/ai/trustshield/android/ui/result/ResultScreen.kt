@@ -1,6 +1,7 @@
 package ai.trustshield.android.ui.result
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -24,12 +26,19 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -42,6 +51,9 @@ import ai.trustshield.android.ui.theme.accent
 import ai.trustshield.android.ui.theme.container
 import ai.trustshield.android.ui.theme.onContainer
 import ai.trustshield.android.ui.theme.onSurface
+import android.animation.ValueAnimator
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.tween
 
 /**
  * C03 — Result / evidence screen, the only Compose file in this package.
@@ -53,9 +65,8 @@ import ai.trustshield.android.ui.theme.onSurface
  *
  * Layout follows `docs/android/UI_SPEC.md`: a scrollable panel with the risk header first, the
  * confidence badge as a separate element, evidence cards carrying exact highlighted quotes, then
- * actions, limitations and the offline/backend note. A critical band is never animated and never
- * pulses; there is no score animation anywhere, because a fake sense of precision is worse than no
- * number at all.
+ * actions, limitations and the offline/backend note. The score arc animates once when a new result
+ * arrives; critical bands never pulse and the displayed score stays static.
  *
  * Accessibility (QUALITY_GATES section 6):
  *  - colour is never the only differentiator — every tone travels with a glyph, a label and a
@@ -80,11 +91,16 @@ fun ResultScreen(
     riskScore: Int? = null,
     onToggleLanguage: () -> Unit = {},
     onSpeakResult: (() -> Boolean)? = null,
+    onShareResult: () -> Unit = {},
     onAction: (String) -> Unit = {},
     onBack: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     var speechUnavailable by remember(language) { mutableStateOf(false) }
+    val view = LocalView.current
+    LaunchedEffect(state.risk, state.confidence, language, riskScore) {
+        view.announceForAccessibility(state.screenDescription(language, riskScore))
+    }
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -123,7 +139,7 @@ fun ResultScreen(
         BackendNote(backend = state.backend, language = language)
 
         if (onSpeakResult != null) {
-            OutlinedButton(
+            OutlinedButton(colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
                 onClick = { speechUnavailable = !onSpeakResult() },
                 modifier = Modifier.fillMaxWidth().heightIn(min = TsTokens.MinTouchTarget),
             ) {
@@ -140,6 +156,13 @@ fun ResultScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
+        }
+
+        OutlinedButton(colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
+            onClick = onShareResult,
+            modifier = Modifier.fillMaxWidth().heightIn(min = TsTokens.MinTouchTarget)
+        ) {
+            Text(ToneCopy("Sirf natija share karein", "Share verdict only", "केवल परिणाम साझा करें").pick(language))
         }
 
         FooterNotes(state = state, language = language)
@@ -159,7 +182,7 @@ private fun ResultTopBar(
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (onBack != null) {
-            TextButton(
+            TextButton(colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
                 onClick = onBack,
                 modifier = Modifier.heightIn(min = TsTokens.MinTouchTarget)
             ) { Text(ToneCopy("\u2039 Peeche", "\u2039 Back", "\u2039 \u0935\u093e\u092a\u0938").pick(language)) }
@@ -174,7 +197,7 @@ private fun ResultTopBar(
                 .weight(1f)
                 .semantics { contentDescription = state.screenDescription(language, riskScore) }
         )
-        TextButton(
+        TextButton(colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
             onClick = onToggleLanguage,
             modifier = Modifier.heightIn(min = TsTokens.MinTouchTarget).semantics {
                 contentDescription = ResultCopy.LANGUAGE_TOGGLE_DESCRIPTION.pick(language)
@@ -194,45 +217,66 @@ private fun ResultTopBar(
 @Composable
 private fun RiskHeader(risk: RiskBand, language: UiLanguage) {
     Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .semantics(mergeDescendants = true) {
-                contentDescription = risk.contentDescription.pick(language)
-            },
+        modifier = Modifier.fillMaxWidth().semantics(mergeDescendants = true) {
+            val scoreDescription = risk.score?.let {
+                ToneCopy("Skor: $it/100", "Score: $it/100", "स्कोर: $it/100").pick(language)
+            }
+            contentDescription = listOfNotNull(risk.contentDescription.pick(language), scoreDescription).joinToString(". ")
+        },
         color = risk.tone.container(),
         shape = RoundedCornerShape(TsTokens.CornerLarge)
     ) {
-        Column(
+        Row(
             modifier = Modifier.padding(TsTokens.SpacingLg),
-            verticalArrangement = Arrangement.spacedBy(TsTokens.SpacingSm)
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(TsTokens.SpacingMd)
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = risk.glyph,
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = risk.tone.onContainer()
-                )
-                Spacer(Modifier.width(TsTokens.SpacingSm))
-                Text(
-                    text = risk.label.pick(language),
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = risk.tone.onContainer()
-                )
+            ScoreGauge(score = risk.score, tone = risk.tone, language = language)
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(TsTokens.SpacingSm)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(risk.glyph, style = MaterialTheme.typography.headlineMedium, color = risk.tone.onContainer())
+                    Spacer(Modifier.width(TsTokens.SpacingSm))
+                    Text(risk.label.pick(language), style = MaterialTheme.typography.headlineMedium, color = risk.tone.onContainer())
+                }
+                Text(risk.summary.pick(language), style = MaterialTheme.typography.bodyLarge, color = risk.tone.onContainer())
+                RiskBandStrip(tone = risk.tone)
             }
-            Text(
-                text = risk.summary.pick(language),
-                style = MaterialTheme.typography.bodyLarge,
-                color = risk.tone.onContainer()
-            )
-            risk.score?.let { score ->
-                Text(
-                    text = ToneCopy("Score: $score/100", "Score: $score/100", "स्कोर: $score/100").pick(language),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = risk.tone.onContainer()
-                )
+        }
+    }
+}
+
+@Composable
+private fun ScoreGauge(score: Int?, tone: RiskTone, language: UiLanguage) {
+    val animationsEnabled = ValueAnimator.areAnimatorsEnabled()
+    val animatedScore by animateFloatAsState(
+        targetValue = (score ?: 0).toFloat(),
+        animationSpec = if (animationsEnabled) tween(TsTokens.MotionMediumMs) else snap(),
+        label = "risk-gauge"
+    )
+    val arcColor = tone.accent()
+    val trackColor = MaterialTheme.colorScheme.outlineVariant
+    Box(
+        modifier = Modifier.size(116.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Canvas(Modifier.fillMaxSize()) {
+            val inset = 7.dp.toPx()
+            val diameter = size.minDimension - inset * 2
+            val topLeft = Offset((size.width - diameter) / 2, (size.height - diameter) / 2)
+            val ring = Stroke(width = 8.dp.toPx(), cap = StrokeCap.Round)
+            drawArc(trackColor, -90f, 360f, false, topLeft, androidx.compose.ui.geometry.Size(diameter, diameter), style = ring)
+            if (score != null && animatedScore > 0f) {
+                drawArc(arcColor, -90f, animatedScore.coerceIn(0f, 100f) * 3.6f, false, topLeft, androidx.compose.ui.geometry.Size(diameter, diameter), style = ring)
             }
-            // Coarse four-step band, static: no number, no animation, no implied precision.
-            RiskBandStrip(tone = risk.tone)
+        }
+        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(0.dp)) {
+            Text(score?.toString() ?: "—", style = MaterialTheme.typography.headlineMedium, color = tone.onContainer())
+            val caption = if (score == null) {
+                ToneCopy("Jaanch nahi hui", "Not verified", "जाँच नहीं हुई")
+            } else {
+                ToneCopy("100 mein se", "out of 100", "100 में से")
+            }
+            Text(caption.pick(language), style = MaterialTheme.typography.bodySmall, color = tone.onContainer())
         }
     }
 }
@@ -345,7 +389,7 @@ private fun EvidenceSection(state: ResultUiState, language: UiLanguage) {
         )
         return
     }
-    state.evidence.forEach { item -> EvidenceCard(item = item, language = language) }
+    state.evidence.forEach { item -> key(item.id) { EvidenceCard(item = item, language = language) } }
     if (!state.droppedEvidence.isClean) {
         Text(
             text = state.droppedEvidence.reason.pick(language),
@@ -445,35 +489,37 @@ private fun ActionsSection(
 ) {
     SectionTitle(ResultCopy.ACTIONS_SECTION.pick(language))
     actions.forEach { action ->
-        val modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(min = TsTokens.MinTouchTarget)
-        val content: @Composable () -> Unit = {
-            Column(
-                modifier = Modifier.padding(vertical = TsTokens.SpacingSm),
-                verticalArrangement = Arrangement.spacedBy(TsTokens.SpacingXs)
-            ) {
-                Text(text = action.label.pick(language), style = MaterialTheme.typography.titleMedium)
-                if (action.detail.hinglish.isNotBlank()) {
-                    Text(
-                        text = action.detail.pick(language),
-                        style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.Start
-                    )
+        key(action.id) {
+            val modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = TsTokens.MinTouchTarget)
+            val content: @Composable () -> Unit = {
+                Column(
+                    modifier = Modifier.padding(vertical = TsTokens.SpacingSm),
+                    verticalArrangement = Arrangement.spacedBy(TsTokens.SpacingXs)
+                ) {
+                    Text(text = action.label.pick(language), style = MaterialTheme.typography.titleMedium)
+                    if (action.detail.hinglish.isNotBlank()) {
+                        Text(
+                            text = action.detail.pick(language),
+                            style = MaterialTheme.typography.bodyMedium,
+                            textAlign = TextAlign.Start
+                        )
+                    }
                 }
             }
-        }
-        if (action.priority == ActionPriority.PRIMARY) {
-            Button(
-                onClick = { onAction(action.id) },
-                modifier = modifier,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                )
-            ) { content() }
-        } else {
-            OutlinedButton(onClick = { onAction(action.id) }, modifier = modifier) { content() }
+            if (action.priority == ActionPriority.PRIMARY) {
+                Button(
+                    onClick = { onAction(action.id) },
+                    modifier = modifier,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    )
+                ) { content() }
+            } else {
+                OutlinedButton(colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface), onClick = { onAction(action.id) }, modifier = modifier) { content() }
+            }
         }
     }
 }
@@ -484,18 +530,20 @@ private fun LimitationsSection(limitations: List<ToneCopy>, language: UiLanguage
     SectionTitle(ResultCopy.LIMITS_SECTION.pick(language))
     Column(verticalArrangement = Arrangement.spacedBy(TsTokens.SpacingXs)) {
         limitations.forEach { line ->
-            Row {
-                Text(
-                    text = "\u2022",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(Modifier.width(TsTokens.SpacingSm))
-                Text(
-                    text = line.pick(language),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+            key(line.hinglish) {
+                Row {
+                    Text(
+                        text = "\u2022",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.width(TsTokens.SpacingSm))
+                    Text(
+                        text = line.pick(language),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
         }
     }

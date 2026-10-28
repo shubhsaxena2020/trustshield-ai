@@ -6,7 +6,6 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTouchInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import ai.trustshield.android.input.qr.QrGuardState
@@ -281,7 +280,6 @@ class QrGuardHostTest {
         val holdDescription = QrStrings.reRegister.text(QrLanguage.HINGLISH) + ". " +
             QrStrings.reRegisterHold.text(QrLanguage.HINGLISH)
         compose.onNodeWithContentDescription(holdDescription)
-            .performScrollTo()
             .performTouchInput { click() }
         compose.waitForIdle()
 

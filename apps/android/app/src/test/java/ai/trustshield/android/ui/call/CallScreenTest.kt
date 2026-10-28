@@ -18,6 +18,14 @@ import org.junit.Test
  */
 class CallScreenTest {
 
+    @Test
+    fun noSpeechHintHasHindiCopy() {
+        assertEquals(
+            "सुन रहा है - अभी कोई आवाज़ नहीं सुनी",
+            CallShieldCopy.micNoSpeechYet.forLanguage(CallLanguage.HINDI),
+        )
+    }
+
     // ---- fixtures (realistic Hinglish scam lines; NOT model output) ------------------------------
 
     private val authorityClaim = StageSignal(

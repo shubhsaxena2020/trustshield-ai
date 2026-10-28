@@ -41,6 +41,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.text.font.FontWeight
+import android.content.Intent
 import android.net.Uri
 import android.content.Context
 import java.util.Locale
@@ -140,6 +141,8 @@ import ai.trustshield.android.ui.theme.accent
 import ai.trustshield.android.ui.settings.SettingsScreen
 import ai.trustshield.android.ui.settings.SettingsState
 import ai.trustshield.android.ui.settings.reduce
+import ai.trustshield.android.ui.history.HistoryScreen
+import ai.trustshield.android.ui.history.MetadataCheck
 
 /**
  * App-level settings, hoisted so the theme at the root and every screen read the *same* preferences.
@@ -190,6 +193,16 @@ fun ResultRouteHost(appLanguage: AppLanguage, outcome: ScanOutcome?, payees: Lis
         state = state,
         language = language,
         riskScore = announcedScore,
+        onShareResult = {
+            val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_TEXT, state.risk.label.pick(language))
+            }
+            context.startActivity(Intent.createChooser(
+                shareIntent,
+                ToneCopy("Natija share karein", "Share verdict", "परिणाम साझा करें").pick(language)
+            ))
+        },
         onSpeakResult = {
             val appTtsLanguage = when (language) {
                 UiLanguage.HINGLISH -> AppLanguage.HINGLISH
@@ -289,7 +302,9 @@ fun TrustShieldRouteContent(
     onCheck: (String) -> Unit = {},
     onImageResult: (ScanOutcome) -> Unit = {},
     sharedImageUri: String? = null,
-    onSharedImageConsumed: () -> Unit = {}
+    onSharedImageConsumed: () -> Unit = {},
+    historyEntries: List<MetadataCheck> = emptyList(),
+    onClearHistory: () -> Unit = {}
 ) {
     val nav = LocalNavActions.current
     val clipboard = LocalClipboardManager.current
@@ -305,13 +320,13 @@ fun TrustShieldRouteContent(
             sharedImageUri = sharedImageUri,
             onSharedImageConsumed = onSharedImageConsumed,
             clipboardText = { clipboard.getText()?.text },
-            onOpenSettings = { nav.navigate(AppRoute.SETTINGS) },
-            onOpenCall = { nav.navigate(AppRoute.CALL_SHIELD) },
-            onOpenQr = { nav.navigate(AppRoute.QR_GUARD) }
+            historyEntries = historyEntries,
+            onClearHistory = onClearHistory
         )
         AppRoute.RESULT -> ResultRouteHost(language, resultOutcome, registeredPayees)
         AppRoute.CALL_SHIELD -> CallShieldRouteHost(language)
-        AppRoute.QR_GUARD -> QrGuardRouteHost { registeredPayees = it }
+         AppRoute.HISTORY -> HistoryScreen(historyEntries, language, onClearHistory)
+         AppRoute.QR_GUARD -> QrGuardRouteHost { registeredPayees = it }
         AppRoute.SETTINGS -> SettingsRouteHost()
     }
 }
@@ -327,9 +342,8 @@ private fun HomeRouteHost(
     sharedImageUri: String?,
     onSharedImageConsumed: () -> Unit,
     clipboardText: () -> String?,
-    onOpenSettings: () -> Unit,
-    onOpenCall: () -> Unit,
-    onOpenQr: () -> Unit,
+    historyEntries: List<MetadataCheck>,
+    onClearHistory: () -> Unit,
 ) {
     val context = LocalContext.current
     val sensitivity = when (LocalUserPreferences.current.sensitivity) {
@@ -368,7 +382,8 @@ private fun HomeRouteHost(
             onEvent = onScanEvent,
             onCheck = onCheck,
             onPickImage = { actions.launch() },
-            onOpenSettings = onOpenSettings,
+            historyEntries = historyEntries,
+            onClearHistory = onClearHistory,
             modifier = Modifier.weight(1f),
             clipboardText = clipboardText
         )
@@ -376,17 +391,6 @@ private fun HomeRouteHost(
             Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp)) {
                 Text(error.message(language), color = MaterialTheme.colorScheme.error)
                 Text(error.nextStep(language), style = MaterialTheme.typography.bodySmall)
-            }
-        }
-        androidx.compose.foundation.layout.Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            OutlinedButton(onClick = onOpenCall, modifier = Modifier.weight(1f).heightIn(min = 48.dp)) {
-                Text(ToneCopy("Call Shield", "Call Shield").forLanguage(language))
-            }
-            OutlinedButton(onClick = onOpenQr, modifier = Modifier.weight(1f).heightIn(min = 48.dp)) {
-                Text(ToneCopy("QR Guard", "QR Guard").forLanguage(language))
             }
         }
     }
@@ -539,7 +543,7 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
             )
         }
         if (networkIsValidated(context)) {
-            OutlinedButton(
+            OutlinedButton(colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
                 onClick = {
                     speechRoute.selectOffline(false)
                     offlineMode = false
@@ -566,22 +570,15 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
             Text(status, modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp), style = MaterialTheme.typography.bodySmall)
         }
     }
-    if (offlineMode && state.isListening) {
-        Text(
-            ToneCopy(
-                "Offline mode: phone par hi speech pehchaan",
-                "Offline mode: on-device recogniser",
-                "ऑफ़लाइन मोड: आवाज़ फ़ोन पर ही पहचानी जाती है",
-            ).forLanguage(selectedLanguage),
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    }
     offlineFailureAction = { host.onStop(); offlineMode = false; state = host.state }
     CallShieldScreen(
         state = state,
         modifier = Modifier.weight(1f),
+        offlineStatus = if (offlineMode && state.isListening) ToneCopy(
+            "Offline mode: phone par hi speech pehchaan",
+            "Offline mode: on-device speech recognition",
+            "ऑफ़लाइन मोड: आवाज़ फ़ोन पर ही पहचानी जाती है",
+        ) else null,
         onEvent = { event ->
             when (event) {
                 CallEvent.GiveConsent -> {
@@ -638,7 +635,7 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
         onOpenStagedDemo = { demoOpen = true },
         onTypeTranscript = null
     )
-    OutlinedButton(
+    OutlinedButton(colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
         onClick = { demoOpen = true },
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp).heightIn(min = 48.dp)
     ) {
@@ -659,17 +656,17 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
             },
             colors = ButtonDefaults.outlinedButtonColors(
                 containerColor = if (speechRoute.useOffline) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
-                contentColor = if (speechRoute.useOffline) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.primary,
+                contentColor = if (speechRoute.useOffline) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
             ),
         ) {
             Text(
                 ToneCopy(
                     if (speechRoute.useOffline) "Offline mode chuna gaya. System recogniser ke liye tap karein"
                     else "Offline mode use karein - Vosk Hindi recogniser",
-                    if (speechRoute.useOffline) "Offline mode selected. Tap to use the system recogniser"
-                    else "Use offline mode - Vosk Hindi recogniser",
-                    if (speechRoute.useOffline) "ऑफ़लाइन मोड चुना गया है। सिस्टम recogniser के लिए टैप करें"
-                    else "ऑफ़लाइन मोड इस्तेमाल करें - Vosk हिंदी recogniser",
+                    if (speechRoute.useOffline) "Offline mode selected. Tap to use system speech recognition"
+                    else "Use offline mode - Vosk Hindi speech recognition",
+                    if (speechRoute.useOffline) "ऑफ़लाइन मोड चुना गया है। सिस्टम वाक् पहचान के लिए टैप करें"
+                    else "ऑफ़लाइन मोड इस्तेमाल करें - Vosk हिंदी वाक् पहचान",
                 ).forLanguage(selectedLanguage),
             )
         }
@@ -787,10 +784,10 @@ private fun CallDemoExperience(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 2.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            TextButton(onClick = onClose, modifier = Modifier.heightIn(min = 48.dp)) {
+            TextButton(colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface), onClick = onClose, modifier = Modifier.heightIn(min = 48.dp)) {
                 Text(ToneCopy("Demo band karein", "Close demo", "\u0921\u0947\u092e\u094b \u092c\u0902\u0926 \u0915\u0930\u0947\u0902").forLanguage(language))
             }
-            TextButton(onClick = onToggleLanguage, modifier = Modifier.heightIn(min = 48.dp)) {
+            TextButton(colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface), onClick = onToggleLanguage, modifier = Modifier.heightIn(min = 48.dp)) {
                 Text(ToneCopy("English", "Hinglish", "हिंग्लिश").forLanguage(language))
             }
         }
@@ -917,13 +914,13 @@ private fun CallDemoExperience(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            OutlinedButton(onClick = onBack, enabled = progress.steps.isNotEmpty(), modifier = Modifier.weight(1f).heightIn(min = 48.dp)) {
+            OutlinedButton(colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface), onClick = onBack, enabled = progress.steps.isNotEmpty(), modifier = Modifier.weight(1f).heightIn(min = 48.dp)) {
                 Text(ToneCopy("Peeche", "Back", "\u092a\u0940\u091b\u0947").forLanguage(language))
             }
             Button(onClick = onAdvance, enabled = !progress.finished, modifier = Modifier.weight(1.25f).heightIn(min = 48.dp)) {
                 Text(ToneCopy("Agli line", "Next line", "\u0905\u0917\u0932\u0940 \u092a\u0902\u0915\u094d\u0924\u093f").forLanguage(language))
             }
-            OutlinedButton(onClick = onReset, modifier = Modifier.weight(1f).heightIn(min = 48.dp)) {
+            OutlinedButton(colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface), onClick = onReset, modifier = Modifier.weight(1f).heightIn(min = 48.dp)) {
                 Text(ToneCopy("Phir se", "Reset", "\u092b\u093f\u0930 \u0938\u0947").forLanguage(language))
             }
         }
@@ -953,7 +950,7 @@ fun QrGuardRouteHost(onPayeesChanged: (List<RegisteredPayee>) -> Unit = {}) {
 fun SettingsRouteHost() {
     val prefs = LocalUserPreferences.current
     val sink = LocalPreferencesSink.current
-    var state by remember(prefs) { mutableStateOf(SettingsState.from(prefs)) }
+    var state by remember { mutableStateOf(SettingsState.from(prefs)) }
 
     SettingsScreen(
         state = state,

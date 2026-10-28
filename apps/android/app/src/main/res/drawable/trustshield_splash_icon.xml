@@ -1,0 +1,3 @@
+<bitmap xmlns:android="http://schemas.android.com/apk/res/android"
+    android:src="@drawable/trustshield_logo_icon_mask"
+    android:tint="@color/trustshield_splash_tint" />

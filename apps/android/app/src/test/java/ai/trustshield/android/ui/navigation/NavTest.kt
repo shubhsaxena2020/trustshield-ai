@@ -43,7 +43,7 @@ class NavTest {
         // The wire names are a persisted format: they appear in saved instance state and in the
         // re-entry intent extra. Changing one silently breaks a user's restored stack, so pin them.
         assertEquals(
-            listOf("home", "result", "call_shield", "qr_guard", "settings"),
+            listOf("home", "result", "call_shield", "qr_guard", "history", "settings"),
             AppRoute.entries.map { it.wireName }
         )
         AppRoute.entries.forEach { route ->
@@ -52,8 +52,16 @@ class NavTest {
     }
 
     @Test
-    fun fiveDestinationsExistAndWireNamesAreUnique() {
-        assertEquals(5, AppRoute.entries.size)
+    fun fivePrimaryTabsExistAndWireNamesAreUnique() {
+        assertEquals(5, AppRoute.primaryTabs.size)
+        assertEquals(
+            listOf(AppRoute.HOME, AppRoute.CALL_SHIELD, AppRoute.QR_GUARD, AppRoute.HISTORY, AppRoute.SETTINGS),
+            AppRoute.primaryTabs
+        )
+        assertEquals(
+            6,
+            AppRoute.entries.size
+        )
         assertEquals(
             "duplicate wire names would make serialise/restore ambiguous",
             AppRoute.entries.size,

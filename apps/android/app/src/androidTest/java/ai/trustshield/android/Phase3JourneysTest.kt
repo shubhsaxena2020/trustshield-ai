@@ -78,6 +78,7 @@ class Phase3JourneysTest {
      */
     @Before
     fun resetPersistedSettings() {
+        markOnboardingCompleteForTest()
         val store = SharedPreferencesUserPreferencesStore
             .open(InstrumentationRegistry.getInstrumentation().targetContext)
         store.save(store.reset().copy(language = AppLanguage.HINGLISH))
@@ -129,10 +130,10 @@ class Phase3JourneysTest {
         // Emoji-only input produces nothing the deterministic rules can read, so the screen must
         // keep the action disabled instead of opening a verdict. Both halves are asserted: the
         // control is not enabled, and no result screen was produced.
-        val checkLabel = if (compose.onAllNodes(hasText("Check karein", substring = true)).fetchSemanticsNodes().isNotEmpty()) {
+        val checkLabel = if (compose.onAllNodes(labelMatcher("Check karein")).fetchSemanticsNodes().isNotEmpty()) {
             "Check karein"
         } else "Check (offline)"
-        compose.onAllNodes(hasText(checkLabel, substring = true)).onFirst().assertIsNotEnabled()
+        compose.onAllNodes(labelMatcher(checkLabel)).onFirst().assertIsNotEnabled()
         assertNoNodeContains("Bharosa")
         assertNoNodeContains("Confidence")
         assertNoNodeContains("100% safe")
@@ -191,9 +192,9 @@ class Phase3JourneysTest {
         tapText(CALL_DEMO_ENTRY)
         waitForText(CALL_DEMO_DISCLOSURE)
         tapExactText("Agli line")
-        waitForContentDescription("Kam risk, 10 out of 100")
+        waitForAnyText(15_000, "Low, 1 of 4", "Kam, 1 mein se 4")
         tapExactText("Agli line")
-        waitForContentDescription("Dhyan dein risk, 44 out of 100")
+        waitForAnyText(15_000, "Medium, 2 of 4", "Dhyan dein, 2 mein se 4")
         // The demo is deterministic: two steps in, the meter still reports a score out of 100 and
         // the honest-limits line stays on screen.
         assertNodeContains(CALL_HONEST_LIMIT_FRAGMENT)
@@ -216,7 +217,7 @@ class Phase3JourneysTest {
         tapText("Demo: sticker tamper")
 
         compose.waitUntil(15_000) {
-            compose.onAllNodes(hasText(QR_STOP_PAYMENT, substring = true))
+            compose.onAllNodes(labelMatcher(QR_STOP_PAYMENT))
                 .fetchSemanticsNodes().isNotEmpty()
         }
         // Unreadable/occlusion wording is a different sentence on the same screen.
@@ -233,9 +234,9 @@ class Phase3JourneysTest {
         launchRoute(AppRoute.SETTINGS)
 
         tapText("Hinglish")
-        waitForText(SETTINGS_HINGLISH_LIGHT)
+        waitForVisibleLabel(SETTINGS_HINGLISH_LIGHT)
         tapText("English")
-        waitForText(SETTINGS_ENGLISH_LIGHT)
+        waitForVisibleLabel(SETTINGS_ENGLISH_LIGHT)
 
         // Stable tag targets the haptics switch independent of translated labels and radio controls.
         compose.onNode(hasTestTag("settings_haptics_toggle")).performScrollTo().performClick()
@@ -246,19 +247,23 @@ class Phase3JourneysTest {
                 .load().haptics
         }
 
+        tapText("Reset to defaults")
+        waitForVisibleLabel("Reset to defaults?")
+        tapText("Cancel")
+
         scenario?.recreate()
 
         // English copy and the toggle position both survived the recreation: the switch is still
         // off after the activity is rebuilt, which is what "persisted across restart" means for a
         // value the user can see.
-        waitForText(SETTINGS_ENGLISH_LIGHT)
+        waitForVisibleLabel(SETTINGS_ENGLISH_LIGHT)
         compose.onNode(hasTestTag("settings_haptics_toggle")).performScrollTo().assertIsOff()
     }
 
     @Test
     fun settingsDeviceCheck_reportsPlatformAndPermissionSnapshot() {
         launchRoute(AppRoute.SETTINGS)
-        waitForText(SETTINGS_HINGLISH_LIGHT)
+        waitForVisibleLabel(SETTINGS_HINGLISH_LIGHT)
         tapText("Device ki jaankari dekhein")
 
         waitForText("Android")
@@ -370,21 +375,21 @@ class Phase3JourneysTest {
      * attempted and simply skipped when the node has no scrollable ancestor.
      */
     private fun tapText(needle: String) {
-        val node = compose.onAllNodes(hasText(needle, substring = true)).onFirst()
+        val node = compose.onAllNodes(labelMatcher(needle)).onFirst()
         runCatching { node.performScrollTo() }
         node.performClick()
         compose.waitForIdle()
     }
 
     private fun tapExactText(text: String) {
-        compose.onAllNodes(hasText(text)).onFirst().performClick()
+        compose.onAllNodes(labelMatcher(text)).onFirst().performClick()
         compose.waitForIdle()
     }
 
     /** Taps the first node matching any of [needles] — used where two host wordings are legal. */
     private fun tapAnyText(vararg needles: String) {
         for (needle in needles) {
-            val nodes = compose.onAllNodes(hasText(needle, substring = true)).fetchSemanticsNodes()
+            val nodes = compose.onAllNodes(labelMatcher(needle)).fetchSemanticsNodes()
             if (nodes.isNotEmpty()) {
                 tapText(needle)
                 return
@@ -395,7 +400,13 @@ class Phase3JourneysTest {
 
     private fun waitForText(text: String, timeoutMs: Long = 15_000) {
         compose.waitUntil(timeoutMs) {
-            compose.onAllNodes(hasText(text, substring = true)).fetchSemanticsNodes().isNotEmpty()
+            compose.onAllNodes(labelMatcher(text)).fetchSemanticsNodes().isNotEmpty()
+        }
+    }
+
+    private fun waitForVisibleLabel(text: String, timeoutMs: Long = 15_000) {
+        compose.waitUntil(timeoutMs) {
+            compose.onAllNodes(labelMatcher(text)).fetchSemanticsNodes().isNotEmpty()
         }
     }
 
@@ -404,10 +415,10 @@ class Phase3JourneysTest {
     }
 
     private fun tapCheck() {
-        val label = if (compose.onAllNodes(hasText("Check karein", substring = true)).fetchSemanticsNodes().isNotEmpty()) {
+        val label = if (compose.onAllNodes(labelMatcher("Check karein")).fetchSemanticsNodes().isNotEmpty()) {
             "Check karein"
         } else "Check (offline)"
-        compose.onAllNodes(hasText(label, substring = true)).onFirst().assertIsEnabled()
+        compose.onAllNodes(labelMatcher(label)).onFirst().assertIsEnabled()
         tapText(label)
     }
 
@@ -417,7 +428,7 @@ class Phase3JourneysTest {
 
     private fun waitForContentDescription(text: String, timeoutMs: Long = 15_000) {
         compose.waitUntil(timeoutMs) {
-            compose.onAllNodes(hasContentDescription(text, substring = true))
+            compose.onAllNodes(labelMatcher(text))
                 .fetchSemanticsNodes().isNotEmpty()
         }
     }
@@ -425,7 +436,7 @@ class Phase3JourneysTest {
     private fun waitForAnyText(timeoutMs: Long, vararg texts: String): Boolean = try {
         compose.waitUntil(timeoutMs) {
             texts.any { needle ->
-                compose.onAllNodes(hasText(needle, substring = true)).fetchSemanticsNodes().isNotEmpty()
+                compose.onAllNodes(labelMatcher(needle)).fetchSemanticsNodes().isNotEmpty()
             }
         }
         true
@@ -434,23 +445,26 @@ class Phase3JourneysTest {
     }
 
     private fun assertNodeContains(text: String) {
-        val nodes = compose.onAllNodes(hasText(text, substring = true)).fetchSemanticsNodes()
+        val nodes = compose.onAllNodes(labelMatcher(text)).fetchSemanticsNodes()
         assertTrue("expected visible text containing '$text'", nodes.isNotEmpty())
     }
 
     private fun assertNodeContains(anyOf: List<String>) {
         val hit = anyOf.any {
-            compose.onAllNodes(hasText(it, substring = true)).fetchSemanticsNodes().isNotEmpty()
+            compose.onAllNodes(labelMatcher(it)).fetchSemanticsNodes().isNotEmpty()
         }
         assertTrue("expected one of $anyOf on screen", hit)
     }
 
     private fun assertNoNodeContains(text: String) {
-        val nodes = compose.onAllNodes(hasText(text, substring = true)).fetchSemanticsNodes()
+        val nodes = compose.onAllNodes(labelMatcher(text)).fetchSemanticsNodes()
         assertTrue("text '$text' must not be shipped in the UI", nodes.isEmpty())
     }
 
     private fun anyOf(vararg texts: String): List<String> = texts.toList()
+
+    private fun labelMatcher(text: String) =
+        hasText(text, substring = true) or hasContentDescription(text, substring = true)
 
 
     private fun shell(command: String): String {
@@ -490,7 +504,7 @@ class Phase3JourneysTest {
         const val QR_STOP_PAYMENT = "payment mat karein"
         const val QR_OCCLUSION_NOT_TAMPER = "tamper ka saboot nahi"
 
-        const val SETTINGS_HINGLISH_LIGHT = "Hamesha light"
-        const val SETTINGS_ENGLISH_LIGHT = "Always light"
+        const val SETTINGS_HINGLISH_LIGHT = "White"
+        const val SETTINGS_ENGLISH_LIGHT = "White"
     }
 }

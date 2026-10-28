@@ -5,6 +5,17 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -24,6 +35,7 @@ import ai.trustshield.android.data.preferences.resolveLanguage
 import ai.trustshield.android.core.analysis.LocalScanPipeline
 import ai.trustshield.android.core.analysis.ScanOutcome
 import ai.trustshield.android.core.score.LocalScorer
+import ai.trustshield.android.core.model.RiskLabel
 import ai.trustshield.android.input.share.ShareIntentReader
 import ai.trustshield.android.input.share.ShareIntentRead
 import ai.trustshield.android.input.share.SharedContent
@@ -40,6 +52,9 @@ import ai.trustshield.android.ui.navigation.LocalPreferencesSink
 import ai.trustshield.android.ui.navigation.LocalUserPreferences
 import ai.trustshield.android.ui.navigation.TrustShieldRouteContent
 import ai.trustshield.android.ui.theme.TrustShieldTheme
+import ai.trustshield.android.ui.history.MetadataCheck
+import ai.trustshield.android.ui.history.MetadataCheckHistory
+import ai.trustshield.android.ui.onboarding.OnboardingScreen
 import java.util.Locale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -50,6 +65,16 @@ import kotlinx.coroutines.withContext
  * keeps the deterministic engine testable on a plain JVM.
  */
 class MainActivity : ComponentActivity() {
+
+    private data class StartupLoad(
+        val preferenceStore: SharedPreferencesUserPreferencesStore,
+        val preferences: UserPreferences,
+        val onboardingComplete: Boolean,
+        val requestedEntry: AppRoute?,
+        val incomingText: String?,
+        val incomingImageUri: String?,
+        val entrySequence: Int
+    )
 
     /**
      * Destination requested by the intent that launched (or re-entered) this activity — a share
@@ -73,46 +98,79 @@ class MainActivity : ComponentActivity() {
         // Edge-to-edge from API 26 up: bar icon colours follow the system light/dark setting, so the
         // status bar is never light-on-light. Insets are consumed by AppNavHost (safeDrawingPadding).
         enableEdgeToEdge()
-        requestedEntry = routeFromIntent(intent)
-        incomingText = sharedText(intent)
-        incomingImageUri = sharedImageUri(intent)
-        if (incomingText != null) {
-            requestedEntry = AppRoute.HOME
-            entrySequence++
-        } else if (incomingImageUri != null) {
-            requestedEntry = AppRoute.HOME
-            entrySequence++
-        }
-        val explicitRoute = routeFromIntent(intent)
-        if (restoredWithoutOutcome && incomingText == null && incomingImageUri == null &&
-            (explicitRoute == null || explicitRoute == AppRoute.RESULT)
-        ) {
-            // A process-death restore cannot recover the in-memory verdict without persisting the
-            // scanned text. Return to Home instead of restoring an empty Result destination.
-            requestedEntry = AppRoute.HOME
-            entrySequence++
-        }
-
         // C04's store. It persists five setting values and nothing else; no analysed text, quote,
         // transcript, OTP, PIN, phone number or UPI id can reach it (see UserPreferences tests).
         setContent {
             // Start composition immediately; even opening SharedPreferences can hit disk on a cold
             // process, so load the five presentation choices off the main thread.
             var preferenceStore by remember { mutableStateOf<SharedPreferencesUserPreferencesStore?>(null) }
-            var pendingPreferences by remember { mutableStateOf<UserPreferences?>(null) }
             var preferences: UserPreferences by remember { mutableStateOf(UserPreferences()) }
+            var startupReady by remember { mutableStateOf(false) }
+            var onboardingComplete by remember { mutableStateOf(false) }
             LaunchedEffect(Unit) {
-                val (loadedStore, loadedPreferences) = withContext(Dispatchers.IO) {
-                    SharedPreferencesUserPreferencesStore.open(applicationContext).let { it to it.load() }
+                val startup = withContext(Dispatchers.IO) {
+                    val store = SharedPreferencesUserPreferencesStore.open(applicationContext)
+                    val parsedSharedText = sharedText(intent)
+                    val parsedSharedImageUri = sharedImageUri(intent)
+                    var loadedEntry = routeFromIntent(intent)
+                    var loadedSequence = entrySequence
+                    if (parsedSharedText != null || parsedSharedImageUri != null) {
+                        loadedEntry = AppRoute.HOME
+                        loadedSequence++
+                    }
+                    val explicitRoute = routeFromIntent(intent)
+                    if (restoredWithoutOutcome && parsedSharedText == null && parsedSharedImageUri == null &&
+                        (explicitRoute == null || explicitRoute == AppRoute.RESULT)
+                    ) {
+                        // A process-death restore cannot recover the in-memory verdict without
+                        // persisting the scanned text. Return Home instead of restoring an empty
+                        // Result destination.
+                        loadedEntry = AppRoute.HOME
+                        loadedSequence++
+                    }
+                    StartupLoad(
+                        store,
+                        store.load(),
+                        applicationContext.getSharedPreferences(ONBOARDING_PREFERENCES, MODE_PRIVATE)
+                            .getBoolean(ONBOARDING_COMPLETE, false),
+                        loadedEntry,
+                        parsedSharedText,
+                        parsedSharedImageUri,
+                        loadedSequence
+                    )
                 }
-                preferenceStore = loadedStore
-                val pending = pendingPreferences
-                if (pending == null) preferences = loadedPreferences
-                else withContext(Dispatchers.IO) { loadedStore.save(pending) }
+                preferenceStore = startup.preferenceStore
+                preferences = startup.preferences
+                onboardingComplete = startup.onboardingComplete
+                requestedEntry = startup.requestedEntry
+                incomingText = startup.incomingText
+                incomingImageUri = startup.incomingImageUri
+                entrySequence = startup.entrySequence
+                startupReady = true
             }
             var scanState by remember { mutableStateOf(ScanInputState()) }
+            var historyStore by remember { mutableStateOf<MetadataCheckHistory?>(null) }
+            var historyEntries by remember { mutableStateOf(emptyList<MetadataCheck>()) }
+            LaunchedEffect(Unit) {
+                val (store, entries) = withContext(Dispatchers.IO) {
+                    MetadataCheckHistory(applicationContext).let { it to it.read() }
+                }
+                historyStore = store
+                historyEntries = entries
+            }
 
-            LaunchedEffect(entrySequence, incomingText) {
+            fun recordCheck(outcome: ScanOutcome) {
+                val entry = MetadataCheck(
+                    checkedAtMillis = System.currentTimeMillis(),
+                    verdict = outcome.result.risk.label,
+                    score = outcome.risk.score.takeUnless { outcome.result.risk.label == RiskLabel.UNABLE_TO_VERIFY }
+                )
+                historyStore?.add(entry)
+                historyEntries = (listOf(entry) + historyEntries).take(30)
+            }
+
+            LaunchedEffect(entrySequence, incomingText, startupReady) {
+                if (!startupReady) return@LaunchedEffect
                 val shared = incomingText ?: return@LaunchedEffect
                 scanState = reduce(scanState, ScanInputEvent.TextChanged(shared))
                 val sensitivity = when (preferences.sensitivity) {
@@ -120,9 +178,11 @@ class MainActivity : ComponentActivity() {
                     ai.trustshield.android.data.preferences.Sensitivity.BALANCED -> LocalScorer.Sensitivity.STANDARD
                     ai.trustshield.android.data.preferences.Sensitivity.HIGH -> LocalScorer.Sensitivity.HIGH
                 }
-                resultOutcome = when (val share = ShareIngestCoordinator(
-                    pipeline = LocalScanPipeline(sensitivity = sensitivity)
-                ).ingest(ShareIngestRequest.Text(shared))) {
+                resultOutcome = when (val share = withContext(Dispatchers.Default) {
+                    ShareIngestCoordinator(
+                        pipeline = LocalScanPipeline(sensitivity = sensitivity)
+                    ).ingest(ShareIngestRequest.Text(shared))
+                }) {
                     is ShareIngestOutcome.Analysed -> share.outcome
                     else -> null
                 }
@@ -149,14 +209,38 @@ class MainActivity : ComponentActivity() {
                     LocalPreferencesSink provides { updated: UserPreferences ->
                         preferences = updated
                         val activeStore = preferenceStore
-                        if (activeStore == null) pendingPreferences = updated
-                        else activeStore.save(updated)
+                        activeStore?.save(updated)
                     }
                 ) {
                     // The back stack itself is restored by AppNavHost via rememberSaveable, so
                     // process recreation returns the user to the same screen; `requestedEntry` only
                     // matters when nothing was saved, or when a genuinely new intent arrives.
-                    AppNavHost(entry = requestedEntry, entrySequence = entrySequence) { route ->
+                    if (!startupReady) {
+                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Image(
+                                painter = painterResource(R.drawable.trustshield_logo_icon),
+                                contentDescription = "TrustShield AI",
+                                contentScale = ContentScale.Fit,
+                                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground),
+                                modifier = Modifier.size(96.dp)
+                            )
+                        }
+                    } else if (!onboardingComplete) {
+                        OnboardingScreen(
+                            language = preferences.language,
+                            onLanguageChange = { language ->
+                                val updated = preferences.copy(language = language)
+                                preferences = updated
+                                preferenceStore?.save(updated)
+                            },
+                            onComplete = {
+                                getSharedPreferences(ONBOARDING_PREFERENCES, MODE_PRIVATE).edit()
+                                    .putBoolean(ONBOARDING_COMPLETE, true)
+                                    .apply()
+                                onboardingComplete = true
+                            }
+                        )
+                    } else AppNavHost(entry = requestedEntry, entrySequence = entrySequence) { route ->
                         SideEffect { visibleRoute = route }
                         TrustShieldRouteContent(
                             route = route,
@@ -166,7 +250,12 @@ class MainActivity : ComponentActivity() {
                             resultOutcome = resultOutcome,
                             sharedImageUri = incomingImageUri,
                             onSharedImageConsumed = { incomingImageUri = null },
-                            onImageResult = { resultOutcome = it },
+                            onImageResult = { resultOutcome = it; recordCheck(it) },
+                            historyEntries = historyEntries,
+                            onClearHistory = {
+                                historyStore?.clear()
+                                historyEntries = emptyList()
+                            },
                             onScanEvent = { event -> scanState = reduce(scanState, event) },
                             onCheck = { text ->
                                 val sensitivity = when (preferences.sensitivity) {
@@ -174,7 +263,10 @@ class MainActivity : ComponentActivity() {
                                     ai.trustshield.android.data.preferences.Sensitivity.BALANCED -> LocalScorer.Sensitivity.STANDARD
                                     ai.trustshield.android.data.preferences.Sensitivity.HIGH -> LocalScorer.Sensitivity.HIGH
                                 }
-                                resultOutcome = LocalScanPipeline(sensitivity = sensitivity).analyzeText(text)
+                                LocalScanPipeline(sensitivity = sensitivity).analyzeText(text).also { outcome ->
+                                    resultOutcome = outcome
+                                    recordCheck(outcome)
+                                }
                             }
                         )
                     }
@@ -243,6 +335,8 @@ class MainActivity : ComponentActivity() {
     }
 
     private companion object {
+        const val ONBOARDING_PREFERENCES = "trustshield_onboarding"
+        const val ONBOARDING_COMPLETE = "complete"
         const val STATE_ENTRY_SEQUENCE = "trustshield.entry_sequence"
         const val STATE_VISIBLE_ROUTE = "trustshield.visible_route"
     }

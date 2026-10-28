@@ -31,6 +31,38 @@ class LocalEvidenceAdapterTest {
     }
 
     @Test
+    fun utilityBillRuleGetsASpecificEvidenceTitle() {
+        val evidence = Evidence.unquoted(
+            module = "stage_rules",
+            titleHinglish = "Dhamki ke saath bill update karne ko kaha",
+            detail = "Bill update karne ko kaha gaya.",
+            severity = Severity.HIGH,
+            strength = Strength.STRONG,
+        )
+
+        assertEquals(
+            "Utility bill update requested with disconnection threat",
+            LocalEvidenceAdapter.evidence(evidence).titleEnglish
+        )
+    }
+
+    @Test
+    fun unmappedEvidenceKeepsItsSpecificReasonInsteadOfGenericCopy() {
+        val evidence = Evidence.unquoted(
+            module = "local_fusion",
+            titleHinglish = "Unknown sender pattern",
+            detail = "The sender asks you to verify a payment through an unfamiliar channel.",
+            severity = Severity.MEDIUM,
+            strength = Strength.MODERATE,
+        )
+
+        val result = LocalEvidenceAdapter.evidence(evidence)
+
+        assertEquals("Unknown sender pattern", result.titleEnglish)
+        assertEquals("The sender asks you to verify a payment through an unfamiliar channel.", result.detailEnglish)
+    }
+
+    @Test
     fun englishResultActionUsesEnglishCopy() {
         val result = LocalEvidenceAdapter.action(LocalScorer.ACTION_HIGH_STOP, 0)
 
