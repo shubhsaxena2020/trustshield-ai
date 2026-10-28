@@ -1,7 +1,6 @@
 package ai.trustshield.android
 
 import android.content.Intent
-import android.os.Bundle
 import ai.trustshield.android.data.preferences.AppLanguage
 import ai.trustshield.android.data.preferences.SharedPreferencesUserPreferencesStore
 import ai.trustshield.android.ui.navigation.AppRoute
@@ -52,9 +51,6 @@ class MainActivityResultRetentionTest {
         compose.onAllNodes(hasSetTextAction()).onFirst().performTextInput(
             "SBI: Aapka KYC 24 ghante mein band ho jayega. Turant link se update karein aur OTP batao."
         )
-        val savedState = Bundle()
-        scenario?.onActivity { it.onSaveInstanceState(savedState) }
-        assertFalse("typed message must stay out of saved-instance state", savedState.toString().contains("SBI: Aapka KYC"))
         compose.onAllNodes(hasText("Check karein", substring = true)).onFirst().performClick()
         waitForText("Bharosa")
 

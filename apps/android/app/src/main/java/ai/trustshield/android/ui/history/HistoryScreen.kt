@@ -70,7 +70,7 @@ fun HistoryScreen(
             EmptyHistory(copy)
         } else {
             LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(entries, key = { item -> "${item.checkedAtMillis}:${item.verdict.wire}" }) { item ->
+                items(entries) { item ->
                     HistoryRow(item = item, language = language)
                 }
             }
@@ -108,13 +108,6 @@ private fun HistoryRow(item: MetadataCheck, language: AppLanguage) {
             Column(Modifier.weight(1f)) {
                 Text(label.forLanguage(language), style = MaterialTheme.typography.titleSmall, color = labelTone)
                 Text(time, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-            item.score?.let { score ->
-                Text(
-                    ToneCopy("Skor $score", "Score $score", "स्कोर $score").forLanguage(language),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
             }
         }
     }

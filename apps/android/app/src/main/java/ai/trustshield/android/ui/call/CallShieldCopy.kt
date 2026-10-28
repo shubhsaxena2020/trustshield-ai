@@ -76,7 +76,7 @@ object CallShieldCopy {
     fun consentBody(disclosure: RecognitionDisclosure): ToneCopy {
         val disclosureEnglish = when (disclosure) {
             RecognitionDisclosure.NOT_CHECKED -> "The recognition path has not been checked; the recognizer may use the internet and audio may leave this device."
-            RecognitionDisclosure.ON_DEVICE_UNVERIFIED -> "Offline behavior is unverified; this on-device recognition path has not been tested."
+            RecognitionDisclosure.ON_DEVICE_UNVERIFIED -> "offline behavior is unverified; this on-device recognition path has not been tested."
             RecognitionDisclosure.MAY_USE_NETWORK -> "The recognizer may use the internet and audio may leave this device."
             RecognitionDisclosure.UNAVAILABLE -> "Speech recognition is unavailable on this device."
         }
@@ -87,15 +87,15 @@ object CallShieldCopy {
             RecognitionDisclosure.UNAVAILABLE -> "Is device par speech recognition available nahi hai."
         }
         val disclosureHindi = when (disclosure) {
-            RecognitionDisclosure.NOT_CHECKED -> "???? ????? ?? ????? ????? ???? ??? ??; ?????????? ??????? ???????? ?? ???? ?? ?? ????? ?? ???? ?? ???? ?? ???? ???"
-            RecognitionDisclosure.ON_DEVICE_UNVERIFIED -> "??????? ??????? ???????? ???? ??; ?????? ?? ????? ?? ?? ????? ?? ??????? ???? ??? ???"
-            RecognitionDisclosure.MAY_USE_NETWORK -> "?????????? ??????? ???????? ?? ???? ?? ?? ????? ?? ???? ?? ???? ?? ???? ???"
-            RecognitionDisclosure.UNAVAILABLE -> "?? ?????? ?? ???? ????? ?????? ???? ???"
+            RecognitionDisclosure.NOT_CHECKED -> "\u0935\u093e\u0915\u094d \u092a\u0939\u091a\u093e\u0928 \u0915\u093e \u0924\u0930\u0940\u0915\u093e \u091c\u093e\u0901\u091a\u093e \u0928\u0939\u0940\u0902 \u0917\u092f\u093e \u0939\u0948; \u092a\u0939\u091a\u093e\u0928\u0915\u0930\u094d\u0924\u093e \u0907\u0902\u091f\u0930\u0928\u0947\u091f \u0907\u0938\u094d\u0924\u0947\u092e\u093e\u0932 \u0915\u0930 \u0938\u0915\u0924\u093e \u0939\u0948 \u0914\u0930 \u0906\u0935\u093e\u091c\u093c \u0907\u0938 \u092b\u093c\u094b\u0928 \u0938\u0947 \u092c\u093e\u0939\u0930 \u091c\u093e \u0938\u0915\u0924\u0940 \u0939\u0948\u0964"
+            RecognitionDisclosure.ON_DEVICE_UNVERIFIED -> "\u0911\u092b\u093c\u0932\u093e\u0907\u0928 \u0935\u094d\u092f\u0935\u0939\u093e\u0930 \u0938\u0924\u094d\u092f\u093e\u092a\u093f\u0924 \u0928\u0939\u0940\u0902 \u0939\u0948; \u0921\u093f\u0935\u093e\u0907\u0938 \u092a\u0930 \u092a\u0939\u091a\u093e\u0928 \u0915\u0947 \u0907\u0938 \u0924\u0930\u0940\u0915\u0947 \u0915\u093e \u092a\u0930\u0940\u0915\u094d\u0937\u0923 \u0928\u0939\u0940\u0902 \u0939\u0941\u0906 \u0939\u0948\u0964"
+            RecognitionDisclosure.MAY_USE_NETWORK -> "\u092a\u0939\u091a\u093e\u0928\u0915\u0930\u094d\u0924\u093e \u0907\u0902\u091f\u0930\u0928\u0947\u091f \u0907\u0938\u094d\u0924\u0947\u092e\u093e\u0932 \u0915\u0930 \u0938\u0915\u0924\u093e \u0939\u0948 \u0914\u0930 \u0906\u0935\u093e\u091c\u093c \u0907\u0938 \u092b\u093c\u094b\u0928 \u0938\u0947 \u092c\u093e\u0939\u0930 \u091c\u093e \u0938\u0915\u0924\u0940 \u0939\u0948\u0964"
+            RecognitionDisclosure.UNAVAILABLE -> "\u0907\u0938 \u0921\u093f\u0935\u093e\u0907\u0938 \u092a\u0930 \u0935\u093e\u0915\u094d \u092a\u0939\u091a\u093e\u0928 \u0909\u092a\u0932\u092c\u094d\u0927 \u0928\u0939\u0940\u0902 \u0939\u0948\u0964"
         }
         return ToneCopy(
             "Start karne par Call Shield aas-paas ki baat sun kar text banata hai. $disclosureHinglish Recording save nahi hoti. Automatic ya Online mode mein internet hone par awaaz sirf Google Speech ko bheji ja sakti hai; kahin aur nahi.",
             "After you start, Call Shield listens to nearby speech and turns it into text. $disclosureEnglish Audio is not recorded or stored. In Automatic or Online mode, if internet is available, speech may be sent only to Google Speech; it is not sent anywhere else. The app does not store audio recordings.",
-            "???? ???? ?? Call Shield ????? ?? ??? ????? ??? ??????? ??? ????? ??? $disclosureHindi ????? ??????? ?? ??? ???? ????? Automatic ?? Online ??? ??? ??????? ?????? ???? ?? ????? ???? Google Speech ?? ???? ?? ???? ??; ??? ???? ?? ???? ???? ?????"
+            "\u0936\u0941\u0930\u0942 \u0915\u0930\u0928\u0947 \u092a\u0930 Call Shield \u0906\u0938\u092a\u093e\u0938 \u0915\u0940 \u092c\u093e\u0924 \u0938\u0941\u0928\u0915\u0930 \u0909\u0938\u0947 \u091f\u0947\u0915\u094d\u0938\u094d\u091f \u092e\u0947\u0902 \u092c\u0926\u0932\u0924\u093e \u0939\u0948\u0964 $disclosureHindi \u0911\u0921\u093f\u092f\u094b \u0930\u093f\u0915\u0949\u0930\u094d\u0921 \u092f\u093e \u0938\u0947\u0935 \u0928\u0939\u0940\u0902 \u0939\u094b\u0924\u093e\u0964 Automatic \u092f\u093e Online \u092e\u094b\u0921 \u092e\u0947\u0902 \u0907\u0902\u091f\u0930\u0928\u0947\u091f \u0909\u092a\u0932\u092c\u094d\u0927 \u0939\u094b\u0928\u0947 \u092a\u0930 \u0906\u0935\u093e\u091c\u093c \u0915\u0947\u0935\u0932 Google Speech \u0915\u094b \u092d\u0947\u091c\u0940 \u091c\u093e \u0938\u0915\u0924\u0940 \u0939\u0948; \u0907\u0938\u0947 \u0915\u0939\u0940\u0902 \u0914\u0930 \u0928\u0939\u0940\u0902 \u092d\u0947\u091c\u093e \u091c\u093e\u0924\u093e\u0964"
         )
     }
     val consentAction = ToneCopy("Main samajh gaya, anumati deta hoon", "I understand and agree", "\u092e\u0948\u0902 \u0938\u092e\u091d \u0917\u092f\u093e/\u0917\u092f\u0940 \u0939\u0942\u0901 \u0914\u0930 \u0938\u0939\u092e\u0924\u093f \u0926\u0947\u0924\u093e/\u0926\u0947\u0924\u0940 \u0939\u0942\u0901")

@@ -105,27 +105,31 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val retainedAcrossConfiguration = lastCustomNonConfigurationInstance is RetainedUiState
         retainedUi = lastCustomNonConfigurationInstance as? RetainedUiState ?: RetainedUiState()
+        if (!retainedAcrossConfiguration) {
+            retainedUi.entrySequence.intValue = savedInstanceState?.getInt(STATE_ENTRY_SEQUENCE) ?: 0
+        }
         val restoredRoute = AppRoute.fromWire(savedInstanceState?.getString(STATE_VISIBLE_ROUTE))
         val restoredWithoutOutcome = restoredRoute == AppRoute.RESULT && retainedUi.resultOutcome.value == null
         // Edge-to-edge from API 26 up: bar icon colours follow the system light/dark setting, so the
         // status bar is never light-on-light. Insets are consumed by AppNavHost (safeDrawingPadding).
         enableEdgeToEdge()
+        // Resolve the stored theme before Compose draws its first frame, avoiding a default-theme flash.
+        val initialPreferences = SharedPreferencesUserPreferencesStore.open(applicationContext).load()
         // C04's store. It persists five setting values and nothing else; no analysed text, quote,
         // transcript, OTP, PIN, phone number or UPI id can reach it (see UserPreferences tests).
         setContent {
-            // Start composition immediately; even opening SharedPreferences can hit disk on a cold
-            // process, so load the five presentation choices off the main thread.
+            // Seed the first composition from the synchronous preference snapshot; startup work below
+            // refreshes the remaining entry and onboarding metadata off the main thread.
             var preferenceStore by remember { mutableStateOf<SharedPreferencesUserPreferencesStore?>(null) }
-            var preferences: UserPreferences by remember {
-                mutableStateOf(SharedPreferencesUserPreferencesStore.open(applicationContext).load())
-            }
+            var preferences: UserPreferences by remember { mutableStateOf(initialPreferences) }
             var startupReady by remember { mutableStateOf(false) }
             var onboardingComplete by remember { mutableStateOf(false) }
             LaunchedEffect(Unit) {
                 val startup = withContext(Dispatchers.IO) {
                     val store = SharedPreferencesUserPreferencesStore.open(applicationContext)
-                    val parsedSharedText = sharedText(intent)
-                    val parsedSharedImageUri = sharedImageUri(intent)
+                    val readIncomingIntent = savedInstanceState == null || !retainedAcrossConfiguration
+                    val parsedSharedText = if (readIncomingIntent) sharedText(intent) else null
+                    val parsedSharedImageUri = if (readIncomingIntent) sharedImageUri(intent) else null
                     var loadedEntry = routeFromIntent(intent)
                     var loadedSequence = retainedUi.entrySequence.intValue
                     if (savedInstanceState == null && (parsedSharedText != null || parsedSharedImageUri != null)) {

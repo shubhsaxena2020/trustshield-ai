@@ -23,8 +23,7 @@ import kotlin.math.pow
  *  2. **Dark counterparts** ([AccentDark], [RiskGreenDark], [RiskAmberDark], [RiskRedDark]) —
  *     checked by [ThemeTest] against the current dark surface.
  *  3. **Text-safe light hues** ([AccentTextLight], [RiskGreenTextLight], [RiskAmberTextLight],
- *     [RiskRedTextLight]) — the light-mode answer to (1) for normal-size text, each >= 6.1:1 on the
- *     light surface.
+ *     [RiskRedTextLight]) — the light-mode answer to (1) for normal-size text.
  *
  * Tone *surfaces* (chips, evidence cards) come from [RiskTone.container] / [RiskTone.onContainer],
  * which are certified >= 4.5:1 in both modes.
@@ -112,7 +111,7 @@ object TsPalette {
     val OutlineLight = Color(0xFF595959)
     val OutlineVariantLight = Color(0xFF595959)
 
-    /** White theme primary buttons use a white fill and black text. */
+    /** Light-theme primary controls use a neutral fill with black text. */
     val AccentFillLight = Color(0xFF888888)
     val OnAccentFillLight = Color(0xFF000000)
     val AccentContainerLight = Color(0xFF888888)

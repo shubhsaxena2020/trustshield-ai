@@ -629,7 +629,6 @@ private fun RecentChecks(
                         Text(verdict.forLanguage(language), style = MaterialTheme.typography.titleSmall)
                         Text(java.text.DateFormat.getTimeInstance(java.text.DateFormat.SHORT).format(java.util.Date(entry.checkedAtMillis)), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
-                    entry.score?.let { Text(copy(ToneCopy("Skor $it", "Score $it", "स्कोर $it")), style = MaterialTheme.typography.labelMedium) }
                 }
             }
         }

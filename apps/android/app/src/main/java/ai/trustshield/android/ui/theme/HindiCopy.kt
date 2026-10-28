@@ -78,7 +78,6 @@ internal object HindiCopy {
         "Careful: some scam-like words were heard. End the call and verify through an official number; if you already sent money, call 1930." to "सावधान: घोटाले जैसे कुछ शब्द सुनाई दिए। कॉल काटें और आधिकारिक नंबर से पुष्टि करें; पैसे भेज चुके हैं तो 1930 पर कॉल करें।",
         "This matches a digital-arrest scam pattern. End the call and verify through an official number; if you already sent money, call 1930. No police or CBI officer arrests anyone over a video call, and nobody needs your money to 'verify' it." to "यह डिजिटल गिरफ़्तारी घोटाले के पैटर्न जैसा है। कॉल काटें और आधिकारिक नंबर से पुष्टि करें; पैसे भेज चुके हैं तो 1930 पर कॉल करें। पुलिस या CBI वीडियो कॉल पर किसी को गिरफ़्तार नहीं करती और पैसे “सत्यापित” करने के लिए नहीं माँगती।",
         "This matches a digital-arrest scam pattern and there is a request for money or a code. End the call now. Verify through an official number; if you already sent money, call 1930. Do not give anyone an OTP, PIN or remote access." to "यह डिजिटल गिरफ़्तारी घोटाले के पैटर्न जैसा है और पैसे या कोड माँगे जा रहे हैं। तुरंत कॉल काटें। आधिकारिक नंबर से पुष्टि करें; पैसे भेज चुके हैं तो 1930 पर कॉल करें। किसी को OTP, PIN या दूर से डिवाइस चलाने की अनुमति न दें।",
-        "english = \"This is a digital-arrest scam pattern. No police or CBI officer arrests anyone over a video call. End the call and call 1930.\"" to "यह डिजिटल गिरफ़्तारी घोटाले का पैटर्न है। पुलिस या CBI वीडियो कॉल पर किसी को गिरफ़्तार नहीं करती। कॉल काटें और 1930 पर कॉल करें।",
         "This alert is about the pattern of words only. It does not accuse any person." to "यह चेतावनी केवल बोले गए शब्दों के पैटर्न के बारे में है। यह किसी व्यक्ति पर आरोप नहीं लगाती।",
         "Audio not clear" to "आवाज़ स्पष्ट नहीं है",
         "Some speech could not be understood, so the alert is on hold. Repeat it, or move closer to the phone, otherwise the alert is not shown." to "कुछ बातें समझ नहीं आईं, इसलिए चेतावनी रोक दी गई है। दोबारा बोलें या फ़ोन के पास आएँ; वरना चेतावनी नहीं दिखाई जाएगी।",
@@ -168,7 +167,6 @@ internal object HindiCopy {
         "camera permission is needed" to "कैमरे की अनुमति चाहिए",
         "camera permission is blocked" to "कैमरे की अनुमति बंद है",
         "this phone has no camera" to "इस फ़ोन में कैमरा नहीं है",
-        "Camera panel —" to "कैमरा पैनल —",
         "Simulate scan demo — not live camera decoding" to "स्कैन डेमो का अनुकरण करें — लाइव कैमरा QR नहीं पढ़ता",
         "Camera permission is needed" to "कैमरे की अनुमति चाहिए",
         "Camera permission is blocked" to "कैमरे की अनुमति बंद है",
@@ -280,7 +278,13 @@ internal object HindiCopy {
         "Arrest ya legal dhamki" to "गिरफ़्तारी या कानूनी धमकी",
         "Message arrest, FIR, warrant, money laundering ya drug-parcel ka darr dikhata hai — digital-arrest scam ka core stage." to "संदेश गिरफ़्तारी, FIR, वारंट, मनी लॉन्ड्रिंग या ड्रग पार्सल का डर दिखाता है — यह डिजिटल गिरफ़्तारी धोखाधड़ी का मुख्य चरण है।",
         "Yeh message akele khatra nahi dikhata. Anjaan link par OTP ya paise phir bhi na dein." to "यह संदेश अकेले जोखिम नहीं दिखाता। फिर भी अनजान लिंक पर OTP न दें और पैसे न भेजें।",
-        "This next step is for you to consider." to "इस अगले कदम पर आप विचार कर सकते हैं।"
+        "This next step is for you to consider." to "इस अगले कदम पर आप विचार कर सकते हैं।",
+        "Camera panel —" to "कैमरा पैनल —",
+        "QR Guard" to "\u0915\u094d\u092f\u0942\u0906\u0930 \u0917\u093e\u0930\u094d\u0921",
+        "Registered: {id}" to "\u092a\u0902\u091c\u0940\u0915\u0943\u0924: {id}",
+        "Scan another QR or start watching." to "\u090f\u0915 \u0914\u0930 QR \u0938\u094d\u0915\u0948\u0928 \u0915\u0930\u0947\u0902 \u092f\u093e \u0928\u093f\u0917\u0930\u093e\u0928\u0940 \u0936\u0941\u0930\u0942 \u0915\u0930\u0947\u0902\u0964",
+        "Camera panel \u2014 " to "\u0915\u0948\u092e\u0930\u093e \u092a\u0948\u0928\u0932 \u2014 ",
+        "This is a digital-arrest scam pattern. No police or CBI officer arrests anyone over a video call. End the call and call 1930." to "\u092f\u0939 \u0921\u093f\u091c\u093f\u091f\u0932 \u0917\u093f\u0930\u092b\u093c\u094d\u0924\u093e\u0930\u0940 \u0918\u094b\u091f\u093e\u0932\u0947 \u0915\u093e \u092a\u0948\u091f\u0930\u094d\u0928 \u0939\u0948\u0964 \u092a\u0941\u0932\u093f\u0938 \u092f\u093e CBI \u0935\u0940\u0921\u093f\u092f\u094b \u0915\u0949\u0932 \u092a\u0930 \u0915\u093f\u0938\u0940 \u0915\u094b \u0917\u093f\u0930\u092b\u093c\u094d\u0924\u093e\u0930 \u0928\u0939\u0940\u0902 \u0915\u0930\u0924\u0940\u0964 \u0915\u0949\u0932 \u0915\u093e\u091f\u0947\u0902 \u0914\u0930 1930 \u092a\u0930 \u0915\u0949\u0932 \u0915\u0930\u0947\u0902\u0964",
     )
     private val resultTranslations = mapOf(
         "The message instructs you to remain on a video call." to "संदेश आपको वीडियो कॉल पर बने रहने का निर्देश देता है।",

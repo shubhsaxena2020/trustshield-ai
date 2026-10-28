@@ -123,10 +123,10 @@ fun AppNavHost(
             .second.forLanguage(selectedLanguage)
         val tabLabels = mapOf(
             AppRoute.HOME to ToneCopy("Check", "Check", "जाँच"),
-            AppRoute.CALL_SHIELD to ToneCopy("Call Shield", "Call Shield", "कॉल सुरक्षा"),
-            AppRoute.QR_GUARD to ToneCopy("QR Guard", "QR Guard", "QR सुरक्षा"),
-            AppRoute.HISTORY to ToneCopy("History", "History", "इतिहास"),
-            AppRoute.SETTINGS to ToneCopy("Settings", "Settings", "सेटिंग्स")
+            AppRoute.CALL_SHIELD to ToneCopy("Call", "Call", "कॉल"),
+            AppRoute.QR_GUARD to ToneCopy("QR", "QR", "QR"),
+            AppRoute.HISTORY to ToneCopy("Recent", "Recent", "हाल"),
+            AppRoute.SETTINGS to ToneCopy("Setup", "Setup", "विकल्प")
         )
 
         Scaffold(

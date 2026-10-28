@@ -500,7 +500,7 @@ class CallScreenTest {
     @Test
     fun uncheckedRecognitionPathWarnsThatAudioMayLeaveTheDevice() {
         val copy = CallShieldCopy.consentBody(RecognitionDisclosure.NOT_CHECKED)
-        assertTrue(copy.english.contains("path not checked"))
+        assertTrue(copy.english.contains("recognition path") && copy.english.contains("has not been checked"))
         assertTrue(copy.english.contains("audio may leave this device"))
         assertTrue(copy.english.contains("does not store audio recordings"))
     }
