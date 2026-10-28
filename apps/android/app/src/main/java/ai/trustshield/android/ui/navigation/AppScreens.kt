@@ -16,6 +16,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -378,10 +379,16 @@ private fun HomeRouteHost(
         onSharedImageConsumed()
     }
     Column(modifier = Modifier.fillMaxSize()) {
-        OutlinedButton(
+        Card(
             onClick = { nav.navigate(AppRoute.BOMB_SHIELD) },
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).heightIn(min = 48.dp)
-        ) { Text(ToneCopy("Bomb Shield · SMS aur call flood", "Bomb Shield · message and call floods", "Bomb Shield · संदेश और कॉल की बाढ़").forLanguage(language)) }
+            shape = MaterialTheme.shapes.large,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
+        ) {
+            Column(Modifier.fillMaxWidth().padding(16.dp)) {
+                Text(ToneCopy("Bomb Shield", "Bomb Shield", "बम शील्ड").forLanguage(language), style = MaterialTheme.typography.titleMedium)
+                Text(ToneCopy("SMS aur baar-baar aane wali calls ke flood ko dekhein.", "See message and repeated-call flood alerts.", "संदेश और बार-बार आने वाली कॉल के अलर्ट देखें।").forLanguage(language), style = MaterialTheme.typography.bodySmall)
+            }
+        }
         ScanScreen(
             state = scanState,
             english = english,

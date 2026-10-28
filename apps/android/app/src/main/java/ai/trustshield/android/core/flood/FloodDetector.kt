@@ -96,8 +96,6 @@ class FloodDetector(private val profile: FloodProfile = FloodProfile.NORMAL) {
                 "Several messages arrived from one sender in 30 seconds.")
             otp.size >= smsOtpFlood - 1 && otpSources >= smsOtpSources -> result(FloodSeverity.WATCH, otp.size, 2 * MINUTE, FloodReason.SMS_OTP_SERVICES,
                 "Several code-like messages arrived from different services.")
-            repeatCalls.size >= repeatCallFlood - 1 -> result(FloodSeverity.WATCH, repeatCalls.size, 5 * MINUTE, FloodReason.CALL_REPEAT,
-                "Repeated missed or rejected calls came from one number.")
             recentCalls.map { it.sourceKey }.distinct().size >= distributedCallFlood - 1 -> result(FloodSeverity.WATCH, recentCalls.size, 5 * MINUTE, FloodReason.CALL_DISTRIBUTED,
                 "Calls are arriving from several different numbers.")
             else -> FloodResult(

@@ -1,0 +1,24 @@
+FINAL P11 cold start 1
+Starting: Intent { cmp=ai.trustshield.android/.MainActivity }
+Status: ok
+LaunchState: COLD
+Activity: ai.trustshield.android/.MainActivity
+TotalTime: 2432
+WaitTime: 2434
+Complete
+FINAL P11 cold start 2
+Starting: Intent { cmp=ai.trustshield.android/.MainActivity }
+Status: ok
+LaunchState: COLD
+Activity: ai.trustshield.android/.MainActivity
+TotalTime: 2380
+WaitTime: 2458
+Complete
+FINAL P11 cold start 3
+Starting: Intent { cmp=ai.trustshield.android/.MainActivity }
+Status: ok
+LaunchState: COLD
+Activity: ai.trustshield.android/.MainActivity
+TotalTime: 3019
+WaitTime: 3039
+Complete

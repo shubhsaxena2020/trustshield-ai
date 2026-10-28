@@ -176,9 +176,9 @@ private fun body(page: Int) = when (page) {
         "जाँच इसी डिवाइस पर होती है। इतिहास में केवल नतीजा और स्कोर सहेजे जाते हैं।"
     )
     else -> ToneCopy(
-        "Bhasha chunein. Camera ya microphone ki permission sirf us feature ko kholne par maangi jayegi.",
-        "Choose a language. Camera or microphone access is requested only when you open that feature.",
-        "भाषा चुनें। कैमरा या माइक्रोफ़ोन की अनुमति संबंधित सुविधा खोलने पर ही माँगी जाएगी।"
+        "Bhasha chunein. Camera ya microphone permission feature kholne par maangi jayegi. Bomb Shield ki SMS/call permissions uske disclosure ke baad opt-in karne par hi maangi jayengi.",
+        "Choose a language. Camera or microphone access is requested only when you open that feature. Bomb Shield asks for SMS/call permissions only after its disclosure and your opt-in.",
+        "भाषा चुनें। कैमरा या माइक्रोफ़ोन की अनुमति सुविधा खोलने पर माँगी जाती है। Bomb Shield की SMS/कॉल अनुमति उसके खुलासे के बाद आपकी सहमति पर ही माँगी जाएगी।"
     )
 }
 

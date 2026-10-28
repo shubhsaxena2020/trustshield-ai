@@ -18,6 +18,10 @@ class FloodDetectorTest {
         detector.record(call(0, "family", CallOutcome.MISSED))
         detector.record(call(60_000, "family", CallOutcome.ANSWERED))
         assertEquals(FloodSeverity.NONE, detector.snapshot().severity)
+        val unanswered = FloodDetector()
+        unanswered.record(call(0, "family", CallOutcome.MISSED))
+        unanswered.record(call(60_000, "family", CallOutcome.REJECTED))
+        assertEquals(FloodSeverity.NONE, unanswered.snapshot().severity)
     }
 
     @Test fun bankOtpAndConfirmationDoNotAlert() {
@@ -52,16 +56,52 @@ class FloodDetectorTest {
         assertEquals(FloodReason.SMS_OTP_SERVICES, otp.snapshot().reason)
     }
 
+    @Test fun sameSenderAndOtpRulesRespectTheirWindowBoundaries() {
+        val sender = FloodDetector()
+        repeat(4) { sender.record(sms(it * 10_000L, "same")) }
+        assertEquals(FloodSeverity.WATCH, sender.snapshot().severity)
+        sender.record(sms(40_001, "same"))
+        assertEquals(FloodSeverity.NONE, sender.snapshot().severity)
+
+        val otp = FloodDetector()
+        repeat(5) { otp.record(sms(it * 20_000L, "otp-$it", true)) }
+        assertEquals(FloodSeverity.WATCH, otp.snapshot().severity)
+        otp.record(sms(160_001, "fresh", true))
+        assertEquals(FloodSeverity.NONE, otp.snapshot().severity)
+    }
+
+    @Test fun strictProfileUsesLowerSmsAndRepeatCallThresholds() {
+        val strictSms = FloodDetector(FloodProfile.STRICT)
+        repeat(6) { strictSms.record(sms(it.toLong(), "sender-$it")) }
+        assertEquals(FloodSeverity.FLOOD, strictSms.snapshot().severity)
+
+        val strictCalls = FloodDetector(FloodProfile.STRICT)
+        strictCalls.record(call(0, "same", CallOutcome.MISSED))
+        assertEquals(FloodSeverity.FLOOD, strictCalls.record(call(1_000, "same", CallOutcome.REJECTED)).severity)
+    }
+
     @Test fun missedOrRejectedRepeatCallsAndDistributedCallsTrigger() {
         val repeated = FloodDetector()
         repeated.record(call(0, "number", CallOutcome.MISSED))
         repeated.record(call(60_000, "number", CallOutcome.REJECTED))
-        assertEquals(FloodSeverity.WATCH, repeated.snapshot().severity)
+        assertEquals(FloodSeverity.NONE, repeated.snapshot().severity)
         assertEquals(FloodSeverity.FLOOD, repeated.record(call(120_000, "number", CallOutcome.ANSWERED)).severity)
 
         val distributed = FloodDetector()
         repeat(4) { distributed.record(call(it * 60_000L, "number-$it", CallOutcome.ANSWERED)) }
         assertEquals(FloodReason.CALL_DISTRIBUTED, distributed.snapshot().reason)
+    }
+
+    @Test fun repeatedCallWindowIncludesFiveMinuteEdgeAndDropsPastIt() {
+        val atEdge = FloodDetector()
+        atEdge.record(call(0, "number", CallOutcome.MISSED))
+        atEdge.record(call(150_000, "number", CallOutcome.REJECTED))
+        assertEquals(FloodSeverity.FLOOD, atEdge.record(call(300_000, "number", CallOutcome.ANSWERED)).severity)
+
+        val pastEdge = FloodDetector()
+        pastEdge.record(call(0, "number", CallOutcome.MISSED))
+        pastEdge.record(call(150_000, "number", CallOutcome.REJECTED))
+        assertEquals(FloodSeverity.NONE, pastEdge.record(call(300_001, "number", CallOutcome.ANSWERED)).severity)
     }
 
     @Test fun clockRollbackDoesNotRewindWindow() {
@@ -97,6 +137,12 @@ class FloodDetectorTest {
             val result = detector.record(event)
             assertTrue(result.count >= 0)
             assertTrue(detector.retainedEventCount <= FloodDetector.MAX_EVENTS)
+            if (result.severity == FloodSeverity.NONE) assertEquals(FloodReason.NONE, result.reason)
+            else {
+                assertTrue(result.count > 0)
+                assertTrue(result.windowMillis > 0)
+                assertFalse(result.reason == FloodReason.NONE)
+            }
         }
     }
 
