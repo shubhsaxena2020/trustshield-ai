@@ -2,7 +2,7 @@
 
 import { Canvas, useFrame } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
-import { Shape, type Group, type Mesh } from "three";
+import { Shape, Vector2, type Group, type Mesh } from "three";
 
 function Shield() {
   const group = useRef<Group>(null);
@@ -28,23 +28,22 @@ function Shield() {
   return <group ref={group}>
     <mesh position={[0, 0, -0.18]}>
       <torusGeometry args={[1.28, 0.012, 8, 80]} />
-      <meshBasicMaterial color="#a6d9b5" transparent opacity={0.72} />
+      <meshBasicMaterial color="#bcbcb8" transparent opacity={0.72} />
     </mesh>
     <mesh>
       <extrudeGeometry args={[shape, { depth: 0.24, bevelEnabled: true, bevelSegments: 3, steps: 1, bevelSize: 0.055, bevelThickness: 0.07 }]} />
-      <meshStandardMaterial color="#143b2d" roughness={0.26} metalness={0.18} />
+      <meshStandardMaterial color="#222222" roughness={0.26} metalness={0.18} />
     </mesh>
     <mesh position={[0, 0, 0.34]}>
       <torusGeometry args={[0.72, 0.018, 8, 64]} />
-      <meshBasicMaterial color="#d8ef7b" />
+      <meshBasicMaterial color="#f4f4f2" />
     </mesh>
-    <mesh position={[0, 0, 0.37]} rotation={[0, 0, -0.76]}>
-      <boxGeometry args={[0.48, 0.13, 0.07]} />
-      <meshStandardMaterial color="#d8ef7b" roughness={0.3} />
-    </mesh>
-    <mesh position={[0.23, 0.1, 0.37]} rotation={[0, 0, 0.72]}>
-      <boxGeometry args={[0.9, 0.13, 0.07]} />
-      <meshStandardMaterial color="#d8ef7b" roughness={0.3} />
+    <mesh position={[0, 0, 0.37]}>
+      <extrudeGeometry args={[new Shape().setFromPoints([
+        new Vector2(-0.51, -0.05), new Vector2(-0.41, 0.04), new Vector2(-0.14, -0.22),
+        new Vector2(0.39, 0.34), new Vector2(0.49, 0.25), new Vector2(-0.15, -0.42),
+      ]), { depth: 0.07, bevelEnabled: false, steps: 1 }]} />
+      <meshStandardMaterial color="#f4f4f2" roughness={0.3} />
     </mesh>
   </group>;
 }
@@ -61,15 +60,15 @@ function Signal({ position, delay }: { position: [number, number, number]; delay
   });
   return <mesh ref={mesh} position={position}>
     <sphereGeometry args={[0.21, 24, 24]} />
-    <meshStandardMaterial color="#f17963" roughness={0.34} emissive="#762f2a" emissiveIntensity={0.22} />
+    <meshStandardMaterial color="#f2f2f2" roughness={0.34} emissive="#777777" emissiveIntensity={0.22} />
   </mesh>;
 }
 
 export default function ShieldScene() {
   return <Canvas className="three-canvas" camera={{ position: [0, 0, 5.2], fov: 42 }} dpr={[1, 1.35]} gl={{ alpha: true, antialias: false, powerPreference: "low-power" }}>
     <ambientLight intensity={1.2} />
-    <directionalLight position={[3, 4, 5]} intensity={2.3} color="#f1ffe7" />
-    <pointLight position={[-3, -2, 2]} intensity={10} color="#87c99b" distance={8} />
+    <directionalLight position={[3, 4, 5]} intensity={2.3} color="#ffffff" />
+    <pointLight position={[-3, -2, 2]} intensity={10} color="#bdbdbd" distance={8} />
     <Shield />
     <Signal position={[-1.65, 0.88, 0.2]} delay={0} />
     <Signal position={[1.65, -0.7, 0.1]} delay={1.7} />
