@@ -231,7 +231,7 @@ fun AppNavHost(
 private enum class AppGlyphKind { CHECK, CALL, QR, HISTORY, SETTINGS, GLOBE }
 
 private fun AppRoute.glyphKind(): AppGlyphKind = when (this) {
-    AppRoute.HOME, AppRoute.RESULT -> AppGlyphKind.CHECK
+    AppRoute.HOME, AppRoute.RESULT, AppRoute.BOMB_SHIELD -> AppGlyphKind.CHECK
     AppRoute.CALL_SHIELD -> AppGlyphKind.CALL
     AppRoute.QR_GUARD -> AppGlyphKind.QR
     AppRoute.HISTORY -> AppGlyphKind.HISTORY

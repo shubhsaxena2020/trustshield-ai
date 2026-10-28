@@ -32,4 +32,19 @@ class BuildContractTest {
         )
         assertTrue("INTERNET must never be granted", !grant.containsMatchIn(manifest()))
     }
+
+    @Test
+    fun manifestUsesOnlyTheReviewedPermissionAllowList() {
+        val granted = Regex("""<uses-permission\s+android:name="([^"]+)"\s*/>""")
+            .findAll(manifest()).map { it.groupValues[1] }.toSet()
+        assertTrue("permission allow-list changed: $granted", granted == setOf(
+            "android.permission.CAMERA",
+            "android.permission.RECORD_AUDIO",
+            "android.permission.ACCESS_NETWORK_STATE",
+            "android.permission.RECEIVE_SMS",
+            "android.permission.READ_PHONE_STATE",
+            "android.permission.READ_CALL_LOG",
+            "android.permission.POST_NOTIFICATIONS"
+        ))
+    }
 }

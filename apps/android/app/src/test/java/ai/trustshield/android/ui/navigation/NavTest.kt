@@ -43,7 +43,7 @@ class NavTest {
         // The wire names are a persisted format: they appear in saved instance state and in the
         // re-entry intent extra. Changing one silently breaks a user's restored stack, so pin them.
         assertEquals(
-            listOf("home", "result", "call_shield", "qr_guard", "history", "settings"),
+            listOf("home", "result", "call_shield", "bomb_shield", "qr_guard", "history", "settings"),
             AppRoute.entries.map { it.wireName }
         )
         AppRoute.entries.forEach { route ->
@@ -59,7 +59,7 @@ class NavTest {
             AppRoute.primaryTabs
         )
         assertEquals(
-            6,
+            7,
             AppRoute.entries.size
         )
         assertEquals(

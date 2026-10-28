@@ -16,6 +16,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -351,6 +352,7 @@ fun TrustShieldRouteContent(
         )
         AppRoute.RESULT -> ResultRouteHost(language, resultOutcome, registeredPayees)
         AppRoute.CALL_SHIELD -> CallShieldRouteHost(language)
+        AppRoute.BOMB_SHIELD -> ai.trustshield.android.ui.bomb.BombShieldScreen(language) { nav.back() }
          AppRoute.HISTORY -> HistoryScreen(historyEntries, language, onClearHistory)
          AppRoute.QR_GUARD -> QrGuardRouteHost { registeredPayees = it }
         AppRoute.SETTINGS -> SettingsRouteHost()
@@ -372,6 +374,7 @@ private fun HomeRouteHost(
     onClearHistory: () -> Unit,
 ) {
     val context = LocalContext.current
+    val nav = LocalNavActions.current
     val sensitivity = when (LocalUserPreferences.current.sensitivity) {
         Sensitivity.LOW -> LocalScorer.Sensitivity.LOW
         Sensitivity.BALANCED -> LocalScorer.Sensitivity.STANDARD
@@ -401,6 +404,16 @@ private fun HomeRouteHost(
         onSharedImageConsumed()
     }
     Column(modifier = Modifier.fillMaxSize()) {
+        Card(
+            onClick = { nav.navigate(AppRoute.BOMB_SHIELD) },
+            shape = MaterialTheme.shapes.large,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
+        ) {
+            Column(Modifier.fillMaxWidth().padding(16.dp)) {
+                Text(ToneCopy("Bomb Shield", "Bomb Shield", "बम शील्ड").forLanguage(language), style = MaterialTheme.typography.titleMedium)
+                Text(ToneCopy("SMS aur baar-baar aane wali calls ke flood ko dekhein.", "See message and repeated-call flood alerts.", "संदेश और बार-बार आने वाली कॉल के अलर्ट देखें।").forLanguage(language), style = MaterialTheme.typography.bodySmall)
+            }
+        }
         ScanScreen(
             state = scanState,
             english = english,
@@ -1048,37 +1061,44 @@ fun SettingsRouteHost() {
     }
     var state by remember { mutableStateOf(SettingsState.from(prefs)) }
 
-    SettingsScreen(
-        state = state,
-        onEvent = { event ->
-            val next = state.reduce(event)
-            if (next.preferences != state.preferences) {
-                sink(next.preferences)
-            }
-            state = next
-        },
-        onPlayVoiceSample = {
-            settingsTts.setSpeechRate(prefs.spokenVerdictRate)
-            val result = settingsSpeaker.speak(
-                prefs.language,
-                SpokenVerdictContent("TrustShield", "Aapka verdict tayyar hai. Your verdict is ready.", emptyList()),
-                Locale.getDefault().toLanguageTag(),
-            )
-            voiceMessage = if (result is SpokenVerdictResult.Spoken) null else ToneCopy(
-                "Is bhasha ka voice data nahi mila. Ab speech data install karein.",
-                "This language voice is missing. Install speech data now.",
-                "इस भाषा की आवाज़ उपलब्ध नहीं है। Speech data install करें।",
-            ).forLanguage(prefs.language).also { settingsTts.installLanguageData() }
-        },
-        onVoiceSelfTest = {
-            voiceMessage = ToneCopy(
-                "Voice self-test abhi uplabdh nahi hai.",
-                "Voice self-test is not available yet.",
-                "Voice self-test अभी उपलब्ध नहीं है।",
-            ).forLanguage(prefs.language)
-        },
-        voiceMessage = voiceMessage
-    )
+    val nav = LocalNavActions.current
+    Column(Modifier.fillMaxSize()) {
+        TextButton(onClick = { nav.navigate(AppRoute.BOMB_SHIELD) }, modifier = Modifier.heightIn(min = 48.dp).padding(horizontal = 16.dp)) {
+            Text(ToneCopy("Bomb Shield", "Bomb Shield", "बम शील्ड").forLanguage(state.preferences.language))
+        }
+        SettingsScreen(
+            state = state,
+            modifier = Modifier.weight(1f),
+            onEvent = { event ->
+                val next = state.reduce(event)
+                if (next.preferences != state.preferences) {
+                    sink(next.preferences)
+                }
+                state = next
+            },
+            onPlayVoiceSample = {
+                settingsTts.setSpeechRate(prefs.spokenVerdictRate)
+                val result = settingsSpeaker.speak(
+                    prefs.language,
+                    SpokenVerdictContent("TrustShield", "Aapka verdict tayyar hai. Your verdict is ready.", emptyList()),
+                    Locale.getDefault().toLanguageTag(),
+                )
+                voiceMessage = if (result is SpokenVerdictResult.Spoken) null else ToneCopy(
+                    "Is bhasha ka voice data nahi mila. Ab speech data install karein.",
+                    "This language voice is missing. Install speech data now.",
+                    "इस भाषा की आवाज़ उपलब्ध नहीं है। Speech data install करें।",
+                ).forLanguage(prefs.language).also { settingsTts.installLanguageData() }
+            },
+            onVoiceSelfTest = {
+                voiceMessage = ToneCopy(
+                    "Voice self-test abhi uplabdh nahi hai.",
+                    "Voice self-test is not available yet.",
+                    "Voice self-test अभी उपलब्ध नहीं है।",
+                ).forLanguage(prefs.language)
+            },
+            voiceMessage = voiceMessage
+        )
+    }
 }
 
 /**
