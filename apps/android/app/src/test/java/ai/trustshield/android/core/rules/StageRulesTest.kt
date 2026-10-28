@@ -373,8 +373,11 @@ class StageRulesTest {
     fun `over long input is truncated and flagged`() {
         val raw = "OTP batao " + "x".repeat(StageDetection.MAX_ANALYSIS_CHARS)
 
+        val startedAt = System.nanoTime()
         val result = rules.detect(raw)
+        val elapsedMs = (System.nanoTime() - startedAt) / 1_000_000
 
+        assertTrue("long input detection took ${elapsedMs}ms", elapsedMs < 2_000)
         assertTrue(result.truncated)
         assertTrue(result.askTypes.contains(AskType.OTP_PIN))
         assertFalse(rules.detect("OTP batao").truncated)

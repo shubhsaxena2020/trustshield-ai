@@ -54,7 +54,7 @@ import ai.trustshield.android.core.model.Strength
  *    "your shipment is out for delivery, track here" notice carries a link and no fee, so it does
  *    not fire.
  *  * The investment "tax bharo" rule requires *both* a withdrawal word and a profit word in the
- *    message (see [OFFER_WITHDRAW_PROFIT]); a genuine tax payment is not a crypto exit fee.
+ *    message (see [OFFER_WITHDRAW_PROFIT_REQUIREMENTS]); a genuine tax payment is not a crypto exit fee.
  *  * Patterns are narrow and sentence-bounded (`[^.!?\n]`), so a fee in one sentence and an
  *    unrelated payment verb two sentences later cannot be welded into one ask.
  *
@@ -192,9 +192,9 @@ internal val OFFER_LOTTERY_FRAME: Regex = rx(
  * being released. One lookahead each, over the whole message, so the two facts may sit in different
  * sentences (as they do in the real script) without letting a plain tax notice through.
  */
-internal val OFFER_WITHDRAW_PROFIT: Regex = rx(
-    """(?=[\s\S]*\b(?:withdraw\w*|withdrawal|nikal\w*|निकाल\w*|nikas\w*)\b)""" +
-        """(?=[\s\S]*\b(?:profit|profits|return|returns|earning|earnings|मुनाफ़ा|लाभ)\b)""",
+internal val OFFER_WITHDRAW_PROFIT_REQUIREMENTS: List<Regex> = listOf(
+    rx("""\b(?:withdraw\w*|withdrawal|nikal\w*|निकाल\w*|nikas\w*)\b"""),
+    rx("""\b(?:profit|profits|return|returns|earning|earnings|मुनाफ़ा|लाभ)\b"""),
 )
 
 // ---------------------------------------------------------------------------------------------
@@ -466,10 +466,9 @@ internal val OFFER_ASK_RULES: List<Rule> = listOf(
         askType = AskType.MONEY_TRANSFER,
         guarded = true,
         skip = SKIP_NO_FEE_ADVICE,
-        requires = rx(
-            """(?=[\s\S]*\b(?:telegram|whatsapp|wa\.me|t\.me)\b)""" +
-                """(?=[\s\S]*\b(?:job|naukri|नौकरी|vacancy|hiring|part[- ]?time|work from home|""" +
-                """task|recruit\w*)\b)""",
+        requiresAll = listOf(
+            rx("""\b(?:telegram|whatsapp|wa\.me|t\.me)\b"""),
+            rx("""\b(?:job|naukri|नौकरी|vacancy|hiring|part[- ]?time|work from home|task|recruit\w*)\b"""),
         ),
     ),
     Rule(
@@ -672,7 +671,7 @@ internal val OFFER_ASK_RULES: List<Rule> = listOf(
         askType = AskType.MONEY_TRANSFER,
         guarded = true,
         skip = SKIP_NO_FEE_ADVICE,
-        requires = OFFER_WITHDRAW_PROFIT,
+        requiresAll = OFFER_WITHDRAW_PROFIT_REQUIREMENTS,
     ),
     Rule(
         titleHinglish = "Prize/claim ke liye pehle fee",

@@ -131,6 +131,7 @@ class StageRules(private val normalizer: TextNormalizer) {
     private fun firstAccepted(text: String, rule: Rule, pattern: Regex): MatchResult? {
         // Whole-text precondition (see [Rule.requires]): constant for this text, so check it once.
         if (rule.requires != null && !rule.requires.containsMatchIn(text)) return null
+        if (rule.requiresAll.any { !it.containsMatchIn(text) }) return null
         for (match in pattern.findAll(text)) {
             val start = match.range.first
             val end = match.range.last + 1
@@ -273,6 +274,8 @@ internal class Rule(
      * the match loop, so it costs nothing and cannot move a quote boundary.
      */
     val requires: Regex? = null,
+    /** Each independent cue must occur somewhere in the text. */
+    val requiresAll: List<Regex> = emptyList(),
 )
 // ---------------------------------------------------------------------------------------------
 // Pattern compilation
@@ -760,8 +763,8 @@ private val ASK_RULES: List<Rule> = listOf(
         severity = Severity.HIGH,
         strength = Strength.STRONG,
         patterns = listOf(
-            rx("""\b(?:download|install|डाउनलोड|इंस्टॉल)\b[^.!?\n]{0,26}?(?:[\w.-]+\.apk|\bapk\b)"""),
-            rx("""(?:[\w.-]+\.apk|\bapk\b)[^.!?\n]{0,26}?\b(?:download|install|डाउनलोड|इंस्टॉल)\b"""),
+            rx("""\b(?:download|install|डाउनलोड|इंस्टॉल)\b[^.!?\n]{0,26}?(?:[\w.-]{1,255}\.apk|\bapk\b)"""),
+            rx("""(?:[\w.-]{1,255}\.apk|\bapk\b)[^.!?\n]{0,26}?\b(?:download|install|डाउनलोड|इंस्टॉल)\b"""),
         ),
         askType = AskType.APK_INSTALL,
         guarded = true,
