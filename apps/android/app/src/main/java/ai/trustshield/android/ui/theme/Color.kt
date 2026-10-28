@@ -34,8 +34,8 @@ object TsTokens {
 
     // ---- Brand + hazard hues: exact UI_SPEC values -------------------------------------------------
 
-    /** Brand accent, `#2F6BFF`. Use for fills, focus rings and indicators; use text-safe tokens for links. */
-    val Accent = Color(0xFF2F6BFF)
+    /** Monochrome foreground used for fills, focus rings and indicators. */
+    val Accent = Color(0xFF000000)
 
     /** Risk green, `#16845B`. 4.68:1 on white, 4.44:1 on [TsPalette.SurfaceLight]. */
     val RiskGreen = Color(0xFF16845B)
@@ -50,7 +50,7 @@ object TsTokens {
     // AccentDark 8.74:1 | RiskGreenDark 10.16:1 | RiskAmberDark 10.25:1 | RiskRedDark 8.02:1
     // Hues are lifted and desaturated so each stays recognisable while clearing 4.5:1 as text.
 
-    val AccentDark = Color(0xFF8FB4FF)
+    val AccentDark = Color(0xFFFFFFFF)
     val RiskGreenDark = Color(0xFF4ED9A4)
     val RiskAmberDark = Color(0xFFF5B85C)
     val RiskRedDark = Color(0xFFFF8A93)
@@ -61,7 +61,7 @@ object TsTokens {
     // Only the amber/accent entries are strictly required (the spec hexes miss 4.5:1 on light), but
     // the whole band exists so a screen never has to reason about which hue is safe where.
 
-    val AccentTextLight = Color(0xFF1F51C7)
+    val AccentTextLight = Color(0xFF000000)
     val RiskGreenTextLight = Color(0xFF0F6A48)
     val RiskAmberTextLight = Color(0xFF8A5000)
     val RiskRedTextLight = Color(0xFFA32D38)
@@ -109,36 +109,36 @@ object TsTokens {
 object TsPalette {
 
     // Light
-    val SurfaceLight = Color(0xFFF7F9FC)
+    val SurfaceLight = Color(0xFFF5F5F5)
     val BackgroundLight = Color(0xFFFFFFFF)
-    val OnSurfaceLight = Color(0xFF101828)          // 16.83:1 on SurfaceLight
-    val OnSurfaceVariantLight = Color(0xFF41506B)   // 7.70:1 on SurfaceLight
-    val SurfaceVariantLight = Color(0xFFE8EDF5)     // OnSurfaceVariantLight 6.91:1 on it
-    val OutlineLight = Color(0xFF5A6784)            // 5.37:1 on SurfaceLight (borders/labels)
-    val OutlineVariantLight = Color(0xFFC8D2E2)     // decorative dividers (non-text only)
+    val OnSurfaceLight = Color(0xFF000000)
+    val OnSurfaceVariantLight = Color(0xFF595959)
+    val SurfaceVariantLight = Color(0xFFE5E5E5)
+    val OutlineLight = Color(0xFF595959)
+    val OutlineVariantLight = Color(0xFFD0D0D0)
 
-    /** Civic navy filled buttons keep white text well above 4.5:1 contrast. */
-    val AccentFillLight = Color(0xFF124E91)
+    /** White theme primary buttons use a black fill. */
+    val AccentFillLight = Color(0xFF000000)
     val OnAccentFillLight = Color(0xFFFFFFFF)
-    val AccentContainerLight = Color(0xFFE5EDF5)
-    val OnAccentContainerLight = Color(0xFF16307F)  // 10.00:1 on AccentContainerLight
+    val AccentContainerLight = Color(0xFFE5E5E5)
+    val OnAccentContainerLight = Color(0xFF000000)
 
     // Dark
-    val SurfaceDark = Color(0xFF12161F)
-    val BackgroundDark = Color(0xFF0D1118)
-    val OnSurfaceDark = Color(0xFFE6ECF5)           // 15.24:1 on SurfaceDark
-    val OnSurfaceVariantDark = Color(0xFFB3C0D4)    // 9.83:1 on SurfaceDark
-    val SurfaceVariantDark = Color(0xFF1D2432)      // OnSurfaceVariantDark 8.45:1 on it
-    val OutlineDark = Color(0xFF93A2BC)             // 7.01:1 on SurfaceDark
-    val OutlineVariantDark = Color(0xFF33405A)      // decorative dividers (non-text only)
+    val SurfaceDark = Color(0xFF141414)
+    val BackgroundDark = Color(0xFF050505)
+    val OnSurfaceDark = Color(0xFFFFFFFF)
+    val OnSurfaceVariantDark = Color(0xFFBDBDBD)
+    val SurfaceVariantDark = Color(0xFF242424)
+    val OutlineDark = Color(0xFFBDBDBD)
+    val OutlineVariantDark = Color(0xFF414141)
 
-    val AccentContainerDark = Color(0xFF22345E)
-    val OnAccentContainerDark = Color(0xFFDCE6FF)   // 9.77:1 on AccentContainerDark
-    val OnAccentFillDark = Color(0xFF0B1020)        // 9.14:1 on AccentDark (used as filled accent)
+    val AccentContainerDark = Color(0xFF292929)
+    val OnAccentContainerDark = Color(0xFFFFFFFF)
+    val OnAccentFillDark = Color(0xFF000000)
 
     // Tone containers (see RiskTone.container / RiskTone.onContainer)
-    val NeutralContainerLight = Color(0xFFEEF1F7)
-    val OnNeutralContainerLight = Color(0xFF1B2330) // 13.96:1
+    val NeutralContainerLight = Color(0xFFE5E5E5)
+    val OnNeutralContainerLight = Color(0xFF000000)
     val GreenContainerLight = Color(0xFFDCF2E7)
     val OnGreenContainerLight = Color(0xFF0C4B34)   // 8.64:1
     val AmberContainerLight = Color(0xFFFDECD2)
@@ -146,8 +146,8 @@ object TsPalette {
     val RedContainerLight = Color(0xFFFBE0E2)
     val OnRedContainerLight = Color(0xFF6E141C)     // 9.47:1
 
-    val NeutralContainerDark = Color(0xFF232A36)
-    val OnNeutralContainerDark = Color(0xFFE4E9F1)  // 11.83:1
+    val NeutralContainerDark = Color(0xFF242424)
+    val OnNeutralContainerDark = Color(0xFFFFFFFF)
     val GreenContainerDark = Color(0xFF10321F)
     val OnGreenContainerDark = Color(0xFFA8E9C9)    // 10.12:1
     val AmberContainerDark = Color(0xFF3A2708)

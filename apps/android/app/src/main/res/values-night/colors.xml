@@ -1,4 +1,4 @@
 <resources>
-    <color name="splash_background">#101820</color>
-    <color name="trustshield_splash_tint">#B9D4FF</color>
+    <color name="splash_background">#050505</color>
+    <color name="trustshield_splash_tint">#FFFFFF</color>
 </resources>

@@ -1450,7 +1450,7 @@ private fun HostBadge(glyph: String, tone: RiskTone, dark: Boolean) {
             text = glyph,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
-            color = if (dark) Color(0xFF10141C) else Color.White,
+            color = MaterialTheme.colorScheme.background,
             textAlign = TextAlign.Center
         )
     }
