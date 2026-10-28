@@ -5,11 +5,16 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -60,6 +65,16 @@ import kotlinx.coroutines.withContext
  */
 class MainActivity : ComponentActivity() {
 
+    private data class StartupLoad(
+        val preferenceStore: SharedPreferencesUserPreferencesStore,
+        val preferences: UserPreferences,
+        val onboardingComplete: Boolean,
+        val requestedEntry: AppRoute?,
+        val incomingText: String?,
+        val incomingImageUri: String?,
+        val entrySequence: Int
+    )
+
     /**
      * Destination requested by the intent that launched (or re-entered) this activity — a share
      * intake or shortcut. `null` when the intent carries no [AppRoute.EXTRA_ROUTE]; the host then
@@ -82,26 +97,6 @@ class MainActivity : ComponentActivity() {
         // Edge-to-edge from API 26 up: bar icon colours follow the system light/dark setting, so the
         // status bar is never light-on-light. Insets are consumed by AppNavHost (safeDrawingPadding).
         enableEdgeToEdge()
-        requestedEntry = routeFromIntent(intent)
-        incomingText = sharedText(intent)
-        incomingImageUri = sharedImageUri(intent)
-        if (incomingText != null) {
-            requestedEntry = AppRoute.HOME
-            entrySequence++
-        } else if (incomingImageUri != null) {
-            requestedEntry = AppRoute.HOME
-            entrySequence++
-        }
-        val explicitRoute = routeFromIntent(intent)
-        if (restoredWithoutOutcome && incomingText == null && incomingImageUri == null &&
-            (explicitRoute == null || explicitRoute == AppRoute.RESULT)
-        ) {
-            // A process-death restore cannot recover the in-memory verdict without persisting the
-            // scanned text. Return to Home instead of restoring an empty Result destination.
-            requestedEntry = AppRoute.HOME
-            entrySequence++
-        }
-
         // C04's store. It persists five setting values and nothing else; no analysed text, quote,
         // transcript, OTP, PIN, phone number or UPI id can reach it (see UserPreferences tests).
         setContent {
@@ -112,18 +107,44 @@ class MainActivity : ComponentActivity() {
             var startupReady by remember { mutableStateOf(false) }
             var onboardingComplete by remember { mutableStateOf(false) }
             LaunchedEffect(Unit) {
-                val (loadedStore, loadedPreferences, loadedOnboardingComplete) = withContext(Dispatchers.IO) {
+                val startup = withContext(Dispatchers.IO) {
                     val store = SharedPreferencesUserPreferencesStore.open(applicationContext)
-                    Triple(
+                    val parsedSharedText = sharedText(intent)
+                    val parsedSharedImageUri = sharedImageUri(intent)
+                    var loadedEntry = routeFromIntent(intent)
+                    var loadedSequence = entrySequence
+                    if (parsedSharedText != null || parsedSharedImageUri != null) {
+                        loadedEntry = AppRoute.HOME
+                        loadedSequence++
+                    }
+                    val explicitRoute = routeFromIntent(intent)
+                    if (restoredWithoutOutcome && parsedSharedText == null && parsedSharedImageUri == null &&
+                        (explicitRoute == null || explicitRoute == AppRoute.RESULT)
+                    ) {
+                        // A process-death restore cannot recover the in-memory verdict without
+                        // persisting the scanned text. Return Home instead of restoring an empty
+                        // Result destination.
+                        loadedEntry = AppRoute.HOME
+                        loadedSequence++
+                    }
+                    StartupLoad(
                         store,
                         store.load(),
                         applicationContext.getSharedPreferences(ONBOARDING_PREFERENCES, MODE_PRIVATE)
-                            .getBoolean(ONBOARDING_COMPLETE, false)
+                            .getBoolean(ONBOARDING_COMPLETE, false),
+                        loadedEntry,
+                        parsedSharedText,
+                        parsedSharedImageUri,
+                        loadedSequence
                     )
                 }
-                preferenceStore = loadedStore
-                preferences = loadedPreferences
-                onboardingComplete = loadedOnboardingComplete
+                preferenceStore = startup.preferenceStore
+                preferences = startup.preferences
+                onboardingComplete = startup.onboardingComplete
+                requestedEntry = startup.requestedEntry
+                incomingText = startup.incomingText
+                incomingImageUri = startup.incomingImageUri
+                entrySequence = startup.entrySequence
                 startupReady = true
             }
             var scanState by remember { mutableStateOf(ScanInputState()) }
@@ -156,9 +177,11 @@ class MainActivity : ComponentActivity() {
                     ai.trustshield.android.data.preferences.Sensitivity.BALANCED -> LocalScorer.Sensitivity.STANDARD
                     ai.trustshield.android.data.preferences.Sensitivity.HIGH -> LocalScorer.Sensitivity.HIGH
                 }
-                resultOutcome = when (val share = ShareIngestCoordinator(
-                    pipeline = LocalScanPipeline(sensitivity = sensitivity)
-                ).ingest(ShareIngestRequest.Text(shared))) {
+                resultOutcome = when (val share = withContext(Dispatchers.Default) {
+                    ShareIngestCoordinator(
+                        pipeline = LocalScanPipeline(sensitivity = sensitivity)
+                    ).ingest(ShareIngestRequest.Text(shared))
+                }) {
                     is ShareIngestOutcome.Analysed -> share.outcome
                     else -> null
                 }
@@ -193,7 +216,13 @@ class MainActivity : ComponentActivity() {
                     // matters when nothing was saved, or when a genuinely new intent arrives.
                     if (!startupReady) {
                         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text("TrustShield AI", style = MaterialTheme.typography.titleLarge)
+                            Image(
+                                painter = painterResource(R.drawable.trustshield_logo_icon),
+                                contentDescription = "TrustShield AI",
+                                contentScale = ContentScale.Fit,
+                                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground),
+                                modifier = Modifier.size(96.dp)
+                            )
                         }
                     } else if (!onboardingComplete) {
                         OnboardingScreen(
