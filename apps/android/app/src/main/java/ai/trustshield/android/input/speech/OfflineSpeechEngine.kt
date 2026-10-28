@@ -230,6 +230,7 @@ private class AndroidPcmSource : PcmSource {
 /** Automatic route policy is pure Kotlin and covered without Android or Vosk. */
 internal class OfflineSpeechPolicy(networkReachable: Boolean, userSelected: Boolean = false) {
     private var networkReachable = networkReachable
+    private var offlineOnly = userSelected
     var useOffline: Boolean = !networkReachable || userSelected
         private set
     var consecutivePlatformErrors: Int = 0
@@ -250,7 +251,16 @@ internal class OfflineSpeechPolicy(networkReachable: Boolean, userSelected: Bool
     fun platformSuccess() { consecutivePlatformErrors = 0 }
     fun updateNetworkReachable(reachable: Boolean) {
         networkReachable = reachable
-        if (!reachable) useOffline = true
+        useOffline = offlineOnly || !reachable
     }
-    fun selectOffline(selected: Boolean) { useOffline = !networkReachable || selected; consecutivePlatformErrors = 0 }
+    fun selectOffline(selected: Boolean) {
+        offlineOnly = selected
+        useOffline = !networkReachable || selected
+        consecutivePlatformErrors = 0
+    }
+    fun selectOnlinePreferred() {
+        offlineOnly = false
+        useOffline = !networkReachable
+        consecutivePlatformErrors = 0
+    }
 }

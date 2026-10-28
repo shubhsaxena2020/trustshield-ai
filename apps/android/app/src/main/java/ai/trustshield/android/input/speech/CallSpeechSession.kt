@@ -570,6 +570,7 @@ class AndroidSpeechRecognizerHandle(
     private val capability: SpeechCapabilityReport,
     private val languageTag: String = DEFAULT_LANGUAGE_TAG,
     private val recognizerFactory: (Context, SpeechRecognitionMode) -> SpeechRecognizer? = ::createPlatformRecognizer,
+    private val preferOffline: Boolean = false,
     private val finalResultListener: ((String?, Float?) -> Unit)? = null,
     private val errorListener: ((Int) -> Unit)? = null,
 ) : RecognizerHandle {
@@ -616,6 +617,7 @@ class AndroidSpeechRecognizerHandle(
         putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, languageTag)
         putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
         putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
+        putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, preferOffline)
     }
 
     private inner class Forwarder : RecognitionListener {

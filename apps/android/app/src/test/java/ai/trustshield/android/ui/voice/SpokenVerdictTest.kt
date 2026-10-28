@@ -28,6 +28,14 @@ class SpokenVerdictTest {
     }
 
     @Test
+    fun EnglishFallsBackFromIndianEnglishToUsEnglishAndHinglishPrefersHindi() {
+        val englishFallback = FakeTts(setOf("en-US"))
+        assertEquals(SpokenVerdictResult.Spoken("en-US"), SpokenVerdictSpeaker(englishFallback).speak(AppLanguage.ENGLISH, content))
+        val hinglish = FakeTts(setOf("hi-IN", "en-IN"))
+        assertEquals(SpokenVerdictResult.Spoken("hi-IN"), SpokenVerdictSpeaker(hinglish).speak(AppLanguage.HINGLISH, content))
+    }
+
+    @Test
     fun missingVoiceOrLanguageDataFallsBackToTextOnly() {
         val tts = FakeTts(emptySet())
         val result = SpokenVerdictSpeaker(tts).speak(AppLanguage.HINDI, content)

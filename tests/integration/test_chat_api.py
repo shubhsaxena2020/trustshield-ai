@@ -1,5 +1,6 @@
 """Conversational API: routing, grounded follow-ups, capability honesty, prompt-injection resistance, unchanged v1 endpoints."""
 import io
+import json
 from pathlib import Path
 
 import pytest
@@ -137,6 +138,8 @@ def test_blank_image_is_unable_to_verify():
     assert r.status_code == 200, r.text
     a = r.json()["analysis"]
     assert a["risk_level"] == "unable_to_verify"
+    reply = r.json()["reply"]["text"]
+    assert ".." not in reply and "fusion" not in reply.lower()
 
 
 def test_upload_rejects_non_image():
@@ -270,3 +273,108 @@ def test_forged_context_is_ignored_not_trusted():
 
 def test_response_has_no_legacy_result():
     assert "legacy_result" not in chat(PHISH).json()
+
+
+def _qr_png(payload):
+    import segno
+    output = io.BytesIO()
+    segno.make(payload, micro=False).save(output, kind="png", scale=8, border=4)
+    return output.getvalue()
+
+
+def test_upi_payment_qr_reply_names_request_payee_amount_and_confirmation_action(monkeypatch):
+    monkeypatch.setenv("TRUSTSHIELD_OCR_PROVIDER", "mock")
+    response = client.post("/api/v1/chat/upload", files={"file": ("payment.png", _qr_png("upi://pay?pa=shop@upi&pn=Coffee%20House&am=125.50&cu=INR"), "image/png")})
+    assert response.status_code == 200, response.text
+    result = response.json()
+    reply = result["reply"]["text"].lower()
+    assert "payment request" in reply
+    assert "coffee house" in reply
+    assert "125.50" in reply
+    assert "confirm" in reply and "payee" in reply and "amount" in reply
+    assert "no action needed" not in reply
+
+
+@pytest.mark.parametrize("title", ["QR requests a UPI payment", "UPI QR contains a pre-filled amount", "OTP is requested", "SBI account is named", "KYC documents are requested"])
+def test_evidence_phrase_preserves_acronyms_and_proper_nouns(title):
+    from services.chat.explain import _evidence_phrase
+    from services.chat.contract import ContractEvidence
+    evidence = ContractEvidence(id="e1", category="test", severity="low", source_module="qr", title=title,
+                                explanation="test", confidence=.5, provenance="test")
+    phrase = _evidence_phrase([evidence])
+    assert phrase.startswith(title.split()[0])
+
+
+def test_qr_only_image_ignores_short_ocr_noise_and_does_not_claim_high_confidence(monkeypatch):
+    from services.analysis import pipeline
+    from services.analysis.extractors.ocr import OCRResult
+
+    class NoisyOCR:
+        name = "noisy-test"
+        def extract(self, image):
+            return OCRResult("completed", "ae\n[a]", self.name, "1", 20, ["OCR mean word confidence is low."], "")
+
+    monkeypatch.setattr(pipeline, "get_ocr_provider", lambda: NoisyOCR())
+    response = client.post("/api/v1/chat/upload", files={"file": ("qr.png", _qr_png("https://example.com"), "image/png")})
+    assert response.status_code == 200, response.text
+    analysis = response.json()["analysis"]
+    assert analysis["extracted_content"] is None
+    assert "text_rules" not in analysis["modules_used"] and "ml" not in analysis["modules_used"]
+    assert analysis["confidence"] != "high"
+
+
+def test_stream_empty_message_returns_422_and_friendly_validation_errors():
+    assert client.post("/api/v1/chat/stream", json={"message": ""}).status_code == 422
+    missing = client.post("/api/v1/chat/stream")
+    assert missing.status_code == 422
+    assert isinstance(missing.json().get("detail"), str)
+    assert "loc" not in missing.text and "model_attributes_type" not in missing.text
+
+
+def test_chat_upload_oversize_body_has_friendly_json_error():
+    response = client.post("/api/v1/chat/upload", content=b"x" * (21 * 1024 * 1024), headers={"content-type": "application/octet-stream"})
+    assert response.status_code == 413
+    assert response.headers["content-type"].startswith("application/json")
+    assert "too large" in response.text.lower()
+
+
+def test_qr_only_end_to_end_handles_inverted_and_suspicious_qrs(monkeypatch):
+    from PIL import ImageOps
+    monkeypatch.setenv("TRUSTSHIELD_OCR_PROVIDER", "mock")
+    inverted = ImageOps.invert(Image.open(io.BytesIO(_qr_png("https://example.com/dark"))).convert("RGB"))
+    buffer = io.BytesIO()
+    inverted.save(buffer, format="PNG")
+    dark = client.post("/api/v1/chat/upload", files={"file": ("dark.png", buffer.getvalue(), "image/png")})
+    assert dark.status_code == 200 and dark.json()["analysis"]["qr_payload"] == "https://example.com/dark"
+    suspicious = client.post("/api/v1/chat/upload", files={"file": ("phish.png", _qr_png("https://secure-login.paypal-verify.tk/account"), "image/png")})
+    assert suspicious.status_code == 200
+    assert suspicious.json()["analysis"]["risk_level"] == "suspicious"
+
+
+def test_method_not_allowed_error_is_friendly_json():
+    response = client.get("/api/v1/chat/stream")
+    assert response.status_code == 405
+    assert isinstance(response.json().get("detail"), str)
+    assert "Method Not Allowed" not in response.text
+
+
+def test_health_check_supports_head():
+    response = client.head("/api/v1/healthz")
+    assert response.status_code == 200
+
+
+def test_stream_does_not_claim_generic_unscanned_text_was_analysed():
+    response = client.post("/api/v1/chat/stream", json={"message": "A" * 2000})
+    assert response.status_code == 200
+    events = [json.loads(line[6:]) for line in response.text.splitlines() if line.startswith("data: ")]
+    meta = next(event for event in events if event["type"] == "meta")
+    if meta["intent"]["intent"] == "analyze_text" and not any(event["type"] == "analysis" for event in events):
+        assert meta["response_type"] == "chat"
+        assert "answered conversationally" in meta["intent"]["reason"]
+
+
+def test_image_bytes_with_text_mime_are_identified_as_images(monkeypatch):
+    monkeypatch.setenv("TRUSTSHIELD_OCR_PROVIDER", "mock")
+    response = client.post("/api/v1/chat/upload", files={"file": ("qr.txt", _qr_png("https://example.com/mime"), "text/plain")})
+    assert response.status_code == 200, response.text
+    assert response.json()["analysis"]["qr_payload"] == "https://example.com/mime"

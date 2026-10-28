@@ -97,6 +97,21 @@ class OfflineSpeechEngineTest {
     }
 
     @Test
+    fun `online preferred remains online when reachable and automatic follows reachability`() {
+        val automatic = OfflineSpeechPolicy(networkReachable = true)
+        automatic.selectOnlinePreferred()
+        assertFalse(automatic.useOffline)
+        automatic.updateNetworkReachable(false)
+        assertTrue(automatic.useOffline)
+        automatic.updateNetworkReachable(true)
+        assertFalse(automatic.useOffline)
+
+        val offlineOnly = OfflineSpeechPolicy(networkReachable = true, userSelected = true)
+        offlineOnly.updateNetworkReachable(true)
+        assertTrue(offlineOnly.useOffline)
+    }
+
+    @Test
     fun `two platform errors switch to offline and explicit choice is honored`() {
         val policy = OfflineSpeechPolicy(networkReachable = true)
         assertFalse(policy.platformError(RecognizerErrorCode.NETWORK))

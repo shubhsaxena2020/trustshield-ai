@@ -45,6 +45,7 @@ import androidx.compose.ui.text.font.FontWeight
 import android.content.Intent
 import android.net.Uri
 import android.content.Context
+import android.app.Activity
 import java.util.Locale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -55,6 +56,8 @@ import android.Manifest
 import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import kotlinx.coroutines.delay
@@ -72,6 +75,7 @@ import ai.trustshield.android.data.preferences.AppLanguage
 import ai.trustshield.android.data.preferences.UserPreferences
 import ai.trustshield.android.data.preferences.resolveLanguage
 import ai.trustshield.android.data.preferences.Sensitivity
+import ai.trustshield.android.data.preferences.VoiceRecognitionChoice
 import ai.trustshield.android.ui.home.ScanInputEvent
 import ai.trustshield.android.ui.home.ScanInputState
 import ai.trustshield.android.ui.home.ScanScreen
@@ -101,6 +105,7 @@ import ai.trustshield.android.ui.call.withStoredChoices
 import ai.trustshield.android.ui.call.CallStage
 import ai.trustshield.android.ui.call.forLanguage
 import ai.trustshield.android.input.speech.CallSpeechSession
+import ai.trustshield.android.input.speech.Snapshot
 import ai.trustshield.android.input.speech.SpeechSessionCoordinator
 import ai.trustshield.android.input.speech.SpeechCapabilityProbe
 import ai.trustshield.android.input.speech.SpeechCapabilityRules
@@ -159,6 +164,24 @@ val LocalUserPreferences: ProvidableCompositionLocal<UserPreferences> =
 val LocalPreferencesSink: ProvidableCompositionLocal<(UserPreferences) -> Unit> =
     staticCompositionLocalOf { {} }
 
+/** Keeps the in-memory call host across Activity configuration recreation only. */
+class CallShieldRouteRetainedState : ViewModel() {
+    var session: CallSpeechSession? = null
+    var sessionSnapshot: Snapshot? = null
+    var coordinator: SpeechSessionCoordinator? = null
+    var host: CallShieldHost? = null
+
+    fun clear() {
+        host?.onCleared()
+        host = null
+        coordinator = null
+        session = null
+        sessionSnapshot = null
+    }
+
+    override fun onCleared() { clear() }
+}
+
 /**
  * Result destination host.
  *
@@ -206,6 +229,8 @@ fun ResultRouteHost(appLanguage: AppLanguage, outcome: ScanOutcome?, payees: Lis
             ))
         },
         onSpeakResult = {
+            tts.setSpeechRate(prefs.spokenVerdictRate)
+            if (prefs.spokenVerdictMuted) return@ResultScreen false
             val appTtsLanguage = when (language) {
                 UiLanguage.HINGLISH -> AppLanguage.HINGLISH
                 UiLanguage.ENGLISH -> AppLanguage.ENGLISH
@@ -419,13 +444,25 @@ private fun HomeRouteHost(
 @Composable
 fun CallShieldRouteHost(appLanguage: AppLanguage) {
     val context = LocalContext.current
+    val activity = context as? Activity
+    val retained = remember(activity) {
+        val owner = activity as? androidx.lifecycle.ViewModelStoreOwner
+            ?: error("Call Shield requires an Activity ViewModelStoreOwner")
+        ViewModelProvider(owner)[CallShieldRouteRetainedState::class.java]
+    }
     val lifecycleOwner = LocalLifecycleOwner.current
     val tts = remember(context) { AndroidSpokenVerdictTts(context) }
     val spokenVerdict = remember(tts) { SpokenVerdictSpeaker(tts) }
     DisposableEffect(spokenVerdict, tts) {
         onDispose { spokenVerdict.stop(); tts.shutdown() }
     }
-    val session = remember { CallSpeechSession(consentGranted = true) }
+    val session = retained.session ?: remember {
+        CallSpeechSession(consentGranted = true).also { created ->
+            retained.sessionSnapshot?.let(created::restore)
+            retained.sessionSnapshot = null
+            retained.session = created
+        }
+    }
     DisposableEffect(tts, session) {
         tts.onSpeakingChanged = session::setInputSuppressed
         onDispose {
@@ -440,20 +477,27 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
     var recognitionLanguage by recognitionLanguageState
     val scriptDetector = remember(selectedSpeechTag) { SpeechScriptLanguageDetector(selectedSpeechTag) }
     var recognitionLanguageStatus by remember { mutableStateOf<String?>(null) }
-    val speechRoute = remember { OfflineSpeechPolicy(networkReachable = networkIsValidated(context)) }
+    val prefs = LocalUserPreferences.current
+    val sink = LocalPreferencesSink.current
+    val speechRoute = remember(prefs.voiceRecognition) {
+        OfflineSpeechPolicy(
+            networkReachable = networkIsValidated(context),
+            userSelected = prefs.voiceRecognition == VoiceRecognitionChoice.OFFLINE_ONLY,
+        )
+    }
     val hostRef = remember { mutableStateOf<CallShieldHost?>(null) }
     var offlineMode by remember(speechRoute) { mutableStateOf(speechRoute.useOffline) }
     var offlineFailureAction by remember { mutableStateOf<(() -> Unit)?>(null) }
     var capability by remember {
         mutableStateOf(SpeechCapabilityRules.evaluate(SpeechCapabilityProbe.probe(context), selectedSpeechTag))
     }
-    val coordinator = remember(session) {
+    val coordinator = retained.coordinator ?: remember(session) {
         lateinit var created: SpeechSessionCoordinator
         val handler = android.os.Handler(android.os.Looper.getMainLooper())
         created = SpeechSessionCoordinator(session, { delay, action -> handler.postDelayed(action, delay) }) { _ ->
             if (speechRoute.useOffline) {
                 VoskSpeechRecognizerHandle(
-                    context = context,
+                    context = context.applicationContext,
                     onPartial = { text -> handler.post { created.onPartialUtterance(text) } },
                     onFinal = { text -> handler.post { created.onUtterance(text) } },
                     onFailure = { handler.post { offlineFailureAction?.invoke() ?: created.stop() } },
@@ -461,7 +505,8 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
                 ).also { offlineMode = true }
             } else {
                 AndroidSpeechRecognizerHandle(
-                    context, session, capability, recognitionLanguageState.value,
+                    context.applicationContext, session, capability, recognitionLanguageState.value,
+                    preferOffline = prefs.voiceRecognition != VoiceRecognitionChoice.ONLINE_PREFERRED,
                     finalResultListener = { text, confidence -> created.onPlatformFinalResult(text, confidence) },
                 ) { code ->
                     speechRoute.platformError(code)
@@ -482,10 +527,9 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
             }
         }
         created
-    }
-    val host = remember(coordinator) { CallShieldHost(coordinator) }.also { hostRef.value = it }
-    val prefs = LocalUserPreferences.current
-    val sink = LocalPreferencesSink.current
+    }.also { retained.coordinator = it }
+    val host = retained.host ?: remember(coordinator) { CallShieldHost(coordinator) }.also { retained.host = it }
+    hostRef.value = host
     // Issue #138. `CallShieldHost` owns the call session, not the user's presentation choices, and
     // it is built before this screen reads any preference — so `host.state` always carries
     // `CallUiState`'s defaults (HINGLISH, haptics on). Copying it verbatim (start / stop / pause /
@@ -503,7 +547,13 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
     val storedReducedMotion by rememberUpdatedState(prefs.reducedMotion)
     fun synced(from: CallUiState): CallUiState =
         from.withStoredChoices(storedLanguage, storedHaptics, storedReducedMotion)
-    var consent by remember { mutableStateOf(SpeechConsent.initial()) }
+    var consent by remember(host) {
+        mutableStateOf(
+            if (host.state.consent == ai.trustshield.android.ui.call.ConsentState.GIVEN) {
+                SpeechConsent.initial().grant()
+            } else SpeechConsent.initial()
+        )
+    }
     var micGranted by remember {
         mutableStateOf(ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED)
     }
@@ -600,10 +650,13 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
     CallShieldScreen(
         state = state,
         modifier = Modifier.weight(1f),
-        offlineStatus = if (offlineMode && state.isListening) ToneCopy(
-            "Offline mode: phone par hi speech pehchaan",
-            "Offline mode: on-device speech recognition",
-            "ऑफ़लाइन मोड: आवाज़ फ़ोन पर ही पहचानी जाती है",
+        offlineStatus = if (state.isListening) ToneCopy(
+            if (offlineMode) "Offline voice. Online: your voice is sent to Google's speech service. Offline: processed on this phone."
+            else "Online voice (Google). Online: your voice is sent to Google's speech service. Offline: processed on this phone.",
+            if (offlineMode) "Offline voice. Online: your voice is sent to Google's speech service. Offline: processed on this phone."
+            else "Online voice (Google). Online: your voice is sent to Google's speech service. Offline: processed on this phone.",
+            if (offlineMode) "ऑफ़लाइन आवाज़। ऑनलाइन: आपकी आवाज़ Google की speech service को भेजी जाती है। ऑफ़लाइन: इसी फ़ोन पर process होती है।"
+            else "ऑनलाइन आवाज़ (Google)। ऑनलाइन: आपकी आवाज़ Google की speech service को भेजी जाती है। ऑफ़लाइन: इसी फ़ोन पर process होती है।",
         ) else null,
         onEvent = { event ->
             when (event) {
@@ -643,8 +696,9 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
             }
         },
         onSpeakAlert = {
+            tts.setSpeechRate(prefs.spokenVerdictRate)
             val alert = state.alert
-            if (alert == null) false else {
+            if (prefs.spokenVerdictMuted || alert == null) false else {
                 val appTtsLanguage = when (state.language) {
                     ai.trustshield.android.ui.call.CallLanguage.HINGLISH -> AppLanguage.HINGLISH
                     ai.trustshield.android.ui.call.CallLanguage.ENGLISH -> AppLanguage.ENGLISH
@@ -702,6 +756,13 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
             )
         }
     }
+    }
+    LaunchedEffect(prefs.voiceRecognition) {
+        when (prefs.voiceRecognition) {
+            VoiceRecognitionChoice.OFFLINE_ONLY -> speechRoute.selectOffline(true)
+            VoiceRecognitionChoice.AUTOMATIC, VoiceRecognitionChoice.ONLINE_PREFERRED -> speechRoute.selectOnlinePreferred()
+        }
+        offlineMode = speechRoute.useOffline
     }
     LaunchedEffect(consent, micGranted, prefs.language, recognitionLanguage, offlineMode) {
         val mic = if (micGranted) SpeechMicPermission.Granted else SpeechMicPermission.Denied
@@ -766,7 +827,8 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(observer)
             session.setUtteranceSink(null)
-            host.onCleared()
+            retained.sessionSnapshot = session.snapshot()
+            if (activity?.isChangingConfigurations != true) retained.clear()
         }
     }
     LaunchedEffect(host) {
@@ -990,6 +1052,13 @@ fun QrGuardRouteHost(onPayeesChanged: (List<RegisteredPayee>) -> Unit = {}) {
 fun SettingsRouteHost() {
     val prefs = LocalUserPreferences.current
     val sink = LocalPreferencesSink.current
+    val context = LocalContext.current
+    val settingsTts = remember(context) { AndroidSpokenVerdictTts(context) }
+    val settingsSpeaker = remember(settingsTts) { SpokenVerdictSpeaker(settingsTts) }
+    var voiceMessage by remember { mutableStateOf<String?>(null) }
+    DisposableEffect(settingsTts, settingsSpeaker) {
+        onDispose { settingsSpeaker.stop(); settingsTts.shutdown() }
+    }
     var state by remember { mutableStateOf(SettingsState.from(prefs)) }
 
     val nav = LocalNavActions.current
@@ -1006,7 +1075,28 @@ fun SettingsRouteHost() {
                     sink(next.preferences)
                 }
                 state = next
-            }
+            },
+            onPlayVoiceSample = {
+                settingsTts.setSpeechRate(prefs.spokenVerdictRate)
+                val result = settingsSpeaker.speak(
+                    prefs.language,
+                    SpokenVerdictContent("TrustShield", "Aapka verdict tayyar hai. Your verdict is ready.", emptyList()),
+                    Locale.getDefault().toLanguageTag(),
+                )
+                voiceMessage = if (result is SpokenVerdictResult.Spoken) null else ToneCopy(
+                    "Is bhasha ka voice data nahi mila. Ab speech data install karein.",
+                    "This language voice is missing. Install speech data now.",
+                    "इस भाषा की आवाज़ उपलब्ध नहीं है। Speech data install करें।",
+                ).forLanguage(prefs.language).also { settingsTts.installLanguageData() }
+            },
+            onVoiceSelfTest = {
+                voiceMessage = ToneCopy(
+                    "Voice self-test abhi uplabdh nahi hai.",
+                    "Voice self-test is not available yet.",
+                    "Voice self-test अभी उपलब्ध नहीं है।",
+                ).forLanguage(prefs.language)
+            },
+            voiceMessage = voiceMessage
         )
     }
 }

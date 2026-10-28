@@ -119,7 +119,9 @@ fun CallShieldScreen(
 
             offlineStatus?.let { status ->
                 Surface(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = TsTokens.SpacingLg, vertical = TsTokens.SpacingXs),
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = TsTokens.SpacingLg, vertical = TsTokens.SpacingXs)
+                        .heightIn(min = TsTokens.MinTouchTarget)
+                        .semantics { contentDescription = status.forLanguage(state.language) },
                     color = MaterialTheme.colorScheme.tertiaryContainer,
                     contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
                     shape = RoundedCornerShape(TsTokens.CornerSmall),

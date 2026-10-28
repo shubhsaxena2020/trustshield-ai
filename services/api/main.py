@@ -20,6 +20,7 @@ from fastapi.responses import StreamingResponse
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from starlette.concurrency import run_in_threadpool
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from services.analysis import pipeline as analysis_pipeline
 from services.analysis.extractors.image_validation import ImageRejected, max_upload_size
@@ -154,6 +155,8 @@ def health():
 
 @router.get("/healthz", include_in_schema=False)
 @router.get("/api/v1/healthz", include_in_schema=False)
+@router.head("/healthz", include_in_schema=False)
+@router.head("/api/v1/healthz", include_in_schema=False)
 def liveness():
     return {"status": "alive"}
 
@@ -553,6 +556,8 @@ def _stream_chat_events(message: str, history: list[Turn], context: ChatAnalysis
             yield _sse({"type": "error", "detail": "Send a message, link, screenshot or QR code to analyse."})
             return
         meta = intent_result.public()
+        if intent_result.intent == "analyze_text" and not _may_scan(message):
+            meta["reason"] = "No scan trigger was present; answered conversationally."
 
         # Every message goes to the model first; it decides whether to call the scanner (see _model_events and _may_scan).
         response_type = _CHAT_ONLY_REPLY.get(intent_result.intent, ("chat", ""))[0]
@@ -579,6 +584,8 @@ def _stream_chat_events(message: str, history: list[Turn], context: ChatAnalysis
 
 @router.post("/api/v1/chat/stream", dependencies=[Depends(limit_light)])
 async def chat_stream_endpoint(body: ChatIn):
+    if not body.message.strip():
+        raise HTTPException(422, "Send a message, link, screenshot or QR code to analyse.")
     return StreamingResponse(_stream_chat_events(body.message, body.history, body.context, body.context_signature),
                              media_type="text/event-stream", headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 
@@ -778,10 +785,18 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @app.exception_handler(RequestValidationError)
     async def validation_error(request: Request, exc: RequestValidationError):
-        # Default FastAPI echoes the submitted input back; return only where and why.
-        details = [{"loc": list(item.get("loc", [])), "msg": item.get("msg", "invalid"), "type": item.get("type", "invalid")}
-                   for item in exc.errors()]
-        return JSONResponse(status_code=422, content={"detail": details})
+        errors = exc.errors()
+        missing_body = any(item.get("type") == "missing" and item.get("loc") == ("body",) for item in errors)
+        wrong_body = any(item.get("type") == "model_attributes_type" for item in errors)
+        detail = "Send a JSON request body." if missing_body else "Send a JSON object with the required fields." if wrong_body else "Some request fields are invalid. Check the values and try again."
+        return JSONResponse(status_code=422, content={"detail": detail})
+
+    @app.exception_handler(StarletteHTTPException)
+    async def http_error(request: Request, exc: StarletteHTTPException):
+        detail = exc.detail if isinstance(exc.detail, str) else "The request could not be completed."
+        if exc.status_code == 405:
+            detail = "This request method is not supported for this endpoint."
+        return JSONResponse(status_code=exc.status_code, content={"detail": detail}, headers=exc.headers)
 
     app.include_router(router)
     if os.getenv("TRUSTSHIELD_DEBUG_PROXY", "").strip() == "1" and settings.env == "development":

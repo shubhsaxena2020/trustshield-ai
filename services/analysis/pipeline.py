@@ -215,7 +215,7 @@ def _ocr_quality(result: OCRResult) -> tuple[float, list[str]]:
     if result.status != "completed":
         return 0.0, warnings
     if result.confidence is None:
-        warnings.append("OCR provider did not report confidence; a conservative quality factor was used for fusion.")
+        warnings.append("The OCR provider did not report a quality score, so the image was assessed conservatively.")
         return 0.75, warnings
     return max(0.0, min(1.0, result.confidence / 100.0)), warnings
 

@@ -4,7 +4,7 @@ Routing rules (also documented in docs/CONVERSATIONAL_ARCHITECTURE.md):
 
 1. A follow-up is a short, question-like message that matches a known follow-up intent, has NO attachment and NO URL, and is
    sent with an existing analysis context. Everything else is new content and is analysed.
-2. An attachment is always analysed as an image: QR decoding and OCR both run; their evidence is combined.
+2. An attachment is analysed as an image: QR decoding runs, and OCR text is included only when it contains sufficient readable text.
    The accompanying message is treated as the user's QUESTION (not scored as message content); URLs inside it are still
    checked structurally.
 3. A message that is only a URL (optionally quoted or in angle brackets) is a URL analysis.

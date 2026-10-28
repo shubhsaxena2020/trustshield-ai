@@ -223,8 +223,8 @@ class LanguagePreferenceTest {
         PreferencePersistence(store).save(preferences(AppLanguage.ENGLISH))
 
         val stored = store.contents()
-        assertEquals("only C04's five keys may be written", SettingsKeys.ALL.toSet(), stored.keys)
-        assertEquals("no more than five keys", 5, stored.size)
+        assertEquals("only allowlisted preference keys may be written", SettingsKeys.ALL.toSet(), stored.keys)
+        assertEquals(SettingsKeys.ALL.size, stored.size)
         assertFalse(
             "the replacing write must delete a stray key, not keep it",
             stored.containsKey("settings.last_message_text")

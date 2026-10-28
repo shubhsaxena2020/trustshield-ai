@@ -45,6 +45,7 @@ const val ON_DEVICE_RECOGNITION_MIN_API: Int = 31
 object SpeechLanguage {
     const val HI_IN: String = "hi-IN"
     const val EN_IN: String = "en-IN"
+    const val EN_US: String = "en-US"
     const val DEFAULT: String = HI_IN
     val selectable: List<String> = listOf(HI_IN, EN_IN)
 

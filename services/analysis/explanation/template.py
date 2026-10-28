@@ -46,6 +46,10 @@ def explain(label: str, evidence: list[Evidence], primary: str, limitations: lis
         actions += GENERIC
     elif label == "unable_to_verify":
         actions = ["Treat the content with caution and verify it through an official channel before acting."]
+    elif any(e.category in {"qr_payment_request", "qr_prefilled_amount"} for e in material):
+        actions = list(dict.fromkeys(actions + [
+            "Confirm the payee and amount with the person you intend to pay before approving this payment request."
+        ]))
     else:
         actions = ["No action needed based on this analysis, but never share OTPs or passwords and verify unexpected requests."]
     return " ".join(parts), actions
