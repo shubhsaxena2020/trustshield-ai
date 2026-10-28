@@ -192,9 +192,9 @@ class Phase3JourneysTest {
         tapText(CALL_DEMO_ENTRY)
         waitForText(CALL_DEMO_DISCLOSURE)
         tapExactText("Agli line")
-        waitForContentDescription("Kam risk, 10 out of 100")
+        waitForAnyText(15_000, "Low, 1 of 4", "Kam, 1 mein se 4")
         tapExactText("Agli line")
-        waitForContentDescription("Dhyan dein risk, 44 out of 100")
+        waitForAnyText(15_000, "Medium, 2 of 4", "Dhyan dein, 2 mein se 4")
         // The demo is deterministic: two steps in, the meter still reports a score out of 100 and
         // the honest-limits line stays on screen.
         assertNodeContains(CALL_HONEST_LIMIT_FRAGMENT)
