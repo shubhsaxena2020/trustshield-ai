@@ -98,6 +98,12 @@ val prepareVoskHindiModel by tasks.registering {
                     }
                     connection.disconnect()
                     partial.copyTo(archive, overwrite = true)
+                    if (sha256(archive) != expectedSha256) {
+                        partial.delete()
+                        archive.delete()
+                        error("Downloaded Vosk model checksum did not match the pinned SHA-256")
+                    }
+                    partial.delete()
                     failure = null
                     break
                 } catch (error: Exception) {

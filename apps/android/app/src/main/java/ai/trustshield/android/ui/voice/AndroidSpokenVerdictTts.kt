@@ -8,7 +8,7 @@ import android.speech.tts.Voice
 import java.util.Locale
 
 /** Thin Android adapter; it selects an installed local voice and never requests a network voice. */
-class AndroidSpokenVerdictTts(context: Context) : SpokenVerdictTts {
+class AndroidSpokenVerdictTts(private val context: Context) : SpokenVerdictTts {
     @Volatile var onSpeakingChanged: ((Boolean) -> Unit)? = null
     @Volatile
     private var ready = false

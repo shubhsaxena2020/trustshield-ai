@@ -206,6 +206,8 @@ fun ResultRouteHost(appLanguage: AppLanguage, outcome: ScanOutcome?, payees: Lis
             ))
         },
         onSpeakResult = {
+            tts.setSpeechRate(prefs.spokenVerdictRate)
+            if (prefs.spokenVerdictMuted) return@ResultScreen false
             val appTtsLanguage = when (language) {
                 UiLanguage.HINGLISH -> AppLanguage.HINGLISH
                 UiLanguage.ENGLISH -> AppLanguage.ENGLISH
@@ -457,6 +459,7 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
             } else {
                 AndroidSpeechRecognizerHandle(
                     context, session, capability, recognitionLanguageState.value,
+                    preferOffline = prefs.voiceRecognition != VoiceRecognitionChoice.ONLINE_PREFERRED,
                     finalResultListener = { text, confidence -> created.onPlatformFinalResult(text, confidence) },
                 ) { code ->
                     speechRoute.platformError(code)
@@ -639,8 +642,9 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
             }
         },
         onSpeakAlert = {
+            tts.setSpeechRate(prefs.spokenVerdictRate)
             val alert = state.alert
-            if (alert == null) false else {
+            if (prefs.spokenVerdictMuted || alert == null) false else {
                 val appTtsLanguage = when (state.language) {
                     ai.trustshield.android.ui.call.CallLanguage.HINGLISH -> AppLanguage.HINGLISH
                     ai.trustshield.android.ui.call.CallLanguage.ENGLISH -> AppLanguage.ENGLISH

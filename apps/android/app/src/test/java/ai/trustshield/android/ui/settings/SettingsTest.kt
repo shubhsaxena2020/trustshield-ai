@@ -135,7 +135,10 @@ class SettingsTest {
                 "|settings.language=SYSTEM" +
                 "|settings.sensitivity=BALANCED" +
                 "|settings.haptics=true" +
-                "|settings.reduced_motion=false",
+                "|settings.reduced_motion=false" +
+                "|settings.voice_recognition=AUTOMATIC" +
+                "|settings.spoken_verdict_muted=false" +
+                "|settings.spoken_verdict_rate=1.0",
             encoded
         )
     }
@@ -153,6 +156,9 @@ class SettingsTest {
         assertTrue(map[SettingsKeys.SENSITIVITY] in setOf("LOW", "BALANCED", "HIGH"))
         assertTrue(map[SettingsKeys.HAPTICS] in setOf("true", "false"))
         assertTrue(map[SettingsKeys.REDUCED_MOTION] in setOf("true", "false"))
+        assertTrue(map[SettingsKeys.VOICE_RECOGNITION] in ai.trustshield.android.data.preferences.VoiceRecognitionChoice.values().map { it.name })
+        assertTrue(map[SettingsKeys.SPOKEN_VERDICT_MUTED] in setOf("true", "false"))
+        assertTrue(map[SettingsKeys.SPOKEN_VERDICT_RATE]?.toFloat()?.let { it in 0.75f..1.25f } == true)
     }
 
     @Test
@@ -251,7 +257,7 @@ class SettingsTest {
 
     @Test
     fun persistedKeySetIsExactlyTheDocumentedFive() {
-        assertEquals(5, SettingsKeys.ALL.size)
+        assertEquals(8, SettingsKeys.ALL.size)
         assertEquals(SettingsKeys.ALL.size, SettingsKeys.ALL.toSet().size)
         assertEquals(SettingsKeys.ALL.toSet(), UserPreferences.defaults().toMap().keys)
     }
@@ -711,7 +717,7 @@ class SettingsTest {
 
     @Test
     fun preferenceModelHasNoUndocumentedFlag() {
-        // Structural guard: the persisted model has exactly the five documented fields, so no
+        // Structural guard: the persisted model has exactly the documented fields, so no
         // "warningsEnabled = false" style flag can be added without failing here and in
         // [persistedKeySetContainsNoSensitiveConcept].
         val fields = UserPreferences::class.java.declaredFields
@@ -720,7 +726,7 @@ class SettingsTest {
             .map { it.name }
             .toSet()
         assertEquals(
-            setOf("themeMode", "language", "sensitivity", "haptics", "reducedMotion"),
+            setOf("themeMode", "language", "sensitivity", "haptics", "reducedMotion", "voiceRecognition", "spokenVerdictMuted", "spokenVerdictRate"),
             fields
         )
     }
@@ -733,5 +739,19 @@ class SettingsTest {
         )
         // No "OFF" mode exists anywhere in the enum.
         assertFalse(Sensitivity.values().any { it.name.contains("OFF") })
+    }
+
+    @Test
+    fun voiceChoicesMuteAndRatePersistWithinBounds() {
+        val chosen = UserPreferences.defaults().copy(
+            voiceRecognition = ai.trustshield.android.data.preferences.VoiceRecognitionChoice.OFFLINE_ONLY,
+            spokenVerdictMuted = true,
+            spokenVerdictRate = 1.25f,
+        )
+        assertEquals(chosen, UserPreferences.fromMap(chosen.toMap()))
+        assertEquals(
+            0.75f,
+            UserPreferences.fromMap(mapOf(SettingsKeys.SPOKEN_VERDICT_RATE to "0.1")).spokenVerdictRate,
+        )
     }
 }
