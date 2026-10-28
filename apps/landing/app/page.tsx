@@ -18,7 +18,8 @@ const faq = [
   ["Does TrustShield guarantee that something is safe?", "No. It shows risk indicators and evidence to help you decide. A low risk result is not proof that a message, caller, link or payment is safe."],
   ["Does the Android app need internet access to check a message?", "The Android app has no INTERNET permission. Supported verdicts are computed on the phone. The separate web scanner runs online and sends submitted content to its service."],
   ["What does Call Shield listen to?", "With your consent, Call Shield reviews speech captured by the phone microphone during a live session and can speak its verdict. It does not capture the other side of a phone call."],
-  ["How does QR Guard help with a payment?", "It checks the decoded QR destination, UPI payee details and signs of tampering. Always confirm the payee and amount in your payment app."],
+  ["What is Bomb Shield, and does the app read my SMS or calls?", "Bomb Shield is optional and off by default. It spots a flood of messages or repeated calls (the kind SMS and call bomber sites cause) and alerts you. Only if you switch it on, Android asks for SMS, call-state and call-log access. It counts events in memory and never stores message text. Android does not let apps block numbers, so it guides you to mute and report instead. A demo mode shows it without any permission."],
+  ["How does QR Guard help with a payment?","It checks the decoded QR destination, UPI payee details and signs of tampering. Always confirm the payee and amount in your payment app."],
   ["Which languages can I use?", "TrustShield supports English, Hindi and Hinglish."],
 ];
 
