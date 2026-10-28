@@ -36,7 +36,7 @@ class DigitalArrestSignalTest {
             "aap digital arrest mein hain" to "Aap digital arrest mein hain.",
             "video call on rakhiye" to "Video call on rakhiye, kuch mat kijiye.",
             "camera band mat karna" to "Camera band mat karna, sirf aawaz chahiye.",
-            "ghar walon ko mat batana" to "Yeh baat ghar walon ko mat batana.",
+            "ghar walon ko mat batana" to "Aapke ghar walon ko mat batana.",
             "kamre mein akele raho" to "Aap kamre mein akele raho.",
             "supreme court ka order" to "Supreme Court ka order aa gaya hai aapke naam par.",
             "arrest warrant" to "Aapka arrest warrant issue ho chuka hai.",
@@ -57,6 +57,15 @@ class DigitalArrestSignalTest {
                 assertEquals(text.substring(item.span!!.start, item.span!!.end), item.quote)
             }
         }
+    }
+
+    @Test
+    fun `family isolation phrase needs second person or threat framing`() {
+        val ordinary = "Papa ko mat batana, maine 5000 bhej diye hain. Turant check kar lena."
+        val framed = "Ghar walon ko mat batana. Apna paisa UPI par pay karo, warna account band ho jayega."
+
+        assertTrue(DigitalArrestSignals.detect(ordinary).isEmpty())
+        assertTrue("threat framed isolation should remain detectable", DigitalArrestSignals.detect(framed).isNotEmpty())
     }
 
     @Test

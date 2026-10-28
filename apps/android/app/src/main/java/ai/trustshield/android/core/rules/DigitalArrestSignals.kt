@@ -100,7 +100,9 @@ object DigitalArrestSignals {
                 //     a company circular names the phrase in the third person.
                 val sentence = sentenceAround(raw, start, end)
                 if (ADVISORY_CUE.containsMatchIn(sentence)) continue
-                if (marker.requiresSecondPerson && !SECOND_PERSON.containsMatchIn(sentence)) continue
+                if (marker.requiresSecondPerson &&
+                    !SECOND_PERSON.containsMatchIn(sentence) && !AUTHORITY_OR_THREAT_CONTEXT.containsMatchIn(raw)
+                ) continue
                 val quote = raw.substring(start, end)
                 if (quote.isBlank()) continue
                 if (!seen.add(normalizeKey(quote))) continue
@@ -228,6 +230,7 @@ object DigitalArrestSignals {
                         """\b(?:batana|bataye\w*|batao|batana\s+hai|tell|inform|share|bhoolna)\b""",
                 ),
             ),
+            requiresSecondPerson = true,
         ),
         Marker(
             titleHinglish = "Kamre mein akele rehne ko kaha",
@@ -239,6 +242,7 @@ object DigitalArrestSignals {
                         """[^.!?\n]{0,16}?\b(?:raho|rahiye|rehna|stay|rakho)\b""",
                 ),
             ),
+            requiresSecondPerson = true,
         ),
         Marker(
             titleHinglish = "Nakli court order ya arrest warrant",
@@ -293,6 +297,11 @@ object DigitalArrestSignals {
     private val SECOND_PERSON: Regex = rx(
         """\b(?:aap|aapko|aapka|aapki|aapke|aap\s+par|aap\s+pe|tum|tumhe|tumhara|""" +
             """you|you're|you\s+are|your)\b""",
+    )
+
+    private val AUTHORITY_OR_THREAT_CONTEXT: Regex = rx(
+        """\b(?:warna|varna|police|cbi|customs|officer|bank|sbi|court|warrant|""" +
+            """complaint|legal\s+action|account\s+(?:band|block|suspend)|case\s+(?:hai|darj|registered))\b""",
     )
 
     // ---------------------------------------------------------------------------------------------

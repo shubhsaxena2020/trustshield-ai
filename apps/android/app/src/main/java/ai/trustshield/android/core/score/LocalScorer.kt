@@ -13,6 +13,7 @@ import ai.trustshield.android.core.model.Severity
 import ai.trustshield.android.core.model.StageId
 import ai.trustshield.android.core.model.Strength
 import ai.trustshield.android.core.model.TextNormalizer
+import ai.trustshield.android.core.model.TextSpan
 import ai.trustshield.android.core.normalize.HinglishNormalizer
 import ai.trustshield.android.core.rules.AskType
 import ai.trustshield.android.core.rules.DigitalArrestSignals
@@ -244,7 +245,7 @@ class LocalScorer(
         matches.forEach { evidence.addAll(it.evidence) }
         detection.injection.forEach { item ->
             val span = item.span ?: return@forEach
-            if (assessment.isQuoted(span)) return@forEach
+            if (quoteIsSuppressed(assessment, span, analyzed)) return@forEach
             evidence.add(item)
         }
         evidence.addAll(assessment.indicators)
@@ -285,7 +286,7 @@ class LocalScorer(
         // A phrase the sender was *quoting* is suppressed by A04, exactly like an injection item.
         val strongSignal: List<Evidence> = DigitalArrestSignals.detect(analyzed).filter { item ->
             val span = item.span
-            span != null && !assessment.isQuoted(span)
+            span != null && !quoteIsSuppressed(assessment, span, analyzed)
         }
         if (strongSignal.isNotEmpty()) evidence.addAll(strongSignal)
 
@@ -432,7 +433,7 @@ class LocalScorer(
             for (item in match.evidence) {
                 val span = item.span ?: continue
                 val quote = item.quote ?: continue
-                if (assessment.isQuoted(span)) continue
+                if (quoteIsSuppressed(assessment, span, analyzed)) continue
                 if (!item.quoteVerifiesAgainst(analyzed)) continue
                 if (!quotes.add(normalizeKey(quote))) continue
                 items.add(item)
@@ -441,6 +442,10 @@ class LocalScorer(
         }
         return out
     }
+
+    private fun quoteIsSuppressed(assessment: LegitAssessment, span: TextSpan, analyzed: String): Boolean =
+        assessment.isQuoted(span) &&
+            (assessment.hasProtectiveIndicator || QUOTED_SCAM_WARNING.containsMatchIn(analyzed))
 
     /** Repeated identical lines collapse to one key so they cannot inflate a stage or the floor. */
     private fun normalizeKey(quote: String): String {
@@ -754,6 +759,9 @@ class LocalScorer(
             "Text ko Roman ya Devanagari Hinglish mein dobara likh kar check karein."
 
         private val URL_PATTERN = Regex("""(?i)\b(?:https?://|www\.)[^\s<>"']{3,}""")
+        private val QUOTED_SCAM_WARNING = Regex(
+            """(?i)\b(?:dhyan\s+dein|beware|warning|fraudster\s+ne\s+kaha)\b[\s\S]{0,200}\b(?:scam|fraud|dhokha|thagi)\b""",
+        )
 
         private const val FNV_OFFSET = -3750763034362895579L // 0xcbf29ce484222325
         private const val FNV_PRIME = 1099511628211L

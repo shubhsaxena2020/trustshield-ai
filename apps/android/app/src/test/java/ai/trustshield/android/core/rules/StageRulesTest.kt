@@ -199,6 +199,29 @@ class StageRulesTest {
     }
 
     @Test
+    fun `delivery OTP with order digits before the agent is not an ask`() {
+        val result = rules.detect(
+            "Your Amazon order will be delivered today. Share the delivery OTP 4471 with the delivery agent at your door.",
+        )
+
+        assertFalse(result.stageIds.contains(StageId.ASK))
+        assertTrue(result.askTypes.isEmpty())
+    }
+
+    @Test
+    fun `ask stage is not starved by full earlier stage evidence`() {
+        val result = rules.detect(
+            "Main SBI se bol raha hoon. Senior officer yahaan hai. HR from Talent Bridge is recruiting for this job. " +
+                "Aapka account band ho jayega. Aapke naam par warrant hai. Warna police complaint hogi. " +
+                "Turant action lo. Accept this UPI request warna cancel ho jayegi. Job opening: limited seats are filling. " +
+                "Kisi ko mat batana. Yeh confidential case hai. Call cut mat karo. OTP batao.",
+        )
+
+        assertTrue(result.stageIds.contains(StageId.ASK))
+        assertTrue(result.askTypes.contains(AskType.OTP_PIN))
+    }
+
+    @Test
     fun `hindi otp request is caught in Devanagari`() {
         val result = rules.detect("जो ओटीपी आया है वो बता दो")
 

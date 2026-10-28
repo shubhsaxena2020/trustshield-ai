@@ -210,6 +210,16 @@ class ScorerTest {
     }
 
     @Test
+    fun `delivery order OTP digits before agent stays low risk`() {
+        val scored = scorer.analyzeScored(
+            "Your Amazon order will be delivered today. Share the delivery OTP 4471 with the delivery agent at your door.",
+        )
+
+        assertFalse(scored.verifiedAsk)
+        assertTrue(scored.result.risk.score < CAUTION_FLOOR)
+    }
+
+    @Test
     fun `quoted scam example inside a warning is not an ask`() {
         val scored = scorer.analyzeScored(
             "Dhyan dein: \"jo OTP aaya hai batao\" aise message scam hote hain.",
@@ -217,6 +227,35 @@ class ScorerTest {
         assertFalse("quoted request must not count", scored.verifiedAsk)
         assertFalse(scored.result.stages.contains(StageId.ASK))
         assertTrue(scored.result.risk.score < CAUTION_FLOOR)
+    }
+
+    @Test
+    fun `forwarded scam in double quotes remains high risk`() {
+        val scored = scorer.analyzeScored(
+            "Fwd: \"SBI ALERT: Aapka account 24 ghante mein band ho jayega. " +
+                "Turant 9876543210 par call karein aur OTP batao.\"",
+        )
+
+        assertTrue(scored.verifiedAsk)
+        assertTrue("expected >= 70, was ${scored.result.risk.score}", scored.result.risk.score >= 70)
+        assertTrue(scored.result.unverifiableEvidence(scored.analyzedText).isEmpty())
+    }
+
+    @Test
+    fun `completed family transfer is not a money ask`() {
+        val scored = scorer.analyzeScored(
+            "Papa ko mat batana, maine 5000 bhej diye hain. Turant check kar lena.",
+        )
+
+        assertFalse(scored.verifiedAsk)
+        assertFalse(scored.escalateCritical)
+        assertNotEquals(RiskLabel.HIGH_RISK, scored.result.risk.label)
+        assertTrue("ordinary family update should stay low risk", scored.result.risk.score < CAUTION_FLOOR)
+        assertTrue(scored.result.evidence.none { it.module == "digital_arrest" })
+
+        val actualRequest = scorer.analyzeScored("Bhai 2000 bhej do ghar ke liye")
+        assertTrue(actualRequest.verifiedAsk)
+        assertEquals(RiskLabel.CAUTION, actualRequest.result.risk.label)
     }
 
     @Test
