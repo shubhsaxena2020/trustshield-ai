@@ -15,6 +15,23 @@ import org.junit.Test
 
 class ResultHindiCopyTest {
     @Test
+    fun limitationsSectionAndEntriesRenderInHindi() {
+        val copies = listOf(
+            ResultCopy.LIMITS_SECTION,
+            ResultCopy.DEFAULT_LIMITATION_SOURCE_SCOPE,
+            ResultCopy.DEFAULT_LIMITATION_NOT_PROOF,
+            ResultCopy.DEFAULT_LIMITATION_OFFLINE,
+            ResultCopy.DEFAULT_LIMITATION_LANGUAGE,
+        )
+
+        copies.forEach { copy ->
+            val hindi = copy.pick(UiLanguage.HINDI)
+            assertTrue("Missing Hindi Result limitation copy: ${copy.english}", hindi.any { it in '\u0900'..'\u097F' })
+            assertNotEquals("Hindi Result limitation falls back to English: ${copy.english}", copy.english, hindi)
+        }
+    }
+
+    @Test
     fun everyCoreRuleHasSpecificHindiTitleAndDescription() {
         val rules = listOf(
             File("src/main/java/ai/trustshield/android/core/rules"),

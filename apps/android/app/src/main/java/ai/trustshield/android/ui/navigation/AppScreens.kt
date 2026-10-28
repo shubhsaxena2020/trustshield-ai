@@ -950,7 +950,7 @@ fun QrGuardRouteHost(onPayeesChanged: (List<RegisteredPayee>) -> Unit = {}) {
 fun SettingsRouteHost() {
     val prefs = LocalUserPreferences.current
     val sink = LocalPreferencesSink.current
-    var state by remember(prefs) { mutableStateOf(SettingsState.from(prefs)) }
+    var state by remember { mutableStateOf(SettingsState.from(prefs)) }
 
     SettingsScreen(
         state = state,

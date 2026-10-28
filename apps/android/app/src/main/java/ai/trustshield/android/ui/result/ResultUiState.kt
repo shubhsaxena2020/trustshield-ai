@@ -4,6 +4,7 @@ import ai.trustshield.android.core.payment.PaymentAdvisory
 import ai.trustshield.android.ui.theme.RiskTone
 import ai.trustshield.android.ui.theme.RiskToneCopy
 import ai.trustshield.android.ui.theme.ToneCopy
+import ai.trustshield.android.ui.theme.HindiCopy
 import ai.trustshield.android.data.preferences.AppLanguage
 import ai.trustshield.android.data.preferences.resolveLanguage
 import java.util.Locale
@@ -77,7 +78,8 @@ fun ToneCopy.pick(language: UiLanguage = UiLanguage.Default): String = when (lan
 internal fun copy(hinglish: String, english: String): ToneCopy {
     val hi = hinglish.trim()
     val en = english.trim()
-    return ToneCopy(hi, en.ifBlank { hi })
+    val resolvedEnglish = en.ifBlank { hi }
+    return ToneCopy(hi, resolvedEnglish, HindiCopy.forEnglish(resolvedEnglish))
 }
 
 // ---------------------------------------------------------------------------------------------
