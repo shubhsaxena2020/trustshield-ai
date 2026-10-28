@@ -13,9 +13,14 @@ import type { ChatAnalysis, ChatResponse, Message, ResponseType } from "./types"
 // Production is same-origin (Vercel Services routes /api/* to the backend); see the deployment runbook.
 const API = process.env.NEXT_PUBLIC_API_URL ?? (process.env.NODE_ENV === "production" ? "" : "http://localhost:8000");
 const MAX_FILE_BYTES = 4 * 1024 * 1024;
+const MAX_DOCUMENT_BYTES = 10 * 1024 * 1024;
+const MAX_ATTACHMENTS = 5;
+const MAX_TOTAL_FILE_BYTES = 20 * 1024 * 1024;
 const MAX_CHARS = 5000;
-const ALLOWED = ["image/png", "image/jpeg", "image/webp", "image/heic", "image/heif"];
-const ALLOWED_EXT = /\.(png|jpe?g|webp|heic|heif)$/i;
+const IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp", "image/heic", "image/heif"];
+const DOCUMENT_TYPES = ["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "text/plain", "text/csv"];
+const ALLOWED = [...IMAGE_TYPES, ...DOCUMENT_TYPES];
+const ALLOWED_EXT = /\.(png|jpe?g|webp|heic|heif|pdf|docx|xlsx|txt|csv)$/i;
 
 const STARTERS = [
   "I got this text: 'URGENT: your bank account is suspended. Verify now at secure-bank-login.top' — is it real?",
@@ -94,7 +99,8 @@ function saveChats(identity: string, chats: Conversation[]) {
       ...c,
       messages: c.messages
         .filter((m) => m.role === "user" || m.kind !== "error")
-        .map((m) => (m.role === "user" ? { id: m.id, role: m.role, text: m.text, fileName: m.fileName } : m)),
+        .map((m) => (m.role === "user" ? { id: m.id, role: m.role, text: m.text, fileName: m.fileName,
+          attachments: m.attachments?.map((a) => ({ fileName: a.fileName })) } : m)),
     }));
     window.localStorage.setItem(storeKeyFor(identity), JSON.stringify(clean));
   } catch {
@@ -172,7 +178,7 @@ function ChatWorkspace({ identity, session, loading }: {
   const [activeId, setActiveId] = useState<string>(() => chats[0].id);
   const identityReady = identity !== null;
   const [draft, setDraft] = useState("");
-  const [attached, setAttached] = useState<{ file: File; url: string } | null>(null);
+  const [attached, setAttached] = useState<{ file: File; url: string }[]>([]);
   // Conversations whose reply is still streaming. Each has its own controller, so switching chats never cancels a reply.
   const [streaming, setStreaming] = useState<Set<string>>(() => new Set());
   const [busyLabel, setBusyLabel] = useState("Thinking…");
@@ -395,25 +401,32 @@ function ChatWorkspace({ identity, session, loading }: {
     void supabase?.auth.signOut();
   }
 
-  function accept(f: File | undefined | null) {
-    if (!f) return;
+  function accept(input: FileList | File[] | File | undefined | null) {
+    if (!input) return;
+    const incoming = input instanceof File ? [input] : Array.from(input);
+    if (attached.length + incoming.length > MAX_ATTACHMENTS) return setNotice("You can attach up to 5 files per message.");
+    if ([...attached.map((item) => item.file), ...incoming].reduce((sum, file) => sum + file.size, 0) > MAX_TOTAL_FILE_BYTES) return setNotice("Attachments must total 20 MB or less.");
+    for (const f of incoming) {
     // Some mobile browsers (notably older Android WebViews on a camera capture) report an empty or generic
     // f.type instead of the real image MIME type. Fall back to the filename extension rather than blocking the
     // upload outright; the backend decodes and validates the actual bytes regardless of what either side claims.
-    const typeOk = f.type ? ALLOWED.includes(f.type) : ALLOWED_EXT.test(f.name);
-    if (!typeOk) return setNotice("Only PNG, JPEG, WebP or HEIC/HEIF images can be attached.");
-    if (f.size > MAX_FILE_BYTES) return setNotice("That image is larger than 4 MB. Please use a smaller screenshot.");
+    const isDocument = DOCUMENT_TYPES.includes(f.type) || /\.(pdf|docx|xlsx|txt|csv)$/i.test(f.name);
+    const typeOk = f.type ? ALLOWED.includes(f.type) || (f.type.startsWith("text/") && isDocument) : ALLOWED_EXT.test(f.name);
+    if (!typeOk) return setNotice("Attach PNG, JPEG, WebP, HEIC/HEIF images or PDF, DOCX, XLSX, TXT and CSV documents.");
+    if (f.size > (isDocument ? MAX_DOCUMENT_BYTES : MAX_FILE_BYTES)) return setNotice(isDocument ? "Each document must be 10 MB or smaller." : "Each image must be 4 MB or smaller.");
+    }
     setNotice("");
-    setAttached((prev) => {
-      if (prev) URL.revokeObjectURL(prev.url);
-      return { file: f, url: URL.createObjectURL(f) };
-    });
+    setAttached((prev) => [...prev, ...incoming.map((file) => ({ file, url: URL.createObjectURL(file) }))]);
   }
 
-  function removeAttachment() {
+  function removeAttachment(index?: number) {
     setAttached((prev) => {
-      if (prev) URL.revokeObjectURL(prev.url);
-      return null;
+      if (index === undefined) {
+        prev.forEach((item) => URL.revokeObjectURL(item.url));
+        return [];
+      }
+      URL.revokeObjectURL(prev[index]?.url);
+      return prev.filter((_, i) => i !== index);
     });
   }
 
@@ -554,8 +567,8 @@ function ChatWorkspace({ identity, session, loading }: {
     }
   }
 
-  async function send(text: string, attachment: File | null, context: Context | null, history: HistoryTurn[], convId: string) {
-    setBusyLabel(attachment ? "Checking the attachment…" : "Thinking…");
+  async function send(text: string, attachment: File[], context: Context | null, history: HistoryTurn[], convId: string) {
+    setBusyLabel(attachment.length ? "Checking the attachments…" : "Thinking…");
     setNotice("");
     const controller = new AbortController();
     controllersRef.current.set(convId, controller);
@@ -568,7 +581,7 @@ function ChatWorkspace({ identity, session, loading }: {
         return next;
       });
     };
-    if (!attachment) {
+    if (attachment.length === 0) {
       try {
         await streamChat(text, context, history, convId, controller);
       } finally {
@@ -579,7 +592,7 @@ function ChatWorkspace({ identity, session, loading }: {
     const append = (m: Message) => setChats((prev) => prev.map((c) => (c.id === convId ? { ...c, messages: [...c.messages, m] } : c)));
     try {
       const form = new FormData();
-      form.append("file", attachment);
+      for (const item of attachment) form.append("files", item);
       form.append("message", text);
       if (context) {
         form.append("context", JSON.stringify(context.analysis));
@@ -623,24 +636,25 @@ function ChatWorkspace({ identity, session, loading }: {
   }
 
   // Adds a user message after `base` (the messages kept before it) and asks for a reply. Used for new sends, edits and regenerate.
-  function dispatch(convId: string, base: Message[], text: string, attachment: File | null, preview?: { url: string; name: string }) {
-    const title = base.length === 0 ? (text || preview?.name || "New chat").slice(0, 40) : undefined;
-    const userMsg: Message = { id: uid(), role: "user", text, fileName: preview?.name, previewUrl: preview?.url };
+  function dispatch(convId: string, base: Message[], text: string, attachment: File[], previews: { url: string; name: string }[] = []) {
+    const title = base.length === 0 ? (text || previews[0]?.name || "New chat").slice(0, 40) : undefined;
+    const userMsg: Message = { id: uid(), role: "user", text, fileName: previews[0]?.name, previewUrl: previews[0]?.url,
+      attachments: previews.map(({ url, name }) => ({ fileName: name, previewUrl: url })) };
     setChats((prev) => prev.map((c) => (c.id === convId ? { ...c, title: title ?? c.title, messages: [...base, userMsg] } : c)));
     void send(text, attachment, lastAnalysisOf(base), toHistory(base), convId);
   }
 
   function submit(textOverride?: string) {
     const text = (textOverride ?? draft).trim();
-    if (busy || (!text && !attached)) return;
+    if (busy || (!text && !attached.length)) return;
     if (listening) {
       recogRef.current?.stop();
       setListening(false);
     }
-    const attachment = attached?.file ?? null;
-    dispatch(active.id, messages, text, attachment, attached ? { url: attached.url, name: attached.file.name } : undefined);
+    const attachment = attached.map(({ file }) => file);
+    dispatch(active.id, messages, text, attachment, attached.map(({ url, file }) => ({ url, name: file.name })));
     setDraft("");
-    setAttached(null); // the URL stays alive: the sent message still shows the thumbnail
+    setAttached([]); // the URLs stay alive: the sent message still shows the thumbnails
   }
 
   // Edit a message you sent: it replaces that message and everything after it, and the reply is asked again.
@@ -648,14 +662,14 @@ function ChatWorkspace({ identity, session, loading }: {
     const text = editing?.text.trim() ?? "";
     if (!text || busy) return;
     setEditing(null);
-    dispatch(active.id, messages.slice(0, index), text, null);
+    dispatch(active.id, messages.slice(0, index), text, []);
   }
 
   // Regenerate: ask the last question again, replacing the last reply.
   function regenerate(replyIndex: number) {
     const question = messages[replyIndex - 1];
     if (busy || !question || question.role !== "user") return;
-    dispatch(active.id, messages.slice(0, replyIndex - 1), question.text, null);
+    dispatch(active.id, messages.slice(0, replyIndex - 1), question.text, []);
   }
 
   function newChat() {
@@ -722,7 +736,7 @@ function ChatWorkspace({ identity, session, loading }: {
       onDrop={(e) => {
         e.preventDefault();
         setDragging(false);
-        accept(e.dataTransfer.files?.[0]);
+        accept(e.dataTransfer.files);
       }}
     >
       {/* Sidebar: desktop always visible, mobile as a drawer */}
@@ -850,8 +864,11 @@ function ChatWorkspace({ identity, session, loading }: {
                       </div>
                     ) : (
                       <div className="rounded-3xl bg-zinc-200 px-4 py-2.5">
-                        {/* eslint-disable-next-line @next/next/no-img-element -- blob: preview */}
-                        {m.previewUrl && <img src={m.previewUrl} alt={m.fileName ?? "Attached image"} className="mb-2 max-h-56 rounded-xl" />}
+                        {(m.attachments?.length ? m.attachments : m.previewUrl ? [{ fileName: m.fileName ?? "Attached image", previewUrl: m.previewUrl }] : []).map((a, i) => (
+                          <span key={`${a.fileName}-${i}`} className="mb-2 mr-2 inline-flex items-center gap-2 rounded-xl bg-zinc-100 p-2 text-sm">
+                            {a.previewUrl && <Image src={a.previewUrl} alt={a.fileName} width={48} height={48} className="h-12 w-12 rounded-lg object-cover" unoptimized />}{a.fileName}
+                          </span>
+                        ))}
                         {m.text && <p className="whitespace-pre-wrap break-words leading-7">{m.text}</p>}
                       </div>
                     )}
@@ -917,12 +934,13 @@ function ChatWorkspace({ identity, session, loading }: {
         <div className={`${empty ? "absolute left-0 right-0 mx-auto top-[calc(50%-18px)] min-[801px]:left-[260px] min-[801px]:right-0 min-[801px]:w-[calc(100%-260px)] min-[801px]:top-[calc(50%-38px)]" : "mx-auto w-full"} w-full max-w-[800px] px-3 pb-3 pt-2 min-[1024px]:px-4`}>
           {dragging && <p className="mb-2 rounded-2xl border-2 border-dashed border-teal-500 p-3 text-center text-sm">Drop an image to attach it</p>}
           {notice && <p role="alert" className="mb-2 text-sm font-medium text-red-600">{notice}</p>}
-          {attached && (
-            <div className="mb-2 flex items-center gap-3 rounded-2xl bg-zinc-200 p-2">
-              {/* eslint-disable-next-line @next/next/no-img-element -- blob: preview */}
-              <img src={attached.url} alt="Attachment preview" className="h-14 w-14 rounded-xl object-cover" />
-              <span className="min-w-0 flex-1 truncate text-sm">{attached.file.name}</span>
-              <button type="button" onClick={removeAttachment} aria-label="Remove attachment" className="min-h-10 rounded-lg px-3 py-2 text-sm underline">Remove</button>
+          {attached.length > 0 && (
+            <div className="mb-2 flex flex-wrap gap-2 rounded-2xl bg-zinc-200 p-2">
+              {attached.map((item, index) => <div key={`${item.file.name}-${index}`} className="flex min-w-0 items-center gap-2 rounded-xl bg-white p-2">
+              {IMAGE_TYPES.includes(item.file.type) && <Image src={item.url} alt={`${item.file.name} preview`} width={56} height={56} className="h-14 w-14 rounded-xl object-cover" unoptimized />}
+              <span className="max-w-36 truncate text-sm">{item.file.name}</span>
+              <button type="button" onClick={() => removeAttachment(index)} aria-label={`Remove ${item.file.name}`} className="min-h-10 rounded-lg px-2 py-2 text-sm underline">Remove</button>
+              </div>)}
             </div>
           )}
 
@@ -933,7 +951,7 @@ function ChatWorkspace({ identity, session, loading }: {
             }}
             className="group relative flex items-center gap-0 rounded-[28px] border border-[rgba(0,0,0,0.1)] bg-white px-1.5 py-[3px] shadow-[0_0_0_1px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.04),0_4px_40px_8px_rgba(0,0,0,0.03)] focus-within:border-zinc-300"
           >
-            <input ref={fileRef} type="file" accept={ALLOWED.join(",")} className="sr-only" aria-label="Attach an image" tabIndex={-1} onChange={(e) => { accept(e.target.files?.[0]); e.target.value = ""; setAttachOpen(false); }} />
+            <input ref={fileRef} type="file" multiple accept={ALLOWED.join(",")} className="sr-only" aria-label="Attach images" tabIndex={-1} onChange={(e) => { accept(e.target.files); e.target.value = ""; setAttachOpen(false); }} />
             <div className="relative">
               <button type="button" onClick={() => setAttachOpen((o) => !o)} aria-label="Attach" aria-expanded={attachOpen} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-2xl text-zinc-800 hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#3566f0] min-[801px]:h-11 min-[801px]:w-11">
                 +
@@ -957,10 +975,10 @@ function ChatWorkspace({ identity, session, loading }: {
                 }
               }}
               onPaste={(e) => {
-                const img = Array.from(e.clipboardData.files).find((f) => f.type.startsWith("image/"));
-                if (img) {
+                const imgs = Array.from(e.clipboardData.files).filter((f) => f.type.startsWith("image/"));
+                if (imgs.length) {
                   e.preventDefault();
-                  accept(img);
+                  accept(imgs);
                 }
               }}
               rows={1}
@@ -973,7 +991,7 @@ function ChatWorkspace({ identity, session, loading }: {
                 {listening ? "■" : "🎙"}
               </button>
             )}
-            <button type="submit" disabled={busy || (!draft.trim() && !attached)} aria-label="Send" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-zinc-900 hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#3566f0] disabled:opacity-50 min-[801px]:h-11 min-[801px]:w-11">
+            <button type="submit" disabled={busy || (!draft.trim() && !attached.length)} aria-label="Send" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-zinc-900 hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#3566f0] disabled:opacity-50 min-[801px]:h-11 min-[801px]:w-11">
               <span aria-hidden="true" className="flex h-8 w-8 items-center justify-center rounded-full bg-[#3566f0] text-lg font-semibold text-white">↑</span>
             </button>
           </form>

@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
-from PIL import Image
+from PIL import Image, ImageDraw, PngImagePlugin
 
 from services.api.main import app
 from services.chat.explain import (DeterministicExplanationProvider, OllamaExplanationProvider, followup_intent,
@@ -142,6 +142,55 @@ def test_blank_image_is_unable_to_verify():
 def test_upload_rejects_non_image():
     r = client.post("/api/v1/chat/upload", files={"file": ("x.png", b"not an image", "image/png")})
     assert r.status_code in (400, 415, 422)
+
+
+def test_multi_attachment_chat_returns_each_result_and_merged_verdict(monkeypatch):
+    import segno
+    from PIL import ImageOps
+    monkeypatch.setenv("TRUSTSHIELD_OCR_PROVIDER", "mock")
+    def qr(payload):
+        out = io.BytesIO()
+        segno.make(payload, micro=False).save(out, kind="png", scale=8, border=4)
+        return out.getvalue()
+    def inverted_qr(payload):
+        image = ImageOps.invert(Image.open(io.BytesIO(qr(payload))).convert("RGB"))
+        out = io.BytesIO()
+        image.save(out, format="PNG")
+        return out.getvalue()
+    text_image = Image.new("RGB", (900, 180), "white")
+    ImageDraw.Draw(text_image).text((20, 40), "Your parcel is held. Pay now at http://parcel-release.top/pay", fill="black")
+    png_info = PngImagePlugin.PngInfo()
+    png_info.add_text("trustshield_demo_text", "Your parcel is held. Pay now at http://parcel-release.top/pay")
+    text_buffer = io.BytesIO()
+    text_image.save(text_buffer, format="PNG", pnginfo=png_info)
+    risky = "http://sbi-secure-login.top:8080/kyc/verify.apk"
+    files = [
+        ("files", ("normal.png", qr("https://example.com/ok"), "image/png")),
+        ("files", ("inverted.png", inverted_qr("https://example.org/inverted"), "image/png")),
+        ("files", ("risky.png", qr(risky), "image/png")),
+        ("files", ("text.png", text_buffer.getvalue(), "image/png")),
+    ]
+    response = client.post("/api/v1/chat/upload", files=files, data={"message": "check these"})
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert len(body["attachments"]) == 4
+    assert {a["file_name"] for a in body["attachments"]} == {"normal.png", "inverted.png", "risky.png", "text.png"}
+    qr_payloads = {a["analysis"]["qr_payload"] for a in body["attachments"] if a["analysis"]["qr_payload"]}
+    assert qr_payloads == {"https://example.com/ok", "https://example.org/inverted", risky}
+    assert "parcel-release.top" in next(a["analysis"]["extracted_content"] for a in body["attachments"] if a["file_name"] == "text.png")
+    severity = {"unable_to_verify": -1, "low_risk": 0, "caution": 1, "suspicious": 2, "high_risk": 3}
+    assert severity[body["analysis"]["risk_level"]] >= max(severity[a["analysis"]["risk_level"]] for a in body["attachments"])
+    assert body["analysis"]["risk_score"] >= max(a["analysis"]["risk_score"] for a in body["attachments"])
+    assert "risky.png" in body["reply"]["text"]
+    followup = chat("Can you tell me what the QR codes contained?", context=body["analysis"], signature=body["context_signature"])
+    assert followup.status_code == 200
+    assert "https://example.com/ok" in followup.json()["reply"]["text"]
+    assert risky in followup.json()["reply"]["text"]
+
+
+def test_multi_attachment_chat_enforces_server_count_and_total_size():
+    too_many = [("files", (f"{i}.png", _png(), "image/png")) for i in range(6)]
+    assert client.post("/api/v1/chat/upload", files=too_many).status_code == 413
 
 
 def test_legacy_endpoints_unchanged():

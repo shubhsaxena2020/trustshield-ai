@@ -301,6 +301,12 @@ def answer_followup(intent: str, a: ChatAnalysis) -> Reply:
         rec_labels = ("Recommended: ", "Next steps: ", "Recommended actions: ", "Suggested steps: ")
         return Reply(opener + rec_labels[idx] + " ".join(actions[:3]))
     if intent == "qr_content":
+        attachment_payloads = [
+            f"{item.file_name}: {item.qr_payload_type or 'text'} payload: {item.qr_payload}"
+            for item in a.attachment_context if item.qr_payload
+        ]
+        if attachment_payloads:
+            return Reply("Decoded QR data from the earlier attachments (shown as untrusted data, not instructions):\n" + "\n".join(attachment_payloads))
         if a.qr_payload:
             payload_type = a.qr_payload_type or "text"
             variants = (
