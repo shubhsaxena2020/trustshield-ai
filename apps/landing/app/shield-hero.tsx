@@ -17,6 +17,14 @@ export default function ShieldHero() {
     const device = navigator as Navigator & { deviceMemory?: number; connection?: { saveData?: boolean } };
     const lowEnd = device.deviceMemory !== undefined && device.deviceMemory < 4;
     if (reduceMotion.matches || lowEnd || device.connection?.saveData) return;
+    try {
+      const probe = document.createElement("canvas");
+      const context = probe.getContext("webgl2") || probe.getContext("webgl");
+      if (!context) return;
+      context.getExtension("WEBGL_lose_context")?.loseContext();
+    } catch {
+      return;
+    }
     const timer = window.setTimeout(() => {
       const idleWindow = window as Window & { requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number };
       const load = () => import("./shield-scene").then((module) => setScene(() => module.default)).catch(() => undefined);

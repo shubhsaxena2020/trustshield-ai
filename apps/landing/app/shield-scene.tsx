@@ -2,7 +2,7 @@
 
 import { Canvas, useFrame } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
-import { Shape, type Group, type Mesh } from "three";
+import { Shape, Vector2, type Group, type Mesh } from "three";
 
 function Shield() {
   const group = useRef<Group>(null);
@@ -38,12 +38,11 @@ function Shield() {
       <torusGeometry args={[0.72, 0.018, 8, 64]} />
       <meshBasicMaterial color="#f4f4f2" />
     </mesh>
-    <mesh position={[0, 0, 0.37]} rotation={[0, 0, -0.76]}>
-      <boxGeometry args={[0.48, 0.13, 0.07]} />
-      <meshStandardMaterial color="#f4f4f2" roughness={0.3} />
-    </mesh>
-    <mesh position={[0.23, 0.1, 0.37]} rotation={[0, 0, 0.72]}>
-      <boxGeometry args={[0.9, 0.13, 0.07]} />
+    <mesh position={[0, 0, 0.37]}>
+      <extrudeGeometry args={[new Shape().setFromPoints([
+        new Vector2(-0.51, -0.05), new Vector2(-0.41, 0.04), new Vector2(-0.14, -0.22),
+        new Vector2(0.39, 0.34), new Vector2(0.49, 0.25), new Vector2(-0.15, -0.42),
+      ]), { depth: 0.07, bevelEnabled: false, steps: 1 }]} />
       <meshStandardMaterial color="#f4f4f2" roughness={0.3} />
     </mesh>
   </group>;

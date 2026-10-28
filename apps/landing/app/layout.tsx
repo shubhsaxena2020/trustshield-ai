@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import manifest from "../public/release-manifest.json";
 import "./globals.css";
 
 const title = "TrustShield AI — pause before you pay";
 const description = "Check suspicious SMS, WhatsApp text, links, screenshots, QR codes, UPI requests and calls. See risk evidence in English, Hindi and Hinglish.";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(new URL(manifest.releasePageUrl).origin),
   title,
   description,
   applicationName: "TrustShield AI",

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ShieldHero from "./shield-hero";
 import manifest from "../public/release-manifest.json";
 
@@ -30,10 +30,27 @@ export default function Home() {
   const [screen, setScreen] = useState(0);
   const [sampleShown, setSampleShown] = useState(false);
 
+  useEffect(() => {
+    const stories = document.querySelectorAll<HTMLElement>("[data-screen-story]");
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) setScreen(Number((entry.target as HTMLElement).dataset.screenStory));
+      });
+    }, { rootMargin: "-36% 0px -44% 0px" });
+    stories.forEach((story) => observer.observe(story));
+    return () => observer.disconnect();
+  }, []);
+
   function toggleTheme() {
     const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
     document.documentElement.dataset.theme = next;
     window.localStorage.setItem("trustshield-theme", next);
+  }
+
+  function selectScreen(index: number) {
+    setScreen(index);
+    const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+    document.querySelector(`[data-screen-story="${index}"]`)?.scrollIntoView({ behavior, block: "center" });
   }
 
   return (
@@ -84,20 +101,20 @@ export default function Home() {
         <div className="screens-head content-width"><div className="section-heading"><p className="eyebrow">On your Android phone</p><h2>Protection that stays close.</h2><p>Explore the main screens from the Android app. Choose a view to see how each part works.</p></div><div className="screens-caption">REAL APP SCREENS <span>·</span> ENGLISH</div></div>
         <div className="screens-showcase content-width">
           <div className="phone-column">
-            <div className="phone-frame"><div className="phone-notch" /><div className="phone-screen"><Image key={screens[screen].image} src={screens[screen].image} alt={screens[screen].alt} width={760} height={1689} sizes="(max-width: 700px) 62vw, 330px" priority={screen === 0} /></div></div>
-            <div className="screen-tabs" role="tablist" aria-label="Android app screens">{screens.map((item, index) => <button type="button" key={item.id} role="tab" aria-selected={screen === index} className={screen === index ? "screen-tab active" : "screen-tab"} onClick={() => setScreen(index)}>{item.label}</button>)}</div>
+          <div className="phone-frame"><div className="phone-notch" /><div className="phone-screen"><Image key={screens[screen].image} src={screens[screen].image} alt={screens[screen].alt} width={760} height={1689} sizes="(max-width: 700px) 62vw, 330px" /></div></div>
+            <div className="screen-tabs" role="group" aria-label="Android app screens">{screens.map((item, index) => <button type="button" key={item.id} aria-pressed={screen === index} className={screen === index ? "screen-tab active" : "screen-tab"} onClick={() => selectScreen(index)}>{item.label}</button>)}</div>
           </div>
-          <div className="screen-details" aria-live="polite">
-            <span className="screen-count">0{screen + 1} / 05</span>
-            <h3>{["Check what arrived.", "Understand the signal.", "Stay aware on a call.", "Check before you pay.", "Make it yours."][screen]}</h3>
-            <p>{[
-              "Review suspicious SMS, WhatsApp text, links and screenshots. The Android app computes supported checks on your device.",
-              "Risk indicators come with exact quotes as evidence. Use them as guidance, then verify important requests independently.",
-              "With your consent, Call Shield listens through the microphone during a live session and can speak a verdict.",
-              "QR Guard checks the decoded destination, UPI payee and tampering signals before you continue in your payment app.",
-              "Choose black or white themes. TalkBack support helps make the app more accessible.",
-            ][screen]}</p>
-            <div className="screen-controls"><button type="button" onClick={() => setScreen((screen + screens.length - 1) % screens.length)} aria-label="Previous app screen">←</button><button type="button" onClick={() => setScreen((screen + 1) % screens.length)} aria-label="Next app screen">→</button></div>
+          <div className="screen-details" aria-label="Android app features">
+            {[
+              ["Check what arrived.", "Review suspicious SMS, WhatsApp text, links and screenshots. The Android app computes supported checks on your device."],
+              ["Understand the signal.", "Risk indicators come with exact quotes as evidence. Use them as guidance, then verify important requests independently."],
+              ["Stay aware on a call.", "With your consent, Call Shield listens through the microphone during a live session and can speak a verdict."],
+              ["Check before you pay.", "QR Guard checks the decoded destination, UPI payee and tampering signals before you continue in your payment app."],
+              ["Make it yours.", "Choose black or white themes. TalkBack support helps make the app more accessible."],
+            ].map(([title, description], index) => <article className="screen-story" data-screen-story={index} key={title}>
+              <span className="screen-count">0{index + 1} / 05</span><h3>{title}</h3><p>{description}</p>
+            </article>)}
+            <div className="screen-controls"><button type="button" onClick={() => selectScreen((screen + screens.length - 1) % screens.length)} aria-label="Previous app screen">←</button><button type="button" onClick={() => selectScreen((screen + 1) % screens.length)} aria-label="Next app screen">→</button></div>
           </div>
         </div>
       </section>
@@ -123,7 +140,7 @@ export default function Home() {
 
       <section className="faq-section content-width" id="faq"><div className="section-heading"><p className="eyebrow">Good to know</p><h2>Questions, answered.</h2></div><div className="faq-list">{faq.map(([question, answer]) => <details className="faq-item" key={question}><summary>{question}<span aria-hidden="true">＋</span></summary><p>{answer}</p></details>)}</div></section>
 
-      <section className="install-band"><div className="install-inner content-width"><div><p className="eyebrow">Android app · version {manifest.version}</p><h2>Take the pause with you.</h2><p>Download the APK directly. Compare its SHA-256 with the release details before installing.</p><a className="button button-primary" href={manifest.downloadUrl} download>Download APK for Android <span aria-hidden="true">↓</span></a></div><dl className="install-facts"><div><dt>File size</dt><dd>{formatBytes(manifest.sizeBytes)}</dd></div><div><dt>Minimum Android</dt><dd>{manifest.minimumAndroidVersion} or newer</dd></div><div><dt>SHA-256</dt><dd>{manifest.sha256}</dd></div></dl></div></section>
+      <section className="install-band"><div className="install-inner content-width"><div><p className="eyebrow">Android app · version {manifest.version}</p><h2>Take the pause with you.</h2><p>Download the APK directly. Compare its SHA-256 with the release details before installing.</p><a className="button button-primary" href={manifest.downloadUrl} download>Download APK for Android <span aria-hidden="true">↓</span></a></div><div><ol className="install-steps"><li><span>01</span><p>Download the APK from this page.</p></li><li><span>02</span><p>If Android asks, allow your browser to install apps for this installation.</p></li><li><span>03</span><p>Compare the file’s SHA-256 below, then follow Android’s install prompts.</p></li></ol><dl className="install-facts"><div><dt>File size</dt><dd>{formatBytes(manifest.sizeBytes)}</dd></div><div><dt>Minimum Android</dt><dd>{manifest.minimumAndroidVersion} or newer</dd></div><div><dt>SHA-256</dt><dd>{manifest.sha256}</dd></div></dl></div></div></section>
 
       <footer className="site-footer"><div className="footer-main content-width"><a className="footer-brand" href="#top"><Image src="/logo.png" alt="TrustShield AI" width={146} height={40} /></a><p>Research / Tech Expo prototype.<br />Results are guidance, not a guarantee.</p><nav aria-label="Footer navigation"><a href="#how-it-works">How it works</a><a href="#features">Features</a><a href="#privacy">Privacy</a><a href="#faq">FAQ</a></nav></div><div className="footer-bottom content-width"><span>© TrustShield AI</span><span>Pause. Read. Verify independently.</span><a href="#top">Back to top ↑</a></div></footer>
     </main>
