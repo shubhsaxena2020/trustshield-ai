@@ -108,6 +108,7 @@ _CONTEXTUAL_REPHRASE_PATTERN = re.compile(
     r"\b(explain|simplify|rephrase|reformulate|shorten|summarize|say|make)\b.{0,20}\b(that|it|this)\b|"
     r"\b(in simple(r)? (words|terms)|more simply|differently|shorter|to a (non.?technical|beginner)|"
     r"(three|3|top)\b.{0,30}\b(reasons?|points?)|why does (that|it|this) matter)\b", re.I)
+_CONTEXTUAL_QR_SCAN_PATTERN = re.compile(r"\b(scan|decode)\b.{0,30}\b(it|that|this|one)\b", re.I)
 
 
 def _norm(text: str) -> str:
@@ -248,6 +249,10 @@ def classify_intent(message: str, has_attachment: bool, has_context: bool, follo
         if intent:
             return IntentResult("follow_up_analysis", f"contextual rephrase/simplify request matching follow-up intent '{intent}'",
                                 followup_intent=intent)
+
+    if has_context and len(text) <= FOLLOWUP_MAX_CHARS and _CONTEXTUAL_QR_SCAN_PATTERN.search(text):
+        return IntentResult("follow_up_analysis", "asks to scan or decode a previously shared item",
+                            followup_intent="qr_content")
 
     # Greeting/off-topic/product/general-knowledge patterns are checked BEFORE the loose follow-up matcher: the follow-up
     # matcher's "can_trust" pattern contains words like "phishing"/"scam"/"fraud", so "What is phishing?" would otherwise be

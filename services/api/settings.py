@@ -31,6 +31,7 @@ class Settings:
     cors_origins: tuple[str, ...] = ("http://localhost:3000",)
     public_api_url: str = ""
     max_body_bytes: int = 5 * 1024 * 1024 + 64 * 1024
+    max_chat_upload_bytes: int = 20 * 1024 * 1024 + 64 * 1024
     request_timeout_s: float = 45.0
     heavy_concurrency: int = 2
     heavy_queue_timeout_s: float = 8.0
@@ -70,6 +71,7 @@ class Settings:
             cors_origins=origins,
             public_api_url=os.getenv("PUBLIC_API_URL", "").strip().rstrip("/"),
             max_body_bytes=max(upload, 1024) + 64 * 1024,
+            max_chat_upload_bytes=20 * 1024 * 1024 + 64 * 1024,
             request_timeout_s=_float("TRUSTSHIELD_REQUEST_TIMEOUT", 45.0, 5.0, 120.0),
             heavy_concurrency=_int("TRUSTSHIELD_HEAVY_CONCURRENCY", 2, 1, 8),
             heavy_queue_timeout_s=_float("TRUSTSHIELD_HEAVY_QUEUE_TIMEOUT", 8.0, 0.5, 60.0),

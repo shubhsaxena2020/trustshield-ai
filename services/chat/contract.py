@@ -70,6 +70,13 @@ class Capability(BaseModel):
     reason: str = Field(default="", max_length=240)
 
 
+class AttachmentContext(BaseModel):
+    file_name: str = Field(max_length=255)
+    qr_payload: str | None = Field(default=None, max_length=1000)
+    qr_payload_type: str | None = Field(default=None, max_length=20)
+    extracted_content: str | None = Field(default=None, max_length=MAX_TEXT)
+
+
 class ChatAnalysis(BaseModel):
     contract_version: str = CONTRACT_VERSION
     analysis_id: str = Field(max_length=64)
@@ -90,6 +97,7 @@ class ChatAnalysis(BaseModel):
     safe_actions: list[Item[400]] = Field(default_factory=list, max_length=8)
     capabilities: list[Capability] = Field(default_factory=list, max_length=12)
     ocr_confidence: float | None = Field(default=None, ge=0, le=100)
+    attachment_context: list[AttachmentContext] = Field(default_factory=list, max_length=5)
 
     @property
     def capabilities_used(self) -> list[str]:

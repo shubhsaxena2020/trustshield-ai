@@ -185,6 +185,31 @@ def test_blank_image_returns_unable_to_verify(monkeypatch):
     assert any("no readable text" in item.lower() for item in result.limitations)
 
 
+def test_chat_analysis_explains_when_qr_cannot_be_decoded(monkeypatch):
+    from services.chat.orchestrator import analyze_turn
+    from services.chat.router import route
+
+    monkeypatch.setenv("TRUSTSHIELD_OCR_PROVIDER", "mock")
+    result, _ = analyze_turn("", (png_bytes(), "image/png", "blank.png"), route("", True, False, lambda _: None))
+    message = " ".join(result.limitations).lower()
+    assert "qr code could not be read" in message
+    assert "original image file" in message
+    assert "type the link/upi text" in message
+
+
+def test_chat_orchestrator_analyzes_each_attachment(monkeypatch):
+    from services.chat.orchestrator import analyze_turn
+    from services.chat.router import route
+
+    monkeypatch.setenv("TRUSTSHIELD_OCR_PROVIDER", "mock")
+    payloads = ["https://example.com/one", "https://sbi-secure-login.top/verify"]
+    files = [(qr_bytes(payload), "image/png", f"qr-{i}.png") for i, payload in enumerate(payloads)]
+    result, types = analyze_turn("", files, route("", True, False, lambda _: None))
+    assert result.modules["qr"].data["payload"] in payloads
+    assert types == ["qr"]
+    assert len(result.evidence) >= 2
+
+
 def test_legitimate_security_awareness_screenshot_is_not_credential_phishing(monkeypatch):
     monkeypatch.setenv("TRUSTSHIELD_OCR_PROVIDER", "mock")
     result = analyze_image(

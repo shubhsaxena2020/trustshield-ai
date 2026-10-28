@@ -40,6 +40,7 @@ export interface ChatAnalysis {
   safe_actions: string[];
   capabilities: Capability[];
   ocr_confidence: number | null;
+  attachment_context?: { file_name: string; qr_payload: string | null; qr_payload_type: string | null; extracted_content: string | null }[];
 }
 
 export interface ChatReply {
@@ -58,11 +59,12 @@ export interface ChatResponse {
   route: { kind: string; reason: string; urls: string[]; intent: string | null; has_attachment: boolean; modules: string[] };
   reply: ChatReply;
   analysis: ChatAnalysis | null;
+  attachments?: { file_name: string; analysis: ChatAnalysis }[];
   context_signature: string | null;
 }
 
 export type Message =
-  | { id: string; role: "user"; text: string; fileName?: string; previewUrl?: string }
+  | { id: string; role: "user"; text: string; fileName?: string; previewUrl?: string; attachments?: { fileName: string; previewUrl?: string }[] }
   | { id: string; role: "assistant"; kind: "analysis"; responseType: ResponseType; reply: ChatReply; analysis: ChatAnalysis; signature: string; route: ChatResponse["route"] }
   | { id: string; role: "assistant"; kind: "followup"; responseType: ResponseType; reply: ChatReply }
   | { id: string; role: "assistant"; kind: "error"; text: string; retry?: () => void };

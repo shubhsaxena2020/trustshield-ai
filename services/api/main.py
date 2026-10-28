@@ -30,7 +30,7 @@ from services.analysis.fusion.result import SCHEMA_VERSION, AnalysisResult, Modu
 from services.analysis.normalization.text import InvalidInput
 from services.analysis.pipeline import analyze_image, analyze_qr, analyze_text, analyze_url
 
-from services.chat.contract import ChatAnalysis, to_contract
+from services.chat.contract import AttachmentContext, ChatAnalysis, to_contract
 from services.chat import agent
 from services.chat.explain import DeterministicExplanationProvider, Reply, followup_intent, get_provider
 
@@ -336,6 +336,11 @@ class ReplyOut(BaseModel):
 ResponseType = Literal["chat", "analysis", "follow_up", "education", "product_info"]
 
 
+class ChatAttachmentOut(BaseModel):
+    file_name: str = Field(max_length=255)
+    analysis: ChatAnalysis
+
+
 class ChatOut(BaseModel):
     kind: Literal["analysis", "followup", "chat"]  # kept for compatibility; response_type is the richer field
     response_type: ResponseType
@@ -344,6 +349,12 @@ class ChatOut(BaseModel):
     reply: ReplyOut
     analysis: ChatAnalysis | None = None
     context_signature: str | None = None
+    attachments: list[ChatAttachmentOut] = Field(default_factory=list, max_length=5)
+
+
+def _safe_upload_name(name: str | None, index: int) -> str:
+    cleaned = re.sub(r"[\x00-\x1f\x7f]", "", (name or "").replace("\\", "/").rsplit("/", 1)[-1])[:255]
+    return cleaned or f"Attachment {index + 1}"
 
 
 def _reply_out(reply: Reply) -> ReplyOut:
@@ -573,7 +584,7 @@ async def chat_stream_endpoint(body: ChatIn):
 
 
 async def _chat_turn(request: Request, response: Response, message: str, context: ChatAnalysis | None, signature: str, history: list[Turn],
-                     image: tuple[bytes, str | None, str | None] | None) -> ChatOut:
+                     image: tuple[bytes, str | None, str | None] | list[tuple[bytes, str | None, str | None]] | None) -> ChatOut:
     if sum(len(t.text) for t in history) > 12_000:
         raise HTTPException(422, "conversation context is too large; start a new chat")
     if context is not None and not verify(context, signature):
@@ -611,8 +622,24 @@ async def _chat_turn(request: Request, response: Response, message: str, context
     plan = route(message, image is not None, False, followup_intent)  # follow-up already ruled out above; this call only
     # selects which pipeline modules to run (url/text/image) for a message intent classification has already decided to analyse
     try:
+        attachment_contracts = []
         if image is not None:
-            result, types = await run_heavy(request, analyze_turn, message, image, plan)
+            if isinstance(image, list):
+                if len(image) > 1:
+                    per_results = [await run_heavy(request, analyze_turn, message, item, plan) for item in image]
+                    from services.chat.orchestrator import merge_results
+                    result = merge_results([part[0] for part in per_results], "image")
+                    types = list(dict.fromkeys(t for _, part_types in per_results for t in part_types))
+                    attachment_contracts = [
+                        ChatAttachmentOut(file_name=_safe_upload_name(item[2], index), analysis=to_contract(part[0], part[1], plan.urls))
+                        for index, (item, part) in enumerate(zip(image, per_results))
+                    ]
+                else:
+                    result, types = await run_heavy(request, analyze_turn, message, image[0], plan)
+                    attachment_contracts = [ChatAttachmentOut(file_name=_safe_upload_name(image[0][2], 0), analysis=to_contract(result, types, plan.urls))]
+            else:
+                result, types = await run_heavy(request, analyze_turn, message, image, plan)
+                attachment_contracts = [ChatAttachmentOut(file_name=_safe_upload_name(image[2], 0), analysis=to_contract(result, types, plan.urls))]
         else:
             result, types = await run_in_threadpool(analyze_turn, message, None, plan)
     except ImageRejected as exc:
@@ -622,6 +649,22 @@ async def _chat_turn(request: Request, response: Response, message: str, context
     except InvalidInput as exc:
         raise HTTPException(422, str(exc))
     analysis = to_contract(result, types, plan.urls)
+    if len(attachment_contracts) > 1:
+        analysis.attachment_context = [
+            AttachmentContext(file_name=a.file_name, qr_payload=a.analysis.qr_payload,
+                              qr_payload_type=a.analysis.qr_payload_type, extracted_content=a.analysis.extracted_content)
+            for a in attachment_contracts
+        ]
+        rank = {"low_risk": 0, "caution": 1, "suspicious": 2, "high_risk": 3, "unable_to_verify": -1}
+        highest = max(attachment_contracts, key=lambda a: (rank[a.analysis.risk_level], a.analysis.risk_score))
+        if rank[highest.analysis.risk_level] >= rank[analysis.risk_level] and highest.analysis.risk_level != "unable_to_verify":
+            analysis.uncertainty = (analysis.uncertainty + [
+                f"The overall verdict includes {len(attachment_contracts)} attachments; the strongest individual result was {highest.file_name} ({highest.analysis.risk_level}, {highest.analysis.risk_score}/100)."
+            ])[:12]
+    attachment_note = ""
+    if len(attachment_contracts) > 1:
+        highest = max(attachment_contracts, key=lambda a: (rank[a.analysis.risk_level], a.analysis.risk_score))
+        attachment_note = f" The overall verdict is most affected by {highest.file_name}, which had the highest individual risk result ({highest.analysis.risk_level}, {highest.analysis.risk_score}/100)."
     if image is None and intent_result.intent == "analyze_text" and agent.configured():
         # The model reads through spelling mistakes. The scanner checks the corrected text too; the higher risk wins.
         corrected = await run_in_threadpool(agent.correct_spelling, message)
@@ -640,11 +683,14 @@ async def _chat_turn(request: Request, response: Response, message: str, context
         text = await run_in_threadpool(agent.explain, message, analysis.model_dump_json(), analysis.risk_score)
         if text:
             return ChatOut(kind="analysis", response_type="analysis", intent=intent_result.public(), route=plan.public(),
-                           reply=ReplyOut(text=text, provider="nilabh", grounded=True), analysis=analysis,
-                           context_signature=sign(analysis))
+                           reply=ReplyOut(text=text + attachment_note, provider="nilabh", grounded=True), analysis=analysis,
+                           context_signature=sign(analysis), attachments=attachment_contracts)
     reply = await run_in_threadpool(provider.reply_for_analysis, analysis)
+    reply_out = _reply_out(reply)
+    if attachment_note:
+        reply_out.text += attachment_note
     return ChatOut(kind="analysis", response_type="analysis", intent=intent_result.public(), route=plan.public(),
-                   reply=_reply_out(reply), analysis=analysis, context_signature=sign(analysis))
+                   reply=reply_out, analysis=analysis, context_signature=sign(analysis), attachments=attachment_contracts)
 
 
 @router.post("/api/v1/chat", response_model=ChatOut, dependencies=[Depends(limit_light)])
@@ -653,7 +699,7 @@ async def chat_endpoint(body: ChatIn, request: Request, response: Response):
 
 
 @router.post("/api/v1/chat/upload", response_model=ChatOut, dependencies=[Depends(limit_heavy)])
-async def chat_upload_endpoint(request: Request, response: Response, file: UploadFile = File(...),
+async def chat_upload_endpoint(request: Request, response: Response, file: UploadFile | None = File(default=None), files: list[UploadFile] | None = File(default=None),
                                message: str = Form(default="", max_length=MAX_MESSAGE_CHARS), context: str = Form(default="", max_length=60_000),
                                context_signature: str = Form(default="", max_length=128), history: str = Form(default="[]", max_length=16_000)):
     try:
@@ -665,10 +711,26 @@ async def chat_upload_endpoint(request: Request, response: Response, file: Uploa
     except (ValueError, TypeError):
         raise HTTPException(422, "invalid conversation history")
     try:
-        data = await file.read(max(max_upload_size(), max_document_bytes_fn()) + 1)
-        return await _chat_turn(request, response, message, parsed, context_signature, turns, (data, file.content_type, file.filename))
+        if file is not None and files:
+            raise HTTPException(422, "Use either the legacy file field or the files field, not both.")
+        uploads = files or ([file] if file is not None else [])
+        if not uploads:
+            raise HTTPException(422, "Attach at least one image or document.")
+        if len(uploads) > 5:
+            raise HTTPException(413, "A message can contain at most 5 attachments.")
+        attachments = []
+        total = 0
+        for upload in uploads:
+            data = await upload.read(max(max_upload_size(), max_document_bytes_fn()) + 1)
+            total += len(data)
+            if total > 20 * 1024 * 1024:
+                raise HTTPException(413, "Attachments exceed the 20 MB total limit.")
+            attachments.append((data, upload.content_type, _safe_upload_name(upload.filename, len(attachments))))
+        return await _chat_turn(request, response, message, parsed, context_signature, turns,
+                                attachments[0] if file is not None and files is None else attachments)
     finally:
-        await file.close()
+        for upload in (files or ([file] if file is not None else [])):
+            await upload.close()
 
 
 # ---- application factory -------------------------------------------------------------------------------------------
@@ -739,7 +801,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                     "x_forwarded_proto": request.headers.get("x-forwarded-proto", ""),
                     "memory": {"current": cgroup("memory.current"), "peak": cgroup("memory.peak"), "max": cgroup("memory.max")}}
 
-    app.add_middleware(BodyLimitMiddleware, max_bytes=settings.max_body_bytes)
+    app.add_middleware(BodyLimitMiddleware, max_bytes=settings.max_body_bytes, chat_upload_max_bytes=settings.max_chat_upload_bytes)
     app.add_middleware(ObservabilityMiddleware, settings=settings)
     app.add_middleware(CORSMiddleware, allow_origins=list(settings.cors_origins), allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
                        allow_headers=["Content-Type", "X-Request-ID", "Authorization"], expose_headers=["X-Request-ID", "X-Analysis-ID", "Retry-After"],

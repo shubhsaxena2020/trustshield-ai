@@ -99,13 +99,16 @@ def _is_document_attachment(data=None, declared_mime=None, filename=None):
     return False
 
 
-def analyze_turn(message: str, image: tuple[bytes, str | None, str | None] | None, plan: RoutePlan) -> tuple[AnalysisResult, list[str]]:
+def analyze_turn(message: str, image: tuple[bytes, str | None, str | None] | list[tuple[bytes, str | None, str | None]] | None, plan: RoutePlan) -> tuple[AnalysisResult, list[str]]:
     """Returns (fused result, input_types that were actually analysed)."""
     text = (message or "").strip()
     if plan.kind == "url":
         return pipeline.analyze_url(plan.urls[0] if plan.urls else text), ["url"]
     if plan.kind == "text":
         return pipeline.analyze_text(text), ["text"] + (["url"] if plan.urls else [])
+    if isinstance(image, list):
+        results = [analyze_turn(message, attachment, plan) for attachment in image]
+        return merge_results([item[0] for item in results], "image"), list(dict.fromkeys(t for _, types in results for t in types))
     assert image is not None, "an attachment is required for this plan"
     data, mime, name = image
     if _is_document_attachment(data, mime, name):
@@ -134,6 +137,7 @@ def analyze_turn(message: str, image: tuple[bytes, str | None, str | None] | Non
     elif not parts:
         parts.append(ocr_result)  # nothing decodable: keep the honest "unable to verify" result with its limitations
         types.append("image")
+        parts[0].limitations.append("A QR code could not be read from this image. Upload the original image file or type the link/UPI text to check it.")
     result = parts[0] if len(parts) == 1 else merge_results(parts, "image")
     if plan.urls:
         result = _add_message_urls(result, plan.urls)
