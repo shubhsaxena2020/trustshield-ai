@@ -73,6 +73,9 @@ class QrGuardSessionTest {
         session.onUiEvent(QrEvent.StartWatch())
         session.onDecoded("upi://pay?pa=demo-recipient@upi&pn=TRUSTSHIELD&am=125.00&cu=INR")
         assertTrue(session.snapshot().paymentAdvisory != null)
+        session.onUnreadable()
+        assertNull(session.snapshot().paymentAdvisory)
+        session.onDecoded("upi://pay?pa=demo-recipient@upi&pn=TRUSTSHIELD&am=125.00&cu=INR")
         session.onUiEvent(QrEvent.Stop)
         assertNull(session.snapshot().paymentAdvisory)
     }

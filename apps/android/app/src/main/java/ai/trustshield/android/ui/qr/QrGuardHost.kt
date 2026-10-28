@@ -839,8 +839,10 @@ internal class QrGuardSession(
         val demo = vpas
             .map { it.trim() }
             .filter { isPlausibleUpiId(it) }
-        demo.forEach { runCatching { registry.register(it) } }
-        watcher = newWatcher()
+            .map { RegisteredPayee(handle = it, name = null) }
+        val merged = (state.payees + demo).distinctBy { it.key }
+        putState(state.copy(payees = merged))
+        syncRegistry(merged)
     }
 
     private companion object {
