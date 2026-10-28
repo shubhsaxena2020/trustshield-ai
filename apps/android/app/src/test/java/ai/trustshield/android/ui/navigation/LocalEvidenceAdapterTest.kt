@@ -52,7 +52,7 @@ class LocalEvidenceAdapterTest {
             module = "local_fusion",
             titleHinglish = "Unknown sender pattern",
             detail = "The sender asks you to verify a payment through an unfamiliar channel.",
-            severity = Severity.MODERATE,
+            severity = Severity.MEDIUM,
             strength = Strength.MODERATE,
         )
 
