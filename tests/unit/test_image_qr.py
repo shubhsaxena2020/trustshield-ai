@@ -375,3 +375,15 @@ def test_real_tesseract_smoke():
 def test_regression_url_categories_only():
     result = analyze_url_static("http://sbi-secure-login.top:8080/kyc/verify.apk")
     assert {"domain_mismatch", "executable_download", "unusual_port"} <= categories(result)
+
+
+def test_inverted_upi_qr_with_light_modules_on_a_dark_card_is_decoded():
+    from PIL import ImageOps
+
+    payload = "upi://pay?pa=merchant@ibl&pn=Test%20Shop&mc=0000&cu=INR"
+    original = Image.open(BytesIO(qr_bytes(payload))).convert("RGB")
+    result = OpenCVQRDecoder().decode(ImageOps.invert(original))
+
+    assert result.status == "completed"
+    assert result.payload_type == "upi"
+    assert result.payload == payload
