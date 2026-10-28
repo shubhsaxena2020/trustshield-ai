@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -69,7 +69,7 @@ fun HistoryScreen(
             EmptyHistory(copy)
         } else {
             LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                itemsIndexed(entries, key = { index, item -> "${item.checkedAtMillis}-$index" }) { _, item ->
+                items(entries, key = { item -> item.checkedAtMillis }) { item ->
                     HistoryRow(item = item, language = language)
                 }
             }
@@ -80,7 +80,9 @@ fun HistoryScreen(
 @Composable
 private fun HistoryRow(item: MetadataCheck, language: AppLanguage) {
     val context = LocalContext.current
-    val time = DateFormat.getTimeFormat(context).format(item.checkedAtMillis)
+    val time = androidx.compose.runtime.remember(context, item.checkedAtMillis) {
+        DateFormat.getTimeFormat(context).format(item.checkedAtMillis)
+    }
     val (label, riskTone) = when (item.verdict) {
         RiskLabel.LOW_RISK -> ToneCopy("Kam khatra", "Low risk", "कम जोखिम") to RiskTone.GREEN
         RiskLabel.CAUTION -> ToneCopy("Dhyan dein", "Caution", "सावधानी") to RiskTone.AMBER

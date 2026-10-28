@@ -442,7 +442,7 @@ private fun StatusCard(state: CallUiState, onEvent: (CallEvent) -> Unit) {
 
 @Composable
 private fun MicActionButton(label: String, enabled: Boolean, listening: Boolean, onClick: () -> Unit) {
-    val animationsEnabled = remember { android.animation.ValueAnimator.areAnimatorsEnabled() }
+    val animationsEnabled = android.animation.ValueAnimator.areAnimatorsEnabled()
     val transition = rememberInfiniteTransition(label = "call-mic-pulse")
     val pulse by transition.animateFloat(
         initialValue = 1f,

@@ -29,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -246,7 +247,7 @@ private fun RiskHeader(risk: RiskBand, language: UiLanguage) {
 
 @Composable
 private fun ScoreGauge(score: Int?, tone: RiskTone, language: UiLanguage) {
-    val animationsEnabled = remember { ValueAnimator.areAnimatorsEnabled() }
+    val animationsEnabled = ValueAnimator.areAnimatorsEnabled()
     val animatedScore by animateFloatAsState(
         targetValue = (score ?: 0).toFloat(),
         animationSpec = if (animationsEnabled) tween(TsTokens.MotionMediumMs) else snap(),
@@ -388,7 +389,7 @@ private fun EvidenceSection(state: ResultUiState, language: UiLanguage) {
         )
         return
     }
-    state.evidence.forEach { item -> EvidenceCard(item = item, language = language) }
+    state.evidence.forEach { item -> key(item.id) { EvidenceCard(item = item, language = language) } }
     if (!state.droppedEvidence.isClean) {
         Text(
             text = state.droppedEvidence.reason.pick(language),
@@ -488,35 +489,37 @@ private fun ActionsSection(
 ) {
     SectionTitle(ResultCopy.ACTIONS_SECTION.pick(language))
     actions.forEach { action ->
-        val modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(min = TsTokens.MinTouchTarget)
-        val content: @Composable () -> Unit = {
-            Column(
-                modifier = Modifier.padding(vertical = TsTokens.SpacingSm),
-                verticalArrangement = Arrangement.spacedBy(TsTokens.SpacingXs)
-            ) {
-                Text(text = action.label.pick(language), style = MaterialTheme.typography.titleMedium)
-                if (action.detail.hinglish.isNotBlank()) {
-                    Text(
-                        text = action.detail.pick(language),
-                        style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.Start
-                    )
+        key(action.id) {
+            val modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = TsTokens.MinTouchTarget)
+            val content: @Composable () -> Unit = {
+                Column(
+                    modifier = Modifier.padding(vertical = TsTokens.SpacingSm),
+                    verticalArrangement = Arrangement.spacedBy(TsTokens.SpacingXs)
+                ) {
+                    Text(text = action.label.pick(language), style = MaterialTheme.typography.titleMedium)
+                    if (action.detail.hinglish.isNotBlank()) {
+                        Text(
+                            text = action.detail.pick(language),
+                            style = MaterialTheme.typography.bodyMedium,
+                            textAlign = TextAlign.Start
+                        )
+                    }
                 }
             }
-        }
-        if (action.priority == ActionPriority.PRIMARY) {
-            Button(
-                onClick = { onAction(action.id) },
-                modifier = modifier,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                )
-            ) { content() }
-        } else {
-            OutlinedButton(colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface), onClick = { onAction(action.id) }, modifier = modifier) { content() }
+            if (action.priority == ActionPriority.PRIMARY) {
+                Button(
+                    onClick = { onAction(action.id) },
+                    modifier = modifier,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    )
+                ) { content() }
+            } else {
+                OutlinedButton(colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface), onClick = { onAction(action.id) }, modifier = modifier) { content() }
+            }
         }
     }
 }
@@ -527,18 +530,20 @@ private fun LimitationsSection(limitations: List<ToneCopy>, language: UiLanguage
     SectionTitle(ResultCopy.LIMITS_SECTION.pick(language))
     Column(verticalArrangement = Arrangement.spacedBy(TsTokens.SpacingXs)) {
         limitations.forEach { line ->
-            Row {
-                Text(
-                    text = "\u2022",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(Modifier.width(TsTokens.SpacingSm))
-                Text(
-                    text = line.pick(language),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+            key(line.hinglish) {
+                Row {
+                    Text(
+                        text = "\u2022",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.width(TsTokens.SpacingSm))
+                    Text(
+                        text = line.pick(language),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
         }
     }

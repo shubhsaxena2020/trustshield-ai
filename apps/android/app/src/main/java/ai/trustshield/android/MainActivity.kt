@@ -5,6 +5,11 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.ui.Alignment
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -103,26 +108,27 @@ class MainActivity : ComponentActivity() {
             // Start composition immediately; even opening SharedPreferences can hit disk on a cold
             // process, so load the five presentation choices off the main thread.
             var preferenceStore by remember { mutableStateOf<SharedPreferencesUserPreferencesStore?>(null) }
-            var pendingPreferences by remember { mutableStateOf<UserPreferences?>(null) }
             var preferences: UserPreferences by remember { mutableStateOf(UserPreferences()) }
+            var startupReady by remember { mutableStateOf(false) }
+            var onboardingComplete by remember { mutableStateOf(false) }
             LaunchedEffect(Unit) {
-                val (loadedStore, loadedPreferences) = withContext(Dispatchers.IO) {
-                    SharedPreferencesUserPreferencesStore.open(applicationContext).let { it to it.load() }
+                val (loadedStore, loadedPreferences, loadedOnboardingComplete) = withContext(Dispatchers.IO) {
+                    val store = SharedPreferencesUserPreferencesStore.open(applicationContext)
+                    Triple(
+                        store,
+                        store.load(),
+                        applicationContext.getSharedPreferences(ONBOARDING_PREFERENCES, MODE_PRIVATE)
+                            .getBoolean(ONBOARDING_COMPLETE, false)
+                    )
                 }
                 preferenceStore = loadedStore
-                val pending = pendingPreferences
-                if (pending == null) preferences = loadedPreferences
-                else withContext(Dispatchers.IO) { loadedStore.save(pending) }
+                preferences = loadedPreferences
+                onboardingComplete = loadedOnboardingComplete
+                startupReady = true
             }
             var scanState by remember { mutableStateOf(ScanInputState()) }
             var historyStore by remember { mutableStateOf<MetadataCheckHistory?>(null) }
             var historyEntries by remember { mutableStateOf(emptyList<MetadataCheck>()) }
-            var onboardingComplete by remember {
-                mutableStateOf(
-                    getSharedPreferences(ONBOARDING_PREFERENCES, MODE_PRIVATE)
-                        .getBoolean(ONBOARDING_COMPLETE, false)
-                )
-            }
             LaunchedEffect(Unit) {
                 val (store, entries) = withContext(Dispatchers.IO) {
                     MetadataCheckHistory(applicationContext).let { it to it.read() }
@@ -141,7 +147,8 @@ class MainActivity : ComponentActivity() {
                 historyEntries = (listOf(entry) + historyEntries).take(30)
             }
 
-            LaunchedEffect(entrySequence, incomingText) {
+            LaunchedEffect(entrySequence, incomingText, startupReady) {
+                if (!startupReady) return@LaunchedEffect
                 val shared = incomingText ?: return@LaunchedEffect
                 scanState = reduce(scanState, ScanInputEvent.TextChanged(shared))
                 val sensitivity = when (preferences.sensitivity) {
@@ -178,22 +185,23 @@ class MainActivity : ComponentActivity() {
                     LocalPreferencesSink provides { updated: UserPreferences ->
                         preferences = updated
                         val activeStore = preferenceStore
-                        if (activeStore == null) pendingPreferences = updated
-                        else activeStore.save(updated)
+                        activeStore?.save(updated)
                     }
                 ) {
                     // The back stack itself is restored by AppNavHost via rememberSaveable, so
                     // process recreation returns the user to the same screen; `requestedEntry` only
                     // matters when nothing was saved, or when a genuinely new intent arrives.
-                    if (!onboardingComplete) {
+                    if (!startupReady) {
+                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Text("TrustShield AI", style = MaterialTheme.typography.titleLarge)
+                        }
+                    } else if (!onboardingComplete) {
                         OnboardingScreen(
                             language = preferences.language,
                             onLanguageChange = { language ->
                                 val updated = preferences.copy(language = language)
                                 preferences = updated
-                                val activeStore = preferenceStore
-                                if (activeStore == null) pendingPreferences = updated
-                                else activeStore.save(updated)
+                                preferenceStore?.save(updated)
                             },
                             onComplete = {
                                 getSharedPreferences(ONBOARDING_PREFERENCES, MODE_PRIVATE).edit()
