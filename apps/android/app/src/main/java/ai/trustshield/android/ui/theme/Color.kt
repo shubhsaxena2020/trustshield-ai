@@ -117,9 +117,9 @@ object TsPalette {
     val OutlineLight = Color(0xFF595959)
     val OutlineVariantLight = Color(0xFFD0D0D0)
 
-    /** White theme primary buttons use a black fill. */
-    val AccentFillLight = Color(0xFF000000)
-    val OnAccentFillLight = Color(0xFFFFFFFF)
+    /** White theme primary buttons use a white fill and black text. */
+    val AccentFillLight = Color(0xFFFFFFFF)
+    val OnAccentFillLight = Color(0xFF000000)
     val AccentContainerLight = Color(0xFFE5E5E5)
     val OnAccentContainerLight = Color(0xFF000000)
 

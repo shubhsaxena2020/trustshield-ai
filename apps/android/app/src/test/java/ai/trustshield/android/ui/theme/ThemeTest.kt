@@ -230,7 +230,7 @@ class ThemeTest {
 
         // ...and the alternatives must actually clear 4.5:1, not merely claim to.
         assertNormalText("AccentTextLight / SurfaceLight", TsTokens.AccentTextLight, TsPalette.SurfaceLight)
-        assertNormalText("white label / AccentFillLight", TsPalette.OnAccentFillLight, TsPalette.AccentFillLight)
+        assertNormalText("black label / AccentFillLight", TsPalette.OnAccentFillLight, TsPalette.AccentFillLight)
         assertNormalText("RiskAmberTextLight / SurfaceLight", TsTokens.RiskAmberTextLight, TsPalette.SurfaceLight)
         assertNormalText("RiskGreenTextLight / SurfaceLight", TsTokens.RiskGreenTextLight, TsPalette.SurfaceLight)
         assertNormalText("RiskRedTextLight / SurfaceLight", TsTokens.RiskRedTextLight, TsPalette.SurfaceLight)
@@ -420,7 +420,7 @@ class ThemeTest {
 
         // Dynamic colour would repaint primary/surface from the wallpaper; pinning the scheme to our
         // own tokens is what proves it is not in play.
-        assertNotEquals(light.primary, dark.primary)
+        assertNotEquals(light.onPrimary, dark.onPrimary)
         assertNotEquals(light.surface, dark.surface)
         assertNotEquals(light.error, dark.error)
         assertEquals(TsColorSchemes.Light, TsColorSchemes.of(dark = false))
