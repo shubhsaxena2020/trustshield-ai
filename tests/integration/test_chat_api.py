@@ -188,6 +188,32 @@ def test_multi_attachment_chat_returns_each_result_and_merged_verdict(monkeypatc
     assert risky in followup.json()["reply"]["text"]
 
 
+def test_single_qr_followup_uses_the_previous_attachment_analysis(monkeypatch):
+    import segno
+    monkeypatch.setenv("TRUSTSHIELD_OCR_PROVIDER", "mock")
+    payload = "https://example.com/previous-qr"
+    output = io.BytesIO()
+    segno.make(payload, micro=False).save(output, kind="png", scale=8, border=4)
+    uploaded = client.post(
+        "/api/v1/chat/upload",
+        files={"file": ("previous-qr.png", output.getvalue(), "image/png")},
+        data={"message": "check this QR"},
+    )
+    assert uploaded.status_code == 200, uploaded.text
+    initial = uploaded.json()
+    assert initial["analysis"]["qr_payload"] == payload
+
+    followup = chat(
+        "can you scan it and check what it is?",
+        context=initial["analysis"],
+        signature=initial["context_signature"],
+    )
+    assert followup.status_code == 200, followup.text
+    result = followup.json()
+    assert result["kind"] == "followup"
+    assert payload in result["reply"]["text"]
+
+
 def test_multi_attachment_chat_enforces_server_count_and_total_size():
     too_many = [("files", (f"{i}.png", _png(), "image/png")) for i in range(6)]
     assert client.post("/api/v1/chat/upload", files=too_many).status_code == 413
