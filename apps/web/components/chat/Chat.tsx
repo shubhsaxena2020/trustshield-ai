@@ -13,7 +13,7 @@ import type { ChatAnalysis, ChatResponse, Message, ResponseType } from "./types"
 // Production is same-origin (Vercel Services routes /api/* to the backend); see the deployment runbook.
 const API = process.env.NEXT_PUBLIC_API_URL ?? (process.env.NODE_ENV === "production" ? "" : "http://localhost:8000");
 const MAX_FILE_BYTES = 4 * 1024 * 1024;
-const MAX_DOCUMENT_BYTES = 10 * 1024 * 1024;
+const MAX_DOCUMENT_BYTES = 5 * 1024 * 1024;
 const MAX_ATTACHMENTS = 5;
 const MAX_TOTAL_FILE_BYTES = 20 * 1024 * 1024;
 const MAX_CHARS = 5000;
@@ -413,7 +413,7 @@ function ChatWorkspace({ identity, session, loading }: {
     const isDocument = DOCUMENT_TYPES.includes(f.type) || /\.(pdf|docx|xlsx|txt|csv)$/i.test(f.name);
     const typeOk = f.type ? ALLOWED.includes(f.type) || (f.type.startsWith("text/") && isDocument) : ALLOWED_EXT.test(f.name);
     if (!typeOk) return setNotice("Attach PNG, JPEG, WebP, HEIC/HEIF images or PDF, DOCX, XLSX, TXT and CSV documents.");
-    if (f.size > (isDocument ? MAX_DOCUMENT_BYTES : MAX_FILE_BYTES)) return setNotice(isDocument ? "Each document must be 10 MB or smaller." : "Each image must be 4 MB or smaller.");
+    if (f.size > (isDocument ? MAX_DOCUMENT_BYTES : MAX_FILE_BYTES)) return setNotice(isDocument ? "Each document must be 5 MB or smaller." : "Each image must be 4 MB or smaller.");
     }
     setNotice("");
     setAttached((prev) => [...prev, ...incoming.map((file) => ({ file, url: URL.createObjectURL(file) }))]);
