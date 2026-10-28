@@ -51,7 +51,7 @@ check then verifies the v1 artifact against the manifest) and redeploy. Retraini
 `PORT=8000`, `TRUSTSHIELD_ENV=production` (the same hardened profile everywhere), `ENABLE_WEB_SANDBOX=false`,
 `TRUSTSHIELD_TRUSTED_PROXY_HOPS=1` (observed: the edge sets a single `X-Forwarded-For` entry). Unset: `CORS_ALLOWED_ORIGINS`,
 `NEXT_PUBLIC_API_URL` (same-origin), `TRUSTSHIELD_DEBUG_PROXY` (observation-only route; set temporarily on a Preview, never in production).
-`MAX_UPLOAD_SIZE=4194304` is baked into the image (below the 4.5 MB platform cap; the UI also limits uploads to 4 MB).
+`MAX_UPLOAD_SIZE=4194304` is baked into the image (below the 4.5 MB platform cap; the chat UI limits each message's combined attachments to 4 MB).
 
 ## Workflow: local -> Preview (staging) -> Production
 
@@ -101,14 +101,13 @@ production by design (startup refuses to run without v3), and is covered by loca
 disabled and external browsing is not enabled.
 
 
-## Conversational build (Preview only)
+## Conversational build (production)
 
-The conversational assistant lives on branch `feature/trustshield-conversational-next` and is **not promoted**. It is deployed, if at all, as a
-Vercel **Preview** using the same bundle/`vercel.json`; production keeps serving the four-tab app until a final report is approved. No
+The conversational assistant is the production web experience. `/api/v1/chat/stream` and `/api/v1/chat/upload` are served by the promoted conversational build. The earlier preview-only status below is historical. No
 new environment variables are required (`TRUSTSHIELD_AI_PROVIDER` is ignored in production). Same limits as before: Hobby, 2 GiB / 1 vCPU,
-~4 MiB uploads, sandbox disabled, stateless, per-instance rate limits. Promotion: `vercel promote <preview>` (rebuilds) after approval.
+4 MiB total browser-side attachment budget, sandbox disabled, stateless, per-instance rate limits.
 
-## Conversational AI assistant build (branch `feature/trustshield-ai-assistant`, Preview only)
+## Historical conversational AI assistant preview
 
 Same deployment shape as the conversational build above; no new infrastructure. `TRUSTSHIELD_AI_PROVIDER` is unset on this
 Preview, so every reply is the deterministic provider — no LLM credential exists or is used. See

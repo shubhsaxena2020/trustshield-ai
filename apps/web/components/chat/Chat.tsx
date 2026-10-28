@@ -15,7 +15,7 @@ const API = process.env.NEXT_PUBLIC_API_URL ?? (process.env.NODE_ENV === "produc
 const MAX_FILE_BYTES = 4 * 1024 * 1024;
 const MAX_DOCUMENT_BYTES = 5 * 1024 * 1024;
 const MAX_ATTACHMENTS = 5;
-const MAX_TOTAL_FILE_BYTES = 20 * 1024 * 1024;
+const MAX_TOTAL_FILE_BYTES = 4 * 1024 * 1024;
 const MAX_CHARS = 5000;
 const IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp", "image/heic", "image/heif"];
 const DOCUMENT_TYPES = ["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "text/plain", "text/csv"];
@@ -405,7 +405,7 @@ function ChatWorkspace({ identity, session, loading }: {
     if (!input) return;
     const incoming = input instanceof File ? [input] : Array.from(input);
     if (attached.length + incoming.length > MAX_ATTACHMENTS) return setNotice("You can attach up to 5 files per message.");
-    if ([...attached.map((item) => item.file), ...incoming].reduce((sum, file) => sum + file.size, 0) > MAX_TOTAL_FILE_BYTES) return setNotice("Attachments must total 20 MB or less.");
+    if ([...attached.map((item) => item.file), ...incoming].reduce((sum, file) => sum + file.size, 0) > MAX_TOTAL_FILE_BYTES) return setNotice("Attachments must total 4 MB or less. Remove a file or choose smaller files.");
     for (const f of incoming) {
     // Some mobile browsers (notably older Android WebViews on a camera capture) report an empty or generic
     // f.type instead of the real image MIME type. Fall back to the filename extension rather than blocking the
@@ -501,7 +501,7 @@ function ChatWorkspace({ identity, session, loading }: {
         signal: controller.signal,
       });
       if (!res.ok || !res.body) {
-        const detail = await res.json().then((d) => (typeof d.detail === "string" ? d.detail : "")).catch(() => "");
+        const detail = res.status === 413 ? "The upload is too large. Please choose a smaller file." : await res.json().then((d) => (typeof d.detail === "string" ? d.detail : "")).catch(() => "");
         throw new Error(detail || `The request failed (${res.status}).`);
       }
       const reader = res.body.getReader();

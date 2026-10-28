@@ -170,7 +170,14 @@ _OPENER_VARIANTS: dict[str, tuple[str, ...]] = {
 
 
 def _evidence_phrase(items: list[ContractEvidence]) -> str:
-    titles = [(t[:1].lower() + t[1:]) for t in (e.title.rstrip(".") for e in items[:3])]
+    titles = []
+    for evidence in items[:3]:
+        title = evidence.title.rstrip(".")
+        first_word = title.split(maxsplit=1)[0] if title else ""
+        if first_word.isupper() and len(first_word) > 1:
+            titles.append(title)
+        else:
+            titles.append(title[:1].lower() + title[1:])
     if len(titles) == 1:
         return titles[0]
     return ", ".join(titles[:-1]) + " and " + titles[-1]
@@ -180,16 +187,24 @@ def initial_reply(a: ChatAnalysis) -> Reply:
     """A natural-language lead paragraph, not a report: technical detail (module names, exact scores, full evidence list,
     capability coverage) lives in the structured card the frontend renders alongside this text, not in the sentence itself."""
     top = top_evidence(a)
+    payment_request = next((e for e in a.evidence if e.category == "qr_payment_request"), None)
+    if payment_request is not None:
+        from urllib.parse import parse_qs, urlsplit
+        fields = parse_qs(urlsplit(a.qr_payload or "").query)
+        payee = (fields.get("pn") or fields.get("pa") or ["not identified"])[0]
+        vpa = (fields.get("pa") or [""])[0]
+        amount = (fields.get("am") or [""])[0]
+        currency = (fields.get("cu") or [""])[0]
+        who = f"{payee} ({vpa})" if vpa and payee != vpa else payee
+        value = f"{currency} {amount}" if currency and amount else amount or "not specified"
+        action = next((item for item in a.safe_actions if "confirm" in item.lower() and "payee" in item.lower()),
+                      "Confirm the payee and amount with the person you intend to pay before approving it.")
+        return Reply(f"This QR contains a UPI payment request for {who} with an amount of {value}. {action}", _cite(top))
     idx = _variant_index(a.analysis_id, 4, salt="initial_reply")
     opener = _OPENER_VARIANTS.get(a.risk_level, _OPENER_VARIANTS["unable_to_verify"])[idx]
     if a.risk_level == "unable_to_verify":
-        reason = a.uncertainty[0] if a.uncertainty else "some checks did not run"
-        detail_variants = (
-            f"There wasn't enough to check reliably here — {reason}.",
-            f"What was provided didn't offer enough material to check reliably — {reason}.",
-            f"The available evidence was insufficient for a dependable evaluation — {reason}.",
-            f"TrustShield did not have enough data to check reliably — {reason}.",
-        )
+        reason = a.uncertainty[0].rstrip(".") if a.uncertainty else "Some checks did not run"
+        detail_variants = tuple(f"{reason}." for _ in range(4))
         detail = detail_variants[idx]
     elif top:
         phrase = _evidence_phrase(top)
@@ -210,7 +225,8 @@ def initial_reply(a: ChatAnalysis) -> Reply:
         detail = detail_variants[idx]
     else:
         detail = _LEVEL_SENTENCE_VARIANTS.get(a.risk_level, _LEVEL_SENTENCE_VARIANTS["unable_to_verify"])[idx]
-    action = (" " + a.safe_actions[0]) if a.safe_actions and a.risk_level != "low_risk" else ""
+    payment = any(e.category in {"qr_payment_request", "qr_prefilled_amount"} for e in a.evidence)
+    action = (" " + a.safe_actions[0]) if a.safe_actions and (a.risk_level != "low_risk" or payment) else ""
     return Reply(f"{opener} {detail}{action}", _cite(top))
 
 

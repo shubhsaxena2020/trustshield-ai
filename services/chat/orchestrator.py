@@ -132,8 +132,17 @@ def analyze_turn(message: str, image: tuple[bytes, str | None, str | None] | lis
     ocr_result = pipeline.analyze_image(data, mime, name)
     ocr_module = ocr_result.modules.get("ocr")
     if ocr_module is not None and ocr_module.status == "completed" and ocr_module.data.get("normalized_text"):
-        parts.append(ocr_result)
-        types.append("screenshot")
+        ocr_text = ocr_module.data["normalized_text"]
+        letters = sum(character.isalpha() for character in ocr_text)
+        words = [word for word in ocr_text.split() if sum(character.isalpha() for character in word) >= 2]
+        is_real_text = len(ocr_text) >= 8 and letters / max(1, len(ocr_text)) >= 0.5 and len(words) >= 2
+        if not qr.payload or is_real_text:
+            parts.append(ocr_result)
+            types.append("screenshot")
+    if qr.payload and "OCR mean word confidence is low." in (ocr_module.data.get("warnings", []) if ocr_module else []):
+        for part in parts:
+            if part.risk.confidence == "high":
+                part.risk.confidence = "medium"
     elif not parts:
         parts.append(ocr_result)  # nothing decodable: keep the honest "unable to verify" result with its limitations
         types.append("image")
