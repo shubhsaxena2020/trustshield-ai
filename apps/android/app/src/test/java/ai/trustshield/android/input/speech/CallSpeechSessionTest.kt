@@ -436,6 +436,21 @@ class CallSpeechSessionTest {
     }
 
     @Test
+    fun ttsOutputIsNotStoredOrForwardedAsCallerSpeech() {
+        val session = CallSpeechSession(consentGranted = true)
+        session.start(FakeHandle())
+        session.onReadyForSpeech()
+        session.setInputSuppressed(true)
+
+        assertEquals(SpeechEvent.Ignored, session.onFinalResult("TrustShield warning", 0.9f))
+        assertEquals(SpeechEvent.Ignored, session.onPartialResult("TrustShield warning", 0.9f))
+        assertTrue(session.transcript().isEmpty())
+
+        session.setInputSuppressed(false)
+        assertTrue(session.onFinalResult("caller words", 0.9f) is SpeechEvent.Accepted)
+    }
+
+    @Test
     fun aResultDuringStartingPromotesTheSessionToListening() {
         val session = CallSpeechSession(clock = { 1_000L }, consentGranted = true)
         session.start(FakeHandle())

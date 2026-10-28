@@ -73,6 +73,7 @@ class CallSpeechSession(
     private var currentState: SpeechSessionState = SpeechSessionState.Idle
     private var handle: RecognizerHandle? = null
     private var sink: UtteranceSink? = null
+    @Volatile private var inputSuppressed: Boolean = false
     private var emptyResultsCount: Int = 0
     private var noSpeechEvents: Int = 0
 
@@ -102,6 +103,11 @@ class CallSpeechSession(
     /** Binds the A05 seam. Pass `null` to detach. */
     fun setUtteranceSink(sink: UtteranceSink?) {
         synchronized(lock) { this.sink = sink }
+    }
+
+    /** Drops recognizer callbacks while the app's own spoken alert is playing. */
+    fun setInputSuppressed(suppressed: Boolean) {
+        inputSuppressed = suppressed
     }
 
     // ---------------------------------------------------------------- lifecycle
@@ -189,6 +195,7 @@ class CallSpeechSession(
 
     /** Interim hypothesis. Stored and forwarded so A05 sees the same words the user hears. */
     fun onPartialResult(text: String?, confidence: Float?): SpeechEvent {
+        if (inputSuppressed) return SpeechEvent.Ignored
         val clean = sanitize(text)
         // A blank partial is not evidence and not noise worth counting; drop it silently.
         if (clean.isEmpty()) return SpeechEvent.Ignored
@@ -200,6 +207,7 @@ class CallSpeechSession(
      * never stored, never an error, never a stage.
      */
     fun onFinalResult(text: String?, confidence: Float?): SpeechEvent {
+        if (inputSuppressed) return SpeechEvent.Ignored
         val clean = sanitize(text)
         if (clean.isEmpty()) return dropAsEmpty()
         return accept(clean, confidence, isFinal = true)
@@ -524,7 +532,11 @@ enum class SpeechRecognitionMode {
 }
 
 /** An OnDeviceReady report must use the on-device API; all other usable reports may use default. */
-internal fun recognitionModeFor(report: SpeechCapabilityReport): SpeechRecognitionMode? = when {
+internal fun recognitionModeFor(
+    report: SpeechCapabilityReport,
+    bundledOfflineSelected: Boolean = false,
+): SpeechRecognitionMode? = when {
+    bundledOfflineSelected && report.status == SpeechStatus.MissingService -> SpeechRecognitionMode.OnDevice
     !report.sessionPossible -> null
     report.offlineCapable && !report.cloudMayBeUsed -> SpeechRecognitionMode.OnDevice
     report.cloudMayBeUsed -> SpeechRecognitionMode.DefaultMayUseNetwork
@@ -558,6 +570,7 @@ class AndroidSpeechRecognizerHandle(
     private val capability: SpeechCapabilityReport,
     private val languageTag: String = DEFAULT_LANGUAGE_TAG,
     private val recognizerFactory: (Context, SpeechRecognitionMode) -> SpeechRecognizer? = ::createPlatformRecognizer,
+    private val finalResultListener: ((String?, Float?) -> Unit)? = null,
     private val errorListener: ((Int) -> Unit)? = null,
 ) : RecognizerHandle {
 
@@ -628,7 +641,9 @@ class AndroidSpeechRecognizerHandle(
         }
 
         override fun onResults(results: Bundle?) {
-            session.onFinalResult(firstAlternative(results), firstConfidence(results))
+            val text = firstAlternative(results)
+            val confidence = firstConfidence(results)
+            finalResultListener?.invoke(text, confidence) ?: session.onFinalResult(text, confidence)
         }
 
         override fun onPartialResults(partialResults: Bundle?) {
