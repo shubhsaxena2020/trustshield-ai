@@ -19,6 +19,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -527,6 +528,11 @@ fun ScanScreen(
                         modifier = Modifier.fillMaxWidth(),
                         label = { Text(copy(ScanCopy.fieldLabel)) },
                         placeholder = { Text(copy(ScanCopy.fieldPlaceholder), style = MaterialTheme.typography.bodyMedium) },
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedLabelColor = MaterialTheme.colorScheme.onSurface,
+                            focusedBorderColor = MaterialTheme.colorScheme.outline,
+                            cursorColor = MaterialTheme.colorScheme.onSurface
+                        ),
                         minLines = 3,
                         maxLines = 6,
                         isError = state.error != null,
