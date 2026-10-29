@@ -55,4 +55,14 @@ class OnboardingUiTest {
         assertTrue(compose.onAllNodes(hasText("Check before you trust")).fetchSemanticsNodes().isEmpty())
         assertTrue(compose.onAllNodes(hasTestTag("bottom_navigation")).fetchSemanticsNodes().isNotEmpty())
     }
+
+    @Test
+    fun getStartedCompletesOnboarding() {
+        scenario = ActivityScenario.launch(MainActivity::class.java)
+
+        compose.onNodeWithText("Next").performClick()
+        compose.onNodeWithText("Next").performClick()
+        compose.onNodeWithText("Get started").assertIsDisplayed().performClick()
+        compose.onNodeWithTag("app_shell").assertIsDisplayed()
+    }
 }

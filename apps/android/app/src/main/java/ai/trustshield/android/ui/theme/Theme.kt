@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
+import ai.trustshield.android.data.preferences.ThemeMode
 
 /**
  * The two Material 3 schemes, built only from [TsTokens] / [TsPalette].
@@ -54,8 +55,8 @@ object TsColorSchemes {
     )
 
     val Dark: ColorScheme = darkColorScheme(
-        primary = TsTokens.AccentDark,
-        onPrimary = TsPalette.OnAccentFillDark,
+        primary = TsPalette.OnSurfaceDark,
+        onPrimary = TsPalette.BackgroundDark,
         primaryContainer = TsPalette.AccentContainerDark,
         onPrimaryContainer = TsPalette.OnAccentContainerDark,
         inversePrimary = TsTokens.Accent,
@@ -86,6 +87,13 @@ object TsColorSchemes {
     )
 
     fun of(dark: Boolean): ColorScheme = if (dark) Dark else Light
+}
+
+/** Resolve the app's theme preference against the current system setting. */
+fun resolveDarkTheme(mode: ThemeMode, systemIsDark: Boolean): Boolean = when (mode) {
+    ThemeMode.LIGHT -> false
+    ThemeMode.DARK -> true
+    ThemeMode.SYSTEM -> systemIsDark
 }
 
 /**
