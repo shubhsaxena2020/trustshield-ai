@@ -428,7 +428,8 @@ class ThemeTest {
 
         assertEquals(TsPalette.SurfaceLight, light.surface)
         assertEquals(TsPalette.OnSurfaceLight, light.onSurface)
-        assertEquals(TsPalette.AccentFillLight, light.primary)
+        assertEquals(TsPalette.OnSurfaceLight, light.primary)
+        assertEquals(TsPalette.BackgroundLight, light.onPrimary)
         assertEquals(TsTokens.RiskRed, light.error)
 
         assertEquals(TsPalette.SurfaceDark, dark.surface)

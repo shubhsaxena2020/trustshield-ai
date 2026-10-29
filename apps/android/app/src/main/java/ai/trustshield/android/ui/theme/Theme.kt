@@ -23,8 +23,8 @@ import ai.trustshield.android.data.preferences.ThemeMode
 object TsColorSchemes {
 
     val Light: ColorScheme = lightColorScheme(
-        primary = TsPalette.AccentFillLight,
-        onPrimary = TsPalette.OnAccentFillLight,
+        primary = TsPalette.OnSurfaceLight,
+        onPrimary = TsPalette.BackgroundLight,
         primaryContainer = TsPalette.AccentContainerLight,
         onPrimaryContainer = TsPalette.OnAccentContainerLight,
         inversePrimary = TsPalette.OnSurfaceDark,
