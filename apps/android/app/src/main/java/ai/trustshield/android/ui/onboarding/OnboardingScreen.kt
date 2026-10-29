@@ -24,6 +24,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -122,10 +123,9 @@ fun OnboardingScreen(
             )
         }
         if (pager.currentPage < 2) {
-            OutlinedButton(colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
-                onClick = onComplete,
-                modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp)
-            ) { Text(ToneCopy("Abhi nahi", "Skip", "छोड़ें").forLanguage(resolved)) }
+            TextButton(onClick = onComplete, modifier = Modifier.heightIn(min = 48.dp)) {
+                Text(ToneCopy("Abhi nahi", "Skip", "??????").forLanguage(resolved))
+            }
         }
     }
 }
