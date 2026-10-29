@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
@@ -29,7 +30,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import ai.trustshield.android.data.preferences.AppLanguage
 import ai.trustshield.android.data.preferences.SharedPreferencesUserPreferencesStore
-import ai.trustshield.android.data.preferences.ThemeMode
 import ai.trustshield.android.data.preferences.UserPreferences
 import ai.trustshield.android.data.preferences.resolveLanguage
 import ai.trustshield.android.core.analysis.LocalScanPipeline
@@ -52,6 +52,7 @@ import ai.trustshield.android.ui.navigation.LocalPreferencesSink
 import ai.trustshield.android.ui.navigation.LocalUserPreferences
 import ai.trustshield.android.ui.navigation.TrustShieldRouteContent
 import ai.trustshield.android.ui.theme.TrustShieldTheme
+import ai.trustshield.android.ui.theme.resolveDarkTheme
 import ai.trustshield.android.ui.history.MetadataCheck
 import ai.trustshield.android.ui.history.MetadataCheckHistory
 import ai.trustshield.android.ui.onboarding.OnboardingScreen
@@ -225,11 +226,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            val dark = when (preferences.themeMode) {
-                ThemeMode.LIGHT -> false
-                ThemeMode.DARK -> true
-                ThemeMode.SYSTEM -> isSystemInDarkTheme()
-            }
+            val dark = resolveDarkTheme(preferences.themeMode, isSystemInDarkTheme())
 
             TrustShieldTheme(darkTheme = dark) {
                 SideEffect {
@@ -238,73 +235,75 @@ class MainActivity : ComponentActivity() {
                         isAppearanceLightNavigationBars = !dark
                     }
                 }
-                CompositionLocalProvider(
-                    LocalUserPreferences provides preferences,
-                    LocalPreferencesSink provides { updated: UserPreferences ->
-                        preferences = updated
-                        val activeStore = preferenceStore
-                        activeStore?.save(updated)
-                    }
-                ) {
-                    // The back stack itself is restored by AppNavHost via rememberSaveable, so
-                    // process recreation returns the user to the same screen; `requestedEntry` only
-                    // matters when nothing was saved, or when a genuinely new intent arrives.
-                    if (!startupReady) {
-                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Image(
-                                painter = painterResource(R.drawable.trustshield_logo_icon),
-                                contentDescription = "TrustShield AI",
-                                contentScale = ContentScale.Fit,
-                                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground),
-                                modifier = Modifier.size(96.dp)
+                Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+                    CompositionLocalProvider(
+                        LocalUserPreferences provides preferences,
+                        LocalPreferencesSink provides { updated: UserPreferences ->
+                            preferences = updated
+                            val activeStore = preferenceStore
+                            activeStore?.save(updated)
+                        }
+                    ) {
+                        // The back stack itself is restored by AppNavHost via rememberSaveable, so
+                        // process recreation returns the user to the same screen; `requestedEntry` only
+                        // matters when nothing was saved, or when a genuinely new intent arrives.
+                        if (!startupReady) {
+                            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                Image(
+                                    painter = painterResource(R.drawable.trustshield_logo_icon),
+                                    contentDescription = "TrustShield AI",
+                                    contentScale = ContentScale.Fit,
+                                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground),
+                                    modifier = Modifier.size(96.dp)
+                                )
+                            }
+                        } else if (!onboardingComplete) {
+                            OnboardingScreen(
+                                language = preferences.language,
+                                onLanguageChange = { language ->
+                                    val updated = preferences.copy(language = language)
+                                    preferences = updated
+                                    preferenceStore?.save(updated)
+                                },
+                                onComplete = {
+                                    getSharedPreferences(ONBOARDING_PREFERENCES, MODE_PRIVATE).edit()
+                                        .putBoolean(ONBOARDING_COMPLETE, true)
+                                        .apply()
+                                    onboardingComplete = true
+                                }
+                            )
+                        } else AppNavHost(entry = retainedUi.requestedEntry.value, entrySequence = retainedUi.entrySequence.intValue) { route ->
+                            SideEffect { retainedUi.visibleRoute.value = route }
+                            TrustShieldRouteContent(
+                                route = route,
+                                language = resolveLanguage(preferences.language, Locale.getDefault().toLanguageTag()),
+                                english = resolveLanguage(preferences.language, Locale.getDefault().toLanguageTag()) == AppLanguage.ENGLISH,
+                                scanState = scanState,
+                                resultOutcome = retainedUi.resultOutcome.value,
+                                sharedImageUri = retainedUi.incomingImageUri.value,
+                                onSharedImageConsumed = { retainedUi.incomingImageUri.value = null },
+                                onImageResult = { retainedUi.resultOutcome.value = it; recordCheck(it) },
+                                historyEntries = historyEntries,
+                                registeredPayees = retainedUi.registeredPayees.value,
+                                onRegisteredPayeesChanged = { retainedUi.registeredPayees.value = it },
+                                onClearHistory = {
+                                    historyStore?.clear()
+                                    historyEntries = emptyList()
+                                },
+                                onScanEvent = { event -> scanState = reduce(scanState, event) },
+                                onCheck = { text ->
+                                    val sensitivity = when (preferences.sensitivity) {
+                                        ai.trustshield.android.data.preferences.Sensitivity.LOW -> LocalScorer.Sensitivity.LOW
+                                        ai.trustshield.android.data.preferences.Sensitivity.BALANCED -> LocalScorer.Sensitivity.STANDARD
+                                        ai.trustshield.android.data.preferences.Sensitivity.HIGH -> LocalScorer.Sensitivity.HIGH
+                                    }
+                                    LocalScanPipeline(sensitivity = sensitivity).analyzeText(text).also { outcome ->
+                                        retainedUi.resultOutcome.value = outcome
+                                        recordCheck(outcome)
+                                    }
+                                }
                             )
                         }
-                    } else if (!onboardingComplete) {
-                        OnboardingScreen(
-                            language = preferences.language,
-                            onLanguageChange = { language ->
-                                val updated = preferences.copy(language = language)
-                                preferences = updated
-                                preferenceStore?.save(updated)
-                            },
-                            onComplete = {
-                                getSharedPreferences(ONBOARDING_PREFERENCES, MODE_PRIVATE).edit()
-                                    .putBoolean(ONBOARDING_COMPLETE, true)
-                                    .apply()
-                                onboardingComplete = true
-                            }
-                        )
-                    } else AppNavHost(entry = retainedUi.requestedEntry.value, entrySequence = retainedUi.entrySequence.intValue) { route ->
-                        SideEffect { retainedUi.visibleRoute.value = route }
-                        TrustShieldRouteContent(
-                            route = route,
-                            language = resolveLanguage(preferences.language, Locale.getDefault().toLanguageTag()),
-                            english = resolveLanguage(preferences.language, Locale.getDefault().toLanguageTag()) == AppLanguage.ENGLISH,
-                            scanState = scanState,
-                            resultOutcome = retainedUi.resultOutcome.value,
-                            sharedImageUri = retainedUi.incomingImageUri.value,
-                            onSharedImageConsumed = { retainedUi.incomingImageUri.value = null },
-                            onImageResult = { retainedUi.resultOutcome.value = it; recordCheck(it) },
-                            historyEntries = historyEntries,
-                            registeredPayees = retainedUi.registeredPayees.value,
-                            onRegisteredPayeesChanged = { retainedUi.registeredPayees.value = it },
-                            onClearHistory = {
-                                historyStore?.clear()
-                                historyEntries = emptyList()
-                            },
-                            onScanEvent = { event -> scanState = reduce(scanState, event) },
-                            onCheck = { text ->
-                                val sensitivity = when (preferences.sensitivity) {
-                                    ai.trustshield.android.data.preferences.Sensitivity.LOW -> LocalScorer.Sensitivity.LOW
-                                    ai.trustshield.android.data.preferences.Sensitivity.BALANCED -> LocalScorer.Sensitivity.STANDARD
-                                    ai.trustshield.android.data.preferences.Sensitivity.HIGH -> LocalScorer.Sensitivity.HIGH
-                                }
-                                LocalScanPipeline(sensitivity = sensitivity).analyzeText(text).also { outcome ->
-                                    retainedUi.resultOutcome.value = outcome
-                                    recordCheck(outcome)
-                                }
-                            }
-                        )
                     }
                 }
             }

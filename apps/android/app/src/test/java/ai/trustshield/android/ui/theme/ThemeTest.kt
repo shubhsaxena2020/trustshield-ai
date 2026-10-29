@@ -1,6 +1,7 @@
 package ai.trustshield.android.ui.theme
 
 import ai.trustshield.android.data.preferences.AppLanguage
+import ai.trustshield.android.data.preferences.ThemeMode
 import androidx.compose.material3.ColorScheme
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -23,6 +24,14 @@ import kotlin.math.abs
  * `Typography` all construct normally inside a JVM unit test, so the tokens are tested as shipped.
  */
 class ThemeTest {
+    @Test
+    fun themeModeResolvesSystemAndExplicitChoices() {
+        assertTrue(resolveDarkTheme(ThemeMode.SYSTEM, systemIsDark = true))
+        assertFalse(resolveDarkTheme(ThemeMode.SYSTEM, systemIsDark = false))
+        assertFalse(resolveDarkTheme(ThemeMode.LIGHT, systemIsDark = true))
+        assertTrue(resolveDarkTheme(ThemeMode.DARK, systemIsDark = false))
+    }
+
     @Test
     fun systemCopyFollowsTheCurrentPhoneLocale() {
         val original = Locale.getDefault()
@@ -419,12 +428,14 @@ class ThemeTest {
 
         assertEquals(TsPalette.SurfaceLight, light.surface)
         assertEquals(TsPalette.OnSurfaceLight, light.onSurface)
-        assertEquals(TsPalette.AccentFillLight, light.primary)
+        assertEquals(TsPalette.OnSurfaceLight, light.primary)
+        assertEquals(TsPalette.BackgroundLight, light.onPrimary)
         assertEquals(TsTokens.RiskRed, light.error)
 
         assertEquals(TsPalette.SurfaceDark, dark.surface)
         assertEquals(TsPalette.OnSurfaceDark, dark.onSurface)
-        assertEquals(TsTokens.AccentDark, dark.primary)
+        assertEquals(TsPalette.OnSurfaceDark, dark.primary)
+        assertEquals(TsPalette.BackgroundDark, dark.onPrimary)
         assertEquals(TsTokens.RiskRedDark, dark.error)
 
         // Dynamic colour would repaint primary/surface from the wallpaper; pinning the scheme to our
