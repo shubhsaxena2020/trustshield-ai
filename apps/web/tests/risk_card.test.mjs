@@ -13,5 +13,5 @@ test("unable-to-verify results do not render a zero score or progress bar", () =
 test("chat UI caps combined attachments and handles platform 413 responses", () => {
   assert.match(chat, /const MAX_TOTAL_FILE_BYTES = 4 \* 1024 \* 1024/);
   assert.match(chat, /Attachments must total 4 MB or less/);
-  assert.match(chat, /res\.status === 413 \? "The upload is too large/);
+  assert.match(chat, /userFacingRequestMessage\(res\.status, detail\)/);
 });

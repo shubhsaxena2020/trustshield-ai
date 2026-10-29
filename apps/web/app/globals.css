@@ -2,13 +2,27 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "../styles/trustshield.css";
+@import "../styles/v2.css";
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:is(.dark *, [data-theme="dark"] *));
 
 @theme inline {
+  --color-ts-bg: var(--ts-bg);
+  --color-ts-sidebar: var(--ts-sidebar);
+  --color-ts-surface: var(--ts-surface);
+  --color-ts-bubble: var(--ts-bubble);
+  --color-ts-text: var(--ts-text);
+  --color-ts-muted: var(--ts-muted);
+  --color-ts-border: var(--ts-border);
+  --color-ts-border-strong: var(--ts-border-strong);
+  --color-ts-hover: var(--ts-hover);
+  --color-ts-accent: var(--ts-accent);
+  --color-ts-accent-fg: var(--ts-accent-fg);
+  --color-ts-danger: var(--ts-danger);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-sans: "Inter Variable", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Instrument Serif", ui-serif, Georgia, serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   --font-heading: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);

@@ -8,6 +8,7 @@ from fastapi.testclient import TestClient
 from services.api.main import create_app
 from services.api.settings import Settings
 from services.api import auth as auth_module
+from services.api import main as api_main
 from services.history import store as history_store
 
 
@@ -98,6 +99,28 @@ def test_analyze_text_writes_nothing_when_anonymous(monkeypatch):
     res = client.post("/api/v1/analyze/text", json={"text": "hello there"})
     assert res.status_code == 200
     assert called["count"] == 0
+
+
+def test_chat_scan_uses_the_existing_user_scoped_history_store(monkeypatch):
+    class FakeAnalysis:
+        risk_score = 72
+
+        def model_dump(self, **_kwargs):
+            return {"risk_score": self.risk_score}
+
+    result = object()
+    request = object()
+    captured = {}
+    saved = []
+    monkeypatch.setattr(api_main, "analyze_turn", lambda *_args: (result, []))
+    monkeypatch.setattr(api_main, "to_contract", lambda *_args: FakeAnalysis())
+    monkeypatch.setattr(api_main, "_record_history", lambda req, user, value: saved.append((req, user, value)))
+
+    scan = api_main._make_scan("URGENT: bank account suspended. Send your OTP now", captured, request, USER)
+    scan("URGENT: bank account suspended. Send your OTP now")
+
+    assert saved == [(request, USER, result)]
+    assert captured["result"] is result
 
 
 # ---- helpers for the expanded coverage ----------------------------------------------------------------------------
