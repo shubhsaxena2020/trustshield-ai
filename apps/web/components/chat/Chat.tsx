@@ -1,13 +1,18 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import Image from "next/image";
 import { authFetch } from "@/lib/authFetch";
+import { userFacingRequestMessage } from "@/lib/userFacingError.mjs";
 import { supabase } from "@/lib/supabaseClient";
 import { useSession } from "@/lib/useSession";
 import { EmptyState } from "./EmptyState";
 import { AppHeader } from "./AppHeader";
 import { RiskCard } from "./RiskCard";
+import { Icon } from "./icons";
+import { ShieldOrb } from "./ShieldOrb";
+import { gsap, Flip, useGSAP, prefersReducedMotion } from "@/lib/gsap";
+import { useTheme } from "@/lib/useTheme";
 import type { ChatAnalysis, ChatResponse, Message, ResponseType } from "./types";
 
 // Production is same-origin (Vercel Services routes /api/* to the backend); see the deployment runbook.
@@ -30,6 +35,7 @@ const STARTERS = [
 ];
 
 type Conversation = { id: string; title: string; messages: Message[] };
+type ScanHistoryEntry = { id: string; input_type: string; input_summary: string; risk_score: number; risk_label: string; created_at: string };
 type HistoryTurn = { role: "user" | "assistant"; text: string };
 type Context = { analysis: ChatAnalysis; signature: string };
 
@@ -142,8 +148,21 @@ function getSpeechCtor(): (new () => SpeechRecognitionLike) | null {
   return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
 }
 
+function spotlight(e: React.PointerEvent<HTMLElement>) {
+  const r = e.currentTarget.getBoundingClientRect();
+  e.currentTarget.style.setProperty("--mx", `${e.clientX - r.left}px`);
+  e.currentTarget.style.setProperty("--my", `${e.clientY - r.top}px`);
+}
+
+const DESKTOP_MQ = "(min-width: 801px)";
+function subscribeDesktop(onChange: () => void) {
+  const mq = window.matchMedia(DESKTOP_MQ);
+  mq.addEventListener("change", onChange);
+  return () => mq.removeEventListener("change", onChange);
+}
+
 function Logo({ className = "" }: { className?: string }) {
-  return <Image src="/logo-icon.png" alt="TrustShield AI" width={28} height={28} className={`shrink-0 object-contain ${className}`} unoptimized />;
+  return <Image src="/logo-icon.png" alt="TrustShield AI" width={28} height={28} className={`ts-logo shrink-0 object-contain ${className}`} unoptimized />;
 }
 
 function IconButton({ label, onClick, children, className = "" }: { label: string; onClick: () => void; children: ReactNode; className?: string }) {
@@ -153,7 +172,7 @@ function IconButton({ label, onClick, children, className = "" }: { label: strin
       onClick={onClick}
       aria-label={label}
       title={label}
-      className={`flex h-8 w-8 items-center justify-center rounded-lg text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 focus:outline-none focus:ring-2 focus:ring-[#3566f0] ${className}`}
+      className={`ts-btn-ghost h-8 w-8 rounded-lg focus-visible:outline-2 ${className}`}
     >
       {children}
     </button>
@@ -177,6 +196,9 @@ function ChatWorkspace({ identity, session, loading }: {
   });
   const [activeId, setActiveId] = useState<string>(() => chats[0].id);
   const identityReady = identity !== null;
+  const [scanHistory, setScanHistory] = useState<ScanHistoryEntry[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(Boolean(session));
+  const [historyError, setHistoryError] = useState("");
   const [draft, setDraft] = useState("");
   const [attached, setAttached] = useState<{ file: File; url: string }[]>([]);
   // Conversations whose reply is still streaming. Each has its own controller, so switching chats never cancels a reply.
@@ -192,6 +214,12 @@ function ChatWorkspace({ identity, session, loading }: {
   const [editing, setEditing] = useState<{ id: string; text: string } | null>(null);
   const [renaming, setRenaming] = useState<{ id: string; title: string } | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [exiting, setExiting] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [atBottom, setAtBottom] = useState(true);
+  const { theme, toggle: toggleTheme } = useTheme();
+  const desktop = useSyncExternalStore(subscribeDesktop, () => window.matchMedia(DESKTOP_MQ).matches, () => true);
   const speechSupported = useSyncExternalStore(
     () => () => {},
     () => getSpeechCtor() !== null,
@@ -200,6 +228,13 @@ function ChatWorkspace({ identity, session, loading }: {
   const controllersRef = useRef(new Map<string, AbortController>());
   const endRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const mainRef = useRef<HTMLElement>(null);
+  const colRef = useRef<HTMLDivElement>(null);
+  const composerRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLUListElement>(null);
+  const flipState = useRef<ReturnType<typeof Flip.getState> | null>(null);
+  const prevCount = useRef({ id: "", n: 0 });
+  const prevChats = useRef(0);
   const fileRef = useRef<HTMLInputElement>(null);
   const recogRef = useRef<SpeechRecognitionLike | null>(null);
   const chatsRef = useRef(chats);
@@ -213,17 +248,86 @@ function ChatWorkspace({ identity, session, loading }: {
   const sidebarRef = useRef<HTMLElement | null>(null);
   const sidebarPrevFocusRef = useRef<HTMLElement | null>(null);
 
+  const refreshHistory = useCallback(async () => {
+    if (!session) return;
+    try {
+      const res = await authFetch(`${API}/api/v1/history`);
+      if (!res.ok) throw new Error("history request failed");
+      const rows = await res.json();
+      if (!Array.isArray(rows)) throw new Error("invalid history response");
+      setScanHistory(rows as ScanHistoryEntry[]);
+      setHistoryError("");
+    } catch {
+      setHistoryError("Scan history could not be loaded. Please try again.");
+    } finally {
+      setHistoryLoading(false);
+    }
+  }, [session]);
+
+  useEffect(() => {
+    if (!session) return;
+    const task = window.setTimeout(() => void refreshHistory(), 0);
+    return () => window.clearTimeout(task);
+  }, [identity, refreshHistory, session]);
+
   useLayoutEffect(() => {
     const input = inputRef.current;
     if (!input) return;
     input.style.height = "auto";
     input.style.height = `${Math.min(input.scrollHeight, 192)}px`;
-  }, [draft]);
+  }, [draft, desktop, chats]);
 
   const active = chats.find((c) => c.id === activeId) ?? chats[0];
   const busy = streaming.has(active.id);
   const messages = active.messages;
   const lastAnalysis = lastAnalysisOf(messages);
+  const wasEmpty = useRef(messages.length === 0);
+
+  // The composer glides from the centre of the welcome screen down to the bottom when the first message is sent.
+  useLayoutEffect(() => {
+    const nowEmpty = messages.length === 0;
+    if (wasEmpty.current && !nowEmpty && flipState.current && !prefersReducedMotion()) {
+      Flip.from(flipState.current, { duration: 0.85, ease: "expo.out", scale: false });
+    }
+    flipState.current = null;
+    wasEmpty.current = nowEmpty;
+  }, [messages.length]);
+
+  // Keep --comp-h (composer height) current so the starter chips sit just under it on the welcome screen.
+  useEffect(() => {
+    const el = composerRef.current;
+    const col = colRef.current;
+    if (!el || !col) return;
+    const ro = new ResizeObserver(() => col.style.setProperty("--comp-h", `${el.offsetHeight}px`));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [identityReady]);
+
+  // New messages ease in; switching chats does not replay the animation.
+  useGSAP(
+    () => {
+      const prev = prevCount.current;
+      const grew = prev.id === active.id && messages.length > prev.n;
+      prevCount.current = { id: active.id, n: messages.length };
+      if (!grew || prefersReducedMotion()) return;
+      const items = mainRef.current?.querySelectorAll<HTMLElement>("[data-msg]");
+      const last = items?.[items.length - 1];
+      if (last) gsap.from(last, { opacity: 0, y: 18, duration: 0.7, ease: "power3.out", clearProps: "opacity,transform" });
+    },
+    { dependencies: [messages.length, active.id] },
+  );
+
+  // New chats slide into the sidebar list.
+  useGSAP(
+    () => {
+      const grew = chats.length > prevChats.current && prevChats.current > 0;
+      prevChats.current = chats.length;
+      if (!grew || prefersReducedMotion()) return;
+      const first = listRef.current?.firstElementChild;
+      if (first) gsap.from(first, { opacity: 0, x: -16, height: 0, duration: 0.55, ease: "power3.out", clearProps: "all" });
+    },
+    { dependencies: [chats.length] },
+  );
 
   useEffect(() => {
     let live = true;
@@ -245,6 +349,21 @@ function ChatWorkspace({ identity, session, loading }: {
   useEffect(() => {
     endRef.current?.scrollIntoView?.({ behavior: busy ? "auto" : "smooth", block: "end" });
   }, [messages.length, busy]);
+
+  function onMainScroll(e: React.UIEvent<HTMLElement>) {
+    const el = e.currentTarget;
+    setScrolled(el.scrollTop > 4);
+    setAtBottom(el.scrollHeight - el.scrollTop - el.clientHeight < 140);
+  }
+
+  function scrollToEnd() {
+    endRef.current?.scrollIntoView?.({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "end" });
+  }
+
+  function toggleSidebar() {
+    if (desktop) setSidebarCollapsed((c) => !c);
+    else setSidebarOpen((o) => !o);
+  }
 
   useEffect(() => () => recogRef.current?.stop(), []);
 
@@ -501,8 +620,8 @@ function ChatWorkspace({ identity, session, loading }: {
         signal: controller.signal,
       });
       if (!res.ok || !res.body) {
-        const detail = res.status === 413 ? "The upload is too large. Please choose a smaller file." : await res.json().then((d) => (typeof d.detail === "string" ? d.detail : "")).catch(() => "");
-        throw new Error(detail || `The request failed (${res.status}).`);
+        const detail = await res.json().then((d) => (typeof d.detail === "string" ? d.detail : "")).catch(() => "");
+        throw new Error(userFacingRequestMessage(res.status, detail));
       }
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
@@ -541,11 +660,12 @@ function ChatWorkspace({ identity, session, loading }: {
                 ? { id: m.id, role: "assistant", kind: "analysis", responseType: "analysis", reply: m.reply, analysis, signature, route }
                 : m,
             );
+            void refreshHistory();
           } else if (ev.type === "replace") {
             full = ev.text ?? "";
             flush();
           } else if (ev.type === "error") {
-            throw new Error(ev.detail || "Something went wrong.");
+            throw new Error(userFacingRequestMessage(422, ev.detail));
           } else if (ev.type === "done") {
             finished = true;
           }
@@ -602,8 +722,7 @@ function ChatWorkspace({ identity, session, loading }: {
       const res = await authFetch(`${API}/api/v1/chat/upload`, { method: "POST", body: form, signal: controller.signal });
       if (!res.ok) {
         const detail = await res.json().then((d) => (typeof d.detail === "string" ? d.detail : "")).catch(() => "");
-        const busyMsg = res.status === 429 ? "Too many requests. Please wait a moment and try again." : res.status === 503 ? "The service is busy right now. Please try again shortly." : "";
-        throw new Error(detail || busyMsg || `The request failed (${res.status}).`);
+        throw new Error(userFacingRequestMessage(res.status, detail));
       }
       const data: ChatResponse = await res.json();
       append(
@@ -611,6 +730,7 @@ function ChatWorkspace({ identity, session, loading }: {
           ? { id: uid(), role: "assistant", kind: "analysis", responseType: data.response_type, reply: data.reply, analysis: data.analysis, signature: data.context_signature ?? "", route: data.route }
           : { id: uid(), role: "assistant", kind: "followup", responseType: data.response_type, reply: data.reply },
       );
+      if (data.kind === "analysis") void refreshHistory();
     } catch (err) {
       if (controller.signal.aborted) {
         append({ id: uid(), role: "assistant", kind: "followup", responseType: "chat", reply: { text: "Stopped.", cited_evidence: [], provider: "none", grounded: true } });
@@ -652,6 +772,10 @@ function ChatWorkspace({ identity, session, loading }: {
       setListening(false);
     }
     const attachment = attached.map(({ file }) => file);
+    if (messages.length === 0) {
+      if (composerRef.current) flipState.current = Flip.getState(composerRef.current);
+      setExiting(true);
+    }
     dispatch(active.id, messages, text, attachment, attached.map(({ url, file }) => ({ url, name: file.name })));
     setDraft("");
     setAttached([]); // the URLs stay alive: the sent message still shows the thumbnails
@@ -719,53 +843,63 @@ function ChatWorkspace({ identity, session, loading }: {
   }
 
   const empty = messages.length === 0;
+  const showWelcome = identityReady && (empty || exiting);
   // Regenerate only the newest reply, to a text question (an attachment is not kept for a second ask).
   const canRegenerate = (i: number) => {
     const prev = messages[i - 1];
     return i === messages.length - 1 && !busy && prev?.role === "user" && !prev.previewUrl;
   };
+  const level = lastAnalysis?.analysis.risk_level;
+  const actionBtn = "ts-btn-ghost h-8 w-8 rounded-lg focus-visible:outline-2";
 
   return (
     <div
-      className="relative flex h-dvh w-full bg-white text-base text-zinc-900"
+      className="relative flex h-dvh w-full overflow-hidden bg-ts-bg text-base text-ts-text"
       onDragOver={(e) => {
         e.preventDefault();
         setDragging(true);
       }}
-      onDragLeave={() => setDragging(false)}
+      onDragLeave={(e) => {
+        if (e.currentTarget.contains(e.relatedTarget as Node | null)) return;
+        setDragging(false);
+      }}
       onDrop={(e) => {
         e.preventDefault();
         setDragging(false);
         accept(e.dataTransfer.files);
       }}
     >
-      {/* Sidebar: desktop always visible, mobile as a drawer */}
+      {/* Sidebar: collapsible on desktop, drawer on mobile */}
       <aside
         ref={sidebarRef}
         tabIndex={-1}
         aria-label="Sidebar"
         inert={!identityReady}
-        className={`${sidebarOpen ? "fixed inset-y-0 left-0 z-30 w-[310px] shadow-2xl" : "hidden"} flex flex-col border-r border-[rgba(0,0,0,0.1)] bg-[rgb(252,252,252)] p-3 text-zinc-900 min-[801px]:static min-[801px]:flex min-[801px]:w-[260px] min-[801px]:shrink-0 min-[801px]:shadow-none`}
+        data-open={sidebarOpen}
+        data-collapsed={sidebarCollapsed}
+        className="ts-aside"
       >
-        <div className="flex h-[52px] items-center gap-2 px-2 pb-1 pt-0">
-          <Logo className="h-7 w-7 text-xs" />
-          <span className="font-semibold tracking-tight">TrustShield</span>
+        <div className="flex h-11 items-center justify-between px-1.5">
+          <div className="flex items-center gap-2.5">
+            <Logo className="h-7 w-7" />
+            <span className="font-semibold tracking-tight">TrustShield</span>
+          </div>
+          <button type="button" onClick={toggleSidebar} aria-label="Close sidebar" className="ts-btn-ghost h-9 w-9 min-[801px]:hidden">
+            <Icon name="x" size={18} />
+          </button>
         </div>
-        <button
-          type="button"
-          onClick={newChat}
-          className="flex min-h-9 items-center gap-2 rounded-[10px] border border-zinc-300 bg-white px-2.5 py-2 text-left text-sm hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#3566f0]"
-        >
-          <span aria-hidden="true" className="text-lg leading-none">+</span> New chat
+        <button type="button" onClick={newChat} className="ts-newchat mt-2">
+          <Icon name="edit" size={17} />
+          New chat
         </button>
-        <nav className="mt-3 flex-1 overflow-y-auto" aria-label="Previous chats">
-          <p className="px-2 pb-2 text-xs font-medium uppercase tracking-wider text-zinc-500">Chats</p>
-          <ul className="space-y-0.5">
+        <nav className="ts-scroll mt-3 flex-1 overflow-y-auto" aria-label="Previous chats">
+          <p className="px-2.5 pb-2 text-xs font-medium text-ts-muted">Chats</p>
+          <ul ref={listRef} className="space-y-0.5">
             {identityReady && chats.map((c) => {
               const isActive = c.id === active.id;
               const isRenaming = renaming?.id === c.id;
               return (
-                <li key={c.id} className={`group flex items-center gap-1 rounded-[10px] pr-1 ${isActive ? "bg-zinc-200 max-[800px]:bg-white/10" : "hover:bg-zinc-100 max-[800px]:hover:bg-white/10"}`}>
+                <li key={c.id} className="ts-chat-item group flex items-center gap-1 rounded-xl pr-1" aria-current={isActive ? "true" : undefined}>
                   {isRenaming ? (
                     <input
                       autoFocus
@@ -777,7 +911,7 @@ function ChatWorkspace({ identity, session, loading }: {
                         if (e.key === "Enter") commitRename();
                         if (e.key === "Escape") setRenaming(null);
                       }}
-                      className="min-w-0 flex-1 rounded-lg bg-white px-3 py-2 text-sm outline-none ring-2 ring-[#3566f0]"
+                      className="min-w-0 flex-1 rounded-lg bg-ts-surface px-3 py-2 text-sm outline-none ring-2 ring-ts-accent"
                     />
                   ) : (
                     <button
@@ -785,18 +919,18 @@ function ChatWorkspace({ identity, session, loading }: {
                       onClick={() => switchTo(c.id)}
                       onDoubleClick={() => setRenaming({ id: c.id, title: c.title })}
                       aria-current={isActive ? "true" : undefined}
-                      className="min-h-9 min-w-0 flex-1 truncate rounded-[10px] px-2.5 py-2 text-left text-sm focus:outline-none focus:ring-2 focus:ring-[#3566f0]"
+                      className="min-h-10 min-w-0 flex-1 truncate rounded-xl px-2.5 py-2 text-left text-sm focus-visible:outline-2"
                     >
                       {c.title}
                     </button>
                   )}
                   {!isRenaming && (
-                    <div className="flex shrink-0 opacity-100 min-[801px]:opacity-0 min-[801px]:group-hover:opacity-100 min-[801px]:group-focus-within:opacity-100">
+                    <div className="flex shrink-0 opacity-100 transition-opacity min-[801px]:opacity-0 min-[801px]:group-hover:opacity-100 min-[801px]:group-focus-within:opacity-100">
                       <IconButton label={`Rename ${c.title}`} onClick={() => setRenaming({ id: c.id, title: c.title })} className="h-7 w-7">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" /></svg>
+                        <Icon name="edit" size={14} />
                       </IconButton>
-                      <IconButton label={`Delete ${c.title}`} onClick={() => deleteChat(c.id)} className="h-7 w-7 hover:text-red-400">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14" /></svg>
+                      <IconButton label={`Delete ${c.title}`} onClick={() => deleteChat(c.id)} className="h-7 w-7 hover:!text-red-500">
+                        <Icon name="trash" size={14} />
                       </IconButton>
                     </div>
                   )}
@@ -804,44 +938,81 @@ function ChatWorkspace({ identity, session, loading }: {
               );
             })}
           </ul>
+          {session && (
+            <section aria-label="Recent scan history" className="mt-5">
+              <div className="flex items-center justify-between px-2.5 pb-2">
+                <p className="text-xs font-medium text-ts-muted">Recent checks</p>
+                <button type="button" onClick={() => { setHistoryLoading(true); void refreshHistory(); }} disabled={historyLoading} className="text-xs text-ts-muted underline-offset-2 hover:underline disabled:opacity-50">
+                  {historyLoading ? "Loading…" : "Refresh"}
+                </button>
+              </div>
+              {historyError ? (
+                <p role="alert" className="px-2.5 py-2 text-xs text-red-700 dark:text-red-300">{historyError}</p>
+              ) : historyLoading && scanHistory.length === 0 ? (
+                <p role="status" className="px-2.5 py-2 text-xs text-ts-muted">Loading saved checks…</p>
+              ) : scanHistory.length === 0 ? (
+                <p className="px-2.5 py-2 text-xs text-ts-muted">No saved checks yet.</p>
+              ) : (
+                <ul className="space-y-1">
+                  {scanHistory.map((entry) => (
+                    <li key={entry.id} className="rounded-xl px-2.5 py-2 text-xs hover:bg-ts-hover">
+                      <p className="truncate font-medium" title={entry.input_summary}>{entry.input_summary || `${entry.input_type} check`}</p>
+                      <p className="mt-1 flex items-center justify-between gap-2 text-ts-muted">
+                        <span className="truncate">{entry.risk_label.replaceAll("_", " ")} · {entry.risk_score}/100</span>
+                        <time className="shrink-0" dateTime={entry.created_at}>{new Date(entry.created_at).toLocaleDateString()}</time>
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          )}
         </nav>
-        <p className="px-2 pt-3 text-xs leading-5 text-zinc-500 max-[800px]:text-zinc-400">
-          {session ? "Chats are saved to your account, so they stay after a refresh." : "Sign in to save your chats. Without an account, this history clears when you refresh or log out."}
+        <p className="px-2.5 pt-3 text-xs leading-5 text-ts-muted">
+          {session ? "Checks are saved to your account. Conversations stay on this device." : "Sign in to save and view your scan history across sessions."}
         </p>
         {session && (
-          <div className="mt-2 flex items-center justify-between gap-2 rounded-lg px-2 py-2 text-xs text-zinc-500">
+          <div className="mt-2 flex items-center justify-between gap-2 rounded-lg px-2.5 py-2 text-xs text-ts-muted">
             <span className="min-w-0 truncate">{session.user.email}</span>
-            <button type="button" onClick={logOut} className="shrink-0 hover:text-zinc-900 max-[800px]:text-zinc-100 max-[800px]:hover:text-white">Log out</button>
+            <button type="button" onClick={logOut} className="shrink-0 transition-colors hover:text-ts-text">Log out</button>
           </div>
         )}
       </aside>
-      {identityReady && sidebarOpen && <button type="button" aria-label="Close chats" onClick={() => setSidebarOpen(false)} className="fixed inset-0 z-20 bg-black/35 min-[801px]:hidden" />}
+      {identityReady && sidebarOpen && <button type="button" aria-label="Close chats" onClick={() => setSidebarOpen(false)} className="ts-scrim min-[801px]:hidden" />}
 
-      <div className="flex min-w-0 flex-1 flex-col" inert={!identityReady}>
+      <div
+        ref={colRef}
+        className="ts-col relative flex min-w-0 flex-1 flex-col"
+        inert={!identityReady}
+      >
+        <div className={`ts-ambient ${level ? `ts-level-${level}` : ""}`} data-on={Boolean(level) && !empty} aria-hidden="true" />
         <AppHeader
           title={identityReady ? active.title : "Your chats"}
           session={session}
           loading={loading}
-          onOpenSidebar={() => setSidebarOpen(true)}
+          onToggleSidebar={toggleSidebar}
+          sidebarOpen={desktop ? !sidebarCollapsed : sidebarOpen}
+          theme={theme}
+          onToggleTheme={toggleTheme}
+          scrolled={scrolled}
           apiUp={apiUp}
           mlUp={mlUp}
         />
 
-        <main className="flex-1 overflow-y-auto bg-[#fcfcfc] px-4" aria-busy={!identityReady}>
+        <main ref={mainRef} onScroll={onMainScroll} className="ts-scroll relative flex-1 overflow-y-auto px-4" aria-busy={!identityReady}>
           <div aria-live="polite" aria-atomic="true" className="sr-only">
             {busy ? "Working on it." : messages.length > 0 && messages[messages.length - 1].role === "assistant" ? "New response received." : ""}
           </div>
 
-          {!identityReady && <p role="status" className="mx-auto mt-12 max-w-3xl text-center text-sm text-zinc-500">Loading your chats…</p>}
-          {identityReady && empty && <EmptyState starters={STARTERS} onPick={(s) => submit(s)} />}
+          {!identityReady && <p role="status" className="mx-auto mt-12 max-w-3xl text-center text-sm text-ts-muted">Loading your chats…</p>}
 
-          {identityReady && <ol aria-label="Conversation" className="mx-auto max-w-3xl space-y-7 py-8">
+          {identityReady && <ol aria-label="Conversation" className="mx-auto max-w-3xl space-y-7 pb-10 pt-10">
             {messages.map((m, index) => (
-              <li key={m.id} className={m.role === "user" ? "flex justify-end" : "flex gap-3"}>
+              <li key={m.id} data-msg className={m.role === "user" ? "flex justify-end" : "flex gap-3"}>
                 {m.role === "user" ? (
                   <div className="group flex max-w-[85%] flex-col items-end gap-1">
                     {editing?.id === m.id ? (
-                      <div className="w-full min-w-[16rem] rounded-2xl bg-zinc-200 p-3">
+                      <div className="ts-pop w-full min-w-[16rem] rounded-3xl bg-ts-bubble p-3">
                         <textarea
                           aria-label="Edit message"
                           autoFocus
@@ -858,14 +1029,14 @@ function ChatWorkspace({ identity, session, loading }: {
                           className="w-full resize-none bg-transparent text-base outline-none"
                         />
                         <div className="mt-2 flex justify-end gap-2 text-sm">
-                          <button type="button" onClick={() => setEditing(null)} className="min-h-9 rounded-lg px-3 hover:bg-zinc-100">Cancel</button>
-                          <button type="button" onClick={() => saveEdit(index)} disabled={!editing.text.trim() || busy} className="min-h-9 rounded-lg bg-zinc-100 px-3 font-medium text-zinc-900 disabled:opacity-40">Save and resend</button>
+                          <button type="button" onClick={() => setEditing(null)} className="min-h-9 rounded-full px-4 font-medium transition-colors hover:bg-ts-hover">Cancel</button>
+                          <button type="button" onClick={() => saveEdit(index)} disabled={!editing.text.trim() || busy} className="min-h-9 rounded-full bg-ts-text px-4 font-medium text-ts-bg transition-transform hover:scale-[1.03] disabled:opacity-40">Save and resend</button>
                         </div>
                       </div>
                     ) : (
-                      <div className="rounded-3xl bg-zinc-200 px-4 py-2.5">
+                      <div className="rounded-3xl bg-ts-bubble px-4 py-2.5">
                         {(m.attachments?.length ? m.attachments : m.previewUrl ? [{ fileName: m.fileName ?? "Attached image", previewUrl: m.previewUrl }] : []).map((a, i) => (
-                          <span key={`${a.fileName}-${i}`} className="mb-2 mr-2 inline-flex items-center gap-2 rounded-xl bg-zinc-100 p-2 text-sm">
+                          <span key={`${a.fileName}-${i}`} className="mb-2 mr-2 inline-flex items-center gap-2 rounded-xl bg-ts-hover p-2 text-sm">
                             {a.previewUrl && <Image src={a.previewUrl} alt={a.fileName} width={48} height={48} className="h-12 w-12 rounded-lg object-cover" unoptimized />}{a.fileName}
                           </span>
                         ))}
@@ -873,73 +1044,85 @@ function ChatWorkspace({ identity, session, loading }: {
                       </div>
                     )}
                     {editing?.id !== m.id && (
-                      <div className="flex gap-1 opacity-100 min-[801px]:opacity-0 min-[801px]:group-hover:opacity-100 min-[801px]:group-focus-within:opacity-100">
+                      <div className="ts-actions flex gap-0.5">
                         {m.text && (
-                          <button type="button" onClick={() => copyText(m.id, m.text)} className="min-h-11 rounded-lg px-2 text-xs text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 focus:outline-none focus:ring-2 focus:ring-[#3566f0]">
-                            {copied === m.id ? "Copied" : "Copy"}
+                          <button type="button" onClick={() => copyText(m.id, m.text)} aria-label={copied === m.id ? "Copied" : "Copy"} title="Copy" className={actionBtn}>
+                            <Icon name={copied === m.id ? "check" : "copy"} size={15} />
                           </button>
                         )}
                         {m.text && !busy && (
-                          <button type="button" onClick={() => setEditing({ id: m.id, text: m.text })} className="min-h-11 rounded-lg px-2 text-xs text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 focus:outline-none focus:ring-2 focus:ring-[#3566f0]">
-                            Edit
+                          <button type="button" onClick={() => setEditing({ id: m.id, text: m.text })} aria-label="Edit" title="Edit" className={actionBtn}>
+                            <Icon name="edit" size={15} />
                           </button>
                         )}
                       </div>
                     )}
                   </div>
                 ) : m.kind === "error" ? (
-                  <div role="alert" className="w-full rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-red-800">
+                  <div role="alert" className="w-full rounded-2xl border border-red-300/60 bg-red-500/10 px-4 py-3 text-red-800 dark:text-red-200">
                     <p>{m.text}</p>
                     {m.retry && (
-                      <button type="button" onClick={m.retry} disabled={busy} className="mt-2 min-h-11 rounded-lg border border-red-200 px-4 py-2 font-medium hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-[#3566f0] disabled:opacity-50">
+                      <button type="button" onClick={m.retry} disabled={busy} className="mt-2 min-h-10 rounded-full border border-red-400/50 px-4 py-2 text-sm font-medium transition-colors hover:bg-red-500/15 disabled:opacity-50">
                         Retry
                       </button>
                     )}
                   </div>
                 ) : (
                   <>
-                    <Logo className="mt-0.5 h-7 w-7 text-[10px]" />
+                    <Logo className="mt-0.5 h-7 w-7" />
                     <div className="group min-w-0 flex-1">
-                      <p className="whitespace-pre-wrap break-words leading-7 text-zinc-900">{m.reply.text}</p>
-                      <div className="mt-2 flex flex-wrap items-center gap-1 text-xs text-zinc-500 opacity-100 min-[801px]:opacity-0 min-[801px]:group-hover:opacity-100 min-[801px]:group-focus-within:opacity-100">
+                      <p className="whitespace-pre-wrap break-words leading-7">
+                        {m.reply.text}
+                        {busy && index === messages.length - 1 && m.kind !== "analysis" && <span className="ts-caret" aria-hidden="true" />}
+                      </p>
+                      <div className="ts-actions mt-1.5 flex flex-wrap items-center gap-0.5 text-xs text-ts-muted">
                         {m.kind === "analysis" && <span className="mr-2">{m.reply.grounded ? "Based on the evidence" : "Not verified against the evidence"}</span>}
                         {m.reply.text && (
-                          <button type="button" onClick={() => copyText(m.id, m.reply.text)} className="min-h-11 rounded-lg px-2 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 focus:outline-none focus:ring-2 focus:ring-[#3566f0]">
-                            {copied === m.id ? "Copied" : "Copy"}
+                          <button type="button" onClick={() => copyText(m.id, m.reply.text)} aria-label={copied === m.id ? "Copied" : "Copy"} title="Copy" className={actionBtn}>
+                            <Icon name={copied === m.id ? "check" : "copy"} size={15} />
                           </button>
                         )}
                         {m.reply.text && canRegenerate(index) && (
-                          <button type="button" onClick={() => regenerate(index)} className="min-h-11 rounded-lg px-2 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 focus:outline-none focus:ring-2 focus:ring-[#3566f0]">
-                            Regenerate
+                          <button type="button" onClick={() => regenerate(index)} aria-label="Regenerate" title="Regenerate" className={actionBtn}>
+                            <Icon name="refresh" size={15} />
                           </button>
                         )}
                       </div>
-                      {m.kind === "analysis" && <div className="mt-3"><RiskCard analysis={m.analysis} /></div>}
+                      {m.kind === "analysis" && <RiskCard analysis={m.analysis} />}
                     </div>
                   </>
                 )}
               </li>
             ))}
             {busy && (
-              <li role="status" className="flex items-center gap-3 text-sm text-zinc-500">
-                <Logo className="h-7 w-7 text-[10px] motion-safe:animate-pulse" />
-                <span>{busyLabel}</span>
-                <button type="button" onClick={() => controllersRef.current.get(active.id)?.abort()} className="min-h-11 rounded-lg px-2 py-1 font-medium text-zinc-800 underline hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#3566f0]">Stop</button>
+              <li role="status" data-msg className="flex items-center gap-3 text-sm text-ts-muted">
+                <span className="h-7 w-7 shrink-0"><ShieldOrb mode="scan" density="small" className="h-full w-full" /></span>
+                <span className="ts-shimmer">{busyLabel}</span>
               </li>
             )}
           </ol>}
           <div ref={endRef} />
         </main>
 
-        <div className={`${empty ? "absolute left-0 right-0 mx-auto top-[calc(50%-18px)] min-[801px]:left-[260px] min-[801px]:right-0 min-[801px]:w-[calc(100%-260px)] min-[801px]:top-[calc(50%-38px)]" : "mx-auto w-full"} w-full max-w-[800px] px-3 pb-3 pt-2 min-[1024px]:px-4`}>
-          {dragging && <p className="mb-2 rounded-2xl border-2 border-dashed border-teal-500 p-3 text-center text-sm">Drop an image to attach it</p>}
-          {notice && <p role="alert" className="mb-2 text-sm font-medium text-red-600">{notice}</p>}
+        {showWelcome && <EmptyState starters={STARTERS} onPick={(s) => submit(s)} leaving={exiting} onExited={() => setExiting(false)} />}
+
+        <div
+          ref={composerRef}
+          className={`${empty ? "absolute inset-x-0 z-[2]" : "relative z-[2]"} mx-auto w-full max-w-[800px] px-4 pb-1 pt-2`}
+          style={empty ? { top: "var(--empty-top)" } : undefined}
+        >
+          {!empty && !atBottom && (
+            <button type="button" onClick={scrollToEnd} aria-label="Scroll to latest" className="ts-pop absolute -top-11 left-1/2 z-10 grid h-9 w-9 -translate-x-1/2 place-items-center rounded-full border border-ts-border-strong bg-ts-surface shadow-lg transition-transform hover:scale-110 active:scale-95">
+              <Icon name="down" size={18} />
+            </button>
+          )}
+          {notice && <p role="alert" className="ts-pop mb-2 px-2 text-sm font-medium text-red-600 dark:text-red-400">{notice}</p>}
           {attached.length > 0 && (
-            <div className="mb-2 flex flex-wrap gap-2 rounded-2xl bg-zinc-200 p-2">
-              {attached.map((item, index) => <div key={`${item.file.name}-${index}`} className="flex min-w-0 items-center gap-2 rounded-xl bg-white p-2">
-              {IMAGE_TYPES.includes(item.file.type) && <Image src={item.url} alt={`${item.file.name} preview`} width={56} height={56} className="h-14 w-14 rounded-xl object-cover" unoptimized />}
-              <span className="max-w-36 truncate text-sm">{item.file.name}</span>
-              <button type="button" onClick={() => removeAttachment(index)} aria-label={`Remove ${item.file.name}`} className="min-h-10 rounded-lg px-2 py-2 text-sm underline">Remove</button>
+            <div className="mb-2 flex flex-wrap gap-2 rounded-2xl bg-ts-bubble p-2">
+              {attached.map((item, index) => <div key={`${item.file.name}-${index}`} className="ts-pop flex min-w-0 items-center gap-2 rounded-xl bg-ts-surface p-2">
+                {IMAGE_TYPES.includes(item.file.type) && <Image src={item.url} alt={`${item.file.name} preview`} width={56} height={56} className="h-14 w-14 rounded-xl object-cover" unoptimized />}
+                <span className="max-w-36 truncate text-sm">{item.file.name}</span>
+                <button type="button" onClick={() => removeAttachment(index)} aria-label={`Remove ${item.file.name}`} className="ts-btn-ghost h-9 w-9 shrink-0"><Icon name="x" size={16} /></button>
               </div>)}
             </div>
           )}
@@ -947,18 +1130,21 @@ function ChatWorkspace({ identity, session, loading }: {
           <form
             onSubmit={(e) => {
               e.preventDefault();
+              if (busy) return;
               submit();
             }}
-            className="group relative flex items-center gap-0 rounded-[28px] border border-[rgba(0,0,0,0.1)] bg-white px-1.5 py-[3px] shadow-[0_0_0_1px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.04),0_4px_40px_8px_rgba(0,0,0,0.03)] focus-within:border-zinc-300"
+            onPointerMove={spotlight}
+            className="ts-composer flex items-end gap-0.5 px-1.5 py-1.5"
           >
             <input ref={fileRef} type="file" multiple accept={ALLOWED.join(",")} className="sr-only" aria-label="Attach images" tabIndex={-1} onChange={(e) => { accept(e.target.files); e.target.value = ""; setAttachOpen(false); }} />
             <div className="relative">
-              <button type="button" onClick={() => setAttachOpen((o) => !o)} aria-label="Attach" aria-expanded={attachOpen} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-2xl text-zinc-800 hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#3566f0] min-[801px]:h-11 min-[801px]:w-11">
-                +
+              <button type="button" onClick={() => setAttachOpen((o) => !o)} aria-label="Attach" aria-expanded={attachOpen} className="ts-btn-ghost h-11 w-11 rounded-full">
+                <Icon name="plus" size={22} className={`transition-transform duration-300 ${attachOpen ? "rotate-45" : ""}`} />
               </button>
               {attachOpen && (
-                <div role="menu" className="absolute bottom-14 left-0 z-10 w-60 rounded-2xl border border-zinc-300 bg-white p-1 shadow-xl">
-                  <button type="button" role="menuitem" onClick={() => { setAttachOpen(false); fileRef.current?.click(); }} className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm hover:bg-zinc-100">
+                <div role="menu" className="ts-menu absolute bottom-14 left-0 z-10 w-64 rounded-2xl border border-ts-border-strong bg-ts-surface p-1.5 shadow-[var(--ts-pop-shadow)]">
+                  <button type="button" role="menuitem" onClick={() => { setAttachOpen(false); fileRef.current?.click(); }} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm transition-colors hover:bg-ts-hover">
+                    <Icon name="clip" size={17} className="text-ts-muted" />
                     Upload a screenshot or QR code
                   </button>
                 </div>
@@ -983,38 +1169,50 @@ function ChatWorkspace({ identity, session, loading }: {
               }}
               rows={1}
               aria-label="Message"
-              placeholder={lastAnalysis ? "Ask a follow-up, or paste something new to check" : "Message TrustShield, or paste something to check"}
-              className="max-h-48 min-h-6 flex-1 resize-none bg-transparent px-1.5 py-0 text-base leading-6 text-zinc-900 outline-none placeholder:text-zinc-500 min-[801px]:text-[17px]"
+              placeholder={desktop ? (lastAnalysis ? "Ask a follow-up, or paste something new to check" : "Message TrustShield, or paste something to check") : (lastAnalysis ? "Ask a follow-up…" : "Paste to check…")}
+              className="max-h-48 min-h-6 flex-1 resize-none self-center bg-transparent px-1.5 py-2 text-base leading-6 text-ts-text outline-none placeholder:text-ts-muted min-[801px]:text-[17px]"
             />
             {speechSupported && (
-              <button type="button" onClick={toggleListening} aria-pressed={listening} aria-label={listening ? "Stop voice input" : "Speak your message"} className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#3566f0] min-[801px]:h-11 min-[801px]:w-11 ${listening ? "bg-red-100" : ""}`}>
-                {listening ? "■" : "🎙"}
+              <button type="button" onClick={toggleListening} aria-pressed={listening} aria-label={listening ? "Stop voice input" : "Speak your message"} className="ts-btn-ghost ts-mic relative h-11 w-11 rounded-full">
+                <Icon name="mic" size={20} />
               </button>
             )}
-            <button type="submit" disabled={busy || (!draft.trim() && !attached.length)} aria-label="Send" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-zinc-900 hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#3566f0] disabled:opacity-50 min-[801px]:h-11 min-[801px]:w-11">
-              <span aria-hidden="true" className="flex h-8 w-8 items-center justify-center rounded-full bg-[#3566f0] text-lg font-semibold text-white">↑</span>
-            </button>
+            {busy ? (
+              <button type="button" onClick={() => controllersRef.current.get(active.id)?.abort()} aria-label="Stop generating" data-stop="true" className="ts-send m-1">
+                <Icon name="stop" size={14} />
+              </button>
+            ) : (
+              <button type="submit" disabled={!draft.trim() && !attached.length} aria-label="Send" className="ts-send m-1">
+                <Icon name="send" size={19} strokeWidth={2.4} />
+              </button>
+            )}
           </form>
-          <p className="mt-2 text-center text-xs text-zinc-500">
-            Avoid sharing passwords, OTPs or card secrets. Results are risk evidence, not a guarantee of safety.
-          </p>
         </div>
+        <p className={`${empty ? "absolute inset-x-0 bottom-3 z-[2] max-[800px]:hidden" : "relative"} px-4 pb-2.5 text-center text-xs text-ts-muted`}>
+          Avoid sharing passwords, OTPs or card secrets. Results are risk evidence, not a guarantee of safety.
+        </p>
+
+        {dragging && (
+          <div className="ts-pop pointer-events-none absolute inset-3 z-40 grid place-items-center rounded-3xl border-2 border-dashed border-ts-accent bg-ts-bg/80 backdrop-blur-sm">
+            <p className="flex items-center gap-2 text-lg font-medium"><Icon name="clip" size={20} /> Drop a screenshot, QR code or document</p>
+          </div>
+        )}
       </div>
 
       {showGate && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div role="dialog" aria-modal="true" aria-labelledby="gate-heading" aria-describedby="gate-description" ref={gateRef} tabIndex={-1} className="relative w-full max-w-sm rounded-2xl bg-white p-6 text-center shadow-2xl focus:outline-none">
-              <button type="button" onClick={dismissGate} aria-label="Skip for now" className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full text-zinc-400 hover:bg-zinc-100 hover:text-zinc-900 focus:outline-none focus:ring-2 focus:ring-[#3566f0] after:absolute after:-inset-2 after:content-['']">
-                ✕
-              </button>
-              <Logo className="mx-auto h-10 w-10" />
-              <h2 id="gate-heading" className="mt-4 text-xl font-semibold text-zinc-900">Welcome to TrustShield</h2>
-              <p id="gate-description" className="mt-2 text-sm text-zinc-500">Log in or sign up to save your scan history to your account.</p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4 backdrop-blur-sm [animation:ts-fade_0.3s_both]">
+          <div role="dialog" aria-modal="true" aria-labelledby="gate-heading" aria-describedby="gate-description" ref={gateRef} tabIndex={-1} className="ts-pop relative w-full max-w-sm rounded-3xl border border-ts-border bg-ts-surface p-7 text-center shadow-[var(--ts-pop-shadow)] focus:outline-none">
+            <button type="button" onClick={dismissGate} aria-label="Skip for now" className="ts-btn-ghost absolute right-3 top-3 h-9 w-9 rounded-full after:absolute after:-inset-2 after:content-['']">
+              <Icon name="x" size={18} />
+            </button>
+            <div className="mx-auto h-16 w-16"><ShieldOrb mode="idle" density="small" className="h-full w-full" /></div>
+            <h2 id="gate-heading" className="font-display mt-3 text-[28px] leading-tight">Welcome to TrustShield</h2>
+            <p id="gate-description" className="mt-2 text-sm text-ts-muted">Log in or sign up to save your scan history to your account.</p>
             <div className="mt-6 flex flex-col gap-2">
-              <a href="/login" className="rounded-lg bg-zinc-900 py-2.5 text-sm font-medium text-white hover:bg-zinc-800">Log in</a>
-              <a href="/signup" className="rounded-lg border border-zinc-300 py-2.5 text-sm font-medium text-zinc-900 hover:bg-zinc-50">Sign up</a>
+              <a href="/login" className="rounded-full bg-ts-text py-3 text-sm font-semibold text-ts-bg transition-transform hover:scale-[1.02] active:scale-[0.98]">Log in</a>
+              <a href="/signup" className="rounded-full border border-ts-border-strong py-3 text-sm font-semibold transition-colors hover:bg-ts-hover">Sign up</a>
             </div>
-            <button type="button" onClick={dismissGate} className="relative mt-4 text-sm text-zinc-500 underline hover:text-zinc-900 after:absolute after:-inset-2 after:content-['']">Skip for now</button>
+            <button type="button" onClick={dismissGate} className="relative mt-4 text-sm text-ts-muted underline transition-colors hover:text-ts-text after:absolute after:-inset-2 after:content-['']">Skip for now</button>
           </div>
         </div>
       )}

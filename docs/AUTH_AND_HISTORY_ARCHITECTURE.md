@@ -29,9 +29,10 @@ the Supabase project/schema itself.
 
 ### History data flow
 
-1. Each `/api/v1/analyze/*` handler takes an optional `user: CurrentUser | None =
-   Depends(get_current_user)`. After a successful analysis, `_record_history`
-   (`services/api/main.py`) writes a row only when `user is not None` and Supabase is configured.
+1. Each `/api/v1/analyze/*` handler and the conversational `/api/v1/chat*` scan path takes an
+   optional `user: CurrentUser | None = Depends(get_current_user)`. After a successful analysis,
+   `_record_history` (`services/api/main.py`) writes a row only when `user is not None` and
+   Supabase is configured. Anonymous scans remain unchanged.
 2. `services/history/store.py` writes/reads via Supabase's PostgREST REST API
    (`{SUPABASE_URL}/rest/v1/scan_history`) using the service-role (secret) key — no SDK, same
    `urllib.request` style as the auth check. A write failure is logged and swallowed; a
@@ -40,7 +41,7 @@ the Supabase project/schema itself.
    characters of the submitted text/URL for text/URL scans, or a generic label (`"Screenshot scan
    (suspicious)"`) for image/QR scans, since OCR text isn't threaded out of `_upload_endpoint`'s
    signature (no change to the detection pipeline). The full `AnalysisResult` is stored separately
-   in `result_json` for the history page's "View" action to re-render.
+   in `result_json` as the compact risk summary currently saved by the service.
 4. `GET /api/v1/history`, `DELETE /api/v1/history/{id}`, `DELETE /api/v1/history` all require a
    resolved user (401 otherwise) and operate only on that user's own rows.
 
@@ -75,5 +76,5 @@ changed:
   Log in/Sign up links in the chat header; signed-in users see their email and a Log out control
   at the bottom of the sidebar. The `scan_history` read/write endpoints described above still
   exist and still work, but nothing in the current UI calls `GET /api/v1/history` yet — the
-  sidebar's chat list is local-browser state, not account-linked history. Wiring the sidebar to
-  real per-account history is unimplemented, not removed.
+  sidebar's conversation list is local-browser state. Its "Recent checks" section reads the
+  account-scoped `GET /api/v1/history` endpoint; only scan summaries are shown there.

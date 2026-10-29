@@ -387,7 +387,8 @@ def _refine_with_model(intent_result, message: str, has_image: bool):
         return IntentResult("general_chat", "model routing: a question or task, not content to check")
     return intent_result
 
-async def _agent_chat(request: Request, response: Response, message: str, history: list[Turn], intent_result) -> ChatOut | None:
+async def _agent_chat(request: Request, response: Response, message: str, history: list[Turn], intent_result,
+                      user: CurrentUser | None) -> ChatOut | None:
     """Model-led chat turn. Returns None when the model is unavailable or a reply fails a check."""
     captured: dict = {}
 
@@ -398,6 +399,7 @@ async def _agent_chat(request: Request, response: Response, message: str, histor
         except (InvalidInput, ImageRejected, DocumentRejected) as exc:
             return json.dumps({"error": str(exc)[:200]})
         analysis = to_contract(result, types, plan.urls)
+        _record_history(request, user, result)
         captured.update(result=result, plan=plan, analysis=analysis)
         return json.dumps(analysis.model_dump(mode="json"), default=str)[:6000]
 
@@ -451,7 +453,7 @@ def _may_scan(message: str) -> bool:
     return words >= 4
 
 
-def _make_scan(message: str, captured: dict):
+def _make_scan(message: str, captured: dict, request: Request, user: CurrentUser | None):
     """The tool the model can call. It refuses anything that is not content the user shared, and records the analysis."""
     def scan(text: str) -> str:
         if not _may_scan(message):
@@ -462,6 +464,7 @@ def _make_scan(message: str, captured: dict):
         except (InvalidInput, ImageRejected, DocumentRejected) as exc:
             return json.dumps({"error": str(exc)[:200]})
         analysis = to_contract(result, types, plan.urls)
+        _record_history(request, user, result)
         captured.update(result=result, plan=plan, analysis=analysis)
         return json.dumps(analysis.model_dump(mode="json"), default=str)[:6000]
     return scan
@@ -542,7 +545,8 @@ def _model_events(message: str, recent: list[dict], captured: dict, scan):
         yield _sse({"type": "replace", "text": _UNAVAILABLE_TEXT})
 
 
-def _stream_chat_events(message: str, history: list[Turn], context: ChatAnalysis | None, signature: str):
+def _stream_chat_events(message: str, history: list[Turn], context: ChatAnalysis | None, signature: str,
+                        request: Request, user: CurrentUser | None):
     try:
         if sum(len(t.text) for t in history) > 12_000:
             yield _sse({"type": "error", "detail": "conversation context is too large; start a new chat"})
@@ -563,7 +567,7 @@ def _stream_chat_events(message: str, history: list[Turn], context: ChatAnalysis
         response_type = _CHAT_ONLY_REPLY.get(intent_result.intent, ("chat", ""))[0]
         yield _sse({"type": "meta", "kind": "chat", "response_type": response_type, "intent": meta})
         captured: dict = {}
-        scan = _make_scan(message, captured)
+        scan = _make_scan(message, captured, request, user)
         # Content that carries a link or a scam signal is always scanned first (2026-10-07): the model must not be able to skip a link.
         # The model then explains the result; the score is the scanner's.
         if _may_scan(message) and (extract_urls(message) or has_suspicious_signal(message) or has_action_or_object_risk(message)):
@@ -583,15 +587,16 @@ def _stream_chat_events(message: str, history: list[Turn], context: ChatAnalysis
 
 
 @router.post("/api/v1/chat/stream", dependencies=[Depends(limit_light)])
-async def chat_stream_endpoint(body: ChatIn):
+async def chat_stream_endpoint(body: ChatIn, request: Request, user: CurrentUser | None = Depends(get_current_user)):
     if not body.message.strip():
         raise HTTPException(422, "Send a message, link, screenshot or QR code to analyse.")
-    return StreamingResponse(_stream_chat_events(body.message, body.history, body.context, body.context_signature),
+    return StreamingResponse(_stream_chat_events(body.message, body.history, body.context, body.context_signature, request, user),
                              media_type="text/event-stream", headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 
 
 async def _chat_turn(request: Request, response: Response, message: str, context: ChatAnalysis | None, signature: str, history: list[Turn],
-                     image: tuple[bytes, str | None, str | None] | list[tuple[bytes, str | None, str | None]] | None) -> ChatOut:
+                     image: tuple[bytes, str | None, str | None] | list[tuple[bytes, str | None, str | None]] | None,
+                     user: CurrentUser | None) -> ChatOut:
     if sum(len(t.text) for t in history) > 12_000:
         raise HTTPException(422, "conversation context is too large; start a new chat")
     if context is not None and not verify(context, signature):
@@ -609,7 +614,7 @@ async def _chat_turn(request: Request, response: Response, message: str, context
 
     if intent_result.intent in _CHAT_ONLY_REPLY and agent.configured():
         # The model is the chat assistant and may call the scanner. Any failed check falls through to the deterministic path.
-        outcome = await _agent_chat(request, response, message, history, intent_result)
+        outcome = await _agent_chat(request, response, message, history, intent_result, user)
         if outcome is not None:
             return outcome
 
@@ -686,6 +691,7 @@ async def _chat_turn(request: Request, response: Response, message: str, context
                 if analysis2.risk_score > analysis.risk_score:
                     result, plan, analysis = result2, plan2, analysis2
     _publish(request, response, result)
+    _record_history(request, user, result)
     if agent.configured() and message.strip() and analysis.risk_level != "unable_to_verify":
         text = await run_in_threadpool(agent.explain, message, analysis.model_dump_json(), analysis.risk_score)
         if text:
@@ -701,14 +707,16 @@ async def _chat_turn(request: Request, response: Response, message: str, context
 
 
 @router.post("/api/v1/chat", response_model=ChatOut, dependencies=[Depends(limit_light)])
-async def chat_endpoint(body: ChatIn, request: Request, response: Response):
-    return await _chat_turn(request, response, body.message, body.context, body.context_signature, body.history, None)
+async def chat_endpoint(body: ChatIn, request: Request, response: Response,
+                        user: CurrentUser | None = Depends(get_current_user)):
+    return await _chat_turn(request, response, body.message, body.context, body.context_signature, body.history, None, user)
 
 
 @router.post("/api/v1/chat/upload", response_model=ChatOut, dependencies=[Depends(limit_heavy)])
 async def chat_upload_endpoint(request: Request, response: Response, file: UploadFile | None = File(default=None), files: list[UploadFile] | None = File(default=None),
                                message: str = Form(default="", max_length=MAX_MESSAGE_CHARS), context: str = Form(default="", max_length=60_000),
-                               context_signature: str = Form(default="", max_length=128), history: str = Form(default="[]", max_length=16_000)):
+                               context_signature: str = Form(default="", max_length=128), history: str = Form(default="[]", max_length=16_000),
+                               user: CurrentUser | None = Depends(get_current_user)):
     try:
         parsed = ChatAnalysis.model_validate_json(context) if context.strip() else None
     except ValueError:
@@ -734,7 +742,7 @@ async def chat_upload_endpoint(request: Request, response: Response, file: Uploa
                 raise HTTPException(413, "Attachments exceed the 20 MB total limit.")
             attachments.append((data, upload.content_type, _safe_upload_name(upload.filename, len(attachments))))
         return await _chat_turn(request, response, message, parsed, context_signature, turns,
-                                attachments[0] if file is not None and files is None else attachments)
+                                attachments[0] if file is not None and files is None else attachments, user)
     finally:
         for upload in (files or ([file] if file is not None else [])):
             await upload.close()
