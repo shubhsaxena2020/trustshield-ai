@@ -1,43 +1,14 @@
 "use client";
 
-import { Component, useEffect, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
-
-class SceneBoundary extends Component<{ children: ReactNode; onFailure: () => void }, { failed: boolean }> {
-  state = { failed: false };
-  static getDerivedStateFromError() { return { failed: true }; }
-  componentDidCatch() { this.props.onFailure(); }
-  render() { return this.state.failed ? null : this.props.children; }
-}
+import { useEffect, useRef } from "react";
 
 export default function ShieldHero() {
-  const [Scene, setScene] = useState<React.ComponentType | null>(null);
   const visual = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const device = navigator as Navigator & { deviceMemory?: number; connection?: { saveData?: boolean } };
-    const lowEnd = device.deviceMemory !== undefined && device.deviceMemory < 4;
-    if (reduceMotion.matches || lowEnd || device.connection?.saveData) return;
-    try {
-      const probe = document.createElement("canvas");
-      const context = probe.getContext("webgl2") || probe.getContext("webgl");
-      if (!context) return;
-      context.getExtension("WEBGL_lose_context")?.loseContext();
-    } catch {
-      return;
-    }
-    const timer = window.setTimeout(() => {
-      const idleWindow = window as Window & { requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number };
-      const load = () => import("./shield-scene").then((module) => setScene(() => module.default)).catch(() => undefined);
-      if (idleWindow.requestIdleCallback) idleWindow.requestIdleCallback(load, { timeout: 1300 });
-      else load();
-    }, 1100);
-    return () => window.clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (reduceMotion.matches) return;
     const update = () => {
       const art = visual.current?.closest(".hero-art") as HTMLElement | null;
       if (!art) return;
@@ -54,17 +25,18 @@ export default function ShieldHero() {
     const bounds = event.currentTarget.getBoundingClientRect();
     const x = (event.clientX - bounds.left) / bounds.width - 0.5;
     const y = (event.clientY - bounds.top) / bounds.height - 0.5;
-    visual.current.style.transform = `translate3d(${x * 8}px, ${y * 6}px, 0)`;
+    visual.current.style.setProperty("--tilt-x", `${x * 12}deg`);
+    visual.current.style.setProperty("--tilt-y", `${-y * 9}deg`);
   }
 
   function resetPointer() {
-    if (visual.current) visual.current.style.transform = "translate3d(0,0,0)";
+    visual.current?.style.setProperty("--tilt-x", "0deg");
+    visual.current?.style.setProperty("--tilt-y", "0deg");
   }
 
-  return <div className={Scene ? "shield-visual three-active" : "shield-visual"} onPointerMove={handlePointerMove} onPointerLeave={resetPointer}>
-    <Image className="shield-fallback" src="/shield-static.svg" alt="" width={320} height={360} priority />
+  return <div ref={visual} className="shield-visual" onPointerMove={handlePointerMove} onPointerLeave={resetPointer}>
+    <Image className="shield-fallback" src="/shield-static.svg" alt="" width={360} height={400} priority />
     <div className="css-bubble bubble-one" aria-hidden="true">OTP?</div>
     <div className="css-bubble bubble-two" aria-hidden="true">PAY</div>
-    <div ref={visual} className="shield-motion" aria-hidden="true">{Scene && <SceneBoundary onFailure={() => setScene(null)}><Scene /></SceneBoundary>}</div>
   </div>;
 }
