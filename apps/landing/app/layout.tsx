@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import manifest from "../public/release-manifest.json";
 import "./globals.css";
 
@@ -10,6 +10,7 @@ export const metadata: Metadata = {
   title,
   description,
   applicationName: "TrustShield AI",
+  robots: { index: true, follow: true },
   icons: { icon: "/logo-icon.png", apple: "/logo-icon.png" },
   openGraph: {
     title,
@@ -20,12 +21,11 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title, description, images: ["/og-image.png"] },
 };
 
-const themeScript = `try{var t=localStorage.getItem('trustshield-theme');document.documentElement.dataset.theme=t==='light'||t==='dark'?t:(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light')}catch(e){document.documentElement.dataset.theme=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}`;
+export const viewport: Viewport = { colorScheme: "light" };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head><script dangerouslySetInnerHTML={{ __html: themeScript }} /></head>
+    <html lang="en">
       <body>{children}</body>
     </html>
   );

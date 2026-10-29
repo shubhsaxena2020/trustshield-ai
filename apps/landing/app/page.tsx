@@ -42,11 +42,23 @@ export default function Home() {
     return () => observer.disconnect();
   }, []);
 
-  function toggleTheme() {
-    const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
-    document.documentElement.dataset.theme = next;
-    window.localStorage.setItem("trustshield-theme", next);
-  }
+  useEffect(() => {
+    const revealItems = document.querySelectorAll<HTMLElement>("[data-reveal]");
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      revealItems.forEach((item) => item.classList.add("is-visible"));
+      return;
+    }
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("is-visible");
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { rootMargin: "0px 0px -8% 0px", threshold: 0.08 });
+    revealItems.forEach((item) => observer.observe(item));
+    return () => observer.disconnect();
+  }, []);
 
   function selectScreen(index: number) {
     setScreen(index);
@@ -62,7 +74,6 @@ export default function Home() {
           <a href="#how-it-works">How it works</a><a href="#features">Features</a><a href="#privacy">Privacy</a><a href="#faq">FAQ</a>
         </nav>
         <div className="nav-actions">
-          <button className="theme-toggle" type="button" onClick={toggleTheme} aria-label="Toggle light and dark theme"><span aria-hidden="true">◐</span><span className="theme-word">Theme</span></button>
           <a className="nav-download" href={manifest.downloadUrl} download>Get the app <span aria-hidden="true">↓</span></a>
         </div>
       </header>
@@ -89,7 +100,7 @@ export default function Home() {
         <a href={manifest.downloadUrl} download aria-label="Download TrustShield AI Android APK">Download the APK <span aria-hidden="true">↓</span></a>
       </section>
 
-      <section className="intro-section content-width" id="how-it-works">
+      <section className="intro-section content-width" id="how-it-works" data-reveal>
         <div className="section-heading"><p className="eyebrow">A clearer pause</p><h2>See what raised the flag.</h2><p>TrustShield checks suspicious content and points to the signals it found, so you can slow down and verify through a channel you already trust.</p></div>
         <div className="steps-grid">
           <article className="step-card"><span className="step-index">01</span><div className="step-glyph" aria-hidden="true">＋</div><h3>Bring it in</h3><p>Paste a text or link, share a screenshot, scan a QR code, or review a payment request or call.</p></article>
@@ -98,7 +109,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="screens-section" id="features">
+      <section className="screens-section" id="features" data-reveal>
         <div className="screens-head content-width"><div className="section-heading"><p className="eyebrow">On your Android phone</p><h2>Protection that stays close.</h2><p>Explore the main screens from the Android app. Choose a view to see how each part works.</p></div><div className="screens-caption">REAL APP SCREENS <span>·</span> ENGLISH</div></div>
         <div className="screens-showcase content-width">
           <div className="phone-column">
@@ -111,7 +122,7 @@ export default function Home() {
               ["Understand the signal.", "Risk indicators come with exact quotes as evidence. Use them as guidance, then verify important requests independently."],
               ["Stay aware on a call.", "With your consent, Call Shield listens through the microphone during a live session and can speak a verdict."],
               ["Check before you pay.", "QR Guard checks the decoded destination, UPI payee and tampering signals before you continue in your payment app."],
-              ["Make it yours.", "Choose black or white themes. TalkBack support helps make the app more accessible."],
+              ["Make it yours.", "TalkBack support helps make the app more accessible."],
             ].map(([title, description], index) => <article className="screen-story" data-screen-story={index} key={title}>
               <span className="screen-count">0{index + 1} / 05</span><h3>{title}</h3><p>{description}</p>
             </article>)}
@@ -122,24 +133,25 @@ export default function Home() {
 
       <section className="stats-band" aria-label="TrustShield at a glance"><div className="content-width stats-grid"><div><strong>0</strong><span>INTERNET permission<br />in the Android app</span></div><div><strong>3</strong><span>languages<br />English · Hindi · Hinglish</span></div><div><strong>2</strong><span>ways to check<br />Android app and web</span></div><p>Android verdicts are computed on-device. The web scanner runs online.</p></div></section>
 
-      <section className="sample-section content-width" aria-labelledby="sample-title">
+      <section className="sample-section content-width" aria-labelledby="sample-title" data-reveal>
         <div className="sample-copy"><p className="eyebrow">A local example · no network</p><h2 id="sample-title">Evidence you can point to.</h2><p>This canned message shows how TrustShield can connect a risk indicator to the words that triggered it. It does not make a real assessment.</p><button className="button button-primary" type="button" onClick={() => setSampleShown(!sampleShown)}>{sampleShown ? "Hide the example" : "Try a sample"} <span aria-hidden="true">{sampleShown ? "−" : "+"}</span></button></div>
         <div className="sample-card"><div className="sample-card-head"><span>MESSAGE EXAMPLE</span><span className="sample-pill">{sampleShown ? "EVIDENCE SHOWN" : "TAP TO REVEAL"}</span></div><p className="sample-message">“Your bank account will be blocked today. Verify your details now to keep access.”</p>{sampleShown ? <div className="evidence-result"><span className="risk-dot" /><div><strong>Risk signals in this example</strong><p><mark>“blocked today”</mark> adds urgency. <mark>“Verify your details”</mark> asks for sensitive information.</p></div></div> : <div className="sample-hint">Select “Try a sample” to reveal the quoted signals.</div>}<span className="sample-disclaimer">Illustrative example. No content is sent or analysed.</span></div>
       </section>
 
-      <section className="feature-grid-section content-width">
+      <section className="feature-grid-section content-width" id="tools" data-reveal>
         <div className="feature-intro"><p className="eyebrow">One product, focused tools</p><h2>From a message to a payment.</h2><p>Built to help you inspect the request before you act.</p></div>
         <article className="feature-card feature-large"><span className="feature-symbol" aria-hidden="true">“</span><span className="feature-label">MESSAGE + SCREENSHOT</span><h3>Read the words that matter.</h3><p>Check suspicious SMS, WhatsApp text, links and screenshots. See exact quotes alongside the risk evidence.</p></article>
         <article className="feature-card"><span className="feature-symbol" aria-hidden="true">◉</span><span className="feature-label">CALL SHIELD</span><h3>Live listening, with consent.</h3><p>During a live session, review speech the microphone can hear and get a spoken verdict.</p></article>
         <article className="feature-card"><span className="feature-symbol" aria-hidden="true">⌗</span><span className="feature-label">QR GUARD</span><h3>Check the payee first.</h3><p>Inspect decoded QR details, UPI payee information and tampering signals before paying.</p></article>
         <article className="feature-card"><span className="feature-symbol" aria-hidden="true">◐</span><span className="feature-label">PAYMENT ADVISORY</span><h3>A pause before money moves.</h3><p>Review payment requests and the signals that may deserve another look.</p></article>
+        <article className="feature-card feature-bomb"><span className="feature-symbol" aria-hidden="true">⌁</span><span className="feature-label">OPTIONAL · OFF BY DEFAULT</span><h3>Bomb Shield spots message and call floods.</h3><p>If enabled, it can request SMS, call-state and call-log access. It counts events in memory and does not store message text. Android does not let apps block numbers.</p></article>
       </section>
 
-      <section className="privacy-section" id="privacy"><div className="privacy-inner content-width"><div className="privacy-mark" aria-hidden="true"><Image src="/logo-icon.png" alt="" width={92} height={92} /></div><div><p className="eyebrow">Android privacy</p><h2>Your core check stays on your phone.</h2><p>The Android app has no INTERNET permission, so it cannot send your scans to a server. Verdicts are computed on-device. The separate web scanner is online and processes what you submit.</p></div><span className="privacy-seal">NO INTERNET<br />PERMISSION</span></div></section>
+      <section className="privacy-section" id="privacy" data-reveal><div className="privacy-inner content-width"><div className="privacy-mark" aria-hidden="true"><Image src="/logo-icon.png" alt="" width={92} height={92} /></div><div><p className="eyebrow">Android privacy</p><h2>Your core check stays on your phone.</h2><p>The Android app has no INTERNET permission, so it cannot send your scans to a server. Verdicts are computed on-device. The separate web scanner is online and processes what you submit. SMS and call access is requested only when you opt in to Bomb Shield.</p></div><span className="privacy-seal">NO INTERNET<br />PERMISSION</span></div></section>
 
-      <section className="language-section content-width"><div><p className="eyebrow">Made for the way you speak</p><h2>English. हिंदी. Hinglish.</h2><p>Check suspicious content in English, Hindi and Hinglish, with the evidence shown in context.</p></div><div className="language-specimens" aria-label="Supported languages"><span>“Verify now”</span><span>“अभी पुष्टि करें”</span><span>“Abhi verify karo”</span></div></section>
+      <section className="language-section content-width" data-reveal><div><p className="eyebrow">Made for the way you speak</p><h2>English. हिंदी. Hinglish.</h2><p>Check suspicious content in English, Hindi and Hinglish, with the evidence shown in context.</p></div><div className="language-specimens" aria-label="Supported languages"><span>“Verify now”</span><span>“अभी पुष्टि करें”</span><span>“Abhi verify karo”</span></div></section>
 
-      <section className="faq-section content-width" id="faq"><div className="section-heading"><p className="eyebrow">Good to know</p><h2>Questions, answered.</h2></div><div className="faq-list">{faq.map(([question, answer]) => <details className="faq-item" key={question}><summary>{question}<span aria-hidden="true">＋</span></summary><p>{answer}</p></details>)}</div></section>
+      <section className="faq-section content-width" id="faq" data-reveal><div className="section-heading"><p className="eyebrow">Good to know</p><h2>Questions, answered.</h2></div><div className="faq-list">{faq.map(([question, answer]) => <details className="faq-item" key={question}><summary>{question}<span aria-hidden="true">＋</span></summary><p>{answer}</p></details>)}</div></section>
 
       <section className="install-band"><div className="install-inner content-width"><div><p className="eyebrow">Android app · version {manifest.version}</p><h2>Take the pause with you.</h2><p>Download the APK directly. Compare its SHA-256 with the release details before installing.</p><a className="button button-primary" href={manifest.downloadUrl} download>Download APK for Android <span aria-hidden="true">↓</span></a></div><div><ol className="install-steps"><li><span>01</span><p>Download the APK from this page.</p></li><li><span>02</span><p>If Android asks, allow your browser to install apps for this installation.</p></li><li><span>03</span><p>Compare the file’s SHA-256 below, then follow Android’s install prompts.</p></li></ol><dl className="install-facts"><div><dt>File size</dt><dd>{formatBytes(manifest.sizeBytes)}</dd></div><div><dt>Minimum Android</dt><dd>{manifest.minimumAndroidVersion} or newer</dd></div><div><dt>SHA-256</dt><dd>{manifest.sha256}</dd></div></dl></div></div></section>
 
