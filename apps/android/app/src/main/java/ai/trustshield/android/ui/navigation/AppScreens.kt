@@ -483,7 +483,8 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
     var recognitionLanguageStatus by remember { mutableStateOf<String?>(null) }
     val prefs = LocalUserPreferences.current
     val sink = LocalPreferencesSink.current
-    val speechRoute = remember(prefs.voiceRecognition) {
+    val currentVoiceRecognition by rememberUpdatedState(prefs.voiceRecognition)
+    val speechRoute = remember {
         OfflineSpeechPolicy(
             networkReachable = networkIsValidated(context),
             userSelected = prefs.voiceRecognition == VoiceRecognitionChoice.OFFLINE_ONLY,
@@ -510,7 +511,7 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
             } else {
                 AndroidSpeechRecognizerHandle(
                     context.applicationContext, session, capability, recognitionLanguageState.value,
-                    preferOffline = prefs.voiceRecognition != VoiceRecognitionChoice.ONLINE_PREFERRED,
+                    preferOffline = currentVoiceRecognition != VoiceRecognitionChoice.ONLINE_PREFERRED,
                     finalResultListener = { text, confidence -> created.onPlatformFinalResult(text, confidence) },
                 ) { code ->
                     speechRoute.platformError(code)
@@ -788,15 +789,6 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
             if (utterance.isFinal) {
                 scriptDetector.observeFinal(utterance.text)?.let { detectedTag ->
                     recognitionLanguage = detectedTag
-                    val mic = if (micGranted) SpeechMicPermission.Granted else SpeechMicPermission.Denied
-                    capability = SpeechCapabilityRules.evaluate(SpeechCapabilityProbe.probe(context, mic), detectedTag)
-                    host.onCapability(
-                        consent,
-                        capability,
-                        if (micGranted) ai.trustshield.android.ui.call.MicPermission.GRANTED
-                        else ai.trustshield.android.ui.call.MicPermission.DENIED,
-                        offlineEngineSelected = offlineMode,
-                    )
                     val languageName = if (detectedTag == SpeechLanguage.EN_IN) {
                         ToneCopy("English", "English", "\u0905\u0902\u0917\u094d\u0930\u0947\u091c\u093c\u0940").forLanguage(selectedLanguage)
                     } else {
