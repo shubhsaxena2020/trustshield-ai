@@ -69,6 +69,8 @@ object BombShieldRuntime {
     private const val KEY_ENABLED = "enabled"
 }
 
+// Kept for the flood engine and tests, but no longer registered in the manifest: declaring RECEIVE_SMS makes
+// Google Play Protect block sideloaded installs. The SMS side of Bomb Shield is demo-only in this build.
 class BombSmsReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action != "android.provider.Telephony.SMS_RECEIVED" || !BombShieldRuntime.isEnabled(context)) return

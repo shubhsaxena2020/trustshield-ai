@@ -3,7 +3,6 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.RECEIVE_SMS" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.READ_CALL_LOG" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
@@ -44,14 +43,7 @@
                 <data android:mimeType="image/*" />
             </intent-filter>
         </activity>
-        <receiver
-            android:name=".core.flood.BombSmsReceiver"
-            android:enabled="true"
-            android:exported="true"
-            android:permission="android.permission.BROADCAST_SMS">
-            <intent-filter android:priority="500">
-                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
-            </intent-filter>
-        </receiver>
+        <!-- No SMS receiver: Google Play Protect blocks sideloaded installs of apps that declare RECEIVE_SMS
+             (India "enhanced fraud protection"). Message-flood detection is demo-only until a Play-listed release. -->
     </application>
 </manifest>

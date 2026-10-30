@@ -511,9 +511,7 @@ fun ScanScreen(
                 .padding(horizontal = TsTokens.SpacingLg, vertical = TsTokens.SpacingMd),
             verticalArrangement = Arrangement.spacedBy(TsTokens.SpacingSm)
         ) {
-            Text(copy(ScanCopy.title), style = MaterialTheme.typography.headlineSmall, modifier = Modifier.semantics { heading() })
-            Text(copy(ScanCopy.subtitle), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            NoticeLine(text = copy(ScanCopy.offlineNotice))
+            Text(copy(ScanCopy.title), style = MaterialTheme.typography.titleLarge, modifier = Modifier.semantics { heading() })
 
             Surface(
                 color = MaterialTheme.colorScheme.surface,
@@ -560,6 +558,8 @@ fun ScanScreen(
                 }
             }
 
+            Text(copy(ScanCopy.subtitle), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            NoticeLine(text = copy(ScanCopy.offlineNotice))
             Text(copy(ScanCopy.examplesHeading), style = MaterialTheme.typography.titleSmall, modifier = Modifier.semantics { heading() })
             Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(TsTokens.SpacingSm)) {
                 examples.forEach { example ->

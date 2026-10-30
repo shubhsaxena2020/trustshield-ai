@@ -103,6 +103,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
+        ai.trustshield.android.core.analysis.RulesWarmup.start()
         super.onCreate(savedInstanceState)
         val retainedAcrossConfiguration = lastCustomNonConfigurationInstance is RetainedUiState
         retainedUi = lastCustomNonConfigurationInstance as? RetainedUiState ?: RetainedUiState()

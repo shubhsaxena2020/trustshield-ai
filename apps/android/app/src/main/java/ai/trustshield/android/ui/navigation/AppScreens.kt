@@ -405,15 +405,16 @@ private fun HomeRouteHost(
         onSharedImageConsumed()
     }
     Column(modifier = Modifier.fillMaxSize()) {
-        Card(
+        // One compact line instead of a tall card: at large font sizes the old card pushed the message box off screen.
+        TextButton(
             onClick = { nav.navigate(AppRoute.BOMB_SHIELD) },
-            shape = MaterialTheme.shapes.large,
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp).heightIn(min = 48.dp)
         ) {
-            Column(Modifier.fillMaxWidth().padding(16.dp)) {
-                Text(ToneCopy("Bomb Shield", "Bomb Shield", "बम शील्ड").forLanguage(language), style = MaterialTheme.typography.titleMedium)
-                Text(ToneCopy("SMS aur baar-baar aane wali calls ke flood ko dekhein.", "See message and repeated-call flood alerts.", "संदेश और बार-बार आने वाली कॉल के अलर्ट देखें।").forLanguage(language), style = MaterialTheme.typography.bodySmall)
-            }
+            Text(
+                ToneCopy("Bomb Shield · call flood alerts", "Bomb Shield · call flood alerts", "बम शील्ड · कॉल फ्लड अलर्ट").forLanguage(language),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            )
         }
         ScanScreen(
             state = scanState,

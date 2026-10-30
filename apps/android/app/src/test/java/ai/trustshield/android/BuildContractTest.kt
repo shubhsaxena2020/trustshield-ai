@@ -41,7 +41,6 @@ class BuildContractTest {
             "android.permission.CAMERA",
             "android.permission.RECORD_AUDIO",
             "android.permission.ACCESS_NETWORK_STATE",
-            "android.permission.RECEIVE_SMS",
             "android.permission.READ_PHONE_STATE",
             "android.permission.READ_CALL_LOG",
             "android.permission.POST_NOTIFICATIONS"
