@@ -423,6 +423,8 @@ private fun HomeRouteHost(
             onEvent = onScanEvent,
             onCheck = onCheck,
             onPickImage = { actions.launch() },
+            onOpenQr = { nav.navigate(AppRoute.QR_GUARD) },
+            onOpenCall = { nav.navigate(AppRoute.CALL_SHIELD) },
             historyEntries = historyEntries,
             onClearHistory = onClearHistory,
             modifier = Modifier.weight(1f),

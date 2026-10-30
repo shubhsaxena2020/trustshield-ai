@@ -24,6 +24,18 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -149,6 +161,10 @@ internal object ScanCopy {
     )
 
     val imageAction = ToneCopy("Screenshot se check karein", "Check from a screenshot")
+    val attachDescription = ToneCopy("Photo, QR ya aur options jodein", "Add a photo, QR or more")
+    val attachPhoto = ToneCopy("Photo ya screenshot", "Photo or screenshot")
+    val attachQr = ToneCopy("QR code scan karein", "Scan a QR code")
+    val attachCall = ToneCopy("Call Shield kholein", "Open Call Shield")
     val imageActionDescription = ToneCopy(
         "Screenshot chunein; OCR text padh kar wahi local check chalega",
         "Pick a screenshot; OCR reads the text and the same local check runs"
@@ -492,6 +508,8 @@ fun ScanScreen(
     onCheck: (String) -> Unit,
     onPickImage: () -> Unit,
     onOpenSettings: () -> Unit = {},
+    onOpenQr: () -> Unit = {},
+    onOpenCall: () -> Unit = {},
     historyEntries: List<MetadataCheck> = emptyList(),
     onClearHistory: () -> Unit = {},
     modifier: Modifier = Modifier,
@@ -501,7 +519,12 @@ fun ScanScreen(
     val copy: (ToneCopy) -> String = { it.text(selectedLanguage) }
     val examples = ScanExamples().entries
 
+    var menuOpen by remember { mutableStateOf(false) }
+    val onSurface = MaterialTheme.colorScheme.onSurface
+    val sendEnabled = state.canCheck
+
     Column(modifier = modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+        // Conversation-style area: what the app is for, quick examples, recent checks.
         Column(
             modifier = Modifier
                 .weight(1f)
@@ -509,94 +532,108 @@ fun ScanScreen(
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = TsTokens.SpacingLg, vertical = TsTokens.SpacingMd),
-            verticalArrangement = Arrangement.spacedBy(TsTokens.SpacingSm)
+            verticalArrangement = Arrangement.spacedBy(TsTokens.SpacingMd)
         ) {
-            Text(copy(ScanCopy.title), style = MaterialTheme.typography.titleLarge, modifier = Modifier.semantics { heading() })
-
-            Surface(
-                color = MaterialTheme.colorScheme.surface,
-                shape = RoundedCornerShape(TsTokens.CornerLarge),
-                tonalElevation = 2.dp,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(Modifier.padding(TsTokens.SpacingMd), verticalArrangement = Arrangement.spacedBy(TsTokens.SpacingSm)) {
-                    OutlinedTextField(
-                        value = state.text,
-                        onValueChange = { onEvent(ScanInputEvent.TextChanged(it)) },
-                        modifier = Modifier.fillMaxWidth(),
-                        label = { Text(copy(ScanCopy.fieldLabel)) },
-                        placeholder = { Text(copy(ScanCopy.fieldPlaceholder), style = MaterialTheme.typography.bodyMedium) },
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedLabelColor = MaterialTheme.colorScheme.onSurface,
-                            focusedBorderColor = MaterialTheme.colorScheme.outline,
-                            cursorColor = MaterialTheme.colorScheme.onSurface
-                        ),
-                        minLines = 3,
-                        maxLines = 6,
-                        isError = state.error != null,
-                        supportingText = {
-                            Column(verticalArrangement = Arrangement.spacedBy(TsTokens.SpacingXs)) {
-                                Text(state.counterLabel, style = MaterialTheme.typography.bodySmall, modifier = Modifier.semantics {
-                                    contentDescription = copy(ScanCopy.counterPrefix) + " " + state.counterLabel
-                                })
-                                if (state.truncationNoticeVisible) Text(copy(ScanCopy.truncationNotice), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            }
-                        }
-                    )
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(TsTokens.SpacingSm)) {
-                        OutlinedButton(colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
-                            onClick = { onEvent(ScanInputEvent.PasteRequested(clipboardText())) },
-                            modifier = Modifier.weight(1f).heightIn(min = TsTokens.MinTouchTarget).semantics { contentDescription = copy(ScanCopy.pasteActionDescription) }
-                        ) { Text(copy(ScanCopy.pasteAction), style = MaterialTheme.typography.labelLarge) }
-                        OutlinedButton(colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
-                            onClick = { onEvent(ScanInputEvent.ClearRequested) },
-                            enabled = state.canClear,
-                            modifier = Modifier.weight(1f).heightIn(min = TsTokens.MinTouchTarget).semantics { contentDescription = copy(ScanCopy.clearActionDescription) }
-                        ) { Text(copy(ScanCopy.clearAction), style = MaterialTheme.typography.labelLarge) }
-                    }
-                    state.error?.let { ErrorBanner(copy(ScanCopy.errorLabel), copy(it.copy), copy(ScanCopy.errorDismissHint)) }
-                }
-            }
-
-            Text(copy(ScanCopy.subtitle), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            NoticeLine(text = copy(ScanCopy.offlineNotice))
+            Text(copy(ScanCopy.title), style = MaterialTheme.typography.headlineSmall, modifier = Modifier.semantics { heading() })
+            Text(copy(ScanCopy.subtitle), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Text(copy(ScanCopy.examplesHeading), style = MaterialTheme.typography.titleSmall, modifier = Modifier.semantics { heading() })
             Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(TsTokens.SpacingSm)) {
                 examples.forEach { example ->
                     val label = example.label.text(selectedLanguage)
                     AssistChip(
                         onClick = { onEvent(ScanInputEvent.ExampleSelected(example.text)) },
-                        label = { Text(label, style = MaterialTheme.typography.labelMedium) },
+                        label = { Text(label, style = MaterialTheme.typography.labelLarge) },
                         modifier = Modifier.heightIn(min = TsTokens.MinTouchTarget).semantics { contentDescription = copy(ScanCopy.exampleChipDescription) + " " + label }
                     )
                 }
             }
+            state.error?.let { ErrorBanner(copy(ScanCopy.errorLabel), copy(it.copy), copy(ScanCopy.errorDismissHint)) }
+            NoticeLine(text = copy(ScanCopy.offlineNotice))
             Text(copy(ScanCopy.privacyNote), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Text(copy(ScanCopy.shareEntryNote), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            OutlinedButton(colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface), onClick = onPickImage, modifier = Modifier.fillMaxWidth().heightIn(min = TsTokens.MinTouchTarget).semantics { contentDescription = copy(ScanCopy.imageActionDescription) }) {
-                Text(copy(ScanCopy.imageAction), style = MaterialTheme.typography.labelLarge)
-            }
-            Text(copy(ScanCopy.imageNote), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             RecentChecks(entries = historyEntries, language = selectedLanguage, onClear = onClearHistory, copy = copy)
         }
+
+        // Composer pinned to the bottom, like a chat app: [ + ] [ message ........ ] [ send ]
         Column(
             modifier = Modifier
                 .widthIn(max = 560.dp)
                 .fillMaxWidth()
-                .padding(horizontal = TsTokens.SpacingLg, vertical = TsTokens.SpacingSm),
+                .imePadding()
+                .padding(horizontal = TsTokens.SpacingMd, vertical = TsTokens.SpacingSm),
             verticalArrangement = Arrangement.spacedBy(TsTokens.SpacingXs)
         ) {
-            Button(
-                onClick = {
-                    val target = state.checkText()
-                    onEvent(ScanInputEvent.CheckRequested)
-                    if (target != null) onCheck(target)
-                },
-                enabled = state.canCheck,
-                modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp).testTag("check_button").semantics { contentDescription = copy(ScanCopy.checkActionDescription) }
-            ) { Text(copy(ScanCopy.checkAction), style = MaterialTheme.typography.labelLarge) }
-            Text(copy(ScanCopy.checkOfflineNote), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            state.checkBlockedReason?.let { Text(copy(it.copy), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+            if (state.text.isNotEmpty()) {
+                Text(
+                    state.counterLabel,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(start = TsTokens.SpacingMd).semantics { contentDescription = copy(ScanCopy.counterPrefix) + " " + state.counterLabel }
+                )
+                if (state.truncationNoticeVisible) Text(copy(ScanCopy.truncationNotice), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(start = TsTokens.SpacingMd))
+            }
+            Surface(
+                shape = RoundedCornerShape(28.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                tonalElevation = 3.dp,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 6.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.Bottom,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Box {
+                        Surface(
+                            onClick = { menuOpen = true },
+                            shape = CircleShape,
+                            color = Color.Transparent,
+                            modifier = Modifier.size(48.dp).semantics { contentDescription = copy(ScanCopy.attachDescription) }
+                        ) { Box(contentAlignment = Alignment.Center) { Text("+", style = MaterialTheme.typography.headlineMedium, color = onSurface) } }
+                        DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                            DropdownMenuItem(text = { Text(copy(ScanCopy.attachPhoto)) }, onClick = { menuOpen = false; onPickImage() })
+                            DropdownMenuItem(text = { Text(copy(ScanCopy.pasteAction)) }, onClick = { menuOpen = false; onEvent(ScanInputEvent.PasteRequested(clipboardText())) })
+                            DropdownMenuItem(text = { Text(copy(ScanCopy.attachQr)) }, onClick = { menuOpen = false; onOpenQr() })
+                            DropdownMenuItem(text = { Text(copy(ScanCopy.attachCall)) }, onClick = { menuOpen = false; onOpenCall() })
+                            if (state.canClear) DropdownMenuItem(text = { Text(copy(ScanCopy.clearAction)) }, onClick = { menuOpen = false; onEvent(ScanInputEvent.ClearRequested) })
+                        }
+                    }
+                    TextField(
+                        value = state.text,
+                        onValueChange = { onEvent(ScanInputEvent.TextChanged(it)) },
+                        modifier = Modifier.weight(1f).heightIn(min = 48.dp),
+                        placeholder = { Text(copy(ScanCopy.fieldPlaceholder), style = MaterialTheme.typography.bodyLarge) },
+                        textStyle = MaterialTheme.typography.bodyLarge,
+                        minLines = 1,
+                        maxLines = 6,
+                        isError = state.error != null,
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            disabledContainerColor = Color.Transparent,
+                            errorContainerColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            disabledIndicatorColor = Color.Transparent,
+                            errorIndicatorColor = Color.Transparent,
+                            cursorColor = onSurface
+                        )
+                    )
+                    Surface(
+                        onClick = {
+                            val target = state.checkText()
+                            onEvent(ScanInputEvent.CheckRequested)
+                            if (target != null) onCheck(target)
+                        },
+                        enabled = sendEnabled,
+                        shape = CircleShape,
+                        color = if (sendEnabled) onSurface else MaterialTheme.colorScheme.outlineVariant,
+                        contentColor = if (sendEnabled) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(48.dp).testTag("check_button").semantics { contentDescription = copy(ScanCopy.checkActionDescription) }
+                    ) { Box(contentAlignment = Alignment.Center) { Text("↑", style = MaterialTheme.typography.headlineSmall) } }
+                }
+            }
+            state.checkBlockedReason?.let { Text(copy(it.copy), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(start = TsTokens.SpacingMd)) }
+            Text(copy(ScanCopy.checkOfflineNote), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(start = TsTokens.SpacingMd))
         }
     }
 }
