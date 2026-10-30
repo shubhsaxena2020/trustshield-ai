@@ -2,9 +2,7 @@ package ai.trustshield.android.ui.onboarding
 
 import android.animation.ValueAnimator
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -14,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
@@ -25,6 +24,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -58,7 +58,7 @@ fun OnboardingScreen(
     val reducedMotion = !ValueAnimator.areAnimatorsEnabled()
 
     Column(
-        modifier = modifier.fillMaxSize().padding(horizontal = 24.dp, vertical = 20.dp),
+        modifier = modifier.fillMaxSize().safeDrawingPadding().padding(horizontal = 24.dp, vertical = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
@@ -66,14 +66,16 @@ fun OnboardingScreen(
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.onSurface
         )
-        HorizontalPager(state = pager, modifier = Modifier.weight(1f)) { page ->
+        HorizontalPager(state = pager, modifier = Modifier.weight(1f).fillMaxWidth()) { page ->
+            // Top-aligned and scrollable: at large font sizes the content is taller than the pager, and a
+            // centred column cut its top and bottom. This keeps the icon at the top and lets the rest scroll.
             Column(
-                modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(vertical = 12.dp),
+                modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(top = 8.dp, bottom = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+                verticalArrangement = Arrangement.Top
             ) {
-                OnboardingIllustration(page, MaterialTheme.colorScheme.onSurface, MaterialTheme.colorScheme.secondaryContainer)
-                Spacer(Modifier.height(28.dp))
+                OnboardingIllustration(page, MaterialTheme.colorScheme.onSurface, MaterialTheme.colorScheme.secondaryContainer, MaterialTheme.colorScheme.surface)
+                Spacer(Modifier.height(20.dp))
                 Text(
                     text = title(page).forLanguage(resolved),
                     style = MaterialTheme.typography.headlineSmall,
@@ -123,10 +125,9 @@ fun OnboardingScreen(
             )
         }
         if (pager.currentPage < 2) {
-            OutlinedButton(colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
-                onClick = onComplete,
-                modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp)
-            ) { Text(ToneCopy("Abhi nahi", "Skip", "छोड़ें").forLanguage(resolved)) }
+            TextButton(onClick = onComplete, modifier = Modifier.heightIn(min = 48.dp)) {
+                Text(ToneCopy("Abhi nahi", "Skip", "??????").forLanguage(resolved))
+            }
         }
     }
 }
@@ -177,18 +178,18 @@ private fun body(page: Int) = when (page) {
         "जाँच इसी डिवाइस पर होती है। इतिहास में केवल नतीजा और स्कोर सहेजे जाते हैं।"
     )
     else -> ToneCopy(
-        "Bhasha chunein. Camera ya microphone permission feature kholne par maangi jayegi. Bomb Shield ki SMS/call permissions uske disclosure ke baad opt-in karne par hi maangi jayengi.",
-        "Choose a language. Camera or microphone access is requested only when you open that feature. Bomb Shield asks for SMS/call permissions only after its disclosure and your opt-in.",
-        "भाषा चुनें। कैमरा या माइक्रोफ़ोन की अनुमति सुविधा खोलने पर माँगी जाती है। Bomb Shield की SMS/कॉल अनुमति उसके खुलासे के बाद आपकी सहमति पर ही माँगी जाएगी।"
+        "Bhasha chunein. Camera ya microphone permission feature kholne par maangi jayegi. Bomb Shield ki call permissions uske disclosure ke baad opt-in karne par hi maangi jayengi.",
+        "Choose a language. Camera or microphone access is requested only when you open that feature. Bomb Shield asks for call permissions only after its disclosure and your opt-in.",
+        "भाषा चुनें। कैमरा या माइक्रोफ़ोन की अनुमति सुविधा खोलने पर माँगी जाती है। Bomb Shield की कॉल अनुमति उसके खुलासे के बाद आपकी सहमति पर ही माँगी जाएगी।"
     )
 }
 
 @Composable
-private fun OnboardingIllustration(page: Int, primary: Color, container: Color) {
+private fun OnboardingIllustration(page: Int, primary: Color, container: Color, mark: Color) {
     Surface(
         color = container,
         shape = RoundedCornerShape(32.dp),
-        modifier = Modifier.size(190.dp)
+        modifier = Modifier.size(150.dp)
     ) {
         Canvas(Modifier.fillMaxSize().padding(34.dp)) {
             val center = Offset(size.width / 2, size.height / 2)
@@ -204,20 +205,20 @@ private fun OnboardingIllustration(page: Int, primary: Color, container: Color) 
                         close()
                     }
                     drawPath(path, primary)
-                    drawLine(Color.White, Offset(size.width * .38f, size.height * .48f), Offset(size.width * .47f, size.height * .57f), 4.dp.toPx())
-                    drawLine(Color.White, Offset(size.width * .47f, size.height * .57f), Offset(size.width * .65f, size.height * .38f), 4.dp.toPx())
+                    drawLine(mark, Offset(size.width * .38f, size.height * .48f), Offset(size.width * .47f, size.height * .57f), 4.dp.toPx())
+                    drawLine(mark, Offset(size.width * .47f, size.height * .57f), Offset(size.width * .65f, size.height * .38f), 4.dp.toPx())
                 }
                 1 -> {
                     drawCircle(primary.copy(alpha = .12f), size.minDimension * .46f, center)
                     drawRoundRect(primary, Offset(size.width * .22f, size.height * .42f), Size(size.width * .56f, size.height * .42f), cornerRadius = androidx.compose.ui.geometry.CornerRadius(16.dp.toPx()))
                     drawArc(primary, 180f, 180f, false, Offset(size.width * .33f, size.height * .16f), Size(size.width * .34f, size.height * .56f), style = Stroke(5.dp.toPx()))
-                    drawCircle(Color.White, 4.dp.toPx(), Offset(center.x, size.height * .59f))
+                    drawCircle(mark, 4.dp.toPx(), Offset(center.x, size.height * .59f))
                 }
                 else -> {
                     drawCircle(primary.copy(alpha = .12f), size.minDimension * .46f, center)
                     drawRoundRect(primary, Offset(size.width * .18f, size.height * .2f), Size(size.width * .64f, size.height * .6f), cornerRadius = androidx.compose.ui.geometry.CornerRadius(18.dp.toPx()))
                     for (index in 0..2) {
-                        drawLine(Color.White.copy(alpha = .92f), Offset(size.width * .3f, size.height * (.36f + .14f * index)), Offset(size.width * .7f, size.height * (.36f + .14f * index)), 3.dp.toPx())
+                        drawLine(mark.copy(alpha = .92f), Offset(size.width * .3f, size.height * (.36f + .14f * index)), Offset(size.width * .7f, size.height * (.36f + .14f * index)), 3.dp.toPx())
                     }
                 }
             }

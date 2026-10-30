@@ -66,14 +66,12 @@ fun BombShieldScreen(language: AppLanguage, onBack: () -> Unit = {}) {
     var disclosure by remember { mutableStateOf(false) }
     var enabled by remember { mutableStateOf(BombShieldRuntime.isEnabled(context)) }
     var permissionMissing by remember { mutableStateOf(false) }
-    val smsPermission = ContextCompat.checkSelfPermission(context, Manifest.permission.RECEIVE_SMS) == PackageManager.PERMISSION_GRANTED
+    val smsPermission = true // SMS access is not requested: sideloaded apps declaring RECEIVE_SMS are blocked by Play Protect in India
     val callPermissions = ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED &&
         ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CALL_LOG) == PackageManager.PERMISSION_GRANTED
     val samples by BombShieldRuntime.events.collectAsState()
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { grants ->
-        val allGranted = grants.values.all { it } &&
-            ContextCompat.checkSelfPermission(context, Manifest.permission.RECEIVE_SMS) == PackageManager.PERMISSION_GRANTED &&
-            ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED &&
+        val allGranted = ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED &&
             ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CALL_LOG) == PackageManager.PERMISSION_GRANTED
         enabled = allGranted
         permissionMissing = !allGranted
@@ -173,10 +171,10 @@ fun BombShieldScreen(language: AppLanguage, onBack: () -> Unit = {}) {
     if (disclosure) AlertDialog(
         onDismissRequest = { disclosure = false },
         title = { Text(UiCopy("Bomb Shield permission", "Bomb Shield permission", "Bomb Shield अनुमति")) },
-        text = { Text(UiCopy("Aane wale SMS sender aur OTP jaisa pattern check hoga. Call state aur recent outcome sirf is screen ke khule hone par check honge. SMS text save nahi hota; grouping ke liye number ka short hash, count aur samay sirf memory mein rehte hain. Kuch phone se bahar nahi jaata. Ab permissions maangi jayengi.", "Incoming SMS sender and an OTP-pattern flag are checked; call state and recent outcomes are read only while this screen is open. Nothing leaves this phone. Message text is never saved; a short number hash, counts and timestamps stay in memory only. Permissions are requested now.", "\u0906\u0928\u0947 \u0935\u093e\u0932\u0947 SMS \u0915\u093e \u092a\u094d\u0930\u0947\u0937\u0915 \u0914\u0930 OTP-\u091c\u0948\u0938\u093e \u0938\u0902\u0915\u0947\u0924 \u091c\u093e\u0901\u091a\u093e \u091c\u093e\u090f\u0917\u093e; \u0915\u0949\u0932 \u0915\u0940 \u0938\u094d\u0925\u093f\u0924\u093f \u0914\u0930 \u0939\u093e\u0932 \u0915\u0947 \u092a\u0930\u093f\u0923\u093e\u092e \u0938\u093f\u0930\u094d\u092b \u092f\u0939 \u0938\u094d\u0915\u094d\u0930\u0940\u0928 \u0916\u0941\u0932\u0940 \u0939\u094b\u0928\u0947 \u092a\u0930 \u092a\u0922\u093c\u0947 \u091c\u093e\u090f\u0901\u0917\u0947\u0964 \u0915\u0941\u091b \u092d\u0940 \u092b\u093c\u094b\u0928 \u0938\u0947 \u092c\u093e\u0939\u0930 \u0928\u0939\u0940\u0902 \u091c\u093e\u0924\u093e\u0964 \u0938\u0902\u0926\u0947\u0936 \u0915\u093e \u092a\u093e\u0920 \u0938\u0939\u0947\u091c\u093e \u0928\u0939\u0940\u0902 \u091c\u093e\u0924\u093e; \u0928\u0902\u092c\u0930 \u0915\u093e \u091b\u094b\u091f\u093e \u0939\u0948\u0936, \u0917\u093f\u0928\u0924\u0940 \u0914\u0930 \u0938\u092e\u092f \u0915\u0947\u0935\u0932 \u092e\u0947\u092e\u094b\u0930\u0940 \u092e\u0947\u0902 \u0930\u0939\u0924\u0947 \u0939\u0948\u0902\u0964 \u0905\u0928\u0941\u092e\u0924\u093f\u092f\u093e\u0901 \u0905\u092c \u092e\u093e\u0901\u0917\u0940 \u091c\u093e\u090f\u0901\u0917\u0940.")) },
+        text = { Text(UiCopy("Call state aur recent outcome sirf is screen ke khule hone par check honge. SMS permission nahi maangi jaati; SMS bomb ka sirf demo hai. Number ka short hash, count aur samay sirf memory mein rehte hain. Kuch phone se bahar nahi jaata. Ab call permissions maangi jayengi.", "Call state and recent outcomes are read only while this screen is open. SMS access is not requested; the SMS flood is a demo only. A short number hash, counts and timestamps stay in memory only. Nothing leaves this phone. Call permissions are requested now.", "कॉल की स्थिति और हाल के परिणाम सिर्फ़ यह स्क्रीन खुली होने पर पढ़े जाएँगे। SMS की अनुमति नहीं माँगी जाती; SMS बम केवल डेमो है। नंबर का छोटा हैश, गिनती और समय केवल मेमोरी में रहते हैं। कुछ भी फ़ोन से बाहर नहीं जाता। कॉल अनुमतियाँ अब माँगी जाएँगी।")) },
         confirmButton = { TextButton(onClick = {
             disclosure = false
-            val requested = mutableListOf(Manifest.permission.RECEIVE_SMS, Manifest.permission.READ_PHONE_STATE, Manifest.permission.READ_CALL_LOG)
+            val requested = mutableListOf(Manifest.permission.READ_PHONE_STATE, Manifest.permission.READ_CALL_LOG)
             if (android.os.Build.VERSION.SDK_INT >= 33) requested += Manifest.permission.POST_NOTIFICATIONS
             permissionLauncher.launch(requested.toTypedArray())
         }) { Text(UiCopy("Samajh gaya", "Continue", "आगे बढ़ें")) } },

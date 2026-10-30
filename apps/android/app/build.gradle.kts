@@ -23,21 +23,12 @@ android {
 
     defaultConfig {
         applicationId = "ai.trustshield.android"
-        minSdk = 26
+        minSdk = 23
         targetSdk = 36
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = 6
+        versionName = "0.2.4"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        ndk { abiFilters += setOf("arm64-v8a", "x86_64") }
-    }
-
-    splits {
-        abi {
-            isEnable = true
-            reset()
-            include("arm64-v8a", "x86_64")
-            isUniversalApk = true
-        }
+        ndk { abiFilters += setOf("arm64-v8a", "armeabi-v7a", "x86_64", "x86") }
     }
 
     signingConfigs {
@@ -46,6 +37,9 @@ android {
             storePassword = releaseSigningProperties.getProperty("storePassword")
             keyAlias = releaseSigningProperties.getProperty("keyAlias")
             keyPassword = releaseSigningProperties.getProperty("keyPassword")
+            enableV1Signing = true
+            enableV2Signing = true
+            enableV3Signing = true
         }
     }
 
@@ -68,6 +62,7 @@ android {
     }
     kotlinOptions { jvmTarget = "17" }
     buildFeatures { compose = true }
+    packaging { jniLibs.useLegacyPackaging = true }
 }
 
 // The 42 MB model is intentionally kept out of Git. This task fetches the pinned Apache-2.0

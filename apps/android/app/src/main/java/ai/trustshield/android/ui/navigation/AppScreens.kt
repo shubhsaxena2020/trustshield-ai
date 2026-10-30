@@ -122,6 +122,7 @@ import ai.trustshield.android.input.speech.MicPermission as SpeechMicPermission
 import ai.trustshield.android.input.speech.UtteranceSink
 import ai.trustshield.android.input.speech.AndroidSpeechRecognizerHandle
 import ai.trustshield.android.input.speech.OfflineSpeechPolicy
+import ai.trustshield.android.input.speech.OfflineSpeechFailure
 import ai.trustshield.android.input.speech.VoskSpeechRecognizerHandle
 import ai.trustshield.android.input.speech.RecognizerErrorCode
 import ai.trustshield.android.input.speech.SpeechEvent
@@ -405,15 +406,16 @@ private fun HomeRouteHost(
         onSharedImageConsumed()
     }
     Column(modifier = Modifier.fillMaxSize()) {
-        Card(
+        // One compact line instead of a tall card: at large font sizes the old card pushed the message box off screen.
+        TextButton(
             onClick = { nav.navigate(AppRoute.BOMB_SHIELD) },
-            shape = MaterialTheme.shapes.large,
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp).heightIn(min = 48.dp)
         ) {
-            Column(Modifier.fillMaxWidth().padding(16.dp)) {
-                Text(ToneCopy("Bomb Shield", "Bomb Shield", "बम शील्ड").forLanguage(language), style = MaterialTheme.typography.titleMedium)
-                Text(ToneCopy("SMS aur baar-baar aane wali calls ke flood ko dekhein.", "See message and repeated-call flood alerts.", "संदेश और बार-बार आने वाली कॉल के अलर्ट देखें।").forLanguage(language), style = MaterialTheme.typography.bodySmall)
-            }
+            Text(
+                ToneCopy("Bomb Shield · call flood alerts", "Bomb Shield · call flood alerts", "बम शील्ड · कॉल फ्लड अलर्ट").forLanguage(language),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            )
         }
         ScanScreen(
             state = scanState,
@@ -422,6 +424,8 @@ private fun HomeRouteHost(
             onEvent = onScanEvent,
             onCheck = onCheck,
             onPickImage = { actions.launch() },
+            onOpenQr = { nav.navigate(AppRoute.QR_GUARD) },
+            onOpenCall = { nav.navigate(AppRoute.CALL_SHIELD) },
             historyEntries = historyEntries,
             onClearHistory = onClearHistory,
             modifier = Modifier.weight(1f),
@@ -480,7 +484,8 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
     var recognitionLanguageStatus by remember { mutableStateOf<String?>(null) }
     val prefs = LocalUserPreferences.current
     val sink = LocalPreferencesSink.current
-    val speechRoute = remember(prefs.voiceRecognition) {
+    val currentVoiceRecognition by rememberUpdatedState(prefs.voiceRecognition)
+    val speechRoute = remember {
         OfflineSpeechPolicy(
             networkReachable = networkIsValidated(context),
             userSelected = prefs.voiceRecognition == VoiceRecognitionChoice.OFFLINE_ONLY,
@@ -488,7 +493,7 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
     }
     val hostRef = remember { mutableStateOf<CallShieldHost?>(null) }
     var offlineMode by remember(speechRoute) { mutableStateOf(speechRoute.useOffline) }
-    var offlineFailureAction by remember { mutableStateOf<(() -> Unit)?>(null) }
+    val offlineFailureAction = remember { arrayOfNulls<(OfflineSpeechFailure) -> Unit>(1) }
     var capability by remember {
         mutableStateOf(SpeechCapabilityRules.evaluate(SpeechCapabilityProbe.probe(context), selectedSpeechTag))
     }
@@ -501,13 +506,13 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
                     context = context.applicationContext,
                     onPartial = { text -> handler.post { created.onPartialUtterance(text) } },
                     onFinal = { text -> handler.post { created.onUtterance(text) } },
-                    onFailure = { handler.post { offlineFailureAction?.invoke() ?: created.stop() } },
+                    onFailure = { reason -> handler.post { offlineFailureAction[0]?.invoke(reason) ?: created.stop() } },
                     onReady = { handler.post { session.onReadyForSpeech() } },
                 ).also { offlineMode = true }
             } else {
                 AndroidSpeechRecognizerHandle(
                     context.applicationContext, session, capability, recognitionLanguageState.value,
-                    preferOffline = prefs.voiceRecognition != VoiceRecognitionChoice.ONLINE_PREFERRED,
+                    preferOffline = currentVoiceRecognition != VoiceRecognitionChoice.ONLINE_PREFERRED,
                     finalResultListener = { text, confidence -> created.onPlatformFinalResult(text, confidence) },
                 ) { code ->
                     speechRoute.platformError(code)
@@ -647,7 +652,15 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
             Text(status, modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp), style = MaterialTheme.typography.bodySmall)
         }
     }
-    offlineFailureAction = { host.onStop(); offlineMode = false; state = host.state }
+    offlineFailureAction[0] = { reason ->
+        recognitionLanguageStatus = when (reason) {
+            OfflineSpeechFailure.MODEL -> "Offline speech model could not load. Free storage and try again."
+            OfflineSpeechFailure.MICROPHONE -> "Microphone could not start. Close other apps using it, then try again."
+            OfflineSpeechFailure.DECODER -> "Offline speech recognition stopped. Try the system recognizer."
+        }
+        host.onStop()
+        state = synced(host.state)
+    }
     CallShieldScreen(
         state = state,
         modifier = Modifier.weight(1f),
@@ -785,15 +798,6 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
             if (utterance.isFinal) {
                 scriptDetector.observeFinal(utterance.text)?.let { detectedTag ->
                     recognitionLanguage = detectedTag
-                    val mic = if (micGranted) SpeechMicPermission.Granted else SpeechMicPermission.Denied
-                    capability = SpeechCapabilityRules.evaluate(SpeechCapabilityProbe.probe(context, mic), detectedTag)
-                    host.onCapability(
-                        consent,
-                        capability,
-                        if (micGranted) ai.trustshield.android.ui.call.MicPermission.GRANTED
-                        else ai.trustshield.android.ui.call.MicPermission.DENIED,
-                        offlineEngineSelected = offlineMode,
-                    )
                     val languageName = if (detectedTag == SpeechLanguage.EN_IN) {
                         ToneCopy("English", "English", "\u0905\u0902\u0917\u094d\u0930\u0947\u091c\u093c\u0940").forLanguage(selectedLanguage)
                     } else {

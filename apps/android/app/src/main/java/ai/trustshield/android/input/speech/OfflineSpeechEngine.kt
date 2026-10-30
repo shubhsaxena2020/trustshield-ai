@@ -11,6 +11,7 @@ import org.vosk.Model
 import org.vosk.Recognizer
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicReference
 
 /** Minimal seams for deterministic lifecycle tests; PCM and transcript are never written to disk. */
 internal interface PcmSource {
@@ -30,6 +31,8 @@ internal fun interface VoskDecoderFactory { fun open(): VoskDecoder }
 internal fun interface SpeechTextSink {
     fun onText(text: String, isFinal: Boolean)
 }
+
+internal enum class OfflineSpeechFailure { MODEL, MICROPHONE, DECODER }
 
 /** Publishes a model directory only after the copy and its byte count have been verified. */
 internal object AtomicModelInstaller {
@@ -84,7 +87,7 @@ internal class OfflineSpeechEngine(
     private val pcm: PcmSource,
     private val decoderFactory: VoskDecoderFactory,
     private val sink: SpeechTextSink,
-    private val onFailure: () -> Unit = {},
+    private val onFailure: (OfflineSpeechFailure) -> Unit = {},
     private val onStarted: () -> Unit = {},
 ) {
     private val stopped = AtomicBoolean(false)
@@ -96,11 +99,15 @@ internal class OfflineSpeechEngine(
     fun start() {
         check(worker == null) { "engine already started" }
         worker = Thread({
+            var stage = OfflineSpeechFailure.MODEL
             try {
                 val activeDecoder = decoderFactory.open()
                 decoder = activeDecoder
+                if (stopped.get()) return@Thread
+                stage = OfflineSpeechFailure.MICROPHONE
                 pcm.start()
                 onStarted()
+                stage = OfflineSpeechFailure.DECODER
                 val buffer = ByteArray(4096)
                 while (!stopped.get()) {
                     val count = pcm.read(buffer)
@@ -114,7 +121,7 @@ internal class OfflineSpeechEngine(
                     }
                 }
             } catch (_: Exception) {
-                onFailure()
+                if (!stopped.get()) onFailure(stage)
             } finally {
                 stopPcm()
                 runCatching { decoder?.close() }
@@ -142,7 +149,7 @@ internal class VoskSpeechRecognizerHandle(
     private val context: Context,
     private val onPartial: (String) -> Unit,
     private val onFinal: (String) -> Unit,
-    private val onFailure: () -> Unit,
+    private val onFailure: (OfflineSpeechFailure) -> Unit,
     private val onReady: () -> Unit,
 ) : RecognizerHandle {
     @Volatile private var engine: OfflineSpeechEngine? = null
@@ -150,7 +157,7 @@ internal class VoskSpeechRecognizerHandle(
     override fun start() {
         if (engine != null) return
         if (context.checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-            onFailure(); return
+            onFailure(OfflineSpeechFailure.MICROPHONE); return
         }
         val localModel = File(context.filesDir, "model-hi")
         val active = OfflineSpeechEngine(
@@ -208,22 +215,41 @@ internal class VoskSpeechRecognizerHandle(
 
 private class AndroidPcmSource : PcmSource {
     private val released = AtomicBoolean(false)
-    private val minBytes = AudioRecord.getMinBufferSize(
-        16_000, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT,
-    ).coerceAtLeast(4096)
-    private val record = AudioRecord(
-        MediaRecorder.AudioSource.VOICE_RECOGNITION, 16_000, AudioFormat.CHANNEL_IN_MONO,
-        AudioFormat.ENCODING_PCM_16BIT, minBytes,
-    )
+    private val record = AtomicReference<AudioRecord?>()
     override fun start() {
-        check(record.state == AudioRecord.STATE_INITIALIZED) { "AudioRecord unavailable" }
-        record.startRecording()
+        check(!released.get()) { "Microphone already stopped" }
+        val minBytes = AudioRecord.getMinBufferSize(
+            16_000, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT,
+        )
+        check(minBytes > 0) { "16 kHz microphone unavailable" }
+        for (source in intArrayOf(MediaRecorder.AudioSource.VOICE_RECOGNITION, MediaRecorder.AudioSource.MIC)) {
+            val candidate = runCatching {
+                AudioRecord(source, 16_000, AudioFormat.CHANNEL_IN_MONO,
+                    AudioFormat.ENCODING_PCM_16BIT, minBytes.coerceAtLeast(4096))
+            }.getOrNull() ?: continue
+            val started = runCatching {
+                if (candidate.state != AudioRecord.STATE_INITIALIZED) false
+                else { candidate.startRecording(); candidate.recordingState == AudioRecord.RECORDSTATE_RECORDING }
+            }.getOrDefault(false)
+            if (started) {
+                record.set(candidate)
+                if (released.get()) {
+                    record.getAndSet(null)?.release()
+                    error("Microphone already stopped")
+                }
+                return
+            }
+            runCatching { candidate.release() }
+        }
+        error("Microphone could not start")
     }
-    override fun read(buffer: ByteArray): Int = record.read(buffer, 0, buffer.size)
+    override fun read(buffer: ByteArray): Int = record.get()?.read(buffer, 0, buffer.size) ?: -1
     override fun stop() {
         if (!released.compareAndSet(false, true)) return
-        runCatching { if (record.recordingState == AudioRecord.RECORDSTATE_RECORDING) record.stop() }
-        record.release()
+        record.getAndSet(null)?.let { active ->
+            runCatching { if (active.recordingState == AudioRecord.RECORDSTATE_RECORDING) active.stop() }
+            active.release()
+        }
     }
 }
 

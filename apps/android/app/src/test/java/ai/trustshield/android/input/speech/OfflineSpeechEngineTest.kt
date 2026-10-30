@@ -7,9 +7,56 @@ import org.junit.Test
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicReference
 import java.io.File
 
 class OfflineSpeechEngineTest {
+    @Test
+    fun `model startup failure is reported instead of silently stopping`() {
+        val failure = CountDownLatch(1)
+        val reason = AtomicReference<OfflineSpeechFailure>()
+        val engine = OfflineSpeechEngine(
+            pcm = FakePcmSource(emptyList()),
+            decoderFactory = VoskDecoderFactory { error("model unavailable") },
+            sink = SpeechTextSink { _, _ -> },
+            onFailure = { reason.set(it); failure.countDown() },
+        )
+
+        engine.start()
+
+        assertTrue(failure.await(2, TimeUnit.SECONDS))
+        assertEquals(OfflineSpeechFailure.MODEL, reason.get())
+    }
+
+    @Test
+    fun `microphone startup failure is reported instead of silently stopping`() {
+        val failure = CountDownLatch(1)
+        val reason = AtomicReference<OfflineSpeechFailure>()
+        val pcm = object : PcmSource {
+            override fun start() { error("microphone unavailable") }
+            override fun read(buffer: ByteArray) = -1
+            override fun stop() = Unit
+        }
+        val engine = OfflineSpeechEngine(
+            pcm = pcm,
+            decoderFactory = VoskDecoderFactory {
+                object : VoskDecoder {
+                    override fun acceptWaveForm(pcm16le: ByteArray, length: Int) = false
+                    override fun partialText() = ""
+                    override fun finalText() = ""
+                    override fun close() = Unit
+                }
+            },
+            sink = SpeechTextSink { _, _ -> },
+            onFailure = { reason.set(it); failure.countDown() },
+        )
+
+        engine.start()
+
+        assertTrue(failure.await(2, TimeUnit.SECONDS))
+        assertEquals(OfflineSpeechFailure.MICROPHONE, reason.get())
+    }
+
     @Test
     fun `model installer publishes only a complete size-verified directory`() {
         val root = createTempDir(prefix = "vosk-install-test")
