@@ -122,6 +122,7 @@ import ai.trustshield.android.input.speech.MicPermission as SpeechMicPermission
 import ai.trustshield.android.input.speech.UtteranceSink
 import ai.trustshield.android.input.speech.AndroidSpeechRecognizerHandle
 import ai.trustshield.android.input.speech.OfflineSpeechPolicy
+import ai.trustshield.android.input.speech.OfflineSpeechFailure
 import ai.trustshield.android.input.speech.VoskSpeechRecognizerHandle
 import ai.trustshield.android.input.speech.RecognizerErrorCode
 import ai.trustshield.android.input.speech.SpeechEvent
@@ -492,7 +493,7 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
     }
     val hostRef = remember { mutableStateOf<CallShieldHost?>(null) }
     var offlineMode by remember(speechRoute) { mutableStateOf(speechRoute.useOffline) }
-    var offlineFailureAction by remember { mutableStateOf<(() -> Unit)?>(null) }
+    val offlineFailureAction = remember { arrayOfNulls<(OfflineSpeechFailure) -> Unit>(1) }
     var capability by remember {
         mutableStateOf(SpeechCapabilityRules.evaluate(SpeechCapabilityProbe.probe(context), selectedSpeechTag))
     }
@@ -505,7 +506,7 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
                     context = context.applicationContext,
                     onPartial = { text -> handler.post { created.onPartialUtterance(text) } },
                     onFinal = { text -> handler.post { created.onUtterance(text) } },
-                    onFailure = { handler.post { offlineFailureAction?.invoke() ?: created.stop() } },
+                    onFailure = { reason -> handler.post { offlineFailureAction[0]?.invoke(reason) ?: created.stop() } },
                     onReady = { handler.post { session.onReadyForSpeech() } },
                 ).also { offlineMode = true }
             } else {
@@ -651,7 +652,15 @@ fun CallShieldRouteHost(appLanguage: AppLanguage) {
             Text(status, modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp), style = MaterialTheme.typography.bodySmall)
         }
     }
-    offlineFailureAction = { host.onStop(); offlineMode = false; state = host.state }
+    offlineFailureAction[0] = { reason ->
+        recognitionLanguageStatus = when (reason) {
+            OfflineSpeechFailure.MODEL -> "Offline speech model could not load. Free storage and try again."
+            OfflineSpeechFailure.MICROPHONE -> "Microphone could not start. Close other apps using it, then try again."
+            OfflineSpeechFailure.DECODER -> "Offline speech recognition stopped. Try the system recognizer."
+        }
+        host.onStop()
+        state = synced(host.state)
+    }
     CallShieldScreen(
         state = state,
         modifier = Modifier.weight(1f),
